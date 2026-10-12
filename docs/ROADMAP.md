@@ -1,0 +1,73 @@
+# Entwicklungsplan
+
+Status: Konzeptphase. Alle folgenden Umsetzungsschritte sind offen.
+
+## 1. Player und Model Zoo
+
+- [ ] Gemeinsame Anwendung mit Player und integriertem Avatar-Studio aufbauen.
+- [ ] Ein vorhandenes, korrekt geriggtes 3D-Modell laden und darstellen.
+- [ ] Model Zoo mit Avatar-Auswahl und Fähigkeitslegende aufbauen.
+- [ ] Vorhandene Animationsclips wiedergeben.
+- [ ] Dateiformate, Modellkoordinaten und Versionierung festlegen.
+
+Abnahme: Ein Avatar lässt sich auswählen; seine tatsächlichen Bewegungen werden angezeigt und abgespielt.
+
+## 2. StateMaschine und externe Steuerung
+
+- [ ] Zustände und einmalige Moves getrennt behandeln.
+- [ ] Übergänge, Rückkehrzustand und Unterbrechungsverhalten definieren.
+- [ ] Fähigkeiten aus dem Model Zoo über MCP zugänglich machen.
+- [ ] MQTT opt-in mit Schalter und Broker-Adresse ergänzen.
+- [ ] Ungültige Befehle und Verbindungsabbrüche behandeln.
+
+Abnahme: Ein externer Agent kann verfügbare Fähigkeiten abfragen und unterstützte Zustände beziehungsweise Moves auslösen.
+
+## 3. Integrierter Bewegungseditor
+
+- [ ] Modus „Figur bewegen“ mit verständlichen Griffpunkten umsetzen.
+- [ ] Posen, Zeitabstände, Gesichtsausdrücke und Gesamtposition bearbeiten.
+- [ ] Zwischenposen berechnen und Vorschau abspielen.
+- [ ] Moves mit eindeutigen Schlagworten speichern.
+- [ ] Neu, Laden und Speichern für bearbeitbare Projekte umsetzen.
+
+Abnahme: Ein Benutzer erstellt aus wenigen Posen eine flüssige Bewegung; nach erneutem Laden ist sie im Player verfügbar.
+
+## 4. Gelenke korrigieren
+
+- [ ] Modus „Gelenke bearbeiten“ umsetzen.
+- [ ] Gelenke hinzufügen, verschieben und löschen.
+- [ ] Verbindungen und Oberflächenzuordnung aktualisieren.
+- [ ] Unterschiedliche Körperformen unterstützen.
+- [ ] Bestehende Moves nach Skelettänderungen prüfen.
+- [ ] Rückgängig/Wiederholen ergänzen.
+
+Abnahme: Ein fehlendes Knie lässt sich ergänzen und anschließend sinnvoll beugen. Eine Figur mit abweichender Gliedmaßenanzahl lässt sich ebenfalls bearbeiten.
+
+## 5. Bild zu 3D und KI-Korrektur
+
+- [ ] Geeignete Generierungs- und Rigging-Verfahren anhand echter Testfiguren bewerten.
+- [ ] Bildimport per Drag & Drop anschließen.
+- [ ] Generierungsfortschritt, Fehler und erneuten Versuch verständlich anzeigen.
+- [ ] Korrekturprompt und „Skelett neu versuchen“ integrieren.
+- [ ] Vorschau übernehmen oder verwerfen, bisheriges Ergebnis bewahren.
+
+Abnahme: Ein Bild durchläuft die tatsächliche Generierung zu einem überprüfbaren, beweglichen Modell. Fehlgeschlagene Generierung wird klar angezeigt; Platzhalter gelten nicht als fertige Funktion.
+
+## 6. Qualität und vollständiger Ablauf
+
+- [ ] Modellqualität und Dateigröße skalieren.
+- [ ] Bearbeitbare Quelldaten bewahren.
+- [ ] Animationen nach Optimierung prüfen.
+- [ ] Gesamten Ablauf ohne Fachwissen erproben.
+
+Abnahme: Bild hineinziehen, Avatar korrigieren, Bewegung erstellen, speichern und durch einen Agenten abspielen lassen – in einer Anwendung.
+
+## Noch zu entscheiden
+
+- Desktop-Verpackung und unterstützte Betriebssysteme.
+- Rendering-Technik und endgültige Dateiformate.
+- Lokale beziehungsweise externe KI-Verfahren und deren Hardwarebedarf.
+- Lizenz.
+- Authentifizierung und genaue Nachrichtenformate für externe Steuerung.
+
+Diese Reihenfolge ist ein Umsetzungsvorschlag. Das Produktziel bleibt der vollständige, einfache Bild-zu-Avatar-Ablauf.
