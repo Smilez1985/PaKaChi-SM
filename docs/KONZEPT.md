@@ -1,0 +1,138 @@
+# PaKaChi-SM – Bedienkonzept
+
+## Status und Begriffe
+
+Dieses Dokument hält das vereinbarte Produktziel fest. Es beschreibt keine bereits implementierten Funktionen.
+
+- **PaKaChi:** Panda-KI-Chimera, das übergeordnete Projekt.
+- **PaKaChi-SM:** StateMaschine mit Avatar-Player und integriertem Studio.
+- **PaKaChi-Avatar-Studio:** Editor-Bereich innerhalb des Players.
+- **Model Zoo:** gemeinsame Sammlung der Modelle, Moves und Zustandszuordnungen.
+
+## 1. Player und Model Zoo
+
+Der Player bietet eine Dropdown-Auswahl für die Avatare im Model Zoo. Nach der Auswahl zeigt eine Legende die vom Avatar tatsächlich unterstützten Bewegungen und Zustände samt Schlagworten an.
+
+Ein Button öffnet das Avatar-Studio innerhalb derselben Anwendung. Gespeicherte Änderungen stehen anschließend im Player bereit. Im Studio und im Player wird dieselbe Datenbasis verwendet.
+
+Jeder Avatar besitzt sein eigenes Modell, Skelett, Gesichtssteuerungen, Bewegungen und Zustandszuordnungen. Bewegungen dürfen nicht ungeprüft auf ein inkompatibles Skelett angewendet werden.
+
+## 2. Bild zu Avatar
+
+1. Ein 2D-Bild per Drag & Drop einfügen.
+2. Die Generierung erstellt ein 3D-Modell und versucht, ein passendes Skelett samt beweglicher Oberfläche zu erzeugen.
+3. Den Avatar drehen und aus verschiedenen Blickwinkeln prüfen.
+4. Ergebnis übernehmen oder mit einem Korrekturprompt erneut versuchen.
+
+Es gibt keine Beschränkung auf humanoide Figuren. Zusätzliche Arme, Flügel, Schwänze und andere Körperformen gehören zum Zielumfang.
+
+**Technische Grenze:** Ein einzelnes Bild enthält keine vollständige 3D-Information. Rückseite, Tiefe und verdeckte Teile müssen geschätzt werden. Die Bedienung kann einfach sein, auch wenn die automatische Erzeugung mehrere Versuche benötigt.
+
+## 3. Genau zwei Bearbeitungsmodi
+
+### Figur bewegen
+
+Körperteile direkt mit der Maus greifen und in eine Pose ziehen. Gesichtsausdrücke und die Gesamtposition sollen ebenfalls bearbeitbar sein. Verständliche Griffpunkte ersetzen technische Knochenlisten und Zahlenfelder im normalen Arbeitsablauf.
+
+Drehen der Ansicht und Bewegen der Figur müssen klar unterscheidbar sein. Räumliches Positionieren darf kein Wissen über 3D-Koordinaten voraussetzen.
+
+### Gelenke bearbeiten
+
+- Gelenk hinzufügen: gewünschte Stelle an der Figur auswählen.
+- Gelenk verschieben: vorhandenen Punkt greifen und versetzen.
+- Gelenk löschen: ausgewählten Punkt entfernen.
+
+Beispiel: Fehlt das rechte Knie, fügt der Benutzer dort einen Gelenkpunkt hinzu und kann das Bein anschließend an dieser Stelle beugen.
+
+**Erforderliche Hintergrundarbeit:** Der Editor muss die Skelettverbindungen, die räumliche Tiefe des Gelenks und die Zuordnung der Oberfläche zu den Gelenken bestimmen oder korrigieren. Ein sichtbarer Punkt allein macht das Modell noch nicht beweglich. Bei mehrdeutiger Zuordnung soll eine einfache visuelle Korrektur möglich sein.
+
+Nach einer Skelettänderung müssen vorhandene Moves auf Kompatibilität geprüft werden. Eine automatische Anpassung ist nur zu übernehmen, wenn sie ein gültiges Ergebnis liefert; andernfalls wird die betroffene Bewegung zur Korrektur markiert.
+
+## 4. KI-Neuversuch und Korrekturprompt
+
+Ein gut sichtbarer Button **„Skelett neu versuchen“** und ein freies Textfeld ermöglichen beispielsweise:
+
+> Das rechte Knie fehlt. Der Schwanz soll an drei Stellen beweglich sein.
+
+Der Neuversuch muss sich auf die gewünschte Korrektur beziehen. Bei einer Skelettkorrektur soll das Aussehen erhalten bleiben, soweit die notwendige Oberflächenanpassung dies erlaubt.
+
+Als Schutzkonzept ist eine Vorschau mit Übernehmen oder Verwerfen vorgesehen. Das bisherige Ergebnis und manuelle Korrekturen bleiben bis zur Übernahme erhalten. Rückgängig/Wiederholen ist eine vorgesehene Ergänzung.
+
+## 5. Bewegung erstellen
+
+1. Figur in die erste Pose ziehen.
+2. **Pose hinzufügen** auswählen.
+3. Weitere Posen erstellen, typischerweise drei bis zehn.
+4. Reihenfolge und Zeitabstände bestimmen.
+5. **Vorschau** abspielen; Zwischenposen werden automatisch berechnet.
+6. Eindeutiges Schlagwort und verständlichen Anzeigenamen vergeben.
+7. **Als Bewegung speichern** auswählen.
+
+Die Anzahl drei bis zehn beschreibt den typischen Arbeitsablauf, keine bereits festgelegte technische Obergrenze.
+
+Eine Bewegung enthält Zeitpunkte, Gelenktransformationen, gegebenenfalls Gesichtsparameter und die Gesamtposition. Sie benötigt keine Sammlung separat gezeichneter Einzelbilder. Textbasierte Speicherung ist möglich; ein endgültiges Format ist noch offen.
+
+Glatte Interpolation allein garantiert keine natürlichen Bewegungen oder Kollisionsfreiheit. Gelenkgrenzen und geeignete Übergänge sind Teil der Umsetzung.
+
+## 6. Neu, Laden, Speichern und Qualität
+
+- **Neu:** neues Projekt beginnen; ungespeicherte Änderungen vorher sichern oder bewusst verwerfen.
+- **Laden:** Avatar samt bearbeitbaren Daten und Moves wiederherstellen.
+- **Speichern:** Modell, Skelett, Gelenkkorrekturen, Posen, Moves, Schlagworte und Zustandszuordnungen sichern.
+- **Avatar-Qualität:** verständliche Skalierung von Detailgrad und Dateigröße.
+
+Vorgeschlagene Qualitätsstufen: Klein, Standard, Hoch und Maximum. Die tatsächliche Dateigröße wird nach der Berechnung angezeigt. Qualität betrifft insbesondere Geometrie und Texturen. Skelett und Bewegungsfähigkeiten sollen erhalten bleiben und nach Optimierungen geprüft werden.
+
+Bearbeitbare Quelldaten sollen erhalten bleiben, damit ein kleiner Export nicht die einzige verbleibende Modellfassung ist.
+
+## 7. StateMaschine
+
+Ein **Zustand** bleibt aktiv, bis ein neuer Zustand angefordert wird. Eine **Bewegung** kann einmalig ablaufen oder wiederholt werden.
+
+Beispiele:
+
+| Eingabe | Bedeutung |
+| --- | --- |
+| idle | Agent wartet |
+| talking | Agent spricht |
+| thinking | Agent denkt |
+| working | Agent arbeitet |
+| gaehnen | Einmalige Bewegung |
+
+Die Zuordnung zu konkreten Animationen gehört zum jeweiligen Avatar. Nicht jeder Avatar muss dieselben Fähigkeiten besitzen.
+
+Als technische Vorschläge gelten: weiche Übergänge, eine definierte Rückkehr aus einmaligen Moves und eine sichere Reaktion auf unbekannte Schlagworte. Prioritäten, Unterbrechung und Warteschlangen werden vor der Implementierung eindeutig festgelegt.
+
+## 8. MCP und MQTT
+
+Die MCP-Schnittstelle soll die tatsächlich verfügbaren Fähigkeiten beschreiben. Vorgeschlagene Operationen:
+
+| Operation | Zweck |
+| --- | --- |
+| list_avatars | Avatare im Model Zoo auflisten |
+| get_avatar_capabilities | Moves und Zustände eines Avatars abfragen |
+| list_moves | Verfügbare Bewegungen auflisten |
+| play_move | Gespeicherte Bewegung auslösen |
+| set_state | Dauerhaften Zustand auswählen |
+
+Diese Namen sind Schnittstellenentwürfe, keine bereits verfügbaren Tools.
+
+MQTT ist opt-in: Schalter zum Aktivieren und ein Feld für die Broker-Adresse, etwa eines NanoMQ-Brokers. Der Player empfängt darüber Zustands- oder Bewegungsbefehle. Er startet nicht ungefragt einen Broker. Zugangsdaten werden nicht im Model Zoo gespeichert.
+
+MCP und MQTT sollen dieselbe Befehlsprüfung und StateMaschine verwenden. Unbekannte Avatare, Moves und ungültige Nachrichten dürfen die Anwendung nicht zum Absturz bringen.
+
+## 9. Vorgeschlagene Datenorganisation
+
+Die logische Struktur des Model Zoo:
+
+- Ein Verzeichnis je Avatar mit stabiler ID.
+- Modell und zugehörige Materialien/Texturen.
+- Avatar-Beschreibung mit Fähigkeiten und Skelettversion.
+- Ein eigener **moves/**-Ordner mit den Bewegungen dieses Avatars.
+- Zustandszuordnungen und bearbeitbare Studio-Daten.
+
+Die konkrete Dateiendung ist offen. GLB für das Modell und JSON für Metadaten beziehungsweise eigene Bewegungsdaten sind Kandidaten. Three.js ist ein Kandidat für die 3D-Darstellung, keine bereits beschlossene oder implementierte Abhängigkeit.
+
+## 10. Bedienziel
+
+Die Komplexität gehört in die Software. Ein Benutzer soll eine eigene Figur erstellen, ein fehlendes Gelenk korrigieren und eine Bewegung speichern können, ohne Rigging, Skinning oder Keyframes lernen zu müssen.
