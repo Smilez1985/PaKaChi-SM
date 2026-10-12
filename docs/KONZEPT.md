@@ -1,4 +1,6 @@
-# PaKaChi-SM – Bedienkonzept
+# PaKaChi-SM – Designdokument
+
+Teil der [Blaupause](README.md) · [Roadmap](ROADMAP.md) · [Changelog](CHANGELOG.md)
 
 ## Status und Begriffe
 

@@ -1,5 +1,7 @@
 # Entwicklungsplan
 
+Teil der [Blaupause](README.md) · [Designdokument](KONZEPT.md) · [Changelog](CHANGELOG.md)
+
 Status: Konzeptphase. Alle folgenden Umsetzungsschritte sind offen.
 
 ## 1. Player und Model Zoo

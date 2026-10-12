@@ -39,8 +39,10 @@ Einmalige Bewegungen und dauerhafte Zustände werden unterschieden. Die StateMas
 
 ## Dokumentation
 
-- [Bedienkonzept und Anforderungen](docs/KONZEPT.md)
-- [Entwicklungsplan](docs/ROADMAP.md)
+- [Blaupause – Übersicht](docs/README.md)
+- [Designdokument und Anforderungen](docs/KONZEPT.md)
+- [Roadmap – was kommt](docs/ROADMAP.md)
+- [Changelog – was war](docs/CHANGELOG.md)
 
 ## Technische Leitlinie
 
