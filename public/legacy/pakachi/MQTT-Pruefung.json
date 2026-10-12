@@ -1,0 +1,10 @@
+{
+  "controller": "passed",
+  "mqtt_local_websocket_transport": "passed",
+  "reconnect_optout": "passed",
+  "javascript_syntax": "passed",
+  "nanomq_live": "not_tested",
+  "default_network_access": "off",
+  "status_specific_animations": "not_created",
+  "visual_quality": "draft_pending_corrections"
+}

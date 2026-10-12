@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "avatars": [
+    {
+      "id": "mika",
+      "name": "Mika",
+      "description": "Ein kleiner Panda. Drei Bewegungen, ein guter Anfang.",
+      "model": "model-zoo/mika/model.gltf",
+      "rigVersion": "fixture-rig-1",
+      "defaultMove": "idle",
+      "moves": [
+        {
+          "id": "idle",
+          "clip": "idle",
+          "name": "Entspannen",
+          "loop": true
+        },
+        {
+          "id": "winken",
+          "clip": "winken",
+          "name": "Winken",
+          "loop": false
+        },
+        {
+          "id": "nicken",
+          "clip": "nicken",
+          "name": "Nicken",
+          "loop": false
+        }
+      ]
+    },
+    {
+      "id": "nori",
+      "name": "Nori",
+      "description": "Ein neugieriger Roboter mit eigenem Bewegungsrepertoire.",
+      "model": "model-zoo/nori/model.gltf",
+      "rigVersion": "fixture-rig-1",
+      "defaultMove": "idle",
+      "moves": [
+        {
+          "id": "idle",
+          "clip": "idle",
+          "name": "Entspannen",
+          "loop": true
+        },
+        {
+          "id": "nicken",
+          "clip": "nicken",
+          "name": "Nicken",
+          "loop": false
+        },
+        {
+          "id": "umschauen",
+          "clip": "umschauen",
+          "name": "Umschauen",
+          "loop": false
+        }
+      ]
+    }
+  ]
+}

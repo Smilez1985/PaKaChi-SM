@@ -1,0 +1,3 @@
+const assert=require('node:assert/strict');const MQTT=require('../pakachi-mqtt.js');
+let created=0;class Socket{constructor(){created++;this.readyState=0;}send(){}close(){this.readyState=3;}}
+(async()=>{const c=new MQTT({WebSocketClass:Socket});c.connect({url:'ws://localhost:8083/mqtt',topic:'pakachi/status'});assert.equal(created,1);const first=c.ws;first.onclose();await new Promise(r=>setTimeout(r,1100));assert.equal(created,2);assert.notEqual(c.ws,first);c.ws.onclose();c.disconnect();await new Promise(r=>setTimeout(r,2100));assert.equal(created,2);assert.equal(c.connectionState,'off');assert.equal(c.options,null);console.log('Passed: reconnect and opt-out cancels scheduled retries.');})().catch(e=>{console.error(e);process.exitCode=1;});

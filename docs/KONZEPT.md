@@ -4,12 +4,20 @@ Teil der [Blaupause](README.md) · [Roadmap](ROADMAP.md) · [Changelog](CHANGELO
 
 ## Status und Begriffe
 
-Dieses Dokument hält das vereinbarte Produktziel fest. Es beschreibt keine bereits implementierten Funktionen.
+Dieses Dokument hält das Produktziel fest. Der umgesetzte Stand wird im Changelog dokumentiert; offene Editor- und KI-Funktionen sind weiterhin Entwicklungsziele.
 
 - **PaKaChi:** Panda-KI-Chimera, das übergeordnete Projekt.
 - **PaKaChi-SM:** StateMaschine mit Avatar-Player und integriertem Studio.
 - **PaKaChi-Avatar-Studio:** Editor-Bereich innerhalb des Players.
 - **Model Zoo:** gemeinsame Sammlung der Modelle, Moves und Zustandszuordnungen.
+
+## Bestehender PaKaChi-Avatar
+
+Tierform und humanoide Arbeitsform bleiben derselbe bestehende Charakter. Die 72 Transformationsbilder und der bisherige Player sind als Originalstand erhalten. Die spätere 3D-Umsetzung übernimmt sein Design; technische Testfiguren ersetzen ihn nicht.
+
+Verbindliche Merkmale aus dem erhaltenen Animationsplan: weiches schwarzes künstliches Fell, cremefarbene Schnauze und Brauen, grüne Augen, Wangenflächen und Ohrinnenseiten, buschiger schwarz-grün geringelter Schwanz, dunkle mechanische Gelenke und grüner Brustkern. Kopfgröße, Gesicht und Schwanzmasse sollen konsistent bleiben. Keine neue Panzerung oder zusätzliche Spezies.
+
+[Referenzen und Herkunft](references/README.md) unterscheiden den ursprünglichen, visuell noch fehlerhaften Transformationsstand von der korrigierten Endform als Stilanker. Die 72 Bilder sind ausschließlich die Verwandlung ohne Tablet/Stift; eigene Arbeitsschleifen bleiben eine spätere Ergänzung.
 
 ## 1. Player und Model Zoo
 
@@ -47,6 +55,17 @@ Drehen der Ansicht und Bewegen der Figur müssen klar unterscheidbar sein. Räum
 Beispiel: Fehlt das rechte Knie, fügt der Benutzer dort einen Gelenkpunkt hinzu und kann das Bein anschließend an dieser Stelle beugen.
 
 **Erforderliche Hintergrundarbeit:** Der Editor muss die Skelettverbindungen, die räumliche Tiefe des Gelenks und die Zuordnung der Oberfläche zu den Gelenken bestimmen oder korrigieren. Ein sichtbarer Punkt allein macht das Modell noch nicht beweglich. Bei mehrdeutiger Zuordnung soll eine einfache visuelle Korrektur möglich sein.
+
+### Präzision und frei gestaltbare Kontrollpunkte
+
+- Mausrad-Zoom bis in kleine Gesichtsbereiche; Ansicht zum gewünschten Detail verschieben und bei Bedarf zurücksetzen.
+- Gelenkpunkte frei im 3D-Raum beziehungsweise auf der sichtbaren Oberfläche setzen, auch ohne vorhandene Gelenkkette. Ansichtsdrehung und Tiefenkorrektur ermöglichen präzise Platzierung.
+- Sichtbare Punktgröße pro Punkt anpassen: zum Beispiel klein am Mundwinkel, größer am Knie. Ein kleiner gezeichneter Punkt behält eine gut erreichbare Auswahlfläche.
+- Punkte gezielt miteinander verbinden oder Verbindungen lösen. Neue Punkte müssen nicht automatisch an das vorhandene Körperskelett angeschlossen werden.
+- Beliebige unabhängige Gruppen erlauben: zum Beispiel drei Mundpunkte, ein Punkt pro Auge oder mehrere Punkte pro Augenlid. Der Benutzer bestimmt den Detailgrad.
+- Punktgröße, Auswahlfläche und Einfluss auf die Modelloberfläche sind getrennte Eigenschaften. Der Benutzer soll deren Wirkung direkt sehen und korrigieren können.
+
+Ein Gesichtspunkt ist eine verständliche Oberflächensteuerung und muss intern nicht zwingend ein klassischer Skelettknochen sein. Knochen, Oberflächendeformationen und Gesichtsformen können dieselbe einfache Bedienung erhalten. Beliebige logische Verbindungen dürfen intern kein ungültiges oder zyklisches Skelett erzeugen. Die Umsetzung löst diesen Unterschied im Hintergrund.
 
 Nach einer Skelettänderung müssen vorhandene Moves auf Kompatibilität geprüft werden. Eine automatische Anpassung ist nur zu übernehmen, wenn sie ein gültiges Ergebnis liefert; andernfalls wird die betroffene Bewegung zur Korrektur markiert.
 
@@ -138,3 +157,4 @@ Die konkrete Dateiendung ist offen. GLB für das Modell und JSON für Metadaten 
 ## 10. Bedienziel
 
 Die Komplexität gehört in die Software. Ein Benutzer soll eine eigene Figur erstellen, ein fehlendes Gelenk korrigieren und eine Bewegung speichern können, ohne Rigging, Skinning oder Keyframes lernen zu müssen.
+

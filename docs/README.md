@@ -1,6 +1,6 @@
 # Blaupause – PaKaChi-SM
 
-**Stand: 0.0.1 · Konzeptphase · keine ausführbare Anwendung**
+**Stand: 0.1.0 · erster lauffähiger Player · Editor und KI teilweise noch offen**
 
 Die Blaupause besteht aus drei zusammengehörigen Dokumenten:
 
@@ -13,3 +13,6 @@ Die Blaupause besteht aus drei zusammengehörigen Dokumenten:
 PaKaChi bedeutet Panda-KI-Chimera. Das PaKaChi-Avatar-Studio ist ein fest integrierter Teil des Players. Der Model Zoo enthält die gemeinsam genutzten Avatare, Moves und Zustandszuordnungen.
 
 Noch offene technische Entscheidungen sind in Designdokument und Roadmap ausdrücklich als offen gekennzeichnet.
+
+
+[Technische Architektur](ARCHITEKTUR.md) · [Erhaltene Originalvorlagen](references/README.md)

@@ -1,0 +1,30 @@
+{
+  "dependencies": {
+    "three": "0.186.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.56.1",
+    "@types/node": "26.6.5",
+    "@types/three": "0.186.0",
+    "typescript": "7.0.2",
+    "vite": "8.3.4"
+  },
+  "name": "pakachi-sm",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "PaKaChi StateMaschine \u2013 lokaler Avatar-Player und integriertes Studio",
+  "license": "UNLICENSED",
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview --host 127.0.0.1",
+    "test": "node --test tests/*.test.ts",
+    "test:e2e": "playwright test",
+    "generate:avatars": "node scripts/generate-avatars.mjs",
+    "test:legacy": "node public/legacy/pakachi/tests/controller.cjs && node public/legacy/pakachi/tests/lifecycle.cjs"
+  }
+}
