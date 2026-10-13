@@ -1,4 +1,4 @@
-# Avatar-Studio – 0.6.0
+# Avatar-Studio – 0.7.0
 
 Das Studio ist Teil des Players. Mika, Nori und eigene GLB-Modelle können bearbeitet werden. Der Original-PaKaChi bleibt mit beiden Formen und 72 Bildern erhalten; für ihn fehlt weiterhin das entsprechende 3D-Modell. Seine Bilder werden durch den Editor nicht verändert.
 
@@ -44,7 +44,7 @@ Ein Skelettpunkt verändert in **Gelenke bearbeiten** den Drehpunkt in der Grund
 
 **Kontrollpunkt löschen** entfernt einen freien Punkt und seine Verformung vollständig. Bei einem vorhandenen Skelettpunkt entfernt es dessen bedienbaren Griff; der zugrunde liegende Knochen und seine Gewichte im Quellmodell bleiben bestehen. Beliebige Quellknochen hinzufügen/löschen, neu gewichten und automatisch zu vollständigen Gelenkketten zusammenbauen ist noch nicht implementiert.
 
-Posen und eigene Moves bleiben bei Punktänderungen erhalten. Neue Punkte werden in vorhandenen Posen in Grundstellung ergänzt; gelöschte Punkte werden aus ihnen entfernt. Nach einer Drehpunkt- oder Einflussänderung vorhandene Bewegungen ansehen und gegebenenfalls korrigieren. Es gibt noch keine automatische Reparatur ihrer Bedeutung. Eine von Moves verwendete Pose kann erst nach Löschen dieser Moves gelöscht werden. Änderungen an einer vorhandenen Pose und ihrer Zeit wirken auf alle Moves, die sie verwenden; die Reihenfolge eines bereits gespeicherten Moves bleibt erhalten.
+Posen und eigene Moves bleiben bei Punktänderungen erhalten. Neue Punkte werden in vorhandenen Posen in Grundstellung ergänzt; gelöschte Punkte werden aus ihnen entfernt. Nach einer Drehpunkt- oder Einflussänderung vorhandene Bewegungen ansehen und gegebenenfalls korrigieren. Seit 0.7.0 helfen automatische Prüfhinweise dabei; eine automatische Reparatur der Bewegung gibt es nicht. Eine von Moves verwendete Pose kann erst nach Löschen dieser Moves gelöscht werden. Änderungen an einer vorhandenen Pose und ihrer Zeit wirken auf alle Moves, die sie verwenden; die Reihenfolge eines bereits gespeicherten Moves bleibt erhalten.
 
 **Zurück/Wiederholen** hält bis zu 40 Bearbeitungsschritte bereit, einschließlich vollständiger Ziehgesten. **Neu** setzt das aktuelle Modell auf seine ursprünglichen Skelettgriffe zurück und entfernt eigene Posen/Moves; auch dieser Schritt lässt sich rückgängig machen.
 
@@ -78,3 +78,18 @@ Eine Pose speichern, die Figur erneut versetzen und eine zweite Pose speichern. 
 - Die Datei ist ein versioniertes Studio-Projekt, kein GLB-Export und kein automatischer Eintrag im gemeinsamen Model Zoo auf GitHub. Die eigenen Moves werden mit dem geladenen Projekt im Player angeboten.
 - Keine automatische 3D-/Skelettgenerierung, Gewichts-Malwerkzeuge, IK, Gesamtrotation/-skalierung oder eigenständiger GLB-Export.
 - Automatisierte Geometrie-, Daten- und DOM-Tests sind bestanden. Die visuelle Maus-/WebGL-Abnahme muss weiterhin in einem Browser erfolgen; Chromium kann in der aktuellen Ausführungsumgebung nicht starten.
+
+## Posen nach Gelenkänderungen prüfen
+
+Relevante Änderungen markieren gespeicherte Posen und die Moves, die diese Posen verwenden, mit **⚠**. Bei der ausgewählten Pose werden die Gründe angezeigt:
+
+- Änderungen der Skelett-Grundstellung oder eines Drehpunkts markieren vorsorglich alle vorhandenen Posen, weil Hautbindung und untergeordnete Gelenke betroffen sein können.
+- Eine neue Grundposition eines bestehenden freien Punkts markiert vorhandene Posen. Ein anderer Einflussradius markiert nur Posen, in denen dieser Punkt von seiner Grundstellung abweicht.
+- Das Entfernen eines Kontrollpunkts markiert Posen, in denen er bewegt war.
+- Namen, sichtbare Punktgrößen, Verbindungen, Gesamtverschiebungen während des Posierens und neutral ergänzte Punkte erzeugen keine solchen Hinweise.
+
+**Anzeigen** lädt die ausgewählte Pose. Falls nötig korrigieren und **Ersetzen** wählen; dadurch wird die Korrektur gespeichert und ihr Hinweis aufgehoben. Ist die Pose bereits richtig, **Pose als geprüft markieren** wählen. Beide Schritte lassen sich rückgängig machen. Ein Move bleibt markiert, solange eine seiner Posen noch einen Hinweis trägt. Vorschau und Wiedergabe bleiben möglich.
+
+Die Hinweise werden in der Projektdatei gespeichert und im Player bei den Moves angezeigt. Agentenabfragen erhalten `needsReview` und `reviewPoseIds` für eigene Moves. Das ist eine Änderungsprüfung, keine automatische anatomische Bewertung, Kollisionsprüfung oder Reparatur. Originalclips spielen weiterhin mit ihrer ursprünglichen Bindung und werden nicht markiert.
+
+Alte Projekte ohne Hinweise bleiben lesbar. Bereits vor 0.7.0 erfolgte Änderungen können ohne früheren Vergleichsstand nicht nachträglich erkannt werden. Beim Öffnen und Speichern in älterer Software werden Prüfhinweise nicht zuverlässig nachgeführt; für diese Funktion Version 0.7.0 oder neuer verwenden.

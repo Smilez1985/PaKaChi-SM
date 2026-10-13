@@ -2,7 +2,7 @@
 
 **SM steht für StateMaschine.** PaKaChi ist die **Panda-KI-Chimera**, das übergeordnete Projekt. PaKaChi-SM vereint Avatar-Player, Model Zoo und das fest integrierte **PaKaChi-Avatar-Studio**.
 
-**Softwarestand: 0.6.0 · Entwicklungsstand, keine fertige Bild-zu-3D-Lösung.**
+**Softwarestand: 0.7.0 · Entwicklungsstand, keine fertige Bild-zu-3D-Lösung.**
 
 Der bestehende PaKaChi mit Tierform, humanoider Arbeitsform und allen 72 Transformationsbildern ist erhalten und beim Start ausgewählt. Mika und Nori sind separate technische 3D-Testavatare. Ein 3D-Modell des Original-PaKaChi und die KI-Generierung stehen noch aus.
 
@@ -21,7 +21,7 @@ Der archivierte Originalplayer lässt sich auch separat ohne Node öffnen: `publ
 
 ## Was aktuell funktioniert
 
-| Bereich | Stand 0.6.0 |
+| Bereich | Stand 0.7.0 |
 | --- | --- |
 | Player | Avatar-Auswahl, tatsächliche Bewegungen anzeigen, abspielen, pausieren, Tempo und Abspielposition ändern. |
 | Modelle | Mika/Nori mit Skeletten und Clips; eigene eigenständige GLB-Dateien laden oder hineinziehen, bis 50 MiB, lokal für die Sitzung. |
@@ -30,6 +30,7 @@ Der archivierte Originalplayer lässt sich auch separat ohne Node öffnen: `publ
 | Bewegungen | Posen, Zeitabstände, Vorschau, eigene Moves und Gesamtverschiebung der Figur – auch ohne Skelett. Rückgängig/Wiederholen. |
 | Projekte | Neu, Laden und Speichern als `.pakachi.json` mit eingebettetem Modell, Arbeitspose, Kontrollpunkten, Posen und Moves. |
 | Agenten | Gemeinsame StateMaschine für manuelle Bedienung, optionales MQTT und MCP; sechs Tools zur Playersteuerung. |
+| Bewegungsprüfung | Betroffene Posen/Moves nach Änderungen an Drehpunkten, Oberflächenpunkten oder Einflussradien markieren, anzeigen und manuell als geprüft bestätigen. |
 | Optionen | Deutsch/English für Studio-Bedienelemente und invertierbare mittlere Maustaste; lokal im Browser gespeichert. |
 
 Die Erkennungsbuttons lesen vorhandene Skelettdaten. Sie erzeugen noch kein anatomisches Skelett aus einer ungeriggten Figur. Bei Skelettpunkten entfernt „Löschen“ den Editorgriff, nicht den Quellknochen.
@@ -98,7 +99,7 @@ npx playwright install chromium
 npm run test:e2e
 ```
 
-Für 0.6.0 sind 30 Tests, beide Original-Testprogramme und der Build bestanden. Die visuelle WebGL-/Mausabnahme ist wegen der Chromium-Startbeschränkung der bisherigen Ausführungsumgebung noch offen. Details und frühere Nachweise stehen im [Prüfstand](docs/PRUEFUNG.md).
+Für 0.7.0 sind 34 Tests, beide Original-Testprogramme und der Build bestanden. Die visuelle WebGL-/Mausabnahme ist wegen der Chromium-Startbeschränkung der bisherigen Ausführungsumgebung noch offen. Details und frühere Nachweise stehen im [Prüfstand](docs/PRUEFUNG.md).
 
 ## Lizenz
 

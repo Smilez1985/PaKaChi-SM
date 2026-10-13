@@ -1,4 +1,4 @@
-# Technischer Stand 0.6.0
+# Technischer Stand 0.7.0
 
 ## Lokale Anwendung
 
@@ -41,3 +41,9 @@ Der Editor unterstützt noch keinen beliebigen Quellknochenumbau, IK, automatisc
 Der reservierte Posenkanal `$figure` speichert die Verschiebung in normierten Weltkoordinaten; er ist unabhängig von den maximal 256 Kontrollpunkten. `StudioRig` rechnet die Verschiebung über die Elternmatrix in die lokalen Root-Koordinaten um. Die Hautbindung wird vor Geometrie- und Griffabfragen aktualisiert. Oberflächenpunkte ohne Mesh-Zuordnung folgen ebenfalls der Gesamtverschiebung.
 
 Der optionale Kanal ergänzt das Projektformat 1. Ältere Dateien ohne Kanal bleiben lesbar und verwenden `[0, 0, 0]`. Dateien mit dem neuen Kanal benötigen PaKaChi-SM ab 0.6.0; ältere Player lehnen sie ab. Rotation im Gesamtkanal ist derzeit ausschließlich die Einheitsquaternion. Ungültige oder unvollständige Werte werden beim Import abgewiesen. Originalclips setzen die Studio-Gesamtverschiebung zurück.
+
+## Änderungsprüfung ab 0.7.0
+
+`studio-review.ts` vergleicht den Rig-Zustand vor und nach einer Editoränderung. Ein Vergleich pro abgeschlossenem Ziehvorgang hält Undo/Redo und die Prüfung zusammen. `Pose.review` ist eine optionale, deduplizierte Liste validierter Gründe: `bone-rest`, `surface-rest`, `surface-radius`, `point-removed`. Namen und Gruppierungsverbindungen verändern keine gespeicherten Transformationen und werden ausgenommen. Skelett-Grundänderungen werden konservativ für alle Posen gemeldet.
+
+Betroffene Moves werden aus ihren referenzierten Posen abgeleitet. Die aktiven Fähigkeiten enthalten für Studio-Moves `needsReview` und `reviewPoseIds`; MQTT/MCP-Antworten reichen diese Felder wie die übrigen Move-Daten weiter. Die Prüfung verändert keine gespeicherten Bewegungswerte und sperrt keine Wiedergabe. Hinweise werden beim expliziten Bestätigen oder Ersetzen der Pose entfernt; ältere Dateien ohne Hinweise bleiben gültig. Ein fehlender Hinweis bescheinigt keine anatomische Richtigkeit.

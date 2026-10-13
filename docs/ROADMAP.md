@@ -1,6 +1,6 @@
 # Roadmap – was kommt
 
-**Softwarestand: 0.6.0 · Abgleich: 13.10.2026.** Teil der [Blaupause](README.md).
+**Softwarestand: 0.7.0 · Abgleich: 13.10.2026.** Teil der [Blaupause](README.md).
 
 Ein Häkchen bedeutet implementiert; es ersetzt keine visuelle oder externe Live-Abnahme. Die Nachweise und Prüfgrenzen stehen im [Prüfstand](PRUEFUNG.md). Die Versionshistorie gehört ins [Changelog](CHANGELOG.md).
 
@@ -58,7 +58,8 @@ Diese Reihenfolge ist ein Umsetzungsvorschlag, kein Terminversprechen. Die dafü
 - [ ] Quellknochen tatsächlich hinzufügen/löschen und Hautgewichte neu zuordnen. Bisher entfernt Löschen eines Skelettpunkts nur den Griff.
 - [ ] Automatische anatomische Gelenkketten und IK implementieren.
 - [ ] Bewegungsfähige Rigs unterschiedlicher Körperformen systematisch prüfen.
-- [ ] Vorhandene Moves nach Skelettänderungen automatisch prüfen und zur Korrektur markieren.
+- [x] Betroffene Posen/Moves nach Änderungen an Skelett-Grundstellung, freien Punktpositionen und Einflussbereichen zur Prüfung markieren (0.7.0).
+- [ ] Bewegungen geometrisch auf Fehlstellungen, Gelenkgrenzen und Kollisionen prüfen und automatisch korrigieren.
 
 **Abnahme:** Ein fehlendes Knie ergänzen und anschließend sinnvoll beugen; ebenso eine Figur mit abweichender Gliedmaßenanzahl bearbeiten. Diese vollständige Abnahme ist noch nicht erreicht.
 

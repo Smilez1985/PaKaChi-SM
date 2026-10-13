@@ -1,3 +1,5 @@
+import {REVIEW_REASONS} from './studio-review.ts';
+import type {ReviewReason} from './studio-review.ts';
 export type Vec3 = [number, number, number];
 export type Quat = [number, number, number, number];
 /** Reserved pose channel; cannot collide with user point IDs. */
@@ -8,7 +10,7 @@ export interface ControlPoint {
   id: string; name: string; kind: 'bone' | 'surface'; bone?: number; mesh?: number;
   rest: Vec3; size: number; radius: number;
 }
-export interface Pose { id: string; name: string; seconds: number; values: Record<string, Transform> }
+export interface Pose { id: string; name: string; seconds: number; values: Record<string, Transform>; review?: ReviewReason[] }
 export interface StudioMove { id: string; name: string; loop: boolean; poses: string[] }
 export interface StudioData {
   points: ControlPoint[]; links: [string, string][]; boneRest: Transform[]; poses: Pose[]; moves: StudioMove[]; draft?: Record<string,Transform>;
@@ -49,6 +51,7 @@ export function parseProject(input: unknown): StudioProject {
   const poses=new Set<string>();
   for(const p of d.poses) {
     require(obj(p) && id(p.id) && !poses.has(p.id) && name(p.name) && finite(p.seconds) && p.seconds>=.1 && p.seconds<=30 && valuesValid(p.values));
+    if(p.review!==undefined)require(Array.isArray(p.review)&&p.review.length<=REVIEW_REASONS.length&&new Set(p.review).size===p.review.length&&p.review.every(r=>REVIEW_REASONS.includes(r)),'Ungültige Posen-Prüfhinweise.');
     poses.add(p.id);
   }
   for(const m of d.moves) {require(obj(m) && id(m.id) && !moveIds.has(m.id) && name(m.name) && typeof m.loop==='boolean' && Array.isArray(m.poses) && m.poses.length>=2 && m.poses.length<=100 && m.poses.every(p=>poses.has(p))); moveIds.add(m.id);}

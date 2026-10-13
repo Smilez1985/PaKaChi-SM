@@ -3,6 +3,8 @@ export interface Move {
   name: string;
   clip: string;
   loop: boolean;
+  needsReview?: boolean;
+  reviewPoseIds?: string[];
 }
 
 export interface Avatar {

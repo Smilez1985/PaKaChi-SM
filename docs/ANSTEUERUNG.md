@@ -1,6 +1,6 @@
 # Agentensteuerung
 
-Gültig für Softwarestand 0.6.0.
+Gültig für Softwarestand 0.7.0.
 
 **Bevorzugter Weg seit 0.4.0:** [Python-MCP 2.3.0 mit eingebettetem aMQTT-Broker](PYTHON-MCP.md). MCP-Anfragen und Player-Antworten laufen dort über denselben MQTT-Broker. Die folgende Node-Einrichtung bleibt als Kompatibilitätsweg erhalten.
 
@@ -93,6 +93,8 @@ Ohne geöffneten, gekoppelten Player liefern die Tools eine klare Fehlermeldung.
 Die Brücke führt weder Shell-Befehle aus noch liest sie beliebige Dateien. Sie reicht ausschließlich die beschriebenen Player-Operationen durch. Ein echter Agent muss den stdio-Server unterstützen; diese Integration richtet keine Verbindung zu einem Chat-Dienst automatisch ein.
 
 ## Direkte Browser-API
+
+Seit 0.7.0 enthalten eigene Moves in `list_moves` und `get_avatar_capabilities` zusätzlich `needsReview` (Boolean) und `reviewPoseIds` (Posen-IDs). Sie informieren über Änderungen am Kontrollsystem; ein markierter Move bleibt abspielbar. Originalclips müssen diese optionalen Felder nicht enthalten.
 
 Eigene Studio-Moves erscheinen nach dem Laden ihrer Projektdatei in `list_moves` und können über ihr Schlagwort ausgelöst werden. Solange das Studio geöffnet ist, werden Steuerbefehle mit einer Fehlermeldung abgewiesen, damit die aktuelle Bearbeitung erhalten bleibt. Abfragen bleiben möglich.
 

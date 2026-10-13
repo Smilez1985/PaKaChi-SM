@@ -1,7 +1,7 @@
 export const STATES = ['idle', 'talking', 'thinking', 'working', 'waiting', 'review', 'error', 'sleeping'] as const;
 export type State = typeof STATES[number];
 export type Command = { state: State; avatar?: string } | { move: string; avatar?: string };
-export interface Capability { id: string; name: string; states: string[]; moves: { id: string; name: string; loop: boolean }[] }
+export interface Capability { id: string; name: string; states: string[]; moves: { id: string; name: string; loop: boolean; needsReview?: boolean; reviewPoseIds?: string[] }[] }
 export interface Adapter {
   capability: Capability;
   setState: (state: string) => void;

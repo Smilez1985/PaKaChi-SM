@@ -1,3 +1,4 @@
+import {moveReview} from './studio-review.ts';
 import './style.css';
 import {mountOptions,translate} from './options.ts';
 import { StudioEditor, encodeModel, decodeModel } from './studio-editor.ts';
@@ -19,7 +20,7 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
       <button id="player-tab" class="nav-button active" aria-pressed="true"><span>◉</span> Player</button>
       <button id="studio-tab" class="nav-button" aria-pressed="false"><span>◇</span> Avatar-Studio</button>
     </nav>
-    <div class="rail-bottom"><span class="online-dot"></span> Lokal auf deinem Gerät<p>Entwicklungsstand 0.6.0<br>Posen · Gesamtbewegung</p></div>
+    <div class="rail-bottom"><span class="online-dot"></span> Lokal auf deinem Gerät<p>Entwicklungsstand 0.7.0<br>Posen · Bewegungsprüfung</p></div>
   </aside>
   <main>
     <header><div><p class="eyebrow">PAKACHI-SM / <span id="section-label">PLAYER</span></p><h1 id="page-title">Dein Model Zoo<span>.</span></h1><p id="page-intro">Eine Figur auswählen. Eine Bewegung starten. Leben einhauchen.</p></div><button id="project-open" class="button outline">Projekt laden</button><input id="project-file" type="file" accept=".json" hidden><button id="import-button" class="button outline">＋ GLB laden</button><input id="file-input" type="file" accept=".glb" hidden></header>
@@ -77,7 +78,7 @@ function resumeBase(): void {
 function refreshCapabilities(): void {
   if (!loaded || !machine.capability) return;
   const capability = machine.capability;
-  capability.moves = [...availableMoves(loaded, loaded.moves.map(m=>m.clip)), ...(editor?.data.moves ?? []).map(m=>({id:m.id,name:m.name,loop:m.loop,clip:m.id}))];
+  capability.moves = [...availableMoves(loaded, loaded.moves.map(m=>m.clip)), ...(editor?.data.moves ?? []).map(m=>({id:m.id,name:m.name,loop:m.loop,clip:m.id,...moveReview(editor!.data,m)}))];
   machine.bind({capability,setState:state=>{editor?.stopMove();editor?.rig.restoreSource();playback!.setBaseMove(loaded!.states![state]);},
     playMove:id=>{if(editor?.play(id))return;editor?.stopMove();editor?.rig.restoreSource();playback!.play(id);}},machine.state);
   renderMoves(capability.moves.map(m=>({...m,clip:m.id})));
@@ -189,9 +190,9 @@ function renderMoves(moves: Move[]): void {
   el('move-count').textContent = String(moves.length);
   moves.forEach(move => {
     const button = document.createElement('button'); button.className = 'move-button'; button.dataset.move = move.id;
-    const title = document.createElement('span'); title.textContent = move.name;
+    const title = document.createElement('span'); title.dataset.userText='';title.textContent = move.name;
     const icon = document.createElement('span'); icon.textContent = move.loop ? '↻' : '↗'; icon.setAttribute('aria-hidden', 'true');
-    button.append(title, icon); button.onclick = () => { try { rpc('play_move',{move:move.id}); syncPlayback(); } catch(error) {message(String(error),true);} };
+    button.append(title, icon);if(move.needsReview){const note=document.createElement('small');note.textContent='⚠ Posen prüfen';note.className='move-review-badge';button.append(note);} button.onclick = () => { try { rpc('play_move',{move:move.id}); syncPlayback(); } catch(error) {message(String(error),true);} };
     el('moves').append(button);
     const li = document.createElement('li'); const code = document.createElement('code'); code.textContent = move.id;
     li.append(code, ` · ${move.loop ? 'Schleife' : 'einmalig'}`); el('capabilities').append(li);

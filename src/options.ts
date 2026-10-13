@@ -7,6 +7,14 @@ const translations:Record<string,string>={
   'Gelenke · Maussteuerung':'Joints · Mouse controls','Höchstens 2048 Verbindungen.':'At most 2048 connections.',
   'Gesamte Figur':'Whole figure','Gesamte Figur verschieben':'Move whole figure','Gesamte Figur verschieben. Diese Position wird in jeder Pose gespeichert.':'Move the whole figure. This position is saved in every pose.',
   'Posen · Gesamtbewegung':'Poses · Whole-figure motion',
+  'Pose prüfen':'Review pose','Pose als geprüft markieren':'Mark pose as reviewed','⚠ Posen prüfen':'⚠ Review poses',
+  'Pose anzeigen und bei Bedarf korrigieren. „Ersetzen“ speichert die Korrektur.':'Show the pose and adjust it if needed. “Replace” saves the correction.',
+  'Diese Bewegung enthält Posen mit Prüfhinweisen. Vorschau ansehen und die markierten Posen prüfen.':'This move contains poses flagged for review. Preview it and check the marked poses.',
+  'Skelett-Grundstellung oder Drehpunkt geändert.':'Skeleton rest pose or pivot changed.',
+  'Grundposition eines Oberflächenpunkts geändert.':'Surface control rest position changed.',
+  'Einflussbereich eines bewegten Oberflächenpunkts geändert.':'Influence radius of an animated surface control changed.',
+  'Ein in dieser Pose bewegter Kontrollpunkt wurde entfernt.':'A control animated in this pose was removed.',
+  'Posen · Bewegungsprüfung':'Poses · Motion review',
   'Optionen':'Options','Sprache':'Language','Schließen':'Close','Drehrichtung der mittleren Maustaste invertieren':'Invert middle mouse rotation',
   'Maustaste 3 = Mausrad drücken und halten.':'Mouse button 3 = press and hold the scroll wheel.',
   'Joints automatisch erkennen':'Detect joints automatically','Joint-Verbindungen automatisch erkennen':'Detect joint connections automatically',
@@ -77,7 +85,7 @@ interface Source {original:string;rendered:string}
 const sources=new WeakMap<Node,Source>();
 const attrs=new WeakMap<Element,Map<string,Source>>();
 const roots=new Map<HTMLElement,MutationObserver>();
-function ignored(node:Node){const el=node.nodeType===1?node as Element:node.parentElement;return !!el?.closest('script,style,code,[data-user-text],#avatar-name,#avatar-description,#studio-points option:not([data-figure-label]),#pose-list option,#studio-moves option,#moves button,#avatar-cards button,#avatar-select option');}
+function ignored(node:Node){const el=node.nodeType===1?node as Element:node.parentElement;return !!el?.closest('script,style,code,[data-user-text],#avatar-name,#avatar-description,#studio-points option:not([data-figure-label]),#pose-list option,#studio-moves option,#avatar-cards button,#avatar-select option');}
 function localize(node:Node){
   if(ignored(node))return;
   if(node.nodeType===3){const current=node.nodeValue??'';let source=sources.get(node);if(!source||current!==source.rendered)source={original:current,rendered:current};const rendered=translate(source.original);source.rendered=rendered;sources.set(node,source);if(current!==rendered)node.nodeValue=rendered;return;}

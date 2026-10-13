@@ -1,3 +1,4 @@
+import {flagAffectedPoses,moveReview,reviewLabels} from './studio-review.ts';
 import * as T from 'three';
 import {detectJoints,detectConnections,edgeKey} from './studio-detection.ts';
 import { connectedPoints, StudioHistory, FIGURE_TRACK } from './studio-data.ts';
@@ -41,7 +42,7 @@ export class StudioEditor {
       }else rig.setPoint(p,position,rotation,this.edit);
       this.view.refresh();this.refreshNumbers();
     };
-    view.onEnd=()=>{if(this.gesture){this.history.push(this.gesture);this.gesture=null;this.mark();this.render();}};
+    view.onEnd=()=>{if(this.gesture){flagAffectedPoses(this.gesture.data,this.data);this.history.push(this.gesture);this.gesture=null;this.mark();this.render();}};
     this.render();
   }
   get point(){if(this.selected===FIGURE_TRACK&&!this.edit)return this.rig.figure;return this.rig.data.points.find(p=>p.id===this.selected);}
@@ -53,7 +54,7 @@ export class StudioEditor {
   private snapshot():Snapshot{return {data:structuredClone(this.data),values:this.rig.capture()};}
   private restore(s:Snapshot){this.rig.data=structuredClone(s.data);this.rig.reset();this.rig.apply(s.values);this.mark();this.render();}
   private mark(){this.dirty=true;this.hooks.changed();}
-  private mutate(fn:()=>void){this.history.push(this.snapshot());fn();this.mark();this.render();}
+  private mutate(fn:()=>void){const before=this.snapshot();fn();flagAffectedPoses(before.data,this.data);this.history.push(before);this.mark();this.render();}
   enter(){this.hooks.suspend();this.stopMove();this.active=true;this.rig.reset();if(this.data.draft)this.rig.apply(this.data.draft);this.view.setEnabled(true);this.render();}
   leave(){if(this.active&&!this.playing)this.data.draft=this.rig.capture();this.active=false;this.stopMove();this.view.setEnabled(false);this.rig.restoreSource();this.hooks.resume();}
   stopMove(){this.timeline=null;this.paused=false;this.view.setEnabled(this.active);}
@@ -100,10 +101,11 @@ export class StudioEditor {
     <button id="pose-reset">Grundpose</button>
     <div class="studio-poses"><h3>Posen & Bewegung</h3><label>Posenname<input id="pose-name" maxlength="100" placeholder="z. B. Hand oben"></label><button id="pose-add">Aktuelle Pose speichern</button>
     <label for="pose-list">Gespeicherte Posen</label><select id="pose-list"></select><div class="studio-actions"><button id="pose-show">Anzeigen</button><button id="pose-replace">Ersetzen</button><button id="pose-delete">Löschen</button></div>
+    <div id="pose-review" class="studio-review" hidden><strong>Pose prüfen</strong><ul id="pose-review-reasons"></ul><p>Pose anzeigen und bei Bedarf korrigieren. „Ersetzen“ speichert die Korrektur.</p><button id="pose-reviewed">Pose als geprüft markieren</button></div>
     <label>Übergang zu dieser Pose (Sekunden)<input id="pose-seconds" type="number" min="0.1" max="30" step="0.1" value="1"></label><div class="studio-actions"><button id="pose-up">↑ Früher</button><button id="pose-down">↓ Später</button></div>
     <p class="subtle">Eine Bewegung nutzt alle Posen in dieser Reihenfolge. Bei Schleifen bestimmt die Zeit der ersten Pose den Rückweg.</p>
     <label>Bewegungsname<input id="move-name" maxlength="100" placeholder="z. B. Lächeln"></label><label>Schlagwort<input id="move-id" maxlength="100" placeholder="z. B. laecheln"></label><label class="check"><input id="move-loop" type="checkbox"> Als Schleife</label><button id="move-add" ${poses.length>=2?'':'disabled'}>Bewegung speichern</button>
-    <label for="studio-moves">Eigene Bewegungen</label><select id="studio-moves"></select><div class="studio-actions"><button id="move-preview">Vorschau</button><button id="move-stop">Stopp</button><button id="move-delete">Löschen</button></div></div>
+    <label for="studio-moves">Eigene Bewegungen</label><select id="studio-moves"></select><p id="move-review" class="studio-review" hidden>Diese Bewegung enthält Posen mit Prüfhinweisen. Vorschau ansehen und die markierten Posen prüfen.</p><div class="studio-actions"><button id="move-preview">Vorschau</button><button id="move-stop">Stopp</button><button id="move-delete">Löschen</button></div></div>
     <p class="subtle">Projekt laden: „Projekt laden“ oben. Mausrad: Nahzoom · rechts ziehen: Ansicht verschieben.</p>`;
     const q=<E extends HTMLElement=HTMLElement>(id:string)=>this.host.querySelector<E>(`#${id}`)!;
     const input=(id:string)=>q<HTMLInputElement>(id);
@@ -143,16 +145,18 @@ export class StudioEditor {
     }
     on('pose-reset',()=>this.mutate(()=>this.rig.reset()));
     on('pose-add',()=>{if(this.data.poses.length>=100)throw new Error('Höchstens 100 Posen.');const name=input('pose-name').value.trim()||`Pose ${poses.length+1}`;this.mutate(()=>this.data.poses.push({id:uid(),name,seconds:1,values:this.rig.capture()}));});
-    const list=q<HTMLSelectElement>('pose-list');poses.forEach((p,i)=>list.add(new Option(`${i+1}. ${p.name}`,p.id)));if(poses.some(p=>p.id===remembered['pose-list']))list.value=remembered['pose-list'];const pose=()=>this.data.poses.find(p=>p.id===list.value);
-    list.onchange=()=>{input('pose-seconds').value=String(pose()?.seconds??1);};list.onchange(new Event('change'));
+    const list=q<HTMLSelectElement>('pose-list');poses.forEach((p,i)=>list.add(new Option(`${p.review?.length?'⚠ ':''}${i+1}. ${p.name}`,p.id)));list.value=poses.some(p=>p.id===remembered['pose-list'])?remembered['pose-list']:(poses[0]?.id??'');const pose=()=>this.data.poses.find(p=>p.id===list.value);
+    list.onchange=()=>{const p=pose();input('pose-seconds').value=String(p?.seconds??1);q('pose-review').hidden=!p?.review?.length;q('pose-review-reasons').replaceChildren();for(const reason of p?.review??[]){const li=document.createElement('li');li.textContent=reviewLabels[reason];q('pose-review-reasons').append(li);}};list.onchange(new Event('change'));
     on('pose-show',()=>{const p=pose();if(p){this.rig.reset();this.rig.apply(p.values);this.view.refresh();this.refreshNumbers();}});
-    on('pose-replace',()=>{const p=pose();if(p)this.mutate(()=>p.values=this.rig.capture());});
+    on('pose-replace',()=>{const p=pose();if(p)this.mutate(()=>{p.values=this.rig.capture();delete p.review;});});
+    on('pose-reviewed',()=>{const p=pose();if(p?.review?.length)this.mutate(()=>{delete p.review;});});
     on('pose-delete',()=>{const p=pose();if(p){if(this.data.moves.some(m=>m.poses.includes(p.id)))throw new Error('Diese Pose wird noch von einer Bewegung verwendet. Zuerst die Bewegung löschen.');this.mutate(()=>this.data.poses=this.data.poses.filter(x=>x!==p));}});
     input('pose-seconds').onchange=()=>{const p=pose(),v=Number(input('pose-seconds').value);if(p && v>=.1&&v<=30)this.mutate(()=>p.seconds=v);};
     for(const [button,offset] of [['pose-up',-1],['pose-down',1]] as const)on(button,()=>{const p=pose(),i=poses.indexOf(p!);if(i>=0 && i+offset>=0 && i+offset<poses.length)this.mutate(()=>{[poses[i],poses[i+offset]]=[poses[i+offset],poses[i]];});});
     on('move-add',()=>{const id=input('move-id').value.trim(),name=input('move-name').value.trim();if(!/^[a-z0-9][a-z0-9_-]{0,99}$/.test(id)||!name)throw new Error('Name und eindeutiges Schlagwort angeben (a–z, 0–9, _ oder -).');if(this.project.avatar.moves.some(m=>m.id===id)||this.data.moves.some(m=>m.id===id))throw new Error('Dieses Schlagwort ist bereits vergeben.');if(this.data.moves.length>=100)throw new Error('Höchstens 100 Bewegungen.');const loop=input('move-loop').checked;this.mutate(()=>this.data.moves.push({id,name,loop,poses:poses.map(p=>p.id)}));});
-    const moves=q<HTMLSelectElement>('studio-moves');this.data.moves.forEach(m=>moves.add(new Option(m.name,m.id)));
-    if(this.data.moves.some(m=>m.id===remembered['studio-moves']))moves.value=remembered['studio-moves'];
+    const moves=q<HTMLSelectElement>('studio-moves');this.data.moves.forEach(m=>moves.add(new Option(`${moveReview(this.data,m).needsReview?'⚠ ':''}${m.name}`,m.id)));
+    moves.value=this.data.moves.some(m=>m.id===remembered['studio-moves'])?remembered['studio-moves']:(this.data.moves[0]?.id??'');
+    moves.onchange=()=>{const m=this.data.moves.find(m=>m.id===moves.value);q('move-review').hidden=!m||!moveReview(this.data,m).needsReview;};moves.onchange(new Event('change'));
     for(const id of ['pose-name','move-name','move-id'])input(id).value=remembered[id];input('move-loop').checked=loop;
     on('move-preview',()=>this.play(moves.value,true));on('move-stop',()=>this.stopPreview());on('move-delete',()=>this.mutate(()=>this.data.moves=this.data.moves.filter(m=>m.id!==moves.value)));
     if(this.playing){this.host.querySelectorAll<HTMLButtonElement|HTMLInputElement|HTMLSelectElement>('button,input,select').forEach(e=>e.disabled=e.id!=='move-stop');}
