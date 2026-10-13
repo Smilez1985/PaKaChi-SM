@@ -1,5 +1,5 @@
 import * as T from 'three';
-import { emptyStudio } from './studio-data.ts';
+import { emptyStudio, FIGURE_TRACK, neutralFigure } from './studio-data.ts';
 import type { ControlPoint, StudioData, Transform, Vec3, Pose, StudioMove } from './studio-data.ts';
 const read = (o:T.Object3D):Transform => ({position:o.position.toArray(),rotation:o.quaternion.toArray()});
 const write = (o:T.Object3D,v:Transform) => {o.position.fromArray(v.position);o.quaternion.fromArray(v.rotation);};
@@ -10,6 +10,9 @@ export class StudioRig {
   readonly root:T.Object3D;
   readonly bones:T.Bone[]=[];
   readonly surfaces:Surface[]=[];
+  readonly figure:ControlPoint={id:FIGURE_TRACK,name:'Gesamte Figur',kind:'surface',rest:[0,0,0],size:.055,radius:.12};
+  private figureOffset=new T.Vector3();
+  private rootPosition:T.Vector3;
   data:StudioData;
   readonly initial:StudioData;
   private originalNodes:{node:T.Object3D;value:Transform;scale:T.Vector3}[]=[];
@@ -17,7 +20,8 @@ export class StudioRig {
   private bindings:{mesh:T.SkinnedMesh;inverses:T.Matrix4[];bind:T.Matrix4}[]=[];
   private surfaceValues:Record<string,Transform>={};
   constructor(root:T.Object3D, saved?:StudioData) {
-    this.root=root;root.updateWorldMatrix(true,true);
+    this.root=root;this.rootPosition=root.position.clone();root.updateWorldMatrix(true,true);
+    const bounds=new T.Box3().setFromObject(root);if(!bounds.isEmpty())this.figure.rest=bounds.getCenter(new T.Vector3()).toArray();
     root.traverse(node=>{this.originalNodes.push({node,value:read(node),scale:node.scale.clone()});if(node instanceof T.Bone)this.bones.push(node);});
     if(this.bones.length>256)throw new Error('Das Studio unterstützt derzeit höchstens 256 Skelettpunkte.');
     this.originalBoneRest=this.bones.map(read);
@@ -41,6 +45,7 @@ export class StudioRig {
     this.reset();
   }
   reset() {
+    this.figureOffset.set(0,0,0);
     for(const item of this.originalNodes){write(item.node,item.value);item.node.scale.copy(item.scale);}
     this.bones.forEach((b,i)=>write(b,this.data.boneRest[i]));
     this.root.updateWorldMatrix(true,true);
@@ -49,6 +54,7 @@ export class StudioRig {
     this.deform();
   }
   restoreSource() {
+    this.figureOffset.set(0,0,0);
     this.bones.forEach((b,i)=>write(b,this.originalBoneRest[i]));
     for(const item of this.originalNodes){write(item.node,item.value);item.node.scale.copy(item.scale);}
     this.root.updateWorldMatrix(true,true);
@@ -59,7 +65,7 @@ export class StudioRig {
   private rebind(){for(const b of this.bindings){b.mesh.skeleton.calculateInverses();b.mesh.bind(b.mesh.skeleton,b.mesh.matrixWorld);}}
   private anchors=new Map<string,{key:string;index:number}>();
   private surfaceMatrix(p:ControlPoint):T.Matrix4 {
-    const surface=p.mesh===undefined?undefined:this.surfaces[p.mesh];if(!surface)return new T.Matrix4();
+    const surface=p.mesh===undefined?undefined:this.surfaces[p.mesh];if(!surface)return new T.Matrix4().makeTranslation(this.figureOffset);
     const mesh=surface.mesh;
     if(!(mesh instanceof T.SkinnedMesh))return mesh.matrixWorld.clone().multiply(surface.worldInverse);
     const key=`${p.mesh}:${p.rest.join(',')}`;let anchor=this.anchors.get(p.id);
@@ -70,14 +76,23 @@ export class StudioRig {
     for(let i=0;i<4;i++){const weight=weights.getComponent(i);if(!weight)continue;const index=indices.getComponent(i),bone=mesh.skeleton.bones[index];const m=bone.matrixWorld.clone().multiply(mesh.skeleton.boneInverses[index]);for(let j=0;j<16;j++)blended.elements[j]+=m.elements[j]*weight;}
     return mesh.matrixWorld.clone().multiply(mesh.bindMatrixInverse).multiply(blended).multiply(mesh.bindMatrix).multiply(surface.worldInverse);
   }
-  position(p:ControlPoint):T.Vector3 {return p.kind==='bone' ? this.bones[p.bone!].getWorldPosition(new T.Vector3()) : new T.Vector3().fromArray(this.surfaceValues[p.id]?.position ?? p.rest).applyMatrix4(this.surfaceMatrix(p));}
+  position(p:ControlPoint):T.Vector3 {return p.id===FIGURE_TRACK ? new T.Vector3().fromArray(this.figure.rest).add(this.figureOffset) : p.kind==='bone' ? this.bones[p.bone!].getWorldPosition(new T.Vector3()) : new T.Vector3().fromArray(this.surfaceValues[p.id]?.position ?? p.rest).applyMatrix4(this.surfaceMatrix(p));}
   rotation(p:ControlPoint):T.Quaternion {return p.kind==='bone' ? this.bones[p.bone!].getWorldQuaternion(new T.Quaternion()) : new T.Quaternion();}
-  capture():Record<string,Transform> {return Object.fromEntries(this.data.points.map(p=>[p.id,p.kind==='bone' ? read(this.bones[p.bone!]) : structuredClone(this.surfaceValues[p.id] ?? {position:p.rest,rotation:[0,0,0,1]})]));}
+  capture():Record<string,Transform> {return {[FIGURE_TRACK]:{position:this.figureOffset.toArray(),rotation:[0,0,0,1]},...Object.fromEntries(this.data.points.map(p=>[p.id,p.kind==='bone' ? read(this.bones[p.bone!]) : structuredClone(this.surfaceValues[p.id] ?? {position:p.rest,rotation:[0,0,0,1]})]))};}
   apply(values:Record<string,Transform>) {
+    this.setFigureOffset(new T.Vector3().fromArray((values[FIGURE_TRACK]??neutralFigure()).position));
     for(const p of this.data.points){const v=values[p.id];if(!v)continue;if(p.kind==='bone')write(this.bones[p.bone!],v);else this.surfaceValues[p.id]=structuredClone(v);}
     this.root.updateWorldMatrix(true,true);this.deform();
   }
+  setFigureOffset(offset:T.Vector3){
+    this.figureOffset.copy(offset);const local=offset.clone();
+    if(this.root.parent){this.root.parent.updateWorldMatrix(true,false);local.applyMatrix3(new T.Matrix3().setFromMatrix4(this.root.parent.matrixWorld).invert());}
+    this.root.position.copy(this.rootPosition).add(local);this.root.updateWorldMatrix(true,true);
+    // SkinnedMesh updates its inverse bind matrix in updateMatrixWorld, not updateWorldMatrix.
+    this.root.updateMatrixWorld(true);
+  }
   setPoint(p:ControlPoint, position:T.Vector3, rotation:T.Quaternion, edit:boolean) {
+    if(p.id===FIGURE_TRACK){if(!edit)this.setFigureOffset(position.clone().sub(new T.Vector3().fromArray(this.figure.rest)));return;}
     if(p.kind==='bone') {
       const bone=this.bones[p.bone!];
       const children=bone.children.map(node=>({node,world:node.getWorldPosition(new T.Vector3())}));
@@ -113,6 +128,8 @@ export class StudioRig {
     const result:Record<string,Transform>={};
     for(const p of this.data.points){const x=a.values[p.id],y=b.values[p.id];if(!x||!y)throw new Error('Posen nach Gelenkänderung neu aufnehmen.');
       result[p.id]={position:new T.Vector3().fromArray(x.position).lerp(new T.Vector3().fromArray(y.position),ratio).toArray(),rotation:new T.Quaternion().fromArray(x.rotation).slerp(new T.Quaternion().fromArray(y.rotation),ratio).toArray()};}
+    const x=a.values[FIGURE_TRACK]??neutralFigure(),y=b.values[FIGURE_TRACK]??neutralFigure();
+    result[FIGURE_TRACK]={position:new T.Vector3().fromArray(x.position).lerp(new T.Vector3().fromArray(y.position),ratio).toArray(),rotation:[0,0,0,1]};
     return result;
   }
   duration(move:StudioMove){const poses=move.poses.map(id=>this.data.poses.find(p=>p.id===id)!);return poses.slice(1).reduce((sum,p)=>sum+p.seconds,0)+(move.loop ? poses[0].seconds : 0);}

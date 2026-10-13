@@ -34,7 +34,7 @@ Abnahme: Ein externer Agent kann verfügbare Fähigkeiten abfragen und unterstü
 
 - [x] Modus „Figur bewegen“ mit verständlichen Griffpunkten umsetzen.
 - [x] Posen, Zeitabstände und Gesichtspunkte bearbeiten.
-- [ ] Globale Position als eigene Spur auch für knochenlose Modelle bearbeiten.
+- [x] Globale Position als eigene Spur auch für knochenlose Modelle bearbeiten (0.6.0).
 - [x] Zwischenposen berechnen und Vorschau abspielen.
 - [x] Moves mit eindeutigen Schlagworten speichern.
 - [x] Neu, Laden und Speichern für bearbeitbare Projekte umsetzen.

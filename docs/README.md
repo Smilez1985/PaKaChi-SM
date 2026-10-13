@@ -15,6 +15,6 @@ PaKaChi bedeutet Panda-KI-Chimera. Das PaKaChi-Avatar-Studio ist ein fest integr
 Noch offene technische Entscheidungen sind in Designdokument und Roadmap ausdrücklich als offen gekennzeichnet.
 
 
-[Agentensteuerung einrichten](ANSTEUERUNG.md) · [Studio-Anleitung](STUDIO.md) · [Python-MCP einrichten](PYTHON-MCP.md) · [Prüfstand 0.5.0](PRUEFUNG-0.5.0.md) · [Technische Architektur](ARCHITEKTUR.md) · [Erhaltene Originalvorlagen](references/README.md)
+[Agentensteuerung einrichten](ANSTEUERUNG.md) · [Studio-Anleitung](STUDIO.md) · [Python-MCP einrichten](PYTHON-MCP.md) · [Prüfstand 0.6.0](PRUEFUNG-0.6.0.md) · [Technische Architektur](ARCHITEKTUR.md) · [Erhaltene Originalvorlagen](references/README.md)
 
 Seit 0.5.0: Skelettbasierte Gelenk-/Verbindungserkennung, einzeln entfernbare Verbindungen, direktes Punktziehen, mittlere Maustaste für freie Ansichtsdrehung und lokal gespeicherte Sprach-/Inversionsoptionen. KI-Erkennung an ungeriggten Modellen bleibt offen. Details: [Studio](STUDIO.md).

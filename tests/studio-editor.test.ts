@@ -11,7 +11,7 @@ test('studio DOM workflow adds, sizes, connects, undoes, poses and plays a real 
   const host=window.document.createElement('div');window.document.body.append(host);
   const root=new T.Group();root.add(new T.Mesh(new T.SphereGeometry(.5,10,10)));root.updateMatrixWorld(true);
   const rig=new StudioRig(root);let resumed=0;let feedback='';
-  const view={setEnabled(){},setAction(){},setRotation(){},select(){},refresh(){},dispose(){},onAdd:(_p:T.Vector3,_mesh?:number)=>{},onSelect:(_id:string)=>{},onConnect:(_id:string)=>{}};
+  const view={setEnabled(){},setFigureEnabled(){},setAction(){},setRotation(){},select(){},refresh(){},dispose(){},onAdd:(_p:T.Vector3,_mesh?:number)=>{},onSelect:(_id:string)=>{},onConnect:(_id:string)=>{}};
   const editor=new StudioEditor(rig,view as unknown as StudioView,host as unknown as HTMLElement,{format:'pakachi-studio',version:1,model:'AAAA',avatar:{id:'x',name:'X',description:'',moves:[]}},{suspend(){},resume(){resumed++;},changed(){},feedback(s){feedback=s;}});
   const click=(id:string)=>(host.querySelector(`#${id}`) as unknown as HTMLButtonElement).click();
   const value=(id:string,text:string,change=true)=>{const e=host.querySelector(`#${id}`) as unknown as HTMLInputElement;e.value=text;if(change)e.dispatchEvent(new window.Event('change') as unknown as Event);};

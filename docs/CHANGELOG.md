@@ -8,6 +8,29 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-10-13
+
+Zeitstempel: 2026-10-13T18:34:16+02:00 (Europe/Berlin)
+
+### Added
+
+- Eigene Gesamtpositionsspur pro Pose; funktioniert auch ohne Skelett und ohne Kontrollpunkte.
+- „Gesamte Figur verschieben“ im Modus „Figur bewegen“, mit direktem Ziehen, Achsgriffen und Undo/Redo.
+- Interpolation, Projektpersistenz und Abspielen der Gesamtspur zusammen mit Gelenk-/Gesichtsbewegungen.
+- Rückwärtskompatibles Laden alter Projekte mit neutraler Gesamtposition und Importprüfung des neuen optionalen Kanals.
+- Geometrie- und DOM-Tests für geriggte und knochenlose Modelle, Elternskalierung, Undo, Wiedergabe und Rückkehr zur Originalposition.
+
+### Fixed
+
+- Hautbindung nach Gesamtverschiebung auch vor dem nächsten Renderdurchlauf aktualisieren, damit Oberfläche und Kontrollpunkte gemeinsam verschoben werden.
+- Neu hinzugefügte Kontrollpunkte auch in einem bestehenden Projektentwurf ergänzen.
+
+### Known limitations
+
+- Gesamtrotation, Skalierung, physikalische Sprünge und Bodenkollision sind nicht enthalten.
+- Projekte mit Gesamtspur benötigen mindestens Version 0.6.0. Visuelle WebGL-Abnahme bleibt offen.
+
+
 ## [0.5.0] - 2026-10-13
 
 Zeitstempel: 2026-10-13T11:32:34+00:00

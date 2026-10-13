@@ -58,3 +58,21 @@ test('a facial control follows the head skin and accepts displacement in the pos
   assert.ok(mesh.getVertexPosition(index,new T.Vector3()).applyMatrix4(mesh.matrixWorld).distanceTo(target)<1e-6);
   disposeModel(root);
 });
+
+test('whole-figure track translates skinned geometry and face controls exactly once and restores source clips',async()=>{
+ const {root}=await fixture();const rig=new StudioRig(root),mesh=rig.surfaces[0].mesh as T.SkinnedMesh;const original=vertices(mesh);const head=rig.data.points.find(p=>p.name==='Head')!,headPosition=rig.position(head);
+ const point={id:'free',name:'Frei',kind:'surface' as const,rest:[0,0,0] as [number,number,number],size:.01,radius:.1};rig.data.points.push(point);const attached={...point,id:'attached',mesh:0,rest:original[0].toArray()};rig.data.points.push(attached);rig.reset();
+ const offset=new T.Vector3(.4,.8,-.2);rig.setPoint(rig.figure,rig.position(rig.figure).add(offset),new T.Quaternion(),false);
+ assert.ok(maxDistance(original.map(v=>v.clone().add(offset)),vertices(mesh))<1e-6);assert.ok(rig.position(head).distanceTo(headPosition.clone().add(offset))<1e-6);assert.ok(rig.position(point).distanceTo(offset)<1e-6);assert.ok(rig.position(attached).distanceTo(original[0].clone().add(offset))<1e-6);
+ const snapshot=rig.capture();rig.reset();rig.apply(snapshot);assert.ok(maxDistance(original.map(v=>v.clone().add(offset)),vertices(mesh))<1e-6);
+ rig.restoreSource();assert.ok(maxDistance(original,vertices(mesh))<1e-6);assert.deepEqual(rig.capture()['$figure'].position,[0,0,0]);disposeModel(root);
+});
+test('boneless model track interpolates, persists, validates and reads pre-track projects',()=>{
+ const holder=new T.Group();holder.rotation.z=.3;holder.scale.set(2,3,1);const root=new T.Group();root.position.set(.1,.2,0);holder.add(root);root.add(new T.Mesh(new T.BoxGeometry()));holder.updateMatrixWorld(true);const rig=new StudioRig(root);const first=rig.capture();rig.setFigureOffset(new T.Vector3(1,2,0));const last=rig.capture();
+ rig.data.poses=[{id:'a',name:'A',seconds:1,values:first},{id:'b',name:'B',seconds:2,values:last}];rig.data.moves=[{id:'slide',name:'Slide',loop:false,poses:['a','b']}];rig.apply(rig.sample(rig.data.moves[0],1));assert.deepEqual(rig.capture()['$figure'].position,[.5,1,0]);
+ const expected=new T.Vector3(.1,.2,0).applyMatrix4(holder.matrixWorld).add(new T.Vector3(.5,1,0));assert.ok(root.getWorldPosition(new T.Vector3()).distanceTo(expected)<1e-6);
+ const project:StudioProject={format:'pakachi-studio',version:1,model:'AAAA',avatar:{id:'x',name:'X',description:'',moves:[]},studio:rig.data};assert.deepEqual(parseProject(JSON.parse(JSON.stringify(project))),project);
+ const old=structuredClone(project);old.studio.poses.forEach(p=>delete p.values['$figure']);assert.doesNotThrow(()=>parseProject(old));rig.data=old.studio;rig.apply(rig.sample(rig.data.moves[0],1));assert.deepEqual(rig.capture()['$figure'].position,[0,0,0]);
+ for(const bad of [Infinity,NaN]){const copy=structuredClone(project);copy.studio.poses[0].values['$figure'].position[0]=bad;assert.throws(()=>parseProject(copy));}
+ const invalid=structuredClone(project);invalid.studio.poses[0].values['$figure'].rotation=[0,1,0,0];assert.throws(()=>parseProject(invalid));disposeModel(root);
+});

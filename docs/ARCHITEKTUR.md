@@ -1,4 +1,4 @@
-# Technischer Stand 0.5.0
+# Technischer Stand 0.6.0
 
 ## Lokale Anwendung
 
@@ -35,3 +35,9 @@ Die Hauptoberfläche verwendet seit 0.4.0 MQTT.js für direkten Status-Empfang u
 Der Editor unterstützt noch keinen beliebigen Quellknochenumbau, IK, automatische Gewichte, Bild-zu-3D oder GLB-Export. Ein gelöschter Skelettgriff entfernt nicht den Quellknochen. Beim Original-PaKaChi bleibt der Bildplayer aktiv, da sein 3D-Modell noch fehlt. Details: [Studio](STUDIO.md).
 
 Seit 0.5.0: Skelettbasierte Gelenk-/Verbindungserkennung, einzeln entfernbare Verbindungen, direktes Punktziehen, mittlere Maustaste für freie Ansichtsdrehung und lokal gespeicherte Sprach-/Inversionsoptionen. KI-Erkennung an ungeriggten Modellen bleibt offen. Details: [Studio](STUDIO.md).
+
+## Gesamtposition ab 0.6.0
+
+Der reservierte Posenkanal `$figure` speichert die Verschiebung in normierten Weltkoordinaten; er ist unabhängig von den maximal 256 Kontrollpunkten. `StudioRig` rechnet die Verschiebung über die Elternmatrix in die lokalen Root-Koordinaten um. Die Hautbindung wird vor Geometrie- und Griffabfragen aktualisiert. Oberflächenpunkte ohne Mesh-Zuordnung folgen ebenfalls der Gesamtverschiebung.
+
+Der optionale Kanal ergänzt das Projektformat 1. Ältere Dateien ohne Kanal bleiben lesbar und verwenden `[0, 0, 0]`. Dateien mit dem neuen Kanal benötigen PaKaChi-SM ab 0.6.0; ältere Player lehnen sie ab. Rotation im Gesamtkanal ist derzeit ausschließlich die Einheitsquaternion. Ungültige oder unvollständige Werte werden beim Import abgewiesen. Originalclips setzen die Studio-Gesamtverschiebung zurück.

@@ -1,6 +1,6 @@
 import * as T from 'three';
 import {detectJoints,detectConnections,edgeKey} from './studio-detection.ts';
-import { connectedPoints, StudioHistory } from './studio-data.ts';
+import { connectedPoints, StudioHistory, FIGURE_TRACK } from './studio-data.ts';
 import type { StudioData, StudioProject, Transform, ControlPoint } from './studio-data.ts';
 import { StudioRig } from './studio-rig.ts';
 import type { StudioView } from './studio-view.ts';
@@ -36,7 +36,7 @@ export class StudioEditor {
     view.onStart=()=>{this.gesture=this.snapshot();this.gesturePosition=this.point ? rig.position(this.point):null;this.gesturePositions=new Map(rig.data.points.map(p=>[p.id,rig.position(p)]));};
     view.onMove=(position,rotation)=>{
       const p=this.point;if(!p)return;
-      if(this.groupMove && !this.edit && p.kind==='surface' && this.gesture && this.gesturePosition){const delta=position.clone().sub(this.gesturePosition), connected=connectedPoints(rig.data,p.id);
+      if(p.id!==FIGURE_TRACK && this.groupMove && !this.edit && p.kind==='surface' && this.gesture && this.gesturePosition){const delta=position.clone().sub(this.gesturePosition), connected=connectedPoints(rig.data,p.id);
         for(const q of rig.data.points.filter(q=>q.kind==='surface'&&connected.has(q.id))){rig.setPoint(q,this.gesturePositions.get(q.id)!.clone().add(delta),new T.Quaternion(),false);}
       }else rig.setPoint(p,position,rotation,this.edit);
       this.view.refresh();this.refreshNumbers();
@@ -44,7 +44,7 @@ export class StudioEditor {
     view.onEnd=()=>{if(this.gesture){this.history.push(this.gesture);this.gesture=null;this.mark();this.render();}};
     this.render();
   }
-  get point(){return this.rig.data.points.find(p=>p.id===this.selected);}
+  get point(){if(this.selected===FIGURE_TRACK&&!this.edit)return this.rig.figure;return this.rig.data.points.find(p=>p.id===this.selected);}
   get data(){return this.rig.data;}
   get playing(){return !!this.timeline;}
   get current(){return this.timeline?.move ?? null;}
@@ -71,7 +71,7 @@ export class StudioEditor {
   seek(ratio:number){if(!this.timeline)return;const move=this.data.moves.find(m=>m.id===this.timeline!.move.id)!;this.timeline.time=T.MathUtils.clamp(ratio,0,.999999)*this.duration;this.rig.apply(this.rig.sample(move,this.timeline.time));}
   setSpeed(value:number){this.speed=T.MathUtils.clamp(value,.25,2);}
   private addPoint(position:T.Vector3,mesh?:number){if(!this.edit||this.playing)return;if(this.data.points.length>=256){this.hooks.feedback('Höchstens 256 Kontrollpunkte pro Projekt.');return;}
-    this.mutate(()=>{const p:ControlPoint={id:uid(),name:`Punkt ${this.data.points.length+1}`,kind:'surface',rest:position.toArray(),size:.015,radius:.12,...(mesh!==undefined?{mesh}:{})};this.data.points.push(p);for(const pose of this.data.poses)pose.values[p.id]={position:[...p.rest],rotation:[0,0,0,1]};this.selected=p.id;this.rig.reset();});
+    this.mutate(()=>{const p:ControlPoint={id:uid(),name:`Punkt ${this.data.points.length+1}`,kind:'surface',rest:position.toArray(),size:.015,radius:.12,...(mesh!==undefined?{mesh}:{})};this.data.points.push(p);for(const pose of this.data.poses)pose.values[p.id]={position:[...p.rest],rotation:[0,0,0,1]};if(this.data.draft)this.data.draft[p.id]={position:[...p.rest],rotation:[0,0,0,1]};this.selected=p.id;this.rig.reset();});
     this.view.setAction('select');this.hooks.feedback('Punkt gesetzt. Größe und Einflussbereich sind getrennt einstellbar.');
   }
   private connect(id:string){if(!this.edit||!this.selected||id===this.selected)return;
@@ -87,6 +87,7 @@ export class StudioEditor {
     <p class="subtle">${this.edit?'Punkte setzen und verbinden. Bestehende Skelettpunkte verschieben ihren Drehpunkt.':'Punkt direkt ziehen oder farbige Griffe verwenden. Skelettpunkte können auch gedreht werden.'}</p>
     <div class="studio-actions"><button id="studio-undo" ${this.history.canUndo?'':'disabled'}>↶ Zurück</button><button id="studio-redo" ${this.history.canRedo?'':'disabled'}>↷ Wiederholen</button></div>
     <div class="studio-detection" ${this.edit?'':'hidden'}><button id="detect-joints">Joints automatisch erkennen</button><button id="detect-links">Joint-Verbindungen automatisch erkennen</button><p class="subtle">Erkennung verwendet vorhandene Skelettdaten. Für Modelle ohne Skelett ist KI-Rigging noch nicht verfügbar.</p></div>
+    <button id="figure-select" ${this.edit?'hidden':''}>Gesamte Figur verschieben</button>
     <label for="studio-points">Gelenk / Gesichtspunkt</label><select id="studio-points"><option value="">Punkt auswählen …</option></select>
     <div class="studio-actions" ${this.edit?'':'hidden'}><button id="point-add">＋ Punkt setzen</button><button id="point-connect" ${this.point?'':'disabled'}>Verbinden / lösen</button></div>
     <div id="point-fields" ${this.point?'':'hidden'}><label>Name<input id="point-name" maxlength="100"></label><label>Punktgröße<input id="point-size" type="range" min="0.003" max="0.15" step="0.001"></label>
@@ -107,10 +108,11 @@ export class StudioEditor {
     const q=<E extends HTMLElement=HTMLElement>(id:string)=>this.host.querySelector<E>(`#${id}`)!;
     const input=(id:string)=>q<HTMLInputElement>(id);
     const on=(id:string,fn:()=>void)=>{q<HTMLButtonElement>(id).onclick=()=>{try{fn();}catch(e){this.hooks.feedback(e instanceof Error?e.message:String(e));}};};
-    const points=q<HTMLSelectElement>('studio-points');for(const p of this.data.points)points.add(new Option(`${p.kind==='bone'?'◇':'●'} ${p.name}`,p.id));points.value=selected??'';
+    const points=q<HTMLSelectElement>('studio-points');if(!this.edit){const option=new Option('Gesamte Figur',FIGURE_TRACK);option.dataset.figureLabel='';points.add(option);}for(const p of this.data.points)points.add(new Option(`${p.kind==='bone'?'◇':'●'} ${p.name}`,p.id));points.value=selected??'';
     points.onchange=()=>{this.selected=points.value||null;this.view.setAction('select');this.render();};
+    on('figure-select',()=>{this.selected=FIGURE_TRACK;this.view.setAction('select');this.render();});
     on('mode-pose',()=>{this.edit=false;this.view.setAction('select');this.rig.reset();this.render();});
-    on('mode-rig',()=>{this.edit=true;this.view.setAction('select');this.rig.reset();this.render();});
+    on('mode-rig',()=>{this.edit=true;if(this.selected===FIGURE_TRACK)this.selected=null;this.view.setAction('select');this.rig.reset();this.render();});
     on('studio-undo',()=>{const s=this.history.undo(this.snapshot());if(s)this.restore(s);});on('studio-redo',()=>{const s=this.history.redo(this.snapshot());if(s)this.restore(s);});
     on('studio-new',()=>this.mutate(()=>{this.rig.data=structuredClone(this.initial);this.data.poses=[];this.data.moves=[];this.rig.reset();this.selected=null;}));
     on('studio-save',()=>this.save());
@@ -128,8 +130,8 @@ export class StudioEditor {
     for(const edge of this.data.links){const row=document.createElement('div');row.className='connection-row';const name=document.createElement('span');name.dataset.userText='';name.textContent=edge.map(id=>this.data.points.find(p=>p.id===id)?.name??id).join(' ↔ ');const remove=document.createElement('button');remove.textContent='Verbindung entfernen';remove.onclick=()=>this.mutate(()=>{this.data.links=this.data.links.filter(e=>edgeKey(e)!==edgeKey(edge));});row.append(name,remove);links.append(row);}
     on('point-add',()=>{this.view.setAction('add');this.hooks.feedback('In die Figur klicken. Neben der Figur wird der Punkt auf der Ansichtsebene gesetzt.');});
     on('point-connect',()=>{this.view.setAction('connect');this.hooks.feedback('Zweiten Punkt anklicken. Eine vorhandene Verbindung wird gelöst.');});
-    if(this.point){const p=this.point;input('point-name').value=p.name;input('point-size').value=String(p.size);input('point-radius').value=String(p.radius);q('radius-label').hidden=p.kind==='bone';q('rotation-label').hidden=p.kind!=='bone'||this.edit;q('group-label').hidden=p.kind!=='surface'||this.edit;
-      q('point-kind').textContent=p.kind==='bone'?'Skelettpunkt. Löschen entfernt den Griff, das Quellskelett bleibt erhalten.':'Freier Oberflächenpunkt. Verbindungen gruppieren Punkte, ohne eine Gelenkkette vorauszusetzen.';
+    if(this.point){const p=this.point;const whole=p.id===FIGURE_TRACK;input('point-name').disabled=whole;input('point-size').disabled=whole;input('point-radius').disabled=whole;input('point-name').value=p.name;input('point-size').value=String(p.size);input('point-radius').value=String(p.radius);q('radius-label').hidden=p.kind==='bone'||whole;q('rotation-label').hidden=p.kind!=='bone'||this.edit;q('group-label').hidden=p.kind!=='surface'||this.edit||whole;
+      q('point-kind').textContent=whole?'Gesamte Figur verschieben. Diese Position wird in jeder Pose gespeichert.':p.kind==='bone'?'Skelettpunkt. Löschen entfernt den Griff, das Quellskelett bleibt erhalten.':'Freier Oberflächenpunkt. Verbindungen gruppieren Punkte, ohne eine Gelenkkette vorauszusetzen.';
       input('point-name').onchange=()=>{const v=input('point-name').value.trim();if(v)this.mutate(()=>p.name=v);};
       input('point-size').onchange=()=>this.mutate(()=>p.size=Number(input('point-size').value));
       input('point-radius').onchange=()=>this.mutate(()=>{p.radius=Number(input('point-radius').value);this.rig.apply(this.rig.capture());});
@@ -139,7 +141,7 @@ export class StudioEditor {
       input('point-group').onchange=()=>this.groupMove=input('point-group').checked;
       on('point-delete',()=>this.mutate(()=>{this.data.points=this.data.points.filter(x=>x.id!==p.id);this.data.links=this.data.links.filter(l=>!l.includes(p.id));this.data.poses.forEach(pose=>delete pose.values[p.id]);if(this.data.draft)delete this.data.draft[p.id];this.selected=null;this.rig.reset();}));
     }
-    on('pose-reset',()=>{this.history.push(this.snapshot());this.rig.reset();this.render();});
+    on('pose-reset',()=>this.mutate(()=>this.rig.reset()));
     on('pose-add',()=>{if(this.data.poses.length>=100)throw new Error('Höchstens 100 Posen.');const name=input('pose-name').value.trim()||`Pose ${poses.length+1}`;this.mutate(()=>this.data.poses.push({id:uid(),name,seconds:1,values:this.rig.capture()}));});
     const list=q<HTMLSelectElement>('pose-list');poses.forEach((p,i)=>list.add(new Option(`${i+1}. ${p.name}`,p.id)));if(poses.some(p=>p.id===remembered['pose-list']))list.value=remembered['pose-list'];const pose=()=>this.data.poses.find(p=>p.id===list.value);
     list.onchange=()=>{input('pose-seconds').value=String(pose()?.seconds??1);};list.onchange(new Event('change'));
@@ -154,7 +156,7 @@ export class StudioEditor {
     for(const id of ['pose-name','move-name','move-id'])input(id).value=remembered[id];input('move-loop').checked=loop;
     on('move-preview',()=>this.play(moves.value,true));on('move-stop',()=>this.stopPreview());on('move-delete',()=>this.mutate(()=>this.data.moves=this.data.moves.filter(m=>m.id!==moves.value)));
     if(this.playing){this.host.querySelectorAll<HTMLButtonElement|HTMLInputElement|HTMLSelectElement>('button,input,select').forEach(e=>e.disabled=e.id!=='move-stop');}
-    this.view.setRotation(this.rotate && !this.edit);this.view.select(this.selected);this.refreshNumbers();
+    this.view.setFigureEnabled(!this.edit);this.view.setRotation(this.rotate && !this.edit);this.view.select(this.selected);this.refreshNumbers();
   }
   save(){
     this.data.draft=this.rig.capture();

@@ -4,7 +4,7 @@ Teil der [Blaupause](README.md) · [Roadmap](ROADMAP.md) · [Changelog](CHANGELO
 
 ## Status und Begriffe
 
-Dieses Dokument hält das Produktziel fest. Stand 0.5.0: Player, gemeinsame Agentensteuerung und ein erster Studio-Editor sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau und KI-Generierung bleiben Entwicklungsziele.
+Dieses Dokument hält das Produktziel fest. Stand 0.6.0: Player, gemeinsame Agentensteuerung und ein erster Studio-Editor sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau und KI-Generierung bleiben Entwicklungsziele.
 
 - **PaKaChi:** Panda-KI-Chimera, das übergeordnete Projekt.
 - **PaKaChi-SM:** StateMaschine mit Avatar-Player und integriertem Studio.
@@ -92,7 +92,7 @@ Als Schutzkonzept ist eine Vorschau mit Übernehmen oder Verwerfen vorgesehen. D
 
 Die Anzahl drei bis zehn beschreibt den typischen Arbeitsablauf, keine bereits festgelegte technische Obergrenze.
 
-Eine Bewegung enthält Zeitpunkte, Gelenktransformationen, gegebenenfalls Gesichtsparameter und die Gesamtposition. Sie benötigt keine Sammlung separat gezeichneter Einzelbilder. Die erste Umsetzung speichert Posen und Moves textbasiert in versionierten `.pakachi.json`-Projekten. Separate Move-Dateien und globale Transformationsspuren bleiben offen.
+Eine Bewegung enthält Zeitpunkte, Gelenktransformationen, gegebenenfalls Gesichtsparameter und die Gesamtposition. Sie benötigt keine Sammlung separat gezeichneter Einzelbilder. Die erste Umsetzung speichert Posen und Moves textbasiert in versionierten `.pakachi.json`-Projekten. Seit 0.6.0 enthält jede neue Pose zusätzlich die globale Verschiebung der gesamten Figur, auch bei Modellen ohne Knochen. Gesamtrotation/-skalierung und separate Move-Dateien bleiben offen.
 
 Glatte Interpolation allein garantiert keine natürlichen Bewegungen oder Kollisionsfreiheit. Gelenkgrenzen und geeignete Übergänge sind Teil der Umsetzung.
 

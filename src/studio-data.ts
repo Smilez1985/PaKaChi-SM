@@ -1,5 +1,8 @@
 export type Vec3 = [number, number, number];
 export type Quat = [number, number, number, number];
+/** Reserved pose channel; cannot collide with user point IDs. */
+export const FIGURE_TRACK='$figure';
+export const neutralFigure=():Transform=>({position:[0,0,0],rotation:[0,0,0,1]});
 export interface Transform { position: Vec3; rotation: Quat }
 export interface ControlPoint {
   id: string; name: string; kind: 'bone' | 'surface'; bone?: number; mesh?: number;
@@ -39,13 +42,13 @@ export function parseProject(input: unknown): StudioProject {
     else require(p.mesh===undefined || Number.isInteger(p.mesh) && (p.mesh as number)>=0 && (p.mesh as number)<2048);
     ids.add(p.id);
   }
-  if(d.draft!==undefined){require(obj(d.draft) && Object.keys(d.draft).length===ids.size);for(const [key,value] of Object.entries(d.draft))require(ids.has(key) && transform(value));}
+  const valuesValid=(values:unknown)=>{if(!obj(values))return false;const keys=Object.keys(values);return keys.length===ids.size+(FIGURE_TRACK in values?1:0)&&keys.every(key=>key===FIGURE_TRACK ? transform(values[key]) && (values[key] as Transform).rotation.every((v,i)=>v===(i===3?1:0)) : ids.has(key)&&transform(values[key]));};
+  if(d.draft!==undefined)require(valuesValid(d.draft));
   const links=new Set<string>();
   for(const l of d.links) {require(Array.isArray(l) && l.length===2 && l[0]!==l[1] && ids.has(l[0]) && ids.has(l[1])); const k=[...l].sort().join('|');require(!links.has(k));links.add(k);}
   const poses=new Set<string>();
   for(const p of d.poses) {
-    require(obj(p) && id(p.id) && !poses.has(p.id) && name(p.name) && finite(p.seconds) && p.seconds>=.1 && p.seconds<=30 && obj(p.values) && Object.keys(p.values).length===ids.size);
-    for(const [key,value] of Object.entries(p.values))require(ids.has(key) && transform(value));
+    require(obj(p) && id(p.id) && !poses.has(p.id) && name(p.name) && finite(p.seconds) && p.seconds>=.1 && p.seconds<=30 && valuesValid(p.values));
     poses.add(p.id);
   }
   for(const m of d.moves) {require(obj(m) && id(m.id) && !moveIds.has(m.id) && name(m.name) && typeof m.loop==='boolean' && Array.isArray(m.poses) && m.poses.length>=2 && m.poses.length<=100 && m.poses.every(p=>poses.has(p))); moveIds.add(m.id);}

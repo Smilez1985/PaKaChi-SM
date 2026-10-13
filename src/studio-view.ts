@@ -14,6 +14,9 @@ export class StudioView {
   private selected:string|null=null;
   private action:'select'|'add'|'connect'='select';
   private rotation=false;
+  private figureEnabled=false;
+  setFigureEnabled(value:boolean){this.figureEnabled=value;}
+  private get points(){return this.figureEnabled?[this.rig.figure,...this.rig.data.points]:this.rig.data.points;}
   private dragging=false;
   onSelect:(id:string)=>void=()=>{};
   onAdd:(position:T.Vector3,mesh?:number)=>void=()=>{};
@@ -45,7 +48,7 @@ export class StudioView {
   private down=(event:PointerEvent)=>{
     if(!this.enabled||event.button!==0)return;this.start={x:event.clientX,y:event.clientY};
     if(this.action!=='select')return;
-    const rect=this.canvas.getBoundingClientRect();const hits=this.rig.data.points.map(p=>{const v=this.rig.position(p).project(this.camera);return {p,z:v.z,d:Math.hypot(rect.left+(v.x+1)*rect.width/2-event.clientX,rect.top+(1-v.y)*rect.height/2-event.clientY)};}).filter(h=>h.z>=-1&&h.z<=1&&h.d<=10).sort((a,b)=>a.d-b.d);
+    const rect=this.canvas.getBoundingClientRect();const hits=this.points.map(p=>{const v=this.rig.position(p).project(this.camera);return {p,z:v.z,d:Math.hypot(rect.left+(v.x+1)*rect.width/2-event.clientX,rect.top+(1-v.y)*rect.height/2-event.clientY)};}).filter(h=>h.z>=-1&&h.z<=1&&h.d<=10).sort((a,b)=>a.d-b.d);
     const point=hits[0]?.p;if(!point)return;
     const position=this.rig.position(point),plane=new T.Plane().setFromNormalAndCoplanarPoint(this.camera.getWorldDirection(new T.Vector3()),position);this.aim(event.clientX,event.clientY);const hit=this.ray.ray.intersectPlane(plane,new T.Vector3());if(!hit)return;
     event.preventDefault();event.stopImmediatePropagation();this.onSelect(point.id);this.direct={pointer:event.pointerId,plane,offset:position.sub(hit),rotation:this.rig.rotation(point),moved:false};this.canvas.setPointerCapture(event.pointerId);this.orbit.enabled=false;
@@ -58,7 +61,7 @@ export class StudioView {
     const rect=this.canvas.getBoundingClientRect();this.ray.setFromCamera(new T.Vector2((event.clientX-rect.left)/rect.width*2-1,-(event.clientY-rect.top)/rect.height*2+1),this.camera);
     // Minimum 10 px pick radius keeps tiny face points usable without enlarging their display.
     const click=new T.Vector2(event.clientX,event.clientY);
-    const hits=this.rig.data.points.map(p=>{const world=this.rig.position(p),v=world.clone().project(this.camera);const pixel=new T.Vector2(rect.left+(v.x+1)*rect.width/2,rect.top+(1-v.y)*rect.height/2);const radius=Math.max(10,p.size*rect.height/(2*Math.tan(T.MathUtils.degToRad(this.camera.fov/2))*world.distanceTo(this.camera.position)));return {id:p.id,d:pixel.distanceTo(click),radius,z:v.z};}).filter(x=>x.z>=-1&&x.z<=1&&x.d<=x.radius).sort((a,b)=>a.d-b.d);
+    const hits=this.points.map(p=>{const world=this.rig.position(p),v=world.clone().project(this.camera);const pixel=new T.Vector2(rect.left+(v.x+1)*rect.width/2,rect.top+(1-v.y)*rect.height/2);const radius=Math.max(10,p.size*rect.height/(2*Math.tan(T.MathUtils.degToRad(this.camera.fov/2))*world.distanceTo(this.camera.position)));return {id:p.id,d:pixel.distanceTo(click),radius,z:v.z};}).filter(x=>x.z>=-1&&x.z<=1&&x.d<=x.radius).sort((a,b)=>a.d-b.d);
     if(this.action==='add') {
       const meshes=this.rig.surfaces.map(s=>s.mesh);const hit=this.ray.intersectObjects(meshes,false)[0];
       if(hit){this.onAdd(hit.point,meshes.indexOf(hit.object as T.Mesh));return;}
@@ -69,9 +72,9 @@ export class StudioView {
   };
   refresh() {
     this.clearGroup(this.handles);this.clearGroup(this.lines);
-    for(const p of this.rig.data.points){const mesh=new T.Mesh(new T.SphereGeometry(1,12,8),new T.MeshBasicMaterial({color:p.id===this.selected?0xffa82e:p.kind==='bone'?0x257fb4:0x17a878,depthTest:false,transparent:true,opacity:.9}));mesh.position.copy(this.rig.position(p));mesh.scale.setScalar(p.size);mesh.renderOrder=20;this.handles.add(mesh);}
+    for(const p of this.points){const mesh=new T.Mesh(new T.SphereGeometry(1,12,8),new T.MeshBasicMaterial({color:p.id===this.selected?0xffa82e:p.kind==='bone'?0x257fb4:0x17a878,depthTest:false,transparent:true,opacity:.9}));mesh.position.copy(this.rig.position(p));mesh.scale.setScalar(p.size);mesh.renderOrder=20;this.handles.add(mesh);}
     for(const [a,b] of this.rig.data.links){const p=this.rig.data.points.find(p=>p.id===a),q=this.rig.data.points.find(p=>p.id===b);if(!p||!q)continue;const line=new T.Line(new T.BufferGeometry().setFromPoints([this.rig.position(p),this.rig.position(q)]),new T.LineBasicMaterial({color:0x388a77,depthTest:false}));line.renderOrder=19;this.lines.add(line);}
-    const point=this.rig.data.points.find(p=>p.id===this.selected);
+    const point=this.points.find(p=>p.id===this.selected);
     if(this.enabled && point && this.action==='select') {this.proxy.position.copy(this.rig.position(point));this.proxy.quaternion.copy(this.rig.rotation(point));this.gizmo.setMode(this.rotation && point.kind==='bone'?'rotate':'translate');this.gizmo.attach(this.proxy);}else this.gizmo.detach();
   }
   private clearGroup(group:T.Group){for(const child of [...group.children]){group.remove(child);if(child instanceof T.Mesh||child instanceof T.Line){child.geometry.dispose();(child.material as T.Material).dispose();}}}
