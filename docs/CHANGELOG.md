@@ -8,6 +8,25 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-10-13
+
+Zeitstempel: 2026-10-13T06:46:36+02:00 (Europe/Berlin)
+
+### Added
+
+- Gemeinsame StateMaschine und Zustandsauswahl für Original-PaKaChi und 3D-Avatare; Prüfung tatsächlicher Fähigkeiten und verständliche Fehler.
+- Zustandsclips für idle, talking, thinking und working in beiden technischen Testmodellen.
+- Gemeinsamer optionaler MQTT-Empfang mit Broker-/Topic-Feldern und Zugangsdaten für die Sitzung.
+- Lokaler MCP-stdio-Server mit sechs Tools, authentifizierter WebSocket-Kopplung und Installationsanleitung.
+- Tests für Zustandswechsel, MQTT-Routing, Verbindungsabbrüche und echten MCP-Protokoll-Handshake.
+
+### Changed
+
+- Einmalige 3D-Moves kehren zum aktiven Zustand zurück; neue Zustände unterbrechen Moves. Clipwechsel blenden über 180 ms über.
+- Die gemeinsame MQTT-Oberfläche übernimmt die Steuerung des eingebetteten Originalplayers; alle Originaldateien und 72 Transformationsbilder bleiben unverändert.
+- Blaupause, Architektur und Roadmap auf den Implementierungsstand aktualisiert; visuelle Browser- und externe Live-Abnahme bleiben ausdrücklich offen.
+
+
 ## [0.1.0] - 2026-10-13
 
 Zeitstempel: 2026-10-13T00:59:25+02:00 (Europe/Berlin)
@@ -47,6 +66,7 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 - Bestehendes Bedienkonzept ausdrücklich als Designdokument eingeordnet und mit Roadmap und Changelog verknüpft.
 
 [Unreleased]: https://github.com/Smilez1985/PaKaChi-SM/commits/main
-[0.1.0]: ./ARCHITEKTUR.md
+[0.2.0]: ./PRUEFUNG-0.2.0.md
+[0.1.0]: ./PRUEFUNG-0.1.0.md
 [0.0.1]: ./README.md
 

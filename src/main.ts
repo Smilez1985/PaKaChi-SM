@@ -1,4 +1,6 @@
 import './style.css';
+import { StateMachine, STATES } from './control.ts';
+import { mountAgentPanel } from './agent-panel.ts';
 import { availableMoves, importedAvatar, parseCatalog } from './catalog.ts';
 import type { Avatar, Move } from './catalog.ts';
 import { Playback } from './playback.ts';
@@ -12,7 +14,7 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
       <button id="player-tab" class="nav-button active" aria-pressed="true"><span>◉</span> Player</button>
       <button id="studio-tab" class="nav-button" aria-pressed="false"><span>◇</span> Avatar-Studio <small>Aufbau</small></button>
     </nav>
-    <div class="rail-bottom"><span class="online-dot"></span> Lokal auf deinem Gerät<p>Entwicklungsstand 0.1.0<br>Player & Model Zoo</p></div>
+    <div class="rail-bottom"><span class="online-dot"></span> Lokal auf deinem Gerät<p>Entwicklungsstand 0.2.0<br>Zustände & Agenten</p></div>
   </aside>
   <main>
     <header><div><p class="eyebrow">PAKACHI-SM / <span id="section-label">PLAYER</span></p><h1 id="page-title">Dein Model Zoo<span>.</span></h1><p id="page-intro">Eine Figur auswählen. Eine Bewegung starten. Leben einhauchen.</p></div><button id="import-button" class="button outline">＋ GLB laden</button><input id="file-input" type="file" accept=".glb" hidden></header>
@@ -47,7 +49,7 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
         <p class="local-note">GLB-Import bleibt lokal im Browser und gilt für diese Sitzung. Es werden keine Modelle hochgeladen.</p>
       </aside>
     </div>
-    <footer><span>PAKACHI · PANDA-KI-CHIMERA</span><span>MCP & gemeinsame 3D-Zustandssteuerung folgen.</span></footer>
+    <footer><span>PAKACHI · PANDA-KI-CHIMERA</span><span>Zustandssteuerung · MQTT · MCP</span></footer>
   </main>`;
 
 const el = <T extends HTMLElement = HTMLElement>(id: string): T => document.getElementById(id) as T;
@@ -60,6 +62,38 @@ let studio = false;
 let request = 0;
 let fetchController: AbortController | null = null;
 let busy = false;
+const machine = new StateMachine(() => window.dispatchEvent(new Event('pakachi-sm:change')));
+function rpc(method: string, args: Record<string, unknown> = {}): unknown {
+  if (!args || typeof args !== 'object' || Array.isArray(args)) throw new Error('Ungültige Argumente.');
+  if (method === 'list_avatars') return [
+    {id:'pakachi-original',name:'PaKaChi Original',selected:original},
+    ...catalog.map(a => ({id:a.id,name:a.name,selected:loaded?.id===a.id})),
+    ...(loaded?.id==='local-import' ? [{id:loaded.id,name:loaded.name,selected:true}] : []),
+  ];
+  if (method === 'get_state') return {state:machine.state, capability:machine.capability, ready:!busy && !!machine.capability};
+  if (busy) throw new Error('Avatar wird geladen. Bitte erneut versuchen.');
+  if (args.avatar && args.avatar !== machine.capability?.id) throw new Error('Bitte diesen Avatar zuerst im Player auswählen.');
+  if (method === 'get_avatar_capabilities') { if(!machine.capability) throw new Error('Kein Avatar bereit.'); return machine.capability; }
+  if (method === 'list_moves') { if(!machine.capability) throw new Error('Kein Avatar bereit.'); return machine.capability.moves; }
+  if (method === 'set_state') return machine.execute({state:args.state, ...(args.avatar ? {avatar:args.avatar} : {})});
+  if (method === 'play_move') return machine.execute({move:args.move, ...(args.avatar ? {avatar:args.avatar} : {})});
+  if (method === 'command') return machine.execute(args.payload);
+  throw new Error('Unbekannte Operation.');
+}
+window.PaKaChiSM = {call:rpc};
+function connectOriginal(): void {
+  if (!original) return;
+  const frame = el<HTMLIFrameElement>('legacy-frame');
+  const win = frame.contentWindow as (Window & {Pakachi?: {setStatus:(value: string) => void; getState:() => {status:string}}}) | null;
+  if (!win?.Pakachi) return;
+  const api = win.Pakachi;
+  const legacyPanel = frame.contentDocument?.querySelector<HTMLElement>('.mqtt-panel');
+  if(legacyPanel) legacyPanel.hidden=true;
+  machine.bind({capability:{id:'pakachi-original',name:'PaKaChi Original',states:[...STATES],moves:[]},
+    setState:state=>api.setStatus(state), playMove:()=>{throw new Error('Formwechsel über Zustände steuern.');}},api.getState().status);
+  win.addEventListener('pakachi:state',()=>{if(original && win===frame.contentWindow) machine.observe(api.getState().status);});
+}
+
 
 function message(text: string, error = false): void {
   el('message').textContent = text;
@@ -128,7 +162,7 @@ function renderMoves(moves: Move[]): void {
     const button = document.createElement('button'); button.className = 'move-button'; button.dataset.move = move.id;
     const title = document.createElement('span'); title.textContent = move.name;
     const icon = document.createElement('span'); icon.textContent = move.loop ? '↻' : '↗'; icon.setAttribute('aria-hidden', 'true');
-    button.append(title, icon); button.onclick = () => { playback?.play(move.id); syncPlayback(); };
+    button.append(title, icon); button.onclick = () => { try { rpc('play_move',{move:move.id}); syncPlayback(); } catch(error) {message(String(error),true);} };
     el('moves').append(button);
     const li = document.createElement('li'); const code = document.createElement('code'); code.textContent = move.id;
     li.append(code, ` · ${move.loop ? 'Schleife' : 'einmalig'}`); el('capabilities').append(li);
@@ -139,10 +173,12 @@ function renderMoves(moves: Move[]): void {
 function showOriginal(): void {
   request++; fetchController?.abort(); busy = false;
   playback?.dispose(); playback = null; viewer?.clear(); loaded = null;
-  original = true;
+  original = true; machine.unbind();
   el('legacy-frame').parentElement!.classList.add('legacy');
   const frame = el<HTMLIFrameElement>('legacy-frame');
+  frame.onload = connectOriginal;
   if (!frame.getAttribute('src')) frame.src = `${import.meta.env.BASE_URL}legacy/pakachi/index.html`;
+  connectOriginal();
   renderCatalog(); changeView(studio);
   message('PaKaChi · Originalstand wiederhergestellt · 72 Bilder · Tierform ↔ Arbeitsform');
 }
@@ -186,7 +222,11 @@ async function loadAvatar(avatar?: Avatar, file?: File): Promise<void> {
     el('avatar-description').textContent = next.description;
     el('model-type').textContent = file ? '3D · EIGENER IMPORT' : '3D · TESTAVATAR';
     viewer?.showSkeleton(studio && el<HTMLInputElement>('skeleton').checked);
-    if (next.defaultMove && moves.some(m => m.id === next.defaultMove)) playback.play(next.defaultMove);
+    const states = Object.fromEntries(Object.entries(next.states ?? {}).filter(([,id])=>moves.some(m=>m.id===id)));
+    machine.bind({capability:{id:next.id,name:next.name,moves,states:Object.keys(states)},
+      setState:state=>playback!.setBaseMove(states[state]), playMove:id=>{playback!.play(id);}}, null);
+    if (states.idle) machine.execute({state:'idle'});
+    else if (next.defaultMove && moves.some(m => m.id === next.defaultMove)) playback.play(next.defaultMove);
     const missing = next.moves.length - moves.length;
     message(missing ? `${missing} deklarierte Bewegung(en) fehlen in der Modelldatei und werden nicht angeboten.` : `${next.name} bereit · ${moves.length} Bewegungen · ${(buffer.byteLength / 1024 / 1024).toFixed(2).replace('.', ',')} MB`);
   } catch (error) {
@@ -199,6 +239,7 @@ async function loadAvatar(avatar?: Avatar, file?: File): Promise<void> {
 }
 
 async function boot(): Promise<void> {
+  const agents = mountAgentPanel(rpc);
   try { viewer = new Viewer(el('viewport')); }
   catch { message('3D ist ohne WebGL2 nicht verfügbar. Der Originalplayer kann verwendet werden.', true); }
   if (viewer) viewer.onFrame = delta => {
@@ -241,6 +282,6 @@ async function boot(): Promise<void> {
     catalog = parseCatalog(await response.json()); renderCatalog();
     showOriginal();
   } catch (error) { message(`Model Zoo: ${error instanceof Error ? error.message : String(error)}`, true); }
-  window.addEventListener('pagehide', () => { fetchController?.abort(); request++; playback?.dispose(); viewer?.dispose(); }, { once: true });
+  window.addEventListener('pagehide', () => { agents.dispose(); fetchController?.abort(); request++; playback?.dispose(); viewer?.dispose(); }, { once: true });
 }
 void boot();

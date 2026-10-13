@@ -1,4 +1,4 @@
-# Technischer Stand 0.1.0
+# Technischer Stand 0.2.0
 
 ## Lokale Anwendung
 
@@ -6,7 +6,7 @@ TypeScript und Three.js bilden den 3D-Player. Vite startet einen lokalen Entwick
 
 ## Model Zoo
 
-`public/model-zoo/catalog.json` ist ein Katalog mit `schemaVersion: 1`. Jeder 3D-Eintrag hat eine ID, einen Namen, eine Beschreibung, den relativen Modellpfad, die Rig-Version und deklarierte Moves. Ein Move hat `id`, `name`, `clip` und `loop`. Optional verweist `defaultMove` auf eine Grundbewegung. Nur deklarierte Clips, die tatsächlich im Modell enthalten sind, werden angeboten.
+`public/model-zoo/catalog.json` ist ein Katalog mit `schemaVersion: 1`. Jeder 3D-Eintrag hat eine ID, einen Namen, eine Beschreibung, den relativen Modellpfad, die Rig-Version und deklarierte Moves. Ein Move hat `id`, `name`, `clip` und `loop`. Optional verweist `defaultMove` auf eine Grundbewegung. Optional ordnet `states` Zustandsnamen vorhandenen Move-IDs zu. Nur deklarierte Clips, die tatsächlich im Modell enthalten sind, werden angeboten.
 
 Modelle verwenden glTF 2.0 beziehungsweise GLB, ein rechtshändiges Koordinatensystem und Y nach oben. Die Vorschau normalisiert die Größe durch einen übergeordneten Knoten; sie verändert nicht die Animationsdaten oder die Skelettbindung. Das Katalogformat umfasst noch keine editierbaren Studio-Projekte oder separaten Move-Dateien. Deren Format entsteht mit dem Bewegungseditor.
 
@@ -14,7 +14,7 @@ Mika und Nori werden durch `scripts/generate-avatars.mjs` reproduzierbar erzeugt
 
 ## Wiedergabe und Import
 
-`src/playback.ts` kapselt Clip-Wiedergabe, Pause, Abspielposition, Tempo und Rückkehr zur Grundbewegung. Es ist noch keine universelle Agenten-StateMaschine. Übergänge zwischen 3D-Clips erfolgen zunächst direkt; weiches Überblenden folgt.
+`src/playback.ts` kapselt Clip-Wiedergabe, Pause, Abspielposition, Tempo und Rückkehr zur Grundbewegung. `src/control.ts` prüft alle manuellen, MQTT- und MCP-Befehle anhand der geladenen Fähigkeiten. Einmalige Moves kehren zum aktiven Zustand zurück; neue Zustände unterbrechen sie. Übergänge zwischen 3D-Clips werden über 180 ms überblendet.
 
 Ein GLB-Import bis 50 MB bleibt nur für die Browser-Sitzung erhalten. Externe Modellressourcen werden blockiert. Draco-/KTX2-komprimierte Importe benötigen zusätzliche Decoder und werden derzeit nicht unterstützt. Ein Modell ohne Clips bleibt als Standbild sichtbar.
 
@@ -22,9 +22,9 @@ Ein GLB-Import bis 50 MB bleibt nur für die Browser-Sitzung erhalten. Externe M
 
 ## Original-PaKaChi
 
-Der wiederhergestellte Bildplayer ist in derselben Oberfläche eingebettet und beim Start ausgewählt. Beim Wechsel zu 3D wird sein Dokument entladen, damit kein versteckter MQTT-Empfang weiterläuft. Beim erneuten Öffnen ist MQTT wieder aus. Der Originalplayer samt 72 Bildern bleibt zusätzlich direkt unter `public/legacy/pakachi/index.html` nutzbar.
+Der wiederhergestellte Bildplayer ist in derselben Oberfläche eingebettet und beim Start ausgewählt. Beim Wechsel zu 3D wird sein Dokument entladen. Seine separate MQTT-Oberfläche wird beim Einbetten ausgeblendet; die gemeinsame Verbindung bleibt beim Avatarwechsel bestehen und adressiert den aktuell ausgewählten Avatar. Der Originalplayer samt 72 Bildern bleibt zusätzlich direkt unter `public/legacy/pakachi/index.html` nutzbar.
 
-Das vorhandene MQTT-Modul gehört derzeit nur zum Originalplayer. Ein gemeinsamer Router für Original- und 3D-Avatare sowie MCP sind Meilenstein 2. Es werden keine Broker automatisch gestartet.
+Das unveränderte vorhandene MQTT-Modul wird auch in der Hauptoberfläche verwendet. `src/agent-panel.ts` bietet Zustandsauswahl und opt-in MQTT/MCP. `server/mcp.mjs` stellt über das offizielle MCP-SDK sechs stdio-Tools bereit; `server/bridge.mjs` verbindet sie nach Schlüssel- und Origin-Prüfung mit genau einem lokalen Player. Es werden keine Broker automatisch gestartet. Details stehen in [ANSTEUERUNG.md](ANSTEUERUNG.md).
 
 ## Studio
 

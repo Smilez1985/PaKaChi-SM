@@ -2,7 +2,7 @@
 
 Teil der [Blaupause](README.md) · [Designdokument](KONZEPT.md) · [Changelog](CHANGELOG.md)
 
-Status: Meilenstein 1 umgesetzt; Gelenkeditor, KI-Generierung und gemeinsame Agentenschnittstellen folgen. Details zum Ist-Stand im Changelog.
+Status: Meilensteine 1 und 2 implementiert und automatisiert geprüft; visuelle und externe Live-Abnahme noch offen. Bewegungs-/Gelenkeditor und KI-Generierung folgen. Details zum Ist-Stand im Changelog.
 
 ## 1. Player und Model Zoo
 
@@ -18,13 +18,13 @@ Abnahme: Ein Avatar lässt sich auswählen; seine tatsächlichen Bewegungen werd
 
 ## 2. StateMaschine und externe Steuerung
 
-Der wiederhergestellte Originalplayer besitzt bereits eine eigene Zustandssteuerung und optionales MQTT. Geplant ist deren Integration in eine gemeinsame Steuerung für Bild- und 3D-Avatare.
+Original- und 3D-Avatare verwenden seit 0.2.0 einen gemeinsamen Router. Einrichtung: [Agentensteuerung](ANSTEUERUNG.md). Prüfgrenzen: [Prüfstand](PRUEFUNG-0.2.0.md).
 
-- [ ] Zustände und einmalige Moves getrennt behandeln.
-- [ ] Übergänge, Rückkehrzustand und Unterbrechungsverhalten definieren.
-- [ ] Fähigkeiten aus dem Model Zoo über MCP zugänglich machen.
-- [ ] MQTT opt-in mit Schalter und Broker-Adresse ergänzen.
-- [ ] Ungültige Befehle und Verbindungsabbrüche behandeln.
+- [x] Zustände und einmalige Moves getrennt behandeln.
+- [x] Übergänge, Rückkehrzustand und Unterbrechungsverhalten definieren.
+- [x] Fähigkeiten aus dem Model Zoo über MCP zugänglich machen.
+- [x] MQTT opt-in mit Schalter und Broker-Adresse ergänzen.
+- [x] Ungültige Befehle und Verbindungsabbrüche behandeln.
 
 Abnahme: Ein externer Agent kann verfügbare Fähigkeiten abfragen und unterstützte Zustände beziehungsweise Moves auslösen.
 
@@ -81,7 +81,7 @@ Abnahme: Bild hineinziehen, Avatar korrigieren, Bewegung erstellen, speichern un
 - Rendering-Technik und endgültige Dateiformate.
 - Lokale beziehungsweise externe KI-Verfahren und deren Hardwarebedarf.
 - Lizenz.
-- Authentifizierung und genaue Nachrichtenformate für externe Steuerung.
+- Weitergehende Remote-Anbindung; lokale MCP-Kopplung und MQTT-Nachrichtenformat sind in 0.2.0 festgelegt.
 
 Diese Reihenfolge ist ein Umsetzungsvorschlag. Das Produktziel bleibt der vollständige, einfache Bild-zu-Avatar-Ablauf.
 

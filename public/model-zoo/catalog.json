@@ -8,6 +8,12 @@
       "model": "model-zoo/mika/model.gltf",
       "rigVersion": "fixture-rig-1",
       "defaultMove": "idle",
+      "states": {
+        "idle": "idle",
+        "thinking": "thinking",
+        "talking": "talking",
+        "working": "working"
+      },
       "moves": [
         {
           "id": "idle",
@@ -26,6 +32,24 @@
           "clip": "nicken",
           "name": "Nicken",
           "loop": false
+        },
+        {
+          "id": "thinking",
+          "clip": "thinking",
+          "name": "Denken",
+          "loop": true
+        },
+        {
+          "id": "talking",
+          "clip": "talking",
+          "name": "Sprechen",
+          "loop": true
+        },
+        {
+          "id": "working",
+          "clip": "working",
+          "name": "Arbeiten",
+          "loop": true
         }
       ]
     },
@@ -36,6 +60,12 @@
       "model": "model-zoo/nori/model.gltf",
       "rigVersion": "fixture-rig-1",
       "defaultMove": "idle",
+      "states": {
+        "idle": "idle",
+        "thinking": "thinking",
+        "talking": "talking",
+        "working": "working"
+      },
       "moves": [
         {
           "id": "idle",
@@ -54,6 +84,24 @@
           "clip": "umschauen",
           "name": "Umschauen",
           "loop": false
+        },
+        {
+          "id": "thinking",
+          "clip": "thinking",
+          "name": "Denken",
+          "loop": true
+        },
+        {
+          "id": "talking",
+          "clip": "talking",
+          "name": "Sprechen",
+          "loop": true
+        },
+        {
+          "id": "working",
+          "clip": "working",
+          "name": "Arbeiten",
+          "loop": true
         }
       ]
     }

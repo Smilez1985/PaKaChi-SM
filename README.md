@@ -4,7 +4,7 @@
 
 PaKaChi-SM soll 3D-Avatare darstellen, ihre Zustände und Bewegungen steuern und das Erstellen eigener Avatare in derselben Anwendung ermöglichen.
 
-> **Projektstand: 0.1.0 – erster lauffähiger Player.** Der bestehende PaKaChi mit allen 72 Transformationsbildern ist erhalten und standardmäßig ausgewählt. Zusätzlich gibt es einen 3D-Player mit Model Zoo, zwei technischen Testavataren und lokalem GLB-Import. Die Studio-Ansicht ist integriert; Gelenkbearbeitung, KI-Generierung und die 3D-Übertragung des Original-PaKaChi folgen noch.
+> **Projektstand: 0.2.0 – gemeinsame Zustands- und Agentensteuerung.** Der bestehende PaKaChi mit allen 72 Transformationsbildern ist erhalten und standardmäßig ausgewählt. Zusätzlich gibt es einen 3D-Player mit Model Zoo, zwei technischen Testavataren und lokalem GLB-Import. Die Studio-Ansicht ist integriert; Gelenkbearbeitung, KI-Generierung und die 3D-Übertragung des Original-PaKaChi folgen noch.
 
 ## Starten
 
@@ -54,13 +54,15 @@ Weitere Grundfunktionen: **Neu, Laden, Speichern**, erneuter KI-Versuch mit frei
 
 Aus typischerweise drei bis zehn gespeicherten Posen entsteht ein Bewegungsablauf. Die Zwischenbewegungen werden berechnet. Eine Bewegung erhält ein eindeutiges Schlagwort, etwa `gaehnen`, und wird im Moves-Ordner des zugehörigen Avatars gespeichert.
 
-Einmalige Bewegungen und dauerhafte Zustände werden unterschieden. Die StateMaschine soll Zustände wie `idle`, `talking`, `thinking` und `working` auf die Fähigkeiten des ausgewählten Avatars abbilden.
+Einmalige Bewegungen und dauerhafte Zustände werden unterschieden. Die gemeinsame StateMaschine bildet Zustände wie `idle`, `talking`, `thinking` und `working` auf die Fähigkeiten des ausgewählten Avatars ab. Einmalige 3D-Moves kehren zum aktiven Zustand zurück; Übergänge werden überblendet.
 
 ## Ansteuerung durch Agenten
 
-- Geplante MCP-Schnittstelle zum Abfragen der verfügbaren Avatare, Moves und Zustände sowie zum Auslösen von Bewegungen.
+- Lokaler MCP-Server zum Abfragen verfügbarer Avatare und der tatsächlichen Fähigkeiten sowie zum Auslösen von Zuständen und Moves.
 - Optionale MQTT-Anbindung, beispielsweise an NanoMQ: standardmäßig ausgeschaltet, mit Schalter und Feld für die Broker-Adresse.
-- Player, Studio und Agenten verwenden dieselben Informationen aus dem Model Zoo.
+- Manuelle Zustandsauswahl, MQTT und MCP verwenden denselben Router und die Fähigkeiten des geladenen Avatars.
+
+Einrichtung und Befehle: [Agentensteuerung](docs/ANSTEUERUNG.md). Nach einem Update vor dem Start erneut `npm ci` ausführen.
 
 ## Dokumentation
 

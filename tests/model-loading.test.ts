@@ -16,7 +16,7 @@ test('bundled glTF files load through the production loader and animate real bon
     const gltf = await parseModel(Uint8Array.from(bytes).buffer);
     const meshes: SkinnedMesh[] = [];
     gltf.scene.traverse(node => { if (node instanceof SkinnedMesh) meshes.push(node); });
-    assert.ok(meshes.length > 0); assert.equal(gltf.animations.length, 3);
+    assert.ok(meshes.length > 0); assert.equal(gltf.animations.length, 6);
     const head = gltf.scene.getObjectByName('Head'); assert.ok(head);
     const before = head.quaternion.clone();
     const mixer = new AnimationMixer(gltf.scene);

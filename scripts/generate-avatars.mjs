@@ -79,7 +79,10 @@ function avatar(robot = false) {
   ]);
   const nod = new T.AnimationClip('nicken', 1.8, [rotation('Head', [0, .3, .6, .9, 1.2, 1.8], [0, .22, -.08, .22, -.08, 0], 'x')]);
   const look = new T.AnimationClip('umschauen', 4, [rotation('Head', [0, 1, 2, 3, 4], [0, -.45, 0, .45, 0], 'y')]);
-  return { mesh, clips: robot ? [idle, nod, look] : [idle, wave, nod] };
+  const thinking = new T.AnimationClip('thinking', 3, [rotation('Head', [0,1.5,3], [-.13,.03,-.13])]);
+  const talking = new T.AnimationClip('talking', 1.2, [rotation('Head', [0,.3,.6,.9,1.2], [0,.1,0,-.05,0], 'x')]);
+  const working = new T.AnimationClip('working', 1.6, [rotation('LeftShoulder', [0,.8,1.6], [.4,.6,.4]), rotation('RightShoulder', [0,.8,1.6], [-.6,-.4,-.6])]);
+  return { mesh, clips: [...(robot ? [idle, nod, look] : [idle, wave, nod]), thinking, talking, working] };
 }
 
 const catalog = { schemaVersion: 1, avatars: [] };
@@ -92,9 +95,9 @@ for (const [id, name, description, robot] of [
   const dir = new URL(`../public/model-zoo/${id}/`, import.meta.url);
   await mkdir(dir, { recursive: true });
   await writeFile(new URL('model.gltf', dir), JSON.stringify(gltf));
-  const labels = { idle: 'Entspannen', winken: 'Winken', nicken: 'Nicken', umschauen: 'Umschauen' };
+  const labels = { idle: 'Entspannen', winken: 'Winken', nicken: 'Nicken', umschauen: 'Umschauen', thinking: 'Denken', talking: 'Sprechen', working: 'Arbeiten' };
   catalog.avatars.push({ id, name, description, model: `model-zoo/${id}/model.gltf`, rigVersion: 'fixture-rig-1',
-    defaultMove: 'idle', moves: clips.map(c => ({ id: c.name, clip: c.name, name: labels[c.name], loop: c.name === 'idle' })) });
+    defaultMove: 'idle', states: {idle:'idle', thinking:'thinking', talking:'talking', working:'working'}, moves: clips.map(c => ({ id: c.name, clip: c.name, name: labels[c.name], loop: ['idle','thinking','talking','working'].includes(c.name) })) });
 }
 await writeFile(new URL('../public/model-zoo/catalog.json', import.meta.url), JSON.stringify(catalog, null, 2) + '\n');
 console.log('Two self-contained, skinned glTF fixtures generated.');

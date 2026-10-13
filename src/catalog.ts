@@ -13,6 +13,7 @@ export interface Avatar {
   rigVersion: string;
   moves: Move[];
   defaultMove?: string;
+  states?: Record<string, string>;
 }
 
 const text = (v: unknown): v is string => typeof v === 'string' && v.trim().length > 0;
@@ -44,8 +45,16 @@ export function parseCatalog(data: unknown): Avatar[] {
     if (raw.defaultMove !== undefined && (!text(raw.defaultMove) || !moveIds.has(raw.defaultMove))) {
       throw new Error(`Unbekannte Grundbewegung bei ${raw.name}.`);
     }
+    const states: Record<string, string> = {};
+    if (raw.states !== undefined) {
+      if (!object(raw.states)) throw new Error('Ungültige Zustandszuordnung.');
+      for (const [state, move] of Object.entries(raw.states)) {
+        if (!['idle','talking','thinking','working','waiting','review','error','sleeping'].includes(state) || !text(move) || !moveIds.has(move)) throw new Error('Ungültige Zustandszuordnung.');
+        states[state] = move;
+      }
+    }
     return { id: raw.id, name: raw.name, description: raw.description, model: raw.model,
-      rigVersion: raw.rigVersion, moves, defaultMove: raw.defaultMove as string | undefined };
+      rigVersion: raw.rigVersion, moves, defaultMove: raw.defaultMove as string | undefined, states };
   });
 }
 

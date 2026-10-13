@@ -2,7 +2,7 @@ import { AnimationMixer, LoopOnce, LoopRepeat } from 'three';
 import type { AnimationAction, AnimationClip, Object3D } from 'three';
 import type { Move } from './catalog.ts';
 
-/** Local clip playback. External states, queues and MCP/MQTT belong to milestone 2. */
+/** Clip playback with persistent base state and short crossfades. */
 export class Playback {
   readonly mixer: AnimationMixer;
   current: Move | null = null;
@@ -12,9 +12,12 @@ export class Playback {
   private readonly clips: Map<string, AnimationClip>;
   private readonly moves: Map<string, Move>;
   private readonly root: Object3D;
-  private readonly defaultId?: string;
+  private defaultId?: string;
   private readonly onChange: () => void;
-  private onFinished = () => {
+  private fading: AnimationAction | null = null;
+  private fadeLeft = 0;
+  private onFinished = (event: { action: AnimationAction }) => {
+    if (event.action !== this.action) return;
     if (this.defaultId && this.current?.id !== this.defaultId) this.play(this.defaultId);
     else { this.paused = true; this.onChange(); }
   };
@@ -30,16 +33,28 @@ export class Playback {
     this.mixer.addEventListener('finished', this.onFinished);
   }
 
+  setBaseMove(id: string): void {
+    if (!this.moves.has(id)) throw new Error('Unbekannte Grundbewegung.');
+    this.defaultId = id;
+    this.play(id);
+  }
+
   play(id: string): boolean {
     const move = this.moves.get(id);
     const clip = move && this.clips.get(move.clip);
     if (!move || !clip) return false;
-    // Stop previous actions so replay, seeking and switches are deterministic.
-    this.mixer.stopAllAction();
-    this.action = this.mixer.clipAction(clip).reset();
+    this.fading?.stop(); this.fading = null;
+    const previous = this.action;
+    this.action = this.mixer.clipAction(clip);
+    if (previous === this.action) this.action.stop();
+    this.action.reset().setEffectiveWeight(1).setEffectiveTimeScale(1);
     this.action.setLoop(move.loop ? LoopRepeat : LoopOnce, move.loop ? Infinity : 1);
     this.action.clampWhenFinished = true;
     this.action.play();
+    if (previous && previous !== this.action) {
+      previous.crossFadeTo(this.action, .18, false);
+      this.fading = previous; this.fadeLeft = .18;
+    }
     this.current = move;
     this.paused = false;
     this.mixer.update(0);
@@ -69,7 +84,10 @@ export class Playback {
   }
 
   update(delta: number): void {
-    if (!this.paused && Number.isFinite(delta) && delta >= 0) this.mixer.update(delta * this.speed);
+    if (!this.paused && Number.isFinite(delta) && delta >= 0) {
+      this.mixer.update(delta * this.speed);
+      if (this.fading && (this.fadeLeft -= delta * this.speed) <= 0) { this.fading.stop(); this.fading = null; }
+    }
   }
 
   get duration(): number { return this.action?.getClip().duration ?? 0; }
