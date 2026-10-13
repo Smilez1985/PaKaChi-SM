@@ -1,6 +1,6 @@
 import * as T from 'three';
 import { TransformControls } from 'three/addons/controls/TransformControls.js';
-import type { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+type NavigationControls = {enabled:boolean; target:T.Vector3};
 import type { StudioRig } from './studio-rig.ts';
 
 export class StudioView {
@@ -24,8 +24,8 @@ export class StudioView {
   private rig:StudioRig;
   private camera:T.PerspectiveCamera;
   private canvas:HTMLCanvasElement;
-  private orbit:OrbitControls;
-  constructor(rig:StudioRig,camera:T.PerspectiveCamera,canvas:HTMLCanvasElement,orbit:OrbitControls,scene:T.Scene) {
+  private orbit:NavigationControls;
+  constructor(rig:StudioRig,camera:T.PerspectiveCamera,canvas:HTMLCanvasElement,orbit:NavigationControls,scene:T.Scene) {
     this.rig=rig;this.camera=camera;this.canvas=canvas;this.orbit=orbit;
     this.group.add(this.handles,this.lines,this.proxy);scene.add(this.group);
     this.gizmo=new TransformControls(camera,canvas);this.gizmo.setSpace('world');this.gizmo.setSize(.75);this.group.add(this.gizmo.getHelper());

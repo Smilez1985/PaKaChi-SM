@@ -18,7 +18,7 @@ Die Zeit der ersten Pose bestimmt bei Schleifen den Rückweg vom letzten zum ers
 
 In **Gelenke bearbeiten** zuerst **Punkt setzen**, dann auf die gewünschte Stelle der Figur klicken. Ein Klick neben die Figur setzt einen freien Punkt auf die Ansichtsebene. Anschließend kann er über die Achsgriffe auch in der Tiefe verschoben werden.
 
-Es gibt keine vorgegebene Anzahl oder erzwungene Gelenkkette: beispielsweise drei Punkte am Mund, einen pro Auge oder mehrere an jedem Augenlid. Mausrad zoomt zum Zeiger; rechte Maustaste verschiebt die Ansicht. Die linke Maustaste dreht die Kamera außerhalb der Achsgriffe.
+Es gibt keine vorgegebene Anzahl oder erzwungene Gelenkkette: beispielsweise drei Punkte am Mund, einen pro Auge oder mehrere an jedem Augenlid. Mausrad zoomt zum Zeiger; rechte Maustaste verschiebt die Ansicht. Seit 0.4.0 ist die Ansicht mit der linken Maustaste frei um alle Achsen drehbar. Die Ansichten Vorne/Hinten/Links/Rechts/Oben/Unten und die Rolltasten machen jede Seite zugänglich; der Sockel ist im Studio ausgeblendet. Die linke Maustaste dreht die Kamera außerhalb der Achsgriffe.
 
 - **Punktgröße** verändert nur die sichtbare Kugel. Kleine Mundpunkte können unabhängig von großen Kniepunkten eingestellt werden. Eine Mindest-Auswahlfläche von 10 Bildschirmpixeln erleichtert das Treffen kleiner Punkte; bei dicht benachbarten Punkten hilft die Auswahlliste.
 - **Einflussbereich** bestimmt separat, wie weit die Oberflächenverformung reicht. Sie fällt zum Rand weich ab. Ein Punkt auf einer Oberfläche wirkt zunächst nur auf dieses Teilmodell; ein frei im Raum gesetzter Punkt kann mehrere Oberflächen in seinem Radius beeinflussen. Zu kleine Radien können zwischen groben Vertices liegen und dann keine sichtbare Verformung erzeugen.

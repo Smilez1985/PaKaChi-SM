@@ -6,3 +6,7 @@ playwright-report/
 .env.*
 !.env.example
 *.log
+
+.venv/
+__pycache__/
+*.pyc

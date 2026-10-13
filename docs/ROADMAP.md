@@ -18,6 +18,8 @@ Abnahme: Ein Avatar lässt sich auswählen; seine tatsächlichen Bewegungen werd
 
 ## 2. StateMaschine und externe Steuerung
 
+Seit 0.4.0: Python-MCP-SDK 2.3.0 und optional eingebetteter aMQTT-Broker mit echtem Anfrage-/Antwortpfad zum Player; Integration automatisiert gegen reale Prozesse getestet.
+
 Original- und 3D-Avatare verwenden seit 0.2.0 einen gemeinsamen Router. Einrichtung: [Agentensteuerung](ANSTEUERUNG.md). Prüfgrenzen: [Prüfstand](PRUEFUNG-0.2.0.md).
 
 - [x] Zustände und einmalige Moves getrennt behandeln.
@@ -46,7 +48,7 @@ Studio 0.3.0: [Bedienung und Grenzen](STUDIO.md). Eigene Moves werden im geladen
 - [x] Modus „Gelenke bearbeiten“ umsetzen.
 - [x] Freie Oberflächenpunkte hinzufügen, verschieben und löschen; bestehende Skelett-Drehpunkte verschieben.
 - [ ] Quellknochen tatsächlich hinzufügen/löschen und Hautgewichte neu zuordnen. Bisher entfernt Löschen bei Quellknochen nur den Editorgriff.
-- [x] Nahzoom mit Mausrad und Verschieben der 3D-Ansicht als Grundlage.
+- [x] Nahzoom mit Mausrad, Verschieben und freie Ansichtsdrehung um alle Achsen einschließlich Rollen, Rückseite und Unterseite.
 - [x] Frei platzierbare Gesichtspunkte und unabhängige Punktgruppen ermöglichen.
 - [x] Punktgröße pro Gelenk mit bedienbarer Auswahlfläche einstellen.
 - [x] Punkte frei verbinden und lösen, ohne bestehende Gelenkketten vorauszusetzen.

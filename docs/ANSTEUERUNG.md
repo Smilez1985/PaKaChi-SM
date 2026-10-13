@@ -1,4 +1,6 @@
-# Agentensteuerung – 0.2.0
+# Agentensteuerung – 0.4.0
+
+**Bevorzugter Weg seit 0.4.0:** [Python-MCP 2.3.0 mit eingebettetem aMQTT-Broker](PYTHON-MCP.md). MCP-Anfragen und Player-Antworten laufen dort über denselben MQTT-Broker. Die folgende Node-Einrichtung bleibt als Kompatibilitätsweg erhalten.
 
 ## Gemeinsame StateMaschine
 
@@ -38,7 +40,7 @@ Ausschalten trennt die Verbindung und beendet Wiederverbindungsversuche. Zugangs
 
 Im eingebetteten Originalplayer ist dessen separate MQTT-Oberfläche ausgeblendet; die übergeordnete Verbindung steuert nun beide Avatararten. Die Originaldateien bleiben unverändert. Beim direkten Öffnen des alten Players funktioniert dessen eigene MQTT-Oberfläche wie bisher.
 
-## MCP einrichten
+## Bisherige Node-MCP-Brücke einrichten
 
 Der MCP-Server wird von einem MCP-fähigen Agenten als **stdio-Prozess** gestartet. Er stellt sechs Tools bereit:
 
@@ -78,7 +80,7 @@ Repository-Abhängigkeiten zuvor mit `npm ci` installieren. Beispielkonfiguratio
 }
 ```
 
-Den Node-Prozess direkt konfigurieren, nicht `npm run mcp`: npm kann Startmeldungen auf stdout schreiben und damit den stdio-Protokollstrom stören. Der genaue Einstellungsort hängt vom MCP-Host ab.
+Den Node-Prozess direkt konfigurieren, nicht `npm run mcp:legacy`: npm kann Startmeldungen auf stdout schreiben und damit den stdio-Protokollstrom stören. Der genaue Einstellungsort hängt vom MCP-Host ab.
 
 ### 3. Player koppeln
 

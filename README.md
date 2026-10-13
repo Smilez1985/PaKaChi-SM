@@ -4,7 +4,7 @@
 
 PaKaChi-SM soll 3D-Avatare darstellen, ihre Zustände und Bewegungen steuern und das Erstellen eigener Avatare in derselben Anwendung ermöglichen.
 
-> **Projektstand: 0.3.0 – erster integrierter Studio-Editor.** Der bestehende PaKaChi mit allen 72 Transformationsbildern ist erhalten und standardmäßig ausgewählt. Zusätzlich gibt es einen 3D-Player mit Model Zoo, zwei technischen Testavataren und lokalem GLB-Import. Das Studio bietet frei platzierbare Kontrollpunkte, Posen, eigene Moves und vollständige Projektdateien. KI-Generierung, tiefgreifender Skelettumbau und die 3D-Übertragung des Original-PaKaChi folgen noch.
+> **Projektstand: 0.4.0 – freie 3D-Ansicht und Python-MCP über MQTT.** Der bestehende PaKaChi mit allen 72 Transformationsbildern ist erhalten und standardmäßig ausgewählt. Zusätzlich gibt es einen 3D-Player mit Model Zoo, zwei technischen Testavataren und lokalem GLB-Import. Das Studio bietet frei platzierbare Kontrollpunkte, Posen, eigene Moves und vollständige Projektdateien. KI-Generierung, tiefgreifender Skelettumbau und die 3D-Übertragung des Original-PaKaChi folgen noch.
 
 ## Starten
 
@@ -25,7 +25,7 @@ Der wiederhergestellte Originalplayer lässt sich auch ohne Node starten: `publi
 - 3D-Testavatare Mika und Nori mit echten Skeletten und unterschiedlichen Animationsclips. Sie ersetzen nicht das PaKaChi-Design.
 - Avatar-Auswahl, Bewegungslegende, Abspielen/Pause, Tempo und Abspielposition.
 - Eigene, eigenständige GLB-Dateien bis 50 MB für die aktuelle Sitzung laden oder hineinziehen. Kein Upload.
-- Integrierter Studio-Editor mit „Figur bewegen“ und „Gelenke bearbeiten“, Skelettgriffen und unabhängigen Gesichtspunkten. Mausrad zoomt bis ins Detail; linke Maustaste dreht, rechte verschiebt die Ansicht.
+- Integrierter Studio-Editor mit „Figur bewegen“ und „Gelenke bearbeiten“, Skelettgriffen und unabhängigen Gesichtspunkten. Mausrad zoomt bis ins Detail; linke Maustaste dreht frei um alle Achsen, rechte verschiebt die Ansicht. Rückseite und Unterseite sind über feste Ansichten erreichbar; Rolltasten drehen die Ansicht um ihre Blickachse.
 - Individuelle Punktgrößen und Einflussbereiche, freie Verbindungen, Rückgängig/Wiederholen, Posen und eigene Bewegungen.
 - Neu, Projekt laden und Speichern als vollständige `.pakachi.json` mit eingebettetem Modell. [Studio-Anleitung und Grenzen](docs/STUDIO.md).
 
@@ -60,7 +60,8 @@ Einmalige Bewegungen und dauerhafte Zustände werden unterschieden. Die gemeinsa
 
 ## Ansteuerung durch Agenten
 
-- Lokaler MCP-Server zum Abfragen verfügbarer Avatare und der tatsächlichen Fähigkeiten sowie zum Auslösen von Zuständen und Moves.
+- Python-MCP-Server mit SDK 2.3.0, eingebettetem aMQTT-Broker und Rückkanal zum Player: [Einrichtung](docs/PYTHON-MCP.md).
+- Lokale MCP-Tools zum Abfragen verfügbarer Avatare und der tatsächlichen Fähigkeiten sowie zum Auslösen von Zuständen und Moves.
 - Optionale MQTT-Anbindung, beispielsweise an NanoMQ: standardmäßig ausgeschaltet, mit Schalter und Feld für die Broker-Adresse.
 - Manuelle Zustandsauswahl, MQTT und MCP verwenden denselben Router und die Fähigkeiten des geladenen Avatars.
 

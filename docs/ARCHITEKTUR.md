@@ -1,4 +1,4 @@
-# Technischer Stand 0.3.0
+# Technischer Stand 0.4.0
 
 ## Lokale Anwendung
 
@@ -18,13 +18,13 @@ Mika und Nori werden durch `scripts/generate-avatars.mjs` reproduzierbar erzeugt
 
 Ein GLB-Import bis 50 MB bleibt nur für die Browser-Sitzung erhalten. Externe Modellressourcen werden blockiert. Draco-/KTX2-komprimierte Importe benötigen zusätzliche Decoder und werden derzeit nicht unterstützt. Ein Modell ohne Clips bleibt als Standbild sichtbar.
 
-`src/viewer.ts` verwaltet Kamera, Beleuchtung, Skelettanzeige und GPU-Ressourcen. Mausrad-Zoom zum Zeiger, Drehen mit linker Maustaste und Verschieben mit rechter Maustaste erlauben die Detailansicht. Der Editor ergänzt TransformControls und gut auswählbare Punktgriffe; Kamera und Editor teilen sich dieselbe Szene.
+`src/viewer.ts` verwaltet Kamera, Beleuchtung, Skelettanzeige und GPU-Ressourcen. ArcballControls erlauben freie Ansichtsdrehung um alle Achsen ohne Polwinkelbegrenzung, Rollen, Mausrad-Zoom zum Zeiger und Verschieben mit rechter Maustaste. Sechs feste Ansichten und Rolltasten ergänzen die Navigation. Im Studio wird der Sockel ausgeblendet, damit die Unterseite zugänglich ist. Modell- und Gelenkkoordinaten bleiben von der Ansichtsdrehung unabhängig. Der Editor ergänzt TransformControls und gut auswählbare Punktgriffe; Kamera und Editor teilen sich dieselbe Szene.
 
 ## Original-PaKaChi
 
 Der wiederhergestellte Bildplayer ist in derselben Oberfläche eingebettet und beim Start ausgewählt. Beim Wechsel zu 3D wird sein Dokument entladen. Seine separate MQTT-Oberfläche wird beim Einbetten ausgeblendet; die gemeinsame Verbindung bleibt beim Avatarwechsel bestehen und adressiert den aktuell ausgewählten Avatar. Der Originalplayer samt 72 Bildern bleibt zusätzlich direkt unter `public/legacy/pakachi/index.html` nutzbar.
 
-Das unveränderte vorhandene MQTT-Modul wird auch in der Hauptoberfläche verwendet. `src/agent-panel.ts` bietet Zustandsauswahl und opt-in MQTT/MCP. `server/mcp.mjs` stellt über das offizielle MCP-SDK sechs stdio-Tools bereit; `server/bridge.mjs` verbindet sie nach Schlüssel- und Origin-Prüfung mit genau einem lokalen Player. Es werden keine Broker automatisch gestartet. Details stehen in [ANSTEUERUNG.md](ANSTEUERUNG.md).
+Die Hauptoberfläche verwendet seit 0.4.0 MQTT.js für direkten Status-Empfang und den bidirektionalen MCP-Kanal; das ursprüngliche MQTT-Modul bleibt unverändert im Originalplayer. `src/agent-panel.ts` bietet Zustandsauswahl und opt-in MQTT/MCP. `server/mcp.mjs` stellt über das offizielle MCP-SDK sechs stdio-Tools bereit; `server/bridge.mjs` verbindet sie nach Schlüssel- und Origin-Prüfung mit genau einem lokalen Player. `server/python/pakachi_mcp.py` ist der bevorzugte MCP-Server mit offiziellem SDK 2.3.0. Sein vom Host gestarteter Prozess enthält optional aMQTT 0.12.1, lokal gebunden und mit Schlüsselanmeldung. `src/mqtt-agent.ts` überträgt korrelierte Anfragen, Antworten und flüchtige Präsenzmeldungen. Der Browser startet keinen Broker; der eingebettete Broker läuft mit dem ausdrücklich eingerichteten MCP-Prozess. Ein externer Broker lässt sich alternativ konfigurieren. Details stehen in [ANSTEUERUNG.md](ANSTEUERUNG.md).
 
 ## Studio
 

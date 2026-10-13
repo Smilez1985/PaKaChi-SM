@@ -18,7 +18,7 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
       <button id="player-tab" class="nav-button active" aria-pressed="true"><span>◉</span> Player</button>
       <button id="studio-tab" class="nav-button" aria-pressed="false"><span>◇</span> Avatar-Studio</button>
     </nav>
-    <div class="rail-bottom"><span class="online-dot"></span> Lokal auf deinem Gerät<p>Entwicklungsstand 0.3.0<br>Studio & eigene Moves</p></div>
+    <div class="rail-bottom"><span class="online-dot"></span> Lokal auf deinem Gerät<p>Entwicklungsstand 0.4.0<br>Freie Ansicht · Python-MCP</p></div>
   </aside>
   <main>
     <header><div><p class="eyebrow">PAKACHI-SM / <span id="section-label">PLAYER</span></p><h1 id="page-title">Dein Model Zoo<span>.</span></h1><p id="page-intro">Eine Figur auswählen. Eine Bewegung starten. Leben einhauchen.</p></div><button id="project-open" class="button outline">Projekt laden</button><input id="project-file" type="file" accept=".json" hidden><button id="import-button" class="button outline">＋ GLB laden</button><input id="file-input" type="file" accept=".glb" hidden></header>
@@ -27,9 +27,9 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
     <div class="workspace">
       <section class="stage-panel" aria-label="Avatar-Vorschau">
         <div class="stage-top"><span class="pill" id="model-type">3D · TESTAVATAR</span><button id="reset-camera" class="text-button">Ansicht zurücksetzen ↺</button></div>
-        <div id="viewport"></div><iframe id="legacy-frame" class="legacy-frame" title="PaKaChi Originalplayer mit Tierform und Arbeitsform"></iframe>
+        <div class="view-tools"><label>Ansicht<select id="view-side"><option value="">Frei drehen</option><option value="front">Vorne</option><option value="back">Hinten</option><option value="left">Links</option><option value="right">Rechts</option><option value="top">Oben</option><option value="bottom">Unten</option></select></label><button id="view-roll-left" title="Ansicht 90 Grad nach links rollen">↶ 90°</button><button id="view-roll-right" title="Ansicht 90 Grad nach rechts rollen">↷ 90°</button></div><div id="viewport"></div><iframe id="legacy-frame" class="legacy-frame" title="PaKaChi Originalplayer mit Tierform und Arbeitsform"></iframe>
         <div class="stage-caption"><div><h2 id="avatar-name">Wird geladen …</h2><p id="avatar-description"></p></div><span class="live-badge" id="activity">Bereit</span></div>
-        <p class="camera-help">Links ziehen: drehen <span>·</span> Rechts ziehen: verschieben <span>·</span> Mausrad: zoomen</p>
+        <p class="camera-help">Links ziehen: frei um alle Achsen drehen <span>·</span> Rechts ziehen: verschieben <span>·</span> Mausrad: zoomen</p>
       </section>
       <aside class="control-panel">
         <div class="panel-heading"><span class="eyebrow">MODEL ZOO</span><span id="avatar-count" class="count">0</span></div>
@@ -125,6 +125,7 @@ function message(text: string, error = false): void {
 function changeView(edit: boolean): void {
   if (studio !== edit) { if(edit) editor?.enter(); else editor?.leave(); }
   studio = edit;
+  viewer?.setStudio(edit);
   document.body.classList.toggle("studio-active",edit);
   window.dispatchEvent(new Event("pakachi-sm:change"));
   el('player-controls').hidden = edit || original;
@@ -292,7 +293,10 @@ async function boot(): Promise<void> {
   el('player-tab').onclick = () => changeView(false);
   el('studio-tab').onclick = () => changeView(true);
   el('back-player').onclick = () => changeView(false);
-  el('reset-camera').onclick = () => viewer?.resetCamera();
+  el('reset-camera').onclick = () => {viewer?.resetCamera();el<HTMLSelectElement>('view-side').value='';};
+  el('view-side').onchange=()=>viewer?.setView(el<HTMLSelectElement>('view-side').value);
+  el('view-roll-left').onclick=()=>viewer?.rollView(90);
+  el('view-roll-right').onclick=()=>viewer?.rollView(-90);
   el('skeleton').onchange = () => viewer?.showSkeleton(el<HTMLInputElement>('skeleton').checked);
   el('pause').onclick = () => {transport()?.togglePause();syncPlayback();};
   el('speed').onchange = () => {const value=Number(el<HTMLSelectElement>('speed').value);playback?.setSpeed(value);editor?.setSpeed(value);};

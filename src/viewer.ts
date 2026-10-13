@@ -1,7 +1,8 @@
 import * as THREE from 'three';
 import { StudioView } from './studio-view.ts';
 import type { StudioRig } from './studio-rig.ts';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { ArcballControls } from 'three/addons/controls/ArcballControls.js';
+import { rotateCamera } from './camera.ts';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import type { GLTF } from 'three/addons/loaders/GLTFLoader.js';
 
@@ -51,7 +52,8 @@ export class Viewer {
   private readonly renderer: THREE.WebGLRenderer;
   private readonly scene = new THREE.Scene();
   private readonly camera = new THREE.PerspectiveCamera(34, 1, 0.01, 100);
-  private readonly controls: OrbitControls;
+  private readonly controls: ArcballControls & {target:THREE.Vector3; _gizmos:THREE.Group};
+  private floor: THREE.Mesh;
   private readonly holder = new THREE.Group();
   private model: THREE.Object3D | null = null;
   private skeleton: THREE.SkeletonHelper | null = null;
@@ -69,13 +71,13 @@ export class Viewer {
     this.renderer.toneMappingExposure = 1.25;
     this.renderer.domElement.setAttribute('aria-label', 'Drehbare 3D-Ansicht des Avatars');
     container.append(this.renderer.domElement);
-    this.controls = new OrbitControls(this.camera, this.renderer.domElement);
-    this.controls.enableDamping = true;
+    this.controls = new ArcballControls(this.camera, this.renderer.domElement, this.scene) as ArcballControls & {target:THREE.Vector3; _gizmos:THREE.Group};
+    this.controls.enableAnimations = false;
     this.controls.enablePan = true;
-    this.controls.zoomToCursor = true;
+    this.controls.cursorZoom = true;
     this.controls.minDistance = 0.08;
     this.controls.maxDistance = 9;
-    this.controls.maxPolarAngle = Math.PI * 0.54;
+    this.controls.setGizmosVisible(false);
     this.scene.add(new THREE.HemisphereLight(0xe5f5ff, 0x75857a, 2.8));
     const key = new THREE.DirectionalLight(0xffffff, 4);
     key.position.set(3, 5, 4);
@@ -83,7 +85,7 @@ export class Viewer {
     const rim = new THREE.DirectionalLight(0xb6e8da, 2.5);
     rim.position.set(-4, 3, -3);
     this.scene.add(rim);
-    const floor = new THREE.Mesh(new THREE.CylinderGeometry(1.23, 1.27, 0.07, 64),
+    const floor = this.floor = new THREE.Mesh(new THREE.CylinderGeometry(1.23, 1.27, 0.07, 64),
       new THREE.MeshStandardMaterial({ color: 0xc7d6c9, roughness: 0.9 }));
     floor.position.y = -0.055;
     this.scene.add(floor, this.holder);
@@ -125,13 +127,33 @@ export class Viewer {
     this.resetCamera();
   }
 
-  createStudioView(rig: StudioRig): StudioView { return new StudioView(rig,this.camera,this.renderer.domElement,this.controls,this.scene); }
+  createStudioView(rig: StudioRig): StudioView { // Arcball keeps its live pan/zoom center in the gizmo group (Three.js 0.186.1).
+    const controls=this.controls;
+    return new StudioView(rig,this.camera,this.renderer.domElement,{get enabled(){return controls.enabled;},set enabled(value:boolean){controls.enabled=value;},get target(){return controls._gizmos.position;}},this.scene); }
 
   showSkeleton(visible: boolean): void { if (this.skeleton) this.skeleton.visible = visible; }
   resetCamera(): void {
+    this.camera.up.set(0,1,0);
     this.camera.position.set(3.2, 2.1, 5.5);
     this.controls.target.set(0, 1.15, 0);
+    this.controls.setCamera(this.camera);
+    this.controls.setGizmosVisible(false);
     this.controls.update();
+  }
+  setStudio(active:boolean):void {this.floor.visible=!active;}
+  rollView(degrees:number):void {
+    this.controls.target.copy(this.controls._gizmos.position);
+    rotateCamera(this.camera,this.controls.target,this.camera.getWorldDirection(new THREE.Vector3()),THREE.MathUtils.degToRad(degrees));
+    this.controls.setCamera(this.camera);this.controls.setGizmosVisible(false);
+  }
+  setView(side:string):void {
+    const directions:Record<string,number[]>={front:[0,0,1],back:[0,0,-1],left:[-1,0,0],right:[1,0,0],top:[0,1,0],bottom:[0,-1,0]};
+    const vector=directions[side];if(!vector)return;
+    this.controls.target.copy(this.controls._gizmos.position);
+    const distance=this.camera.position.distanceTo(this.controls.target);
+    this.camera.up.set(0,1,0);if(side==='top')this.camera.up.set(0,0,-1);if(side==='bottom')this.camera.up.set(0,0,1);
+    this.camera.position.copy(this.controls.target).add(new THREE.Vector3().fromArray(vector).multiplyScalar(distance));
+    this.controls.setCamera(this.camera);this.controls.setGizmosVisible(false);
   }
   clear(): void {
     if (this.skeleton) { this.scene.remove(this.skeleton); this.skeleton.dispose(); this.skeleton = null; }
