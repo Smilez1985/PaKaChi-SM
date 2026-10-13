@@ -1,0 +1,102 @@
+export interface Options {language:'de'|'en';invertMiddleRotation:boolean}
+export function readOptions(storage?:Pick<Storage,'getItem'>):Options {
+  try{const value=JSON.parse((storage??localStorage).getItem('pakachi-options-v1')??'{}');return {language:value.language==='en'?'en':'de',invertMiddleRotation:value.invertMiddleRotation===true};}catch{return {language:'de',invertMiddleRotation:false};}
+}
+export const options=readOptions();
+const translations:Record<string,string>={
+  'Gelenke · Maussteuerung':'Joints · Mouse controls','Höchstens 2048 Verbindungen.':'At most 2048 connections.',
+  'Optionen':'Options','Sprache':'Language','Schließen':'Close','Drehrichtung der mittleren Maustaste invertieren':'Invert middle mouse rotation',
+  'Maustaste 3 = Mausrad drücken und halten.':'Mouse button 3 = press and hold the scroll wheel.',
+  'Joints automatisch erkennen':'Detect joints automatically','Joint-Verbindungen automatisch erkennen':'Detect joint connections automatically',
+  'Erkennung verwendet vorhandene Skelettdaten. Für Modelle ohne Skelett ist KI-Rigging noch nicht verfügbar.':'Detection uses the existing skeleton. AI rigging for models without a skeleton is not available yet.',
+  'Verbindungen':'Connections','Verbindung entfernen':'Remove connection','Keine Verbindungen.':'No connections.',
+  'Keine zusätzlichen Gelenke erkannt. Vorhandene Punkte bleiben erhalten.':'No additional joints detected. Existing points are preserved.',
+  'Das Modell enthält kein Skelett. KI-Erkennung für ungeriggte Modelle ist noch nicht verfügbar.':'This model has no skeleton. AI detection for unrigged models is not available yet.',
+  'Keine zusätzlichen Skelettverbindungen erkannt. Freie Punkte bitte gezielt verbinden.':'No additional skeleton connections detected. Connect free points explicitly.',
+  'Erkannte Gelenke ergänzt.':'Detected joints added.','Erkannte Verbindungen ergänzt.':'Detected connections added.',
+  'Punkt hier setzen':'Add point here','Mit ausgewähltem Punkt verbinden / lösen':'Connect to / disconnect from selected point',
+  'Punkt löschen':'Delete point','Punkt verschieben':'Move point','Punkt drehen':'Rotate point',
+  'Figur bewegen':'Pose figure','Gelenke bearbeiten':'Edit joints','Avatar-Studio':'Avatar Studio','Bearbeitungsmodus':'Editing mode',
+  'Neu':'New','Speichern':'Save','Speichern *':'Save *','Laden':'Load','Projekt laden':'Load project','＋ GLB laden':'＋ Load GLB',
+  '↶ Zurück':'↶ Undo','↷ Wiederholen':'↷ Redo','Gelenk / Gesichtspunkt':'Joint / facial control','Punkt auswählen …':'Select a point …',
+  '＋ Punkt setzen':'＋ Add point','Verbinden / lösen':'Connect / disconnect','Name':'Name','Punktgröße':'Point size','Einflussbereich':'Influence radius',
+  'Griffe':'Handles','Verschieben':'Translate','Drehen':'Rotate','Verbundene freie Punkte gemeinsam bewegen':'Move connected free points together',
+  'Kontrollpunkt löschen':'Delete control point','Grundpose':'Rest pose','Posen & Bewegung':'Poses & motion','Posenname':'Pose name','z. B. Hand oben':'e.g. Hand up',
+  'Aktuelle Pose speichern':'Save current pose','Gespeicherte Posen':'Saved poses','Anzeigen':'Show','Ersetzen':'Replace','Löschen':'Delete',
+  'Übergang zu dieser Pose (Sekunden)':'Transition to this pose (seconds)','↑ Früher':'↑ Earlier','↓ Später':'↓ Later',
+  'Eine Bewegung nutzt alle Posen in dieser Reihenfolge. Bei Schleifen bestimmt die Zeit der ersten Pose den Rückweg.':'A move uses all poses in this order. For loops, the first pose’s time controls the return transition.',
+  'Bewegungsname':'Move name','z. B. Lächeln':'e.g. Smile','Schlagwort':'Command name','z. B. laecheln':'e.g. smile','Als Schleife':'Loop',
+  'Bewegung speichern':'Save move','Eigene Bewegungen':'Custom moves','Vorschau':'Preview','Stopp':'Stop',
+  'Punkte setzen und verbinden. Bestehende Skelettpunkte verschieben ihren Drehpunkt.':'Place and connect points. Moving a skeleton point changes its pivot.',
+  'Punkt direkt ziehen oder farbige Griffe verwenden. Skelettpunkte können auch gedreht werden.':'Drag a point directly or use its coloured handles. Skeleton points can also rotate.',
+  'Skelettpunkt. Löschen entfernt den Griff, das Quellskelett bleibt erhalten.':'Skeleton point. Deleting it removes the handle and preserves the source skeleton.',
+  'Freier Oberflächenpunkt. Verbindungen gruppieren Punkte, ohne eine Gelenkkette vorauszusetzen.':'Free surface point. Connections group points without requiring a skeleton chain.',
+  'In die Figur klicken. Neben der Figur wird der Punkt auf der Ansichtsebene gesetzt.':'Click the figure. Outside the figure, the point is placed on the view plane.',
+  'Zweiten Punkt anklicken. Eine vorhandene Verbindung wird gelöst.':'Click the second point. An existing connection will be removed.',
+  'Punkt gesetzt. Größe und Einflussbereich sind getrennt einstellbar.':'Point added. Display size and influence radius are independent.',
+  'Studio-Projekt mit Modell, Kontrollpunkten, Posen und Bewegungen heruntergeladen.':'Studio project downloaded with the model, control points, poses and moves.',
+  'Höchstens 256 Kontrollpunkte pro Projekt.':'At most 256 control points per project.','Höchstens 100 Posen.':'At most 100 poses.','Höchstens 100 Bewegungen.':'At most 100 moves.',
+  'Diese Pose wird noch von einer Bewegung verwendet. Zuerst die Bewegung löschen.':'This pose is still used by a move. Delete that move first.',
+  'Name und eindeutiges Schlagwort angeben (a–z, 0–9, _ oder -).':'Enter a name and a unique command (a–z, 0–9, _ or -).','Dieses Schlagwort ist bereits vergeben.':'That command name is already in use.',
+  'Projekt laden: „Projekt laden“ oben. Mausrad: Nahzoom · rechts ziehen: Ansicht verschieben.':'Load projects using “Load project” above. Scroll: zoom · right drag: pan.',
+  'Mitte halten: frei drehen · rechts ziehen: verschieben · Mausrad: zoomen':'Hold middle: rotate freely · right drag: pan · scroll: zoom',
+  'Links: Punkt ziehen · Rechtsklick: Punkt-/Verbindungsmenü':'Left: drag point · right click: point / connection menu',
+  'Dein Editor, direkt im Player.':'Your editor, built into the player.','Skelett anzeigen':'Show skeleton','Zurück zum Player':'Back to player',
+  'Zuerst einen 3D-Avatar auswählen. Für den Original-Bildplayer liegt noch kein 3D-Modell vor.':'Select a 3D avatar first. The original image player has no 3D model yet.',
+  'Ansicht':'View','Frei drehen':'Free rotation','Vorne':'Front','Hinten':'Back','Links':'Left','Rechts':'Right','Oben':'Top','Unten':'Bottom','Ansicht zurücksetzen ↺':'Reset view ↺',
+  'Ansicht 90 Grad nach links rollen':'Roll view left by 90 degrees','Ansicht 90 Grad nach rechts rollen':'Roll view right by 90 degrees',
+  'DEIN AVATAR, IN BEWEGUNG':'YOUR AVATAR IN MOTION','Lokal auf deinem Gerät':'Local on your device','Dein Model Zoo':'Your Model Zoo','Dein Model Zoo.':'Your Model Zoo.',
+  'Dein Avatar-Studio.':'Your Avatar Studio.','Eine Figur auswählen. Eine Bewegung starten. Leben einhauchen.':'Choose a figure. Start a move. Bring it to life.',
+  'Ein gemeinsamer Ort für deine Figuren und ihre Bewegungen.':'One place for your figures and their moves.','Dein PaKaChi bleibt PaKaChi.':'Your PaKaChi remains PaKaChi.',
+  'Beide Formen und alle 72 Transformationsbilder sind im Originalplayer erhalten. Mika und Nori sind ausschließlich technische Testavatare.':'Both forms and all 72 transformation frames are preserved in the original player. Mika and Nori are technical test avatars only.',
+  'Model Zoo wird geladen …':'Loading Model Zoo …','Avatar-Vorschau':'Avatar preview','Avatar auswählen':'Select avatar','Bewegungen':'Moves','Was dieser Avatar schon kann.':'What this avatar can already do.',
+  'Pause':'Pause','Ⅱ Pause':'Ⅱ Pause','▶ Weiter':'▶ Resume','Tempo':'Speed','Abspielposition':'Playback position','Schlagworte & Fähigkeiten':'Commands & capabilities',
+  'Bereit':'Ready','Standbild':'Still image','Pausiert':'Paused','Schleife':'Loop','einmalig':'once','3D · TESTAVATAR':'3D · TEST AVATAR','3D · EIGENER IMPORT':'3D · IMPORTED MODEL','3D-Testavatar':'3D test avatar',
+  'Dieses Modell enthält keine abspielbaren Bewegungen.':'This model contains no playable moves.',
+  'GLB-Import bleibt lokal im Browser und gilt für diese Sitzung. Es werden keine Modelle hochgeladen.':'GLB imports remain local in this browser session. No models are uploaded.',
+  'Zustandssteuerung · MQTT · MCP':'State control · MQTT · MCP','Agent verbinden · MQTT / MCP':'Connect agent · MQTT / MCP','Zustand':'State','Kein Avatar bereit':'No avatar ready',
+  'MQTT-Empfang einschalten':'Enable MQTT reception','Python-MCP über diesen Broker erlauben':'Allow Python MCP through this broker','Broker-Adresse':'Broker address','Benutzername':'Username','Passwort':'Password',
+  'Aus · keine Verbindung':'Off · no connection','MCP · bisherige Node-Brücke':'MCP · legacy Node bridge','MCP-Kopplung einschalten':'Enable MCP pairing','Lokale Brücke':'Local bridge','Kopplungsschlüssel':'Pairing key',
+  'Beide Verbindungen starten ausgeschaltet. Änderungen an Verbindungsdaten durch Aus- und Einschalten übernehmen. Zugangsdaten werden nicht gespeichert.':'Both connections start disabled. Reconnect to apply changed settings. Credentials are not stored.',
+  'Befehl übernommen.':'Command accepted.','Kein aktiver Zustand':'No active state','Studio ist geöffnet. Zum Steuern zurück zum Player wechseln.':'The studio is open. Return to the player for external control.',
+  'Ungültige Argumente.':'Invalid arguments.','Avatar wird geladen. Bitte erneut versuchen.':'Avatar is loading. Please try again.','Bitte diesen Avatar zuerst im Player auswählen.':'Select this avatar in the player first.',
+  'Kein Avatar bereit.':'No avatar ready.','Unbekannte Operation.':'Unknown operation.','Dieser Avatar unterstützt den Zustand nicht.':'This avatar does not support that state.','Dieser Avatar unterstützt den Move nicht.':'This avatar does not support that move.',
+  'Ungespeicherte Studio-Änderungen verwerfen? Mit Abbrechen kannst du zuerst das Projekt speichern.':'Discard unsaved studio changes? Cancel to save the project first.',
+};
+export function translate(value:string):string {
+  if(options.language==='de')return value;
+  const trimmed=value.trim(),result=translations[trimmed];
+  if(result!==undefined)return value.replace(trimmed,result);
+  if(trimmed.startsWith('Entwicklungsstand '))return value.replace('Entwicklungsstand ','Version ');
+  if(trimmed.startsWith('● · ')||trimmed.startsWith('Pausiert · '))return value.replace('Pausiert · ','Paused · ');
+  return value;
+}
+interface Source {original:string;rendered:string}
+const sources=new WeakMap<Node,Source>();
+const attrs=new WeakMap<Element,Map<string,Source>>();
+const roots=new Map<HTMLElement,MutationObserver>();
+function ignored(node:Node){const el=node.nodeType===1?node as Element:node.parentElement;return !!el?.closest('script,style,code,[data-user-text],#avatar-name,#avatar-description,#studio-points option,#pose-list option,#studio-moves option,#moves button,#avatar-cards button,#avatar-select option');}
+function localize(node:Node){
+  if(ignored(node))return;
+  if(node.nodeType===3){const current=node.nodeValue??'';let source=sources.get(node);if(!source||current!==source.rendered)source={original:current,rendered:current};const rendered=translate(source.original);source.rendered=rendered;sources.set(node,source);if(current!==rendered)node.nodeValue=rendered;return;}
+  if(node.nodeType===1){const el=node as Element;for(const key of ['title','aria-label','placeholder']){const current=el.getAttribute(key);if(current===null)continue;const map=attrs.get(el)??new Map<string,Source>();let source=map.get(key);if(!source||source.rendered!==current)source={original:current,rendered:current};source.rendered=translate(source.original);map.set(key,source);attrs.set(el,map);if(current!==source.rendered)el.setAttribute(key,source.rendered);}}
+  node.childNodes.forEach(localize);
+}
+export function translateRoot(root:HTMLElement):()=>void {
+  localize(root);const observer=new MutationObserver(records=>{for(const record of records){if(record.type==='childList')record.addedNodes.forEach(localize);else localize(record.target);}});
+  observer.observe(root,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['title','aria-label','placeholder']});roots.set(root,observer);
+  return ()=>{observer.disconnect();roots.delete(root);};
+}
+export function updateOptions(value:Options):void {
+  options.language=value.language;options.invertMiddleRotation=value.invertMiddleRotation;
+  try{localStorage.setItem('pakachi-options-v1',JSON.stringify(options));}catch{/* The editor also works with storage disabled. */}
+  if(typeof document!=='undefined'){document.documentElement.lang=options.language;for(const root of roots.keys())localize(root);window.dispatchEvent(new Event('pakachi-options'));}
+}
+export function mountOptions():void {
+  const dialog=document.createElement('dialog');dialog.id='options-dialog';dialog.innerHTML='<h2>Optionen</h2><label>Sprache<select id="option-language"><option value="de">Deutsch</option><option value="en">English</option></select></label><label class="check"><input type="checkbox" id="option-invert"> Drehrichtung der mittleren Maustaste invertieren</label><p>Maustaste 3 = Mausrad drücken und halten.</p><button id="options-close" class="button primary">Schließen</button>';document.body.append(dialog);
+  const language=dialog.querySelector<HTMLSelectElement>('#option-language')!,invert=dialog.querySelector<HTMLInputElement>('#option-invert')!;
+  language.value=options.language;invert.checked=options.invertMiddleRotation;
+  const apply=()=>updateOptions({language:language.value==='en'?'en':'de',invertMiddleRotation:invert.checked});language.onchange=apply;invert.onchange=apply;
+  document.getElementById('options-open')!.onclick=()=>dialog.showModal();dialog.querySelector<HTMLButtonElement>('#options-close')!.onclick=()=>dialog.close();
+  document.documentElement.lang=options.language;translateRoot(document.body);
+}

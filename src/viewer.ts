@@ -2,6 +2,8 @@ import * as THREE from 'three';
 import { StudioView } from './studio-view.ts';
 import type { StudioRig } from './studio-rig.ts';
 import { ArcballControls } from 'three/addons/controls/ArcballControls.js';
+import { MouseNavigation } from './mouse-navigation.ts';
+import { options } from './options.ts';
 import { rotateCamera } from './camera.ts';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import type { GLTF } from 'three/addons/loaders/GLTFLoader.js';
@@ -53,6 +55,7 @@ export class Viewer {
   private readonly scene = new THREE.Scene();
   private readonly camera = new THREE.PerspectiveCamera(34, 1, 0.01, 100);
   private readonly controls: ArcballControls & {target:THREE.Vector3; _gizmos:THREE.Group};
+  private readonly mouse:MouseNavigation;
   private floor: THREE.Mesh;
   private readonly holder = new THREE.Group();
   private model: THREE.Object3D | null = null;
@@ -72,6 +75,9 @@ export class Viewer {
     this.renderer.domElement.setAttribute('aria-label', 'Drehbare 3D-Ansicht des Avatars');
     container.append(this.renderer.domElement);
     this.controls = new ArcballControls(this.camera, this.renderer.domElement, this.scene) as ArcballControls & {target:THREE.Vector3; _gizmos:THREE.Group};
+    this.controls.unsetMouseAction(1);
+    this.mouse=new MouseNavigation(this.renderer.domElement,this.camera,()=>this.controls._gizmos.position,
+      active=>{this.controls.enabled=!active;},()=>{this.controls.target.copy(this.controls._gizmos.position);this.controls.setCamera(this.camera);this.controls.setGizmosVisible(false);},()=>options.invertMiddleRotation);
     this.controls.enableAnimations = false;
     this.controls.enablePan = true;
     this.controls.cursorZoom = true;
@@ -140,7 +146,7 @@ export class Viewer {
     this.controls.setGizmosVisible(false);
     this.controls.update();
   }
-  setStudio(active:boolean):void {this.floor.visible=!active;}
+  setStudio(active:boolean):void {this.floor.visible=!active;if(active)this.controls.unsetMouseAction(0);else this.controls.setMouseAction('ROTATE',0);}
   rollView(degrees:number):void {
     this.controls.target.copy(this.controls._gizmos.position);
     rotateCamera(this.camera,this.controls.target,this.camera.getWorldDirection(new THREE.Vector3()),THREE.MathUtils.degToRad(degrees));
@@ -162,6 +168,7 @@ export class Viewer {
   dispose(): void {
     cancelAnimationFrame(this.frame);
     this.resize.disconnect();
+    this.mouse.dispose();
     this.controls.dispose();
     this.clear();
     disposeModel(this.scene);

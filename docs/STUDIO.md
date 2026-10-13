@@ -1,4 +1,4 @@
-# Avatar-Studio – 0.3.0
+# Avatar-Studio – 0.5.0
 
 Das Studio ist Teil des Players. Mika, Nori und eigene GLB-Modelle können bearbeitet werden. Der Original-PaKaChi bleibt mit beiden Formen und 72 Bildern erhalten; für ihn fehlt weiterhin das entsprechende 3D-Modell. Seine Bilder werden durch den Editor nicht verändert.
 
@@ -18,7 +18,7 @@ Die Zeit der ersten Pose bestimmt bei Schleifen den Rückweg vom letzten zum ers
 
 In **Gelenke bearbeiten** zuerst **Punkt setzen**, dann auf die gewünschte Stelle der Figur klicken. Ein Klick neben die Figur setzt einen freien Punkt auf die Ansichtsebene. Anschließend kann er über die Achsgriffe auch in der Tiefe verschoben werden.
 
-Es gibt keine vorgegebene Anzahl oder erzwungene Gelenkkette: beispielsweise drei Punkte am Mund, einen pro Auge oder mehrere an jedem Augenlid. Mausrad zoomt zum Zeiger; rechte Maustaste verschiebt die Ansicht. Seit 0.4.0 ist die Ansicht mit der linken Maustaste frei um alle Achsen drehbar. Die Ansichten Vorne/Hinten/Links/Rechts/Oben/Unten und die Rolltasten machen jede Seite zugänglich; der Sockel ist im Studio ausgeblendet. Die linke Maustaste dreht die Kamera außerhalb der Achsgriffe.
+Es gibt keine vorgegebene Anzahl oder erzwungene Gelenkkette: beispielsweise drei Punkte am Mund, einen pro Auge oder mehrere an jedem Augenlid. Mausrad zoomt zum Zeiger; rechte Maustaste verschiebt die Ansicht. Seit 0.5.0: **Mausrad drücken und halten (Maustaste 3)** und die Maus bewegen, um frei um alle Achsen zu drehen; Bewegungen am Rand der virtuellen Kugel rollen die Ansicht. Linkes Ziehen bewegt einen Punkt direkt auf der Ansichtsebene; die farbigen Griffe erlauben achsengebundene Änderungen. Rechts ziehen verschiebt die Ansicht, das Mausrad zoomt. Zur Navigation sind keine Tastatur-Modifikatoren oder Ansichtsbuttons nötig. Feste Ansichten und Rolltasten bleiben optional verfügbar; der Sockel ist im Studio ausgeblendet.
 
 - **Punktgröße** verändert nur die sichtbare Kugel. Kleine Mundpunkte können unabhängig von großen Kniepunkten eingestellt werden. Eine Mindest-Auswahlfläche von 10 Bildschirmpixeln erleichtert das Treffen kleiner Punkte; bei dicht benachbarten Punkten hilft die Auswahlliste.
 - **Einflussbereich** bestimmt separat, wie weit die Oberflächenverformung reicht. Sie fällt zum Rand weich ab. Ein Punkt auf einer Oberfläche wirkt zunächst nur auf dieses Teilmodell; ein frei im Raum gesetzter Punkt kann mehrere Oberflächen in seinem Radius beeinflussen. Zu kleine Radien können zwischen groben Vertices liegen und dann keine sichtbare Verformung erzeugen.
@@ -44,3 +44,16 @@ Posen und eigene Moves bleiben bei Punktänderungen erhalten. Neue Punkte werden
 - Die Datei ist ein versioniertes Studio-Projekt, kein GLB-Export und kein automatischer Eintrag im gemeinsamen Model Zoo auf GitHub. Die eigenen Moves werden mit dem geladenen Projekt im Player angeboten.
 - Keine automatische 3D-/Skelettgenerierung, Gewichts-Malwerkzeuge, IK, globale Transformationsspur für knochenlose Modelle oder eigenständiger GLB-Export.
 - Automatisierte Geometrie-, Daten- und DOM-Tests sind bestanden. Die visuelle Maus-/WebGL-Abnahme muss weiterhin in einem Browser erfolgen; Chromium kann in der aktuellen Ausführungsumgebung nicht starten.
+
+
+## Automatische Erkennung und einzelne Verbindungen
+
+Im Modus **Gelenke bearbeiten** stehen **Joints automatisch erkennen** und **Joint-Verbindungen automatisch erkennen** bereit. Die Erkennung liest vorhandene Knochen und deren Eltern-Kind-Beziehungen aus dem 3D-Modell. Schon vorhandene Griffe werden nicht doppelt angelegt; eigene Punkte, Namen und Größen bleiben erhalten. Gelöschte Skelettgriffe lassen sich erneut erkennen. Verbindungen werden nur zwischen vorhandenen Skelettgriffen ergänzt.
+
+Für selbst gesetzte Punkte: ersten Punkt auswählen, **Verbinden / lösen**, zweiten Punkt anklicken. Eine bestehende Verbindung wird dabei gelöst. Die Liste **Verbindungen** zeigt alle Verbindungen; **Verbindung entfernen** löscht genau diese eine Verbindung, unabhängig von ihrer Herkunft. Punkte und andere Verbindungen bleiben bestehen. Erkennung, Löschen und direktes Ziehen unterstützen Zurück/Wiederholen.
+
+Die Buttons sind noch keine KI-Anatomieerkennung: Für Modelle ohne Skelett und für freie Gesichtspunkte bleibt anatomisches KI-Rigging offen. Verbindungen freier Punkte bilden Bearbeitungsgruppen; sie erzeugen keine neuen Knochen oder automatische Hautgewichte.
+
+## Optionen
+
+**Optionen** in der linken Leiste enthält Deutsch/English und **Drehrichtung der mittleren Maustaste invertieren**. Beide Einstellungen werden lokal im Browser gespeichert und sofort angewendet. Studio-Bedienelemente wechseln die Sprache, benutzervergebene Namen bleiben erhalten. Der archivierte Original-Bildplayer bleibt unverändert auf Deutsch; Modellbeschreibungen und einzelne technische Fehlermeldungen sind noch nicht vollständig lokalisiert.

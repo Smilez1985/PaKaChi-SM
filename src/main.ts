@@ -1,4 +1,5 @@
 import './style.css';
+import {mountOptions,translate} from './options.ts';
 import { StudioEditor, encodeModel, decodeModel } from './studio-editor.ts';
 import { StudioRig } from './studio-rig.ts';
 import { parseProject } from './studio-data.ts';
@@ -14,11 +15,11 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
   <aside class="rail">
     <a class="brand" href="./" aria-label="PaKaChi-SM Startseite"><span class="brand-mark">P<span>•</span></span><span>PaKaChi<span class="brand-sub">STATE MASCHINE</span></span></a>
     <p class="rail-label">DEIN AVATAR, IN BEWEGUNG</p>
-    <nav aria-label="Anwendungsbereiche">
+    <button id="options-open" class="button outline">Optionen</button><nav aria-label="Anwendungsbereiche">
       <button id="player-tab" class="nav-button active" aria-pressed="true"><span>◉</span> Player</button>
       <button id="studio-tab" class="nav-button" aria-pressed="false"><span>◇</span> Avatar-Studio</button>
     </nav>
-    <div class="rail-bottom"><span class="online-dot"></span> Lokal auf deinem Gerät<p>Entwicklungsstand 0.4.0<br>Freie Ansicht · Python-MCP</p></div>
+    <div class="rail-bottom"><span class="online-dot"></span> Lokal auf deinem Gerät<p>Entwicklungsstand 0.5.0<br>Gelenke · Maussteuerung</p></div>
   </aside>
   <main>
     <header><div><p class="eyebrow">PAKACHI-SM / <span id="section-label">PLAYER</span></p><h1 id="page-title">Dein Model Zoo<span>.</span></h1><p id="page-intro">Eine Figur auswählen. Eine Bewegung starten. Leben einhauchen.</p></div><button id="project-open" class="button outline">Projekt laden</button><input id="project-file" type="file" accept=".json" hidden><button id="import-button" class="button outline">＋ GLB laden</button><input id="file-input" type="file" accept=".glb" hidden></header>
@@ -29,7 +30,7 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
         <div class="stage-top"><span class="pill" id="model-type">3D · TESTAVATAR</span><button id="reset-camera" class="text-button">Ansicht zurücksetzen ↺</button></div>
         <div class="view-tools"><label>Ansicht<select id="view-side"><option value="">Frei drehen</option><option value="front">Vorne</option><option value="back">Hinten</option><option value="left">Links</option><option value="right">Rechts</option><option value="top">Oben</option><option value="bottom">Unten</option></select></label><button id="view-roll-left" title="Ansicht 90 Grad nach links rollen">↶ 90°</button><button id="view-roll-right" title="Ansicht 90 Grad nach rechts rollen">↷ 90°</button></div><div id="viewport"></div><iframe id="legacy-frame" class="legacy-frame" title="PaKaChi Originalplayer mit Tierform und Arbeitsform"></iframe>
         <div class="stage-caption"><div><h2 id="avatar-name">Wird geladen …</h2><p id="avatar-description"></p></div><span class="live-badge" id="activity">Bereit</span></div>
-        <p class="camera-help">Links ziehen: frei um alle Achsen drehen <span>·</span> Rechts ziehen: verschieben <span>·</span> Mausrad: zoomen</p>
+        <p class="camera-help">Mitte halten: frei drehen · rechts ziehen: verschieben · Mausrad: zoomen</p>
       </section>
       <aside class="control-panel">
         <div class="panel-heading"><span class="eyebrow">MODEL ZOO</span><span id="avatar-count" class="count">0</span></div>
@@ -56,6 +57,8 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
     <footer><span>PAKACHI · PANDA-KI-CHIMERA</span><span>Zustandssteuerung · MQTT · MCP</span></footer>
   </main>`;
 
+mountOptions();
+
 const el = <T extends HTMLElement = HTMLElement>(id: string): T => document.getElementById(id) as T;
 let viewer: Viewer | undefined;
 let original = false;
@@ -65,7 +68,7 @@ let loaded: Avatar | null = null;
 let studio = false;
 let editor: StudioEditor | null = null;
 const transport = () => editor?.playing ? editor : playback;
-function mayReplace(): boolean { return !editor?.dirty || window.confirm("Ungespeicherte Studio-Änderungen verwerfen? Mit Abbrechen kannst du zuerst das Projekt speichern."); }
+function mayReplace(): boolean { return !editor?.dirty || window.confirm(translate("Ungespeicherte Studio-Änderungen verwerfen? Mit Abbrechen kannst du zuerst das Projekt speichern.")); }
 function resumeBase(): void {
   const id = loaded?.states?.[machine.state ?? ""] ?? loaded?.defaultMove;
   if (id) playback?.setBaseMove(id);

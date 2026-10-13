@@ -32,7 +32,7 @@ export class StudioView {
     this.gizmo.addEventListener('mouseDown',()=>{this.dragging=true;orbit.enabled=false;this.onStart();});
     this.gizmo.addEventListener('objectChange',()=>{if(this.dragging)this.onMove(this.proxy.position.clone(),this.proxy.quaternion.clone());});
     this.gizmo.addEventListener('mouseUp',()=>{this.dragging=false;orbit.enabled=true;this.onEnd();});
-    canvas.addEventListener('pointerdown',this.down,true);canvas.addEventListener('pointerup',this.up,true);
+    canvas.addEventListener('pointermove',this.move,true);canvas.addEventListener('pointercancel',this.cancel,true);canvas.addEventListener('lostpointercapture',this.cancel,true);canvas.addEventListener('pointerdown',this.down,true);canvas.addEventListener('pointerup',this.up,true);
     this.setEnabled(false);
   }
   setEnabled(value:boolean) {this.enabled=value;this.canvas.style.cursor=value&&this.action==='add'?'crosshair':'';this.group.visible=value;this.gizmo.enabled=value;this.orbit.enabled=true;if(!value){this.gizmo.detach();this.dragging=false;}else this.refresh();}
@@ -40,8 +40,20 @@ export class StudioView {
   setRotation(value:boolean){this.rotation=value;this.gizmo.setMode(value?'rotate':'translate');}
   select(id:string|null){this.selected=id;this.refresh();}
   private start:{x:number;y:number}|null=null;
-  private down=(event:PointerEvent)=>{if(this.enabled && event.button===0)this.start={x:event.clientX,y:event.clientY};};
+  private direct:{pointer:number;plane:T.Plane;offset:T.Vector3;rotation:T.Quaternion;moved:boolean}|null=null;
+  private aim(x:number,y:number){const r=this.canvas.getBoundingClientRect();this.ray.setFromCamera(new T.Vector2((x-r.left)/r.width*2-1,-(y-r.top)/r.height*2+1),this.camera);}
+  private down=(event:PointerEvent)=>{
+    if(!this.enabled||event.button!==0)return;this.start={x:event.clientX,y:event.clientY};
+    if(this.action!=='select')return;
+    const rect=this.canvas.getBoundingClientRect();const hits=this.rig.data.points.map(p=>{const v=this.rig.position(p).project(this.camera);return {p,z:v.z,d:Math.hypot(rect.left+(v.x+1)*rect.width/2-event.clientX,rect.top+(1-v.y)*rect.height/2-event.clientY)};}).filter(h=>h.z>=-1&&h.z<=1&&h.d<=10).sort((a,b)=>a.d-b.d);
+    const point=hits[0]?.p;if(!point)return;
+    const position=this.rig.position(point),plane=new T.Plane().setFromNormalAndCoplanarPoint(this.camera.getWorldDirection(new T.Vector3()),position);this.aim(event.clientX,event.clientY);const hit=this.ray.ray.intersectPlane(plane,new T.Vector3());if(!hit)return;
+    event.preventDefault();event.stopImmediatePropagation();this.onSelect(point.id);this.direct={pointer:event.pointerId,plane,offset:position.sub(hit),rotation:this.rig.rotation(point),moved:false};this.canvas.setPointerCapture(event.pointerId);this.orbit.enabled=false;
+  };
+  private move=(event:PointerEvent)=>{const d=this.direct;if(!d||event.pointerId!==d.pointer)return;event.preventDefault();event.stopImmediatePropagation();if(!d.moved&&this.start&&Math.hypot(event.clientX-this.start.x,event.clientY-this.start.y)<3)return;this.aim(event.clientX,event.clientY);const hit=this.ray.ray.intersectPlane(d.plane,new T.Vector3());if(!hit)return;if(!d.moved){d.moved=true;this.onStart();}this.onMove(hit.add(d.offset),d.rotation);};
+  private cancel=(event:PointerEvent)=>{if(this.direct?.pointer!==event.pointerId)return;const d=this.direct;this.direct=null;this.start=null;this.orbit.enabled=true;if(this.canvas.hasPointerCapture(event.pointerId))this.canvas.releasePointerCapture(event.pointerId);if(d.moved)this.onEnd();};
   private up=(event:PointerEvent)=>{
+    if(this.direct?.pointer===event.pointerId){event.preventDefault();event.stopImmediatePropagation();this.cancel(event);return;}
     const start=this.start;this.start=null;if(!start||!this.enabled||event.button!==0||Math.hypot(event.clientX-start.x,event.clientY-start.y)>4||this.dragging||this.gizmo.axis)return;
     const rect=this.canvas.getBoundingClientRect();this.ray.setFromCamera(new T.Vector2((event.clientX-rect.left)/rect.width*2-1,-(event.clientY-rect.top)/rect.height*2+1),this.camera);
     // Minimum 10 px pick radius keeps tiny face points usable without enlarging their display.
@@ -63,5 +75,5 @@ export class StudioView {
     if(this.enabled && point && this.action==='select') {this.proxy.position.copy(this.rig.position(point));this.proxy.quaternion.copy(this.rig.rotation(point));this.gizmo.setMode(this.rotation && point.kind==='bone'?'rotate':'translate');this.gizmo.attach(this.proxy);}else this.gizmo.detach();
   }
   private clearGroup(group:T.Group){for(const child of [...group.children]){group.remove(child);if(child instanceof T.Mesh||child instanceof T.Line){child.geometry.dispose();(child.material as T.Material).dispose();}}}
-  dispose(){this.canvas.removeEventListener('pointerdown',this.down,true);this.canvas.removeEventListener('pointerup',this.up,true);this.canvas.style.cursor='';this.orbit.enabled=true;this.gizmo.dispose();this.clearGroup(this.handles);this.clearGroup(this.lines);this.group.removeFromParent();}
+  dispose(){this.canvas.removeEventListener('pointermove',this.move,true);this.canvas.removeEventListener('pointercancel',this.cancel,true);this.canvas.removeEventListener('lostpointercapture',this.cancel,true);this.canvas.removeEventListener('pointerdown',this.down,true);this.canvas.removeEventListener('pointerup',this.up,true);this.canvas.style.cursor='';this.orbit.enabled=true;this.gizmo.dispose();this.clearGroup(this.handles);this.clearGroup(this.lines);this.group.removeFromParent();}
 }

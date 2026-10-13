@@ -4,7 +4,7 @@
 
 PaKaChi-SM soll 3D-Avatare darstellen, ihre Zustände und Bewegungen steuern und das Erstellen eigener Avatare in derselben Anwendung ermöglichen.
 
-> **Projektstand: 0.4.0 – freie 3D-Ansicht und Python-MCP über MQTT.** Der bestehende PaKaChi mit allen 72 Transformationsbildern ist erhalten und standardmäßig ausgewählt. Zusätzlich gibt es einen 3D-Player mit Model Zoo, zwei technischen Testavataren und lokalem GLB-Import. Das Studio bietet frei platzierbare Kontrollpunkte, Posen, eigene Moves und vollständige Projektdateien. KI-Generierung, tiefgreifender Skelettumbau und die 3D-Übertragung des Original-PaKaChi folgen noch.
+> **Projektstand: 0.5.0 – Gelenkerkennung, einzelne Verbindungen und Maussteuerung.** Der bestehende PaKaChi mit allen 72 Transformationsbildern ist erhalten und standardmäßig ausgewählt. Zusätzlich gibt es einen 3D-Player mit Model Zoo, zwei technischen Testavataren und lokalem GLB-Import. Das Studio bietet frei platzierbare Kontrollpunkte, Posen, eigene Moves und vollständige Projektdateien. KI-Generierung, tiefgreifender Skelettumbau und die 3D-Übertragung des Original-PaKaChi folgen noch.
 
 ## Starten
 

@@ -92,3 +92,14 @@ Abnahme: Bild hineinziehen, Avatar korrigieren, Bewegung erstellen, speichern un
 
 Diese Reihenfolge ist ein Umsetzungsvorschlag. Das Produktziel bleibt der vollständige, einfache Bild-zu-Avatar-Ablauf.
 
+
+## Ergänzungen 0.5.0
+
+- [x] Vorhandene Skelettgelenke und Verbindungen per Button erkennen.
+- [x] Eigene Punkte gezielt verbinden und jede Verbindung einzeln entfernen.
+- [x] Ansicht mit gedrückter mittlerer Maustaste um alle Achsen drehen; Drehrichtung optional invertieren.
+- [x] Punkte direkt ziehen; Zoom und Verschieben ohne Tastaturmodifikatoren.
+- [x] Deutsch/English für Studio-Bedienelemente mit lokaler Speicherung.
+- [ ] Anatomische KI-Erkennung für Modelle ohne Skelett und freie Gesichtspunkte.
+- [ ] Vollständige Lokalisierung von Originalplayer und technischen Meldungen.
+- [ ] Visuelle WebGL-Abnahme mit realer Maus.

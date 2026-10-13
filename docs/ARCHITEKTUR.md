@@ -1,4 +1,4 @@
-# Technischer Stand 0.4.0
+# Technischer Stand 0.5.0
 
 ## Lokale Anwendung
 
@@ -33,3 +33,5 @@ Die Hauptoberfläche verwendet seit 0.4.0 MQTT.js für direkten Status-Empfang u
 `studio-view.ts` verbindet Raycasting, Mindest-Auswahlfläche und TransformControls. `studio-editor.ts` verwaltet genau zwei Bearbeitungsmodi, Posen, Interpolation, Projekt-Download und eigene Moves. Während der Bearbeitung pausieren Originalclips, externe Mutationen werden abgewiesen. Eigene Moves werden beim Laden des Projekts in die aktive Fähigkeitsliste aufgenommen und kehren einmalig zum Grundzustand zurück.
 
 Der Editor unterstützt noch keinen beliebigen Quellknochenumbau, IK, automatische Gewichte, Bild-zu-3D oder GLB-Export. Ein gelöschter Skelettgriff entfernt nicht den Quellknochen. Beim Original-PaKaChi bleibt der Bildplayer aktiv, da sein 3D-Modell noch fehlt. Details: [Studio](STUDIO.md).
+
+Seit 0.5.0: Skelettbasierte Gelenk-/Verbindungserkennung, einzeln entfernbare Verbindungen, direktes Punktziehen, mittlere Maustaste für freie Ansichtsdrehung und lokal gespeicherte Sprach-/Inversionsoptionen. KI-Erkennung an ungeriggten Modellen bleibt offen. Details: [Studio](STUDIO.md).

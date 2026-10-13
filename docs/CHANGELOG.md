@@ -8,6 +8,28 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-10-13
+
+Zeitstempel: 2026-10-13T11:32:34+00:00
+
+### Added
+
+- Zwei Buttons zur Erkennung vorhandener Skelettgelenke und ihrer Verbindungen, ohne vorhandene manuelle Punkte zu überschreiben.
+- Verbindungsliste zum einzelnen Entfernen automatischer und selbst angelegter Verbindungen mit Undo/Redo.
+- Direkte Punktbewegung per linkem Ziehen und freie Kugeldrehung mit gedrücktem Mausrad; Rechtsziehen verschiebt, Mausrad zoomt.
+- Optionsdialog für Deutsch/English und invertierte Drehrichtung, lokal gespeichert.
+- Automatisierte Prüfungen für Erkennung, Einzellöschung, direkte Punktbewegung, Mausnavigation und Sprachwechsel.
+
+### Changed
+
+- Im Studio bewegt die linke Maustaste Punkte; die Kamera wird mit der mittleren Maustaste gedreht.
+
+### Known limitations
+
+- Anatomische KI-Erkennung ohne vorhandenes Skelett ist noch nicht implementiert; die Oberfläche weist darauf hin.
+- Original-Bildplayer und einige technische Meldungen bleiben deutsch. Visuelle WebGL-Abnahme bleibt offen.
+
+
 ## [0.4.0] - 2026-10-13
 
 Zeitstempel: 2026-10-13T07:52:17+02:00 (Europe/Berlin)
