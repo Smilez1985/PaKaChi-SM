@@ -74,5 +74,20 @@ test('boneless model track interpolates, persists, validates and reads pre-track
  const project:StudioProject={format:'pakachi-studio',version:1,model:'AAAA',avatar:{id:'x',name:'X',description:'',moves:[]},studio:rig.data};assert.deepEqual(parseProject(JSON.parse(JSON.stringify(project))),project);
  const old=structuredClone(project);old.studio.poses.forEach(p=>delete p.values['$figure']);assert.doesNotThrow(()=>parseProject(old));rig.data=old.studio;rig.apply(rig.sample(rig.data.moves[0],1));assert.deepEqual(rig.capture()['$figure'].position,[0,0,0]);
  for(const bad of [Infinity,NaN]){const copy=structuredClone(project);copy.studio.poses[0].values['$figure'].position[0]=bad;assert.throws(()=>parseProject(copy));}
- const invalid=structuredClone(project);invalid.studio.poses[0].values['$figure'].rotation=[0,1,0,0];assert.throws(()=>parseProject(invalid));disposeModel(root);
+ const invalid=structuredClone(project);invalid.studio.poses[0].values['$figure'].rotation=[0,2,0,0];assert.throws(()=>parseProject(invalid));disposeModel(root);
+});
+
+test('whole rotation moves skinned vertices and attached controls around the model center and restores original clips',async()=>{
+ const {root}=await fixture();const rig=new StudioRig(root),mesh=rig.surfaces[0].mesh as T.SkinnedMesh;const initial=vertices(mesh),center=rig.position(rig.figure);const face={id:'attached',name:'Face',kind:'surface' as const,mesh:0,rest:initial[0].toArray(),size:.01,radius:.1};rig.data.points.push(face);const free={...face,id:'free'};delete (free as {mesh?:number}).mesh;rig.data.points.push(free);rig.reset();
+ const angle=new T.Quaternion().setFromAxisAngle(new T.Vector3(1,0,0),Math.PI/2),offset=new T.Vector3(.3,.2,-.1);rig.setPoint(rig.figure,center.clone().add(offset),angle,false);
+ const expected=initial.map(v=>v.clone().sub(center).applyQuaternion(angle).add(center).add(offset));assert.ok(maxDistance(expected,vertices(mesh))<1e-6);assert.ok(rig.position(face).distanceTo(expected[0])<1e-6);assert.ok(rig.position(free).distanceTo(expected[0])<1e-6);assert.ok(rig.rotation(rig.figure).angleTo(angle)<1e-6);
+ const target=expected[0].clone().add(new T.Vector3(0,.03,0));rig.setPoint(face,target,new T.Quaternion(),false);assert.ok(rig.position(face).distanceTo(target)<1e-6,'face control remains editable after full-body rotation');
+ rig.restoreSource();assert.equal(root.matrixAutoUpdate,true);assert.ok(maxDistance(initial,vertices(mesh))<1e-6);assert.deepEqual(rig.capture()['$figure'].rotation,[0,0,0,1]);disposeModel(root);
+});
+test('whole rotation retains exact geometry under nonuniform parents and round-trips interpolated poses',()=>{
+ const holder=new T.Group();holder.scale.set(2,3,1);holder.rotation.z=.4;const root=new T.Group();root.position.set(.2,.3,.1);root.rotation.x=.2;holder.add(root);const mesh=new T.Mesh(new T.BoxGeometry());root.add(mesh);holder.updateMatrixWorld(true);const rig=new StudioRig(root),initial=vertices(mesh),center=rig.position(rig.figure),first=rig.capture();
+ const q=new T.Quaternion().setFromAxisAngle(new T.Vector3(0,1,0),Math.PI/2);rig.setFigureTransform(new T.Vector3(),q);assert.ok(maxDistance(initial.map(v=>v.clone().sub(center).applyQuaternion(q).add(center)),vertices(mesh))<1e-6);
+ rig.data.poses=[{id:'a',name:'A',seconds:1,values:first},{id:'b',name:'B',seconds:2,values:rig.capture()}];rig.data.moves=[{id:'turn',name:'Turn',loop:false,poses:['a','b']}];
+ const project:StudioProject={format:'pakachi-studio',version:1,model:'AAAA',avatar:{id:'x',name:'X',description:'',moves:[]},studio:rig.data};const saved=parseProject(JSON.parse(JSON.stringify(project)));rig.data=saved.studio;rig.reset();rig.apply(rig.sample(rig.data.moves[0],1));const half=new T.Quaternion().setFromAxisAngle(new T.Vector3(0,1,0),Math.PI/4);assert.ok(rig.rotation(rig.figure).angleTo(half)<1e-6);assert.ok(maxDistance(initial.map(v=>v.clone().sub(center).applyQuaternion(half).add(center)),vertices(mesh))<1e-6);
+ rig.reset();assert.ok(maxDistance(initial,vertices(mesh))<1e-6);disposeModel(root);
 });

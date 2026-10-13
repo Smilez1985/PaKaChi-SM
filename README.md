@@ -2,7 +2,7 @@
 
 **SM steht für StateMaschine.** PaKaChi ist die **Panda-KI-Chimera**, das übergeordnete Projekt. PaKaChi-SM vereint Avatar-Player, Model Zoo und das fest integrierte **PaKaChi-Avatar-Studio**.
 
-**Softwarestand: 0.7.0 · Entwicklungsstand, keine fertige Bild-zu-3D-Lösung.**
+**Softwarestand: 0.8.0 · Entwicklungsstand, keine fertige Bild-zu-3D-Lösung.**
 
 Der bestehende PaKaChi mit Tierform, humanoider Arbeitsform und allen 72 Transformationsbildern ist erhalten und beim Start ausgewählt. Mika und Nori sind separate technische 3D-Testavatare. Ein 3D-Modell des Original-PaKaChi und die KI-Generierung stehen noch aus.
 
@@ -21,13 +21,13 @@ Der archivierte Originalplayer lässt sich auch separat ohne Node öffnen: `publ
 
 ## Was aktuell funktioniert
 
-| Bereich | Stand 0.7.0 |
+| Bereich | Stand 0.8.0 |
 | --- | --- |
 | Player | Avatar-Auswahl, tatsächliche Bewegungen anzeigen, abspielen, pausieren, Tempo und Abspielposition ändern. |
 | Modelle | Mika/Nori mit Skeletten und Clips; eigene eigenständige GLB-Dateien laden oder hineinziehen, bis 50 MiB, lokal für die Sitzung. |
 | Studio | Genau zwei Modi: **Figur bewegen** und **Gelenke bearbeiten**. Skelettgriffe, frei platzierbare Gesichtspunkte, individuelle Größe und Einflussradius. |
 | Verbindungen | Punkte frei verbinden; jede Verbindung einzeln entfernen; vorhandene Skelettgelenke und Eltern-Kind-Verbindungen per Button erkennen. |
-| Bewegungen | Posen, Zeitabstände, Vorschau, eigene Moves und Gesamtverschiebung der Figur – auch ohne Skelett. Rückgängig/Wiederholen. |
+| Bewegungen | Posen, Zeitabstände, Vorschau, eigene Moves und Gesamtverschiebung/-drehung der Figur – auch ohne Skelett. Rückgängig/Wiederholen. |
 | Projekte | Neu, Laden und Speichern als `.pakachi.json` mit eingebettetem Modell, Arbeitspose, Kontrollpunkten, Posen und Moves. |
 | Agenten | Gemeinsame StateMaschine für manuelle Bedienung, optionales MQTT und MCP; sechs Tools zur Playersteuerung. |
 | Bewegungsprüfung | Betroffene Posen/Moves nach Änderungen an Drehpunkten, Oberflächenpunkten oder Einflussradien markieren, anzeigen und manuell als geprüft bestätigen. |
@@ -38,7 +38,7 @@ Die Erkennungsbuttons lesen vorhandene Skelettdaten. Sie erzeugen noch kein anat
 ## Erste eigene Bewegung
 
 1. Einen 3D-Avatar auswählen oder eine GLB-Datei laden; **Avatar-Studio** öffnen.
-2. In **Figur bewegen** einen Punkt ziehen oder **Gesamte Figur verschieben** auswählen.
+2. In **Figur bewegen** einen Punkt ziehen oder **Gesamte Figur bewegen** auswählen.
 3. **Aktuelle Pose speichern**, Figur verändern und mindestens eine weitere Pose speichern.
 4. Zeiten, Bewegungsname und eindeutiges Schlagwort festlegen; **Bewegung speichern**.
 5. Vorschau prüfen und das Projekt mit **Speichern** herunterladen. Im Player steht der eigene Move anschließend auch für MQTT/MCP bereit.
@@ -67,9 +67,9 @@ MCP steuert bisher den Player, nicht die Gelenkbearbeitung im Studio. Während d
 
 GLB-Importe bleiben in der Browsersitzung. **Projekte herunterladen, um die Arbeit dauerhaft zu sichern.** Es gibt keine automatische Projektspeicherung und keinen automatischen Eintrag in den gemeinsamen Model Zoo. Eigene Moves liegen derzeit in der Projektdatei, nicht in separaten `moves/`-Dateien.
 
-Ältere Projektdateien werden in 0.6.0 gelesen. Neu gespeicherte Dateien mit Gesamtpositionsspur benötigen mindestens 0.6.0. Ein Projekt ist kein GLB-Export.
+Ältere Projektdateien werden in 0.6.0 gelesen. Dateien mit Gesamtpositionsspur benötigen mindestens 0.6.0, mit Gesamtdrehung mindestens 0.8.0. Ein Projekt ist kein GLB-Export.
 
-Offen sind insbesondere Bild-zu-3D, anatomische KI-Erkennung, vollständiger Knochenumbau und Hautgewichte, IK, Modelloptimierung sowie Gesamtrotation/-skalierung als Bewegungsspuren. Originalplayer, Modellbeschreibungen und einige technische Meldungen sind noch nicht vollständig englisch lokalisiert.
+Offen sind insbesondere Bild-zu-3D, anatomische KI-Erkennung, vollständiger Knochenumbau und Hautgewichte, IK, Modelloptimierung sowie Skalierung als Bewegungsspur. Originalplayer, Modellbeschreibungen und einige technische Meldungen sind noch nicht vollständig englisch lokalisiert.
 
 Das Ziel bleibt: **Bild hineinziehen → 3D-Avatar erzeugen → korrigieren → Bewegungen speichern → per Agent auslösen.** Der Bildimport und die Generierung sind noch nicht implementiert. Der Original-Bildstand hat bekannte Proportions- und Materialschwankungen; [Referenzen und korrigierter Stilanker](docs/references/README.md) sind erhalten.
 
@@ -99,7 +99,7 @@ npx playwright install chromium
 npm run test:e2e
 ```
 
-Für 0.7.0 sind 34 Tests, beide Original-Testprogramme und der Build bestanden. Die visuelle WebGL-/Mausabnahme ist wegen der Chromium-Startbeschränkung der bisherigen Ausführungsumgebung noch offen. Details und frühere Nachweise stehen im [Prüfstand](docs/PRUEFUNG.md).
+Für 0.8.0 sind 37 Tests, beide Original-Testprogramme und der Build bestanden. Die visuelle WebGL-/Mausabnahme ist wegen der Chromium-Startbeschränkung der bisherigen Ausführungsumgebung noch offen. Details und frühere Nachweise stehen im [Prüfstand](docs/PRUEFUNG.md).
 
 ## Lizenz
 

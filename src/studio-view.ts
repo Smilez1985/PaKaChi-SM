@@ -1,3 +1,4 @@
+import {FIGURE_TRACK} from './studio-data.ts';
 import * as T from 'three';
 import { TransformControls } from 'three/addons/controls/TransformControls.js';
 type NavigationControls = {enabled:boolean; target:T.Vector3};
@@ -75,7 +76,7 @@ export class StudioView {
     for(const p of this.points){const mesh=new T.Mesh(new T.SphereGeometry(1,12,8),new T.MeshBasicMaterial({color:p.id===this.selected?0xffa82e:p.kind==='bone'?0x257fb4:0x17a878,depthTest:false,transparent:true,opacity:.9}));mesh.position.copy(this.rig.position(p));mesh.scale.setScalar(p.size);mesh.renderOrder=20;this.handles.add(mesh);}
     for(const [a,b] of this.rig.data.links){const p=this.rig.data.points.find(p=>p.id===a),q=this.rig.data.points.find(p=>p.id===b);if(!p||!q)continue;const line=new T.Line(new T.BufferGeometry().setFromPoints([this.rig.position(p),this.rig.position(q)]),new T.LineBasicMaterial({color:0x388a77,depthTest:false}));line.renderOrder=19;this.lines.add(line);}
     const point=this.points.find(p=>p.id===this.selected);
-    if(this.enabled && point && this.action==='select') {this.proxy.position.copy(this.rig.position(point));this.proxy.quaternion.copy(this.rig.rotation(point));this.gizmo.setMode(this.rotation && point.kind==='bone'?'rotate':'translate');this.gizmo.attach(this.proxy);}else this.gizmo.detach();
+    if(this.enabled && point && this.action==='select') {this.proxy.position.copy(this.rig.position(point));this.proxy.quaternion.copy(this.rig.rotation(point));this.gizmo.setMode(this.rotation && (point.kind==='bone'||point.id===FIGURE_TRACK)?'rotate':'translate');this.gizmo.attach(this.proxy);}else this.gizmo.detach();
   }
   private clearGroup(group:T.Group){for(const child of [...group.children]){group.remove(child);if(child instanceof T.Mesh||child instanceof T.Line){child.geometry.dispose();(child.material as T.Material).dispose();}}}
   dispose(){this.canvas.removeEventListener('pointermove',this.move,true);this.canvas.removeEventListener('pointercancel',this.cancel,true);this.canvas.removeEventListener('lostpointercapture',this.cancel,true);this.canvas.removeEventListener('pointerdown',this.down,true);this.canvas.removeEventListener('pointerup',this.up,true);this.canvas.style.cursor='';this.orbit.enabled=true;this.gizmo.dispose();this.clearGroup(this.handles);this.clearGroup(this.lines);this.group.removeFromParent();}

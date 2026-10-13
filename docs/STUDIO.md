@@ -1,4 +1,4 @@
-# Avatar-Studio – 0.7.0
+# Avatar-Studio – 0.8.0
 
 Das Studio ist Teil des Players. Mika, Nori und eigene GLB-Modelle können bearbeitet werden. Der Original-PaKaChi bleibt mit beiden Formen und 72 Bildern erhalten; für ihn fehlt weiterhin das entsprechende 3D-Modell. Seine Bilder werden durch den Editor nicht verändert.
 
@@ -62,13 +62,13 @@ Die Buttons sind noch keine KI-Anatomieerkennung: Für Modelle ohne Skelett und 
 
 ## Die ganze Figur bewegen
 
-Im Modus **Figur bewegen** auf **Gesamte Figur verschieben** klicken. Der Griff sitzt am ursprünglichen Mittelpunkt des Modells. Mit links ziehen oder den farbigen Achsgriffen die gesamte Figur versetzen; X/Y/Z dienen der präzisen Positionierung. Die Ansicht weiterhin mit gedrücktem Mausrad drehen.
+Im Modus **Figur bewegen** auf **Gesamte Figur bewegen** klicken. Der Griff sitzt am ursprünglichen Mittelpunkt des Modells. Mit links ziehen oder den farbigen Achsgriffen die gesamte Figur versetzen; X/Y/Z dienen der präzisen Positionierung. Die Ansicht weiterhin mit gedrücktem Mausrad drehen.
 
 Eine Pose speichern, die Figur erneut versetzen und eine zweite Pose speichern. Die daraus erzeugte Bewegung interpoliert die Gesamtposition zusammen mit den Gelenk- und Gesichtspunkten. Das funktioniert auch mit einem statischen GLB ohne Skelett oder Kontrollpunkte. Beispiel: unten – oben – unten für einen Sprung. Es werden keine physikalische Flugbahn oder Bodenkollision berechnet.
 
-**Grundpose** setzt auch die Gesamtverschiebung zurück. Undo/Redo, Projekt-Speichern, Laden und die bestehenden Player-/Agentenbefehle für eigene Moves verwenden dieselbe Spur. Beim Bearbeiten von Gelenken steht die Figur in ihrer Grundposition; dort gibt es keinen Gesamtgriff. Beim Zurückkehren zu Originalclips wird die Gesamtverschiebung zurückgesetzt.
+**Grundpose** setzt auch Gesamtverschiebung und -drehung zurück. Undo/Redo, Projekt-Speichern, Laden und die bestehenden Player-/Agentenbefehle für eigene Moves verwenden dieselbe Spur. Beim Bearbeiten von Gelenken steht die Figur in ihrer Grundposition; dort gibt es keinen Gesamtgriff. Beim Zurückkehren zu Originalclips wird die Gesamtverschiebung zurückgesetzt.
 
-Ältere Projekte ohne Gesamtspur laden mit neutraler Position. Neu gespeicherte Projekte mit Gesamtspur benötigen Version 0.6.0 oder neuer. Gesamtrotation und Skalierung als Bewegungsspuren sind noch nicht implementiert.
+Ältere Projekte ohne Gesamtspur laden mit neutraler Position. Neu gespeicherte Projekte mit Gesamtspur benötigen Version 0.6.0 oder neuer. Gesamtdrehung ist seit 0.8.0 vorhanden; Skalierung als Bewegungsspur bleibt offen.
 
 ## Dateien, Agenten und Grenzen
 
@@ -76,7 +76,7 @@ Eine Pose speichern, die Figur erneut versetzen und eine zweite Pose speichern. 
 - Während der Studio-Bearbeitung werden Zustands-/Move-Befehle aus MQTT, MCP und der Browser-API mit einer verständlichen Fehlermeldung abgewiesen. Es gibt keine nachträglich abgespielte Warteschlange. Zurück im Player sind eigene Moves normal steuerbar.
 - Maximal 256 Kontrollpunkte, 2048 Verbindungen, 100 Posen und 100 eigene Moves pro Projekt; maximal 80 MiB beim Projektimport. Eingebettete Modelldaten unterliegen zusätzlich dem GLB-Limit von 50 MiB. Aufwendige Modelle und viele gleichzeitig verformende Punkte können langsam sein.
 - Die Datei ist ein versioniertes Studio-Projekt, kein GLB-Export und kein automatischer Eintrag im gemeinsamen Model Zoo auf GitHub. Die eigenen Moves werden mit dem geladenen Projekt im Player angeboten.
-- Keine automatische 3D-/Skelettgenerierung, Gewichts-Malwerkzeuge, IK, Gesamtrotation/-skalierung oder eigenständiger GLB-Export.
+- Keine automatische 3D-/Skelettgenerierung, Gewichts-Malwerkzeuge, IK, Skalierung oder eigenständiger GLB-Export.
 - Automatisierte Geometrie-, Daten- und DOM-Tests sind bestanden. Die visuelle Maus-/WebGL-Abnahme muss weiterhin in einem Browser erfolgen; Chromium kann in der aktuellen Ausführungsumgebung nicht starten.
 
 ## Posen nach Gelenkänderungen prüfen
@@ -93,3 +93,11 @@ Relevante Änderungen markieren gespeicherte Posen und die Moves, die diese Pose
 Die Hinweise werden in der Projektdatei gespeichert und im Player bei den Moves angezeigt. Agentenabfragen erhalten `needsReview` und `reviewPoseIds` für eigene Moves. Das ist eine Änderungsprüfung, keine automatische anatomische Bewertung, Kollisionsprüfung oder Reparatur. Originalclips spielen weiterhin mit ihrer ursprünglichen Bindung und werden nicht markiert.
 
 Alte Projekte ohne Hinweise bleiben lesbar. Bereits vor 0.7.0 erfolgte Änderungen können ohne früheren Vergleichsstand nicht nachträglich erkannt werden. Beim Öffnen und Speichern in älterer Software werden Prüfhinweise nicht zuverlässig nachgeführt; für diese Funktion Version 0.7.0 oder neuer verwenden.
+
+## Die ganze Figur drehen
+
+In **Figur bewegen → Gesamte Figur bewegen** unter **Griffe** den Eintrag **Drehen** wählen. Die farbigen Drehringe drehen das Modell um seinen ursprünglichen Mittelpunkt. Die Kamera lässt sich weiterhin mit gedrücktem Mausrad drehen – diese Ansichtsdrehung wird nicht in Posen gespeichert.
+
+Pose speichern, weiterdrehen und die nächste Pose speichern. Verschiebung, Gesamtdrehung, Knochen- und Gesichtspunkte werden gemeinsam interpoliert. Für eine Rolle oder 360°-Drehung beispielsweise Posen bei 0°, 90°, 180°, 270° und wieder 0° aufnehmen. Zwischen zwei Posen wird die kürzere Drehung verwendet; deshalb Zwischenabstände unter 180° wählen. Gleiche Anfangs- und Endausrichtung allein beschreibt keine volle Umdrehung.
+
+Gesamtdrehung unterstützt Undo/Redo, Projektdateien und eigene Moves im Player. Ein Projekt mit nicht neutraler Gesamtdrehung benötigt mindestens Version 0.8.0. Alte Projekte ohne Drehspur werden unverändert eingelesen. Körpergröße, Bodenkollision und Schwerkraft werden durch diese Funktion nicht gesteuert.

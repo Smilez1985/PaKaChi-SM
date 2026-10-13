@@ -15,6 +15,8 @@ const translations:Record<string,string>={
   'Einflussbereich eines bewegten Oberflächenpunkts geändert.':'Influence radius of an animated surface control changed.',
   'Ein in dieser Pose bewegter Kontrollpunkt wurde entfernt.':'A control animated in this pose was removed.',
   'Posen · Bewegungsprüfung':'Poses · Motion review',
+  'Gesamte Figur bewegen':'Move whole figure','Gesamte Figur verschieben oder drehen. Beides wird in jeder Pose gespeichert.':'Translate or rotate the whole figure. Both are saved in every pose.',
+  'Posen · Gesamtdrehung':'Poses · Whole-figure rotation',
   'Optionen':'Options','Sprache':'Language','Schließen':'Close','Drehrichtung der mittleren Maustaste invertieren':'Invert middle mouse rotation',
   'Maustaste 3 = Mausrad drücken und halten.':'Mouse button 3 = press and hold the scroll wheel.',
   'Joints automatisch erkennen':'Detect joints automatically','Joint-Verbindungen automatisch erkennen':'Detect joint connections automatically',

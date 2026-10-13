@@ -44,7 +44,7 @@ export function parseProject(input: unknown): StudioProject {
     else require(p.mesh===undefined || Number.isInteger(p.mesh) && (p.mesh as number)>=0 && (p.mesh as number)<2048);
     ids.add(p.id);
   }
-  const valuesValid=(values:unknown)=>{if(!obj(values))return false;const keys=Object.keys(values);return keys.length===ids.size+(FIGURE_TRACK in values?1:0)&&keys.every(key=>key===FIGURE_TRACK ? transform(values[key]) && (values[key] as Transform).rotation.every((v,i)=>v===(i===3?1:0)) : ids.has(key)&&transform(values[key]));};
+  const valuesValid=(values:unknown)=>{if(!obj(values))return false;const keys=Object.keys(values);return keys.length===ids.size+(FIGURE_TRACK in values?1:0)&&keys.every(key=>key===FIGURE_TRACK ? transform(values[key]) : ids.has(key)&&transform(values[key]));};
   if(d.draft!==undefined)require(valuesValid(d.draft));
   const links=new Set<string>();
   for(const l of d.links) {require(Array.isArray(l) && l.length===2 && l[0]!==l[1] && ids.has(l[0]) && ids.has(l[1])); const k=[...l].sort().join('|');require(!links.has(k));links.add(k);}
