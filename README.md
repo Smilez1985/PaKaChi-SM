@@ -1,86 +1,85 @@
 # PaKaChi-SM
 
-**SM steht für StateMaschine.** PaKaChi bezeichnet das übergeordnete Projekt **Panda-KI-Chimera**.
+**SM steht für StateMaschine.** PaKaChi ist die **Panda-KI-Chimera**, das übergeordnete Projekt. PaKaChi-SM vereint Avatar-Player, Model Zoo und das fest integrierte **PaKaChi-Avatar-Studio**.
 
-PaKaChi-SM soll 3D-Avatare darstellen, ihre Zustände und Bewegungen steuern und das Erstellen eigener Avatare in derselben Anwendung ermöglichen.
+**Softwarestand: 0.6.0 · Entwicklungsstand, keine fertige Bild-zu-3D-Lösung.**
 
-> **Projektstand: 0.6.0 – eigene Bewegungsspur für die gesamte Figur, auch ohne Skelett.** Der bestehende PaKaChi mit allen 72 Transformationsbildern ist erhalten und standardmäßig ausgewählt. Zusätzlich gibt es einen 3D-Player mit Model Zoo, zwei technischen Testavataren und lokalem GLB-Import. Das Studio bietet frei platzierbare Kontrollpunkte, Posen, eigene Moves und vollständige Projektdateien. KI-Generierung, tiefgreifender Skelettumbau und die 3D-Übertragung des Original-PaKaChi folgen noch.
+Der bestehende PaKaChi mit Tierform, humanoider Arbeitsform und allen 72 Transformationsbildern ist erhalten und beim Start ausgewählt. Mika und Nori sind separate technische 3D-Testavatare. Ein 3D-Modell des Original-PaKaChi und die KI-Generierung stehen noch aus.
 
-## Starten
+## Schnellstart
 
-Voraussetzung für die neue Oberfläche: **Node.js 24 LTS** und ein aktueller Browser. 3D benötigt WebGL2/Hardwarebeschleunigung.
+Voraussetzungen: **Node.js ab Version 24** und ein aktueller Browser. Die 3D-Ansicht benötigt WebGL2 und Hardwarebeschleunigung. Python ist nur für den Python-MCP-Server erforderlich.
 
 ```sh
 npm ci
 npm run dev
 ```
 
-Die angezeigte lokale Adresse öffnen (normalerweise `http://127.0.0.1:5173`). Unter Windows kann alternativ **Start-Windows.cmd** gestartet werden. Der erste Start installiert die Abhängigkeiten und benötigt Internet. Es gibt noch keinen EXE-Installer.
+Die angezeigte Adresse öffnen, normalerweise `http://127.0.0.1:5173`. Unter Windows startet alternativ **Start-Windows.cmd** die Anwendung und öffnet den Browser. Fehlen die Abhängigkeiten, installiert das Skript sie zunächst; dafür ist Internet nötig. Nach einem Update erneut `npm ci` ausführen. Ein EXE-Installer ist noch nicht vorhanden.
 
-Der wiederhergestellte Originalplayer lässt sich auch ohne Node starten: `public/legacy/pakachi/index.html` direkt im Browser öffnen.
+Der archivierte Originalplayer lässt sich auch separat ohne Node öffnen: `public/legacy/pakachi/index.html`.
 
-## Bereits nutzbar
+## Was aktuell funktioniert
 
-- PaKaChi-Originalplayer: Tierform, humanoide Arbeitsform, 72 Bilder, Formwechsel auf Signal, optionaler MQTT-Empfang (standardmäßig aus).
-- 3D-Testavatare Mika und Nori mit echten Skeletten und unterschiedlichen Animationsclips. Sie ersetzen nicht das PaKaChi-Design.
-- Avatar-Auswahl, Bewegungslegende, Abspielen/Pause, Tempo und Abspielposition.
-- Eigene, eigenständige GLB-Dateien bis 50 MB für die aktuelle Sitzung laden oder hineinziehen. Kein Upload.
-- Integrierter Studio-Editor mit „Figur bewegen“ und „Gelenke bearbeiten“, Skelettgriffen und unabhängigen Gesichtspunkten. Mausrad zoomt bis ins Detail; linke Maustaste dreht frei um alle Achsen, rechte verschiebt die Ansicht. Rückseite und Unterseite sind über feste Ansichten erreichbar; Rolltasten drehen die Ansicht um ihre Blickachse.
-- Individuelle Punktgrößen und Einflussbereiche, freie Verbindungen, Rückgängig/Wiederholen, Posen und eigene Bewegungen.
-- Neu, Projekt laden und Speichern als vollständige `.pakachi.json` mit eingebettetem Modell. [Studio-Anleitung und Grenzen](docs/STUDIO.md).
+| Bereich | Stand 0.6.0 |
+| --- | --- |
+| Player | Avatar-Auswahl, tatsächliche Bewegungen anzeigen, abspielen, pausieren, Tempo und Abspielposition ändern. |
+| Modelle | Mika/Nori mit Skeletten und Clips; eigene eigenständige GLB-Dateien laden oder hineinziehen, bis 50 MiB, lokal für die Sitzung. |
+| Studio | Genau zwei Modi: **Figur bewegen** und **Gelenke bearbeiten**. Skelettgriffe, frei platzierbare Gesichtspunkte, individuelle Größe und Einflussradius. |
+| Verbindungen | Punkte frei verbinden; jede Verbindung einzeln entfernen; vorhandene Skelettgelenke und Eltern-Kind-Verbindungen per Button erkennen. |
+| Bewegungen | Posen, Zeitabstände, Vorschau, eigene Moves und Gesamtverschiebung der Figur – auch ohne Skelett. Rückgängig/Wiederholen. |
+| Projekte | Neu, Laden und Speichern als `.pakachi.json` mit eingebettetem Modell, Arbeitspose, Kontrollpunkten, Posen und Moves. |
+| Agenten | Gemeinsame StateMaschine für manuelle Bedienung, optionales MQTT und MCP; sechs Tools zur Playersteuerung. |
+| Optionen | Deutsch/English für Studio-Bedienelemente und invertierbare mittlere Maustaste; lokal im Browser gespeichert. |
 
-Der ursprüngliche Bildstand hat bekannte Proportions- und Materialfehler. Die korrigierte humanoide Stilreferenz ist separat erhalten; siehe [Originalvorlagen](docs/references/README.md).
+Die Erkennungsbuttons lesen vorhandene Skelettdaten. Sie erzeugen noch kein anatomisches Skelett aus einer ungeriggten Figur. Bei Skelettpunkten entfernt „Löschen“ den Editorgriff, nicht den Quellknochen.
 
-Die folgenden Abschnitte beschreiben das vollständige Produktziel; noch offene Funktionen stehen in der Roadmap.
+## Erste eigene Bewegung
 
-## Eine Anwendung, drei zusammenhängende Bereiche
+1. Einen 3D-Avatar auswählen oder eine GLB-Datei laden; **Avatar-Studio** öffnen.
+2. In **Figur bewegen** einen Punkt ziehen oder **Gesamte Figur verschieben** auswählen.
+3. **Aktuelle Pose speichern**, Figur verändern und mindestens eine weitere Pose speichern.
+4. Zeiten, Bewegungsname und eindeutiges Schlagwort festlegen; **Bewegung speichern**.
+5. Vorschau prüfen und das Projekt mit **Speichern** herunterladen. Im Player steht der eigene Move anschließend auch für MQTT/MCP bereit.
 
-- **PaKaChi-Player:** Avatar auswählen, anzeigen und gespeicherte Bewegungen abspielen.
-- **PaKaChi-Avatar-Studio:** fest integrierter Editor im Player zum Erstellen und Bearbeiten von Avataren, Gelenken und Bewegungen. Kein eigenständiges Programm.
-- **Model Zoo:** gemeinsame Sammlung der Avatare mit ihren jeweiligen Moves, Zuständen und eindeutigen Schlagworten.
+| Mausbedienung im Studio | Wirkung |
+| --- | --- |
+| Links auf einem Punkt ziehen | Punkt auf der Ansichtsebene verschieben; farbige Griffe erlauben achsengebundene Änderungen. |
+| Mausrad drücken und halten, Maus bewegen | Frei um alle Achsen drehen; Bewegungen am Rand der virtuellen Kugel erlauben Rollen. |
+| Rechts ziehen | Ansicht verschieben. |
+| Mausrad drehen | Zum Detail zoomen. |
 
-## Bedienprinzip
+Feste Ansichten und Rolltasten sind zusätzliche Hilfen. Details, Punktverbindungen und Dateigrenzen: [Studio-Anleitung](docs/STUDIO.md).
 
-**2D-Bild hineinziehen → 3D-Avatar erzeugen → Figur mit der Maus bewegen → Posen speichern → Bewegung benennen.**
+## Zustände und Agenten
 
-Die Oberfläche soll ohne 3D-Vorkenntnisse verständlich sein. Frei gestaltbare Figuren sind vorgesehen: Menschen, Tiere, Roboter und Fantasiefiguren, auch mit ungewöhnlichem Körperbau.
+Ein **Zustand** wie `idle`, `talking`, `thinking` oder `working` bleibt aktiv, bis ein neuer Zustand angefordert wird. Ein **Move** ist eine gespeicherte einmalige oder wiederholte Bewegung mit eindeutigem Schlagwort. Verfügbar sind nur die Fähigkeiten des ausgewählten Avatars.
 
-Das Studio hat genau zwei Bearbeitungsmodi:
+Bevorzugter Agentenweg: **MCP-Host → Python-MCP → MQTT-Broker → geöffneter Player → Rückantwort**. Das Projekt verwendet `mcp==2.3.0` und optional einen eingebetteten `amqtt==0.12.1`. Der Browser startet keinen Broker. MQTT und MCP sind zunächst ausgeschaltet; der Nutzer aktiviert sie ausdrücklich.
 
-1. **Figur bewegen:** Körperteile mit der Maus posieren, Gesichtsausdrücke und die Gesamtposition bearbeiten.
-2. **Gelenke bearbeiten:** automatisch erkannte Gelenke direkt an der Figur verschieben, ergänzen oder löschen. Im ersten Editor werden bei vorhandenen Skelettpunkten nur die Griffe gelöscht; das Quellskelett bleibt erhalten.
+- [Python-MCP einrichten](docs/PYTHON-MCP.md)
+- [MQTT-Nachrichten, StateMaschine, Browser-API und bisherige Node-Brücke](docs/ANSTEUERUNG.md)
 
-Weitere Grundfunktionen: **Neu, Laden, Speichern**, erneuter KI-Versuch mit freiem Korrekturprompt sowie eine Einstellung für Modellqualität und Dateigröße.
+MCP steuert bisher den Player, nicht die Gelenkbearbeitung im Studio. Während der Bearbeitung werden externe Zustands-/Move-Befehle abgewiesen. Nach einmaligen Studio-Moves kehrt die Figur zur Grundbewegung zurück. Nur Originalclips untereinander werden überblendet; der Wechsel zu eigenen Moves erfolgt direkt.
 
-## Bewegungen und Zustände
+## Dateien und Grenzen
 
-Aus typischerweise drei bis zehn gespeicherten Posen entsteht ein Bewegungsablauf. Die Zwischenbewegungen werden berechnet. Eine Bewegung erhält ein eindeutiges Schlagwort, etwa `gaehnen`, und wird im Moves-Ordner des zugehörigen Avatars gespeichert.
+GLB-Importe bleiben in der Browsersitzung. **Projekte herunterladen, um die Arbeit dauerhaft zu sichern.** Es gibt keine automatische Projektspeicherung und keinen automatischen Eintrag in den gemeinsamen Model Zoo. Eigene Moves liegen derzeit in der Projektdatei, nicht in separaten `moves/`-Dateien.
 
-Einmalige Bewegungen und dauerhafte Zustände werden unterschieden. Die gemeinsame StateMaschine bildet Zustände wie `idle`, `talking`, `thinking` und `working` auf die Fähigkeiten des ausgewählten Avatars ab. Einmalige 3D-Moves kehren zum aktiven Zustand zurück; Übergänge werden überblendet.
+Ältere Projektdateien werden in 0.6.0 gelesen. Neu gespeicherte Dateien mit Gesamtpositionsspur benötigen mindestens 0.6.0. Ein Projekt ist kein GLB-Export.
 
-## Ansteuerung durch Agenten
+Offen sind insbesondere Bild-zu-3D, anatomische KI-Erkennung, vollständiger Knochenumbau und Hautgewichte, IK, Modelloptimierung sowie Gesamtrotation/-skalierung als Bewegungsspuren. Originalplayer, Modellbeschreibungen und einige technische Meldungen sind noch nicht vollständig englisch lokalisiert.
 
-- Python-MCP-Server mit SDK 2.3.0, eingebettetem aMQTT-Broker und Rückkanal zum Player: [Einrichtung](docs/PYTHON-MCP.md).
-- Lokale MCP-Tools zum Abfragen verfügbarer Avatare und der tatsächlichen Fähigkeiten sowie zum Auslösen von Zuständen und Moves.
-- Optionale MQTT-Anbindung, beispielsweise an NanoMQ: standardmäßig ausgeschaltet, mit Schalter und Feld für die Broker-Adresse.
-- Manuelle Zustandsauswahl, MQTT und MCP verwenden denselben Router und die Fähigkeiten des geladenen Avatars.
-
-Einrichtung und Befehle: [Agentensteuerung](docs/ANSTEUERUNG.md). Nach einem Update vor dem Start erneut `npm ci` ausführen.
+Das Ziel bleibt: **Bild hineinziehen → 3D-Avatar erzeugen → korrigieren → Bewegungen speichern → per Agent auslösen.** Der Bildimport und die Generierung sind noch nicht implementiert. Der Original-Bildstand hat bekannte Proportions- und Materialschwankungen; [Referenzen und korrigierter Stilanker](docs/references/README.md) sind erhalten.
 
 ## Dokumentation
 
-- [Blaupause – Übersicht](docs/README.md)
-- [Designdokument und Anforderungen](docs/KONZEPT.md)
-- [Roadmap – was kommt](docs/ROADMAP.md)
-- [Changelog – was war](docs/CHANGELOG.md)
-- [Technischer Stand](docs/ARCHITEKTUR.md)
-- [Erhaltene PaKaChi-Vorlagen](docs/references/README.md)
-
-## Technische Leitlinie
-
-Ein dauerhaftes 3D-Modell mit Skelett und gespeicherten Animationsdaten ersetzt inkonsistente Einzelbilder. Bewegungen lassen sich als Zahlen und Zeitpunkte speichern; der Player berechnet die Zwischenposen während der Wiedergabe.
-
-Der erste Player verwendet TypeScript, Three.js, glTF/GLB und einen JSON-Katalog. Das Studio nutzt ein versioniertes JSON-Projektformat mit eingebettetem Modell. Die KI-Anbieter sind noch nicht festgelegt. Aus einem einzelnen Bild müssen verdeckte Bereiche geschätzt werden. Zuverlässiges Rigging beliebiger Figuren ist eine eigene Entwicklungsaufgabe.
+- [Blaupause und Dokumentationsübersicht](docs/README.md)
+- [Designdokument: Produktziel und Anforderungen](docs/KONZEPT.md)
+- [Roadmap: umgesetzt, offen und nächste Schritte](docs/ROADMAP.md)
+- [Changelog: Versionen und Zeitstempel](docs/CHANGELOG.md)
+- [Technische Architektur und Projektformat](docs/ARCHITEKTUR.md)
+- [Aktueller Prüfstand und offene Abnahme](docs/PRUEFUNG.md)
 
 ## Entwicklung und Prüfungen
 
@@ -88,13 +87,19 @@ Der erste Player verwendet TypeScript, Three.js, glTF/GLB und einen JSON-Katalog
 npm test
 npm run test:legacy
 npm run build
+```
+
+`npm run preview` zeigt den zuvor gebauten Stand lokal. `npm run generate:avatars` erzeugt ausschließlich Mika und Nori neu. Python-Integration: [Testeinrichtung](docs/PYTHON-MCP.md#tests).
+
+Für Browserprüfungen in einer Umgebung, in der Chromium startet:
+
+```sh
 npx playwright install chromium
 npm run test:e2e
 ```
 
-`npm run preview` startet den gebauten Stand lokal. `npm run generate:avatars` erzeugt ausschließlich die beiden technischen 3D-Testmodelle neu.
+Für 0.6.0 sind 30 Tests, beide Original-Testprogramme und der Build bestanden. Die visuelle WebGL-/Mausabnahme ist wegen der Chromium-Startbeschränkung der bisherigen Ausführungsumgebung noch offen. Details und frühere Nachweise stehen im [Prüfstand](docs/PRUEFUNG.md).
 
 ## Lizenz
 
 Noch nicht festgelegt.
-

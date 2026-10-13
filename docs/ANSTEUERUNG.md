@@ -1,4 +1,6 @@
-# Agentensteuerung – 0.4.0
+# Agentensteuerung
+
+Gültig für Softwarestand 0.6.0.
 
 **Bevorzugter Weg seit 0.4.0:** [Python-MCP 2.3.0 mit eingebettetem aMQTT-Broker](PYTHON-MCP.md). MCP-Anfragen und Player-Antworten laufen dort über denselben MQTT-Broker. Die folgende Node-Einrichtung bleibt als Kompatibilitätsweg erhalten.
 
@@ -6,7 +8,7 @@
 
 Der geöffnete Player besitzt einen ausgewählten Avatar. Manuelle Zustandsauswahl, MQTT und MCP verwenden dieselbe Prüfung und dieselbe StateMaschine. Der letzte gültige neue Zustand gewinnt; es gibt keine Befehlswarteschlange. Ungültige Befehle und Befehle für einen anderen Avatar verändern nichts.
 
-Ein erneuter identischer Zustand startet die Animation nicht neu. Ein neuer Zustand unterbricht eine einmalige Bewegung. Nach einer einmaligen Bewegung kehrt ein 3D-Avatar zum aktiven Zustand zurück. Explizit als Schleife deklarierte Moves laufen dagegen weiter, bis ein neuer Move oder ein anderer Zustand gewählt wird. 3D-Clips werden in etwa 180 ms überblendet. Ein Avatarwechsel beginnt beim Grundzustand des neuen Modells; Zustände werden nicht blind übertragen.
+Ein erneuter identischer Zustand startet die Animation nicht neu. Ein neuer Zustand unterbricht eine einmalige Bewegung. Nach einer einmaligen Bewegung kehrt ein 3D-Avatar zum aktiven Zustand zurück. Explizit als Schleife deklarierte Moves laufen dagegen weiter, bis ein neuer Move oder ein anderer Zustand gewählt wird. Originalclips untereinander werden in etwa 180 ms überblendet; Übergänge zu eigenen Studio-Moves erfolgen direkt. Ein Avatarwechsel beginnt beim Grundzustand des neuen Modells; Zustände werden nicht blind übertragen.
 
 | Avatar | Unterstützte Zustände |
 | --- | --- |
@@ -107,4 +109,4 @@ MCP und MQTT können gleichzeitig aktiviert werden. Es gibt keine versteckte Pri
 
 ## Prüfstand
 
-Automatisiert geprüft: gemeinsamer Router, wiederholte und ungültige Befehle, Rückkehr zu aktiven Zuständen, MQTT-Protokollnachrichten bis zum Router, Kopplungsschlüssel und Origin-Prüfung, lokale WebSocket-Brücke sowie echter MCP-stdio-Handshake und Tool-Aufrufe mit simulierter Player-Gegenstelle. Keine Live-Abnahme gegen NanoMQ oder einen konkreten externen Agenten. Visuelle Browserabnahme bleibt in dieser Umgebung blockiert.
+Router und Node-MCP sind Bestandteil der regulären Tests; der Python-Weg wurde in 0.4.0 mit realen Prozessen, aMQTT und produktivem MQTT-Client integriert getestet. Eine konkrete externe Host-/NanoMQ-Abnahme und die visuelle Browserabnahme stehen aus. Vollständige Übersicht: [Prüfstand](PRUEFUNG.md).

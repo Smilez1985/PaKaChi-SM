@@ -5,20 +5,32 @@ Das Studio ist Teil des Players. Mika, Nori und eigene GLB-Modelle können bearb
 ## Eine erste eigene Bewegung
 
 1. Im Player einen 3D-Avatar auswählen und **Avatar-Studio** öffnen. Die laufende Animation hält an und die Grundpose wird angezeigt.
-2. In **Figur bewegen** einen Skelettpunkt anklicken oder aus der Liste wählen. An einem farbigen Achsgriff ziehen. Unter **Griffe → Drehen** lässt sich ein Skelettpunkt drehen; seine gebundenen Körperteile folgen. X/Y/Z ermöglichen genaue Positionen.
-3. Einen Posenname eingeben und **Aktuelle Pose speichern** wählen. Figur verändern und eine zweite Pose speichern.
+2. In **Figur bewegen** einen Skelettpunkt anklicken oder aus der Liste wählen. Den Punkt direkt oder an einem farbigen Achsgriff ziehen. Unter **Griffe → Drehen** lässt sich ein Skelettpunkt drehen; seine gebundenen Körperteile folgen. X/Y/Z ermöglichen genaue Positionen.
+3. Einen Posennamen eingeben und **Aktuelle Pose speichern** wählen. Figur verändern und eine zweite Pose speichern.
 4. Die Übergangszeit jeder Pose festlegen. Mit **Früher/Später** wird die Reihenfolge für die nächste gespeicherte Bewegung geändert. **Anzeigen** lädt eine Pose; **Ersetzen** übernimmt die aktuelle Haltung.
 5. Bewegungsname und eindeutiges Schlagwort eingeben, z. B. `laecheln`. **Bewegung speichern** übernimmt alle Posen in der angezeigten Reihenfolge. Eine Bewegung benötigt mindestens zwei Posen. Optional läuft sie als Schleife.
 6. **Vorschau** abspielen oder zurück zum Player wechseln. Die eigene Bewegung steht dort in der Bewegungslegende und über MQTT/MCP zur Verfügung.
 7. **Speichern** lädt eine `.pakachi.json`-Projektdatei herunter. Sie enthält das ursprüngliche Modell, das bearbeitete Kontrollsystem, die aktuelle Arbeitspose, gespeicherte Posen und Bewegungen. **Projekt laden** öffnet diese Datei später wieder vollständig, auch ohne die ursprüngliche GLB-Datei.
 
-Die Zeit der ersten Pose bestimmt bei Schleifen den Rückweg vom letzten zum ersten Bild. Bei einmaligen Bewegungen startet die erste Pose sofort; die folgenden Zeiten bestimmen die jeweiligen Übergänge. Nach einer einmaligen Bewegung im Player folgt wieder der aktive Grundzustand. Eigene Bewegungen verwenden Positionsinterpolation und Quaternion-Interpolation für Drehungen. Der Wechsel zwischen Originalclips und eigenen Moves erfolgt in dieser Version direkt; die 180-ms-Überblendung gilt für Originalclips untereinander.
+Die Zeit der ersten Pose bestimmt bei Schleifen den Rückweg von der letzten zur ersten Pose. Bei einmaligen Bewegungen startet die erste Pose sofort; die folgenden Zeiten bestimmen die jeweiligen Übergänge. Nach einer einmaligen Bewegung im Player folgt wieder der aktive Grundzustand. Eigene Bewegungen verwenden Positionsinterpolation und Quaternion-Interpolation für Drehungen. Der Wechsel zwischen Originalclips und eigenen Moves erfolgt in dieser Version direkt; die 180-ms-Überblendung gilt für Originalclips untereinander.
+
+## Maussteuerung
+
+| Aktion | Wirkung |
+| --- | --- |
+| Mausrad drücken/halten und Maus bewegen | Ansicht frei um alle Achsen drehen; am Rand der virtuellen Kugel auch rollen. |
+| Rechts ziehen | Ansicht verschieben. |
+| Mausrad drehen | Zum Zeiger zoomen, etwa bis zu Mund oder Augenlid. |
+| Links auf einem Punkt ziehen | Punkt auf der Ansichtsebene verschieben. |
+| Farbige Achsgriffe ziehen | Punkt entlang einer Achse bewegen; Skelettpunkte im Drehmodus rotieren. |
+
+Zur Navigation sind keine Tastaturmodifikatoren oder Ansichtsbuttons nötig. Feste Ansichten und Rolltasten bleiben zusätzliche Hilfen; der Sockel ist im Studio ausgeblendet. Die Drehrichtung lässt sich in den Optionen invertieren.
 
 ## Freie Gesichtspunkte und Verbindungen
 
 In **Gelenke bearbeiten** zuerst **Punkt setzen**, dann auf die gewünschte Stelle der Figur klicken. Ein Klick neben die Figur setzt einen freien Punkt auf die Ansichtsebene. Anschließend kann er über die Achsgriffe auch in der Tiefe verschoben werden.
 
-Es gibt keine vorgegebene Anzahl oder erzwungene Gelenkkette: beispielsweise drei Punkte am Mund, einen pro Auge oder mehrere an jedem Augenlid. Mausrad zoomt zum Zeiger; rechte Maustaste verschiebt die Ansicht. Seit 0.5.0: **Mausrad drücken und halten (Maustaste 3)** und die Maus bewegen, um frei um alle Achsen zu drehen; Bewegungen am Rand der virtuellen Kugel rollen die Ansicht. Linkes Ziehen bewegt einen Punkt direkt auf der Ansichtsebene; die farbigen Griffe erlauben achsengebundene Änderungen. Rechts ziehen verschiebt die Ansicht, das Mausrad zoomt. Zur Navigation sind keine Tastatur-Modifikatoren oder Ansichtsbuttons nötig. Feste Ansichten und Rolltasten bleiben optional verfügbar; der Sockel ist im Studio ausgeblendet.
+Die Anordnung ist frei; innerhalb des Limits von 256 Kontrollpunkten gibt es keine erzwungene Gelenkkette: beispielsweise drei Punkte am Mund, einen pro Auge oder mehrere an jedem Augenlid.
 
 - **Punktgröße** verändert nur die sichtbare Kugel. Kleine Mundpunkte können unabhängig von großen Kniepunkten eingestellt werden. Eine Mindest-Auswahlfläche von 10 Bildschirmpixeln erleichtert das Treffen kleiner Punkte; bei dicht benachbarten Punkten hilft die Auswahlliste.
 - **Einflussbereich** bestimmt separat, wie weit die Oberflächenverformung reicht. Sie fällt zum Rand weich ab. Ein Punkt auf einer Oberfläche wirkt zunächst nur auf dieses Teilmodell; ein frei im Raum gesetzter Punkt kann mehrere Oberflächen in seinem Radius beeinflussen. Zu kleine Radien können zwischen groben Vertices liegen und dann keine sichtbare Verformung erzeugen.
@@ -35,16 +47,6 @@ Ein Skelettpunkt verändert in **Gelenke bearbeiten** den Drehpunkt in der Grund
 Posen und eigene Moves bleiben bei Punktänderungen erhalten. Neue Punkte werden in vorhandenen Posen in Grundstellung ergänzt; gelöschte Punkte werden aus ihnen entfernt. Nach einer Drehpunkt- oder Einflussänderung vorhandene Bewegungen ansehen und gegebenenfalls korrigieren. Es gibt noch keine automatische Reparatur ihrer Bedeutung. Eine von Moves verwendete Pose kann erst nach Löschen dieser Moves gelöscht werden. Änderungen an einer vorhandenen Pose und ihrer Zeit wirken auf alle Moves, die sie verwenden; die Reihenfolge eines bereits gespeicherten Moves bleibt erhalten.
 
 **Zurück/Wiederholen** hält bis zu 40 Bearbeitungsschritte bereit, einschließlich vollständiger Ziehgesten. **Neu** setzt das aktuelle Modell auf seine ursprünglichen Skelettgriffe zurück und entfernt eigene Posen/Moves; auch dieser Schritt lässt sich rückgängig machen.
-
-## Dateien, Agenten und Grenzen
-
-- Beim Avatarwechsel, Projektwechsel und Schließen der Seite wird auf ungespeicherte Änderungen hingewiesen. Es gibt keine automatische dauerhafte Speicherung; die Projektdatei herunterladen.
-- Während der Studio-Bearbeitung werden Zustands-/Move-Befehle aus MQTT, MCP und der Browser-API mit einer verständlichen Fehlermeldung abgewiesen. Es gibt keine nachträglich abgespielte Warteschlange. Zurück im Player sind eigene Moves normal steuerbar.
-- Maximal 256 Kontrollpunkte, 100 Posen und 100 eigene Moves pro Projekt; maximal 80 MB beim Projektimport. Eingebettete Modelldaten unterliegen zusätzlich dem GLB-Limit von 50 MB. Aufwendige Modelle und viele gleichzeitig verformende Punkte können langsam sein.
-- Die Datei ist ein versioniertes Studio-Projekt, kein GLB-Export und kein automatischer Eintrag im gemeinsamen Model Zoo auf GitHub. Die eigenen Moves werden mit dem geladenen Projekt im Player angeboten.
-- Keine automatische 3D-/Skelettgenerierung, Gewichts-Malwerkzeuge, IK, Gesamtrotation/-skalierung oder eigenständiger GLB-Export.
-- Automatisierte Geometrie-, Daten- und DOM-Tests sind bestanden. Die visuelle Maus-/WebGL-Abnahme muss weiterhin in einem Browser erfolgen; Chromium kann in der aktuellen Ausführungsumgebung nicht starten.
-
 
 ## Automatische Erkennung und einzelne Verbindungen
 
@@ -67,3 +69,12 @@ Eine Pose speichern, die Figur erneut versetzen und eine zweite Pose speichern. 
 **Grundpose** setzt auch die Gesamtverschiebung zurück. Undo/Redo, Projekt-Speichern, Laden und die bestehenden Player-/Agentenbefehle für eigene Moves verwenden dieselbe Spur. Beim Bearbeiten von Gelenken steht die Figur in ihrer Grundposition; dort gibt es keinen Gesamtgriff. Beim Zurückkehren zu Originalclips wird die Gesamtverschiebung zurückgesetzt.
 
 Ältere Projekte ohne Gesamtspur laden mit neutraler Position. Neu gespeicherte Projekte mit Gesamtspur benötigen Version 0.6.0 oder neuer. Gesamtrotation und Skalierung als Bewegungsspuren sind noch nicht implementiert.
+
+## Dateien, Agenten und Grenzen
+
+- Beim Avatarwechsel, Projektwechsel und Schließen der Seite wird auf ungespeicherte Änderungen hingewiesen. Es gibt keine automatische dauerhafte Speicherung; die Projektdatei herunterladen.
+- Während der Studio-Bearbeitung werden Zustands-/Move-Befehle aus MQTT, MCP und der Browser-API mit einer verständlichen Fehlermeldung abgewiesen. Es gibt keine nachträglich abgespielte Warteschlange. Zurück im Player sind eigene Moves normal steuerbar.
+- Maximal 256 Kontrollpunkte, 2048 Verbindungen, 100 Posen und 100 eigene Moves pro Projekt; maximal 80 MiB beim Projektimport. Eingebettete Modelldaten unterliegen zusätzlich dem GLB-Limit von 50 MiB. Aufwendige Modelle und viele gleichzeitig verformende Punkte können langsam sein.
+- Die Datei ist ein versioniertes Studio-Projekt, kein GLB-Export und kein automatischer Eintrag im gemeinsamen Model Zoo auf GitHub. Die eigenen Moves werden mit dem geladenen Projekt im Player angeboten.
+- Keine automatische 3D-/Skelettgenerierung, Gewichts-Malwerkzeuge, IK, Gesamtrotation/-skalierung oder eigenständiger GLB-Export.
+- Automatisierte Geometrie-, Daten- und DOM-Tests sind bestanden. Die visuelle Maus-/WebGL-Abnahme muss weiterhin in einem Browser erfolgen; Chromium kann in der aktuellen Ausführungsumgebung nicht starten.

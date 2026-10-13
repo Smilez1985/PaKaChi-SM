@@ -4,7 +4,7 @@ Teil der [Blaupause](README.md) · [Roadmap](ROADMAP.md) · [Changelog](CHANGELO
 
 ## Status und Begriffe
 
-Dieses Dokument hält das Produktziel fest. Stand 0.6.0: Player, gemeinsame Agentensteuerung und ein erster Studio-Editor sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau und KI-Generierung bleiben Entwicklungsziele.
+Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.6.0: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und eine Gesamtpositionsspur sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau und KI-Generierung bleiben Entwicklungsziele.
 
 - **PaKaChi:** Panda-KI-Chimera, das übergeordnete Projekt.
 - **PaKaChi-SM:** StateMaschine mit Avatar-Player und integriertem Studio.
@@ -56,9 +56,11 @@ Beispiel: Fehlt das rechte Knie, fügt der Benutzer dort einen Gelenkpunkt hinzu
 
 **Erforderliche Hintergrundarbeit:** Der Editor muss die Skelettverbindungen, die räumliche Tiefe des Gelenks und die Zuordnung der Oberfläche zu den Gelenken bestimmen oder korrigieren. Ein sichtbarer Punkt allein macht das Modell noch nicht beweglich. Bei mehrdeutiger Zuordnung soll eine einfache visuelle Korrektur möglich sein.
 
+Seit 0.5.0 erkennen zwei Buttons vorhandene Skelettgriffe und Eltern-Kind-Verbindungen. Manuelle Verbindungen lassen sich gezielt ergänzen und einzeln entfernen. Diese Erkennung wertet Modelldaten aus; anatomische KI-Erkennung für Figuren ohne Skelett bleibt offen.
+
 ### Präzision und frei gestaltbare Kontrollpunkte
 
-- Freie Ansichtsdrehung um alle Achsen, einschließlich Rollen sowie Zugang zu Rückseite und Unterseite. Die Ansichtsdrehung verändert keine gespeicherten Gelenkkoordinaten.
+- Freie Ansichtsdrehung durch Drücken/Halten des Mausrads und Bewegen der Maus; im Optionsmenü invertierbar. Drehung um alle Achsen, einschließlich Rollen sowie Zugang zu Rückseite und Unterseite. Die Ansichtsdrehung verändert keine gespeicherten Gelenkkoordinaten.
 - Mausrad-Zoom bis in kleine Gesichtsbereiche; Ansicht zum gewünschten Detail verschieben und bei Bedarf zurücksetzen.
 - Gelenkpunkte frei im 3D-Raum beziehungsweise auf der sichtbaren Oberfläche setzen, auch ohne vorhandene Gelenkkette. Ansichtsdrehung und Tiefenkorrektur ermöglichen präzise Platzierung.
 - Sichtbare Punktgröße pro Punkt anpassen: zum Beispiel klein am Mundwinkel, größer am Knie. Ein kleiner gezeichneter Punkt behält eine gut erreichbare Auswahlfläche.
@@ -68,7 +70,7 @@ Beispiel: Fehlt das rechte Knie, fügt der Benutzer dort einen Gelenkpunkt hinzu
 
 Ein Gesichtspunkt ist eine verständliche Oberflächensteuerung und muss intern nicht zwingend ein klassischer Skelettknochen sein. Knochen, Oberflächendeformationen und Gesichtsformen können dieselbe einfache Bedienung erhalten. Beliebige logische Verbindungen dürfen intern kein ungültiges oder zyklisches Skelett erzeugen. Die Umsetzung löst diesen Unterschied im Hintergrund.
 
-Nach einer Skelettänderung müssen vorhandene Moves auf Kompatibilität geprüft werden. Eine automatische Anpassung ist nur zu übernehmen, wenn sie ein gültiges Ergebnis liefert; andernfalls wird die betroffene Bewegung zur Korrektur markiert.
+Noch offenes Ziel: Nach einer Skelettänderung müssen vorhandene Moves automatisch auf Kompatibilität geprüft werden. Eine automatische Anpassung ist nur zu übernehmen, wenn sie ein gültiges Ergebnis liefert; andernfalls wird die betroffene Bewegung zur Korrektur markiert.
 
 ## 4. KI-Neuversuch und Korrekturprompt
 
@@ -141,6 +143,8 @@ Zusätzlich gibt es `get_state`. Die konkrete Einrichtung und Einschränkungen s
 
 MQTT ist opt-in: Schalter zum Aktivieren und ein Feld für die Broker-Adresse, etwa eines NanoMQ-Brokers. Der Player empfängt darüber Zustands- oder Bewegungsbefehle. Seit 0.4.0 kann der ausdrücklich eingerichtete Python-MCP-Prozess einen aMQTT-Broker einbetten; MCP-Anfragen und Bestätigungen laufen ebenfalls darüber. Alternativ wird ein vorhandener Broker verwendet. Die Browseroberfläche startet keinen Broker. Zugangsdaten werden nicht im Model Zoo gespeichert.
 
+Die vorhandenen Tools bedienen den Player; automatisches Bearbeiten von Studio-Gelenken über MCP ist noch nicht implementiert.
+
 MCP und MQTT verwenden dieselbe Befehlsprüfung und StateMaschine. Unbekannte Avatare, Moves und ungültige Nachrichten dürfen die Anwendung nicht zum Absturz bringen.
 
 ## 9. Vorgeschlagene Datenorganisation
@@ -157,7 +161,6 @@ Implementiert sind Three.js für die Darstellung, glTF/GLB für Modelle, ein JSO
 
 ## 10. Bedienziel
 
+Die Studio-Bedienelemente lassen sich seit 0.5.0 auf Deutsch oder Englisch umschalten. Vollständige Lokalisierung einschließlich Originalplayer und technischer Meldungen bleibt offen.
+
 Die Komplexität gehört in die Software. Ein Benutzer soll eine eigene Figur erstellen, ein fehlendes Gelenk korrigieren und eine Bewegung speichern können, ohne Rigging, Skinning oder Keyframes lernen zu müssen.
-
-
-Seit 0.5.0: Skelettbasierte Gelenk-/Verbindungserkennung, einzeln entfernbare Verbindungen, direktes Punktziehen, mittlere Maustaste für freie Ansichtsdrehung und lokal gespeicherte Sprach-/Inversionsoptionen. KI-Erkennung an ungeriggten Modellen bleibt offen. Details: [Studio](STUDIO.md).

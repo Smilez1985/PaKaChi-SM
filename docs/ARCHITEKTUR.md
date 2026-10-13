@@ -16,9 +16,9 @@ Mika und Nori werden durch `scripts/generate-avatars.mjs` reproduzierbar erzeugt
 
 `src/playback.ts` kapselt Clip-Wiedergabe, Pause, Abspielposition, Tempo und Rückkehr zur Grundbewegung. `src/control.ts` prüft alle manuellen, MQTT- und MCP-Befehle anhand der geladenen Fähigkeiten. Einmalige Moves kehren zum aktiven Zustand zurück; neue Zustände unterbrechen sie. Übergänge zwischen 3D-Clips werden über 180 ms überblendet.
 
-Ein GLB-Import bis 50 MB bleibt nur für die Browser-Sitzung erhalten. Externe Modellressourcen werden blockiert. Draco-/KTX2-komprimierte Importe benötigen zusätzliche Decoder und werden derzeit nicht unterstützt. Ein Modell ohne Clips bleibt als Standbild sichtbar.
+Ein GLB-Import bis 50 MiB bleibt nur für die Browser-Sitzung erhalten. Externe Modellressourcen werden blockiert. Draco-/KTX2-komprimierte Importe benötigen zusätzliche Decoder und werden derzeit nicht unterstützt. Ein Modell ohne Clips bleibt als Standbild sichtbar.
 
-`src/viewer.ts` verwaltet Kamera, Beleuchtung, Skelettanzeige und GPU-Ressourcen. ArcballControls erlauben freie Ansichtsdrehung um alle Achsen ohne Polwinkelbegrenzung, Rollen, Mausrad-Zoom zum Zeiger und Verschieben mit rechter Maustaste. Sechs feste Ansichten und Rolltasten ergänzen die Navigation. Im Studio wird der Sockel ausgeblendet, damit die Unterseite zugänglich ist. Modell- und Gelenkkoordinaten bleiben von der Ansichtsdrehung unabhängig. Der Editor ergänzt TransformControls und gut auswählbare Punktgriffe; Kamera und Editor teilen sich dieselbe Szene.
+`src/viewer.ts` verwaltet Kamera, Beleuchtung, Skelettanzeige und GPU-Ressourcen. `mouse-navigation.ts` übernimmt die Drehung mit gedrückter mittlerer Maustaste über eine virtuelle Kugel, einschließlich Rollen und optionaler Inversion. ArcballControls übernehmen Mausrad-Zoom zum Zeiger und Verschieben mit rechter Maustaste. Im Studio ist linkes Kameradrehen abgeschaltet, damit Punkte direkt gezogen werden können. Sechs feste Ansichten und Rolltasten ergänzen die Navigation. Im Studio wird der Sockel ausgeblendet, damit die Unterseite zugänglich ist. Modell- und Gelenkkoordinaten bleiben von der Ansichtsdrehung unabhängig. Der Editor ergänzt TransformControls und gut auswählbare Punktgriffe; Kamera und Editor teilen sich dieselbe Szene.
 
 ## Original-PaKaChi
 
@@ -34,7 +34,7 @@ Die Hauptoberfläche verwendet seit 0.4.0 MQTT.js für direkten Status-Empfang u
 
 Der Editor unterstützt noch keinen beliebigen Quellknochenumbau, IK, automatische Gewichte, Bild-zu-3D oder GLB-Export. Ein gelöschter Skelettgriff entfernt nicht den Quellknochen. Beim Original-PaKaChi bleibt der Bildplayer aktiv, da sein 3D-Modell noch fehlt. Details: [Studio](STUDIO.md).
 
-Seit 0.5.0: Skelettbasierte Gelenk-/Verbindungserkennung, einzeln entfernbare Verbindungen, direktes Punktziehen, mittlere Maustaste für freie Ansichtsdrehung und lokal gespeicherte Sprach-/Inversionsoptionen. KI-Erkennung an ungeriggten Modellen bleibt offen. Details: [Studio](STUDIO.md).
+`studio-detection.ts` liest vorhandene Knochen und ihre Eltern-Kind-Beziehungen. Eigene Punkte bleiben erhalten; Verbindungen sind ungerichtete Bearbeitungsgruppen, kein automatisch neu erzeugtes Skelett. `options.ts` speichert Sprache und invertierte Drehrichtung lokal und übersetzt die Studio-Bedienelemente. Benutzerdefinierte Namen werden nicht übersetzt; Projektdateien und Broker-Zugangsdaten werden darüber nicht gespeichert.
 
 ## Gesamtposition ab 0.6.0
 

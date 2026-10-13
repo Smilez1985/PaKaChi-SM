@@ -3,10 +3,31 @@
 Alle wesentlichen Änderungen an PaKaChi-SM werden hier dokumentiert.
 
 Das Format folgt [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+Versionen verwenden das Schema MAJOR.MINOR.PATCH. Während der 0.x-Entwicklung wird keine versionsübergreifende Kompatibilität zugesichert; bekannte Formatgrenzen werden je Version benannt.
+
 Zusätzlich zum Versionsdatum wird der Meilenstein mit einem ISO-8601-Zeitstempel einschließlich Zeitzone dokumentiert.
+Die Kategorien Added, Changed, Deprecated, Removed, Fixed und Security werden nur bei passenden Einträgen verwendet. Unreleased sammelt Änderungen seit dem letzten Software-Meilenstein. Versionslinks vergleichen die tatsächlichen Meilenstein-Commits; dafür werden keine nicht vorhandenen Release-Tags vorausgesetzt.
+
 Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist ein lokaler Player vorhanden.
 
 ## [Unreleased]
+
+Dokumentationspflege: 2026-10-13T18:42:37+02:00 (Europe/Berlin). Softwareversion bleibt 0.6.0.
+
+### Added
+
+- Zentraler Prüfstand mit den letzten tatsächlichen Testergebnissen, historischen Berichten und ausstehender visueller und externer Abnahme.
+
+### Changed
+
+- README, Blaupausen-Übersicht, Designdokument, Roadmap, Architektur und Anleitungen auf den gemeinsamen Stand 0.6.0 abgeglichen.
+- Nachträgliche Versionsanhänge in die passenden Themen integriert; Produktziele von vorhandenen Funktionen und deren Prüfstand getrennt.
+- Changelog mit vollständigen Versionsvergleichslinks und Keep-a-Changelog-Kategorien ergänzt; historische Einschränkungen als Versionshinweise erhalten.
+
+### Fixed
+
+- Veraltete Angaben zur linken Maustaste, zum Blaupausenstand, zur Gesamtpositionsspur und zum noch nicht vorhandenen separaten Moves-Ordner berichtigt.
+- Umfang der Clip-Überblendung, MCP-Playersteuerung, Dateigrenzen und Projektkompatibilität präzisiert; fehlende Changelog-Links für 0.5.0 und 0.6.0 ergänzt.
 
 ## [0.6.0] - 2026-10-13
 
@@ -25,11 +46,7 @@ Zeitstempel: 2026-10-13T18:34:16+02:00 (Europe/Berlin)
 - Hautbindung nach Gesamtverschiebung auch vor dem nächsten Renderdurchlauf aktualisieren, damit Oberfläche und Kontrollpunkte gemeinsam verschoben werden.
 - Neu hinzugefügte Kontrollpunkte auch in einem bestehenden Projektentwurf ergänzen.
 
-### Known limitations
-
-- Gesamtrotation, Skalierung, physikalische Sprünge und Bodenkollision sind nicht enthalten.
-- Projekte mit Gesamtspur benötigen mindestens Version 0.6.0. Visuelle WebGL-Abnahme bleibt offen.
-
+**Hinweise zu dieser Version:** Gesamtrotation, Skalierung, physikalische Sprünge und Bodenkollision sind nicht enthalten. Projekte mit Gesamtspur benötigen mindestens Version 0.6.0. Visuelle WebGL-Abnahme bleibt offen.
 
 ## [0.5.0] - 2026-10-13
 
@@ -47,11 +64,7 @@ Zeitstempel: 2026-10-13T11:32:34+00:00
 
 - Im Studio bewegt die linke Maustaste Punkte; die Kamera wird mit der mittleren Maustaste gedreht.
 
-### Known limitations
-
-- Anatomische KI-Erkennung ohne vorhandenes Skelett ist noch nicht implementiert; die Oberfläche weist darauf hin.
-- Original-Bildplayer und einige technische Meldungen bleiben deutsch. Visuelle WebGL-Abnahme bleibt offen.
-
+**Hinweise zu dieser Version:** Anatomische KI-Erkennung ohne vorhandenes Skelett ist noch nicht implementiert; die Oberfläche weist darauf hin. Original-Bildplayer und einige technische Meldungen bleiben deutsch. Visuelle WebGL-Abnahme bleibt offen.
 
 ## [0.4.0] - 2026-10-13
 
@@ -71,7 +84,6 @@ Zeitstempel: 2026-10-13T07:52:17+02:00 (Europe/Berlin)
 - Die bisherige vertikale Kamera-Begrenzung ist entfernt. Ansichtsdrehung verändert weder Modell noch gespeicherte Gelenkpositionen.
 - MQTT.js übernimmt den bidirektionalen Transport der Hauptoberfläche. Die Originaldateien bleiben unverändert.
 - Python ist der bevorzugte MCP-Weg; die bisherige Node-Brücke bleibt als Kompatibilitätsoption verfügbar.
-
 
 ## [0.3.0] - 2026-10-13
 
@@ -96,7 +108,6 @@ Zeitstempel: 2026-10-13T07:15:59+02:00 (Europe/Berlin)
 
 - Zustandsauswahl wird nach abgeschlossenem Avatarladen wieder freigegeben.
 
-
 ## [0.2.0] - 2026-10-13
 
 Zeitstempel: 2026-10-13T06:46:36+02:00 (Europe/Berlin)
@@ -114,7 +125,6 @@ Zeitstempel: 2026-10-13T06:46:36+02:00 (Europe/Berlin)
 - Einmalige 3D-Moves kehren zum aktiven Zustand zurück; neue Zustände unterbrechen Moves. Clipwechsel blenden über 180 ms über.
 - Die gemeinsame MQTT-Oberfläche übernimmt die Steuerung des eingebetteten Originalplayers; alle Originaldateien und 72 Transformationsbilder bleiben unverändert.
 - Blaupause, Architektur und Roadmap auf den Implementierungsstand aktualisiert; visuelle Browser- und externe Live-Abnahme bleiben ausdrücklich offen.
-
 
 ## [0.1.0] - 2026-10-13
 
@@ -136,7 +146,6 @@ Zeitstempel: 2026-10-13T00:59:25+02:00 (Europe/Berlin)
 - Blaupause um tatsächlichen Implementierungsstand, Architektur und Herkunft der Originaldateien ergänzt.
 - Studio-, KI- und 3D-Agentenfunktionen ausdrücklich von bereits nutzbaren Funktionen getrennt.
 
-
 ## [0.0.1] - 2026-10-12
 
 Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
@@ -154,10 +163,11 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 
 - Bestehendes Bedienkonzept ausdrücklich als Designdokument eingeordnet und mit Roadmap und Changelog verknüpft.
 
-[Unreleased]: https://github.com/Smilez1985/PaKaChi-SM/commits/main
-[0.4.0]: ./PRUEFUNG-0.4.0.md
-[0.3.0]: ./PRUEFUNG-0.3.0.md
-[0.2.0]: ./PRUEFUNG-0.2.0.md
-[0.1.0]: ./PRUEFUNG-0.1.0.md
-[0.0.1]: ./README.md
-
+[Unreleased]: https://github.com/Smilez1985/PaKaChi-SM/compare/1a2cc30de87d3a90ab35e240f413f047bc16fd6a...main
+[0.6.0]: https://github.com/Smilez1985/PaKaChi-SM/compare/4ce44c3b70d4dbbba5ecdc4e1bc99d8ea89bb7bc...1a2cc30de87d3a90ab35e240f413f047bc16fd6a
+[0.5.0]: https://github.com/Smilez1985/PaKaChi-SM/compare/5d3dd2d9e115e597735bf089c9ea27de1e701545...4ce44c3b70d4dbbba5ecdc4e1bc99d8ea89bb7bc
+[0.4.0]: https://github.com/Smilez1985/PaKaChi-SM/compare/085e11ec7576d6e25634526f1c68ecdc7b00020a...5d3dd2d9e115e597735bf089c9ea27de1e701545
+[0.3.0]: https://github.com/Smilez1985/PaKaChi-SM/compare/379e517b58280e3aa94b5a2b382002faf7f8befe...085e11ec7576d6e25634526f1c68ecdc7b00020a
+[0.2.0]: https://github.com/Smilez1985/PaKaChi-SM/compare/4c54448062977dbee105fe553f5ce1617a788f7f...379e517b58280e3aa94b5a2b382002faf7f8befe
+[0.1.0]: https://github.com/Smilez1985/PaKaChi-SM/compare/2fd20e09bb518f1e3edde27e060209c57a56f103...4c54448062977dbee105fe553f5ce1617a788f7f
+[0.0.1]: https://github.com/Smilez1985/PaKaChi-SM/tree/2fd20e09bb518f1e3edde27e060209c57a56f103

@@ -1,20 +1,31 @@
 # Blaupause – PaKaChi-SM
 
-**Stand: 0.4.0 · freie Ansicht, Python-MCP/MQTT und Studio-Editor · KI und erweiterter Skelettumbau noch offen**
+**Softwarestand: 0.6.0 · Dokumentation abgeglichen am 13.10.2026.**
 
-Die Blaupause besteht aus drei zusammengehörigen Dokumenten:
+Die Blaupause besteht aus drei Dokumenten. Das Designdokument beschreibt das Produktziel, die Roadmap die Umsetzung und das Changelog die bereits erfolgten Änderungen.
 
-| Dokument | Inhalt |
+| Dokument | Zweck |
 | --- | --- |
-| [Designdokument](KONZEPT.md) | Was PaKaChi-SM ist, wie es bedient werden soll und welche Anforderungen gelten. |
-| [Roadmap](ROADMAP.md) | Was als Nächstes umgesetzt werden soll, einschließlich Abnahmekriterien. |
-| [Changelog](CHANGELOG.md) | Was bereits geändert wurde, mit Version, Datum und Zeitstempel. |
+| [Designdokument](KONZEPT.md) | Begriffe, Bedienprinzip, Anforderungen und noch offene Produktziele. |
+| [Roadmap](ROADMAP.md) | Umgesetzte Funktionen, nächste Arbeitspakete und Abnahmekriterien. |
+| [Changelog](CHANGELOG.md) | Historie mit Version, Datum und ISO-8601-Zeitstempel. |
 
-PaKaChi bedeutet Panda-KI-Chimera. Das PaKaChi-Avatar-Studio ist ein fest integrierter Teil des Players. Der Model Zoo enthält die gemeinsam genutzten Avatare, Moves und Zustandszuordnungen.
+## Aktueller Stand
 
-Noch offene technische Entscheidungen sind in Designdokument und Roadmap ausdrücklich als offen gekennzeichnet.
+Player, gemeinsame StateMaschine und der integrierte Studio-Editor sind implementiert. Das Studio kann Gelenk-/Gesichtspunkte bearbeiten, vorhandene Skelettdaten erkennen, Punkte frei verbinden, Posen und Moves speichern sowie die gesamte Figur verschieben – auch ohne Skelett. Genau zwei Bearbeitungsmodi bleiben erhalten: **Figur bewegen** und **Gelenke bearbeiten**.
 
+Das Original-PaKaChi mit beiden Formen und 72 Transformationsbildern bleibt unverändert als Bildplayer erhalten. Mika und Nori prüfen die 3D-Technik; sie ersetzen sein Design nicht. KI-Generierung, anatomische Erkennung ohne vorhandenes Skelett, vollständiger Knochenumbau und das 3D-Modell des Original-PaKaChi sind noch offen. Eine automatisierte Prüfung ist keine visuelle Produktabnahme.
 
-[Agentensteuerung einrichten](ANSTEUERUNG.md) · [Studio-Anleitung](STUDIO.md) · [Python-MCP einrichten](PYTHON-MCP.md) · [Prüfstand 0.6.0](PRUEFUNG-0.6.0.md) · [Technische Architektur](ARCHITEKTUR.md) · [Erhaltene Originalvorlagen](references/README.md)
+## Anleitungen und technische Dokumente
 
-Seit 0.5.0: Skelettbasierte Gelenk-/Verbindungserkennung, einzeln entfernbare Verbindungen, direktes Punktziehen, mittlere Maustaste für freie Ansichtsdrehung und lokal gespeicherte Sprach-/Inversionsoptionen. KI-Erkennung an ungeriggten Modellen bleibt offen. Details: [Studio](STUDIO.md).
+| Gesucht | Dokument |
+| --- | --- |
+| Installation und Schnellstart | [Projekt-README](../README.md) |
+| Maussteuerung, Gelenke, Posen, Projekte | [Studio-Anleitung](STUDIO.md) |
+| Bevorzugter Agentenweg mit Python und MQTT | [Python-MCP](PYTHON-MCP.md) |
+| Befehle, Zustände, Browser-API, Node-Kompatibilität | [Agentensteuerung](ANSTEUERUNG.md) |
+| Komponenten, Datenformat und technische Grenzen | [Architektur](ARCHITEKTUR.md) |
+| Testergebnisse und offene Abnahme | [Prüfstand](PRUEFUNG.md) |
+| Originaldesign und Herkunft der erhaltenen Bilder | [Referenzen](references/README.md) |
+
+Softwareversion, Projektformat und historischer Prüfstand sind unterschiedliche Angaben: Die Software steht auf 0.6.0, das Projektformat weiterhin auf Version 1. Ältere Projekte sind lesbar; Dateien mit der neuen Gesamtpositionsspur benötigen Software ab 0.6.0. Historische Prüfberichte behalten ihren damaligen Stand.

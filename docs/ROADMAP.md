@@ -1,105 +1,95 @@
-# Entwicklungsplan
+# Roadmap – was kommt
 
-Teil der [Blaupause](README.md) · [Designdokument](KONZEPT.md) · [Changelog](CHANGELOG.md)
+**Softwarestand: 0.6.0 · Abgleich: 13.10.2026.** Teil der [Blaupause](README.md).
 
-Status: Meilensteine 1 und 2 implementiert und automatisiert geprüft; visuelle und externe Live-Abnahme noch offen. Erster Bewegungseditor und freie Kontrollpunkte sind seit 0.3.0 implementiert. Erweiterter Skelettumbau und KI-Generierung folgen. Details zum Ist-Stand im Changelog.
+Ein Häkchen bedeutet implementiert; es ersetzt keine visuelle oder externe Live-Abnahme. Die Nachweise und Prüfgrenzen stehen im [Prüfstand](PRUEFUNG.md). Die Versionshistorie gehört ins [Changelog](CHANGELOG.md).
+
+## Nächste Arbeitspakete
+
+1. **Vorhandenen Ablauf visuell abnehmen:** Mausnavigation, kleine Gesichtspunkte, Gesamtverschiebung, Speichern/Laden und Agentensteuerung in einer lauffähigen Browserumgebung prüfen.
+2. **Gelenkbearbeitung vervollständigen:** echte Quellknochen hinzufügen/löschen, Hautgewichte zuordnen und vorhandene Moves nach Änderungen prüfen. Erst damit wird das Beispiel „fehlendes Knie ergänzen und beugen“ vollständig erfüllt.
+3. **KI-Verfahren bewerten und integrieren:** Bild-zu-3D und anatomische Skelettgenerierung an tatsächlichen Testfiguren bewerten; anschließend Generierung und Korrekturvorschau anschließen. Vorhandene Skelettdaten auszulesen ist bereits möglich, aber keine KI-Anatomieerkennung.
+
+Diese Reihenfolge ist ein Umsetzungsvorschlag, kein Terminversprechen. Die dafür nötigen KI-Verfahren, Hardwareanforderungen und Lizenzen sind noch nicht festgelegt.
 
 ## 1. Player und Model Zoo
 
-- [x] Gemeinsame Anwendung mit Player und integriertem Avatar-Studio aufbauen.
-- [x] Ein vorhandenes, korrekt geriggtes 3D-Modell laden und darstellen.
-- [x] Model Zoo mit Avatar-Auswahl und Fähigkeitslegende aufbauen.
-- [x] Vorhandene Animationsclips wiedergeben.
-- [x] Dateiformate, Modellkoordinaten und Versionierung festlegen.
+- [x] Gemeinsame Anwendung mit Player, integriertem Studio und Avatar-Auswahl.
+- [x] Geriggte 3D-Testmodelle laden und tatsächliche Animationsclips anbieten.
+- [x] Original-PaKaChi mit beiden Formen und 72 Bildern bewahren.
+- [x] Eigenständige GLB-Dateien lokal importieren; glTF/GLB und JSON-Katalog als aktuelle Formate festlegen.
+- [ ] Bearbeitete Projekte in den gemeinsamen Model Zoo exportieren.
+- [ ] Separate Move-Dateien und deren Austausch ergänzen.
 
-Studio in Meilenstein 1: integrierte Ansicht mit Skelettanzeige und Navigation; noch keine Posen- oder Gelenkbearbeitung. Der ursprüngliche PaKaChi-Bildplayer ist zusätzlich mit allen 72 Frames eingebunden. Der Model Zoo nutzt zunächst glTF/GLB und einen versionierten JSON-Katalog.
-
-Abnahme: Ein Avatar lässt sich auswählen; seine tatsächlichen Bewegungen werden angezeigt und abgespielt.
+**Abnahme:** Avatar auswählen und vorhandene Bewegungen abspielen. Code und automatisierte Prüfungen vorhanden; visuelle Abnahme offen.
 
 ## 2. StateMaschine und externe Steuerung
 
-Seit 0.4.0: Python-MCP-SDK 2.3.0 und optional eingebetteter aMQTT-Broker mit echtem Anfrage-/Antwortpfad zum Player; Integration automatisiert gegen reale Prozesse getestet.
+- [x] Zustände und einmalige beziehungsweise wiederholte Moves unterscheiden; ungültige Befehle abweisen.
+- [x] Manuelle Auswahl, MQTT und MCP über denselben Router führen.
+- [x] MQTT opt-in mit Broker-Adresse, Topic und optionaler Anmeldung.
+- [x] Sechs MCP-Tools für Fähigkeiten, Zustände und Moves bereitstellen.
+- [x] Python-MCP mit optional eingebettetem aMQTT und bestätigten Player-Antworten verbinden.
+- [ ] Konkreten externen MCP-Host und externen NanoMQ-Broker live abnehmen.
+- [ ] MCP-Werkzeuge für die Bearbeitung des Studios entwerfen und implementieren; bisher steuert MCP nur den Player.
 
-Original- und 3D-Avatare verwenden seit 0.2.0 einen gemeinsamen Router. Einrichtung: [Agentensteuerung](ANSTEUERUNG.md). Prüfgrenzen: [Prüfstand](PRUEFUNG-0.2.0.md).
+**Abnahme:** Ein externer Agent fragt tatsächliche Fähigkeiten ab und löst einen unterstützten Zustand/Move aus. Reale Python-/MQTT-Prozessintegration in 0.4.0 geprüft; konkrete Host-Abnahme offen.
 
-- [x] Zustände und einmalige Moves getrennt behandeln.
-- [x] Übergänge, Rückkehrzustand und Unterbrechungsverhalten definieren.
-- [x] Fähigkeiten aus dem Model Zoo über MCP zugänglich machen.
-- [x] MQTT opt-in mit Schalter und Broker-Adresse ergänzen.
-- [x] Ungültige Befehle und Verbindungsabbrüche behandeln.
+## 3. Posen und Bewegungen
 
-Abnahme: Ein externer Agent kann verfügbare Fähigkeiten abfragen und unterstützte Zustände beziehungsweise Moves auslösen.
+- [x] Genau zwei Modi: „Figur bewegen“ und „Gelenke bearbeiten“.
+- [x] Skelettgriffe und freie Gesichtspunkte posieren; Zeitabstände und Zwischenposen berechnen.
+- [x] Gesamtposition als eigene Spur bearbeiten, auch ohne Skelett (0.6.0).
+- [x] Eigene Moves mit Schlagwort, Vorschau und Wiedergabe im Player.
+- [x] Neu/Laden/Speichern für vollständige `.pakachi.json`-Projekte; Undo/Redo.
+- [ ] Gesamtrotation und Skalierung als Bewegungsspuren ergänzen.
+- [ ] Überblendung zwischen Originalclips und Studio-Moves ergänzen; bisher nur Originalclips untereinander.
 
-## 3. Integrierter Bewegungseditor
-
-- [x] Modus „Figur bewegen“ mit verständlichen Griffpunkten umsetzen.
-- [x] Posen, Zeitabstände und Gesichtspunkte bearbeiten.
-- [x] Globale Position als eigene Spur auch für knochenlose Modelle bearbeiten (0.6.0).
-- [x] Zwischenposen berechnen und Vorschau abspielen.
-- [x] Moves mit eindeutigen Schlagworten speichern.
-- [x] Neu, Laden und Speichern für bearbeitbare Projekte umsetzen.
-
-Abnahme: Ein Benutzer erstellt aus wenigen Posen eine flüssige Bewegung; nach erneutem Laden ist sie im Player verfügbar.
-
-Studio 0.3.0: [Bedienung und Grenzen](STUDIO.md). Eigene Moves werden im geladenen Projekt angeboten; gemeinschaftlicher Model-Zoo-Export und visuelle Abnahme sind noch offen.
+**Abnahme:** Aus Posen eine Bewegung erstellen, speichern, erneut laden und abspielen. Geometrie-/Daten-/DOM-Prüfungen vorhanden; visueller Gesamtablauf offen.
 
 ## 4. Gelenke korrigieren
 
-- [x] Modus „Gelenke bearbeiten“ umsetzen.
-- [x] Freie Oberflächenpunkte hinzufügen, verschieben und löschen; bestehende Skelett-Drehpunkte verschieben.
-- [ ] Quellknochen tatsächlich hinzufügen/löschen und Hautgewichte neu zuordnen. Bisher entfernt Löschen bei Quellknochen nur den Editorgriff.
-- [x] Nahzoom mit Mausrad, Verschieben und freie Ansichtsdrehung um alle Achsen einschließlich Rollen, Rückseite und Unterseite.
-- [x] Frei platzierbare Gesichtspunkte und unabhängige Punktgruppen ermöglichen.
-- [x] Punktgröße pro Gelenk mit bedienbarer Auswahlfläche einstellen.
-- [x] Punkte frei verbinden und lösen, ohne bestehende Gelenkketten vorauszusetzen.
-- [x] Einflussbereiche auf Mund, Augen und Augenlider getrennt von der sichtbaren Punktgröße behandeln.
-- [x] Freie Punktverbindungen und lokale Oberflächenverformung einschließlich Hautbindung umsetzen.
-- [ ] Automatische Gelenkketten, IK und vollständiges Neugewichten des Quellskeletts umsetzen.
-- [ ] Unterschiedliche Körperformen unterstützen.
-- [ ] Bestehende Moves nach Skelettänderungen prüfen.
-- [x] Rückgängig/Wiederholen ergänzen.
+- [x] Freie Oberflächenpunkte hinzufügen, verschieben, löschen und unabhängig verbinden.
+- [x] Skelett-Drehpunkte verschieben; vorhandene Oberfläche in der Grundpose erhalten.
+- [x] Vorhandene Skelettgriffe und Eltern-Kind-Verbindungen per Button erkennen.
+- [x] Automatische und manuelle Verbindungen einzeln entfernen.
+- [x] Punktgröße, Auswahlfläche und Einflussradius getrennt behandeln.
+- [x] Freie Punktgruppen bewegen und lokale Oberflächenverformung mit Hautbindung nutzen.
+- [ ] Quellknochen tatsächlich hinzufügen/löschen und Hautgewichte neu zuordnen. Bisher entfernt Löschen eines Skelettpunkts nur den Griff.
+- [ ] Automatische anatomische Gelenkketten und IK implementieren.
+- [ ] Bewegungsfähige Rigs unterschiedlicher Körperformen systematisch prüfen.
+- [ ] Vorhandene Moves nach Skelettänderungen automatisch prüfen und zur Korrektur markieren.
 
-Abnahme: Ein fehlendes Knie lässt sich ergänzen und anschließend sinnvoll beugen. Eine Figur mit abweichender Gliedmaßenanzahl lässt sich ebenfalls bearbeiten.
+**Abnahme:** Ein fehlendes Knie ergänzen und anschließend sinnvoll beugen; ebenso eine Figur mit abweichender Gliedmaßenanzahl bearbeiten. Diese vollständige Abnahme ist noch nicht erreicht.
 
 ## 5. Bild zu 3D und KI-Korrektur
 
-- [ ] Den bestehenden PaKaChi anhand der erhaltenen Tierform und korrigierten humanoiden Stilreferenz in 3D nachbilden. Beide Formen und die Transformation erhalten.
+- [ ] Bestehenden PaKaChi anhand seiner erhaltenen Tierform und korrigierten humanoiden Stilreferenz in 3D nachbilden; beide Formen und die Transformation erhalten.
+- [ ] Geeignete Generierungs-/Rigging-Verfahren an echten Testfiguren bewerten.
+- [ ] Bildimport per Drag & Drop, tatsächliche Generierung, Fortschritt und Fehlermeldungen anschließen.
+- [ ] Freien Korrekturprompt und „Skelett neu versuchen“ integrieren.
+- [ ] Vorschau übernehmen/verwerfen, bisheriges Ergebnis bis dahin erhalten.
 
-- [ ] Geeignete Generierungs- und Rigging-Verfahren anhand echter Testfiguren bewerten.
-- [ ] Bildimport per Drag & Drop anschließen.
-- [ ] Generierungsfortschritt, Fehler und erneuten Versuch verständlich anzeigen.
-- [ ] Korrekturprompt und „Skelett neu versuchen“ integrieren.
-- [ ] Vorschau übernehmen oder verwerfen, bisheriges Ergebnis bewahren.
+**Abnahme:** Ein Bild wird tatsächlich zu einem überprüfbaren, beweglichen Modell. Platzhalter oder nur geladene Skelettdaten erfüllen dieses Ziel nicht.
 
-Abnahme: Ein Bild durchläuft die tatsächliche Generierung zu einem überprüfbaren, beweglichen Modell. Fehlgeschlagene Generierung wird klar angezeigt; Platzhalter gelten nicht als fertige Funktion.
+## 6. Bedienung, Qualität und Export
 
-## 6. Qualität und vollständiger Ablauf
-
-- [ ] Modellqualität und Dateigröße skalieren.
-- [ ] Bearbeitbare Quelldaten bewahren.
-- [ ] Animationen nach Optimierung prüfen.
+- [x] Freie Ansichtsdrehung mit gedrücktem Mausrad, Zoomen und Rechtsziehen ohne Tastaturmodifikatoren.
+- [x] Rück-/Unterseite zugänglich machen; direkte Punktbewegung und optionale Achsgriffe.
+- [x] Deutsch/English für Studio-Bedienelemente sowie invertierbare Drehrichtung lokal speichern.
+- [x] Ursprüngliches Modell und bearbeitbare Studio-Daten in der Projektdatei erhalten.
+- [ ] Lokalisierung von Originalplayer, Modellbeschreibungen und technischen Meldungen vervollständigen.
+- [ ] Modellqualität und Dateigröße skalieren; Quelle neben optimierten Ableitungen bewahren.
+- [ ] Animationen nach Optimierungen prüfen; eigenständigen GLB-Export ergänzen.
 - [ ] Gesamten Ablauf ohne Fachwissen erproben.
 
-Abnahme: Bild hineinziehen, Avatar korrigieren, Bewegung erstellen, speichern und durch einen Agenten abspielen lassen – in einer Anwendung.
+**Abnahme:** Bild hineinziehen, Avatar korrigieren, Bewegung erstellen, speichern und per Agent auslösen – in einer Anwendung.
 
 ## Noch zu entscheiden
 
-- Desktop-Verpackung und unterstützte Betriebssysteme.
-- Rendering-Technik und endgültige Dateiformate.
-- Lokale beziehungsweise externe KI-Verfahren und deren Hardwarebedarf.
+- Desktop-Verpackung und tatsächlich geprüfte Betriebssysteme.
+- Lokale oder externe KI-Verfahren, Hardwarebedarf und Anbieter.
 - Lizenz.
-- Weitergehende Remote-Anbindung; lokale MCP-Kopplung und MQTT-Nachrichtenformat sind in 0.2.0 festgelegt.
+- Erweiterungen der Exportformate und der sicheren Remote-Anbindung.
 
-Diese Reihenfolge ist ein Umsetzungsvorschlag. Das Produktziel bleibt der vollständige, einfache Bild-zu-Avatar-Ablauf.
-
-
-## Ergänzungen 0.5.0
-
-- [x] Vorhandene Skelettgelenke und Verbindungen per Button erkennen.
-- [x] Eigene Punkte gezielt verbinden und jede Verbindung einzeln entfernen.
-- [x] Ansicht mit gedrückter mittlerer Maustaste um alle Achsen drehen; Drehrichtung optional invertieren.
-- [x] Punkte direkt ziehen; Zoom und Verschieben ohne Tastaturmodifikatoren.
-- [x] Deutsch/English für Studio-Bedienelemente mit lokaler Speicherung.
-- [ ] Anatomische KI-Erkennung für Modelle ohne Skelett und freie Gesichtspunkte.
-- [ ] Vollständige Lokalisierung von Originalplayer und technischen Meldungen.
-- [ ] Visuelle WebGL-Abnahme mit realer Maus.
+Three.js, glTF/GLB, JSON-Katalog und Studio-Projektformat 1 sind bereits die Implementierungsbasis; diese Entscheidungen sind nicht mehr pauschal offen.

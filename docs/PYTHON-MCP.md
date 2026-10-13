@@ -1,19 +1,21 @@
-# Python-MCP mit eingebettetem MQTT-Broker – 0.4.0
+# Python-MCP mit eingebettetem MQTT-Broker
+
+Gültig für Softwarestand 0.6.0; Integration zuletzt in 0.4.0 geprüft.
 
 Der bevorzugte Agentenweg lautet:
 
 **KI/MCP-Host → Python-MCP-Server → aMQTT-Broker → geöffneter Player → Antwort zurück zum MCP-Host.**
 
-Der Server verwendet das offizielle Python-Paket **mcp 2.3.0**. Zum Prüfzeitpunkt 13.10.2026 ist das die aktuelle stabile SDK-Version. Der eingebettete Broker ist **aMQTT 0.12.1**. Es handelt sich um das offizielle MCP-SDK, nicht um das separate Paket FastMCP.
+Der Server verwendet das offizielle Python-Paket **mcp 2.3.0**. Die Abhängigkeiten sind in `server/python/requirements.txt` auf konkrete Versionen festgelegt. Der eingebettete Broker ist **aMQTT 0.12.1**. Es handelt sich um das offizielle MCP-SDK, nicht um das separate Paket FastMCP.
 
 Quellen: [MCP SDK auf PyPI](https://pypi.org/project/mcp/2.3.0/), [offizielle SDK-Dokumentation](https://py.sdk.modelcontextprotocol.io/), [aMQTT auf PyPI](https://pypi.org/project/amqtt/0.12.1/), [Broker-Einbettung](https://amqtt.readthedocs.io/en/latest/references/broker/).
 
 ## Installation unter Windows
 
-Python 3.12 oder neuer zusätzlich zu Node installieren. Im Projektordner:
+Zusätzlich zu Node wird Python benötigt; geprüft wurde Python 3.12. Im Projektordner:
 
 ```powershell
-py -3 -m venv .venv
+py -3.12 -m venv .venv
 .venv\Scripts\python.exe -m pip install -r server/python/requirements.txt
 npm ci
 ```
@@ -106,3 +108,5 @@ npm run test:python
 ```
 
 Der Integrationstest startet einen echten Python-MCP-Prozess und den echten eingebetteten Broker auf freien Ports. Er verwendet den produktiven MQTT-Playerclient und den gemeinsamen Zustandsrouter. Geprüft: MCP-Handshake, sechs Tools, Rückantworten, Authentifizierung, ungültige Zustände, direkte MQTT-Steuerung, Duplikate, Ablaufzeit, Mehrdeutigkeit und Opt-out. Die Darstellung selbst wird dabei nicht in einem Browser gerendert.
+
+Die Testergebnisse und noch offenen externen Abnahmen stehen im [aktuellen Prüfstand](PRUEFUNG.md).
