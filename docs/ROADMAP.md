@@ -2,7 +2,7 @@
 
 Teil der [Blaupause](README.md) · [Designdokument](KONZEPT.md) · [Changelog](CHANGELOG.md)
 
-Status: Meilensteine 1 und 2 implementiert und automatisiert geprüft; visuelle und externe Live-Abnahme noch offen. Bewegungs-/Gelenkeditor und KI-Generierung folgen. Details zum Ist-Stand im Changelog.
+Status: Meilensteine 1 und 2 implementiert und automatisiert geprüft; visuelle und externe Live-Abnahme noch offen. Erster Bewegungseditor und freie Kontrollpunkte sind seit 0.3.0 implementiert. Erweiterter Skelettumbau und KI-Generierung folgen. Details zum Ist-Stand im Changelog.
 
 ## 1. Player und Model Zoo
 
@@ -30,27 +30,32 @@ Abnahme: Ein externer Agent kann verfügbare Fähigkeiten abfragen und unterstü
 
 ## 3. Integrierter Bewegungseditor
 
-- [ ] Modus „Figur bewegen“ mit verständlichen Griffpunkten umsetzen.
-- [ ] Posen, Zeitabstände, Gesichtsausdrücke und Gesamtposition bearbeiten.
-- [ ] Zwischenposen berechnen und Vorschau abspielen.
-- [ ] Moves mit eindeutigen Schlagworten speichern.
-- [ ] Neu, Laden und Speichern für bearbeitbare Projekte umsetzen.
+- [x] Modus „Figur bewegen“ mit verständlichen Griffpunkten umsetzen.
+- [x] Posen, Zeitabstände und Gesichtspunkte bearbeiten.
+- [ ] Globale Position als eigene Spur auch für knochenlose Modelle bearbeiten.
+- [x] Zwischenposen berechnen und Vorschau abspielen.
+- [x] Moves mit eindeutigen Schlagworten speichern.
+- [x] Neu, Laden und Speichern für bearbeitbare Projekte umsetzen.
 
 Abnahme: Ein Benutzer erstellt aus wenigen Posen eine flüssige Bewegung; nach erneutem Laden ist sie im Player verfügbar.
 
+Studio 0.3.0: [Bedienung und Grenzen](STUDIO.md). Eigene Moves werden im geladenen Projekt angeboten; gemeinschaftlicher Model-Zoo-Export und visuelle Abnahme sind noch offen.
+
 ## 4. Gelenke korrigieren
 
-- [ ] Modus „Gelenke bearbeiten“ umsetzen.
-- [ ] Gelenke hinzufügen, verschieben und löschen.
+- [x] Modus „Gelenke bearbeiten“ umsetzen.
+- [x] Freie Oberflächenpunkte hinzufügen, verschieben und löschen; bestehende Skelett-Drehpunkte verschieben.
+- [ ] Quellknochen tatsächlich hinzufügen/löschen und Hautgewichte neu zuordnen. Bisher entfernt Löschen bei Quellknochen nur den Editorgriff.
 - [x] Nahzoom mit Mausrad und Verschieben der 3D-Ansicht als Grundlage.
-- [ ] Frei platzierbare Gesichtspunkte und unabhängige Punktgruppen ermöglichen.
-- [ ] Punktgröße pro Gelenk mit bedienbarer Auswahlfläche einstellen.
-- [ ] Punkte frei verbinden und lösen, ohne bestehende Gelenkketten vorauszusetzen.
-- [ ] Einflussbereiche auf Mund, Augen und Augenlider getrennt von der sichtbaren Punktgröße behandeln.
-- [ ] Verbindungen und Oberflächenzuordnung aktualisieren.
+- [x] Frei platzierbare Gesichtspunkte und unabhängige Punktgruppen ermöglichen.
+- [x] Punktgröße pro Gelenk mit bedienbarer Auswahlfläche einstellen.
+- [x] Punkte frei verbinden und lösen, ohne bestehende Gelenkketten vorauszusetzen.
+- [x] Einflussbereiche auf Mund, Augen und Augenlider getrennt von der sichtbaren Punktgröße behandeln.
+- [x] Freie Punktverbindungen und lokale Oberflächenverformung einschließlich Hautbindung umsetzen.
+- [ ] Automatische Gelenkketten, IK und vollständiges Neugewichten des Quellskeletts umsetzen.
 - [ ] Unterschiedliche Körperformen unterstützen.
 - [ ] Bestehende Moves nach Skelettänderungen prüfen.
-- [ ] Rückgängig/Wiederholen ergänzen.
+- [x] Rückgängig/Wiederholen ergänzen.
 
 Abnahme: Ein fehlendes Knie lässt sich ergänzen und anschließend sinnvoll beugen. Eine Figur mit abweichender Gliedmaßenanzahl lässt sich ebenfalls bearbeiten.
 

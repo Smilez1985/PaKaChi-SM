@@ -1,4 +1,4 @@
-# Technischer Stand 0.2.0
+# Technischer Stand 0.3.0
 
 ## Lokale Anwendung
 
@@ -8,7 +8,7 @@ TypeScript und Three.js bilden den 3D-Player. Vite startet einen lokalen Entwick
 
 `public/model-zoo/catalog.json` ist ein Katalog mit `schemaVersion: 1`. Jeder 3D-Eintrag hat eine ID, einen Namen, eine Beschreibung, den relativen Modellpfad, die Rig-Version und deklarierte Moves. Ein Move hat `id`, `name`, `clip` und `loop`. Optional verweist `defaultMove` auf eine Grundbewegung. Optional ordnet `states` Zustandsnamen vorhandenen Move-IDs zu. Nur deklarierte Clips, die tatsächlich im Modell enthalten sind, werden angeboten.
 
-Modelle verwenden glTF 2.0 beziehungsweise GLB, ein rechtshändiges Koordinatensystem und Y nach oben. Die Vorschau normalisiert die Größe durch einen übergeordneten Knoten; sie verändert nicht die Animationsdaten oder die Skelettbindung. Das Katalogformat umfasst noch keine editierbaren Studio-Projekte oder separaten Move-Dateien. Deren Format entsteht mit dem Bewegungseditor.
+Modelle verwenden glTF 2.0 beziehungsweise GLB, ein rechtshändiges Koordinatensystem und Y nach oben. Die Vorschau normalisiert die Größe durch einen übergeordneten Knoten; sie verändert nicht die Animationsdaten oder die Skelettbindung. Der gemeinsame Katalog bleibt unverändert. Editierbare Projekte verwenden separat `format: pakachi-studio`, `version: 1` und enthalten Modellbytes als Base64, Avatar-Metadaten, Kontrollpunkte, Skelett-Grundtransformationen, Verbindungen, Arbeitspose, gespeicherte Posen und Moves. Das ist noch kein GLB-Export.
 
 Mika und Nori werden durch `scripts/generate-avatars.mjs` reproduzierbar erzeugt. Beide besitzen ein tatsächliches Skin/Skelett und eingebettete Animationsclips. Die Testmodelle benötigen keine externen Texturen.
 
@@ -18,7 +18,7 @@ Mika und Nori werden durch `scripts/generate-avatars.mjs` reproduzierbar erzeugt
 
 Ein GLB-Import bis 50 MB bleibt nur für die Browser-Sitzung erhalten. Externe Modellressourcen werden blockiert. Draco-/KTX2-komprimierte Importe benötigen zusätzliche Decoder und werden derzeit nicht unterstützt. Ein Modell ohne Clips bleibt als Standbild sichtbar.
 
-`src/viewer.ts` verwaltet Kamera, Beleuchtung, Skelettanzeige und GPU-Ressourcen. Mausrad-Zoom zum Zeiger, Drehen mit linker Maustaste und Verschieben mit rechter Maustaste erlauben die Detailansicht. Gelenkpunkte sind noch nicht editierbar.
+`src/viewer.ts` verwaltet Kamera, Beleuchtung, Skelettanzeige und GPU-Ressourcen. Mausrad-Zoom zum Zeiger, Drehen mit linker Maustaste und Verschieben mit rechter Maustaste erlauben die Detailansicht. Der Editor ergänzt TransformControls und gut auswählbare Punktgriffe; Kamera und Editor teilen sich dieselbe Szene.
 
 ## Original-PaKaChi
 
@@ -28,4 +28,8 @@ Das unveränderte vorhandene MQTT-Modul wird auch in der Hauptoberfläche verwen
 
 ## Studio
 
-Die Studio-Ansicht ist integriert. Für 3D-Modelle sind Ansicht, Nahzoom und Skelettanzeige verfügbar. Gelenke bearbeiten, freie Gesichtspunkte, Posen speichern, KI-Generierung und Qualitätsoptimierung sind noch offen. Beim Original-PaKaChi wird weiterhin sein vorhandener Player gezeigt, da kein 3D-Skelett vorliegt.
+`studio-data.ts` validiert Projektdateien und hält eine begrenzte Snapshot-Historie. `studio-rig.ts` bearbeitet Skelettgriffe und freie Oberflächenpunkte. Skelett-Drehpunktänderungen aktualisieren die Studio-Bindematrizen; beim Originalclip wird die originale Bindung wiederhergestellt. Freie Punkte wirken mit glattem radialem Abfall auf das Mesh vor der Hautverformung. Die sichtbaren Griffe folgen der Hautmatrix am nächsten Vertex. Punktgröße und Einflussradius bleiben getrennt.
+
+`studio-view.ts` verbindet Raycasting, Mindest-Auswahlfläche und TransformControls. `studio-editor.ts` verwaltet genau zwei Bearbeitungsmodi, Posen, Interpolation, Projekt-Download und eigene Moves. Während der Bearbeitung pausieren Originalclips, externe Mutationen werden abgewiesen. Eigene Moves werden beim Laden des Projekts in die aktive Fähigkeitsliste aufgenommen und kehren einmalig zum Grundzustand zurück.
+
+Der Editor unterstützt noch keinen beliebigen Quellknochenumbau, IK, automatische Gewichte, Bild-zu-3D oder GLB-Export. Ein gelöschter Skelettgriff entfernt nicht den Quellknochen. Beim Original-PaKaChi bleibt der Bildplayer aktiv, da sein 3D-Modell noch fehlt. Details: [Studio](STUDIO.md).

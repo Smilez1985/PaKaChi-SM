@@ -1,4 +1,8 @@
 import './style.css';
+import { StudioEditor, encodeModel, decodeModel } from './studio-editor.ts';
+import { StudioRig } from './studio-rig.ts';
+import { parseProject } from './studio-data.ts';
+import type { StudioProject } from './studio-data.ts';
 import { StateMachine, STATES } from './control.ts';
 import { mountAgentPanel } from './agent-panel.ts';
 import { availableMoves, importedAvatar, parseCatalog } from './catalog.ts';
@@ -12,12 +16,12 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
     <p class="rail-label">DEIN AVATAR, IN BEWEGUNG</p>
     <nav aria-label="Anwendungsbereiche">
       <button id="player-tab" class="nav-button active" aria-pressed="true"><span>◉</span> Player</button>
-      <button id="studio-tab" class="nav-button" aria-pressed="false"><span>◇</span> Avatar-Studio <small>Aufbau</small></button>
+      <button id="studio-tab" class="nav-button" aria-pressed="false"><span>◇</span> Avatar-Studio</button>
     </nav>
-    <div class="rail-bottom"><span class="online-dot"></span> Lokal auf deinem Gerät<p>Entwicklungsstand 0.2.0<br>Zustände & Agenten</p></div>
+    <div class="rail-bottom"><span class="online-dot"></span> Lokal auf deinem Gerät<p>Entwicklungsstand 0.3.0<br>Studio & eigene Moves</p></div>
   </aside>
   <main>
-    <header><div><p class="eyebrow">PAKACHI-SM / <span id="section-label">PLAYER</span></p><h1 id="page-title">Dein Model Zoo<span>.</span></h1><p id="page-intro">Eine Figur auswählen. Eine Bewegung starten. Leben einhauchen.</p></div><button id="import-button" class="button outline">＋ GLB laden</button><input id="file-input" type="file" accept=".glb" hidden></header>
+    <header><div><p class="eyebrow">PAKACHI-SM / <span id="section-label">PLAYER</span></p><h1 id="page-title">Dein Model Zoo<span>.</span></h1><p id="page-intro">Eine Figur auswählen. Eine Bewegung starten. Leben einhauchen.</p></div><button id="project-open" class="button outline">Projekt laden</button><input id="project-file" type="file" accept=".json" hidden><button id="import-button" class="button outline">＋ GLB laden</button><input id="file-input" type="file" accept=".glb" hidden></header>
     <div class="notice identity-note"><span>✦</span><p><strong>Dein PaKaChi bleibt PaKaChi.</strong> Beide Formen und alle 72 Transformationsbilder sind im Originalplayer erhalten. Mika und Nori sind ausschließlich technische Testavatare.</p></div>
     <div id="message" role="status" aria-live="polite">Model Zoo wird geladen …</div>
     <div class="workspace">
@@ -41,9 +45,9 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
           <details class="legend"><summary>Schlagworte & Fähigkeiten</summary><ul id="capabilities"></ul></details>
         </div>
         <div id="studio-controls" hidden>
-          <h2>Avatar-Studio</h2><p class="subtle">Dein Editor, direkt im Player.</p>
+          <p class="subtle">Dein Editor, direkt im Player.</p>
           <label class="check"><input type="checkbox" id="skeleton"> Skelett anzeigen</label>
-          <div class="studio-next"><span class="eyebrow">NÄCHSTE AUSBAUSTUFEN</span><h3>Aus Posen werden Moves.</h3><p>„Figur bewegen“ und „Gelenke bearbeiten“ folgen in den nächsten Meilensteinen.</p><p>Bild-zu-3D, KI-Korrektur, Neu/Laden/Speichern von Studio-Projekten und Modellqualität sind noch nicht implementiert.</p></div>
+          <div id="studio-editor"><p class="subtle">Zuerst einen 3D-Avatar auswählen. Für den Original-Bildplayer liegt noch kein 3D-Modell vor.</p></div>
           <button id="back-player" class="button outline">Zurück zum Player</button>
         </div>
         <p class="local-note">GLB-Import bleibt lokal im Browser und gilt für diese Sitzung. Es werden keine Modelle hochgeladen.</p>
@@ -59,6 +63,23 @@ let playback: Playback | null = null;
 let catalog: Avatar[] = [];
 let loaded: Avatar | null = null;
 let studio = false;
+let editor: StudioEditor | null = null;
+const transport = () => editor?.playing ? editor : playback;
+function mayReplace(): boolean { return !editor?.dirty || window.confirm("Ungespeicherte Studio-Änderungen verwerfen? Mit Abbrechen kannst du zuerst das Projekt speichern."); }
+function resumeBase(): void {
+  const id = loaded?.states?.[machine.state ?? ""] ?? loaded?.defaultMove;
+  if (id) playback?.setBaseMove(id);
+  syncPlayback();
+}
+function refreshCapabilities(): void {
+  if (!loaded || !machine.capability) return;
+  const capability = machine.capability;
+  capability.moves = [...availableMoves(loaded, loaded.moves.map(m=>m.clip)), ...(editor?.data.moves ?? []).map(m=>({id:m.id,name:m.name,loop:m.loop,clip:m.id}))];
+  machine.bind({capability,setState:state=>{editor?.stopMove();editor?.rig.restoreSource();playback!.setBaseMove(loaded!.states![state]);},
+    playMove:id=>{if(editor?.play(id))return;editor?.stopMove();editor?.rig.restoreSource();playback!.play(id);}},machine.state);
+  renderMoves(capability.moves.map(m=>({...m,clip:m.id})));
+  syncPlayback();
+}
 let request = 0;
 let fetchController: AbortController | null = null;
 let busy = false;
@@ -70,11 +91,12 @@ function rpc(method: string, args: Record<string, unknown> = {}): unknown {
     ...catalog.map(a => ({id:a.id,name:a.name,selected:loaded?.id===a.id})),
     ...(loaded?.id==='local-import' ? [{id:loaded.id,name:loaded.name,selected:true}] : []),
   ];
-  if (method === 'get_state') return {state:machine.state, capability:machine.capability, ready:!busy && !!machine.capability};
+  if (method === 'get_state') return {state:machine.state, capability:machine.capability, ready:!busy && !studio && !!machine.capability};
   if (busy) throw new Error('Avatar wird geladen. Bitte erneut versuchen.');
   if (args.avatar && args.avatar !== machine.capability?.id) throw new Error('Bitte diesen Avatar zuerst im Player auswählen.');
   if (method === 'get_avatar_capabilities') { if(!machine.capability) throw new Error('Kein Avatar bereit.'); return machine.capability; }
   if (method === 'list_moves') { if(!machine.capability) throw new Error('Kein Avatar bereit.'); return machine.capability.moves; }
+  if (studio && ['set_state','play_move','command'].includes(method)) throw new Error('Studio ist geöffnet. Zum Steuern zurück zum Player wechseln.');
   if (method === 'set_state') return machine.execute({state:args.state, ...(args.avatar ? {avatar:args.avatar} : {})});
   if (method === 'play_move') return machine.execute({move:args.move, ...(args.avatar ? {avatar:args.avatar} : {})});
   if (method === 'command') return machine.execute(args.payload);
@@ -101,7 +123,10 @@ function message(text: string, error = false): void {
 }
 
 function changeView(edit: boolean): void {
+  if (studio !== edit) { if(edit) editor?.enter(); else editor?.leave(); }
   studio = edit;
+  document.body.classList.toggle("studio-active",edit);
+  window.dispatchEvent(new Event("pakachi-sm:change"));
   el('player-controls').hidden = edit || original;
   el('studio-controls').hidden = !edit || original;
   el('legacy-controls').hidden = !original;
@@ -116,12 +141,12 @@ function changeView(edit: boolean): void {
 }
 
 function syncPlayback(): void {
-  el<HTMLButtonElement>('pause').disabled = busy || !playback?.current;
-  el<HTMLInputElement>('timeline').disabled = busy || !playback?.current;
-  el('pause').textContent = playback?.paused ? '▶ Weiter' : 'Ⅱ Pause';
-  el('activity').textContent = playback?.current ? `${playback.paused ? 'Pausiert' : '●'} · ${playback.current.name}` : 'Standbild';
+  el<HTMLButtonElement>('pause').disabled = busy || !transport()?.current;
+  el<HTMLInputElement>('timeline').disabled = busy || !transport()?.current;
+  el('pause').textContent = transport()?.paused ? '▶ Weiter' : 'Ⅱ Pause';
+  el('activity').textContent = transport()?.current ? `${transport()!.paused ? 'Pausiert' : '●'} · ${transport()!.current!.name}` : 'Standbild';
   el('moves').querySelectorAll<HTMLButtonElement>('button').forEach(button => {
-    const active = button.dataset.move === playback?.current?.id;
+    const active = button.dataset.move === transport()?.current?.id;
     button.classList.toggle('selected', active);
     button.setAttribute('aria-pressed', String(active));
     button.disabled = busy;
@@ -171,6 +196,8 @@ function renderMoves(moves: Move[]): void {
 }
 
 function showOriginal(): void {
+  if(!mayReplace()){renderCatalog();return;}
+  editor?.dispose();editor=null;
   request++; fetchController?.abort(); busy = false;
   playback?.dispose(); playback = null; viewer?.clear(); loaded = null;
   original = true; machine.unbind();
@@ -183,16 +210,18 @@ function showOriginal(): void {
   message('PaKaChi · Originalstand wiederhergestellt · 72 Bilder · Tierform ↔ Arbeitsform');
 }
 
-async function loadAvatar(avatar?: Avatar, file?: File): Promise<void> {
+async function loadAvatar(avatar?: Avatar, file?: File, project?: StudioProject): Promise<void> {
+  if(!mayReplace()){renderCatalog();return;}
   const token = ++request;
   fetchController?.abort();
   fetchController = new AbortController();
-  busy = true; syncPlayback();
+  busy = true; syncPlayback();window.dispatchEvent(new Event("pakachi-sm:change"));
   message(`${file?.name ?? avatar?.name ?? 'Avatar'} wird geladen …`);
   try {
     if (!viewer) throw new Error('3D benötigt WebGL2/Hardwarebeschleunigung. Der Originalplayer bleibt verfügbar.');
     let buffer: ArrayBuffer;
-    if (file) {
+    if (project) {buffer = decodeModel(project.model);if(buffer.byteLength>50*1024*1024)throw new Error("Das enthaltene Modell ist größer als 50 MB.");}
+    else if (file) {
       if (!/\.glb$/i.test(file.name)) throw new Error('Bitte eine eigenständige .glb-Datei auswählen.');
       if (file.size > 50 * 1024 * 1024) throw new Error('Die GLB-Datei ist größer als 50 MB. Bitte einen kleineren Export verwenden.');
       buffer = await file.arrayBuffer();
@@ -204,17 +233,25 @@ async function loadAvatar(avatar?: Avatar, file?: File): Promise<void> {
     }
     const gltf = await parseModel(buffer);
     if (token !== request) { disposeModel(gltf.scene); return; }
-    const next = file ? importedAvatar(file.name, gltf.animations.map(c => c.name)) : avatar!;
+    const next: Avatar = project ? {...project.avatar,id:'local-import',model:'',rigVersion:'studio-1'} : file ? importedAvatar(file.name, gltf.animations.map(c => c.name)) : avatar!;
     const moves = availableMoves(next, gltf.animations.map(c => c.name));
     // Validate visible geometry before replacing a working avatar.
     const hasMesh = gltf.scene.getObjectsByProperty('isMesh', true).length > 0;
     if (!hasMesh) { disposeModel(gltf.scene); throw new Error('Das Modell enthält keine sichtbare Geometrie.'); }
+    // Check studio/model compatibility before replacing the current avatar.
+    let bones=0, meshes=0;gltf.scene.traverse(n=>{if(n.type==='Bone')bones++;if('isMesh' in n)meshes++;});
+    if(bones>256 || project && (project.studio.boneRest.length!==bones || project.studio.points.some(p=>p.mesh!==undefined && p.mesh>=meshes))) {disposeModel(gltf.scene);throw new Error('Studio-Daten passen nicht zum Modell oder das Modell hat mehr als 256 Gelenke.');}
+    editor?.dispose();editor=null;
     playback?.dispose(); playback = null;
     viewer.show(gltf.scene);
     loaded = next; original = false;
     el('legacy-frame').parentElement!.classList.remove('legacy');
     el<HTMLIFrameElement>('legacy-frame').removeAttribute('src');
     changeView(studio);
+    const rig = new StudioRig(gltf.scene, project?.studio);
+    const projectSource = {format:'pakachi-studio' as const,version:1 as const,model:project?.model ?? encodeModel(buffer),avatar:{...next,moves}};
+    editor = new StudioEditor(rig,viewer.createStudioView(rig),el('studio-editor'),projectSource,{suspend:()=>playback?.suspend(),resume:resumeBase,changed:refreshCapabilities,feedback:s=>message(s)});
+    rig.restoreSource();
     playback = new Playback(gltf.scene, gltf.animations, moves, next.defaultMove, syncPlayback);
     playback.setSpeed(Number(el<HTMLSelectElement>('speed').value));
     renderMoves(moves); renderCatalog();
@@ -227,6 +264,8 @@ async function loadAvatar(avatar?: Avatar, file?: File): Promise<void> {
       setState:state=>playback!.setBaseMove(states[state]), playMove:id=>{playback!.play(id);}}, null);
     if (states.idle) machine.execute({state:'idle'});
     else if (next.defaultMove && moves.some(m => m.id === next.defaultMove)) playback.play(next.defaultMove);
+    loaded = {...next,moves};refreshCapabilities();
+    if(studio)editor.enter();
     const missing = next.moves.length - moves.length;
     message(missing ? `${missing} deklarierte Bewegung(en) fehlen in der Modelldatei und werden nicht angeboten.` : `${next.name} bereit · ${moves.length} Bewegungen · ${(buffer.byteLength / 1024 / 1024).toFixed(2).replace('.', ',')} MB`);
   } catch (error) {
@@ -234,7 +273,7 @@ async function loadAvatar(avatar?: Avatar, file?: File): Promise<void> {
     message(`Laden fehlgeschlagen: ${error instanceof Error ? error.message : String(error)}`, true);
     renderCatalog();
   } finally {
-    if (token === request) { busy = false; syncPlayback(); }
+    if (token === request) { busy = false; syncPlayback();window.dispatchEvent(new Event("pakachi-sm:change")); }
   }
 }
 
@@ -243,9 +282,10 @@ async function boot(): Promise<void> {
   try { viewer = new Viewer(el('viewport')); }
   catch { message('3D ist ohne WebGL2 nicht verfügbar. Der Originalplayer kann verwendet werden.', true); }
   if (viewer) viewer.onFrame = delta => {
-    playback?.update(delta);
-    const duration = playback?.duration ?? 0;
-    const progress = playback?.progress ?? 0;
+    if(editor?.playing)editor.update(delta);else if(!studio)playback?.update(delta);
+    if(editor?.playing)syncPlayback();
+    const duration = transport()?.duration ?? 0;
+    const progress = transport()?.progress ?? 0;
     if (document.activeElement !== el('timeline')) el<HTMLInputElement>('timeline').value = String(progress * 1000);
     el('time').textContent = `${(duration * progress).toFixed(1).replace('.', ',')} / ${duration.toFixed(1).replace('.', ',')} s`;
   };
@@ -254,14 +294,21 @@ async function boot(): Promise<void> {
   el('back-player').onclick = () => changeView(false);
   el('reset-camera').onclick = () => viewer?.resetCamera();
   el('skeleton').onchange = () => viewer?.showSkeleton(el<HTMLInputElement>('skeleton').checked);
-  el('pause').onclick = () => playback?.togglePause();
-  el('speed').onchange = () => playback?.setSpeed(Number(el<HTMLSelectElement>('speed').value));
-  el('timeline').oninput = () => playback?.seek(Number(el<HTMLInputElement>('timeline').value) / 1000);
+  el('pause').onclick = () => {transport()?.togglePause();syncPlayback();};
+  el('speed').onchange = () => {const value=Number(el<HTMLSelectElement>('speed').value);playback?.setSpeed(value);editor?.setSpeed(value);};
+  el('timeline').oninput = () => transport()?.seek(Number(el<HTMLInputElement>('timeline').value) / 1000);
   el('avatar-select').onchange = () => {
     if (el<HTMLSelectElement>('avatar-select').value === 'pakachi-original') { showOriginal(); return; }
     const avatar = catalog.find(a => a.id === el<HTMLSelectElement>('avatar-select').value);
     if (avatar) void loadAvatar(avatar);
   };
+  el('project-open').onclick = () => el<HTMLInputElement>('project-file').click();
+  el('project-file').onchange = async () => {
+    const file=el<HTMLInputElement>('project-file').files?.[0];el<HTMLInputElement>('project-file').value='';if(!file)return;
+    try {if(file.size>80*1024*1024)throw new Error('Projektdatei ist größer als 80 MB.');const project=parseProject(JSON.parse(await file.text()));await loadAvatar(undefined,undefined,project);}
+    catch(error){message(`Projekt konnte nicht geladen werden: ${error instanceof Error?error.message:String(error)}`,true);}
+  };
+  window.addEventListener('beforeunload',event=>{if(editor?.dirty){event.preventDefault();event.returnValue='';}});
   el('import-button').onclick = () => el<HTMLInputElement>('file-input').click();
   el('file-input').onchange = () => {
     const file = el<HTMLInputElement>('file-input').files?.[0];
@@ -282,6 +329,6 @@ async function boot(): Promise<void> {
     catalog = parseCatalog(await response.json()); renderCatalog();
     showOriginal();
   } catch (error) { message(`Model Zoo: ${error instanceof Error ? error.message : String(error)}`, true); }
-  window.addEventListener('pagehide', () => { agents.dispose(); fetchController?.abort(); request++; playback?.dispose(); viewer?.dispose(); }, { once: true });
+  window.addEventListener('pagehide', () => { agents.dispose(); editor?.dispose(); fetchController?.abort(); request++; playback?.dispose(); viewer?.dispose(); }, { once: true });
 }
 void boot();

@@ -1,4 +1,6 @@
 import * as THREE from 'three';
+import { StudioView } from './studio-view.ts';
+import type { StudioRig } from './studio-rig.ts';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import type { GLTF } from 'three/addons/loaders/GLTFLoader.js';
@@ -122,6 +124,8 @@ export class Viewer {
     this.scene.add(this.skeleton);
     this.resetCamera();
   }
+
+  createStudioView(rig: StudioRig): StudioView { return new StudioView(rig,this.camera,this.renderer.domElement,this.controls,this.scene); }
 
   showSkeleton(visible: boolean): void { if (this.skeleton) this.skeleton.visible = visible; }
   resetCamera(): void {

@@ -90,6 +90,8 @@ Die Brücke führt weder Shell-Befehle aus noch liest sie beliebige Dateien. Sie
 
 ## Direkte Browser-API
 
+Eigene Studio-Moves erscheinen nach dem Laden ihrer Projektdatei in `list_moves` und können über ihr Schlagwort ausgelöst werden. Solange das Studio geöffnet ist, werden Steuerbefehle mit einer Fehlermeldung abgewiesen, damit die aktuelle Bearbeitung erhalten bleibt. Abfragen bleiben möglich.
+
 Für eine Host-Integration im selben Browserfenster:
 
 ```js

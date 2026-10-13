@@ -1,6 +1,6 @@
 # Blaupause – PaKaChi-SM
 
-**Stand: 0.2.0 · Player und gemeinsame Agentensteuerung · Editor und KI teilweise noch offen**
+**Stand: 0.3.0 · Player, Agentensteuerung und erster Studio-Editor · KI und erweiterter Skelettumbau noch offen**
 
 Die Blaupause besteht aus drei zusammengehörigen Dokumenten:
 
@@ -15,4 +15,4 @@ PaKaChi bedeutet Panda-KI-Chimera. Das PaKaChi-Avatar-Studio ist ein fest integr
 Noch offene technische Entscheidungen sind in Designdokument und Roadmap ausdrücklich als offen gekennzeichnet.
 
 
-[Agentensteuerung einrichten](ANSTEUERUNG.md) · [Prüfstand 0.2.0](PRUEFUNG-0.2.0.md) · [Technische Architektur](ARCHITEKTUR.md) · [Erhaltene Originalvorlagen](references/README.md)
+[Agentensteuerung einrichten](ANSTEUERUNG.md) · [Studio-Anleitung](STUDIO.md) · [Prüfstand 0.3.0](PRUEFUNG-0.3.0.md) · [Technische Architektur](ARCHITEKTUR.md) · [Erhaltene Originalvorlagen](references/README.md)

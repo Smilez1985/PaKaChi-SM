@@ -4,7 +4,7 @@
 
 PaKaChi-SM soll 3D-Avatare darstellen, ihre Zustände und Bewegungen steuern und das Erstellen eigener Avatare in derselben Anwendung ermöglichen.
 
-> **Projektstand: 0.2.0 – gemeinsame Zustands- und Agentensteuerung.** Der bestehende PaKaChi mit allen 72 Transformationsbildern ist erhalten und standardmäßig ausgewählt. Zusätzlich gibt es einen 3D-Player mit Model Zoo, zwei technischen Testavataren und lokalem GLB-Import. Die Studio-Ansicht ist integriert; Gelenkbearbeitung, KI-Generierung und die 3D-Übertragung des Original-PaKaChi folgen noch.
+> **Projektstand: 0.3.0 – erster integrierter Studio-Editor.** Der bestehende PaKaChi mit allen 72 Transformationsbildern ist erhalten und standardmäßig ausgewählt. Zusätzlich gibt es einen 3D-Player mit Model Zoo, zwei technischen Testavataren und lokalem GLB-Import. Das Studio bietet frei platzierbare Kontrollpunkte, Posen, eigene Moves und vollständige Projektdateien. KI-Generierung, tiefgreifender Skelettumbau und die 3D-Übertragung des Original-PaKaChi folgen noch.
 
 ## Starten
 
@@ -25,7 +25,9 @@ Der wiederhergestellte Originalplayer lässt sich auch ohne Node starten: `publi
 - 3D-Testavatare Mika und Nori mit echten Skeletten und unterschiedlichen Animationsclips. Sie ersetzen nicht das PaKaChi-Design.
 - Avatar-Auswahl, Bewegungslegende, Abspielen/Pause, Tempo und Abspielposition.
 - Eigene, eigenständige GLB-Dateien bis 50 MB für die aktuelle Sitzung laden oder hineinziehen. Kein Upload.
-- Integrierte Studio-Ansicht mit Skelettanzeige für 3D-Modelle. Mausrad zoomt bis ins Detail; linke Maustaste dreht, rechte verschiebt die Ansicht.
+- Integrierter Studio-Editor mit „Figur bewegen“ und „Gelenke bearbeiten“, Skelettgriffen und unabhängigen Gesichtspunkten. Mausrad zoomt bis ins Detail; linke Maustaste dreht, rechte verschiebt die Ansicht.
+- Individuelle Punktgrößen und Einflussbereiche, freie Verbindungen, Rückgängig/Wiederholen, Posen und eigene Bewegungen.
+- Neu, Projekt laden und Speichern als vollständige `.pakachi.json` mit eingebettetem Modell. [Studio-Anleitung und Grenzen](docs/STUDIO.md).
 
 Der ursprüngliche Bildstand hat bekannte Proportions- und Materialfehler. Die korrigierte humanoide Stilreferenz ist separat erhalten; siehe [Originalvorlagen](docs/references/README.md).
 
@@ -46,7 +48,7 @@ Die Oberfläche soll ohne 3D-Vorkenntnisse verständlich sein. Frei gestaltbare 
 Das Studio hat genau zwei Bearbeitungsmodi:
 
 1. **Figur bewegen:** Körperteile mit der Maus posieren, Gesichtsausdrücke und die Gesamtposition bearbeiten.
-2. **Gelenke bearbeiten:** automatisch erkannte Gelenke direkt an der Figur verschieben, ergänzen oder löschen.
+2. **Gelenke bearbeiten:** automatisch erkannte Gelenke direkt an der Figur verschieben, ergänzen oder löschen. Im ersten Editor werden bei vorhandenen Skelettpunkten nur die Griffe gelöscht; das Quellskelett bleibt erhalten.
 
 Weitere Grundfunktionen: **Neu, Laden, Speichern**, erneuter KI-Versuch mit freiem Korrekturprompt sowie eine Einstellung für Modellqualität und Dateigröße.
 
@@ -77,7 +79,7 @@ Einrichtung und Befehle: [Agentensteuerung](docs/ANSTEUERUNG.md). Nach einem Upd
 
 Ein dauerhaftes 3D-Modell mit Skelett und gespeicherten Animationsdaten ersetzt inkonsistente Einzelbilder. Bewegungen lassen sich als Zahlen und Zeitpunkte speichern; der Player berechnet die Zwischenposen während der Wiedergabe.
 
-Der erste Player verwendet TypeScript, Three.js, glTF/GLB und einen JSON-Katalog. Das editierbare Studio-Format und die KI-Anbieter sind noch nicht abschließend festgelegt. Aus einem einzelnen Bild müssen verdeckte Bereiche geschätzt werden. Zuverlässiges Rigging beliebiger Figuren ist eine eigene Entwicklungsaufgabe.
+Der erste Player verwendet TypeScript, Three.js, glTF/GLB und einen JSON-Katalog. Das Studio nutzt ein versioniertes JSON-Projektformat mit eingebettetem Modell. Die KI-Anbieter sind noch nicht festgelegt. Aus einem einzelnen Bild müssen verdeckte Bereiche geschätzt werden. Zuverlässiges Rigging beliebiger Figuren ist eine eigene Entwicklungsaufgabe.
 
 ## Entwicklung und Prüfungen
 

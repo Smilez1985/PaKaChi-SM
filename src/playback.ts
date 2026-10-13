@@ -93,6 +93,10 @@ export class Playback {
   get duration(): number { return this.action?.getClip().duration ?? 0; }
   get progress(): number { return this.duration ? (this.action?.time ?? 0) / this.duration : 0; }
 
+  suspend(): void {
+    this.mixer.stopAllAction(); this.fading=null; this.action=null; this.current=null; this.paused=true; this.onChange();
+  }
+
   dispose(): void {
     this.mixer.removeEventListener('finished', this.onFinished);
     this.mixer.stopAllAction();

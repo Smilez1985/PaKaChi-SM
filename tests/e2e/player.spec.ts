@@ -73,3 +73,20 @@ test('shared state controls original and 3D; transports start disabled', async (
   expect(invalid).toBe(true);
   await expect(state).toHaveValue('working');
 });
+
+test('studio creates a free facial point and a persistent move',async({page})=>{
+  await page.goto('/');await page.getByLabel('Avatar auswählen',{exact:true}).selectOption('mika');await expect(page.locator('#message')).toContainText('Mika bereit');
+  await page.locator('#studio-tab').click();await expect(page.locator('#agent-state')).toBeDisabled();
+  await page.locator('#mode-rig').click();await page.locator('#point-add').click();
+  const area=await page.locator('#viewport').boundingBox();expect(area).toBeTruthy();await page.mouse.click(area!.x+area!.width*.52,area!.y+area!.height*.3);
+  await page.locator('#point-name').fill('Mundwinkel');await page.locator('#point-name').press('Tab');
+  await page.locator('#point-size').fill('0.006');await page.locator('#point-size').dispatchEvent('change');
+  await page.locator('#mode-pose').click();await page.locator('#pose-name').fill('Neutral');await page.locator('#pose-add').click();
+  const y=Number(await page.locator('#point-y').inputValue());await page.locator('#point-y').fill(String(y+.02));await page.locator('#point-y').press('Tab');await page.locator('#pose-name').fill('Lächeln');await page.locator('#pose-add').click();
+  await page.locator('#move-name').fill('Lächeln');await page.locator('#move-id').fill('laecheln');await page.locator('#move-add').click();
+  const blocked=await page.evaluate(()=>{try{window.PaKaChiSM.call('play_move',{move:'nicken'});return false;}catch{return true;}});expect(blocked).toBe(true);
+  const download=page.waitForEvent('download');await page.locator('#studio-save').click();const file=await (await download).path();expect(file).toBeTruthy();
+  await page.locator('#project-file').setInputFiles(file!);await expect(page.locator('#message')).toContainText('Mika bereit');
+  await expect(page.locator('#studio-points')).toContainText('Mundwinkel');await expect(page.locator('#studio-moves')).toContainText('Lächeln');
+  await page.locator('#back-player').click();await expect(page.locator('#agent-state')).toBeEnabled();await page.getByRole('button',{name:'Lächeln',exact:false}).click();await expect(page.locator('#activity')).toContainText('Lächeln');await expect(page.locator('#activity')).toContainText('Entspannen',{timeout:5000});
+});

@@ -63,9 +63,9 @@ export function mountAgentPanel(rpc: Rpc) {
     } catch(error) { input('mcp-active').checked=false; feedback('mcp-feedback',String(error)); }
   };
   function refresh() {
-    const current = rpc('get_state') as { state: string | null; capability: { states: string[] } | null };
+    const current = rpc('get_state') as { state: string | null; ready: boolean; capability: { states: string[] } | null };
     state.replaceChildren(...(current.capability?.states ?? []).map(s => new Option(s,s)));
-    state.disabled = !state.options.length; if(current.state) state.value=current.state;
+    state.disabled = !current.ready || !state.options.length; if(current.state) state.value=current.state;
     feedback('state-readout',current.state ?? 'Kein aktiver Zustand');
   }
   window.addEventListener('pakachi-sm:change',refresh); refresh();

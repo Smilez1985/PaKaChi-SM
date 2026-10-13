@@ -8,6 +8,30 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-10-13
+
+Zeitstempel: 2026-10-13T07:15:59+02:00 (Europe/Berlin)
+
+### Added
+
+- Erster integrierter Studio-Editor mit genau zwei Modi: Figur bewegen und Gelenke bearbeiten.
+- Frei platzierbare Oberflächen-/Gesichtspunkte mit individueller Punktgröße, separatem Einflussradius und unabhängigen Verbindungen; tatsächliche Oberflächenverformung und gemeinsames Bewegen verbundener freier Punkte.
+- Auswahl und Transformation bestehender Skelettgriffe; verschiebbare Drehpunkte mit Erhalt der Grundoberfläche.
+- Posen, Übergangszeiten, benannte eigene Moves, Vorschau und Wiedergabe im Player über die bestehende Agentensteuerung.
+- Vollständiges versioniertes Studio-Projektformat mit eingebettetem Modell, Arbeitspose, Neu/Laden/Speichern sowie Rückgängig/Wiederholen.
+- Geometrie-, Daten- und DOM-Tests für Verformung, Skelettbindung, Hautfolge von Gesichtspunkten, Posen, Projekt-Roundtrip und Bedienablauf.
+
+### Changed
+
+- Externe Steuerbefehle werden während geöffneter Studio-Bearbeitung abgewiesen; danach sind eigene Moves normal steuerbar.
+- Die 3D-Ansicht bleibt neben den längeren Studio-Bedienelementen sichtbar.
+- Blaupause unterscheidet die vorhandene Kontrollpunktbearbeitung vom noch offenen vollständigen Quellknochenumbau, IK und KI-Generierung.
+
+### Fixed
+
+- Zustandsauswahl wird nach abgeschlossenem Avatarladen wieder freigegeben.
+
+
 ## [0.2.0] - 2026-10-13
 
 Zeitstempel: 2026-10-13T06:46:36+02:00 (Europe/Berlin)
@@ -66,6 +90,7 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 - Bestehendes Bedienkonzept ausdrücklich als Designdokument eingeordnet und mit Roadmap und Changelog verknüpft.
 
 [Unreleased]: https://github.com/Smilez1985/PaKaChi-SM/commits/main
+[0.3.0]: ./PRUEFUNG-0.3.0.md
 [0.2.0]: ./PRUEFUNG-0.2.0.md
 [0.1.0]: ./PRUEFUNG-0.1.0.md
 [0.0.1]: ./README.md

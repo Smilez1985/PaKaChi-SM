@@ -4,7 +4,7 @@ Teil der [Blaupause](README.md) · [Roadmap](ROADMAP.md) · [Changelog](CHANGELO
 
 ## Status und Begriffe
 
-Dieses Dokument hält das Produktziel fest. Der umgesetzte Stand wird im Changelog dokumentiert; offene Editor- und KI-Funktionen sind weiterhin Entwicklungsziele.
+Dieses Dokument hält das Produktziel fest. Stand 0.3.0: Player, gemeinsame Agentensteuerung und ein erster Studio-Editor sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau und KI-Generierung bleiben Entwicklungsziele.
 
 - **PaKaChi:** Panda-KI-Chimera, das übergeordnete Projekt.
 - **PaKaChi-SM:** StateMaschine mit Avatar-Player und integriertem Studio.
@@ -77,7 +77,7 @@ Ein gut sichtbarer Button **„Skelett neu versuchen“** und ein freies Textfel
 
 Der Neuversuch muss sich auf die gewünschte Korrektur beziehen. Bei einer Skelettkorrektur soll das Aussehen erhalten bleiben, soweit die notwendige Oberflächenanpassung dies erlaubt.
 
-Als Schutzkonzept ist eine Vorschau mit Übernehmen oder Verwerfen vorgesehen. Das bisherige Ergebnis und manuelle Korrekturen bleiben bis zur Übernahme erhalten. Rückgängig/Wiederholen ist eine vorgesehene Ergänzung.
+Als Schutzkonzept ist eine Vorschau mit Übernehmen oder Verwerfen vorgesehen. Das bisherige Ergebnis und manuelle Korrekturen bleiben bis zur Übernahme erhalten. Rückgängig/Wiederholen ist im manuellen Studio seit 0.3.0 vorhanden; die KI-Vorschau bleibt ein Entwicklungsziel.
 
 ## 5. Bewegung erstellen
 
@@ -91,7 +91,7 @@ Als Schutzkonzept ist eine Vorschau mit Übernehmen oder Verwerfen vorgesehen. D
 
 Die Anzahl drei bis zehn beschreibt den typischen Arbeitsablauf, keine bereits festgelegte technische Obergrenze.
 
-Eine Bewegung enthält Zeitpunkte, Gelenktransformationen, gegebenenfalls Gesichtsparameter und die Gesamtposition. Sie benötigt keine Sammlung separat gezeichneter Einzelbilder. Textbasierte Speicherung ist möglich; ein endgültiges Format ist noch offen.
+Eine Bewegung enthält Zeitpunkte, Gelenktransformationen, gegebenenfalls Gesichtsparameter und die Gesamtposition. Sie benötigt keine Sammlung separat gezeichneter Einzelbilder. Die erste Umsetzung speichert Posen und Moves textbasiert in versionierten `.pakachi.json`-Projekten. Separate Move-Dateien und globale Transformationsspuren bleiben offen.
 
 Glatte Interpolation allein garantiert keine natürlichen Bewegungen oder Kollisionsfreiheit. Gelenkgrenzen und geeignete Übergänge sind Teil der Umsetzung.
 
@@ -122,11 +122,11 @@ Beispiele:
 
 Die Zuordnung zu konkreten Animationen gehört zum jeweiligen Avatar. Nicht jeder Avatar muss dieselben Fähigkeiten besitzen.
 
-Als technische Vorschläge gelten: weiche Übergänge, eine definierte Rückkehr aus einmaligen Moves und eine sichere Reaktion auf unbekannte Schlagworte. Prioritäten, Unterbrechung und Warteschlangen werden vor der Implementierung eindeutig festgelegt.
+Implementiert sind die Rückkehr aus einmaligen Moves und das Abweisen ungültiger Befehle. Der letzte gültige neue Zustand gewinnt; es gibt keine Befehlswarteschlange. Die Überblendung ist bisher auf Originalclips untereinander beschränkt. Details: [Agentensteuerung](ANSTEUERUNG.md).
 
 ## 8. MCP und MQTT
 
-Die MCP-Schnittstelle soll die tatsächlich verfügbaren Fähigkeiten beschreiben. Vorgeschlagene Operationen:
+Die lokale MCP-Schnittstelle beschreibt seit 0.2.0 die tatsächlich geladenen Fähigkeiten. Implementierte Operationen:
 
 | Operation | Zweck |
 | --- | --- |
@@ -136,11 +136,11 @@ Die MCP-Schnittstelle soll die tatsächlich verfügbaren Fähigkeiten beschreibe
 | play_move | Gespeicherte Bewegung auslösen |
 | set_state | Dauerhaften Zustand auswählen |
 
-Diese Namen sind Schnittstellenentwürfe, keine bereits verfügbaren Tools.
+Zusätzlich gibt es `get_state`. Die konkrete Einrichtung und Einschränkungen stehen in [ANSTEUERUNG.md](ANSTEUERUNG.md).
 
 MQTT ist opt-in: Schalter zum Aktivieren und ein Feld für die Broker-Adresse, etwa eines NanoMQ-Brokers. Der Player empfängt darüber Zustands- oder Bewegungsbefehle. Er startet nicht ungefragt einen Broker. Zugangsdaten werden nicht im Model Zoo gespeichert.
 
-MCP und MQTT sollen dieselbe Befehlsprüfung und StateMaschine verwenden. Unbekannte Avatare, Moves und ungültige Nachrichten dürfen die Anwendung nicht zum Absturz bringen.
+MCP und MQTT verwenden dieselbe Befehlsprüfung und StateMaschine. Unbekannte Avatare, Moves und ungültige Nachrichten dürfen die Anwendung nicht zum Absturz bringen.
 
 ## 9. Vorgeschlagene Datenorganisation
 
@@ -152,7 +152,7 @@ Die logische Struktur des Model Zoo:
 - Ein eigener **moves/**-Ordner mit den Bewegungen dieses Avatars.
 - Zustandszuordnungen und bearbeitbare Studio-Daten.
 
-Die konkrete Dateiendung ist offen. GLB für das Modell und JSON für Metadaten beziehungsweise eigene Bewegungsdaten sind Kandidaten. Three.js ist ein Kandidat für die 3D-Darstellung, keine bereits beschlossene oder implementierte Abhängigkeit.
+Implementiert sind Three.js für die Darstellung, glTF/GLB für Modelle, ein JSON-Katalog und `.pakachi.json` für bearbeitbare Projekte mit eingebettetem Modell. Der vorgeschlagene separate moves/-Ordner und der gemeinsame Export bearbeiteter Projekte in den Model Zoo stehen noch aus.
 
 ## 10. Bedienziel
 
