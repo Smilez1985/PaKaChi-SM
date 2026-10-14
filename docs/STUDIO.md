@@ -1,4 +1,4 @@
-# Avatar-Studio – 0.11.0
+# Avatar-Studio – 0.11.1
 
 Das Studio ist Teil des Players. Mika, Nori und eigene GLB-Modelle können bearbeitet werden. Der Original-PaKaChi bleibt mit beiden Formen und 72 Bildern erhalten; für ihn fehlt weiterhin das entsprechende 3D-Modell. Seine Bilder werden durch den Editor nicht verändert.
 
@@ -18,7 +18,7 @@ Die Zeit der ersten Pose bestimmt bei Schleifen den Rückweg von der letzten zur
 
 | Aktion | Wirkung |
 | --- | --- |
-| Mausrad drücken/halten und Maus bewegen | Ansicht frei um alle Achsen drehen; am Rand der virtuellen Kugel auch rollen. |
+| Mausrad drücken/halten und Maus bewegen | Ansicht um den aktuellen Mittelpunkt der gesamten Figur frei um alle Achsen drehen; am Rand der virtuellen Kugel auch rollen. |
 | Rechts ziehen | Ansicht verschieben. |
 | Mausrad drehen | Zum Zeiger zoomen, etwa bis zu Mund oder Augenlid. |
 | Links auf einem Punkt ziehen | Im Verschiebemodus: Ziel für die Gelenkkette setzen oder freien Punkt verschieben. Im Drehmodus: Gelenk/Ausrichtung drehen. |
@@ -131,3 +131,7 @@ Unter **Griffe → Drehen** den Punkt direkt mit der Maus ziehen: horizontal/ver
 Mika und Nori enthalten im Beispiel-Rig 2 zusätzlich Hand-, Knie-, Fuß- und Halsknochen mit entsprechenden Hautzuordnungen. Zum Testen die Avatare frisch aus dem Katalog laden. Ein altes Projekt enthält weiterhin sein ursprüngliches Modell; fehlende Hand-/Knieknochen werden dort nicht nachträglich erfunden. Bereits mit älteren Versionen auseinandergezogene Posen bleiben erhalten und müssen aus der Grundpose neu aufgenommen oder ersetzt werden.
 
 **Grenzen:** Die Kettenlösung dreht bis zu zwei verbundene Vorfahren und stoppt vor verzweigten Körperansätzen. Sie ist keine vollständige Körperphysik. Anatomische Winkelgrenzen, Kollisionen, fixierte Füße und gekoppelte Ganzkörper-IK bleiben offen. Die bisherige Form/Beugeseite wird bevorzugt, aber nicht anatomisch bewertet; komplexe Import-Rigs müssen geprüft werden. **Gelenke bearbeiten** darf weiterhin bewusst die Grundstellung ändern.
+
+### Drehpunkt nach Zoom und Verschieben
+
+Seit 0.11.1 bestimmt die aktuelle Modellgeometrie den Mittelpunkt für die mittlere Maustaste. Das zuletzt angeklickte Gelenk und das verschobene Kamera-Ziel bestimmen ihn nicht. Beim Drücken wird der Mittelpunkt einmal ermittelt und für die gesamte Ziehgeste beibehalten. Der gezoomte/verschobene Bildausschnitt bleibt erhalten; es erfolgt kein Sprung zur Bildmitte. Nach einer Änderung der Figur wird bei der nächsten Geste deren neuer Mittelpunkt verwendet.

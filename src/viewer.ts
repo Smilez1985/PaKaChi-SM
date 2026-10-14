@@ -4,7 +4,7 @@ import type { StudioRig } from './studio-rig.ts';
 import { ArcballControls } from 'three/addons/controls/ArcballControls.js';
 import { MouseNavigation } from './mouse-navigation.ts';
 import { options } from './options.ts';
-import { rotateCamera } from './camera.ts';
+import { modelCenter, rotateCamera } from './camera.ts';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import type { GLTF } from 'three/addons/loaders/GLTFLoader.js';
 
@@ -76,8 +76,8 @@ export class Viewer {
     container.append(this.renderer.domElement);
     this.controls = new ArcballControls(this.camera, this.renderer.domElement, this.scene) as ArcballControls & {target:THREE.Vector3; _gizmos:THREE.Group};
     this.controls.unsetMouseAction(1);
-    this.mouse=new MouseNavigation(this.renderer.domElement,this.camera,()=>this.controls._gizmos.position,
-      active=>{this.controls.enabled=!active;},()=>{this.controls.target.copy(this.controls._gizmos.position);this.controls.setCamera(this.camera);this.controls.setGizmosVisible(false);},()=>options.invertMiddleRotation);
+    this.mouse=new MouseNavigation(this.renderer.domElement,this.camera,()=>modelCenter(this.model),
+      active=>{this.controls.enabled=!active;},(rotation,pivot)=>{this.controls.target.copy(this.controls._gizmos.position).sub(pivot).applyQuaternion(rotation).add(pivot);this.controls.setCamera(this.camera);this.controls.setGizmosVisible(false);},()=>options.invertMiddleRotation);
     this.controls.enableAnimations = false;
     this.controls.enablePan = true;
     this.controls.cursorZoom = true;
@@ -141,21 +141,21 @@ export class Viewer {
   resetCamera(): void {
     this.camera.up.set(0,1,0);
     this.camera.position.set(3.2, 2.1, 5.5);
-    this.controls.target.set(0, 1.15, 0);
+    this.controls.target.copy(modelCenter(this.model));
     this.controls.setCamera(this.camera);
     this.controls.setGizmosVisible(false);
     this.controls.update();
   }
   setStudio(active:boolean):void {this.floor.visible=!active;if(active)this.controls.unsetMouseAction(0);else this.controls.setMouseAction('ROTATE',0);}
   rollView(degrees:number):void {
-    this.controls.target.copy(this.controls._gizmos.position);
-    rotateCamera(this.camera,this.controls.target,this.camera.getWorldDirection(new THREE.Vector3()),THREE.MathUtils.degToRad(degrees));
+    const pivot=modelCenter(this.model),rotation=rotateCamera(this.camera,pivot,this.camera.getWorldDirection(new THREE.Vector3()),THREE.MathUtils.degToRad(degrees));
+    this.controls.target.copy(this.controls._gizmos.position).sub(pivot).applyQuaternion(rotation).add(pivot);
     this.controls.setCamera(this.camera);this.controls.setGizmosVisible(false);
   }
   setView(side:string):void {
     const directions:Record<string,number[]>={front:[0,0,1],back:[0,0,-1],left:[-1,0,0],right:[1,0,0],top:[0,1,0],bottom:[0,-1,0]};
     const vector=directions[side];if(!vector)return;
-    this.controls.target.copy(this.controls._gizmos.position);
+    this.controls.target.copy(modelCenter(this.model));
     const distance=this.camera.position.distanceTo(this.controls.target);
     this.camera.up.set(0,1,0);if(side==='top')this.camera.up.set(0,0,-1);if(side==='bottom')this.camera.up.set(0,0,1);
     this.camera.position.copy(this.controls.target).add(new THREE.Vector3().fromArray(vector).multiplyScalar(distance));

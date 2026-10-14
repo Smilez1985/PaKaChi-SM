@@ -1,4 +1,4 @@
-# Technischer Stand 0.11.0
+# Technischer Stand 0.11.1
 
 ## Lokale Anwendung
 
@@ -77,3 +77,7 @@ Neue Studio-Daten erhalten sämtliche erkennbaren Quellverbindungen. Gespeichert
 Direktes Ziehen im Drehmodus erzeugt eine Rotation relativ zur Kamera. Während eines Achsgriff-Zuges wird der Proxy nicht durch die Oberflächenaktualisierung zurückgesetzt. Maus-, Zahlenfeld- und MCP-Positionsbefehle benutzen dieselbe IK-Prüfung. Posen speichern die resultierenden Knochenquaternionen; unveränderte lokale Positionen halten auch die Interpolation zusammen. Das Projektformat bleibt 1; frühere gestreckte Posen werden nicht stillschweigend verändert.
 
 Die Beispielmodelle verwenden `fixture-rig-2` mit Hand-, Knie-, Fuß- und Halsknochen. Diese Änderung betrifft ausschließlich die technischen 3D-Fixtures, nicht die Original-PaKaChi-Dateien. Importmodelle mit ungewöhnlichen Skalierungen/Hierarchien, Gelenkgrenzen, Kollisionen und Ganzkörperbedingungen benötigen weitere Abnahme beziehungsweise Umsetzung.
+
+## Modellmittelpunkt für Navigation ab 0.11.1
+
+`modelCenter` bestimmt mit präzisen aktuellen Vertexpositionen die Welt-Bounding-Box des Modells, einschließlich Skinning. Boden, Skelettanzeige und Editorgriffe gehören nicht zu diesem Modellbaum. `MouseNavigation` speichert den Mittelpunkt zu Gestenbeginn; es gibt keine Bounds-Berechnung pro Pointermove. Kamera, Orientierung und das separate Arcball-Ziel werden gemeinsam um diesen festen Punkt rotiert. Dadurch bleiben Zoom und seitlicher Bildausschnitt erhalten. Der virtuelle Trackball liegt auf dem projizierten Figurenmittelpunkt. Reset/feste Ansichten beziehen sich ebenfalls auf die Figur.

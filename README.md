@@ -2,7 +2,7 @@
 
 **SM steht für StateMaschine.** PaKaChi ist die **Panda-KI-Chimera**, das übergeordnete Projekt. PaKaChi-SM vereint Avatar-Player, Model Zoo und das fest integrierte **PaKaChi-Avatar-Studio**.
 
-**Softwarestand: 0.11.0 · Entwicklungsstand, keine fertige Bild-zu-3D-Lösung.**
+**Softwarestand: 0.11.1 · Entwicklungsstand, keine fertige Bild-zu-3D-Lösung.**
 
 Der bestehende PaKaChi mit Tierform, humanoider Arbeitsform und allen 72 Transformationsbildern ist erhalten und beim Start ausgewählt. Mika und Nori sind separate technische 3D-Testavatare. Ein 3D-Modell des Original-PaKaChi und die KI-Generierung stehen noch aus.
 
@@ -19,13 +19,15 @@ Die angezeigte Adresse öffnen, normalerweise `http://127.0.0.1:5173`. Unter Win
 
 Der archivierte Originalplayer lässt sich auch separat ohne Node öffnen: `public/legacy/pakachi/index.html`.
 
+Seit **0.11.1** dreht die mittlere Maustaste um die Mitte der ganzen Figur, auch nach Zoom zum Mauszeiger und Verschieben des Bildausschnitts.
+
 ## Korrektur der Körpersteuerung in 0.11.0
 
 Mika/Nori frisch auswählen: Hand ziehen beugt Schulter/Ellenbogen, Fuß ziehen Hüfte/Knie. Rumpf ziehen nimmt den ganzen Körper mit; Hals/Kopf bleiben verbunden. Unter **Griffe → Drehen** kann ein Gelenk direkt mit der Maus ausgerichtet werden. Die mitgelieferten Testmodelle besitzen jetzt Hand-, Knie-, Fuß- und Halsgelenke. Alte Projektdateien behalten ihr eingebettetes Modell; sie erhalten diese neuen Knochen nicht automatisch. [Bedienung und Grenzen](docs/STUDIO.md#verbundener-körper-statt-auseinanderziehen).
 
 ## Was aktuell funktioniert
 
-| Bereich | Stand 0.11.0 |
+| Bereich | Stand 0.11.1 |
 | --- | --- |
 | Player | Avatar-Auswahl, tatsächliche Bewegungen anzeigen, abspielen, pausieren, Tempo und Abspielposition ändern. |
 | Modelle | Mika/Nori mit Skeletten und Clips; eigene eigenständige GLB-Dateien laden oder hineinziehen, bis 50 MiB, lokal für die Sitzung. |
@@ -103,7 +105,7 @@ npx playwright install chromium
 npm run test:e2e
 ```
 
-Für 0.11.0 sind 47 Tests und der Build bestanden. Die unveränderten Original-Testprogramme wurden zuletzt in 0.9.0 geprüft. Die visuelle WebGL-/Mausabnahme ist wegen der Chromium-Startbeschränkung der bisherigen Ausführungsumgebung noch offen. Die reale Python-MCP-/MQTT-Integration mit Studio-Editor wurde zuletzt in 0.10.0 erfolgreich geprüft. Details und frühere Nachweise stehen im [Prüfstand](docs/PRUEFUNG.md).
+Für 0.11.1 sind 49 Tests und der Build bestanden. Die unveränderten Original-Testprogramme wurden zuletzt in 0.9.0 geprüft. Die visuelle WebGL-/Mausabnahme ist wegen der Chromium-Startbeschränkung der bisherigen Ausführungsumgebung noch offen. Die reale Python-MCP-/MQTT-Integration mit Studio-Editor wurde zuletzt in 0.10.0 erfolgreich geprüft. Details und frühere Nachweise stehen im [Prüfstand](docs/PRUEFUNG.md).
 
 ## Lizenz
 

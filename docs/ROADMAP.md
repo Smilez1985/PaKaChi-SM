@@ -1,12 +1,12 @@
 # Roadmap – was kommt
 
-**Softwarestand: 0.11.0 · Abgleich: 14.10.2026.** Teil der [Blaupause](README.md).
+**Softwarestand: 0.11.1 · Abgleich: 14.10.2026.** Teil der [Blaupause](README.md).
 
 Ein Häkchen bedeutet implementiert; es ersetzt keine visuelle oder externe Live-Abnahme. Die Nachweise und Prüfgrenzen stehen im [Prüfstand](PRUEFUNG.md). Die Versionshistorie gehört ins [Changelog](CHANGELOG.md).
 
 ## Nächste Arbeitspakete
 
-1. **Korrektur 0.11.0 visuell nachprüfen:** vollständige Körperverbindungen, Hand-/Fußziele, Rumpfbewegung und direktes Drehen. Nutzertest 0.10.0 meldete auseinanderziehbare Knochen und unbrauchbare Ausrichtung; diese Fehler sind technisch korrigiert, die erneute Nutzerabnahme steht aus. Anschließend Mausnavigation, kleine Gesichtspunkte, Gesamtverschiebung, Speichern/Laden und Agentensteuerung in einer lauffähigen Browserumgebung prüfen.
+1. **Korrekturen 0.11.0/0.11.1 visuell nachprüfen:** Drehung um die Figurenmitte auch nach Zoom/Pan sowie vollständige Körperverbindungen, Hand-/Fußziele, Rumpfbewegung und direktes Drehen. Nutzertest 0.10.0 meldete auseinanderziehbare Knochen und unbrauchbare Ausrichtung; diese Fehler sind technisch korrigiert, die erneute Nutzerabnahme steht aus. Anschließend Mausnavigation, kleine Gesichtspunkte, Gesamtverschiebung, Speichern/Laden und Agentensteuerung in einer lauffähigen Browserumgebung prüfen.
 2. **Gelenkbearbeitung vervollständigen:** echte Quellknochen hinzufügen/löschen, Hautgewichte zuordnen und vorhandene Moves nach Änderungen prüfen. Erst damit wird das Beispiel „fehlendes Knie ergänzen und beugen“ vollständig erfüllt.
 3. **KI-Verfahren bewerten und integrieren:** Bild-zu-3D und anatomische Skelettgenerierung an tatsächlichen Testfiguren bewerten; anschließend Generierung und Korrekturvorschau anschließen. Vorhandene Skelettdaten auszulesen ist bereits möglich, aber keine KI-Anatomieerkennung.
 
@@ -77,7 +77,7 @@ Diese Reihenfolge ist ein Umsetzungsvorschlag, kein Terminversprechen. Die dafü
 
 ## 6. Bedienung, Qualität und Export
 
-- [x] Freie Ansichtsdrehung mit gedrücktem Mausrad, Zoomen und Rechtsziehen ohne Tastaturmodifikatoren.
+- [x] Freie Ansichtsdrehung mit gedrücktem Mausrad, Zoomen und Rechtsziehen ohne Tastaturmodifikatoren; Drehpunkt an der aktuellen Figurenmitte statt am verschobenen Zoom-Ziel (0.11.1).
 - [x] Rück-/Unterseite zugänglich machen; direkte Punktbewegung und optionale Achsgriffe.
 - [x] Deutsch/English für Studio-Bedienelemente sowie invertierbare Drehrichtung lokal speichern.
 - [x] Ursprüngliches Modell und bearbeitbare Studio-Daten in der Projektdatei erhalten.
