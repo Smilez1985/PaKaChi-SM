@@ -1,4 +1,4 @@
-# Technischer Stand 0.11.1
+# Technischer Stand 0.12.0
 
 ## Lokale Anwendung
 
@@ -81,3 +81,7 @@ Die Beispielmodelle verwenden `fixture-rig-2` mit Hand-, Knie-, Fuß- und Halskn
 ## Modellmittelpunkt für Navigation ab 0.11.1
 
 `modelCenter` bestimmt mit präzisen aktuellen Vertexpositionen die Welt-Bounding-Box des Modells, einschließlich Skinning. Boden, Skelettanzeige und Editorgriffe gehören nicht zu diesem Modellbaum. `MouseNavigation` speichert den Mittelpunkt zu Gestenbeginn; es gibt keine Bounds-Berechnung pro Pointermove. Kamera, Orientierung und das separate Arcball-Ziel werden gemeinsam um diesen festen Punkt rotiert. Dadurch bleiben Zoom und seitlicher Bildausschnitt erhalten. Der virtuelle Trackball liegt auf dem projizierten Figurenmittelpunkt. Reset/feste Ansichten beziehen sich ebenfalls auf die Figur.
+
+## Lokaler Generierungs-Testadapter ab 0.12.0
+
+`scripts/generate-model.mjs` startet einen ausdrücklich angegebenen lokalen TripoSR-Checkout als Python-Unterprozess ohne Shell. Vorprüfung und Eingabegrenzen erfolgen vor der Generierung. Ein neuer Laufordner isoliert die Eingabekopie und Ergebnisse. Exitcode, Zeitlimit und produktiver GLB-Lader bestimmen den technischen Status; visuelle, Rig- und Transformationsfreigabe bleiben separat offen. Kein HTTP-Server, keine Browser-/MCP-Generierungsoperation und keine automatische Model-Zoo-Änderung. Vier Tests verwenden Backend-Testdoubles, keine echten Gewichte. Einrichtung und Quellen: [KI-Testlauf](KI-GENERIERUNG.md).

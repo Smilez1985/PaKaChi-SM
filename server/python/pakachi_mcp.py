@@ -149,7 +149,7 @@ def build_server(uri=None, embedded=True, tcp_port=1883, ws_port=8083):
                 with suppress(Exception):
                     await broker.shutdown()
 
-    server = MCPServer('pakachi-sm', version='0.11.1', lifespan=lifespan)
+    server = MCPServer('pakachi-sm', version='0.12.0', lifespan=lifespan)
 
     async def request(method, args=None):
         if bridge is None:

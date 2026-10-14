@@ -16,7 +16,7 @@
     "vite": "8.3.4"
   },
   "name": "pakachi-sm",
-  "version": "0.11.1",
+  "version": "0.12.0",
   "private": true,
   "type": "module",
   "description": "PaKaChi StateMaschine – lokaler Avatar-Player und integriertes Studio",
@@ -34,6 +34,7 @@
     "test:legacy": "node public/legacy/pakachi/tests/controller.cjs && node public/legacy/pakachi/tests/lifecycle.cjs",
     "mcp": "python server/python/pakachi_mcp.py",
     "mcp:legacy": "node server/mcp.mjs",
-    "test:python": "node --test tests/integration/*.test.ts"
+    "test:python": "node --test tests/integration/*.test.ts",
+    "generate:model": "node scripts/generate-model.mjs"
   }
 }

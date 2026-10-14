@@ -1,6 +1,6 @@
 # Roadmap – was kommt
 
-**Softwarestand: 0.11.1 · Abgleich: 14.10.2026.** Teil der [Blaupause](README.md).
+**Softwarestand: 0.12.0 · Abgleich: 14.10.2026.** Teil der [Blaupause](README.md).
 
 Ein Häkchen bedeutet implementiert; es ersetzt keine visuelle oder externe Live-Abnahme. Die Nachweise und Prüfgrenzen stehen im [Prüfstand](PRUEFUNG.md). Die Versionshistorie gehört ins [Changelog](CHANGELOG.md).
 
@@ -68,7 +68,8 @@ Diese Reihenfolge ist ein Umsetzungsvorschlag, kein Terminversprechen. Die dafü
 ## 5. Bild zu 3D und KI-Korrektur
 
 - [ ] Bestehenden PaKaChi anhand seiner erhaltenen Tierform und korrigierten humanoiden Stilreferenz in 3D nachbilden; beide Formen und die Transformation erhalten.
-- [ ] Geeignete Generierungs-/Rigging-Verfahren an echten Testfiguren bewerten.
+- [x] Technische Vorauswahl und lokales TripoSR-Testwerkzeug mit Vorprüfung/GLB-Berichten vorbereiten (0.12.0).
+- [ ] Geeignete Generierungs-/Rigging-Verfahren an echten Testfiguren bewerten. **Echte Inferenz und Qualitätsvergleich stehen weiterhin aus.** [Testlauf](KI-GENERIERUNG.md).
 - [ ] Bildimport per Drag & Drop, tatsächliche Generierung, Fortschritt und Fehlermeldungen anschließen.
 - [ ] Freien Korrekturprompt und „Skelett neu versuchen“ integrieren.
 - [ ] Vorschau übernehmen/verwerfen, bisheriges Ergebnis bis dahin erhalten.
