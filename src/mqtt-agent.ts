@@ -34,7 +34,7 @@ export class PlayerMQTT {
         const data=JSON.parse(payload.toString());
         if(!data||typeof data.id!=='string'||!/^[a-z0-9-]{1,64}$/.test(data.id)||typeof data.replyTo!=='string'||!/^pakachi\/mcp\/[a-z0-9-]{1,64}\/reply$/.test(data.replyTo)||!Number.isFinite(data.expires)||data.expires<Date.now()||data.expires>Date.now()+10000)return;
         let response=this.cache.get(data.id)?.response;
-        if(!response){try{if(!['list_avatars','get_avatar_capabilities','list_moves','get_state','set_state','play_move'].includes(data.method))throw new Error('Unbekannte MCP-Operation.');response=JSON.stringify({id:data.id,result:this.rpc(data.method,data.args)});}catch(e){response=JSON.stringify({id:data.id,error:e instanceof Error?e.message:String(e)});}
+        if(!response){try{if(!['list_avatars','get_avatar_capabilities','list_moves','get_state','set_state','play_move','get_studio','edit_studio'].includes(data.method))throw new Error('Unbekannte MCP-Operation.');response=JSON.stringify({id:data.id,result:this.rpc(data.method,data.args)});}catch(e){response=JSON.stringify({id:data.id,error:e instanceof Error?e.message:String(e)});}
           for(const [id,item] of this.cache)if(item.expires<Date.now())this.cache.delete(id);
           if(this.cache.size>=128)this.cache.delete(this.cache.keys().next().value!);
           this.cache.set(data.id,{response,expires:Date.now()+10000});

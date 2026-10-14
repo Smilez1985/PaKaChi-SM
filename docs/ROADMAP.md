@@ -1,6 +1,6 @@
 # Roadmap – was kommt
 
-**Softwarestand: 0.8.0 · Abgleich: 14.10.2026.** Teil der [Blaupause](README.md).
+**Softwarestand: 0.9.0 · Abgleich: 14.10.2026.** Teil der [Blaupause](README.md).
 
 Ein Häkchen bedeutet implementiert; es ersetzt keine visuelle oder externe Live-Abnahme. Die Nachweise und Prüfgrenzen stehen im [Prüfstand](PRUEFUNG.md). Die Versionshistorie gehört ins [Changelog](CHANGELOG.md).
 
@@ -28,12 +28,12 @@ Diese Reihenfolge ist ein Umsetzungsvorschlag, kein Terminversprechen. Die dafü
 - [x] Zustände und einmalige beziehungsweise wiederholte Moves unterscheiden; ungültige Befehle abweisen.
 - [x] Manuelle Auswahl, MQTT und MCP über denselben Router führen.
 - [x] MQTT opt-in mit Broker-Adresse, Topic und optionaler Anmeldung.
-- [x] Sechs MCP-Tools für Fähigkeiten, Zustände und Moves bereitstellen.
+- [x] Acht MCP-Tools für Player-Fähigkeiten, Zustände, Moves und freigegebene Studio-Bearbeitung bereitstellen.
 - [x] Python-MCP mit optional eingebettetem aMQTT und bestätigten Player-Antworten verbinden.
 - [ ] Konkreten externen MCP-Host und externen NanoMQ-Broker live abnehmen.
-- [ ] MCP-Werkzeuge für die Bearbeitung des Studios entwerfen und implementieren; bisher steuert MCP nur den Player.
+- [x] Studio über `get_studio`/`edit_studio` abfragen und freigegeben bearbeiten; Sitzungs-/Revisionsprüfung und Undo (0.9.0).
 
-**Abnahme:** Ein externer Agent fragt tatsächliche Fähigkeiten ab und löst einen unterstützten Zustand/Move aus. Reale Python-/MQTT-Prozessintegration in 0.4.0 geprüft; konkrete Host-Abnahme offen.
+**Abnahme:** Ein externer Agent fragt tatsächliche Fähigkeiten ab und löst einen unterstützten Zustand/Move aus. Reale Python-/MQTT-Prozessintegration einschließlich Studio in 0.9.0 geprüft; konkrete Host-Abnahme offen.
 
 ## 3. Posen und Bewegungen
 

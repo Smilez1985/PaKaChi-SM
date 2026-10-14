@@ -1,6 +1,6 @@
 # Agentensteuerung
 
-Gültig für Softwarestand 0.8.0.
+Gültig für Softwarestand 0.9.0.
 
 **Bevorzugter Weg seit 0.4.0:** [Python-MCP 2.3.0 mit eingebettetem aMQTT-Broker](PYTHON-MCP.md). MCP-Anfragen und Player-Antworten laufen dort über denselben MQTT-Broker. Die folgende Node-Einrichtung bleibt als Kompatibilitätsweg erhalten.
 
@@ -44,7 +44,7 @@ Im eingebetteten Originalplayer ist dessen separate MQTT-Oberfläche ausgeblende
 
 ## Bisherige Node-MCP-Brücke einrichten
 
-Der MCP-Server wird von einem MCP-fähigen Agenten als **stdio-Prozess** gestartet. Er stellt sechs Tools bereit:
+Der MCP-Server wird von einem MCP-fähigen Agenten als **stdio-Prozess** gestartet. Er stellt acht Tools bereit:
 
 - `list_avatars`
 - `get_avatar_capabilities`
@@ -52,6 +52,8 @@ Der MCP-Server wird von einem MCP-fähigen Agenten als **stdio-Prozess** gestart
 - `get_state`
 - `set_state`
 - `play_move`
+- `get_studio`
+- `edit_studio`
 
 Er verbindet sich über eine lokale WebSocket-Brücke mit dem geöffneten Player. Das ist kein öffentlich gehosteter HTTP-MCP-Endpunkt. Es kann genau ein Player pro Brücke gekoppelt sein.
 
@@ -90,7 +92,7 @@ Player mit `npm run dev` öffnen. Unter MCP denselben Schlüssel und `ws://127.0
 
 Ohne geöffneten, gekoppelten Player liefern die Tools eine klare Fehlermeldung. Fähigkeiten und Moves werden aus dem geladenen Modell abgefragt. Andere Avatare können gelistet werden; zur Steuerung müssen sie zuerst im Player ausgewählt werden. Nach Trennung erneut einschalten. Ein Timeout wiederholt einen Befehl nicht automatisch; er könnte bereits ausgeführt sein. Vor einem erneuten Aufruf `get_state` abfragen.
 
-Die Brücke führt weder Shell-Befehle aus noch liest sie beliebige Dateien. Sie reicht ausschließlich die beschriebenen Player-Operationen durch. Ein echter Agent muss den stdio-Server unterstützen; diese Integration richtet keine Verbindung zu einem Chat-Dienst automatisch ein.
+Die Brücke führt weder Shell-Befehle aus noch liest sie beliebige Dateien. Sie reicht ausschließlich die beschriebenen Player-/Studio-Operationen durch. Ein echter Agent muss den stdio-Server unterstützen; diese Integration richtet keine Verbindung zu einem Chat-Dienst automatisch ein.
 
 ## Direkte Browser-API
 
@@ -98,7 +100,7 @@ Seit 0.7.0 enthalten eigene Moves in `list_moves` und `get_avatar_capabilities` 
 
 Eigene Studio-Moves erscheinen nach dem Laden ihrer Projektdatei in `list_moves` und können über ihr Schlagwort ausgelöst werden. Solange das Studio geöffnet ist, werden Steuerbefehle mit einer Fehlermeldung abgewiesen, damit die aktuelle Bearbeitung erhalten bleibt. Abfragen bleiben möglich.
 
-Für eine Host-Integration im selben Browserfenster:
+Für eine Host-Integration im selben Browserfenster (Studio-Befehle siehe [MCP-Studio](MCP-STUDIO.md)):
 
 ```js
 window.PaKaChiSM.call('get_avatar_capabilities');
@@ -111,4 +113,4 @@ MCP und MQTT können gleichzeitig aktiviert werden. Es gibt keine versteckte Pri
 
 ## Prüfstand
 
-Router und Node-MCP sind Bestandteil der regulären Tests; der Python-Weg wurde in 0.4.0 mit realen Prozessen, aMQTT und produktivem MQTT-Client integriert getestet. Eine konkrete externe Host-/NanoMQ-Abnahme und die visuelle Browserabnahme stehen aus. Vollständige Übersicht: [Prüfstand](PRUEFUNG.md).
+Router und Node-MCP sind Bestandteil der regulären Tests; der Python-Weg wurde in 0.9.0 mit realen Prozessen, aMQTT, produktivem MQTT-Client und Studio-Editor integriert getestet. Eine konkrete externe Host-/NanoMQ-Abnahme und die visuelle Browserabnahme stehen aus. Vollständige Übersicht: [Prüfstand](PRUEFUNG.md).

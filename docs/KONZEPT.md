@@ -4,7 +4,7 @@ Teil der [Blaupause](README.md) · [Roadmap](ROADMAP.md) · [Changelog](CHANGELO
 
 ## Status und Begriffe
 
-Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.8.0: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und eine Gesamtpositionsspur sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau und KI-Generierung bleiben Entwicklungsziele.
+Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.9.0: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und eine Gesamtpositionsspur sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau und KI-Generierung bleiben Entwicklungsziele.
 
 - **PaKaChi:** Panda-KI-Chimera, das übergeordnete Projekt.
 - **PaKaChi-SM:** StateMaschine mit Avatar-Player und integriertem Studio.
@@ -139,11 +139,11 @@ Die lokale MCP-Schnittstelle beschreibt seit 0.2.0 die tatsächlich geladenen F�
 | play_move | Gespeicherte Bewegung auslösen |
 | set_state | Dauerhaften Zustand auswählen |
 
-Zusätzlich gibt es `get_state`. Die konkrete Einrichtung und Einschränkungen stehen in [ANSTEUERUNG.md](ANSTEUERUNG.md).
+Zusätzlich gibt es `get_state` sowie seit 0.9.0 `get_studio` und `edit_studio`. Die konkrete Einrichtung und Einschränkungen stehen in [ANSTEUERUNG.md](ANSTEUERUNG.md).
 
 MQTT ist opt-in: Schalter zum Aktivieren und ein Feld für die Broker-Adresse, etwa eines NanoMQ-Brokers. Der Player empfängt darüber Zustands- oder Bewegungsbefehle. Seit 0.4.0 kann der ausdrücklich eingerichtete Python-MCP-Prozess einen aMQTT-Broker einbetten; MCP-Anfragen und Bestätigungen laufen ebenfalls darüber. Alternativ wird ein vorhandener Broker verwendet. Die Browseroberfläche startet keinen Broker. Zugangsdaten werden nicht im Model Zoo gespeichert.
 
-Die vorhandenen Tools bedienen den Player; automatisches Bearbeiten von Studio-Gelenken über MCP ist noch nicht implementiert.
+Seit 0.9.0 können Agenten das Studio abfragen und mit zusätzlicher Sitzungsfreigabe vorhandene Skelettgriffe sowie freie Punkte, Verbindungen, Posen und Moves bearbeiten. Jeder Schreibbefehl prüft Sitzung und Bearbeitungsrevision; manuelle Änderungen machen alte Befehle ungültig. Undo/Redo und die Posen-Prüfhinweise gelten auch für KI-Änderungen. Die Schnittstelle erzeugt selbst kein KI-Modell und kein neues Quellskelett. Details: [MCP-Studio](MCP-STUDIO.md).
 
 MCP und MQTT verwenden dieselbe Befehlsprüfung und StateMaschine. Unbekannte Avatare, Moves und ungültige Nachrichten dürfen die Anwendung nicht zum Absturz bringen.
 

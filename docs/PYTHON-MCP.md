@@ -1,6 +1,6 @@
 # Python-MCP mit eingebettetem MQTT-Broker
 
-Gültig für Softwarestand 0.8.0; Integration zuletzt in 0.4.0 geprüft.
+Gültig für Softwarestand 0.9.0; Integration zuletzt in 0.9.0 einschließlich Studio geprüft.
 
 Der bevorzugte Agentenweg lautet:
 
@@ -70,10 +70,12 @@ Nach der Anmeldung dauert die Erkennung durch MCP höchstens ungefähr zwei Seku
 | `get_state` | Aktiver Zustand, Fähigkeiten und Bereitschaft. |
 | `set_state` | Unterstützten Zustand des ausgewählten Avatars setzen. |
 | `play_move` | Bewegung über ihr eindeutiges Schlagwort auslösen. |
+| `get_studio` | Sitzung, Revision, Freigabe und paginierte Punkte-/Posen-/Move-Listen abfragen. |
+| `edit_studio` | Nach zusätzlicher Studio-Freigabe einen validierten Bearbeitungsschritt ausführen. |
 
 Das SDK übernimmt MCP-Handshakes, Protokollaushandlung, Schemas und Tool-Aufrufe. Der Player bestätigt die tatsächliche Ausführung beziehungsweise meldet Fehler zurück. Ein erfolgreiches MQTT-Publish allein wird nicht als erfolgreiche Aktion ausgegeben.
 
-Die Avatar-Auswahl erfolgt weiterhin im Player. Solange das Studio geöffnet ist, werden externe Zustands-/Move-Befehle abgewiesen. Der Server bedient die Playersteuerung; er ist noch kein Werkzeug zum automatischen Setzen von Studio-Gelenken durch einen Agenten.
+Die Avatar-Auswahl erfolgt weiterhin im Player. Solange das Studio geöffnet ist, werden externe Zustands-/Move-Befehle abgewiesen. Für Studio-Änderungen stehen eigene Befehle bereit. Vorher im geöffneten 3D-Studio **KI darf dieses Studio bearbeiten** aktivieren. Die Freigabe endet beim Verlassen beziehungsweise Ersetzen des Studios. [Befehle und Beispielablauf](MCP-STUDIO.md).
 
 ## Nachrichten und Verhalten
 
@@ -107,6 +109,6 @@ $env:PAKACHI_PYTHON = "$PWD/.venv/Scripts/python.exe"
 npm run test:python
 ```
 
-Der Integrationstest startet einen echten Python-MCP-Prozess und den echten eingebetteten Broker auf freien Ports. Er verwendet den produktiven MQTT-Playerclient und den gemeinsamen Zustandsrouter. Geprüft: MCP-Handshake, sechs Tools, Rückantworten, Authentifizierung, ungültige Zustände, direkte MQTT-Steuerung, Duplikate, Ablaufzeit, Mehrdeutigkeit und Opt-out. Die Darstellung selbst wird dabei nicht in einem Browser gerendert.
+Der Integrationstest startet einen echten Python-MCP-Prozess und den echten eingebetteten Broker auf freien Ports. Er verwendet den produktiven MQTT-Playerclient und den gemeinsamen Zustandsrouter. Geprüft: MCP-Handshake, acht Tools, Studio-Abfrage, tatsächliches Anlegen eines Kontrollpunkts/Speichern einer Pose, Freigabe- und Revisionsprüfung, Rückantworten, Authentifizierung, ungültige Zustände, direkte MQTT-Steuerung, Duplikate, Ablaufzeit, Mehrdeutigkeit und Opt-out. Die Darstellung selbst wird dabei nicht in einem Browser gerendert.
 
 Die Testergebnisse und noch offenen externen Abnahmen stehen im [aktuellen Prüfstand](PRUEFUNG.md).

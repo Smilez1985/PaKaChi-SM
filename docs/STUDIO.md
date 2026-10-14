@@ -1,4 +1,4 @@
-# Avatar-Studio – 0.8.0
+# Avatar-Studio – 0.9.0
 
 Das Studio ist Teil des Players. Mika, Nori und eigene GLB-Modelle können bearbeitet werden. Der Original-PaKaChi bleibt mit beiden Formen und 72 Bildern erhalten; für ihn fehlt weiterhin das entsprechende 3D-Modell. Seine Bilder werden durch den Editor nicht verändert.
 
@@ -101,3 +101,11 @@ In **Figur bewegen → Gesamte Figur bewegen** unter **Griffe** den Eintrag **Dr
 Pose speichern, weiterdrehen und die nächste Pose speichern. Verschiebung, Gesamtdrehung, Knochen- und Gesichtspunkte werden gemeinsam interpoliert. Für eine Rolle oder 360°-Drehung beispielsweise Posen bei 0°, 90°, 180°, 270° und wieder 0° aufnehmen. Zwischen zwei Posen wird die kürzere Drehung verwendet; deshalb Zwischenabstände unter 180° wählen. Gleiche Anfangs- und Endausrichtung allein beschreibt keine volle Umdrehung.
 
 Gesamtdrehung unterstützt Undo/Redo, Projektdateien und eigene Moves im Player. Ein Projekt mit nicht neutraler Gesamtdrehung benötigt mindestens Version 0.8.0. Alte Projekte ohne Drehspur werden unverändert eingelesen. Körpergröße, Bodenkollision und Schwerkraft werden durch diese Funktion nicht gesteuert.
+
+## KI im Studio mitarbeiten lassen
+
+MCP wie in [Python-MCP](PYTHON-MCP.md) einrichten und das 3D-Studio öffnen. **KI darf dieses Studio bearbeiten** freigeben. Der Agent kann dann Punkte anlegen/ändern/löschen, Verbindungen bearbeiten, Posen speichern/anzeigen/ersetzen und Moves erstellen. Änderungen erscheinen sofort und können mit **Zurück/Wiederholen** rückgängig gemacht werden.
+
+Die Freigabe wird nicht gespeichert und endet beim Verlassen oder Ersetzen des Studios. Sie kann auch während einer Vorschau ausgeschaltet werden. Während einer Vorschau oder Ziehgeste werden KI-Schreibbefehle abgewiesen. Manuelle Änderungen machen ältere Befehle ungültig; der Agent muss den aktuellen Stand erneut lesen.
+
+Der Agent löst keinen Dateidownload aus. Das fertige Projekt weiterhin selbst mit **Speichern** herunterladen. API und Beispiel: [MCP-Studio](MCP-STUDIO.md).

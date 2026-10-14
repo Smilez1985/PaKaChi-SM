@@ -12,8 +12,27 @@ from uuid import uuid4
 from amqtt.broker import Broker
 from amqtt.client import MQTTClient
 from mcp.server import MCPServer
+from pydantic import BaseModel, ConfigDict, Field
 
 STATES = Literal['idle', 'talking', 'thinking', 'working', 'waiting', 'review', 'error', 'sleeping']
+
+class StudioCommand(BaseModel):
+    model_config = ConfigDict(extra='forbid', strict=True)
+    session: str = Field(max_length=100)
+    expectedRevision: int = Field(ge=0)
+    action: Literal['set_mode', 'add_point', 'update_point', 'delete_point', 'connect_points', 'disconnect_points', 'save_pose', 'apply_pose', 'replace_pose', 'create_move', 'undo', 'redo']
+    mode: Literal['pose', 'rig'] | None = None
+    id: str | None = Field(default=None, max_length=100)
+    target: str | None = Field(default=None, max_length=100)
+    name: str | None = Field(default=None, min_length=1, max_length=100)
+    position: list[float] | None = Field(default=None, min_length=3, max_length=3)
+    rotation: list[float] | None = Field(default=None, min_length=4, max_length=4)
+    size: float | None = Field(default=None, ge=.003, le=.15)
+    radius: float | None = Field(default=None, ge=.005, le=.6)
+    mesh: int | None = Field(default=None, ge=0)
+    seconds: float | None = Field(default=None, ge=.1, le=30)
+    loop: bool | None = None
+    poses: list[str] | None = Field(default=None, min_length=2, max_length=100)
 
 class MQTTBridge:
     def __init__(self, uri, player=None, timeout=5.0):
@@ -129,7 +148,7 @@ def build_server(uri=None, embedded=True, tcp_port=1883, ws_port=8083):
                 with suppress(Exception):
                     await broker.shutdown()
 
-    server = MCPServer('pakachi-sm', version='0.4.0', lifespan=lifespan)
+    server = MCPServer('pakachi-sm', version='0.9.0', lifespan=lifespan)
 
     async def request(method, args=None):
         if bridge is None:
@@ -167,6 +186,25 @@ def build_server(uri=None, embedded=True, tcp_port=1883, ws_port=8083):
         if not re.fullmatch(r'[a-z0-9][a-z0-9_-]{0,99}', move):
             raise ValueError('Ungültiges Move-Schlagwort.')
         return await request('play_move', {'move': move, **({'avatar': avatar} if avatar else {})})
+
+    @server.tool()
+    async def get_studio(section: Literal['info', 'points', 'poses', 'moves'] = 'info', offset: int = 0, limit: int = 32) -> dict:
+        """Studio-Sitzung, Revision, Modus und Freigabe lesen. Listen seitenweise bis 32 Elemente; nextOffset beachten. Keine Modellbytes. Positionen: normierte Weltkoordinaten; Rotation: Quaternion [x,y,z,w]."""
+        if offset < 0 or not 1 <= limit <= 32:
+            raise ValueError('Ungültige Studio-Seite.')
+        return await request('get_studio', {'section': section, 'offset': offset, 'limit': limit})
+
+    @server.tool()
+    async def edit_studio(command: StudioCommand) -> dict:
+        """Freigegebenes geöffnetes Studio bearbeiten. session/expectedRevision aus get_studio verwenden.
+        set_mode: mode=pose/rig. add_point: position, optional name/mesh/size/radius.
+        update_point: id und name/position/rotation/size/radius; $figure ist die ganze Figur.
+        delete_point: id. connect_points/disconnect_points: id,target.
+        save_pose: optional name,seconds. apply_pose/replace_pose: id.
+        create_move: id,name,poses,optional loop. undo/redo ohne weitere Felder.
+        Keine Dateizugriffe; Konflikte oder Timeouts zuerst mit get_studio aufklären.
+        """
+        return await request('edit_studio', {'command': command.model_dump(exclude_none=True)})
 
     return server
 

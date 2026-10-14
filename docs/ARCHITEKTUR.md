@@ -1,4 +1,4 @@
-# Technischer Stand 0.8.0
+# Technischer Stand 0.9.0
 
 ## Lokale Anwendung
 
@@ -24,7 +24,7 @@ Ein GLB-Import bis 50 MiB bleibt nur für die Browser-Sitzung erhalten. Externe 
 
 Der wiederhergestellte Bildplayer ist in derselben Oberfläche eingebettet und beim Start ausgewählt. Beim Wechsel zu 3D wird sein Dokument entladen. Seine separate MQTT-Oberfläche wird beim Einbetten ausgeblendet; die gemeinsame Verbindung bleibt beim Avatarwechsel bestehen und adressiert den aktuell ausgewählten Avatar. Der Originalplayer samt 72 Bildern bleibt zusätzlich direkt unter `public/legacy/pakachi/index.html` nutzbar.
 
-Die Hauptoberfläche verwendet seit 0.4.0 MQTT.js für direkten Status-Empfang und den bidirektionalen MCP-Kanal; das ursprüngliche MQTT-Modul bleibt unverändert im Originalplayer. `src/agent-panel.ts` bietet Zustandsauswahl und opt-in MQTT/MCP. `server/mcp.mjs` stellt über das offizielle MCP-SDK sechs stdio-Tools bereit; `server/bridge.mjs` verbindet sie nach Schlüssel- und Origin-Prüfung mit genau einem lokalen Player. `server/python/pakachi_mcp.py` ist der bevorzugte MCP-Server mit offiziellem SDK 2.3.0. Sein vom Host gestarteter Prozess enthält optional aMQTT 0.12.1, lokal gebunden und mit Schlüsselanmeldung. `src/mqtt-agent.ts` überträgt korrelierte Anfragen, Antworten und flüchtige Präsenzmeldungen. Der Browser startet keinen Broker; der eingebettete Broker läuft mit dem ausdrücklich eingerichteten MCP-Prozess. Ein externer Broker lässt sich alternativ konfigurieren. Details stehen in [ANSTEUERUNG.md](ANSTEUERUNG.md).
+Die Hauptoberfläche verwendet seit 0.4.0 MQTT.js für direkten Status-Empfang und den bidirektionalen MCP-Kanal; das ursprüngliche MQTT-Modul bleibt unverändert im Originalplayer. `src/agent-panel.ts` bietet Zustandsauswahl und opt-in MQTT/MCP. `server/mcp.mjs` stellt über das offizielle MCP-SDK acht stdio-Tools bereit; `server/bridge.mjs` verbindet sie nach Schlüssel- und Origin-Prüfung mit genau einem lokalen Player. `server/python/pakachi_mcp.py` ist der bevorzugte MCP-Server mit offiziellem SDK 2.3.0. Sein vom Host gestarteter Prozess enthält optional aMQTT 0.12.1, lokal gebunden und mit Schlüsselanmeldung. `src/mqtt-agent.ts` überträgt korrelierte Anfragen, Antworten und flüchtige Präsenzmeldungen. Der Browser startet keinen Broker; der eingebettete Broker läuft mit dem ausdrücklich eingerichteten MCP-Prozess. Ein externer Broker lässt sich alternativ konfigurieren. Details stehen in [ANSTEUERUNG.md](ANSTEUERUNG.md).
 
 ## Studio
 
@@ -53,3 +53,11 @@ Betroffene Moves werden aus ihren referenzierten Posen abgeleitet. Die aktiven F
 Der `$figure`-Kanal kombiniert Weltverschiebung und Gesamtdrehung um den beim Laden ermittelten Modellmittelpunkt. Die gewünschte Welttransformation wird über die inverse Elternmatrix auf die ursprüngliche Root-Matrix angewendet. Während eigener Posen bleibt die exakte Root-Matrix aktiv; so geht auch bei ungleichmäßig skalierten Eltern keine Scherkomponente durch Zerlegung verloren. Rückkehr zur Grundpose beziehungsweise zu Originalclips stellt die ursprüngliche Root-Matrix und `matrixAutoUpdate` wieder her.
 
 Die Rotationsinterpolation verwendet Quaternion-Slerp entlang des kürzeren Wegs. Für volle oder mehrfache Umdrehungen sind Zwischenposen mit weniger als 180 Grad Abstand nötig; eine gesonderte Umdrehungsanzahl wird nicht gespeichert. Die Gesamtbewegung ändert keine Skelett-Grundwerte und erzeugt daher keine Rig-Prüfhinweise.
+
+## Studio-RPC ab 0.9.0
+
+`get_studio` liefert JSON-Metadaten ohne Modellbytes. Listen sind auf maximal 32 Elemente und etwa 40 kB Nutzdaten pro Seite begrenzt, damit die Rückantwort unter dem 64-KiB-Limit beider Brücken bleibt. `nextOffset` setzt die Abfrage fort. Punkte enthalten Weltposition, Quaternion, Grundposition, Größe, Radius und Verbindungs-IDs; Posen und Moves werden als Zusammenfassungen geliefert.
+
+`edit_studio` verwendet `studio-command.ts` zur strikten Validierung der pro Aktion erlaubten Felder. Editorseitige Vorbedingungen prüfen Existenz, Modus, Limits, zusätzliche Freigabe, Studiositzung und monotone Revision. Während Gesten/Vorschauen wird nicht geschrieben. Manuelle oder externe Datenänderungen erhöhen die Revision; wiederholte veraltete Befehle werden abgewiesen. Normale Undo-Snapshots und Posen-Prüfhinweise werden auch für externe Änderungen benutzt. Die Freigabe gehört nur zur geladenen Editorsitzung und kann nicht per RPC eingeschaltet werden.
+
+Python und Node stellen dieselben acht Tools bereit. Der MQTT-Anfragekanal erlaubt die beiden Studio-Methoden ausdrücklich; das direkte Status-Topic bleibt auf Zustands-/Move-Befehle begrenzt. `save_pose` speichert im aktuellen Projekt, nicht auf der Festplatte. Es gibt keine Datei-, URL-, Codeausführungs- oder Importoperation über diese Werkzeuge.

@@ -17,6 +17,8 @@ const translations:Record<string,string>={
   'Posen · Bewegungsprüfung':'Poses · Motion review',
   'Gesamte Figur bewegen':'Move whole figure','Gesamte Figur verschieben oder drehen. Beides wird in jeder Pose gespeichert.':'Translate or rotate the whole figure. Both are saved in every pose.',
   'Posen · Gesamtdrehung':'Poses · Whole-figure rotation',
+  'KI darf dieses Studio bearbeiten':'Allow AI to edit this studio','Nur für diese Sitzung. Änderungen sind rückgängig machbar.':'This session only. Changes can be undone.','Studio-Änderung durch KI übernommen.':'AI studio edit applied.',
+  'MCP · Studio-Bearbeitung':'MCP · Studio editing',
   'Optionen':'Options','Sprache':'Language','Schließen':'Close','Drehrichtung der mittleren Maustaste invertieren':'Invert middle mouse rotation',
   'Maustaste 3 = Mausrad drücken und halten.':'Mouse button 3 = press and hold the scroll wheel.',
   'Joints automatisch erkennen':'Detect joints automatically','Joint-Verbindungen automatisch erkennen':'Detect joint connections automatically',

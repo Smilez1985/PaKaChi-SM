@@ -1,18 +1,18 @@
 # Prüfstand und Abnahme
 
-**Softwarestand: 0.8.0 · Dokumentationsabgleich: 14.10.2026.**
+**Softwarestand: 0.9.0 · Dokumentationsabgleich: 14.10.2026.**
 
 ## Nachgewiesen
 
 | Prüfung | Letzter Nachweis | Umfang und Grenze |
 | --- | --- | --- |
-| `npm test` | 0.8.0: 37 Tests bestanden | Player, Router, Studio-Daten, reale Three.js-Geometrie, DOM/Ereignisse mit happy-dom, Node-MCP und Erhaltungsprüfung. Kein gerenderter Browser. |
-| `npm run test:legacy` | 0.8.0: beide Programme bestanden | Originalplayer-Steuerung, MQTT-Verhalten und Lebenszyklus. |
-| `npm run build` | 0.8.0: bestanden | TypeScript und Produktionsbuild; Vite meldet weiterhin das große gemeinsame JS-Bundle (rund 1,12 MB / 303 kB gzip). |
-| `npm run test:python` mit `PAKACHI_PYTHON` | 0.4.0: Integration bestanden | Echter Python-MCP-Prozess, eingebetteter aMQTT-Broker, produktiver MQTT-Client und Router. Seitdem in 0.5.0–0.8.0 nicht erneut ausgeführt; Python-Code unverändert. |
-| Originaldateien | 0.8.0: bytegenau erhalten | 83 wiederhergestellte Dateien einschließlich exakt 72 Transformationsbildern. |
+| `npm test` | 0.9.0: 40 Tests bestanden | Player, Router, Studio-Daten, reale Three.js-Geometrie, DOM/Ereignisse mit happy-dom, Node-MCP und Erhaltungsprüfung. Kein gerenderter Browser. |
+| `npm run test:legacy` | 0.9.0: beide Programme bestanden | Originalplayer-Steuerung, MQTT-Verhalten und Lebenszyklus. |
+| `npm run build` | 0.9.0: bestanden | TypeScript und Produktionsbuild; Vite meldet weiterhin das große gemeinsame JS-Bundle (rund 1,12 MB / 303 kB gzip). |
+| `npm run test:python` mit `PAKACHI_PYTHON` | 0.9.0: Integration bestanden | Echter Python-MCP-Prozess, eingebetteter aMQTT-Broker, produktiver MQTT-Client, Router und Studio-Editor. Acht Tools, Studio-Änderungen, fehlende Freigabe und Revisionskonflikte geprüft. |
+| Originaldateien | 0.9.0: bytegenau erhalten | 83 wiederhergestellte Dateien einschließlich exakt 72 Transformationsbildern. |
 
-Drei neue Prüfungen in 0.8.0 decken Gesamtdrehung an echter skinned Geometrie, mitgeführte/bearbeitbare Gesichtspunkte, ungleichmäßig skalierte Eltern, Interpolation, Projektpersistenz, Undo und Wiederherstellung der Ausgangslage ab.
+Drei neue reguläre Tests in 0.9.0 prüfen den Studio-Agentenablauf, Freigabe/Sitzung/Revision und atomare Ablehnung ungültiger Befehle sowie begrenzte Antworten. Node- und Python-MCP-Integration sind erweitert.
 
 ## Noch nicht abgenommen
 
@@ -35,4 +35,4 @@ Diese Liste beschreibt ausstehende Prüfungen, keine bereits erzielten Ergebniss
 
 ## Historische Berichte
 
-[0.1.0](PRUEFUNG-0.1.0.md) · [0.2.0](PRUEFUNG-0.2.0.md) · [0.3.0](PRUEFUNG-0.3.0.md) · [0.4.0](PRUEFUNG-0.4.0.md) · [0.5.0](PRUEFUNG-0.5.0.md) · [0.6.0](PRUEFUNG-0.6.0.md) · [0.7.0](PRUEFUNG-0.7.0.md) · [0.8.0](PRUEFUNG-0.8.0.md)
+[0.1.0](PRUEFUNG-0.1.0.md) · [0.2.0](PRUEFUNG-0.2.0.md) · [0.3.0](PRUEFUNG-0.3.0.md) · [0.4.0](PRUEFUNG-0.4.0.md) · [0.5.0](PRUEFUNG-0.5.0.md) · [0.6.0](PRUEFUNG-0.6.0.md) · [0.7.0](PRUEFUNG-0.7.0.md) · [0.8.0](PRUEFUNG-0.8.0.md) · [0.9.0](PRUEFUNG-0.9.0.md)

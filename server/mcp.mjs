@@ -5,8 +5,12 @@ import { createBridge } from './bridge.mjs';
 
 const bridge = createBridge({token: process.env.PAKACHI_TOKEN, port: Number(process.env.PAKACHI_PORT ?? 8765)});
 bridge.server.on('error', error => { console.error(`PaKaChi-Brücke: ${error.message}`); process.exit(1); });
-const server = new McpServer({name:'pakachi-sm', version:'0.2.0'});
+const server = new McpServer({name:'pakachi-sm', version:'0.9.0'});
+const studioActions=['set_mode','add_point','update_point','delete_point','connect_points','disconnect_points','save_pose','apply_pose','replace_pose','create_move','undo','redo'];
+const studioCommand=z.object({session:z.string().max(100),expectedRevision:z.number().int().nonnegative(),action:z.enum(studioActions),mode:z.enum(['pose','rig']).optional(),id:z.string().max(100).optional(),target:z.string().max(100).optional(),name:z.string().min(1).max(100).optional(),position:z.array(z.number().min(-100).max(100)).length(3).optional(),rotation:z.array(z.number().min(-1).max(1)).length(4).optional(),size:z.number().min(.003).max(.15).optional(),radius:z.number().min(.005).max(.6).optional(),mesh:z.number().int().nonnegative().optional(),seconds:z.number().min(.1).max(30).optional(),loop:z.boolean().optional(),poses:z.array(z.string().max(100)).min(2).max(100).optional()}).strict();
 const schemas = {
+  get_studio:{section:z.enum(['info','points','poses','moves']).optional(),offset:z.number().int().nonnegative().optional(),limit:z.number().int().min(1).max(32).optional()},
+  edit_studio:{command:studioCommand},
   list_avatars: {},
   get_avatar_capabilities: { avatar: z.string().optional() },
   list_moves: { avatar: z.string().optional() },
@@ -15,6 +19,8 @@ const schemas = {
   play_move: { move: z.string().min(1).max(100), avatar: z.string().optional() },
 };
 const descriptions = {
+  get_studio:'Studio-Sitzung, Revision, Modus und Freigabe abfragen; points/poses/moves seitenweise bis 32 Elemente. nextOffset beachten. Keine Modellbytes. Positionen sind normierte Weltkoordinaten, Rotation Quaternion [x,y,z,w].',
+  edit_studio:'Freigegebenes geöffnetes Studio bearbeiten. session und expectedRevision aus get_studio verwenden. set_mode: mode=pose/rig; add_point: position, optional name/mesh/size/radius; update_point: id, optionale name/position/rotation/size/radius; delete_point: id; connect_points/disconnect_points: id,target; save_pose: optional name,seconds; apply_pose/replace_pose: id; create_move: id,name,poses,optional loop; undo/redo. $figure bezeichnet die ganze Figur. Keine Dateizugriffe. Bei Konflikten/Timeout erneut get_studio abfragen.', 
   list_avatars: 'Avatare im geöffneten Model Zoo auflisten. Auswahl erfolgt im Player.',
   get_avatar_capabilities: 'Tatsächlich geladene Fähigkeiten des ausgewählten Avatars abfragen.',
   list_moves: 'Tatsächlich verfügbare Moves des ausgewählten Avatars auflisten.',
@@ -24,7 +30,7 @@ const descriptions = {
 };
 for (const [name, schema] of Object.entries(schemas)) {
   server.registerTool(name, { description: descriptions[name], inputSchema: schema,
-    annotations: {readOnlyHint: !['set_state','play_move'].includes(name), destructiveHint:false, openWorldHint:false} }, async args => {
+    annotations: {readOnlyHint: !['set_state','play_move','edit_studio'].includes(name), destructiveHint:false, openWorldHint:false} }, async args => {
     try { return {content:[{type:'text', text:JSON.stringify(await bridge.request(name, args))}]}; }
     catch (error) { return {isError:true, content:[{type:'text', text:error.message}]}; }
   });
