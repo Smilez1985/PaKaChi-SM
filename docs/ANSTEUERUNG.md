@@ -1,6 +1,6 @@
 # Agentensteuerung
 
-Gültig für Softwarestand 0.10.0.
+Gültig für Softwarestand 0.11.0.
 
 **Bevorzugter Weg seit 0.4.0:** [Python-MCP 2.3.0 mit eingebettetem aMQTT-Broker](PYTHON-MCP.md). MCP-Anfragen und Player-Antworten laufen dort über denselben MQTT-Broker. Die folgende Node-Einrichtung bleibt als Kompatibilitätsweg erhalten.
 

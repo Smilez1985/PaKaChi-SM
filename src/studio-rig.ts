@@ -1,3 +1,5 @@
+import {solveLimb} from './studio-ik.ts';
+import {detectConnections,edgeKey} from './studio-detection.ts';
 import * as T from 'three';
 import { emptyStudio, FIGURE_TRACK, neutralFigure, validFigureScale } from './studio-data.ts';
 import type { ControlPoint, StudioData, Transform, Vec3, Pose, StudioMove } from './studio-data.ts';
@@ -49,6 +51,7 @@ export class StudioRig {
     if(saved) {
       if(saved.boneRest.length!==this.bones.length || saved.points.some(p=>p.mesh!==undefined && p.mesh>=this.surfaces.length))throw new Error('Studio-Daten passen nicht zum enthaltenen Modell.');
     }
+    if(!saved){this.data.links=detectConnections(this);this.initial.links=structuredClone(this.data.links);}
     this.reset();
   }
   reset() {
@@ -107,10 +110,39 @@ export class StudioRig {
     // SkinnedMesh updates its inverse bind matrix in updateMatrixWorld, not updateWorldMatrix.
     this.root.updateMatrixWorld(true);
   }
-  setPoint(p:ControlPoint, position:T.Vector3, rotation:T.Quaternion, edit:boolean) {
+  isBoneConnection(a:ControlPoint,b:ControlPoint):boolean {
+    if(a.kind!=='bone'||b.kind!=='bone')return false;
+    const x=this.bones[a.bone!],y=this.bones[b.bone!];return x.parent===y||y.parent===x;
+  }
+  validateConnection(a:ControlPoint,b:ControlPoint) {
+    if((a.kind==='bone'||b.kind==='bone')&&!this.isBoneConnection(a,b))throw new Error('Gelenkketten verbinden benachbarte Quellknochen. Freie Punkte lassen sich untereinander gruppieren.');
+  }
+  /** Only actual connected parent bones drive IK; arbitrary lines never rewrite a source rig. */
+  poseChain(p:ControlPoint):T.Bone[] {
+    if(p.kind!=='bone')return [];
+    const byBone=new Map(this.data.points.filter(p=>p.kind==='bone').map(p=>[this.bones[p.bone!],p]));
+    const edges=new Set(this.data.links.map(edgeKey)),result:T.Bone[]=[];
+    let child=this.bones[p.bone!];
+    while(result.length<2&&child.parent instanceof T.Bone){
+      const parent=child.parent,a=byBone.get(child),b=byBone.get(parent);
+      if(!a||!b||!edges.has(edgeKey([a.id,b.id]))||parent.children.filter(n=>n instanceof T.Bone).length>1)break;
+      result.push(parent);child=parent;
+    }
+    return result;
+  }
+  setPoint(p:ControlPoint, position:T.Vector3, rotation:T.Quaternion, edit:boolean, intent?:'translate'|'rotate'|'both') {
     if(p.id===FIGURE_TRACK){if(!edit)this.setFigureTransform(position.clone().sub(new T.Vector3().fromArray(this.figure.rest)),rotation);return;}
     if(p.kind==='bone') {
       const bone=this.bones[p.bone!];
+      if(!edit){
+        const mode=intent??(position.distanceTo(this.position(p))>1e-7?'both':'rotate');
+        if(mode!=='rotate'){
+          if(!(bone.parent instanceof T.Bone))this.setFigureOffset(this.figureOffset.clone().add(position.clone().sub(this.position(p))));
+          else solveLimb(bone,this.poseChain(p),position);
+        }
+        if(mode!=='translate'){const parentQ=bone.parent!.getWorldQuaternion(new T.Quaternion());bone.quaternion.copy(parentQ.invert().multiply(rotation));}
+        this.root.updateWorldMatrix(true,true);this.root.updateMatrixWorld(true);this.deform();return;
+      }
       const children=bone.children.map(node=>({node,world:node.getWorldPosition(new T.Vector3())}));
       bone.position.copy(bone.parent!.worldToLocal(position.clone()));
       const parentQ=bone.parent!.getWorldQuaternion(new T.Quaternion());bone.quaternion.copy(parentQ.invert().multiply(rotation));

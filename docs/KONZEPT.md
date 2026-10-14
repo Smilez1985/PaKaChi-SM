@@ -4,7 +4,7 @@ Teil der [Blaupause](README.md) · [Roadmap](ROADMAP.md) · [Changelog](CHANGELO
 
 ## Status und Begriffe
 
-Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.10.0: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau und KI-Generierung bleiben Entwicklungsziele.
+Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.11.0: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau und KI-Generierung bleiben Entwicklungsziele.
 
 - **PaKaChi:** Panda-KI-Chimera, das übergeordnete Projekt.
 - **PaKaChi-SM:** StateMaschine mit Avatar-Player und integriertem Studio.
@@ -42,7 +42,7 @@ Es gibt keine Beschränkung auf humanoide Figuren. Zusätzliche Arme, Flügel, S
 
 ### Figur bewegen
 
-Körperteile direkt mit der Maus greifen und in eine Pose ziehen. Gesichtsausdrücke und die Gesamtposition sollen ebenfalls bearbeitbar sein. Verständliche Griffpunkte ersetzen technische Knochenlisten und Zahlenfelder im normalen Arbeitsablauf.
+Körperteile direkt mit der Maus greifen und in eine Pose ziehen. Die Gelenklinien bilden zusammenhängende Bewegungsketten des gesamten Körpers: Hand–Ellenbogen–Schulter, Fuß–Knie–Hüfte sowie Rumpf–Hals–Kopf. Ziehen muss die Kette beugen, ohne Körperteile zu trennen oder Knochen künstlich zu verlängern. Gesichtsausdrücke und die Gesamtposition sollen ebenfalls bearbeitbar sein. Verständliche Griffpunkte ersetzen technische Knochenlisten und Zahlenfelder im normalen Arbeitsablauf.
 
 Drehen der Ansicht und Bewegen der Figur müssen klar unterscheidbar sein. Räumliches Positionieren darf kein Wissen über 3D-Koordinaten voraussetzen.
 
@@ -56,7 +56,7 @@ Beispiel: Fehlt das rechte Knie, fügt der Benutzer dort einen Gelenkpunkt hinzu
 
 **Erforderliche Hintergrundarbeit:** Der Editor muss die Skelettverbindungen, die räumliche Tiefe des Gelenks und die Zuordnung der Oberfläche zu den Gelenken bestimmen oder korrigieren. Ein sichtbarer Punkt allein macht das Modell noch nicht beweglich. Bei mehrdeutiger Zuordnung soll eine einfache visuelle Korrektur möglich sein.
 
-Seit 0.5.0 erkennen zwei Buttons vorhandene Skelettgriffe und Eltern-Kind-Verbindungen. Manuelle Verbindungen lassen sich gezielt ergänzen und einzeln entfernen. Diese Erkennung wertet Modelldaten aus; anatomische KI-Erkennung für Figuren ohne Skelett bleibt offen.
+Seit 0.11.0 wird das gesamte vorhandene Skelett beim neuen Laden verbunden. Ein-/Zweiglied-Ketten drehen sich beim Ziehen mit festen lokalen Knochenabständen; Rumpfbewegung trägt den Körper mit. Die Ausrichtung ist durch direktes Ziehen im Drehmodus änderbar. Anatomische Winkelgrenzen und Ganzkörper-IK bleiben offen. Seit 0.5.0 erkennen zwei Buttons vorhandene Skelettgriffe und Eltern-Kind-Verbindungen. Manuelle Verbindungen lassen sich gezielt ergänzen und einzeln entfernen. Diese Erkennung wertet Modelldaten aus; anatomische KI-Erkennung für Figuren ohne Skelett bleibt offen.
 
 ### Präzision und frei gestaltbare Kontrollpunkte
 

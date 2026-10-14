@@ -1,11 +1,11 @@
-# Avatar-Studio – 0.10.0
+# Avatar-Studio – 0.11.0
 
 Das Studio ist Teil des Players. Mika, Nori und eigene GLB-Modelle können bearbeitet werden. Der Original-PaKaChi bleibt mit beiden Formen und 72 Bildern erhalten; für ihn fehlt weiterhin das entsprechende 3D-Modell. Seine Bilder werden durch den Editor nicht verändert.
 
 ## Eine erste eigene Bewegung
 
 1. Im Player einen 3D-Avatar auswählen und **Avatar-Studio** öffnen. Die laufende Animation hält an und die Grundpose wird angezeigt.
-2. In **Figur bewegen** einen Skelettpunkt anklicken oder aus der Liste wählen. Den Punkt direkt oder an einem farbigen Achsgriff ziehen. Unter **Griffe → Drehen** lässt sich ein Skelettpunkt drehen; seine gebundenen Körperteile folgen. X/Y/Z ermöglichen genaue Positionen.
+2. In **Figur bewegen** einen Skelettpunkt anklicken oder aus der Liste wählen. Den Punkt direkt oder an einem farbigen Achsgriff ziehen. Verbundene Skelettpunkte beugen dabei die Kette mit erhaltenen Knochenlängen. Unter **Griffe → Drehen** lässt sich ein Skelettpunkt drehen; seine gebundenen Körperteile folgen. X/Y/Z ermöglichen genaue Positionen.
 3. Einen Posennamen eingeben und **Aktuelle Pose speichern** wählen. Figur verändern und eine zweite Pose speichern.
 4. Die Übergangszeit jeder Pose festlegen. Mit **Früher/Später** wird die Reihenfolge für die nächste gespeicherte Bewegung geändert. **Anzeigen** lädt eine Pose; **Ersetzen** übernimmt die aktuelle Haltung.
 5. Bewegungsname und eindeutiges Schlagwort eingeben, z. B. `laecheln`. **Bewegung speichern** übernimmt alle Posen in der angezeigten Reihenfolge. Eine Bewegung benötigt mindestens zwei Posen. Optional läuft sie als Schleife.
@@ -21,7 +21,7 @@ Die Zeit der ersten Pose bestimmt bei Schleifen den Rückweg von der letzten zur
 | Mausrad drücken/halten und Maus bewegen | Ansicht frei um alle Achsen drehen; am Rand der virtuellen Kugel auch rollen. |
 | Rechts ziehen | Ansicht verschieben. |
 | Mausrad drehen | Zum Zeiger zoomen, etwa bis zu Mund oder Augenlid. |
-| Links auf einem Punkt ziehen | Punkt auf der Ansichtsebene verschieben. |
+| Links auf einem Punkt ziehen | Im Verschiebemodus: Ziel für die Gelenkkette setzen oder freien Punkt verschieben. Im Drehmodus: Gelenk/Ausrichtung drehen. |
 | Farbige Achsgriffe ziehen | Punkt entlang einer Achse bewegen; Skelettpunkte im Drehmodus rotieren. |
 
 Zur Navigation sind keine Tastaturmodifikatoren oder Ansichtsbuttons nötig. Feste Ansichten und Rolltasten bleiben zusätzliche Hilfen; der Sockel ist im Studio ausgeblendet. Die Drehrichtung lässt sich in den Optionen invertieren.
@@ -35,7 +35,7 @@ Die Anordnung ist frei; innerhalb des Limits von 256 Kontrollpunkten gibt es kei
 - **Punktgröße** verändert nur die sichtbare Kugel. Kleine Mundpunkte können unabhängig von großen Kniepunkten eingestellt werden. Eine Mindest-Auswahlfläche von 10 Bildschirmpixeln erleichtert das Treffen kleiner Punkte; bei dicht benachbarten Punkten hilft die Auswahlliste.
 - **Einflussbereich** bestimmt separat, wie weit die Oberflächenverformung reicht. Sie fällt zum Rand weich ab. Ein Punkt auf einer Oberfläche wirkt zunächst nur auf dieses Teilmodell; ein frei im Raum gesetzter Punkt kann mehrere Oberflächen in seinem Radius beeinflussen. Zu kleine Radien können zwischen groben Vertices liegen und dann keine sichtbare Verformung erzeugen.
 - **Verbinden / lösen** und anschließend der zweite Punkt erzeugen oder entfernen eine freie Verbindung. Getrennte Mund-, Augen- und Körpergruppen sind möglich. Es gibt keinen Zwang, sie an ein vorhandenes Skelett anzuschließen.
-- In **Figur bewegen** kann **Verbundene freie Punkte gemeinsam bewegen** aktiviert werden. Die verbundenen Oberflächenpunkte verschieben sich dann zusammen. Verbindungen erzeugen keine automatische Gelenkphysik oder inverse Kinematik.
+- In **Figur bewegen** kann **Verbundene freie Punkte gemeinsam bewegen** aktiviert werden. Die verbundenen Oberflächenpunkte verschieben sich dann zusammen. Diese freien Punktgruppen erzeugen keine Knochen. Die getrennt beschriebenen Skelettketten verwenden dagegen seit 0.11.0 inverse Kinematik.
 - Freie Oberflächenpunkte folgen beim Posieren der Hautbindung am nächstgelegenen Vertex. Ihre eigene Verformung wird vor der Skelettverformung angewendet. Bei komplexen Gelenkübergängen muss die Zuordnung visuell geprüft werden.
 
 ## Bestehende Skelettpunkte und Änderungen
@@ -76,7 +76,7 @@ Eine Pose speichern, die Figur erneut versetzen und eine zweite Pose speichern. 
 - Während der Studio-Bearbeitung werden Zustands-/Move-Befehle aus MQTT, MCP und der Browser-API mit einer verständlichen Fehlermeldung abgewiesen. Es gibt keine nachträglich abgespielte Warteschlange. Zurück im Player sind eigene Moves normal steuerbar.
 - Maximal 256 Kontrollpunkte, 2048 Verbindungen, 100 Posen und 100 eigene Moves pro Projekt; maximal 80 MiB beim Projektimport. Eingebettete Modelldaten unterliegen zusätzlich dem GLB-Limit von 50 MiB. Aufwendige Modelle und viele gleichzeitig verformende Punkte können langsam sein.
 - Die Datei ist ein versioniertes Studio-Projekt, kein GLB-Export und kein automatischer Eintrag im gemeinsamen Model Zoo auf GitHub. Die eigenen Moves werden mit dem geladenen Projekt im Player angeboten.
-- Keine automatische 3D-/Skelettgenerierung, Gewichts-Malwerkzeuge, IK, Skalierung oder eigenständiger GLB-Export.
+- Keine automatische 3D-/Skelettgenerierung, Gewichts-Malwerkzeuge, anatomische Gelenkgrenzen, Ganzkörper-IK oder eigenständiger GLB-Export.
 - Automatisierte Geometrie-, Daten- und DOM-Tests sind bestanden. Die visuelle Maus-/WebGL-Abnahme muss weiterhin in einem Browser erfolgen; Chromium kann in der aktuellen Ausführungsumgebung nicht starten.
 
 ## Posen nach Gelenkänderungen prüfen
@@ -117,3 +117,17 @@ In **Figur bewegen → Gesamte Figur bewegen** den Regler **Figurgröße** mit d
 Die Skalierung bleibt proportional und erfolgt um den ursprünglichen Modellmittelpunkt, gemeinsam mit Verschiebung und Drehung. Skelett und Gesichtspunkte folgen mit; die separat eingestellte sichtbare Griffgröße bleibt erhalten. Zwei unterschiedlich große Posen speichern und daraus einen Move erstellen: Die Größe wird zwischen den Posen linear interpoliert, auch beim Rückweg einer Schleife. **Grundpose** und Originalclips stellen die Ausgangsgröße wieder her.
 
 Arbeitspose, gespeicherte Posen und Projektdateien enthalten den Größenfaktor. Alte Dateien ohne Faktor verwenden 100 %. Projekte mit Größenänderungen benötigen **0.10.0 oder neuer**: Ältere Versionen ignorieren die neue Spur. Die Funktion verändert keine Modellqualität oder Dateigröße und ersetzt keine Schwerkraft/Bodenkollision. Unterschiedliche Skalierung je Achse oder einzelner Körperteile ist nicht enthalten.
+
+## Verbundener Körper statt Auseinanderziehen
+
+Ab 0.11.0 verschiebt **Figur bewegen** die lokalen Skelettknochen nicht mehr einzeln. Hand ziehen dreht Ellenbogen und Schulter; Fuß ziehen dreht Knie und Hüfte. Der Ansatz der Kette bleibt stehen. Ein Ziel außerhalb der Reichweite wird auf die erreichbare Länge begrenzt. Bei Kopf/Hals wirkt die vorhandene kurze Kette; Ziehen am Rumpf-Wurzelpunkt verschiebt die ganze Figur einschließlich Kopf und Gliedmaßen. Füße bleiben dabei nicht am Boden fixiert.
+
+Bei frisch geladenen 3D-Modellen werden alle vorhandenen Eltern-Kind-Verbindungen automatisch als Linien angelegt, nicht nur Arme. In **Gelenke bearbeiten** ergänzen **Joints automatisch erkennen** und **Joint-Verbindungen automatisch erkennen** gelöschte Griffe beziehungsweise Linien aus dem Quellskelett. Vorhandene manuelle Punkte bleiben erhalten. Neue Oberflächenmodelle ohne Knochen benötigen weiterhin echtes Rigging; aus ihnen erzeugt dieser Button noch kein anatomisches Skelett.
+
+Manuell: einen Skelettpunkt auswählen, **Verbinden / lösen**, den benachbarten Skelettpunkt anklicken. Die Liste kennzeichnet **Gelenkkette** und **Punktgruppe**. Als Gelenkkette sind direkte Eltern-Kind-Paare des Quellmodells möglich. Unpassende neue Querverbindungen, etwa linke Hand zu rechtem Fuß, werden mit einer Erklärung abgewiesen. Eine entfernte Kettenlinie beendet die dortige Mitbewegung, löst aber niemals die Haut vom Skelett. Freie Gesichtspunkte lassen sich weiterhin untereinander gruppieren; ein frei gesetzter Punkt ist noch kein neuer Quellknochen.
+
+Unter **Griffe → Drehen** den Punkt direkt mit der Maus ziehen: horizontal/vertikal verändert die Ausrichtung relativ zur Ansicht. Die Drehringe bieten weiterhin einzelne Achsen. Drehbewegungen verändern keine Knochenabstände. Sowohl Ziehen als auch Drehen bleiben als vollständige Gesten rückgängig machbar und werden in Posen/Moves gespeichert.
+
+Mika und Nori enthalten im Beispiel-Rig 2 zusätzlich Hand-, Knie-, Fuß- und Halsknochen mit entsprechenden Hautzuordnungen. Zum Testen die Avatare frisch aus dem Katalog laden. Ein altes Projekt enthält weiterhin sein ursprüngliches Modell; fehlende Hand-/Knieknochen werden dort nicht nachträglich erfunden. Bereits mit älteren Versionen auseinandergezogene Posen bleiben erhalten und müssen aus der Grundpose neu aufgenommen oder ersetzt werden.
+
+**Grenzen:** Die Kettenlösung dreht bis zu zwei verbundene Vorfahren und stoppt vor verzweigten Körperansätzen. Sie ist keine vollständige Körperphysik. Anatomische Winkelgrenzen, Kollisionen, fixierte Füße und gekoppelte Ganzkörper-IK bleiben offen. Die bisherige Form/Beugeseite wird bevorzugt, aber nicht anatomisch bewertet; komplexe Import-Rigs müssen geprüft werden. **Gelenke bearbeiten** darf weiterhin bewusst die Grundstellung ändern.

@@ -6,7 +6,7 @@
       "name": "Mika",
       "description": "Ein kleiner Panda. Drei Bewegungen, ein guter Anfang.",
       "model": "model-zoo/mika/model.gltf",
-      "rigVersion": "fixture-rig-1",
+      "rigVersion": "fixture-rig-2",
       "defaultMove": "idle",
       "states": {
         "idle": "idle",
@@ -58,7 +58,7 @@
       "name": "Nori",
       "description": "Ein neugieriger Roboter mit eigenem Bewegungsrepertoire.",
       "model": "model-zoo/nori/model.gltf",
-      "rigVersion": "fixture-rig-1",
+      "rigVersion": "fixture-rig-2",
       "defaultMove": "idle",
       "states": {
         "idle": "idle",

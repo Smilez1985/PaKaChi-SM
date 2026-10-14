@@ -1,6 +1,6 @@
 # Python-MCP mit eingebettetem MQTT-Broker
 
-Gültig für Softwarestand 0.10.0; Integration zuletzt in 0.10.0 einschließlich Studio-Skalierung geprüft.
+Gültig für Softwarestand 0.11.0; Integration zuletzt in 0.10.0 einschließlich Studio-Skalierung geprüft.
 
 Der bevorzugte Agentenweg lautet:
 

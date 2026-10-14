@@ -20,13 +20,20 @@ function avatar(robot = false) {
     bones.push(b); return b;
   }
   const root = bone('Root', null, [0, 0.82, 0]);
-  const head = bone('Head', root, [0, 0.86, 0]);
+  const neck = bone('Neck', root, [0, 0.66, 0]);
+  const head = bone('Head', neck, [0, 0.20, 0]);
   const left = bone('LeftShoulder', root, [0.46, 0.47, 0]);
   const right = bone('RightShoulder', root, [-0.46, 0.47, 0]);
   const leftElbow = bone('LeftElbow', left, [0.13, -0.34, 0]);
   const rightElbow = bone('RightElbow', right, [-0.13, -0.34, 0]);
   const leftLeg = bone('LeftHip', root, [0.24, -0.30, 0]);
   const rightLeg = bone('RightHip', root, [-0.24, -0.30, 0]);
+  const leftKnee=bone('LeftKnee',leftLeg,[0,-.25,0]);
+  const rightKnee=bone('RightKnee',rightLeg,[0,-.25,0]);
+  const leftFoot=bone('LeftFoot',leftKnee,[0,-.23,.07]);
+  const rightFoot=bone('RightFoot',rightKnee,[0,-.23,.07]);
+  const leftHand=bone('LeftHand',leftElbow,[.02,-.25,0]);
+  const rightHand=bone('RightHand',rightElbow,[-.02,-.25,0]);
   root.updateMatrixWorld(true);
   const light = new T.MeshStandardMaterial({ color: robot ? 0xe7b85d : 0xf1eee3, roughness: 0.52, metalness: robot ? 0.35 : 0.02 });
   const dark = new T.MeshStandardMaterial({ color: 0x223b3c, roughness: 0.57 });
@@ -57,8 +64,14 @@ function avatar(robot = false) {
   shape(right, [-0.06, -0.15, 0], [0.16, 0.25, 0.17], dark);
   shape(leftElbow, [0.02, -0.12, 0], [0.16, 0.22, 0.17], robot ? light : dark);
   shape(rightElbow, [-0.02, -0.12, 0], [0.16, 0.22, 0.17], robot ? light : dark);
-  shape(leftLeg, [0, -0.20, 0.07], [0.21, 0.30, 0.26], dark);
-  shape(rightLeg, [0, -0.20, 0.07], [0.21, 0.30, 0.26], dark);
+  shape(leftHand,[0,-.045,.015],[.14,.11,.15],dark);
+  shape(rightHand,[0,-.045,.015],[.14,.11,.15],dark);
+  shape(leftLeg, [0, -.12, 0], [.2,.19,.2], dark);
+  shape(leftKnee, [0,-.10,.03], [.18,.18,.2], dark);
+  shape(leftFoot, [0,-.03,.06], [.21,.08,.26], dark);
+  shape(rightLeg, [0, -.12, 0], [.2,.19,.2], dark);
+  shape(rightKnee, [0,-.10,.03], [.18,.18,.2], dark);
+  shape(rightFoot, [0,-.03,.06], [.21,.08,.26], dark);
   const mesh = new T.SkinnedMesh(mergeGeometries(parts, true), materials);
   mesh.name = robot ? 'Nori' : 'Mika';
   mesh.add(root); mesh.bind(new T.Skeleton(bones));
@@ -96,7 +109,7 @@ for (const [id, name, description, robot] of [
   await mkdir(dir, { recursive: true });
   await writeFile(new URL('model.gltf', dir), JSON.stringify(gltf));
   const labels = { idle: 'Entspannen', winken: 'Winken', nicken: 'Nicken', umschauen: 'Umschauen', thinking: 'Denken', talking: 'Sprechen', working: 'Arbeiten' };
-  catalog.avatars.push({ id, name, description, model: `model-zoo/${id}/model.gltf`, rigVersion: 'fixture-rig-1',
+  catalog.avatars.push({ id, name, description, model: `model-zoo/${id}/model.gltf`, rigVersion: 'fixture-rig-2',
     defaultMove: 'idle', states: {idle:'idle', thinking:'thinking', talking:'talking', working:'working'}, moves: clips.map(c => ({ id: c.name, clip: c.name, name: labels[c.name], loop: ['idle','thinking','talking','working'].includes(c.name) })) });
 }
 await writeFile(new URL('../public/model-zoo/catalog.json', import.meta.url), JSON.stringify(catalog, null, 2) + '\n');

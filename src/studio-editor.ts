@@ -39,11 +39,11 @@ export class StudioEditor {
     view.onAdd=(position,mesh)=>this.addPoint(position,mesh);
     view.onConnect=id=>this.connect(id);
     view.onStart=()=>{this.gesture=this.snapshot();this.gesturePosition=this.point ? rig.position(this.point):null;this.gesturePositions=new Map(rig.data.points.map(p=>[p.id,rig.position(p)]));};
-    view.onMove=(position,rotation)=>{
+    view.onMove=(position,rotation,intent)=>{
       const p=this.point;if(!p)return;
       if(p.id!==FIGURE_TRACK && this.groupMove && !this.edit && p.kind==='surface' && this.gesture && this.gesturePosition){const delta=position.clone().sub(this.gesturePosition), connected=connectedPoints(rig.data,p.id);
         for(const q of rig.data.points.filter(q=>q.kind==='surface'&&connected.has(q.id))){rig.setPoint(q,this.gesturePositions.get(q.id)!.clone().add(delta),new T.Quaternion(),false);}
-      }else rig.setPoint(p,position,rotation,this.edit);
+      }else rig.setPoint(p,position,rotation,this.edit,intent??(this.rotate?'rotate':'translate'));
       this.view.refresh();this.refreshNumbers();
     };
     view.onEnd=()=>{if(this.gesture){flagAffectedPoses(this.gesture.data,this.data);this.history.push(this.gesture);this.gesture=null;this.mark();this.render();}};
@@ -80,6 +80,8 @@ export class StudioEditor {
     this.view.setAction('select');this.hooks.feedback('Punkt gesetzt. Größe und Einflussbereich sind getrennt einstellbar.');
   }
   private connect(id:string){if(!this.edit||!this.selected||id===this.selected)return;
+    const a=this.data.points.find(p=>p.id===this.selected),b=this.data.points.find(p=>p.id===id);if(!a||!b)return;
+    if(!this.data.links.some(l=>l.includes(a.id)&&l.includes(b.id))){try{this.rig.validateConnection(a,b);}catch(e){this.hooks.feedback((e as Error).message);return;}}
     this.mutate(()=>{const index=this.data.links.findIndex(([a,b])=>(a===id&&b===this.selected)||(b===id&&a===this.selected));if(index>=0)this.data.links.splice(index,1);else if(this.data.links.length<2048)this.data.links.push([this.selected!,id]);});this.view.setAction('select');
   }
   private refreshNumbers(){const label=this.host.querySelector('#figure-scale-value');if(label)label.textContent=`${Math.round(this.rig.scale*100)} %`;const p=this.point;if(!p)return;const pos=this.rig.position(p);['x','y','z'].forEach((axis,i)=>{const input=this.host.querySelector<HTMLInputElement>(`#point-${axis}`);if(input)input.value=pos.toArray()[i].toFixed(3);});}
@@ -89,7 +91,7 @@ export class StudioEditor {
     const selected=this.selected;const poses=this.data.poses;
     this.host.innerHTML=`<h2>Avatar-Studio</h2><label class="check"><input id="studio-agent-edit" type="checkbox" ${this.agentEditing?'checked':''}> KI darf dieses Studio bearbeiten</label><p class="subtle">Nur für diese Sitzung. Änderungen sind rückgängig machbar.</p><div class="studio-file-actions"><button id="studio-new">Neu</button><button id="studio-save">Speichern${this.dirty?' *':''}</button></div>
     <div class="studio-modes" role="group" aria-label="Bearbeitungsmodus"><button id="mode-pose" aria-pressed="${!this.edit}">Figur bewegen</button><button id="mode-rig" aria-pressed="${this.edit}">Gelenke bearbeiten</button></div>
-    <p class="subtle">${this.edit?'Punkte setzen und verbinden. Bestehende Skelettpunkte verschieben ihren Drehpunkt.':'Punkt direkt ziehen oder farbige Griffe verwenden. Skelettpunkte können auch gedreht werden.'}</p>
+    <p class="subtle">${this.edit?'Punkte setzen und verbinden. Bestehende Skelettpunkte verschieben ihren Drehpunkt.':'Ziehen bewegt verbundene Gelenkketten. Unter Drehen lässt sich die Ausrichtung direkt mit der Maus ändern.'}</p>
     <div class="studio-actions"><button id="studio-undo" ${this.history.canUndo?'':'disabled'}>↶ Zurück</button><button id="studio-redo" ${this.history.canRedo?'':'disabled'}>↷ Wiederholen</button></div>
     <div class="studio-detection" ${this.edit?'':'hidden'}><button id="detect-joints">Joints automatisch erkennen</button><button id="detect-links">Joint-Verbindungen automatisch erkennen</button><p class="subtle">Erkennung verwendet vorhandene Skelettdaten. Für Modelle ohne Skelett ist KI-Rigging noch nicht verfügbar.</p></div>
     <button id="figure-select" ${this.edit?'hidden':''}>Gesamte Figur bewegen</button>
@@ -135,7 +137,7 @@ export class StudioEditor {
       if(this.data.links.length+edges.length>2048)throw new Error('Höchstens 2048 Verbindungen.');
       this.mutate(()=>this.data.links.push(...edges));this.hooks.feedback('Erkannte Verbindungen ergänzt.');});
     const links=q('studio-links');if(!this.data.links.length)links.textContent='Keine Verbindungen.';
-    for(const edge of this.data.links){const row=document.createElement('div');row.className='connection-row';const name=document.createElement('span');name.dataset.userText='';name.textContent=edge.map(id=>this.data.points.find(p=>p.id===id)?.name??id).join(' ↔ ');const remove=document.createElement('button');remove.textContent='Verbindung entfernen';remove.onclick=()=>this.mutate(()=>{this.data.links=this.data.links.filter(e=>edgeKey(e)!==edgeKey(edge));});row.append(name,remove);links.append(row);}
+    for(const edge of this.data.links){const row=document.createElement('div');row.className='connection-row';const name=document.createElement('span');name.dataset.userText='';name.textContent=edge.map(id=>this.data.points.find(p=>p.id===id)?.name??id).join(' ↔ ');const remove=document.createElement('button');remove.textContent='Verbindung entfernen';remove.onclick=()=>this.mutate(()=>{this.data.links=this.data.links.filter(e=>edgeKey(e)!==edgeKey(edge));});const kind=document.createElement('span');kind.textContent=this.rig.isBoneConnection(this.data.points.find(p=>p.id===edge[0])!,this.data.points.find(p=>p.id===edge[1])!)?'Gelenkkette':'Punktgruppe';row.append(name,kind,remove);links.append(row);}
     on('point-add',()=>{this.view.setAction('add');this.hooks.feedback('In die Figur klicken. Neben der Figur wird der Punkt auf der Ansichtsebene gesetzt.');});
     on('point-connect',()=>{this.view.setAction('connect');this.hooks.feedback('Zweiten Punkt anklicken. Eine vorhandene Verbindung wird gelöst.');});
     if(this.point){const p=this.point;const whole=p.id===FIGURE_TRACK;input('point-name').disabled=whole;input('point-size').disabled=whole;input('point-radius').disabled=whole;input('point-name').value=p.name;input('point-size').value=String(p.size);input('point-radius').value=String(p.radius);q('radius-label').hidden=p.kind==='bone'||whole;q('rotation-label').hidden=(!whole&&p.kind!=='bone')||this.edit;q('group-label').hidden=p.kind!=='surface'||this.edit||whole;
@@ -143,11 +145,11 @@ export class StudioEditor {
       const scale=input('figure-scale');scale.value=String(this.rig.scale);
       scale.oninput=()=>{const value=Number(scale.value);if(!validFigureScale(value))return;if(!this.gesture)this.view.onStart();this.rig.setFigureScale(value);this.view.refresh();this.refreshNumbers();};
       const finishScale=()=>{if(this.gesture)this.view.onEnd();};scale.onchange=finishScale;scale.onblur=finishScale;scale.onpointercancel=finishScale;
-      q('point-kind').textContent=whole?'Gesamte Figur verschieben, drehen oder gleichmäßig skalieren. Alles wird in jeder Pose gespeichert.':p.kind==='bone'?'Skelettpunkt. Löschen entfernt den Griff, das Quellskelett bleibt erhalten.':'Freier Oberflächenpunkt. Verbindungen gruppieren Punkte, ohne eine Gelenkkette vorauszusetzen.';
+      q('point-kind').textContent=whole?'Gesamte Figur verschieben, drehen oder gleichmäßig skalieren. Alles wird in jeder Pose gespeichert.':p.kind==='bone'?'Skelettpunkt: Ziehen beugt die verbundene Kette, ohne Knochen zu verlängern. Drehen ändert die Ausrichtung.':'Freier Oberflächenpunkt. Verbindungen gruppieren Punkte, ohne eine Gelenkkette vorauszusetzen.';
       input('point-name').onchange=()=>{const v=input('point-name').value.trim();if(v)this.mutate(()=>p.name=v);};
       input('point-size').onchange=()=>this.mutate(()=>p.size=Number(input('point-size').value));
       input('point-radius').onchange=()=>this.mutate(()=>{p.radius=Number(input('point-radius').value);this.rig.apply(this.rig.capture());});
-      ['x','y','z'].forEach((axis,i)=>{input(`point-${axis}`).onchange=()=>{const v=Number(input(`point-${axis}`).value);if(!Number.isFinite(v)||Math.abs(v)>100)return;this.mutate(()=>{const pos=this.rig.position(p).toArray();pos[i]=v;this.rig.setPoint(p,new T.Vector3().fromArray(pos),this.rig.rotation(p),this.edit);});};});
+      ['x','y','z'].forEach((axis,i)=>{input(`point-${axis}`).onchange=()=>{const v=Number(input(`point-${axis}`).value);if(!Number.isFinite(v)||Math.abs(v)>100)return;this.mutate(()=>{const pos=this.rig.position(p).toArray();pos[i]=v;this.rig.setPoint(p,new T.Vector3().fromArray(pos),this.rig.rotation(p),this.edit,'translate');});};});
       q<HTMLSelectElement>('point-transform').value=this.rotate?'rotate':'translate';
       q<HTMLSelectElement>('point-transform').onchange=()=>{this.rotate=q<HTMLSelectElement>('point-transform').value==='rotate';this.view.setRotation(this.rotate);};
       input('point-group').onchange=()=>this.groupMove=input('point-group').checked;
@@ -177,7 +179,7 @@ export class StudioEditor {
     if(Object.keys(args).some(k=>!['section','offset','limit'].includes(k))||!['info','points','poses','moves'].includes(section as string)||!Number.isInteger(offset)||(offset as number)<0||!Number.isInteger(limit)||(limit as number)<1||(limit as number)>32)throw new Error('Ungültige Studio-Abfrage.');
     const info={session:this.session,revision:this.revision,dirty:this.dirty,open:this.active,editable:this.active&&this.agentEditing&&!this.playing&&!this.gesture,mode:this.edit?'rig':'pose',figure:{id:FIGURE_TRACK,scale:this.rig.scale,position:this.rig.position(this.rig.figure).toArray(),rotation:this.rig.rotation(this.rig.figure).toArray()},counts:{points:this.data.points.length,poses:this.data.poses.length,moves:this.data.moves.length,surfaces:this.rig.surfaces.length},undo:this.history.canUndo,redo:this.history.canRedo};
     if(section==='info')return info;
-    const items=section==='points'?this.data.points.map(p=>({...p,position:this.rig.position(p).toArray(),rotation:this.rig.rotation(p).toArray(),connections:this.data.links.filter(l=>l.includes(p.id)).map(l=>l[0]===p.id?l[1]:l[0])})):section==='poses'?this.data.poses.map(p=>({id:p.id,name:p.name,seconds:p.seconds,review:p.review??[]})):this.data.moves.map(m=>({id:m.id,name:m.name,loop:m.loop,poseCount:m.poses.length,...moveReview(this.data,m)}));
+    const items=section==='points'?this.data.points.map(p=>({...p,position:this.rig.position(p).toArray(),rotation:this.rig.rotation(p).toArray(),ikChain:this.rig.poseChain(p).map(b=>this.data.points.find(p=>p.kind==='bone'&&this.rig.bones[p.bone!]===b)!.id),connections:this.data.links.filter(l=>l.includes(p.id)).map(l=>l[0]===p.id?l[1]:l[0])})):section==='poses'?this.data.poses.map(p=>({id:p.id,name:p.name,seconds:p.seconds,review:p.review??[]})):this.data.moves.map(m=>({id:m.id,name:m.name,loop:m.loop,poseCount:m.poses.length,...moveReview(this.data,m)}));
     // Bound pages by count and UTF-8 size so both MCP bridges stay below their payload limit.
     const page:unknown[]=[];let bytes=0;for(const item of items.slice(offset as number,(offset as number)+(limit as number))){const length=new TextEncoder().encode(JSON.stringify(item)).length;if(page.length&&bytes+length>40000)break;page.push(item);bytes+=length;}
     return {...info,section,total:items.length,items:page,nextOffset:(offset as number)+page.length<items.length?(offset as number)+page.length:null};
@@ -198,11 +200,11 @@ export class StudioEditor {
       }
       case 'update_point':{
         require(point);const p=point!;require(p.id!==FIGURE_TRACK||!this.edit);require(c.rotation===undefined||!this.edit&&(p.kind==='bone'||p.id===FIGURE_TRACK));require(p.id!==FIGURE_TRACK||(c.size===undefined&&c.radius===undefined&&c.name===undefined));require(c.radius===undefined||p.kind==='surface');require(c.scale===undefined||p.id===FIGURE_TRACK&&!this.edit);require(['name','position','rotation','scale','size','radius'].some(k=>k in c));
-        this.mutate(()=>{if(c.name!==undefined)p.name=c.name.trim();if(c.size!==undefined)p.size=c.size;if(c.radius!==undefined)p.radius=c.radius;if(c.position||c.rotation)this.rig.setPoint(p,c.position?new T.Vector3().fromArray(c.position):this.rig.position(p),c.rotation?new T.Quaternion().fromArray(c.rotation):this.rig.rotation(p),this.edit);else this.rig.apply(this.rig.capture());if(c.scale!==undefined)this.rig.setFigureScale(c.scale);this.selected=p.id;});break;
+        this.mutate(()=>{if(c.name!==undefined)p.name=c.name.trim();if(c.size!==undefined)p.size=c.size;if(c.radius!==undefined)p.radius=c.radius;if(c.position||c.rotation)this.rig.setPoint(p,c.position?new T.Vector3().fromArray(c.position):this.rig.position(p),c.rotation?new T.Quaternion().fromArray(c.rotation):this.rig.rotation(p),this.edit,c.position?(c.rotation?'both':'translate'):'rotate');else this.rig.apply(this.rig.capture());if(c.scale!==undefined)this.rig.setFigureScale(c.scale);this.selected=p.id;});break;
       }
       case 'delete_point':require(this.edit&&point&&point.id!==FIGURE_TRACK);this.mutate(()=>{this.data.points=this.data.points.filter(p=>p.id!==c.id);this.data.links=this.data.links.filter(l=>!l.includes(c.id!));for(const p of this.data.poses)delete p.values[c.id!];if(this.data.draft)delete this.data.draft[c.id!];this.selected=null;this.rig.reset();});break;
       case 'connect_points':case 'disconnect_points':{
-        require(this.edit&&point&&point.id!==FIGURE_TRACK&&c.target!==c.id&&this.data.points.some(p=>p.id===c.target));const index=this.data.links.findIndex(l=>l.includes(c.id!)&&l.includes(c.target!));require(c.action!=='connect_points'||index>=0||this.data.links.length<2048);
+        require(this.edit&&point&&point.id!==FIGURE_TRACK&&c.target!==c.id&&this.data.points.some(p=>p.id===c.target));const index=this.data.links.findIndex(l=>l.includes(c.id!)&&l.includes(c.target!));if(c.action==='connect_points'&&index<0)this.rig.validateConnection(point!,this.data.points.find(p=>p.id===c.target)!);require(c.action!=='connect_points'||index>=0||this.data.links.length<2048);
         if(c.action==='connect_points'&&index<0)this.mutate(()=>this.data.links.push([c.id!,c.target!]));else if(c.action==='disconnect_points'&&index>=0)this.mutate(()=>{this.data.links.splice(index,1);});else this.revision++;break;
       }
       case 'save_pose':require(!this.edit&&this.data.poses.length<100);this.mutate(()=>{resultId=uid();this.data.poses.push({id:resultId,name:c.name?.trim()||`Pose ${this.data.poses.length+1}`,seconds:c.seconds??1,values:this.rig.capture()});});break;

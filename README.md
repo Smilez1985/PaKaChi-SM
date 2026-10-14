@@ -2,7 +2,7 @@
 
 **SM steht für StateMaschine.** PaKaChi ist die **Panda-KI-Chimera**, das übergeordnete Projekt. PaKaChi-SM vereint Avatar-Player, Model Zoo und das fest integrierte **PaKaChi-Avatar-Studio**.
 
-**Softwarestand: 0.10.0 · Entwicklungsstand, keine fertige Bild-zu-3D-Lösung.**
+**Softwarestand: 0.11.0 · Entwicklungsstand, keine fertige Bild-zu-3D-Lösung.**
 
 Der bestehende PaKaChi mit Tierform, humanoider Arbeitsform und allen 72 Transformationsbildern ist erhalten und beim Start ausgewählt. Mika und Nori sind separate technische 3D-Testavatare. Ein 3D-Modell des Original-PaKaChi und die KI-Generierung stehen noch aus.
 
@@ -19,14 +19,18 @@ Die angezeigte Adresse öffnen, normalerweise `http://127.0.0.1:5173`. Unter Win
 
 Der archivierte Originalplayer lässt sich auch separat ohne Node öffnen: `public/legacy/pakachi/index.html`.
 
+## Korrektur der Körpersteuerung in 0.11.0
+
+Mika/Nori frisch auswählen: Hand ziehen beugt Schulter/Ellenbogen, Fuß ziehen Hüfte/Knie. Rumpf ziehen nimmt den ganzen Körper mit; Hals/Kopf bleiben verbunden. Unter **Griffe → Drehen** kann ein Gelenk direkt mit der Maus ausgerichtet werden. Die mitgelieferten Testmodelle besitzen jetzt Hand-, Knie-, Fuß- und Halsgelenke. Alte Projektdateien behalten ihr eingebettetes Modell; sie erhalten diese neuen Knochen nicht automatisch. [Bedienung und Grenzen](docs/STUDIO.md#verbundener-körper-statt-auseinanderziehen).
+
 ## Was aktuell funktioniert
 
-| Bereich | Stand 0.10.0 |
+| Bereich | Stand 0.11.0 |
 | --- | --- |
 | Player | Avatar-Auswahl, tatsächliche Bewegungen anzeigen, abspielen, pausieren, Tempo und Abspielposition ändern. |
 | Modelle | Mika/Nori mit Skeletten und Clips; eigene eigenständige GLB-Dateien laden oder hineinziehen, bis 50 MiB, lokal für die Sitzung. |
 | Studio | Genau zwei Modi: **Figur bewegen** und **Gelenke bearbeiten**. Skelettgriffe, frei platzierbare Gesichtspunkte, individuelle Größe und Einflussradius. |
-| Verbindungen | Punkte frei verbinden; jede Verbindung einzeln entfernen; vorhandene Skelettgelenke und Eltern-Kind-Verbindungen per Button erkennen. |
+| Verbindungen | Gesamtes vorhandenes Skelett automatisch als Linien anzeigen; Gelenkketten beim Ziehen beugen, statt Knochen auseinanderzuziehen. Freie Gesichtspunkte separat gruppieren. |
 | Bewegungen | Posen, Zeitabstände, Vorschau, eigene Moves und Gesamtverschiebung/-drehung/-skalierung der Figur – auch ohne Skelett. Rückgängig/Wiederholen. |
 | Projekte | Neu, Laden und Speichern als `.pakachi.json` mit eingebettetem Modell, Arbeitspose, Kontrollpunkten, Posen und Moves. |
 | Agenten | Gemeinsame StateMaschine für manuelle Bedienung, optionales MQTT und MCP; acht Tools für Player und freigegebenes Studio. |
@@ -69,7 +73,7 @@ GLB-Importe bleiben in der Browsersitzung. **Projekte herunterladen, um die Arbe
 
 Ältere Projektdateien bleiben lesbar. Dateien mit Gesamtpositionsspur benötigen mindestens 0.6.0, mit Gesamtdrehung mindestens 0.8.0, mit Skalierung mindestens 0.10.0. Ältere Versionen ignorieren die Skalierung. Ein Projekt ist kein GLB-Export.
 
-Offen sind insbesondere Bild-zu-3D, anatomische KI-Erkennung, vollständiger Knochenumbau und Hautgewichte, IK, Modelloptimierung. Originalplayer, Modellbeschreibungen und einige technische Meldungen sind noch nicht vollständig englisch lokalisiert.
+Offen sind insbesondere Bild-zu-3D, anatomische KI-Erkennung, vollständiger Knochenumbau und Hautgewichte, anatomische Winkelgrenzen, Ganzkörper-IK und Modelloptimierung. Originalplayer, Modellbeschreibungen und einige technische Meldungen sind noch nicht vollständig englisch lokalisiert.
 
 Das Ziel bleibt: **Bild hineinziehen → 3D-Avatar erzeugen → korrigieren → Bewegungen speichern → per Agent auslösen.** Der Bildimport und die Generierung sind noch nicht implementiert. Der Original-Bildstand hat bekannte Proportions- und Materialschwankungen; [Referenzen und korrigierter Stilanker](docs/references/README.md) sind erhalten.
 
@@ -99,7 +103,7 @@ npx playwright install chromium
 npm run test:e2e
 ```
 
-Für 0.10.0 sind 43 Tests und der Build bestanden. Die unveränderten Original-Testprogramme wurden zuletzt in 0.9.0 geprüft. Die visuelle WebGL-/Mausabnahme ist wegen der Chromium-Startbeschränkung der bisherigen Ausführungsumgebung noch offen. Auch die reale Python-MCP-/MQTT-Integration mit Studio-Editor wurde erneut erfolgreich geprüft. Details und frühere Nachweise stehen im [Prüfstand](docs/PRUEFUNG.md).
+Für 0.11.0 sind 47 Tests und der Build bestanden. Die unveränderten Original-Testprogramme wurden zuletzt in 0.9.0 geprüft. Die visuelle WebGL-/Mausabnahme ist wegen der Chromium-Startbeschränkung der bisherigen Ausführungsumgebung noch offen. Die reale Python-MCP-/MQTT-Integration mit Studio-Editor wurde zuletzt in 0.10.0 erfolgreich geprüft. Details und frühere Nachweise stehen im [Prüfstand](docs/PRUEFUNG.md).
 
 ## Lizenz
 

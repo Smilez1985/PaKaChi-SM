@@ -1,12 +1,12 @@
 # Roadmap – was kommt
 
-**Softwarestand: 0.10.0 · Abgleich: 14.10.2026.** Teil der [Blaupause](README.md).
+**Softwarestand: 0.11.0 · Abgleich: 14.10.2026.** Teil der [Blaupause](README.md).
 
 Ein Häkchen bedeutet implementiert; es ersetzt keine visuelle oder externe Live-Abnahme. Die Nachweise und Prüfgrenzen stehen im [Prüfstand](PRUEFUNG.md). Die Versionshistorie gehört ins [Changelog](CHANGELOG.md).
 
 ## Nächste Arbeitspakete
 
-1. **Vorhandenen Ablauf visuell abnehmen:** Mausnavigation, kleine Gesichtspunkte, Gesamtverschiebung, Speichern/Laden und Agentensteuerung in einer lauffähigen Browserumgebung prüfen.
+1. **Korrektur 0.11.0 visuell nachprüfen:** vollständige Körperverbindungen, Hand-/Fußziele, Rumpfbewegung und direktes Drehen. Nutzertest 0.10.0 meldete auseinanderziehbare Knochen und unbrauchbare Ausrichtung; diese Fehler sind technisch korrigiert, die erneute Nutzerabnahme steht aus. Anschließend Mausnavigation, kleine Gesichtspunkte, Gesamtverschiebung, Speichern/Laden und Agentensteuerung in einer lauffähigen Browserumgebung prüfen.
 2. **Gelenkbearbeitung vervollständigen:** echte Quellknochen hinzufügen/löschen, Hautgewichte zuordnen und vorhandene Moves nach Änderungen prüfen. Erst damit wird das Beispiel „fehlendes Knie ergänzen und beugen“ vollständig erfüllt.
 3. **KI-Verfahren bewerten und integrieren:** Bild-zu-3D und anatomische Skelettgenerierung an tatsächlichen Testfiguren bewerten; anschließend Generierung und Korrekturvorschau anschließen. Vorhandene Skelettdaten auszulesen ist bereits möglich, aber keine KI-Anatomieerkennung.
 
@@ -57,7 +57,8 @@ Diese Reihenfolge ist ein Umsetzungsvorschlag, kein Terminversprechen. Die dafü
 - [x] Punktgröße, Auswahlfläche und Einflussradius getrennt behandeln.
 - [x] Freie Punktgruppen bewegen und lokale Oberflächenverformung mit Hautbindung nutzen.
 - [ ] Quellknochen tatsächlich hinzufügen/löschen und Hautgewichte neu zuordnen. Bisher entfernt Löschen eines Skelettpunkts nur den Griff.
-- [ ] Automatische anatomische Gelenkketten und IK implementieren.
+- [x] Vorhandenes Gesamtskelett automatisch verbinden; beim Posieren Ein-/Zweiglied-Ketten mit erhaltenen Knochenlängen lösen (0.11.0).
+- [ ] Anatomische Gelenkketten aus ungeriggter Oberfläche erzeugen; Winkelgrenzen, fixierte Füße und gekoppelte Ganzkörper-IK ergänzen.
 - [ ] Bewegungsfähige Rigs unterschiedlicher Körperformen systematisch prüfen.
 - [x] Betroffene Posen/Moves nach Änderungen an Skelett-Grundstellung, freien Punktpositionen und Einflussbereichen zur Prüfung markieren (0.7.0).
 - [ ] Bewegungen geometrisch auf Fehlstellungen, Gelenkgrenzen und Kollisionen prüfen und automatisch korrigieren.

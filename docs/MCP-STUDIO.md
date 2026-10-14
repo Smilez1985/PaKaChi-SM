@@ -15,7 +15,7 @@ Die Zusatzfreigabe startet ausgeschaltet und endet beim Verlassen oder Ersetzen 
 
 Argumente: `section` = `info` (Vorgabe), `points`, `poses` oder `moves`; optional `offset` ab 0 und `limit` von 1 bis 32. Wenn `nextOffset` nicht `null` ist, dort weiterlesen. Modellbytes und Dateiinhalte werden nicht übertragen.
 
-Jede Antwort enthält `session`, `revision`, `open`, `editable`, `dirty`, `mode` (`pose`/`rig`), die Transformation von `figure`, Anzahl von Punkten/Posen/Moves/Teiloberflächen und die Verfügbarkeit von Undo/Redo. `points` enthält auch verbundene Punkt-IDs. Posen-/Move-Listen liefern Zusammenfassungen; `apply_pose` lädt eine Pose, danach zeigt eine Punkteabfrage ihre aktuelle Lage.
+Jede Antwort enthält `session`, `revision`, `open`, `editable`, `dirty`, `mode` (`pose`/`rig`), die Transformation von `figure`, Anzahl von Punkten/Posen/Moves/Teiloberflächen und die Verfügbarkeit von Undo/Redo. `points` enthält auch verbundene Punkt-IDs. Posen-/Move-Listen liefern Zusammenfassungen; `apply_pose` lädt eine Pose, danach zeigt eine Punkteabfrage ihre aktuelle Lage. Seit 0.11.0 nennt `ikChain` pro Punkt die beteiligten Vorfahren (nächster zuerst).
 
 Positionen sind die normierten **Weltkoordinaten des Studios**, keine Pixel oder ursprünglichen GLB-Einheiten. Rotation ist eine normierte Quaternion `[x, y, z, w]`. `$figure` bezeichnet die gesamte Figur. `figure.scale` ist ihr Größenfaktor (1 = 100 %), unabhängig von Kamera-Zoom und sichtbarer Punktgröße. Der optionale `mesh`-Index bindet einen freien Punkt an eine Teiloberfläche; gültig sind 0 bis `counts.surfaces - 1`. Ohne Index wirkt der Punkt in seinem Radius über Teiloberflächen hinweg. Die API führt kein Oberflächen-Raycasting aus; der Agent muss die Position angeben.
 
@@ -65,3 +65,7 @@ Danach jeweils die zurückgegebene Revision verwenden:
 `save_pose` speichert im geöffneten Projekt. Kein Studio-Tool lädt Dateien herunter, importiert Modelle, ruft beliebige URLs auf oder führt Code aus. Für die dauerhafte Sicherung den Projekt-Download im Studio verwenden.
 
 Beispiel für eine Größenänderung: `update_point` mit `id: "$figure"` und `scale: 1.5` vergrößert proportional auf 150 %. Position und Drehung bleiben dabei erhalten. Danach `save_pose` verwenden, um die Größe in einer Bewegung zu speichern.
+
+## Positionsziele am Skelett ab 0.11.0
+
+Bei `update_point` im Modus `pose` bedeutet `position` für einen Skelettpunkt ein IK-Ziel. Die verbundene Kette folgt durch Rotation; der tatsächlich erreichte Punkt kann bei begrenzter Reichweite abweichen. Danach `get_studio` lesen. `rotation` allein richtet den Punkt aus, ohne ihn zu verschieben; mit beiden Feldern folgt die Ausrichtung nach der Zielberechnung. Ein Wurzelpunkt verschiebt die ganze Figur. `connect_points` verbindet Knochen nur entlang tatsächlicher direkter Eltern-Kind-Kanten; freie Punkte bleiben untereinander gruppierbar. Ein Ziel ohne nutzbare Kette wird nicht aus dem Skelett herausgezogen.

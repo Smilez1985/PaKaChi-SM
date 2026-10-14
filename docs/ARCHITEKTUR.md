@@ -1,4 +1,4 @@
-# Technischer Stand 0.10.0
+# Technischer Stand 0.11.0
 
 ## Lokale Anwendung
 
@@ -32,7 +32,7 @@ Die Hauptoberfläche verwendet seit 0.4.0 MQTT.js für direkten Status-Empfang u
 
 `studio-view.ts` verbindet Raycasting, Mindest-Auswahlfläche und TransformControls. `studio-editor.ts` verwaltet genau zwei Bearbeitungsmodi, Posen, Interpolation, Projekt-Download und eigene Moves. Während der Bearbeitung pausieren Originalclips, externe Mutationen werden abgewiesen. Eigene Moves werden beim Laden des Projekts in die aktive Fähigkeitsliste aufgenommen und kehren einmalig zum Grundzustand zurück.
 
-Der Editor unterstützt noch keinen beliebigen Quellknochenumbau, IK, automatische Gewichte, Bild-zu-3D oder GLB-Export. Ein gelöschter Skelettgriff entfernt nicht den Quellknochen. Beim Original-PaKaChi bleibt der Bildplayer aktiv, da sein 3D-Modell noch fehlt. Details: [Studio](STUDIO.md).
+Der Editor unterstützt noch keinen beliebigen Quellknochenumbau, Ganzkörper-IK, automatische Gewichte, Bild-zu-3D oder GLB-Export. Ein gelöschter Skelettgriff entfernt nicht den Quellknochen. Beim Original-PaKaChi bleibt der Bildplayer aktiv, da sein 3D-Modell noch fehlt. Details: [Studio](STUDIO.md).
 
 `studio-detection.ts` liest vorhandene Knochen und ihre Eltern-Kind-Beziehungen. Eigene Punkte bleiben erhalten; Verbindungen sind ungerichtete Bearbeitungsgruppen, kein automatisch neu erzeugtes Skelett. `options.ts` speichert Sprache und invertierte Drehrichtung lokal und übersetzt die Studio-Bedienelemente. Benutzerdefinierte Namen werden nicht übersetzt; Projektdateien und Broker-Zugangsdaten werden darüber nicht gespeichert.
 
@@ -67,3 +67,13 @@ Python und Node stellen dieselben acht Tools bereit. Der MQTT-Anfragekanal erlau
 `$figure.scale` ist ein optionaler endlicher Faktor von 0.1 bis 5; fehlende Werte werden als 1 gelesen. Nur der Gesamtkanal darf dieses Feld enthalten, weder Punkttransformationen noch `boneRest`. Die Matrix wird als `T(center + offset) * R * S * T(-center)` auf die ursprüngliche Root-Weltmatrix angewendet. Die bestehenden exakten Eltern-/Hautmatrizen bleiben erhalten. `sample` interpoliert den Faktor linear, auch zum Schleifenanfang; Reset und Originalclips setzen ihn auf 1 zurück.
 
 Der Mausregler nutzt eine gemeinsame Gestenaufnahme für Vorschau, Undo und Revisionsschutz. Der Agent liest `figure.scale` und schreibt über `update_point` mit `id: "$figure"`, ausschließlich im Pose-Modus. Beide MCP-Schemas und die Browserprüfung begrenzen den Wert. Projektformat 1 bleibt bestehen; ältere Software ignoriert das Zusatzfeld und kann die Größenbewegung nicht wiedergeben.
+
+## Zusammenhängendes Posieren ab 0.11.0
+
+`studio-ik.ts` löst eine oder zwei Segmente analytisch, begrenzt die Reichweite und bevorzugt die bisherige Beugeseite. Ein stabiler Ersatzvektor löst die gerade Ausgangskette. `StudioRig.poseChain` verfolgt nur tatsächlich verbundene direkte Elternknochen, maximal zwei Vorfahren, und stoppt vor verzweigten Ansätzen. `setPoint` unterscheidet Translation als IK-Ziel von expliziter Rotation; lokale Knochenpositionen bleiben im Pose-Modus erhalten. Verschieben eines Skelett-Wurzelpunkts nutzt die globale Figurspur. Rig-Bearbeitung bleibt separat.
+
+Neue Studio-Daten erhalten sämtliche erkennbaren Quellverbindungen. Gespeicherte Links bleiben unangetastet. Neue Verbindungen mit Knochen müssen direkte Quellknochen-Nachbarn sein; Oberflächenpunkte dürfen miteinander Gruppen bilden. Die Oberfläche zeigt die beiden Arten getrennt an. `get_studio` nennt für Punkte zusätzlich `ikChain` (nächster Vorfahr zuerst).
+
+Direktes Ziehen im Drehmodus erzeugt eine Rotation relativ zur Kamera. Während eines Achsgriff-Zuges wird der Proxy nicht durch die Oberflächenaktualisierung zurückgesetzt. Maus-, Zahlenfeld- und MCP-Positionsbefehle benutzen dieselbe IK-Prüfung. Posen speichern die resultierenden Knochenquaternionen; unveränderte lokale Positionen halten auch die Interpolation zusammen. Das Projektformat bleibt 1; frühere gestreckte Posen werden nicht stillschweigend verändert.
+
+Die Beispielmodelle verwenden `fixture-rig-2` mit Hand-, Knie-, Fuß- und Halsknochen. Diese Änderung betrifft ausschließlich die technischen 3D-Fixtures, nicht die Original-PaKaChi-Dateien. Importmodelle mit ungewöhnlichen Skalierungen/Hierarchien, Gelenkgrenzen, Kollisionen und Ganzkörperbedingungen benötigen weitere Abnahme beziehungsweise Umsetzung.
