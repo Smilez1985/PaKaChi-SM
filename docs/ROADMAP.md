@@ -8,9 +8,10 @@ Ein Häkchen bedeutet implementiert; es ersetzt keine visuelle oder externe Live
 
 1. **Korrekturen 0.11.0/0.11.1 visuell nachprüfen:** Drehung um die Figurenmitte auch nach Zoom/Pan sowie vollständige Körperverbindungen, Hand-/Fußziele, Rumpfbewegung und direktes Drehen. Nutzertest 0.10.0 meldete auseinanderziehbare Knochen und unbrauchbare Ausrichtung; diese Fehler sind technisch korrigiert, die erneute Nutzerabnahme steht aus. Anschließend Mausnavigation, kleine Gesichtspunkte, Gesamtverschiebung, Speichern/Laden und Agentensteuerung in einer lauffähigen Browserumgebung prüfen.
 2. **Gelenkbearbeitung vervollständigen:** echte Quellknochen hinzufügen/löschen, Hautgewichte zuordnen und vorhandene Moves nach Änderungen prüfen. Erst damit wird das Beispiel „fehlendes Knie ergänzen und beugen“ vollständig erfüllt.
-3. **KI-Verfahren bewerten und integrieren:** Bild-zu-3D und anatomische Skelettgenerierung an tatsächlichen Testfiguren bewerten; anschließend Generierung und Korrekturvorschau anschließen. Vorhandene Skelettdaten auszulesen ist bereits möglich, aber keine KI-Anatomieerkennung.
+3. **Studio-Harness vorbereiten:** gemeinsame Adapterverträge, Fähigkeiten und mehrere Verbindungsprofile definieren; danach unabhängige Anbieter-/Modellwahl für Assistent, 3D-Generator und Rigging im Optionsmenü anschließen. Details und Abnahme in Abschnitt 7.
+4. **Aufträge und KI-Verfahren integrieren:** nach der Konfigurationsbasis die Auftragsverwaltung und geeignete Generator-/Rigging-Adapter anschließen, echte Inferenz und Qualität prüfen, anschließend Korrekturvorschau und Übernahme integrieren. Vorhandene Skelettdaten auszulesen ist bereits möglich, aber keine KI-Anatomieerkennung.
 
-Diese Reihenfolge ist ein Umsetzungsvorschlag, kein Terminversprechen. Die dafür nötigen KI-Verfahren, Hardwareanforderungen und Lizenzen sind noch nicht festgelegt.
+Diese Reihenfolge ist ein Umsetzungsvorschlag, kein Terminversprechen. Lokale und externe Dienste sowie getrennte Anbieter je Rolle sind als Architektur festgelegt. Die konkreten zuerst unterstützten Verfahren, Hardwareanforderungen und Lizenzen sind noch zu prüfen.
 
 ## 1. Player und Model Zoo
 
@@ -89,10 +90,26 @@ Diese Reihenfolge ist ein Umsetzungsvorschlag, kein Terminversprechen. Die dafü
 
 **Abnahme:** Bild hineinziehen, Avatar korrigieren, Bewegung erstellen, speichern und per Agent auslösen – in einer Anwendung.
 
+## 7. Studio-Harness und Anbieteranbindung
+
+Beschlossenes Design: [Anbieter, Rollen und Auftragsablauf](KONZEPT.md#11-studio-als-ki-harness-und-freie-anbieterwahl). Alle folgenden Umsetzungsschritte sind noch offen; die Reihenfolge beschreibt ihre Abhängigkeiten.
+
+- [ ] Gemeinsame Adapterverträge und Fähigkeitsprüfung für Assistent, 3D-Generierung und Rigging definieren; ungeeignete Modelle vor dem Auftrag erkennbar abweisen.
+- [ ] Mehrere benannte Verbindungs-/Modellprofile je Rolle speichern; Serveradresse, Anbieter und aktive Auswahl unabhängig zuordnen. Zugangsdaten getrennt von Projekt und Export verwalten.
+- [ ] Optionsmenü um Verbindungsprüfung, Modellliste beziehungsweise manuelle Modell-ID, API-Anmeldung und nur tatsächlich unterstützte OAuth-Verfahren ergänzen. Deutsch/English beibehalten; keinen dritten Bearbeitungsmodus einführen.
+- [ ] Adapter für passende OpenAI-kompatible Dienste einschließlich lokaler Ollama-/LM-Studio-Anbindungen und erforderliche native Anbieteradapter entwickeln; unterstützte Fähigkeiten und getestete Modelle dokumentieren.
+- [ ] Gemeinsame Auftragsverwaltung mit Anbieter-/Modellnachweis, Fortschritt, Fehlern, Zeitlimit, Abbruch und ausdrücklichem Neuversuch umsetzen. Empfänger vor Datenübertragung anzeigen; keinen stillen Anbieter- oder Cloud-Wechsel zulassen.
+- [ ] Geeignete lokale und externe 3D- sowie Rigging-Adapter mit echten Eingaben prüfen. Geometrie, vollständige Körperhierarchie und Hautgewichte getrennt bewerten; Original-PaKaChi in beiden Formen und die Transformation zusätzlich prüfen.
+- [ ] Optionalen integrierten Assistenten an die validierten Studio-Werkzeuge anschließen; externe MCP-Clients weiter unabhängig unterstützen. Direkte Generierung ohne zusätzlichen LLM-Aufruf ermöglichen.
+- [ ] Korrekturprompt, Zwischenstände und Vorschau mit Übernehmen/Verwerfen integrieren; manuelle Änderungen über Revisionsprüfung schützen und Übernahme rückgängig machen können.
+
+**Abnahme:** Ein Nutzer kann drei unterschiedliche geeignete Dienste konfigurieren, Modelle je Rolle wählen und einen vollständigen Bild-zu-Avatar-Auftrag ausführen. Ein lokaler Ablauf benötigt keinen Cloud-Zugang. Fehler, Abbruch oder ein veraltetes Ergebnis überschreiben keine manuellen Änderungen; Neuversuche wechseln nicht unbemerkt Anbieter oder Kostenquelle. Exporte enthalten keine Zugangsdaten. Die Vorschau zeigt ein tatsächlich bewegliches Modell und wird erst nach Übernahme zum Projektstand.
+
 ## Noch zu entscheiden
 
 - Desktop-Verpackung und tatsächlich geprüfte Betriebssysteme.
-- Lokale oder externe KI-Verfahren, Hardwarebedarf und Anbieter.
+- Priorität und geprüfter Funktionsumfang konkreter lokaler und externer Anbieteradapter, Modelle, Hardwarebedarf und Lizenzen.
+- Geschützte lokale Zugangsdatenverwaltung und anbieterspezifisch verfügbare OAuth-Verfahren.
 - Lizenz.
 - Erweiterungen der Exportformate und der sicheren Remote-Anbindung.
 

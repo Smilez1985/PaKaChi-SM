@@ -40,6 +40,8 @@ Es gibt keine Beschränkung auf humanoide Figuren. Zusätzliche Arme, Flügel, S
 
 Seit 0.12.0 ist ein experimenteller lokaler TripoSR-Testlauf als separates Entwicklerwerkzeug vorhanden. Er erzeugt bei eingerichteter Laufzeit einen zu prüfenden GLB-Entwurf; die produktive Inferenz und Designqualität sind noch nicht nachgewiesen. Tier- und humanoide Form werden einzeln getestet. Ein erfolgreicher Import ersetzt weder anatomisches Rigging noch den abgestimmten Formwechsel. Details: [KI-Testlauf](KI-GENERIERUNG.md).
 
+Die geplante Auswahl unabhängiger Generator- und Rigging-Anbieter beschreibt [Studio als KI-Harness](#11-studio-als-ki-harness-und-freie-anbieterwahl).
+
 ## 3. Genau zwei Bearbeitungsmodi
 
 ### Figur bewegen
@@ -166,3 +168,53 @@ Implementiert sind Three.js für die Darstellung, glTF/GLB für Modelle, ein JSO
 Die Studio-Bedienelemente lassen sich seit 0.5.0 auf Deutsch oder Englisch umschalten. Vollständige Lokalisierung einschließlich Originalplayer und technischer Meldungen bleibt offen.
 
 Die Komplexität gehört in die Software. Ein Benutzer soll eine eigene Figur erstellen, ein fehlendes Gelenk korrigieren und eine Bewegung speichern können, ohne Rigging, Skinning oder Keyframes lernen zu müssen.
+
+## 11. Studio als KI-Harness und freie Anbieterwahl
+
+**Beschlossenes Produktdesign; noch nicht implementiert in 0.12.0.** Das Studio wird zu einem kleinen, spezialisierten KI-Harness: Es stellt Projektkontext, Werkzeuge und kontrollierte Arbeitsabläufe bereit und verbindet dafür austauschbare Dienste. Es bleibt Teil derselben Anwendung mit genau zwei Bearbeitungsmodi. Anbieter und Modelle werden im Optionsmenü eingestellt.
+
+### Drei unabhängig konfigurierbare Rollen
+
+| Rolle | Aufgabe | Erwartetes Ergebnis |
+| --- | --- | --- |
+| Assistent | Wünsche und gegebenenfalls Bilder verstehen, Schritte planen und Studio-Werkzeuge aufrufen | Nachvollziehbare Aktionen und Korrekturvorschläge |
+| 3D-Generator | Aus Bildvorlagen Geometrie und gegebenenfalls Materialien erzeugen | Importierbares, überprüfbares 3D-Modell |
+| Rigging-Dienst | Körperstruktur erkennen, Skelett und Hierarchie erzeugen, Oberfläche den Knochen zuordnen | Zusammenhängendes Skelett mit Hautgewichten und gegebenenfalls Bewegungssteuerungen |
+
+Jede Rolle erhält eine eigene Kombination aus Verbindung, Anbieter und Modell. Alle drei dürfen unterschiedliche Dienste, API-Konten oder lokale Server verwenden; derselbe Dienst darf auch mehrere Rollen übernehmen, sofern er deren Fähigkeiten erfüllt. Mehrere benannte Verbindungs- und Modellprofile je Rolle sind vorgesehen. Die aktive Auswahl wird für jeden Auftrag festgehalten.
+
+Ein Rigging-Dienst ist eine technische Funktion, kein zwingend externes Abonnement und kein notwendigerweise sprachbasiertes Modell. Er muss beispielsweise Füße–Beine–Becken, Arme–Schultern–Rumpf und Kopf–Hals–Rumpf passend verbinden. Sichtbare Linien allein reichen nicht: Hautgewichte bestimmen, welche Oberfläche sich mitbewegt. Gelenkgrenzen und IK steuern anschließend die Bewegung; sie ersetzen weder Skelett noch Hautgewichte. Gesichtspunkte können eigene unabhängige Gruppen behalten.
+
+Ein Sprach- oder Bildverständnismodell wird durch die Auswahl als „3D-Generator“ oder „Rigging-Dienst“ nicht automatisch zu einem entsprechenden Fachmodell. Lokal über Ollama oder LM Studio betriebene Modelle können geeignete Werkzeuge koordinieren; die eigentliche Geometrie- oder Rigging-Berechnung benötigt einen passenden Dienst. Ein direkter Bild-zu-3D-Auftrag soll auch ohne zusätzlichen LLM-Assistenten möglich sein.
+
+### Verbindungen und Anmeldung
+
+Der geplante Einrichtungsablauf lautet:
+
+1. Benannte Verbindung hinzufügen: Anbieter oder eigene Serveradresse wählen.
+2. Mit API-Schlüssel/Token oder einem offiziell unterstützten OAuth-Verfahren anmelden; lokale Dienste können je nach Einrichtung ohne Anmeldung erreichbar sein.
+3. Erreichbarkeit und unterstützte Fähigkeiten testen.
+4. Modell aus der vom Dienst bereitgestellten Liste wählen; andernfalls Modell-ID manuell eingeben und prüfen.
+5. Verbindung und Modell unabhängig dem Assistenten, Generator oder Rigging zuweisen.
+
+Cloud-Anbieter und lokale Dienste wie Ollama und LM Studio sollen über Adapter schrittweise angebunden werden. Ein gemeinsamer Adapter für OpenAI-kompatible Schnittstellen deckt passende Dienste ab; abweichende Protokolle benötigen eigene Adapter. Kompatible Transportformate garantieren keine Bildverarbeitung, Werkzeugaufrufe, 3D-Ausgabe oder Rigging. Verfügbarkeit und Fähigkeiten werden je Modell und Auftrag geprüft. Es gibt keine fest eingebaute Bindung an einen Anbieter und keine Zusage, bereits alle Anbieter zu unterstützen.
+
+OAuth wird nur angeboten, wenn der betreffende Anbieter einen geeigneten offiziellen Zugang für Drittanwendungen ermöglicht. Ein vorhandenes Chat-Abonnement wird nicht als automatisch nutzbarer API-Zugang behandelt. Zugangsdaten gehören in eine lokale, geschützte Verwaltung; die konkrete Backend-/Betriebssystemablage ist noch festzulegen. Sie dürfen weder ins Repository noch in Avatar-Projekte oder deren Exporte gelangen.
+
+### Adapter und Auftragsablauf
+
+Die gemeinsame Adapterschicht beschreibt Fähigkeiten, Anmeldung, Modellauflistung beziehungsweise manuelle Modellwahl sowie Start, Status und Ergebnis eines Auftrags. Lange Berechnungen benötigen Fortschritt, verständliche Fehler, Zeitlimits und Abbruch; soweit ein Dienst keinen echten Abbruch unterstützt, muss dies sichtbar sein. Wiederholungen erfolgen ausdrücklich und dürfen nicht stillschweigend weitere kostenpflichtige Aufträge auslösen.
+
+Der normale Ablauf ist: Bild und Wunsch eingeben, optional den Assistenten planen lassen, Geometrie erzeugen, Rigging ausführen und das Ergebnis im Studio visuell prüfen. Erst **Übernehmen** ersetzt den bearbeiteten Projektstand; **Verwerfen** erhält ihn. Zwischenstände, verwendeter Anbieter und Modell, Korrekturprompt und Auftragsstatus bleiben nachvollziehbar. Eine zwischenzeitlich manuell veränderte Projektversion darf nicht durch ein verspätetes Ergebnis überschrieben werden. Übernommene Änderungen müssen sich rückgängig machen lassen.
+
+Vor dem Start zeigt das Studio den tatsächlich empfangenden Dienst und die übertragenen Eingaben an. Kosten werden angezeigt, soweit verlässliche Angaben vorliegen. Es gibt keinen stillen Wechsel von lokal zu Cloud oder zu einem anderen Anbieter. Dies gilt auch für einen vom Assistenten vorgeschlagenen Folgeschritt.
+
+Für lokale 3D-Generierung werden zunächst vorhandene spezialisierte Modelle beziehungsweise Software über Adapter eingebunden. PaKaChi-SM entwickelt die Integration und Bedienung; das Training eines eigenen grundlegenden 3D-KI-Modells ist nicht vorgesehen. Der vorhandene experimentelle TripoSR-Testadapter ist ein Ausgangspunkt zur Bewertung, kein fertiger Generator im Studio.
+
+### Gemeinsame Werkzeuge mit externen Agenten
+
+Der integrierte Assistent und externe MCP-Clients sollen dieselben validierten Studio-Werkzeuge verwenden. Sitzungsfreigabe, Revisionsprüfung, Rückgängig/Wiederholen und Prüfhinweise gelten weiterhin. Ein externer MCP-Client verwaltet seinen KI-Zugang selbst; seine Zugangsdaten werden nicht an PaKaChi weitergereicht. MCP stellt Werkzeuge bereit, MQTT transportiert bereits Befehle und Status; beide ersetzen keine Anbieter-API oder Modelllaufzeit.
+
+In 0.12.0 existieren acht MCP-Werkzeuge und der separate lokale TripoSR-Testlauf. Anbieterprofile, Modellwahl im Studio, OAuth-Anbindungen, interner KI-Assistent, einheitliche Generierungsaufträge und automatische anatomische Rigging-Dienste sind noch offen. Die Umsetzungsschritte stehen in der [Roadmap](ROADMAP.md#7-studio-harness-und-anbieteranbindung).
+
+Das Original-PaKaChi bleibt mit Tierform, humanoider Form und den 72 Transformationsbildern die Designreferenz. Zwei unabhängig erzeugte 3D-Modelle belegen noch keinen kompatiblen Formwechsel; Geometrie, Rigging und Transformation müssen eigens geprüft werden.
