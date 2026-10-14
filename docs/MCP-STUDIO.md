@@ -1,6 +1,6 @@
 # Studio über MCP bearbeiten
 
-**Ab Softwareversion 0.9.0.** [Python-Einrichtung](PYTHON-MCP.md) · [Studio-Anleitung](STUDIO.md)
+**Studio-Tools ab 0.9.0; Skalierung ab 0.10.0.** [Python-Einrichtung](PYTHON-MCP.md) · [Studio-Anleitung](STUDIO.md)
 
 ## Freigeben und beobachten
 
@@ -17,7 +17,7 @@ Argumente: `section` = `info` (Vorgabe), `points`, `poses` oder `moves`; optiona
 
 Jede Antwort enthält `session`, `revision`, `open`, `editable`, `dirty`, `mode` (`pose`/`rig`), die Transformation von `figure`, Anzahl von Punkten/Posen/Moves/Teiloberflächen und die Verfügbarkeit von Undo/Redo. `points` enthält auch verbundene Punkt-IDs. Posen-/Move-Listen liefern Zusammenfassungen; `apply_pose` lädt eine Pose, danach zeigt eine Punkteabfrage ihre aktuelle Lage.
 
-Positionen sind die normierten **Weltkoordinaten des Studios**, keine Pixel oder ursprünglichen GLB-Einheiten. Rotation ist eine normierte Quaternion `[x, y, z, w]`. `$figure` bezeichnet die gesamte Figur. Der optionale `mesh`-Index bindet einen freien Punkt an eine Teiloberfläche; gültig sind 0 bis `counts.surfaces - 1`. Ohne Index wirkt der Punkt in seinem Radius über Teiloberflächen hinweg. Die API führt kein Oberflächen-Raycasting aus; der Agent muss die Position angeben.
+Positionen sind die normierten **Weltkoordinaten des Studios**, keine Pixel oder ursprünglichen GLB-Einheiten. Rotation ist eine normierte Quaternion `[x, y, z, w]`. `$figure` bezeichnet die gesamte Figur. `figure.scale` ist ihr Größenfaktor (1 = 100 %), unabhängig von Kamera-Zoom und sichtbarer Punktgröße. Der optionale `mesh`-Index bindet einen freien Punkt an eine Teiloberfläche; gültig sind 0 bis `counts.surfaces - 1`. Ohne Index wirkt der Punkt in seinem Radius über Teiloberflächen hinweg. Die API führt kein Oberflächen-Raycasting aus; der Agent muss die Position angeben.
 
 ## Schreiben: `edit_studio`
 
@@ -27,7 +27,7 @@ Das Werkzeug erhält ein Objekt `command`. **Jeder** Befehl benötigt `session`,
 | --- | --- | --- |
 | `set_mode` | `mode`: `rig` oder `pose` | Keine Vorschau/Geste aktiv. |
 | `add_point` | `position`; optional `name`, `mesh`, `size`, `radius` | `rig`; erzeugt freien Oberflächenpunkt. |
-| `update_point` | `id`; mindestens eines von `name`, `position`, `rotation`, `size`, `radius` | Rotation nur in `pose`, für Skelettgriffe oder `$figure`. |
+| `update_point` | `id`; mindestens eines von `name`, `position`, `rotation`, `scale`, `size`, `radius` | `scale` nur für `$figure` in `pose`. Rotation nur in `pose`, für Skelettgriffe oder `$figure`. |
 | `delete_point` | `id` | `rig`; bei Quellknochen wird nur der Griff entfernt. |
 | `connect_points` | `id`, `target` | `rig`; ergänzt die Verbindung, falls sie fehlt. |
 | `disconnect_points` | `id`, `target` | `rig`; entfernt nur diese Verbindung, falls vorhanden. |
@@ -37,7 +37,7 @@ Das Werkzeug erhält ein Objekt `command`. **Jeder** Befehl benötigt `session`,
 | `create_move` | `id`, `name`, `poses` (geordnete Posen-IDs); optional `loop` | `pose`; mindestens zwei Posenreferenzen, freies Schlagwort. |
 | `undo` / `redo` | keine | Passender Bearbeitungsschritt vorhanden. |
 
-Grenzen: Position je Achse −100 bis +100; Punktgröße 0,003 bis 0,15; Radius 0,005 bis 0,6; Posenzeit 0,1 bis 30 Sekunden; Namen bis 100 Zeichen. Projektgrenzen gelten unverändert. Bei `$figure` sind nur Position und Rotation änderbar. Zusätzliche oder für die jeweilige Aktion unpassende Felder werden abgewiesen. JSON-Zahlen verwenden einen Dezimalpunkt.
+Grenzen: Position je Achse −100 bis +100; Punktgröße 0,003 bis 0,15; Radius 0,005 bis 0,6; Posenzeit 0,1 bis 30 Sekunden; Namen bis 100 Zeichen. Projektgrenzen gelten unverändert. Bei `$figure` sind Position, Rotation und die proportionale `scale` von 0.1 bis 5 änderbar. Zusätzliche oder für die jeweilige Aktion unpassende Felder werden abgewiesen. JSON-Zahlen verwenden einen Dezimalpunkt.
 
 ## Beispiel: zwei Posen für eine Gesamtbewegung
 
@@ -63,3 +63,5 @@ Danach jeweils die zurückgegebene Revision verwenden:
 5. Im Studio Vorschau prüfen, **Speichern** wählen und zum Player zurückkehren. Nun kann `play_move` das Schlagwort `huepfen` auslösen.
 
 `save_pose` speichert im geöffneten Projekt. Kein Studio-Tool lädt Dateien herunter, importiert Modelle, ruft beliebige URLs auf oder führt Code aus. Für die dauerhafte Sicherung den Projekt-Download im Studio verwenden.
+
+Beispiel für eine Größenänderung: `update_point` mit `id: "$figure"` und `scale: 1.5` vergrößert proportional auf 150 %. Position und Drehung bleiben dabei erhalten. Danach `save_pose` verwenden, um die Größe in einer Bewegung zu speichern.

@@ -23,3 +23,15 @@ test('invalid studio commands cannot change data or revision and snapshots stay 
  for(const extra of [{action:'add_point',position:[NaN,0,0]},{action:'add_point',position:[0,0,0],mesh:999},{action:'save_pose'},{action:'delete_point',id:'missing'},{action:'update_point',id:'$figure',position:[0,0,0]},{action:'set_mode',mode:'rig',path:'/tmp/file'},{action:'add_point',position:[0,0,0],rotation:[0,0,0,0]}]){assert.throws(()=>f.run(extra));assert.equal(JSON.stringify(f.rig.data),before);assert.equal(f.editor.inspect().revision,revision);}
  for(let i=0;i<35;i++)f.run({action:'add_point',position:[0,0,0],name:'顔'.repeat(100)});const first=f.editor.inspect({section:'points',limit:32});assert.ok('items' in first);assert.equal(first.items.length,32);assert.equal(first.nextOffset,32);assert.ok(new TextEncoder().encode(JSON.stringify(first)).length<65536);assert.throws(()=>f.editor.inspect({limit:33}));assert.throws(()=>parseStudioCommand(null));f.editor.dispose();f.w.happyDOM.abort();
 });
+
+test('mouse scale is one undoable gesture, blocks racing MCP, persists poses and is editable through MCP',()=>{
+ const f=fixture(),{editor,rig,host,run}=f;editor.enter();f.grant();host.querySelector<HTMLButtonElement>('#figure-select')!.click();
+ const slider=host.querySelector<HTMLInputElement>('#figure-scale')!,revision=editor.inspect().revision;
+ for(const scale of ['1.5','2']){slider.value=scale;slider.dispatchEvent(new f.w.Event('input') as unknown as Event);}
+ assert.equal(rig.scale,2);assert.equal(editor.inspect().revision,revision);assert.equal(host.querySelector('#figure-scale-value')!.textContent,'200 %');assert.throws(()=>run({action:'save_pose'}),/beschäftigt/);
+ slider.dispatchEvent(new f.w.Event('change') as unknown as Event);assert.equal(editor.inspect().revision,revision+1);run({action:'undo'});assert.equal(rig.scale,1);run({action:'redo'});assert.equal(rig.scale,2);
+ const a=run({action:'save_pose'}).id!;run({action:'update_point',id:'$figure',scale:.5});assert.equal(editor.inspect().figure.scale,.5);const b=run({action:'save_pose',seconds:2}).id!;run({action:'create_move',id:'shrink',name:'Shrink',poses:[a,b]});editor.play('shrink',true);editor.update(1);assert.equal(rig.scale,1.25);editor.stopPreview();
+ editor.leave();editor.enter();assert.equal(rig.scale,1.25,'draft persists');f.grant();assert.doesNotThrow(()=>parseProject({...f.project,studio:rig.data}));
+ for(const scale of [0,-1,6,NaN,Infinity,'2']){const before=rig.capture(),rev=editor.inspect().revision;assert.throws(()=>run({action:'update_point',id:'$figure',scale}));assert.deepEqual(rig.capture(),before);assert.equal(editor.inspect().revision,rev);}
+ run({action:'set_mode',mode:'rig'});const id=run({action:'add_point',position:[0,0,0]}).id!;run({action:'set_mode',mode:'pose'});assert.throws(()=>run({action:'update_point',id,scale:2}));editor.dispose();f.w.happyDOM.abort();
+});

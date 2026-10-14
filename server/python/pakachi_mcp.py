@@ -27,6 +27,7 @@ class StudioCommand(BaseModel):
     name: str | None = Field(default=None, min_length=1, max_length=100)
     position: list[float] | None = Field(default=None, min_length=3, max_length=3)
     rotation: list[float] | None = Field(default=None, min_length=4, max_length=4)
+    scale: float | None = Field(default=None, ge=.1, le=5)
     size: float | None = Field(default=None, ge=.003, le=.15)
     radius: float | None = Field(default=None, ge=.005, le=.6)
     mesh: int | None = Field(default=None, ge=0)
@@ -148,7 +149,7 @@ def build_server(uri=None, embedded=True, tcp_port=1883, ws_port=8083):
                 with suppress(Exception):
                     await broker.shutdown()
 
-    server = MCPServer('pakachi-sm', version='0.9.0', lifespan=lifespan)
+    server = MCPServer('pakachi-sm', version='0.10.0', lifespan=lifespan)
 
     async def request(method, args=None):
         if bridge is None:
@@ -198,7 +199,7 @@ def build_server(uri=None, embedded=True, tcp_port=1883, ws_port=8083):
     async def edit_studio(command: StudioCommand) -> dict:
         """Freigegebenes geöffnetes Studio bearbeiten. session/expectedRevision aus get_studio verwenden.
         set_mode: mode=pose/rig. add_point: position, optional name/mesh/size/radius.
-        update_point: id und name/position/rotation/size/radius; $figure ist die ganze Figur.
+        update_point: id und name/position/rotation/scale/size/radius (scale nur $figure, 0.1–5); $figure ist die ganze Figur.
         delete_point: id. connect_points/disconnect_points: id,target.
         save_pose: optional name,seconds. apply_pose/replace_pose: id.
         create_move: id,name,poses,optional loop. undo/redo ohne weitere Felder.

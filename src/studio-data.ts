@@ -5,7 +5,7 @@ export type Quat = [number, number, number, number];
 /** Reserved pose channel; cannot collide with user point IDs. */
 export const FIGURE_TRACK='$figure';
 export const neutralFigure=():Transform=>({position:[0,0,0],rotation:[0,0,0,1]});
-export interface Transform { position: Vec3; rotation: Quat }
+export interface Transform { position: Vec3; rotation: Quat; /** Uniform whole-figure scale only; absent means 1. */ scale?: number }
 export interface ControlPoint {
   id: string; name: string; kind: 'bone' | 'surface'; bone?: number; mesh?: number;
   rest: Vec3; size: number; radius: number;
@@ -26,7 +26,8 @@ const name = (v: unknown): v is string => typeof v==='string' && v.trim().length
 const id = (v: unknown): v is string => name(v) && /^[a-z0-9][a-z0-9_-]*$/.test(v);
 const finite = (v: unknown): v is number => typeof v==='number' && Number.isFinite(v) && Math.abs(v)<=10000;
 const vector = (v:unknown,n:number) => Array.isArray(v) && v.length===n && v.every(finite);
-const transform = (v:unknown) => obj(v) && vector(v.position,3) && vector(v.rotation,4) && Math.abs((v.rotation as number[]).reduce((s,x)=>s+x*x,0)-1)<.01;
+export const validFigureScale = (v:unknown):v is number => typeof v==='number' && Number.isFinite(v) && v>=.1 && v<=5;
+const transform = (v:unknown,figure=false) => obj(v) && (v.scale===undefined || figure && validFigureScale(v.scale)) && vector(v.position,3) && vector(v.rotation,4) && Math.abs((v.rotation as number[]).reduce((s,x)=>s+x*x,0)-1)<.01;
 function require(condition:unknown, message='Ungültige Studio-Projektdatei.'): asserts condition { if(!condition) throw new Error(message); }
 export function parseProject(input: unknown): StudioProject {
   require(obj(input) && input.format==='pakachi-studio' && input.version===1,'Unbekanntes Studio-Projektformat.');
@@ -36,7 +37,7 @@ export function parseProject(input: unknown): StudioProject {
   for(const m of a.moves) { require(obj(m) && id(m.id) && !moveIds.has(m.id) && name(m.name) && name(m.clip) && typeof m.loop==='boolean'); moveIds.add(m.id); }
   require(a.defaultMove===undefined || moveIds.has(a.defaultMove as string));
   if(a.states!==undefined) {require(obj(a.states));for(const [key,value] of Object.entries(a.states))require(['idle','talking','thinking','working','waiting','review','error','sleeping'].includes(key) && moveIds.has(value as string));}
-  const d=input.studio; require(obj(d) && Array.isArray(d.points) && d.points.length<=256 && Array.isArray(d.links) && d.links.length<=2048 && Array.isArray(d.boneRest) && d.boneRest.length<=512 && d.boneRest.every(transform) && Array.isArray(d.poses) && d.poses.length<=100 && Array.isArray(d.moves) && d.moves.length<=100);
+  const d=input.studio; require(obj(d) && Array.isArray(d.points) && d.points.length<=256 && Array.isArray(d.links) && d.links.length<=2048 && Array.isArray(d.boneRest) && d.boneRest.length<=512 && d.boneRest.every(v=>transform(v)) && Array.isArray(d.poses) && d.poses.length<=100 && Array.isArray(d.moves) && d.moves.length<=100);
   const ids=new Set<string>(), bones=new Set<number>();
   for(const p of d.points) {
     require(obj(p) && id(p.id) && !ids.has(p.id) && name(p.name) && ['bone','surface'].includes(p.kind as string) && vector(p.rest,3) && finite(p.size) && p.size>=.003 && p.size<=.15 && finite(p.radius) && p.radius>=.005 && p.radius<=2);
@@ -44,7 +45,7 @@ export function parseProject(input: unknown): StudioProject {
     else require(p.mesh===undefined || Number.isInteger(p.mesh) && (p.mesh as number)>=0 && (p.mesh as number)<2048);
     ids.add(p.id);
   }
-  const valuesValid=(values:unknown)=>{if(!obj(values))return false;const keys=Object.keys(values);return keys.length===ids.size+(FIGURE_TRACK in values?1:0)&&keys.every(key=>key===FIGURE_TRACK ? transform(values[key]) : ids.has(key)&&transform(values[key]));};
+  const valuesValid=(values:unknown)=>{if(!obj(values))return false;const keys=Object.keys(values);return keys.length===ids.size+(FIGURE_TRACK in values?1:0)&&keys.every(key=>key===FIGURE_TRACK ? transform(values[key],true) : ids.has(key)&&transform(values[key]));};
   if(d.draft!==undefined)require(valuesValid(d.draft));
   const links=new Set<string>();
   for(const l of d.links) {require(Array.isArray(l) && l.length===2 && l[0]!==l[1] && ids.has(l[0]) && ids.has(l[1])); const k=[...l].sort().join('|');require(!links.has(k));links.add(k);}

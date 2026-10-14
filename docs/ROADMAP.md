@@ -1,6 +1,6 @@
 # Roadmap – was kommt
 
-**Softwarestand: 0.9.0 · Abgleich: 14.10.2026.** Teil der [Blaupause](README.md).
+**Softwarestand: 0.10.0 · Abgleich: 14.10.2026.** Teil der [Blaupause](README.md).
 
 Ein Häkchen bedeutet implementiert; es ersetzt keine visuelle oder externe Live-Abnahme. Die Nachweise und Prüfgrenzen stehen im [Prüfstand](PRUEFUNG.md). Die Versionshistorie gehört ins [Changelog](CHANGELOG.md).
 
@@ -43,7 +43,7 @@ Diese Reihenfolge ist ein Umsetzungsvorschlag, kein Terminversprechen. Die dafü
 - [x] Eigene Moves mit Schlagwort, Vorschau und Wiedergabe im Player.
 - [x] Neu/Laden/Speichern für vollständige `.pakachi.json`-Projekte; Undo/Redo.
 - [x] Gesamtrotation als interpolierte Bewegungsspur ergänzen (0.8.0).
-- [ ] Skalierung als Bewegungsspur ergänzen.
+- [x] Gleichmäßige Skalierung als Bewegungsspur mit Mausregler, Posen, Undo/Redo und MCP ergänzen (0.10.0).
 - [ ] Überblendung zwischen Originalclips und Studio-Moves ergänzen; bisher nur Originalclips untereinander.
 
 **Abnahme:** Aus Posen eine Bewegung erstellen, speichern, erneut laden und abspielen. Geometrie-/Daten-/DOM-Prüfungen vorhanden; visueller Gesamtablauf offen.

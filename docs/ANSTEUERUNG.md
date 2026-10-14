@@ -1,6 +1,6 @@
 # Agentensteuerung
 
-Gültig für Softwarestand 0.9.0.
+Gültig für Softwarestand 0.10.0.
 
 **Bevorzugter Weg seit 0.4.0:** [Python-MCP 2.3.0 mit eingebettetem aMQTT-Broker](PYTHON-MCP.md). MCP-Anfragen und Player-Antworten laufen dort über denselben MQTT-Broker. Die folgende Node-Einrichtung bleibt als Kompatibilitätsweg erhalten.
 
@@ -113,4 +113,4 @@ MCP und MQTT können gleichzeitig aktiviert werden. Es gibt keine versteckte Pri
 
 ## Prüfstand
 
-Router und Node-MCP sind Bestandteil der regulären Tests; der Python-Weg wurde in 0.9.0 mit realen Prozessen, aMQTT, produktivem MQTT-Client und Studio-Editor integriert getestet. Eine konkrete externe Host-/NanoMQ-Abnahme und die visuelle Browserabnahme stehen aus. Vollständige Übersicht: [Prüfstand](PRUEFUNG.md).
+Router und Node-MCP sind Bestandteil der regulären Tests; der Python-Weg wurde in 0.10.0 mit realen Prozessen, aMQTT, produktivem MQTT-Client und Studio-Editor integriert getestet. Eine konkrete externe Host-/NanoMQ-Abnahme und die visuelle Browserabnahme stehen aus. Vollständige Übersicht: [Prüfstand](PRUEFUNG.md).

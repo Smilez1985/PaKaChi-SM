@@ -1,4 +1,4 @@
-# Technischer Stand 0.9.0
+# Technischer Stand 0.10.0
 
 ## Lokale Anwendung
 
@@ -61,3 +61,9 @@ Die Rotationsinterpolation verwendet Quaternion-Slerp entlang des kürzeren Wegs
 `edit_studio` verwendet `studio-command.ts` zur strikten Validierung der pro Aktion erlaubten Felder. Editorseitige Vorbedingungen prüfen Existenz, Modus, Limits, zusätzliche Freigabe, Studiositzung und monotone Revision. Während Gesten/Vorschauen wird nicht geschrieben. Manuelle oder externe Datenänderungen erhöhen die Revision; wiederholte veraltete Befehle werden abgewiesen. Normale Undo-Snapshots und Posen-Prüfhinweise werden auch für externe Änderungen benutzt. Die Freigabe gehört nur zur geladenen Editorsitzung und kann nicht per RPC eingeschaltet werden.
 
 Python und Node stellen dieselben acht Tools bereit. Der MQTT-Anfragekanal erlaubt die beiden Studio-Methoden ausdrücklich; das direkte Status-Topic bleibt auf Zustands-/Move-Befehle begrenzt. `save_pose` speichert im aktuellen Projekt, nicht auf der Festplatte. Es gibt keine Datei-, URL-, Codeausführungs- oder Importoperation über diese Werkzeuge.
+
+## Gleichmäßige Gesamtskalierung ab 0.10.0
+
+`$figure.scale` ist ein optionaler endlicher Faktor von 0.1 bis 5; fehlende Werte werden als 1 gelesen. Nur der Gesamtkanal darf dieses Feld enthalten, weder Punkttransformationen noch `boneRest`. Die Matrix wird als `T(center + offset) * R * S * T(-center)` auf die ursprüngliche Root-Weltmatrix angewendet. Die bestehenden exakten Eltern-/Hautmatrizen bleiben erhalten. `sample` interpoliert den Faktor linear, auch zum Schleifenanfang; Reset und Originalclips setzen ihn auf 1 zurück.
+
+Der Mausregler nutzt eine gemeinsame Gestenaufnahme für Vorschau, Undo und Revisionsschutz. Der Agent liest `figure.scale` und schreibt über `update_point` mit `id: "$figure"`, ausschließlich im Pose-Modus. Beide MCP-Schemas und die Browserprüfung begrenzen den Wert. Projektformat 1 bleibt bestehen; ältere Software ignoriert das Zusatzfeld und kann die Größenbewegung nicht wiedergeben.

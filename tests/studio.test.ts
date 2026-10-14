@@ -91,3 +91,24 @@ test('whole rotation retains exact geometry under nonuniform parents and round-t
  const project:StudioProject={format:'pakachi-studio',version:1,model:'AAAA',avatar:{id:'x',name:'X',description:'',moves:[]},studio:rig.data};const saved=parseProject(JSON.parse(JSON.stringify(project)));rig.data=saved.studio;rig.reset();rig.apply(rig.sample(rig.data.moves[0],1));const half=new T.Quaternion().setFromAxisAngle(new T.Vector3(0,1,0),Math.PI/4);assert.ok(rig.rotation(rig.figure).angleTo(half)<1e-6);assert.ok(maxDistance(initial.map(v=>v.clone().sub(center).applyQuaternion(half).add(center)),vertices(mesh))<1e-6);
  rig.reset();assert.ok(maxDistance(initial,vertices(mesh))<1e-6);disposeModel(root);
 });
+
+test('whole scale follows rotated skinned geometry and facial controls, preserves editing and restores source',async()=>{
+ const {root}=await fixture();const rig=new StudioRig(root),mesh=rig.surfaces[0].mesh as T.SkinnedMesh,initial=vertices(mesh),center=rig.position(rig.figure);
+ const face={id:'face',name:'Face',kind:'surface' as const,mesh:0,rest:initial[0].toArray(),size:.006,radius:.1};rig.data.points.push(face);rig.reset();
+ const rotation=new T.Quaternion().setFromAxisAngle(new T.Vector3(1,0,0),.7),offset=new T.Vector3(.2,-.1,.4);rig.setFigureTransform(offset,rotation,2);
+ const expected=initial.map(v=>v.clone().sub(center).multiplyScalar(2).applyQuaternion(rotation).add(center).add(offset));
+ assert.ok(maxDistance(expected,vertices(mesh))<1e-6);assert.ok(rig.position(face).distanceTo(expected[0])<1e-6);assert.ok(rig.position(rig.figure).distanceTo(center.clone().add(offset))<1e-6);
+ const target=expected[0].clone().add(new T.Vector3(0,.03,0));rig.setPoint(face,target,new T.Quaternion(),false);assert.ok(rig.position(face).distanceTo(target)<1e-6);
+ rig.setPoint(rig.figure,rig.position(rig.figure).addScalar(.1),rotation,false);assert.equal(rig.scale,2,'translation retains scale');
+ rig.restoreSource();assert.equal(rig.scale,1);assert.ok(maxDistance(initial,vertices(mesh))<1e-6);disposeModel(root);
+});
+test('scale interpolates and loops around the center under nonuniform parents; old files default to one',()=>{
+ const holder=new T.Group();holder.scale.set(2,3,1);holder.rotation.z=.4;const root=new T.Group();root.position.set(.2,.3,.1);holder.add(root);const mesh=new T.Mesh(new T.BoxGeometry());root.add(mesh);holder.updateMatrixWorld(true);
+ const rig=new StudioRig(root),initial=vertices(mesh),center=rig.position(rig.figure),first=rig.capture();delete first.$figure.scale;
+ rig.setFigureScale(3);const last=rig.capture();rig.data.poses=[{id:'a',name:'A',seconds:2,values:first},{id:'b',name:'B',seconds:2,values:last}];rig.data.moves=[{id:'grow',name:'Grow',loop:true,poses:['a','b']}];
+ const project:StudioProject={format:'pakachi-studio',version:1,model:'AAAA',avatar:{id:'test',name:'Test',description:'',moves:[]},studio:rig.data};rig.data=parseProject(JSON.parse(JSON.stringify(project))).studio;
+ for(const time of [1,3]){rig.apply(rig.sample(rig.data.moves[0],time));assert.equal(rig.scale,2);assert.ok(maxDistance(initial.map(v=>v.clone().sub(center).multiplyScalar(2).add(center)),vertices(mesh))<1e-6);}
+ rig.apply(first);assert.equal(rig.scale,1);assert.ok(maxDistance(initial,vertices(mesh))<1e-6);
+ for(const value of [0,-1,5.01,Infinity,NaN,'2',null]){const invalid=structuredClone(project);(invalid.studio.poses[0].values.$figure as any).scale=value;assert.throws(()=>parseProject(invalid));assert.throws(()=>rig.setFigureScale(value as number));assert.equal(rig.scale,1);}
+ const invalid=structuredClone(project);invalid.studio.boneRest=[{position:[0,0,0],rotation:[0,0,0,1],scale:2}];assert.throws(()=>parseProject(invalid),'scale belongs only to the figure');disposeModel(root);
+});

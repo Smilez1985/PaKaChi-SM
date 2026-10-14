@@ -34,6 +34,7 @@ const translations:Record<string,string>={
   'Neu':'New','Speichern':'Save','Speichern *':'Save *','Laden':'Load','Projekt laden':'Load project','＋ GLB laden':'＋ Load GLB',
   '↶ Zurück':'↶ Undo','↷ Wiederholen':'↷ Redo','Gelenk / Gesichtspunkt':'Joint / facial control','Punkt auswählen …':'Select a point …',
   '＋ Punkt setzen':'＋ Add point','Verbinden / lösen':'Connect / disconnect','Name':'Name','Punktgröße':'Point size','Einflussbereich':'Influence radius',
+  'Figurgröße':'Figure size','Gesamte Figur verschieben, drehen oder gleichmäßig skalieren. Alles wird in jeder Pose gespeichert.':'Translate, rotate or uniformly scale the whole figure. All are saved in every pose.',
   'Griffe':'Handles','Verschieben':'Translate','Drehen':'Rotate','Verbundene freie Punkte gemeinsam bewegen':'Move connected free points together',
   'Kontrollpunkt löschen':'Delete control point','Grundpose':'Rest pose','Posen & Bewegung':'Poses & motion','Posenname':'Pose name','z. B. Hand oben':'e.g. Hand up',
   'Aktuelle Pose speichern':'Save current pose','Gespeicherte Posen':'Saved poses','Anzeigen':'Show','Ersetzen':'Replace','Löschen':'Delete',

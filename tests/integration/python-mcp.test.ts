@@ -45,6 +45,8 @@ test('Python MCP 2.3 -> embedded authenticated aMQTT -> actual PlayerMQTT -> sta
   const add=await edit({action:'add_point',name:'MCP-Auge',position:[.1,.2,0],size:.006,mesh:0});assert.notEqual(add.isError,true,JSON.stringify(add));assert.equal(rig.data.points.length,1);assert.equal(rig.data.points[0].name,'MCP-Auge');
   assert.equal((await client.callTool({name:'edit_studio',arguments:{command}})).isError,true,'stale revision cannot repeat edit');
   await edit({action:'set_mode',mode:'pose'});const pose=await edit({action:'save_pose',name:'Neutral'});assert.notEqual(pose.isError,true,JSON.stringify(pose));assert.equal(rig.data.poses.length,1);
+  const scaled=await edit({action:'update_point',id:'$figure',scale:1.5});assert.notEqual(scaled.isError,true,JSON.stringify(scaled));assert.equal(rig.scale,1.5);
+  assert.equal((await edit({action:'update_point',id:'$figure',scale:0})).isError,true);assert.equal(rig.scale,1.5);
   const mqtt=await connectAsync(`mqtt://127.0.0.1:${tcp}`,{username:'pakachi',password:token,reconnectPeriod:0});t.after(()=>mqtt.endAsync(true));
   mqtt.publish('pakachi/status','idle');await delay(100);assert.equal(machine.state,'idle');
   const request={id:'duplicate-test',method:'play_move',args:{move:'wave'},replyTo:'pakachi/mcp/test/reply',expires:Date.now()+5000};

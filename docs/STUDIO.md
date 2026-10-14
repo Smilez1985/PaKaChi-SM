@@ -1,4 +1,4 @@
-# Avatar-Studio – 0.9.0
+# Avatar-Studio – 0.10.0
 
 Das Studio ist Teil des Players. Mika, Nori und eigene GLB-Modelle können bearbeitet werden. Der Original-PaKaChi bleibt mit beiden Formen und 72 Bildern erhalten; für ihn fehlt weiterhin das entsprechende 3D-Modell. Seine Bilder werden durch den Editor nicht verändert.
 
@@ -109,3 +109,11 @@ MCP wie in [Python-MCP](PYTHON-MCP.md) einrichten und das 3D-Studio öffnen. **K
 Die Freigabe wird nicht gespeichert und endet beim Verlassen oder Ersetzen des Studios. Sie kann auch während einer Vorschau ausgeschaltet werden. Während einer Vorschau oder Ziehgeste werden KI-Schreibbefehle abgewiesen. Manuelle Änderungen machen ältere Befehle ungültig; der Agent muss den aktuellen Stand erneut lesen.
 
 Der Agent löst keinen Dateidownload aus. Das fertige Projekt weiterhin selbst mit **Speichern** herunterladen. API und Beispiel: [MCP-Studio](MCP-STUDIO.md).
+
+## Die ganze Figur größer oder kleiner bewegen
+
+In **Figur bewegen → Gesamte Figur bewegen** den Regler **Figurgröße** mit der Maus ziehen. 100 % entspricht der ursprünglichen Größe; möglich sind 10 % bis 500 %. Die Vorschau reagiert während des Ziehens, die Prozentanzeige zeigt den aktuellen Wert. Eine Reglerbewegung ist ein gemeinsamer Schritt für **Zurück/Wiederholen**.
+
+Die Skalierung bleibt proportional und erfolgt um den ursprünglichen Modellmittelpunkt, gemeinsam mit Verschiebung und Drehung. Skelett und Gesichtspunkte folgen mit; die separat eingestellte sichtbare Griffgröße bleibt erhalten. Zwei unterschiedlich große Posen speichern und daraus einen Move erstellen: Die Größe wird zwischen den Posen linear interpoliert, auch beim Rückweg einer Schleife. **Grundpose** und Originalclips stellen die Ausgangsgröße wieder her.
+
+Arbeitspose, gespeicherte Posen und Projektdateien enthalten den Größenfaktor. Alte Dateien ohne Faktor verwenden 100 %. Projekte mit Größenänderungen benötigen **0.10.0 oder neuer**: Ältere Versionen ignorieren die neue Spur. Die Funktion verändert keine Modellqualität oder Dateigröße und ersetzt keine Schwerkraft/Bodenkollision. Unterschiedliche Skalierung je Achse oder einzelner Körperteile ist nicht enthalten.

@@ -1,18 +1,18 @@
 # Prüfstand und Abnahme
 
-**Softwarestand: 0.9.0 · Dokumentationsabgleich: 14.10.2026.**
+**Softwarestand: 0.10.0 · Dokumentationsabgleich: 14.10.2026.**
 
 ## Nachgewiesen
 
 | Prüfung | Letzter Nachweis | Umfang und Grenze |
 | --- | --- | --- |
-| `npm test` | 0.9.0: 40 Tests bestanden | Player, Router, Studio-Daten, reale Three.js-Geometrie, DOM/Ereignisse mit happy-dom, Node-MCP und Erhaltungsprüfung. Kein gerenderter Browser. |
+| `npm test` | 0.10.0: 43 Tests bestanden | Player, Router, Studio-Daten, reale Three.js-Geometrie, DOM/Ereignisse mit happy-dom, Node-MCP und Erhaltungsprüfung. Kein gerenderter Browser. |
 | `npm run test:legacy` | 0.9.0: beide Programme bestanden | Originalplayer-Steuerung, MQTT-Verhalten und Lebenszyklus. |
-| `npm run build` | 0.9.0: bestanden | TypeScript und Produktionsbuild; Vite meldet weiterhin das große gemeinsame JS-Bundle (rund 1,12 MB / 303 kB gzip). |
-| `npm run test:python` mit `PAKACHI_PYTHON` | 0.9.0: Integration bestanden | Echter Python-MCP-Prozess, eingebetteter aMQTT-Broker, produktiver MQTT-Client, Router und Studio-Editor. Acht Tools, Studio-Änderungen, fehlende Freigabe und Revisionskonflikte geprüft. |
-| Originaldateien | 0.9.0: bytegenau erhalten | 83 wiederhergestellte Dateien einschließlich exakt 72 Transformationsbildern. |
+| `npm run build` | 0.10.0: bestanden | TypeScript und Produktionsbuild; Vite meldet weiterhin das große gemeinsame JS-Bundle (rund 1,13 MB / 308 kB gzip). |
+| `npm run test:python` mit `PAKACHI_PYTHON` | 0.10.0: Integration bestanden | Echter Python-MCP-Prozess, eingebetteter aMQTT-Broker, produktiver MQTT-Client, Router und Studio-Editor. Acht Tools, Studio-Änderungen einschließlich gültiger/ungültiger Skalierung, fehlende Freigabe und Revisionskonflikte geprüft. |
+| Originaldateien | 0.10.0: bytegenau erhalten | 83 wiederhergestellte Dateien einschließlich exakt 72 Transformationsbildern. |
 
-Drei neue reguläre Tests in 0.9.0 prüfen den Studio-Agentenablauf, Freigabe/Sitzung/Revision und atomare Ablehnung ungültiger Befehle sowie begrenzte Antworten. Node- und Python-MCP-Integration sind erweitert.
+Drei neue reguläre Tests in 0.10.0 prüfen skalierte Hautgeometrie/Gesichtspunkte, Interpolation/Schleifen/Dateikompatibilität und den Mausregler mit Undo/MCP-Schutz. Die reale Python-Integration prüft zusätzlich den Größenfaktor.
 
 ## Noch nicht abgenommen
 
@@ -27,7 +27,7 @@ Drei neue reguläre Tests in 0.9.0 prüfen den Studio-Agentenablauf, Freigabe/Si
 2. Mika/Nori und eine eigene GLB öffnen; Kamera mit gedrücktem Mausrad drehen, auch zur Rück-/Unterseite, rechts verschieben und per Mausrad bis ins Gesicht zoomen. Inversion in den Optionen prüfen.
 3. Gesichtspunkte setzen, verkleinern, direkt ziehen, verbinden und eine einzelne Verbindung entfernen; Zurück/Wiederholen prüfen.
 4. Vorhandene Skelettgriffe/Verbindungen erneut erkennen; bei einem Modell ohne Skelett den zutreffenden Hinweis prüfen.
-5. Gelenkpose und Gesamtverschiebung aufnehmen, Move abspielen, Projekt speichern und neu laden. Auch ein knochenloses Modell verwenden.
+5. Gelenkpose und Gesamtverschiebung, Drehung und Größenänderung aufnehmen, Move abspielen, Projekt speichern und neu laden. Auch ein knochenloses Modell verwenden.
 6. Deutsch/English umschalten und kontrollieren, dass eigene Namen erhalten bleiben.
 7. Im Player einen eigenen Move über den eingerichteten Agenten auslösen; im Studio muss derselbe Steuerbefehl abgewiesen werden.
 
@@ -36,3 +36,5 @@ Diese Liste beschreibt ausstehende Prüfungen, keine bereits erzielten Ergebniss
 ## Historische Berichte
 
 [0.1.0](PRUEFUNG-0.1.0.md) · [0.2.0](PRUEFUNG-0.2.0.md) · [0.3.0](PRUEFUNG-0.3.0.md) · [0.4.0](PRUEFUNG-0.4.0.md) · [0.5.0](PRUEFUNG-0.5.0.md) · [0.6.0](PRUEFUNG-0.6.0.md) · [0.7.0](PRUEFUNG-0.7.0.md) · [0.8.0](PRUEFUNG-0.8.0.md) · [0.9.0](PRUEFUNG-0.9.0.md)
+
+[Prüfbericht 0.10.0](PRUEFUNG-0.10.0.md)

@@ -12,6 +12,23 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.10.0] - 2026-10-14
+
+Zeitstempel: 2026-10-14T07:05:35+02:00 (Europe/Berlin)
+
+### Added
+
+- Proportionale Gesamtgröße als gespeicherte Bewegungsspur von 10 % bis 500 %, einschließlich linearer Interpolation und Schleifen.
+- Live-Mausregler mit Prozentanzeige und einem Undo-Schritt pro Reglerbewegung.
+- `figure.scale` in Studio-Abfragen und Größenänderung per `edit_studio` in Python und Node.
+- Drei Tests für Geometrie/Hautbindung, Altdateien, Interpolation, Regler und Agentenschutz; reale Python-Integration um Skalierung erweitert.
+
+### Changed
+
+- README, Designdokument, Roadmap, Bedien-/API-Anleitungen und Prüfstand auf 0.10.0 abgeglichen.
+
+**Hinweise zu dieser Version:** Ältere Projekte verwenden ohne Größenfaktor 100 %. Größenbewegungen benötigen mindestens 0.10.0; ältere Software ignoriert diese Spur. Skalierung ist proportional, keine Optimierung der Modellqualität. Visuelle Abnahme bleibt offen.
+
 ## [0.9.0] - 2026-10-14
 
 Zeitstempel: 2026-10-14T00:14:37+02:00 (Europe/Berlin)
@@ -212,7 +229,8 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 - Bestehendes Bedienkonzept ausdrücklich als Designdokument eingeordnet und mit Roadmap und Changelog verknüpft.
 
 [Unreleased]: https://github.com/Smilez1985/PaKaChi-SM/commits/main
-[0.9.0]: ./PRUEFUNG-0.9.0.md
+[0.10.0]: ./PRUEFUNG-0.10.0.md
+[0.9.0]: https://github.com/Smilez1985/PaKaChi-SM/compare/7694667885e57c9ca4573c25396a42799428d33a...b0c0782b4e54f1c15032f98648d0af59fc61028d
 [0.8.0]: https://github.com/Smilez1985/PaKaChi-SM/compare/16ea247734a97aa831343f0ec0d2cbb6b51c16a5...7694667885e57c9ca4573c25396a42799428d33a
 [0.7.0]: https://github.com/Smilez1985/PaKaChi-SM/compare/1a2cc30de87d3a90ab35e240f413f047bc16fd6a...16ea247734a97aa831343f0ec0d2cbb6b51c16a5
 [0.6.0]: https://github.com/Smilez1985/PaKaChi-SM/compare/4ce44c3b70d4dbbba5ecdc4e1bc99d8ea89bb7bc...1a2cc30de87d3a90ab35e240f413f047bc16fd6a

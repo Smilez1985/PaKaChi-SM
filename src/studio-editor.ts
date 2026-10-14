@@ -2,7 +2,7 @@ import {parseStudioCommand} from './studio-command.ts';
 import {flagAffectedPoses,moveReview,reviewLabels} from './studio-review.ts';
 import * as T from 'three';
 import {detectJoints,detectConnections,edgeKey} from './studio-detection.ts';
-import { connectedPoints, StudioHistory, FIGURE_TRACK } from './studio-data.ts';
+import { connectedPoints, StudioHistory, FIGURE_TRACK, validFigureScale } from './studio-data.ts';
 import type { StudioData, StudioProject, Transform, ControlPoint } from './studio-data.ts';
 import { StudioRig } from './studio-rig.ts';
 import type { StudioView } from './studio-view.ts';
@@ -82,7 +82,7 @@ export class StudioEditor {
   private connect(id:string){if(!this.edit||!this.selected||id===this.selected)return;
     this.mutate(()=>{const index=this.data.links.findIndex(([a,b])=>(a===id&&b===this.selected)||(b===id&&a===this.selected));if(index>=0)this.data.links.splice(index,1);else if(this.data.links.length<2048)this.data.links.push([this.selected!,id]);});this.view.setAction('select');
   }
-  private refreshNumbers(){const p=this.point;if(!p)return;const pos=this.rig.position(p);['x','y','z'].forEach((axis,i)=>{const input=this.host.querySelector<HTMLInputElement>(`#point-${axis}`);if(input)input.value=pos.toArray()[i].toFixed(3);});}
+  private refreshNumbers(){const label=this.host.querySelector('#figure-scale-value');if(label)label.textContent=`${Math.round(this.rig.scale*100)} %`;const p=this.point;if(!p)return;const pos=this.rig.position(p);['x','y','z'].forEach((axis,i)=>{const input=this.host.querySelector<HTMLInputElement>(`#point-${axis}`);if(input)input.value=pos.toArray()[i].toFixed(3);});}
   private render(){
     const remembered = Object.fromEntries(['pose-name','move-name','move-id','pose-list','studio-moves'].map(id=>[id,this.host.querySelector<HTMLInputElement>(`#${id}`)?.value ?? '']));
     const loop = this.host.querySelector<HTMLInputElement>('#move-loop')?.checked ?? false;
@@ -98,6 +98,7 @@ export class StudioEditor {
     <div id="point-fields" ${this.point?'':'hidden'}><label>Name<input id="point-name" maxlength="100"></label><label>Punktgröße<input id="point-size" type="range" min="0.003" max="0.15" step="0.001"></label>
     <label id="radius-label">Einflussbereich<input id="point-radius" type="range" min="0.005" max="0.6" step="0.005"></label>
     <div class="point-xyz">${['x','y','z'].map(a=>`<label>${a.toUpperCase()}<input id="point-${a}" type="number" step="0.005" min="-100" max="100"></label>`).join('')}</div>
+    <label id="figure-scale-label" hidden>Figurgröße <output id="figure-scale-value"></output><input id="figure-scale" type="range" min="0.1" max="5" step="0.01"></label>
     <label id="rotation-label">Griffe<select id="point-transform"><option value="translate">Verschieben</option><option value="rotate">Drehen</option></select></label>
     <label class="check" id="group-label"><input id="point-group" type="checkbox" ${this.groupMove?'checked':''}> Verbundene freie Punkte gemeinsam bewegen</label>
     <button id="point-delete" ${this.edit?'':'hidden'}>Kontrollpunkt löschen</button><p class="subtle" id="point-kind"></p></div>
@@ -138,7 +139,11 @@ export class StudioEditor {
     on('point-add',()=>{this.view.setAction('add');this.hooks.feedback('In die Figur klicken. Neben der Figur wird der Punkt auf der Ansichtsebene gesetzt.');});
     on('point-connect',()=>{this.view.setAction('connect');this.hooks.feedback('Zweiten Punkt anklicken. Eine vorhandene Verbindung wird gelöst.');});
     if(this.point){const p=this.point;const whole=p.id===FIGURE_TRACK;input('point-name').disabled=whole;input('point-size').disabled=whole;input('point-radius').disabled=whole;input('point-name').value=p.name;input('point-size').value=String(p.size);input('point-radius').value=String(p.radius);q('radius-label').hidden=p.kind==='bone'||whole;q('rotation-label').hidden=(!whole&&p.kind!=='bone')||this.edit;q('group-label').hidden=p.kind!=='surface'||this.edit||whole;
-      q('point-kind').textContent=whole?'Gesamte Figur verschieben oder drehen. Beides wird in jeder Pose gespeichert.':p.kind==='bone'?'Skelettpunkt. Löschen entfernt den Griff, das Quellskelett bleibt erhalten.':'Freier Oberflächenpunkt. Verbindungen gruppieren Punkte, ohne eine Gelenkkette vorauszusetzen.';
+      q('figure-scale-label').hidden=!whole||this.edit;
+      const scale=input('figure-scale');scale.value=String(this.rig.scale);
+      scale.oninput=()=>{const value=Number(scale.value);if(!validFigureScale(value))return;if(!this.gesture)this.view.onStart();this.rig.setFigureScale(value);this.view.refresh();this.refreshNumbers();};
+      const finishScale=()=>{if(this.gesture)this.view.onEnd();};scale.onchange=finishScale;scale.onblur=finishScale;scale.onpointercancel=finishScale;
+      q('point-kind').textContent=whole?'Gesamte Figur verschieben, drehen oder gleichmäßig skalieren. Alles wird in jeder Pose gespeichert.':p.kind==='bone'?'Skelettpunkt. Löschen entfernt den Griff, das Quellskelett bleibt erhalten.':'Freier Oberflächenpunkt. Verbindungen gruppieren Punkte, ohne eine Gelenkkette vorauszusetzen.';
       input('point-name').onchange=()=>{const v=input('point-name').value.trim();if(v)this.mutate(()=>p.name=v);};
       input('point-size').onchange=()=>this.mutate(()=>p.size=Number(input('point-size').value));
       input('point-radius').onchange=()=>this.mutate(()=>{p.radius=Number(input('point-radius').value);this.rig.apply(this.rig.capture());});
@@ -170,7 +175,7 @@ export class StudioEditor {
   inspect(args:Record<string,unknown>={}) {
     const section=args.section??'info',offset=args.offset??0,limit=args.limit??32;
     if(Object.keys(args).some(k=>!['section','offset','limit'].includes(k))||!['info','points','poses','moves'].includes(section as string)||!Number.isInteger(offset)||(offset as number)<0||!Number.isInteger(limit)||(limit as number)<1||(limit as number)>32)throw new Error('Ungültige Studio-Abfrage.');
-    const info={session:this.session,revision:this.revision,dirty:this.dirty,open:this.active,editable:this.active&&this.agentEditing&&!this.playing&&!this.gesture,mode:this.edit?'rig':'pose',figure:{id:FIGURE_TRACK,position:this.rig.position(this.rig.figure).toArray(),rotation:this.rig.rotation(this.rig.figure).toArray()},counts:{points:this.data.points.length,poses:this.data.poses.length,moves:this.data.moves.length,surfaces:this.rig.surfaces.length},undo:this.history.canUndo,redo:this.history.canRedo};
+    const info={session:this.session,revision:this.revision,dirty:this.dirty,open:this.active,editable:this.active&&this.agentEditing&&!this.playing&&!this.gesture,mode:this.edit?'rig':'pose',figure:{id:FIGURE_TRACK,scale:this.rig.scale,position:this.rig.position(this.rig.figure).toArray(),rotation:this.rig.rotation(this.rig.figure).toArray()},counts:{points:this.data.points.length,poses:this.data.poses.length,moves:this.data.moves.length,surfaces:this.rig.surfaces.length},undo:this.history.canUndo,redo:this.history.canRedo};
     if(section==='info')return info;
     const items=section==='points'?this.data.points.map(p=>({...p,position:this.rig.position(p).toArray(),rotation:this.rig.rotation(p).toArray(),connections:this.data.links.filter(l=>l.includes(p.id)).map(l=>l[0]===p.id?l[1]:l[0])})):section==='poses'?this.data.poses.map(p=>({id:p.id,name:p.name,seconds:p.seconds,review:p.review??[]})):this.data.moves.map(m=>({id:m.id,name:m.name,loop:m.loop,poseCount:m.poses.length,...moveReview(this.data,m)}));
     // Bound pages by count and UTF-8 size so both MCP bridges stay below their payload limit.
@@ -192,8 +197,8 @@ export class StudioEditor {
         this.mutate(()=>{const p:ControlPoint={id:uid(),name:c.name?.trim()||`Punkt ${this.data.points.length+1}`,kind:'surface',rest:[...c.position!],size:c.size??.015,radius:c.radius??.12,...(c.mesh!==undefined?{mesh:c.mesh}:{})};this.data.points.push(p);for(const pose of this.data.poses)pose.values[p.id]={position:[...p.rest],rotation:[0,0,0,1]};if(this.data.draft)this.data.draft[p.id]={position:[...p.rest],rotation:[0,0,0,1]};this.selected=p.id;resultId=p.id;this.rig.reset();});break;
       }
       case 'update_point':{
-        require(point);const p=point!;require(p.id!==FIGURE_TRACK||!this.edit);require(c.rotation===undefined||!this.edit&&(p.kind==='bone'||p.id===FIGURE_TRACK));require(p.id!==FIGURE_TRACK||(c.size===undefined&&c.radius===undefined&&c.name===undefined));require(c.radius===undefined||p.kind==='surface');require(['name','position','rotation','size','radius'].some(k=>k in c));
-        this.mutate(()=>{if(c.name!==undefined)p.name=c.name.trim();if(c.size!==undefined)p.size=c.size;if(c.radius!==undefined)p.radius=c.radius;if(c.position||c.rotation)this.rig.setPoint(p,c.position?new T.Vector3().fromArray(c.position):this.rig.position(p),c.rotation?new T.Quaternion().fromArray(c.rotation):this.rig.rotation(p),this.edit);else this.rig.apply(this.rig.capture());this.selected=p.id;});break;
+        require(point);const p=point!;require(p.id!==FIGURE_TRACK||!this.edit);require(c.rotation===undefined||!this.edit&&(p.kind==='bone'||p.id===FIGURE_TRACK));require(p.id!==FIGURE_TRACK||(c.size===undefined&&c.radius===undefined&&c.name===undefined));require(c.radius===undefined||p.kind==='surface');require(c.scale===undefined||p.id===FIGURE_TRACK&&!this.edit);require(['name','position','rotation','scale','size','radius'].some(k=>k in c));
+        this.mutate(()=>{if(c.name!==undefined)p.name=c.name.trim();if(c.size!==undefined)p.size=c.size;if(c.radius!==undefined)p.radius=c.radius;if(c.position||c.rotation)this.rig.setPoint(p,c.position?new T.Vector3().fromArray(c.position):this.rig.position(p),c.rotation?new T.Quaternion().fromArray(c.rotation):this.rig.rotation(p),this.edit);else this.rig.apply(this.rig.capture());if(c.scale!==undefined)this.rig.setFigureScale(c.scale);this.selected=p.id;});break;
       }
       case 'delete_point':require(this.edit&&point&&point.id!==FIGURE_TRACK);this.mutate(()=>{this.data.points=this.data.points.filter(p=>p.id!==c.id);this.data.links=this.data.links.filter(l=>!l.includes(c.id!));for(const p of this.data.poses)delete p.values[c.id!];if(this.data.draft)delete this.data.draft[c.id!];this.selected=null;this.rig.reset();});break;
       case 'connect_points':case 'disconnect_points':{

@@ -1,5 +1,5 @@
 import * as T from 'three';
-import { emptyStudio, FIGURE_TRACK, neutralFigure } from './studio-data.ts';
+import { emptyStudio, FIGURE_TRACK, neutralFigure, validFigureScale } from './studio-data.ts';
 import type { ControlPoint, StudioData, Transform, Vec3, Pose, StudioMove } from './studio-data.ts';
 const read = (o:T.Object3D):Transform => ({position:o.position.toArray(),rotation:o.quaternion.toArray()});
 const write = (o:T.Object3D,v:Transform) => {o.position.fromArray(v.position);o.quaternion.fromArray(v.rotation);};
@@ -13,6 +13,9 @@ export class StudioRig {
   readonly figure:ControlPoint={id:FIGURE_TRACK,name:'Gesamte Figur',kind:'surface',rest:[0,0,0],size:.055,radius:.12};
   private figureOffset=new T.Vector3();
   private figureRotation=new T.Quaternion();
+  private figureScale=1;
+  get scale(){return this.figureScale;}
+  setFigureScale(value:number){this.setFigureTransform(this.figureOffset,this.figureRotation,value);}
   private figureMatrix=new T.Matrix4();
   private rootMatrix:T.Matrix4;
   private rootWorld:T.Matrix4;
@@ -49,7 +52,7 @@ export class StudioRig {
     this.reset();
   }
   reset() {
-    this.figureOffset.set(0,0,0);this.figureRotation.identity();this.figureMatrix.identity();this.root.matrixAutoUpdate=this.rootAutoUpdate;this.root.matrix.copy(this.rootMatrix);
+    this.figureOffset.set(0,0,0);this.figureRotation.identity();this.figureScale=1;this.figureMatrix.identity();this.root.matrixAutoUpdate=this.rootAutoUpdate;this.root.matrix.copy(this.rootMatrix);
     for(const item of this.originalNodes){write(item.node,item.value);item.node.scale.copy(item.scale);}
     this.bones.forEach((b,i)=>write(b,this.data.boneRest[i]));
     this.root.updateWorldMatrix(true,true);
@@ -58,7 +61,7 @@ export class StudioRig {
     this.deform();
   }
   restoreSource() {
-    this.figureOffset.set(0,0,0);this.figureRotation.identity();this.figureMatrix.identity();this.root.matrixAutoUpdate=this.rootAutoUpdate;this.root.matrix.copy(this.rootMatrix);
+    this.figureOffset.set(0,0,0);this.figureRotation.identity();this.figureScale=1;this.figureMatrix.identity();this.root.matrixAutoUpdate=this.rootAutoUpdate;this.root.matrix.copy(this.rootMatrix);
     this.bones.forEach((b,i)=>write(b,this.originalBoneRest[i]));
     for(const item of this.originalNodes){write(item.node,item.value);item.node.scale.copy(item.scale);}
     this.root.updateWorldMatrix(true,true);
@@ -82,17 +85,19 @@ export class StudioRig {
   }
   position(p:ControlPoint):T.Vector3 {return p.id===FIGURE_TRACK ? new T.Vector3().fromArray(this.figure.rest).add(this.figureOffset) : p.kind==='bone' ? this.bones[p.bone!].getWorldPosition(new T.Vector3()) : new T.Vector3().fromArray(this.surfaceValues[p.id]?.position ?? p.rest).applyMatrix4(this.surfaceMatrix(p));}
   rotation(p:ControlPoint):T.Quaternion {if(p.id===FIGURE_TRACK)return this.figureRotation.clone();return p.kind==='bone' ? this.bones[p.bone!].getWorldQuaternion(new T.Quaternion()) : new T.Quaternion();}
-  capture():Record<string,Transform> {return {[FIGURE_TRACK]:{position:this.figureOffset.toArray(),rotation:this.figureRotation.toArray()},...Object.fromEntries(this.data.points.map(p=>[p.id,p.kind==='bone' ? read(this.bones[p.bone!]) : structuredClone(this.surfaceValues[p.id] ?? {position:p.rest,rotation:[0,0,0,1]})]))};}
+  capture():Record<string,Transform> {return {[FIGURE_TRACK]:{position:this.figureOffset.toArray(),rotation:this.figureRotation.toArray(),scale:this.figureScale},...Object.fromEntries(this.data.points.map(p=>[p.id,p.kind==='bone' ? read(this.bones[p.bone!]) : structuredClone(this.surfaceValues[p.id] ?? {position:p.rest,rotation:[0,0,0,1]})]))};}
   apply(values:Record<string,Transform>) {
-    const figure=values[FIGURE_TRACK]??neutralFigure();this.setFigureTransform(new T.Vector3().fromArray(figure.position),new T.Quaternion().fromArray(figure.rotation));
+    const figure=values[FIGURE_TRACK]??neutralFigure();this.setFigureTransform(new T.Vector3().fromArray(figure.position),new T.Quaternion().fromArray(figure.rotation),figure.scale??1);
     for(const p of this.data.points){const v=values[p.id];if(!v)continue;if(p.kind==='bone')write(this.bones[p.bone!],v);else this.surfaceValues[p.id]=structuredClone(v);}
     this.root.updateWorldMatrix(true,true);this.deform();
   }
   setFigureOffset(offset:T.Vector3){this.setFigureTransform(offset,this.figureRotation);}
-  setFigureTransform(offset:T.Vector3,rotation:T.Quaternion){
+  setFigureTransform(offset:T.Vector3,rotation:T.Quaternion,scale=this.figureScale){
+    if(!validFigureScale(scale))throw new Error('Figurgröße muss zwischen 10 % und 500 % liegen.');
+    this.figureScale=scale;
     this.figureOffset.copy(offset);this.figureRotation.copy(rotation).normalize();
     const center=new T.Vector3().fromArray(this.figure.rest);
-    this.figureMatrix.makeTranslation(center.clone().add(offset)).multiply(new T.Matrix4().makeRotationFromQuaternion(this.figureRotation)).multiply(new T.Matrix4().makeTranslation(center.negate()));
+    this.figureMatrix.makeTranslation(center.clone().add(offset)).multiply(new T.Matrix4().makeRotationFromQuaternion(this.figureRotation)).multiply(new T.Matrix4().makeScale(scale,scale,scale)).multiply(new T.Matrix4().makeTranslation(center.negate()));
     const local=this.figureMatrix.clone().multiply(this.rootWorld);
     if(this.root.parent){this.root.parent.updateWorldMatrix(true,false);local.premultiply(this.root.parent.matrixWorld.clone().invert());}
     // Keep the exact matrix, including shear from nonuniformly scaled parents.
@@ -140,7 +145,7 @@ export class StudioRig {
     for(const p of this.data.points){const x=a.values[p.id],y=b.values[p.id];if(!x||!y)throw new Error('Posen nach Gelenkänderung neu aufnehmen.');
       result[p.id]={position:new T.Vector3().fromArray(x.position).lerp(new T.Vector3().fromArray(y.position),ratio).toArray(),rotation:new T.Quaternion().fromArray(x.rotation).slerp(new T.Quaternion().fromArray(y.rotation),ratio).toArray()};}
     const x=a.values[FIGURE_TRACK]??neutralFigure(),y=b.values[FIGURE_TRACK]??neutralFigure();
-    result[FIGURE_TRACK]={position:new T.Vector3().fromArray(x.position).lerp(new T.Vector3().fromArray(y.position),ratio).toArray(),rotation:new T.Quaternion().fromArray(x.rotation).slerp(new T.Quaternion().fromArray(y.rotation),ratio).toArray()};
+    result[FIGURE_TRACK]={scale:T.MathUtils.lerp(x.scale??1,y.scale??1,ratio),position:new T.Vector3().fromArray(x.position).lerp(new T.Vector3().fromArray(y.position),ratio).toArray(),rotation:new T.Quaternion().fromArray(x.rotation).slerp(new T.Quaternion().fromArray(y.rotation),ratio).toArray()};
     return result;
   }
   duration(move:StudioMove){const poses=move.poses.map(id=>this.data.poses.find(p=>p.id===id)!);return poses.slice(1).reduce((sum,p)=>sum+p.seconds,0)+(move.loop ? poses[0].seconds : 0);}
