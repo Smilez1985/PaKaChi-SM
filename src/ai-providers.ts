@@ -1,3 +1,4 @@
+import type {JobExecution,JobOutput} from './ai-job-types.ts';
 import {z} from 'zod';
 
 export const ROLES = ['assistant','generation','rigging'] as const;
@@ -41,16 +42,17 @@ export function removeProviderProfile(config:ProviderConfig,id:string):ProviderC
 }
 
 // Adapter transport and credentials belong outside the persisted profile.
-// No built-in network adapters or job execution are installed in this milestone.
+// No built-in network adapters are installed; execution is supplied by each adapter.
 export type Capability = 'tool-calling'|'image-to-3d'|'rigging';
 export interface ProviderAdapter {
   id:ProviderProfile['adapter'];
   probe(profile:Readonly<ProviderProfile>,signal:AbortSignal):Promise<{model:string;capabilities:readonly Capability[]}>;
+  run?(request:JobExecution):Promise<JobOutput>;
   listModels?(profile:Readonly<ProviderProfile>,signal:AbortSignal):Promise<readonly string[]>;
 }
 export const REQUIRED_CAPABILITY:Record<ProviderRole,Capability>={assistant:'tool-calling',generation:'image-to-3d',rigging:'rigging'};
 export class ProviderUnavailable extends Error {
-  readonly reason:'unassigned'|'adapter-missing'|'unsupported-model'|'unsupported-role';
+  readonly reason:'unassigned'|'adapter-missing'|'unsupported-model'|'unsupported-role'|'execution-missing';
   constructor(reason:ProviderUnavailable['reason']) {super(reason);this.reason=reason;}
 }
 export class ProviderRegistry {
@@ -58,6 +60,12 @@ export class ProviderRegistry {
   register(adapter:ProviderAdapter):void {
     if(this.adapters.has(adapter.id))throw new Error('duplicate-adapter');
     this.adapters.set(adapter.id,adapter);
+  }
+  async resolveJob(config:ProviderConfig,role:ProviderRole,signal:AbortSignal):Promise<{profile:Readonly<ProviderProfile>;run:(request:JobExecution)=>Promise<JobOutput>}> {
+    const profile=await this.resolve(config,role,signal);
+    const adapter=this.adapters.get(profile.adapter)!;
+    if(!adapter.run)throw new ProviderUnavailable('execution-missing');
+    return {profile,run:adapter.run.bind(adapter)};
   }
   async resolve(config:ProviderConfig,role:ProviderRole,signal:AbortSignal):Promise<Readonly<ProviderProfile>> {
     signal.throwIfAborted();

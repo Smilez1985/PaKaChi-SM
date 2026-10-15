@@ -4,7 +4,7 @@ Teil der [Blaupause](README.md) · [Roadmap](ROADMAP.md) · [Changelog](CHANGELO
 
 ## Status und Begriffe
 
-Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.13.0: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau und KI-Generierung bleiben Entwicklungsziele.
+Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.14.0: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau und KI-Generierung bleiben Entwicklungsziele.
 
 - **PaKaChi:** Panda-KI-Chimera, das übergeordnete Projekt.
 - **PaKaChi-SM:** StateMaschine mit Avatar-Player und integriertem Studio.
@@ -218,3 +218,9 @@ Der integrierte Assistent und externe MCP-Clients sollen dieselben validierten S
 Seit 0.13.0 existieren zusätzlich zu acht MCP-Werkzeugen und dem separaten TripoSR-Testlauf lokale Anbieterprofile mit manueller Modell-ID und unabhängiger Rollenzuordnung im Optionsmenü. Eine interne Registry prüft Modellidentität und Rollenfähigkeit anhand eines Adapter-Probes; produktive Netzwerkadapter sind noch nicht registriert. Die Profile enthalten keine vorgesehenen Zugangsdatenfelder und gehören nicht zum Avatar-Projekt. Automatische Modelllisten, Verbindungsprüfung mit echten Diensten, API-/OAuth-Anmeldung, interner KI-Assistent, einheitliche Generierungsaufträge und automatische anatomische Rigging-Dienste bleiben offen. [Bedienung und Speichergrenzen](ANBIETER.md). Die Umsetzungsschritte stehen in der [Roadmap](ROADMAP.md#7-studio-harness-und-anbieteranbindung).
 
 Das Original-PaKaChi bleibt mit Tierform, humanoider Form und den 72 Transformationsbildern die Designreferenz. Zwei unabhängig erzeugte 3D-Modelle belegen noch keinen kompatiblen Formwechsel; Geometrie, Rigging und Transformation müssen eigens geprüft werden.
+
+### Implementierungsstand des Auftragskerns (0.14.0)
+
+Die eigenständige Implementierung in `ai-jobs.ts` hält Anbieterprofil, Modell, Eingabe und Studio-Sitzung/Revision pro Auftrag fest. Der optionale Adapter-Einstieg `run` liefert Fortschritt und ein Ergebnis. Zeitlimit und Abbruch beenden das lokale Warten auch dann, wenn ein Adapter das Abbruchsignal ignoriert. Späte Ergebnisse dürfen weder Vorschau noch Projekt verändern. Ein fernseitiger Abbruch wird dadurch ausdrücklich nicht als bestätigt ausgegeben.
+
+Eine verpflichtende, vom Aufrufer bereitzustellende Formatprüfung steht vor der Ergebnisfreigabe. `preview` bezeichnet hier einen internen Ergebniszustand, noch keine sichtbare 3D-Vorschau. Erst eine ausdrückliche Übernahme prüft Sitzung und Revision erneut und ruft die synchrone Übernahmetransaktion des Hosts auf. Der Host muss atomare Änderung und Undo gewährleisten; die tatsächliche Verbindung zur Studio-Transaktion steht noch aus. Kein automatischer Neuversuch und kein Anbieterwechsel. Details: [Auftragskern](AUFTRAE.md).

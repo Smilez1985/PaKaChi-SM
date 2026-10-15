@@ -1,6 +1,6 @@
 # Blaupause – PaKaChi-SM
 
-**Softwarestand: 0.13.0 · Dokumentation abgeglichen am 15.10.2026.**
+**Softwarestand: 0.14.0 · Dokumentation abgeglichen am 15.10.2026.**
 
 Die Blaupause besteht aus drei Dokumenten. Das Designdokument beschreibt das Produktziel, die Roadmap die Umsetzung und das Changelog die bereits erfolgten Änderungen.
 
@@ -20,12 +20,13 @@ Das Original-PaKaChi mit beiden Formen und 72 Transformationsbildern bleibt unve
 
 Das Studio soll als spezialisierter **KI-Harness** den Arbeitsablauf koordinieren. **Assistent, 3D-Generator und Rigging-Dienst** erhalten unabhängig wählbare Anbieter, Modelle und mehrere Verbindungsprofile. Geplant sind Cloud-APIs, offiziell unterstützte OAuth-Anmeldungen und lokale Dienste wie Ollama oder LM Studio über geeignete Adapter. Sprachmodelle koordinieren Werkzeuge; tatsächliche Geometrie und Hautgewichte benötigen passende Fachverfahren.
 
-Seit 0.13.0 sind lokale Anbieterprofile, unabhängige Rollenzuordnung im Optionsmenü und eine interne Adapter-/Fähigkeitsprüfung vorhanden. Echte Netzwerkadapter, Anmeldung, Modellabfrage und Generierungsaufträge sind weiterhin offen. Außerdem bestehen die MCP-Studio-Werkzeuge und der experimentelle TripoSR-Testlauf. [Design und Grenzen](KONZEPT.md#11-studio-als-ki-harness-und-freie-anbieterwahl) sowie [Umsetzungsschritte und Abnahme](ROADMAP.md#7-studio-harness-und-anbieteranbindung) sind jetzt Bestandteil der Blaupause.
+Seit 0.13.0 sind lokale Anbieterprofile, unabhängige Rollenzuordnung im Optionsmenü und eine interne Adapter-/Fähigkeitsprüfung vorhanden. Seit 0.14.0 ergänzt ein interner Auftragskern Fortschritt, Abbruch, Zeitlimit und eine revisionsgeprüfte Übernahme. Echte Netzwerkadapter, Anmeldung, Modellabfrage und die Generierungs-/Vorschauoberfläche sind weiterhin offen. Außerdem bestehen die MCP-Studio-Werkzeuge und der experimentelle TripoSR-Testlauf. [Design und Grenzen](KONZEPT.md#11-studio-als-ki-harness-und-freie-anbieterwahl) sowie [Umsetzungsschritte und Abnahme](ROADMAP.md#7-studio-harness-und-anbieteranbindung) sind jetzt Bestandteil der Blaupause.
 
 ## Anleitungen und technische Dokumente
 
 | Gesucht | Dokument |
 | --- | --- |
+| Interner Auftragsablauf und Prüfgrenzen | [Auftragskern](AUFTRAE.md) |
 | Anbieterprofile und aktuelle Verbindungsgrenzen | [Anbieter vorbereiten](ANBIETER.md) |
 | Lokaler KI-Geometrietest, Vorlagen und Prüfgrenzen | [Bild-zu-3D-Testlauf](KI-GENERIERUNG.md) |
 | Installation und Schnellstart | [Projekt-README](../README.md) |
@@ -37,4 +38,4 @@ Seit 0.13.0 sind lokale Anbieterprofile, unabhängige Rollenzuordnung im Options
 | Testergebnisse und offene Abnahme | [Prüfstand](PRUEFUNG.md) |
 | Originaldesign und Herkunft der erhaltenen Bilder | [Referenzen](references/README.md) |
 
-Softwareversion, Projektformat und historischer Prüfstand sind unterschiedliche Angaben: Die Software steht auf 0.13.0, das Projektformat weiterhin auf Version 1. Ältere Projekte sind lesbar; Dateien mit Gesamtpositionsspur benötigen Software ab 0.6.0; Gesamtdrehung benötigt mindestens 0.8.0; Skalierung mindestens 0.10.0. Ältere Software ignoriert die neue Skalierung. Historische Prüfberichte behalten ihren damaligen Stand.
+Softwareversion, Projektformat und historischer Prüfstand sind unterschiedliche Angaben: Die Software steht auf 0.14.0, das Projektformat weiterhin auf Version 1. Ältere Projekte sind lesbar; Dateien mit Gesamtpositionsspur benötigen Software ab 0.6.0; Gesamtdrehung benötigt mindestens 0.8.0; Skalierung mindestens 0.10.0. Ältere Software ignoriert die neue Skalierung. Historische Prüfberichte behalten ihren damaligen Stand.

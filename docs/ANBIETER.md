@@ -20,7 +20,7 @@ Deutsch/English wird im selben Optionsdialog umgeschaltet; selbst gewählte Name
 
 ## Technischer Stand und nächste Schritte
 
-`src/ai-providers.ts` trennt Profilformat, Speicherung und Adapter-Registry. `resolve` verlangt genau das zugeordnete Profil, einen registrierten Adapter, das angeforderte Modell und die erforderliche Fähigkeit (`tool-calling`, `image-to-3d` oder `rigging`). Fehlende oder ungeeignete Adapter führen zum Fehler, nicht zu einem Anbieterwechsel. Der geprüfte Profilstand wird als unveränderliche Kopie zurückgegeben. Die Registry ist die Grundlage für spätere Aufträge und wird noch nicht für echte Netzwerkaufrufe verwendet.
+`src/ai-providers.ts` trennt Profilformat, Speicherung und Adapter-Registry. `resolve` verlangt genau das zugeordnete Profil, einen registrierten Adapter, das angeforderte Modell und die erforderliche Fähigkeit (`tool-calling`, `image-to-3d` oder `rigging`). Fehlende oder ungeeignete Adapter führen zum Fehler, nicht zu einem Anbieterwechsel. Der geprüfte Profilstand wird als unveränderliche Kopie zurückgegeben. Seit 0.14.0 ergänzt `resolveJob` den optionalen `run`-Vertrag für den [Auftragskern](AUFTRAE.md). Fehlende Ausführung wird ausdrücklich abgewiesen. Es sind weiterhin keine produktiven Netzwerkadapter registriert.
 
 **Noch offen:** produktive Netzwerkadapter, Verbindungsprüfung, Modelllisten, API-/OAuth-Anmeldung, tatsächliche Assistentenaufrufe und Generierungs-/Rigging-Aufträge einschließlich Vorschau. Das Eintragen oder Zuordnen eines Profils löst keine Netzwerkverbindung aus. Die vorhandenen MCP-/MQTT-Verbindungen werden weiterhin separat eingerichtet.
 

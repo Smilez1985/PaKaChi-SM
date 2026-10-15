@@ -20,7 +20,7 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
       <button id="player-tab" class="nav-button active" aria-pressed="true"><span>◉</span> Player</button>
       <button id="studio-tab" class="nav-button" aria-pressed="false"><span>◇</span> Avatar-Studio</button>
     </nav>
-    <div class="rail-bottom"><span class="online-dot"></span> Lokal auf deinem Gerät<p>Entwicklungsstand 0.13.0<br>KI-Anbieter · Vorbereitung</p></div>
+    <div class="rail-bottom"><span class="online-dot"></span> Lokal auf deinem Gerät<p>Entwicklungsstand 0.14.0<br>KI-Anbieter · Vorbereitung</p></div>
   </aside>
   <main>
     <header><div><p class="eyebrow">PAKACHI-SM / <span id="section-label">PLAYER</span></p><h1 id="page-title">Dein Model Zoo<span>.</span></h1><p id="page-intro">Eine Figur auswählen. Eine Bewegung starten. Leben einhauchen.</p></div><button id="project-open" class="button outline">Projekt laden</button><input id="project-file" type="file" accept=".json" hidden><button id="import-button" class="button outline">＋ GLB laden</button><input id="file-input" type="file" accept=".glb" hidden></header>

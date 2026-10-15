@@ -12,6 +12,23 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.14.0] - 2026-10-15
+
+Zeitstempel: 2026-10-15T18:42:19+02:00 (Europe/Berlin)
+
+### Added
+
+- Eigenständig entwickelter interner Auftragskern mit pro Auftrag festgehaltenem Anbieterprofil, Modell, Eingabe und Studio-Sitzung/Revision.
+- Optionaler Adapter-Ausführungsvertrag mit Fortschritt, Abbruchsignal und Ergebnis. Zeitlimit und lokaler Abbruch wirken auch bei nicht reagierenden Testadaptern; späte Antworten werden verworfen.
+- Verpflichtender Formatprüfungs-Hook, isolierte Ergebnisvorschau als Datenzustand, ausdrückliche Übernahme/Verwerfung und Sitzungs-/Revisionsabgleich vor der Host-Transaktion.
+- Zehn Lebenszyklus- und Konflikttests sowie technische Anleitung zum Auftragskern.
+
+### Changed
+
+- README, Design, Roadmap und Prüfstand unterscheiden den implementierten Kern von noch fehlenden Netzwerkadaptern, sichtbarer Vorschau, produktiver Ergebnisprüfung und Studio-Übernahme mit Undo.
+
+**Grenzen:** Mit simulierten Adaptern geprüft. Noch keine echte KI-Verbindung oder neue Generierungsoberfläche; fernseitiger Abbruch ist nicht bestätigt. Keine automatische Wiederholung und kein Anbieterwechsel.
+
 ## [0.13.0] - 2026-10-15
 
 Zeitstempel: 2026-10-15T15:56:12+02:00 (Europe/Berlin)
@@ -310,6 +327,7 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 - Bestehendes Bedienkonzept ausdrücklich als Designdokument eingeordnet und mit Roadmap und Changelog verknüpft.
 
 [Unreleased]: https://github.com/Smilez1985/PaKaChi-SM/commits/main
+[0.14.0]: ./PRUEFUNG-0.14.0.md
 [0.13.0]: ./PRUEFUNG-0.13.0.md
 [0.12.0]: ./PRUEFUNG-0.12.0.md
 [0.11.1]: https://github.com/Smilez1985/PaKaChi-SM/compare/3febc7f6a9c7326bdb7295284d2a042e97bd24f3...207faaac1f0c35dbf0bda71d1142792f1e5bab0c
