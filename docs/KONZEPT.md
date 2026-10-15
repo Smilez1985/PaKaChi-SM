@@ -4,7 +4,7 @@ Teil der [Blaupause](README.md) · [Roadmap](ROADMAP.md) · [Changelog](CHANGELO
 
 ## Status und Begriffe
 
-Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.12.0: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau und KI-Generierung bleiben Entwicklungsziele.
+Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.13.0: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau und KI-Generierung bleiben Entwicklungsziele.
 
 - **PaKaChi:** Panda-KI-Chimera, das übergeordnete Projekt.
 - **PaKaChi-SM:** StateMaschine mit Avatar-Player und integriertem Studio.
@@ -171,7 +171,7 @@ Die Komplexität gehört in die Software. Ein Benutzer soll eine eigene Figur er
 
 ## 11. Studio als KI-Harness und freie Anbieterwahl
 
-**Beschlossenes Produktdesign; noch nicht implementiert in 0.12.0.** Das Studio wird zu einem kleinen, spezialisierten KI-Harness: Es stellt Projektkontext, Werkzeuge und kontrollierte Arbeitsabläufe bereit und verbindet dafür austauschbare Dienste. Es bleibt Teil derselben Anwendung mit genau zwei Bearbeitungsmodi. Anbieter und Modelle werden im Optionsmenü eingestellt.
+**Beschlossenes Produktdesign; Konfigurationsgrundlage seit 0.13.0 teilweise implementiert.** Das Studio wird zu einem kleinen, spezialisierten KI-Harness: Es stellt Projektkontext, Werkzeuge und kontrollierte Arbeitsabläufe bereit und verbindet dafür austauschbare Dienste. Es bleibt Teil derselben Anwendung mit genau zwei Bearbeitungsmodi. Anbieter und Modelle werden im Optionsmenü eingestellt.
 
 ### Drei unabhängig konfigurierbare Rollen
 
@@ -215,6 +215,6 @@ Für lokale 3D-Generierung werden zunächst vorhandene spezialisierte Modelle be
 
 Der integrierte Assistent und externe MCP-Clients sollen dieselben validierten Studio-Werkzeuge verwenden. Sitzungsfreigabe, Revisionsprüfung, Rückgängig/Wiederholen und Prüfhinweise gelten weiterhin. Ein externer MCP-Client verwaltet seinen KI-Zugang selbst; seine Zugangsdaten werden nicht an PaKaChi weitergereicht. MCP stellt Werkzeuge bereit, MQTT transportiert bereits Befehle und Status; beide ersetzen keine Anbieter-API oder Modelllaufzeit.
 
-In 0.12.0 existieren acht MCP-Werkzeuge und der separate lokale TripoSR-Testlauf. Anbieterprofile, Modellwahl im Studio, OAuth-Anbindungen, interner KI-Assistent, einheitliche Generierungsaufträge und automatische anatomische Rigging-Dienste sind noch offen. Die Umsetzungsschritte stehen in der [Roadmap](ROADMAP.md#7-studio-harness-und-anbieteranbindung).
+Seit 0.13.0 existieren zusätzlich zu acht MCP-Werkzeugen und dem separaten TripoSR-Testlauf lokale Anbieterprofile mit manueller Modell-ID und unabhängiger Rollenzuordnung im Optionsmenü. Eine interne Registry prüft Modellidentität und Rollenfähigkeit anhand eines Adapter-Probes; produktive Netzwerkadapter sind noch nicht registriert. Die Profile enthalten keine vorgesehenen Zugangsdatenfelder und gehören nicht zum Avatar-Projekt. Automatische Modelllisten, Verbindungsprüfung mit echten Diensten, API-/OAuth-Anmeldung, interner KI-Assistent, einheitliche Generierungsaufträge und automatische anatomische Rigging-Dienste bleiben offen. [Bedienung und Speichergrenzen](ANBIETER.md). Die Umsetzungsschritte stehen in der [Roadmap](ROADMAP.md#7-studio-harness-und-anbieteranbindung).
 
 Das Original-PaKaChi bleibt mit Tierform, humanoider Form und den 72 Transformationsbildern die Designreferenz. Zwei unabhängig erzeugte 3D-Modelle belegen noch keinen kompatiblen Formwechsel; Geometrie, Rigging und Transformation müssen eigens geprüft werden.

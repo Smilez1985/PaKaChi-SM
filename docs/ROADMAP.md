@@ -1,6 +1,6 @@
 # Roadmap – was kommt
 
-**Softwarestand: 0.12.0 · Abgleich: 14.10.2026.** Teil der [Blaupause](README.md).
+**Softwarestand: 0.13.0 · Abgleich: 15.10.2026.** Teil der [Blaupause](README.md).
 
 Ein Häkchen bedeutet implementiert; es ersetzt keine visuelle oder externe Live-Abnahme. Die Nachweise und Prüfgrenzen stehen im [Prüfstand](PRUEFUNG.md). Die Versionshistorie gehört ins [Changelog](CHANGELOG.md).
 
@@ -8,7 +8,7 @@ Ein Häkchen bedeutet implementiert; es ersetzt keine visuelle oder externe Live
 
 1. **Korrekturen 0.11.0/0.11.1 visuell nachprüfen:** Drehung um die Figurenmitte auch nach Zoom/Pan sowie vollständige Körperverbindungen, Hand-/Fußziele, Rumpfbewegung und direktes Drehen. Nutzertest 0.10.0 meldete auseinanderziehbare Knochen und unbrauchbare Ausrichtung; diese Fehler sind technisch korrigiert, die erneute Nutzerabnahme steht aus. Anschließend Mausnavigation, kleine Gesichtspunkte, Gesamtverschiebung, Speichern/Laden und Agentensteuerung in einer lauffähigen Browserumgebung prüfen.
 2. **Gelenkbearbeitung vervollständigen:** echte Quellknochen hinzufügen/löschen, Hautgewichte zuordnen und vorhandene Moves nach Änderungen prüfen. Erst damit wird das Beispiel „fehlendes Knie ergänzen und beugen“ vollständig erfüllt.
-3. **Studio-Harness vorbereiten:** gemeinsame Adapterverträge, Fähigkeiten und mehrere Verbindungsprofile definieren; danach unabhängige Anbieter-/Modellwahl für Assistent, 3D-Generator und Rigging im Optionsmenü anschließen. Details und Abnahme in Abschnitt 7.
+3. **Studio-Harness anbinden:** auf den Profilen und der Rollen-/Fähigkeitsprüfung aus 0.13.0 aufbauen; als Nächstes echte Verbindungsprüfung, Modellauflistung und geschützte Anmeldung mit passenden Adaptern umsetzen. Details und Abnahme in Abschnitt 7.
 4. **Aufträge und KI-Verfahren integrieren:** nach der Konfigurationsbasis die Auftragsverwaltung und geeignete Generator-/Rigging-Adapter anschließen, echte Inferenz und Qualität prüfen, anschließend Korrekturvorschau und Übernahme integrieren. Vorhandene Skelettdaten auszulesen ist bereits möglich, aber keine KI-Anatomieerkennung.
 
 Diese Reihenfolge ist ein Umsetzungsvorschlag, kein Terminversprechen. Lokale und externe Dienste sowie getrennte Anbieter je Rolle sind als Architektur festgelegt. Die konkreten zuerst unterstützten Verfahren, Hardwareanforderungen und Lizenzen sind noch zu prüfen.
@@ -92,10 +92,12 @@ Diese Reihenfolge ist ein Umsetzungsvorschlag, kein Terminversprechen. Lokale un
 
 ## 7. Studio-Harness und Anbieteranbindung
 
-Beschlossenes Design: [Anbieter, Rollen und Auftragsablauf](KONZEPT.md#11-studio-als-ki-harness-und-freie-anbieterwahl). Alle folgenden Umsetzungsschritte sind noch offen; die Reihenfolge beschreibt ihre Abhängigkeiten.
+Beschlossenes Design: [Anbieter, Rollen und Auftragsablauf](KONZEPT.md#11-studio-als-ki-harness-und-freie-anbieterwahl). Die Konfigurationsgrundlage ist seit 0.13.0 umgesetzt; die verbleibenden Schritte bauen darauf auf. Ein gespeichertes Profil ist noch keine geprüfte Verbindung.
 
-- [ ] Gemeinsame Adapterverträge und Fähigkeitsprüfung für Assistent, 3D-Generierung und Rigging definieren; ungeeignete Modelle vor dem Auftrag erkennbar abweisen.
-- [ ] Mehrere benannte Verbindungs-/Modellprofile je Rolle speichern; Serveradresse, Anbieter und aktive Auswahl unabhängig zuordnen. Zugangsdaten getrennt von Projekt und Export verwalten.
+- [x] Profilformat, Adaptervertrag für Probe/Modellliste und interne Prüfung von Modellidentität und Rollenfähigkeit definieren (0.13.0; mit Testadaptern geprüft).
+- [ ] Produktive Adapter sowie Verträge für Start, Status, Abbruch und Ergebnis von Aufträgen ergänzen; Fähigkeiten gegen echte Dienste prüfen.
+- [x] Mehrere benannte Profile mit Schnittstelle, Serveradresse und Modell-ID lokal speichern, bearbeiten, entfernen und unabhängig den Rollen zuordnen (0.13.0).
+- [ ] Geschützte Zugangsdatenverwaltung ergänzen; Profile enthalten bislang bewusst keine Authentifizierungsfelder.
 - [ ] Optionsmenü um Verbindungsprüfung, Modellliste beziehungsweise manuelle Modell-ID, API-Anmeldung und nur tatsächlich unterstützte OAuth-Verfahren ergänzen. Deutsch/English beibehalten; keinen dritten Bearbeitungsmodus einführen.
 - [ ] Adapter für passende OpenAI-kompatible Dienste einschließlich lokaler Ollama-/LM-Studio-Anbindungen und erforderliche native Anbieteradapter entwickeln; unterstützte Fähigkeiten und getestete Modelle dokumentieren.
 - [ ] Gemeinsame Auftragsverwaltung mit Anbieter-/Modellnachweis, Fortschritt, Fehlern, Zeitlimit, Abbruch und ausdrücklichem Neuversuch umsetzen. Empfänger vor Datenübertragung anzeigen; keinen stillen Anbieter- oder Cloud-Wechsel zulassen.

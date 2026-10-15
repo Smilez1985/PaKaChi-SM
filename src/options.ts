@@ -1,3 +1,4 @@
+import {mountProviderPanel} from './provider-panel.ts';
 export interface Options {language:'de'|'en';invertMiddleRotation:boolean}
 export function readOptions(storage?:Pick<Storage,'getItem'>):Options {
   try{const value=JSON.parse((storage??localStorage).getItem('pakachi-options-v1')??'{}');return {language:value.language==='en'?'en':'de',invertMiddleRotation:value.invertMiddleRotation===true};}catch{return {language:'de',invertMiddleRotation:false};}
@@ -19,6 +20,7 @@ const translations:Record<string,string>={
   'Posen · Gesamtdrehung':'Poses · Whole-figure rotation',
   'KI darf dieses Studio bearbeiten':'Allow AI to edit this studio','Nur für diese Sitzung. Änderungen sind rückgängig machbar.':'This session only. Changes can be undone.','Studio-Änderung durch KI übernommen.':'AI studio edit applied.',
   'MCP · Studio-Bearbeitung':'MCP · Studio editing',
+  'KI-Anbieter · Vorbereitung':'AI providers · preparation',
   'Optionen':'Options','Sprache':'Language','Schließen':'Close','Drehrichtung der mittleren Maustaste invertieren':'Invert middle mouse rotation',
   'Maustaste 3 = Mausrad drücken und halten.':'Mouse button 3 = press and hold the scroll wheel.',
   'Joints automatisch erkennen':'Detect joints automatically','Joint-Verbindungen automatisch erkennen':'Detect joint connections automatically',
@@ -117,5 +119,7 @@ export function mountOptions():void {
   language.value=options.language;invert.checked=options.invertMiddleRotation;
   const apply=()=>updateOptions({language:language.value==='en'?'en':'de',invertMiddleRotation:invert.checked});language.onchange=apply;invert.onchange=apply;
   document.getElementById('options-open')!.onclick=()=>dialog.showModal();dialog.querySelector<HTMLButtonElement>('#options-close')!.onclick=()=>dialog.close();
+  const providers=document.createElement('section');providers.className='provider-settings';dialog.insertBefore(providers,dialog.querySelector('#options-close'));
+  mountProviderPanel(providers,()=>options.language,{getItem:key=>localStorage.getItem(key),setItem:(key,value)=>localStorage.setItem(key,value)});
   document.documentElement.lang=options.language;translateRoot(document.body);
 }
