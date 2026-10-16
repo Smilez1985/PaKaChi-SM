@@ -1,3 +1,4 @@
+import {mountDiscoveryPanel} from './provider-discovery-panel.ts';
 import {ADAPTERS,ROLES,parseProviderConfig,readProviderConfig,removeProviderProfile,saveProviderConfig} from './ai-providers.ts';
 import type {ProviderConfig,ProviderRole} from './ai-providers.ts';
 
@@ -19,7 +20,11 @@ export function mountProviderPanel(host:HTMLElement,language:()=>Language,storag
   ADAPTERS.forEach((id,i)=>{const option=document.createElement('option');option.value=id;option.textContent=adapterNames[i];adapter.append(option);});
   const captions:[HTMLSpanElement,string,string][]=[];
   function field(control:HTMLElement,de:string,en:string){const label=document.createElement('label'),caption=document.createElement('span');caption.textContent=t(de,en);captions.push([caption,de,en]);label.append(caption,control);form.append(label);}
-  field(name,'Profilname','Profile name');field(adapter,'Schnittstelle','Interface');field(endpoint,'Serveradresse (ohne Zugangsdaten)','Server URL (without credentials)');field(model,'Modell-ID','Model ID');
+  field(name,'Profilname','Profile name');field(adapter,'Schnittstelle','Interface');field(endpoint,'API-Basisadresse (ohne Zugangsdaten)','API base URL (without credentials)');field(model,'Modell-ID','Model ID');
+  const discoveryHost=document.createElement('div');form.append(discoveryHost);
+  const discovery=mountDiscoveryPanel(discoveryHost,()=>({adapter:adapter.value as typeof ADAPTERS[number],endpoint:endpoint.value}),language,id=>{model.value=id;});
+  endpoint.oninput=()=>discovery.invalidate();adapter.onchange=()=>discovery.invalidate();
+  const dialog=host.closest('dialog');const onClose=()=>discovery.invalidate();dialog?.addEventListener('close',onClose);
   const submit=document.createElement('button');submit.type='submit';submit.className='button outline';
   const cancel=document.createElement('button');cancel.type='button';cancel.hidden=true;let editing:string|null=null;
   form.append(submit,cancel);host.append(heading,intro,list,form,roles,status);
@@ -28,10 +33,10 @@ export function mountProviderPanel(host:HTMLElement,language:()=>Language,storag
     try{saveProviderConfig(next,storage);config=next;message('Gespeichert · noch nicht verbunden.','Saved · not connected yet.');return true;}
     catch{message('Speichern nicht möglich. Bisherige Einstellungen bleiben erhalten.','Could not save. Previous settings are preserved.');return false;}
   }
-  function reset(){editing=null;form.reset();cancel.hidden=true;submit.textContent=t('Profil hinzufügen','Add profile');}
+  function reset(){editing=null;form.reset();discovery.invalidate();cancel.hidden=true;submit.textContent=t('Profil hinzufügen','Add profile');}
   function render(){
-    heading.textContent=t('KI-Anbieter · Vorbereitung','AI providers · preparation');
-    intro.textContent=t('Profile werden nur in diesem Browser gespeichert. Noch keine Verbindung, Anmeldung oder Generierung. Keine API-Schlüssel eingeben. Eine Zuordnung bestätigt keine Modellfähigkeit.','Profiles are saved only in this browser. Connection, authentication and generation are not available yet. Do not enter API keys. Assigning a role does not verify model capabilities.');
+    heading.textContent=t('KI-Anbieter','AI providers');
+    intro.textContent=t('Profile bleiben in diesem Browser. Modelllisten können auf Knopfdruck geladen werden. Noch keine Generierung oder OAuth-Anmeldung. Schlüssel nur im gesonderten Tokenfeld eingeben. Eine Rollenzuordnung bestätigt keine Modellfähigkeit.','Profiles stay in this browser. Model lists can be fetched on request. Generation and OAuth login are not available yet. Enter keys only in the separate token field. Assigning a role does not verify model capabilities.');
     captions.forEach(([el,de,en])=>el.textContent=t(de,en));
     adapter.options[3].textContent=t('3D · eigener Dienst','3D · custom service');adapter.options[4].textContent=t('Rigging · eigener Dienst','Rigging · custom service');
     submit.textContent=editing?t('Änderungen speichern','Save changes'):t('Profil hinzufügen','Add profile');cancel.textContent=t('Abbrechen','Cancel');
@@ -40,7 +45,7 @@ export function mountProviderPanel(host:HTMLElement,language:()=>Language,storag
       const row=document.createElement('div');row.className='provider-row';const summary=document.createElement('p');
       summary.textContent=`${profile.name} · ${profile.model}\n${profile.endpoint}`;
       const edit=document.createElement('button');edit.type='button';edit.textContent=t('Bearbeiten','Edit');edit.setAttribute('aria-label',`${edit.textContent}: ${profile.name}`);
-      edit.onclick=()=>{editing=profile.id;name.value=profile.name;adapter.value=profile.adapter;endpoint.value=profile.endpoint;model.value=profile.model;cancel.hidden=false;render();name.focus();};
+      edit.onclick=()=>{editing=profile.id;name.value=profile.name;adapter.value=profile.adapter;endpoint.value=profile.endpoint;model.value=profile.model;discovery.invalidate();cancel.hidden=false;render();name.focus();};
       const remove=document.createElement('button');remove.type='button';remove.textContent=t('Entfernen','Remove');remove.setAttribute('aria-label',`${remove.textContent}: ${profile.name}`);
       remove.onclick=()=>{if(persist(removeProviderProfile(config,profile.id))){if(editing===profile.id)reset();render();}};
       row.append(summary,edit,remove);list.append(row);
@@ -65,7 +70,7 @@ export function mountProviderPanel(host:HTMLElement,language:()=>Language,storag
       if(persist(valid)){reset();render();}
     }catch{message('Profil ungültig: Name und Modell-ID angeben; HTTP(S)-Adresse ohne Anmeldung, Suchparameter oder Fragment verwenden. Maximal 64 Profile.','Invalid profile: enter name and model ID; use an HTTP(S) URL without credentials, query or fragment. Maximum 64 profiles.');}
   };
-  const onLanguage=()=>{status.textContent='';render();};window.addEventListener('pakachi-options',onLanguage);render();
+  const onLanguage=()=>{status.textContent='';render();discovery.render();};window.addEventListener('pakachi-options',onLanguage);render();
   if(loaded.error)message('Gespeicherte Anbieterprofile konnten nicht gelesen werden. Sie werden erst beim nächsten Speichern ersetzt.','Saved provider profiles could not be read. They will only be replaced when you save.');
-  return ()=>window.removeEventListener('pakachi-options',onLanguage);
+  return ()=>{window.removeEventListener('pakachi-options',onLanguage);dialog?.removeEventListener('close',onClose);discovery.dispose();};
 }

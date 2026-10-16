@@ -4,7 +4,7 @@ Teil der [Blaupause](README.md) · [Roadmap](ROADMAP.md) · [Changelog](CHANGELO
 
 ## Status und Begriffe
 
-Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.14.0: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau und KI-Generierung bleiben Entwicklungsziele.
+Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.15.0: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau und KI-Generierung bleiben Entwicklungsziele.
 
 - **PaKaChi:** Panda-KI-Chimera, das übergeordnete Projekt.
 - **PaKaChi-SM:** StateMaschine mit Avatar-Player und integriertem Studio.
@@ -215,7 +215,12 @@ Für lokale 3D-Generierung werden zunächst vorhandene spezialisierte Modelle be
 
 Der integrierte Assistent und externe MCP-Clients sollen dieselben validierten Studio-Werkzeuge verwenden. Sitzungsfreigabe, Revisionsprüfung, Rückgängig/Wiederholen und Prüfhinweise gelten weiterhin. Ein externer MCP-Client verwaltet seinen KI-Zugang selbst; seine Zugangsdaten werden nicht an PaKaChi weitergereicht. MCP stellt Werkzeuge bereit, MQTT transportiert bereits Befehle und Status; beide ersetzen keine Anbieter-API oder Modelllaufzeit.
 
-Seit 0.13.0 existieren zusätzlich zu acht MCP-Werkzeugen und dem separaten TripoSR-Testlauf lokale Anbieterprofile mit manueller Modell-ID und unabhängiger Rollenzuordnung im Optionsmenü. Eine interne Registry prüft Modellidentität und Rollenfähigkeit anhand eines Adapter-Probes; produktive Netzwerkadapter sind noch nicht registriert. Die Profile enthalten keine vorgesehenen Zugangsdatenfelder und gehören nicht zum Avatar-Projekt. Automatische Modelllisten, Verbindungsprüfung mit echten Diensten, API-/OAuth-Anmeldung, interner KI-Assistent, einheitliche Generierungsaufträge und automatische anatomische Rigging-Dienste bleiben offen. [Bedienung und Speichergrenzen](ANBIETER.md). Die Umsetzungsschritte stehen in der [Roadmap](ROADMAP.md#7-studio-harness-und-anbieteranbindung).
+Seit 0.15.0 stehen zusätzlich zu Profilen und unabhängiger Rollenzuordnung echte Modelllisten-Abfragen für Ollama, LM Studio und OpenAI-kompatible Endpunkte bereit. Ein optionaler Bearer-Schlüssel bleibt ausschließlich im offenen Dialog. Diese Abfrage ist kein Fähigkeitsnachweis und registriert keinen Inferenzadapter. Native Anbieteradapter, geschützte dauerhafte Zugangsdatenverwaltung, OAuth, Assistenten-Inferenz und Generator-/Rigging-Ausführung bleiben offen. [Bedienung und Speichergrenzen](ANBIETER.md).
+
+**Freie Wahl für ALLE Rollen:** Jede Rolle unterstützt im Zielbild lokale und Cloud-Verbindungen. Anthropic, OpenAI, DeepInfra und OpenRouter sind gewünschte Cloud-Anbindungen; Ollama und LM Studio sind lokale Optionen, keine feste Rollenzuordnung. Rollen dürfen Anbieter, Modell und Zugang getrennt wählen oder ein geeignetes Profil gemeinsam nutzen. OAuth nur bei offiziell unterstütztem Drittanwendungszugang. Ein LLM kann einen Fachgenerator oder Rigging-Werkzeuge orchestrieren; der Adapter muss dann die vollständige Werkzeugkette und das Ergebnis prüfen. Die Wahl eines Sprachmodells allein ersetzt diese Ausführung nicht.
+
+Der optionale Ollama-Helfer kuratiert derzeit nur Assistentenkandidaten. Er misst die Hardware des ausführenden Rechners, prüft Modellgewichte samt Reserven und lädt erst nach Rückfrage. GPU-Freigabe vorerst nur mit einer messbaren NVIDIA-GPU; CPU ausdrücklich wählbar. Für alle Rollen bleiben eigene Modelle und andere lokale oder Cloud-Dienste vorgesehen. [Auswahl, Prüfung und Grenzen](LOKALE-MODELLE.md).
+
 
 Das Original-PaKaChi bleibt mit Tierform, humanoider Form und den 72 Transformationsbildern die Designreferenz. Zwei unabhängig erzeugte 3D-Modelle belegen noch keinen kompatiblen Formwechsel; Geometrie, Rigging und Transformation müssen eigens geprüft werden.
 

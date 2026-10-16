@@ -12,6 +12,24 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.15.0] - 2026-10-16
+
+Zeitstempel: 2026-10-16T02:05:26+02:00 (Europe/Berlin)
+
+### Added
+
+- Modelllisten-Abfrage für Ollama, LM Studio und OpenAI-kompatible Endpunkte mit optionalem Bearer-Schlüssel nur für den offenen Dialog; Abbruch, Zeitlimit, Antwortgrenzen und Schutz vor verspäteten Antworten.
+- Optionaler Ollama-Einrichtungshelfer samt Windows-Startdatei: echte Hardwaremessung, konservative Speicherbudgets, vier exakte kuratierte Tags, eigene Tags und Rückfrage vor Download und Ladetest.
+- Prüfung von Modellidentität, 4096 Kontext, CPU-/GPU-Belegung und zwei einfachen Werkzeugaufrufen nach Download; eigener Modellalias und lokaler Ergebnisbericht.
+- 16 zusätzliche Tests für Modellabfrage, Schlüsselbehandlung, Hardwaregrenzen und unabhängige lokale/Cloud-Profile für alle Rollen.
+
+### Changed
+
+- README, Design, Roadmap, Anbieteranleitung und Prüfstand auf 0.15.0 aktualisiert; aufgabenbezogene Modellauswahl ergänzt.
+- Freie Anbieterwahl ausdrücklich für Assistent, 3D-Generator UND Rigging: lokal oder Cloud je Rolle, einschließlich späterer Fachwerkzeugketten. Ollama-Kuration ist optional und schränkt keine Rolle ein.
+
+**Grenzen:** 84 Tests und Produktionsbuild bestanden. Echte Hardware-/Modellabnahme, komplexe Aufgabenqualität, Studio-Inferenzadapter, native Cloud-Anmeldung und OAuth bleiben offen. Automatische GPU-Vorauswahl derzeit nur für eine messbare NVIDIA-GPU; CPU ausdrücklich wählbar. Keine Modellgewichte im Rahmen dieser Entwicklung heruntergeladen.
+
 ## [0.14.0] - 2026-10-15
 
 Zeitstempel: 2026-10-15T18:42:19+02:00 (Europe/Berlin)
@@ -327,6 +345,7 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 - Bestehendes Bedienkonzept ausdrücklich als Designdokument eingeordnet und mit Roadmap und Changelog verknüpft.
 
 [Unreleased]: https://github.com/Smilez1985/PaKaChi-SM/commits/main
+[0.15.0]: ./PRUEFUNG-0.15.0.md
 [0.14.0]: ./PRUEFUNG-0.14.0.md
 [0.13.0]: ./PRUEFUNG-0.13.0.md
 [0.12.0]: ./PRUEFUNG-0.12.0.md

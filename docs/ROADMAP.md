@@ -1,6 +1,6 @@
 # Roadmap – was kommt
 
-**Softwarestand: 0.14.0 · Abgleich: 15.10.2026.** Teil der [Blaupause](README.md).
+**Softwarestand: 0.15.0 · Abgleich: 16.10.2026.** Teil der [Blaupause](README.md).
 
 Ein Häkchen bedeutet implementiert; es ersetzt keine visuelle oder externe Live-Abnahme. Die Nachweise und Prüfgrenzen stehen im [Prüfstand](PRUEFUNG.md). Die Versionshistorie gehört ins [Changelog](CHANGELOG.md).
 
@@ -8,7 +8,7 @@ Ein Häkchen bedeutet implementiert; es ersetzt keine visuelle oder externe Live
 
 1. **Korrekturen 0.11.0/0.11.1 visuell nachprüfen:** Drehung um die Figurenmitte auch nach Zoom/Pan sowie vollständige Körperverbindungen, Hand-/Fußziele, Rumpfbewegung und direktes Drehen. Nutzertest 0.10.0 meldete auseinanderziehbare Knochen und unbrauchbare Ausrichtung; diese Fehler sind technisch korrigiert, die erneute Nutzerabnahme steht aus. Anschließend Mausnavigation, kleine Gesichtspunkte, Gesamtverschiebung, Speichern/Laden und Agentensteuerung in einer lauffähigen Browserumgebung prüfen.
 2. **Gelenkbearbeitung vervollständigen:** echte Quellknochen hinzufügen/löschen, Hautgewichte zuordnen und vorhandene Moves nach Änderungen prüfen. Erst damit wird das Beispiel „fehlendes Knie ergänzen und beugen“ vollständig erfüllt.
-3. **Studio-Harness anbinden:** auf den Profilen und der Rollen-/Fähigkeitsprüfung aus 0.13.0 aufbauen; als Nächstes echte Verbindungsprüfung, Modellauflistung und geschützte Anmeldung mit passenden Adaptern umsetzen. Details und Abnahme in Abschnitt 7.
+3. **Studio-Harness anbinden:** auf den Profilen und der Rollen-/Fähigkeitsprüfung aus 0.13.0 aufbauen; Modellauflistung ist seit 0.15.0 vorhanden. Als Nächstes Fähigkeitsprüfung, geschützte Anmeldung und Inferenzadapter für lokale und Cloud-Dienste umsetzen. Details und Abnahme in Abschnitt 7.
 4. **Aufträge und KI-Verfahren integrieren:** den Auftragskern aus 0.14.0 an geeignete Generator-/Rigging-Adapter und den Studio-Editor anschließen, echte Inferenz und Qualität prüfen, anschließend Korrekturvorschau und Übernahme integrieren. Vorhandene Skelettdaten auszulesen ist bereits möglich, aber keine KI-Anatomieerkennung.
 
 Diese Reihenfolge ist ein Umsetzungsvorschlag, kein Terminversprechen. Lokale und externe Dienste sowie getrennte Anbieter je Rolle sind als Architektur festgelegt. Die konkreten zuerst unterstützten Verfahren, Hardwareanforderungen und Lizenzen sind noch zu prüfen.
@@ -99,7 +99,8 @@ Beschlossenes Design: [Anbieter, Rollen und Auftragsablauf](KONZEPT.md#11-studio
 - [ ] Produktive Adapter implementieren; Fähigkeiten und Auftragsabläufe gegen echte Dienste prüfen.
 - [x] Mehrere benannte Profile mit Schnittstelle, Serveradresse und Modell-ID lokal speichern, bearbeiten, entfernen und unabhängig den Rollen zuordnen (0.13.0).
 - [ ] Geschützte Zugangsdatenverwaltung ergänzen; Profile enthalten bislang bewusst keine Authentifizierungsfelder.
-- [ ] Optionsmenü um Verbindungsprüfung, Modellliste beziehungsweise manuelle Modell-ID, API-Anmeldung und nur tatsächlich unterstützte OAuth-Verfahren ergänzen. Deutsch/English beibehalten; keinen dritten Bearbeitungsmodus einführen.
+- [x] Modelllisten und Verbindungsprüfung für Ollama, LM Studio und OpenAI-kompatible APIs mit optionalem Sitzungsschlüssel; manuelle Modell-ID weiterhin möglich (0.15.0).
+- [ ] Dauerhafte geschützte Zugangsdatenverwaltung, native Cloud-Adapter und offiziell unterstützte OAuth-Verfahren ergänzen.
 - [ ] Adapter für passende OpenAI-kompatible Dienste einschließlich lokaler Ollama-/LM-Studio-Anbindungen und erforderliche native Anbieteradapter entwickeln; unterstützte Fähigkeiten und getestete Modelle dokumentieren.
 - [x] Internen Auftragskern mit festem Anbieter/Modell, Fortschritt, Fehlern, Zeitlimit und Abbruch umsetzen; späte Antworten verwerfen und weder automatisch wiederholen noch den Anbieter wechseln (0.14.0).
 - [ ] Auftragsoberfläche mit Empfängeranzeige vor Datenübertragung, ausdrücklichem Neuversuch und fernseitigem Abbruchstatus anbinden.
@@ -119,3 +120,16 @@ Beschlossenes Design: [Anbieter, Rollen und Auftragsablauf](KONZEPT.md#11-studio
 - Erweiterungen der Exportformate und der sicheren Remote-Anbindung.
 
 Three.js, glTF/GLB, JSON-Katalog und Studio-Projektformat 1 sind bereits die Implementierungsbasis; diese Entscheidungen sind nicht mehr pauschal offen.
+
+## 8. Freie Modellwahl und lokale Einrichtung
+
+- [x] Unabhängige Profile für ALLE Rollen; keine feste Bindung zwischen Rolle und lokalem/Cloud-Anbieter.
+- [x] Optionaler Ollama-Helfer mit Hardwaremessung, Speicherbudget, exakten Tags, ausdrücklicher Downloadbestätigung und eigenen Tags (0.15.0).
+- [x] Nach Download Modellidentität, 4096 Kontext, vollständige GPU-Belegung beziehungsweise ausdrücklichen CPU-Betrieb und zwei einfache Werkzeugaufrufe prüfen; Bericht und eigener Alias.
+- [ ] Reale Hardwareabnahme und komplexe deutsche/englische Studio-Aufgaben einschließlich Bilder pro Quantisierung prüfen.
+- [ ] AMD/Intel/Apple und mehrere GPUs zuverlässig messen; LM-Studio-Modellinstallation prüfen.
+- [ ] Für jede Rolle lokale und Cloud-Ausführung integrieren: direkte Fachmodelle sowie LLM-gesteuerte Werkzeugketten, soweit nachweislich geeignet.
+- [ ] Anthropic, OpenAI, DeepInfra und OpenRouter mit den jeweils unterstützten Authentifizierungswegen anbinden; keine pauschale OAuth- oder Abonnement-Kompatibilität versprechen.
+- [ ] Fachverfahren für Geometrie und Rigging live validieren und über austauschbare Adapter zugänglich machen. Recherche nur nach diesen Aufgaben, kein Gesamtkatalogscan.
+
+Details: [Modellauswahl](LOKALE-MODELLE.md). Die aktuelle Ollama-Kuration ist eine Einstiegshilfe für die lokale Assistentenrolle und keine Einschränkung der anderen Rollen.

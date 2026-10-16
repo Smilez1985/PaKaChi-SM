@@ -1,6 +1,6 @@
 # Interner Auftragskern
 
-**Stand 0.14.0.** Diese Entwicklungsschnittstelle ist noch nicht an die sichtbare Generierungsoberfläche oder einen echten KI-Dienst angeschlossen. Die vorhandene Anbieteroberfläche bleibt eine Profilverwaltung.
+**Stand 0.15.0.** Diese Entwicklungsschnittstelle ist noch nicht an die sichtbare Generierungsoberfläche oder einen echten KI-Dienst angeschlossen. Die Anbieteroberfläche kann inzwischen Modelllisten abrufen; diese Abfrage ist unabhängig vom Auftragskern und startet keine Inferenz.
 
 ## Ablauf
 
@@ -36,7 +36,7 @@ Diese Host-Anbindung ist noch nicht implementiert. Die Tests prüfen die Abweisu
 
 ## Noch offen
 
-- Produktive lokale und externe Adapter samt Anmeldung und Modellabfrage.
+- Produktive lokale und externe Inferenzadapter samt geschützter Anmeldung; Modelllisten sind separat bereits vorhanden.
 - Sichtbare Auftragsliste, Empfängeranzeige, Korrekturprompt und 3D-Vorschau.
 - Tatsächliche Format-/Rigging-Prüfung und atomarer Modellwechsel mit Undo im Studio.
 - Fernseitige Abbruchbestätigung, Wiederaufnahme nach App-Neustart und begrenzte Auftragshistorie.

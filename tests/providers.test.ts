@@ -66,3 +66,15 @@ test('failed UI persistence keeps the draft and previously saved assignments',()
  assert.equal(host.querySelector<HTMLInputElement>('#provider-name')!.value,'Unsaved');assert.equal(JSON.parse(raw).profiles[0].name,'a');
  assert.equal(w.localStorage.getItem(PROVIDER_STORAGE_KEY),null);dispose();w.happyDOM.abort();
 });
+
+test('every role can resolve a local or cloud profile by capabilities, without provider-role locking',async()=>{
+ const config=fixture(),registry=new ProviderRegistry();
+ config.profiles[1]={...config.profiles[1],adapter:'openai-compatible',endpoint:'https://example.com/v1'};
+ for(const id of ['ollama','openai-compatible'] as const)registry.register({id,async probe(p){return {model:p.model,capabilities:['tool-calling','image-to-3d','rigging']};}});
+ for(const role of ['assistant','generation','rigging'] as const){
+  for(const id of ['a','b']){
+   config.assignments[role]=id;
+   assert.equal((await registry.resolve(config,role,new AbortController().signal)).id,id);
+  }
+ }
+});
