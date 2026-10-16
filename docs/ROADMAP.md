@@ -1,6 +1,6 @@
 # Roadmap – was kommt
 
-**Softwarestand: 0.15.0 · Abgleich: 16.10.2026.** Teil der [Blaupause](README.md).
+**Softwarestand: 0.16.0 · Abgleich: 16.10.2026.** Teil der [Blaupause](README.md).
 
 Ein Häkchen bedeutet implementiert; es ersetzt keine visuelle oder externe Live-Abnahme. Die Nachweise und Prüfgrenzen stehen im [Prüfstand](PRUEFUNG.md). Die Versionshistorie gehört ins [Changelog](CHANGELOG.md).
 
@@ -8,7 +8,7 @@ Ein Häkchen bedeutet implementiert; es ersetzt keine visuelle oder externe Live
 
 1. **Korrekturen 0.11.0/0.11.1 visuell nachprüfen:** Drehung um die Figurenmitte auch nach Zoom/Pan sowie vollständige Körperverbindungen, Hand-/Fußziele, Rumpfbewegung und direktes Drehen. Nutzertest 0.10.0 meldete auseinanderziehbare Knochen und unbrauchbare Ausrichtung; diese Fehler sind technisch korrigiert, die erneute Nutzerabnahme steht aus. Anschließend Mausnavigation, kleine Gesichtspunkte, Gesamtverschiebung, Speichern/Laden und Agentensteuerung in einer lauffähigen Browserumgebung prüfen.
 2. **Gelenkbearbeitung vervollständigen:** echte Quellknochen hinzufügen/löschen, Hautgewichte zuordnen und vorhandene Moves nach Änderungen prüfen. Erst damit wird das Beispiel „fehlendes Knie ergänzen und beugen“ vollständig erfüllt.
-3. **Studio-Harness anbinden:** auf den Profilen und der Rollen-/Fähigkeitsprüfung aus 0.13.0 aufbauen; Modellauflistung ist seit 0.15.0 vorhanden. Als Nächstes Fähigkeitsprüfung, geschützte Anmeldung und Inferenzadapter für lokale und Cloud-Dienste umsetzen. Details und Abnahme in Abschnitt 7.
+3. **Studio-Harness anbinden:** auf den Profilen und der Rollen-/Fähigkeitsprüfung aus 0.13.0 aufbauen; Modellauflistung ist seit 0.15.0 vorhanden. Assistenten-Inferenz für Ollama/OpenAI-kompatible APIs ist seit 0.16.0 vorhanden. Als Nächstes reale Modell-/Werkzeugqualität prüfen sowie native Cloud-Anmeldung und Fachadapter ergänzen. Details und Abnahme in Abschnitt 7.
 4. **Aufträge und KI-Verfahren integrieren:** den Auftragskern aus 0.14.0 an geeignete Generator-/Rigging-Adapter und den Studio-Editor anschließen, echte Inferenz und Qualität prüfen, anschließend Korrekturvorschau und Übernahme integrieren. Vorhandene Skelettdaten auszulesen ist bereits möglich, aber keine KI-Anatomieerkennung.
 
 Diese Reihenfolge ist ein Umsetzungsvorschlag, kein Terminversprechen. Lokale und externe Dienste sowie getrennte Anbieter je Rolle sind als Architektur festgelegt. Die konkreten zuerst unterstützten Verfahren, Hardwareanforderungen und Lizenzen sind noch zu prüfen.
@@ -133,3 +133,12 @@ Three.js, glTF/GLB, JSON-Katalog und Studio-Projektformat 1 sind bereits die Imp
 - [ ] Fachverfahren für Geometrie und Rigging live validieren und über austauschbare Adapter zugänglich machen. Recherche nur nach diesen Aufgaben, kein Gesamtkatalogscan.
 
 Details: [Modellauswahl](LOKALE-MODELLE.md). Die aktuelle Ollama-Kuration ist eine Einstiegshilfe für die lokale Assistentenrolle und keine Einschränkung der anderen Rollen.
+
+## 9. Integrierter Assistent
+
+- [x] Aufgaben an das unabhängig gewählte Assistentenprofil senden (Ollama, LM Studio, OpenAI-kompatible Chat-API; 0.16.0).
+- [x] Begrenzte lesende Werkzeugschleife und konkrete, einzeln bestätigte Studio-Vorschläge mit bestehender Freigabe, Sitzung/Revision und Undo.
+- [x] Ziel/Datenumfang anzeigen; keine persistenten Schlüssel oder Chatverläufe, Abbruch und späte Antworten absichern.
+- [ ] Reale Anbieter- und Modellabnahme einschließlich deutscher/englischer Studio-Aufgaben und Browser-CORS.
+- [ ] Mehrschrittige Vorschau, Bildkontext und zusammenhängende Änderungstransaktionen ergänzen.
+- [ ] Native Cloud-Adapter, geschützte Anmeldung und Generator-/Rigging-Ausführung unabhängig von der Assistentenrolle integrieren.

@@ -19,7 +19,7 @@ export function modelListURL(connection:ProviderConnection):string {
   return url.href;
 }
 const MAX_BYTES=1024*1024;
-async function readJSON(response:Response,signal:AbortSignal):Promise<unknown>{
+export async function readJSON(response:Response,signal:AbortSignal):Promise<unknown>{
   if(Number(response.headers.get('content-length'))>MAX_BYTES){void response.body?.cancel().catch(()=>{});throw new DiscoveryError('response-too-large');}
   if(!response.body)throw new DiscoveryError('invalid-response');
   const reader=response.body.getReader(),parts:Uint8Array[]=[];let size=0;

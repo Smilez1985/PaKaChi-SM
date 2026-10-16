@@ -29,3 +29,10 @@ body.studio-active .control-panel{border-radius:0 18px 18px 0;min-width:0}
 .studio-review{border-left:3px solid #b07918;background:#fff4d9;padding:10px 12px;margin:12px 0;color:#654817}.studio-review ul{padding-left:18px}.move-review-badge{display:block;color:#865b0e;font-size:.75rem}
 
 #options-dialog{width:min(620px,calc(100vw - 32px));max-width:620px;max-height:90dvh;overflow:auto;box-sizing:border-box}.provider-settings{border-top:1px solid #a8bbb3;margin-top:24px;padding-top:8px}.provider-settings input,.provider-settings select{display:block;width:100%;box-sizing:border-box;min-height:36px}.provider-settings p{line-height:1.5;overflow-wrap:anywhere}.provider-row{border-bottom:1px solid #ccd5ce;padding-bottom:10px}.provider-row p{white-space:pre-line}.provider-settings button{margin:4px 8px 4px 0;min-height:36px}
+
+.assistant-panel { margin-top: 1rem; border-top: 1px solid var(--border, #ddd); padding-top: .75rem; }
+.assistant-panel summary { cursor: pointer; font-weight: 600; }
+.assistant-panel form { display: grid; gap: .6rem; max-width: 48rem; }
+.assistant-panel textarea { width: 100%; min-height: 5rem; font: inherit; padding: .6rem; }
+.assistant-panel pre { max-height: 22rem; overflow: auto; overflow-wrap: anywhere; font-size: .85rem; }
+.assistant-panel p { overflow-wrap: anywhere; }

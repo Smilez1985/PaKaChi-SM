@@ -12,6 +12,24 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.16.0] - 2026-10-16
+
+Zeitstempel: 2026-10-16T02:20:27+02:00 (Europe/Berlin)
+
+### Added
+
+- Integrierter aufklappbarer KI-Assistent mit ausdrücklich gestarteten Aufgaben an das zugeordnete Ollama-, LM-Studio- oder OpenAI-kompatible Profil.
+- Begrenzte Werkzeugschleife für Zustand und Studio-Metadaten; sichtbarer einzelner Änderungsvorschlag statt sofortiger Mutation. Übernehmen verwendet den bestehenden RPC-/Editorweg mit Studio-Freigabe, Sitzung/Revision und Undo.
+- Anzeige von Zieladresse, Modell und Datenumfang; Sitzungsschlüssel ohne Speicherung, Abbruch, Antwortgrenzen und Verwerfen verspäteter Antworten.
+- Acht Tests für Transportformate, Werkzeuggrenzen, ungültige Befehle, Revisionskonflikte, Zeitlimit, Schlüsselbehandlung und explizite Übernahme.
+
+### Changed
+
+- Profilwechsel benachrichtigen den Assistenten und verwerfen laufende Antworten, Vorschläge sowie Schlüssel.
+- README, Blaupause, Roadmap, Anbieteranleitung und Prüfstand aktualisiert; Assistentenanleitung ergänzt.
+
+**Grenzen:** 92 Tests und Produktionsbuild bestanden. Protokoll- und DOM-Tests verwenden Testdoubles; keine reale Modell-/Cloud-Abnahme. Noch keine Bilder, automatischen 3D-/Rigging-Aufträge, native Anthropic-API oder OAuth. Jede Aufgabe startet ohne Chatverlauf und kann höchstens einen bestätigten Studio-Befehl erzeugen.
+
 ## [0.15.0] - 2026-10-16
 
 Zeitstempel: 2026-10-16T02:05:26+02:00 (Europe/Berlin)
@@ -345,6 +363,7 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 - Bestehendes Bedienkonzept ausdrücklich als Designdokument eingeordnet und mit Roadmap und Changelog verknüpft.
 
 [Unreleased]: https://github.com/Smilez1985/PaKaChi-SM/commits/main
+[0.16.0]: ./PRUEFUNG-0.16.0.md
 [0.15.0]: ./PRUEFUNG-0.15.0.md
 [0.14.0]: ./PRUEFUNG-0.14.0.md
 [0.13.0]: ./PRUEFUNG-0.13.0.md

@@ -1,6 +1,6 @@
 # Interner Auftragskern
 
-**Stand 0.15.0.** Diese Entwicklungsschnittstelle ist noch nicht an die sichtbare Generierungsoberfläche oder einen echten KI-Dienst angeschlossen. Die Anbieteroberfläche kann inzwischen Modelllisten abrufen; diese Abfrage ist unabhängig vom Auftragskern und startet keine Inferenz.
+**Stand 0.16.0.** Diese Entwicklungsschnittstelle ist noch nicht an die sichtbare Generierungsoberfläche oder einen echten KI-Dienst angeschlossen. Die Anbieteroberfläche kann inzwischen Modelllisten abrufen; diese Abfrage ist unabhängig vom Auftragskern und startet keine Inferenz.
 
 ## Ablauf
 

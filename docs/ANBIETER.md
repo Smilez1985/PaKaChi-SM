@@ -1,6 +1,6 @@
 # Anbieter und Modelle
 
-**Stand 0.15.0.** Unter **Optionen → KI-Anbieter** lassen sich Profile unabhängig Assistent, 3D-Generator und Rigging-Dienst zuordnen. Alle Rollen dürfen im Zielbild lokal oder in der Cloud ausgeführt werden. Ein Profil kann mehrere Rollen bedienen, wenn dessen Adapter die benötigten Fähigkeiten nachweist.
+**Stand 0.16.0.** Unter **Optionen → KI-Anbieter** lassen sich Profile unabhängig Assistent, 3D-Generator und Rigging-Dienst zuordnen. Alle Rollen dürfen im Zielbild lokal oder in der Cloud ausgeführt werden. Ein Profil kann mehrere Rollen bedienen, wenn dessen Adapter die benötigten Fähigkeiten nachweist.
 
 1. Profilnamen und Schnittstelle wählen, API-Basisadresse eintragen.
 2. Optional im dafür vorgesehenen Passwortfeld einen Bearer-Schlüssel eingeben.
@@ -27,10 +27,12 @@ Maximal 64 Profile werden unter `pakachi-providers-v1` im lokalen Browserspeiche
 
 ## Was eine erfolgreiche Abfrage bedeutet
 
-Die Verbindung hat eine gültige Modellliste geliefert. Das bestätigt weder Werkzeugaufrufe noch 3D-Generierung oder Rigging. Die Registry verlangt weiterhin die zur Rolle passende Fähigkeit und einen Ausführungsadapter. Es sind noch keine produktiven Inferenzadapter im Studio registriert. Ein LLM darf künftig Fachwerkzeuge koordinieren; der vollständige Ablauf muss die Ergebnisse der jeweiligen Rolle liefern und prüfen.
+Die Verbindung hat eine gültige Modellliste geliefert. Das bestätigt weder Werkzeugaufrufe noch 3D-Generierung oder Rigging. Die Registry verlangt weiterhin die zur Rolle passende Fähigkeit und einen Ausführungsadapter. Seit 0.16.0 verwendet der separate Assistentenablauf Ollama und OpenAI-kompatible Chat-Endpunkte. Im Generator-/Rigging-Auftragskern sind weiterhin keine produktiven Ausführungsadapter registriert. Ein LLM darf künftig Fachwerkzeuge koordinieren; der vollständige Ablauf muss die Ergebnisse der jeweiligen Rolle liefern und prüfen.
 
 Zeitlimit, Abbruch, Antwortgrößenbegrenzung und das Verwerfen verspäteter Antworten sind implementiert. Abbrechen beendet das lokale Warten; es bestätigt keinen serverseitigen Auftragsabbruch. Sprachwechsel Deutsch/English erhält eigene Namen.
 
 [Lokale Einrichtung](LOKALE-MODELLE.md) · [Design](KONZEPT.md#11-studio-als-ki-harness-und-freie-anbieterwahl) · [Roadmap](ROADMAP.md)
 
 Quellen: [Ollama Modellliste](https://docs.ollama.com/api/tags), [Ollama FAQ](https://docs.ollama.com/faq), [LM Studio Modelle](https://lmstudio.ai/docs/developer/openai-compat/models), [LM Studio Server](https://lmstudio.ai/docs/developer/core/server/settings).
+
+[Assistent: Aufgaben und bestätigte Studio-Änderungen](ASSISTENT.md)

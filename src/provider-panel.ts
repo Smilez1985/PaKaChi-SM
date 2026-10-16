@@ -30,7 +30,7 @@ export function mountProviderPanel(host:HTMLElement,language:()=>Language,storag
   form.append(submit,cancel);host.append(heading,intro,list,form,roles,status);
   const message=(de:string,en:string)=>{status.textContent=t(de,en);};
   function persist(next:ProviderConfig):boolean {
-    try{saveProviderConfig(next,storage);config=next;message('Gespeichert · noch nicht verbunden.','Saved · not connected yet.');return true;}
+    try{saveProviderConfig(next,storage);config=next;window.dispatchEvent(new window.Event('pakachi-providers'));message('Gespeichert · noch nicht verbunden.','Saved · not connected yet.');return true;}
     catch{message('Speichern nicht möglich. Bisherige Einstellungen bleiben erhalten.','Could not save. Previous settings are preserved.');return false;}
   }
   function reset(){editing=null;form.reset();discovery.invalidate();cancel.hidden=true;submit.textContent=t('Profil hinzufügen','Add profile');}
