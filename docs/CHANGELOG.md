@@ -12,6 +12,27 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.18.0] - 2026-10-16
+
+Zeitstempel: 2026-10-16T21:26:33+02:00 (Europe/Berlin)
+
+### Added
+
+- Unabhängiges Hauptprofil und geordnete Fallback-Profile für Assistent, Generator und Rigging; Reihenfolge im Optionsmenü bearbeiten und dauerhaft als Konfiguration speichern.
+- Assistenten-Fallback-Ausführung ausschließlich entlang der vorab angezeigten Route, mit passendem Sitzungsschlüssel und eingefrorener Auswahl pro Versuch. Bei Abbruch oder Studio-/Werkzeugkonflikt kein weiterer Versuch.
+- Fünf Tests für Routen, alte Konfigurationen, Schlüsseltrennung, Fehler-/Abbruchverhalten und Profilwechsel.
+
+### Fixed
+
+- Anbieter-/Profilwechsel und Dialogschluss löschen nicht mehr Schlüssel und Modellauswahl. Mehrere Profile und deren bearbeitete Modell-/Schlüsselentwürfe bleiben gleichzeitig erhalten.
+
+### Changed
+
+- Schlüssel liegen pro Profil und Zieladresse im Sitzungsspeicher statt nur im geöffneten Dialog. Neuladen löscht weiterhin Sitzungsschlüssel; geschützte dauerhafte Ablage bleibt offen.
+- README, Design, Roadmap, Anbieter-/Assistentenanleitung und Prüfstand an die Mehranbieter-Konfiguration angepasst.
+
+**Grenzen:** Generator-/Rigging-Routen sind konfigurierbar, aber noch nicht ausführbar. Keine echte Konto-/Modellabnahme. Keine Schlüssel im Browserspeicher oder Projekt.
+
 ## [0.17.1] - 2026-10-16
 
 Zeitstempel: 2026-10-16T19:56:25+02:00 (Europe/Berlin)
@@ -391,6 +412,7 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 - Bestehendes Bedienkonzept ausdrücklich als Designdokument eingeordnet und mit Roadmap und Changelog verknüpft.
 
 [Unreleased]: https://github.com/Smilez1985/PaKaChi-SM/commits/main
+[0.18.0]: ./PRUEFUNG-0.18.0.md
 [0.17.1]: ./PRUEFUNG-0.17.1.md
 [0.17.0]: ./PRUEFUNG-0.17.0.md
 [0.16.0]: ./PRUEFUNG-0.16.0.md

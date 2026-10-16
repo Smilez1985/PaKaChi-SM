@@ -18,11 +18,12 @@ const profileSchema = z.object({
 }).strict();
 const configSchema = z.object({
   version:z.literal(1),profiles:z.array(profileSchema).max(64),
+  fallbacks:z.object({assistant:z.array(z.string()).max(63),generation:z.array(z.string()).max(63),rigging:z.array(z.string()).max(63)}).strict().optional(),
   assignments:z.object({assistant:z.string().nullable(),generation:z.string().nullable(),rigging:z.string().nullable()}).strict(),
 }).strict().superRefine((config,ctx)=>{
   const ids=new Set(config.profiles.map(p=>p.id));
   if(ids.size!==config.profiles.length)ctx.addIssue({code:'custom',message:'duplicate-id'});
-  for(const role of ROLES){const id=config.assignments[role];if(id!==null&&!ids.has(id))ctx.addIssue({code:'custom',message:'missing-profile'});}
+  for(const role of ROLES){const chain=config.fallbacks?.[role]??[];if(chain.some(id=>!ids.has(id)||id===config.assignments[role])||new Set(chain).size!==chain.length)ctx.addIssue({code:'custom',message:'invalid-fallbacks'});const id=config.assignments[role];if(id!==null&&!ids.has(id))ctx.addIssue({code:'custom',message:'missing-profile'});}
 });
 export type ProviderProfile = z.infer<typeof profileSchema>;
 export type ProviderConfig = z.infer<typeof configSchema>;
@@ -37,7 +38,7 @@ export function saveProviderConfig(config:ProviderConfig,storage:Pick<Storage,'s
 }
 export function removeProviderProfile(config:ProviderConfig,id:string):ProviderConfig {
   const next=parseProviderConfig(config);next.profiles=next.profiles.filter(p=>p.id!==id);
-  for(const role of ROLES)if(next.assignments[role]===id)next.assignments[role]=null;
+  for(const role of ROLES){if(next.assignments[role]===id)next.assignments[role]=null;if(next.fallbacks)next.fallbacks[role]=next.fallbacks[role].filter(item=>item!==id);}
   return next;
 }
 
@@ -80,3 +81,5 @@ export class ProviderRegistry {
     return snapshot;
   }
 }
+
+export function providerRoute(config:ProviderConfig,role:ProviderRole):ProviderProfile[]{const valid=parseProviderConfig(config);const primary=valid.assignments[role];if(!primary)return [];return [primary,...(valid.fallbacks?.[role]??[])].map(id=>valid.profiles.find(p=>p.id===id)!);}

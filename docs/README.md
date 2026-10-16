@@ -1,6 +1,6 @@
 # Blaupause – PaKaChi-SM
 
-**Softwarestand: 0.17.1 · Dokumentation abgeglichen am 16.10.2026.**
+**Softwarestand: 0.18.0 · Dokumentation abgeglichen am 16.10.2026.**
 
 Die Blaupause besteht aus drei Dokumenten. Das Designdokument beschreibt das Produktziel, die Roadmap die Umsetzung und das Changelog die bereits erfolgten Änderungen.
 
@@ -38,10 +38,12 @@ Seit 0.13.0 sind lokale Anbieterprofile, unabhängige Rollenzuordnung im Options
 | Testergebnisse und offene Abnahme | [Prüfstand](PRUEFUNG.md) |
 | Originaldesign und Herkunft der erhaltenen Bilder | [Referenzen](references/README.md) |
 
-Softwareversion, Projektformat und historischer Prüfstand sind unterschiedliche Angaben: Die Software steht auf 0.17.1, das Projektformat weiterhin auf Version 1. Ältere Projekte sind lesbar; Dateien mit Gesamtpositionsspur benötigen Software ab 0.6.0; Gesamtdrehung benötigt mindestens 0.8.0; Skalierung mindestens 0.10.0. Ältere Software ignoriert die neue Skalierung. Historische Prüfberichte behalten ihren damaligen Stand.
+Softwareversion, Projektformat und historischer Prüfstand sind unterschiedliche Angaben: Die Software steht auf 0.18.0, das Projektformat weiterhin auf Version 1. Ältere Projekte sind lesbar; Dateien mit Gesamtpositionsspur benötigen Software ab 0.6.0; Gesamtdrehung benötigt mindestens 0.8.0; Skalierung mindestens 0.10.0. Ältere Software ignoriert die neue Skalierung. Historische Prüfberichte behalten ihren damaligen Stand.
 
 [Aufgabenbezogene Modellwahl und lokale Einrichtung](LOKALE-MODELLE.md) · [Prüfbericht 0.15.0](PRUEFUNG-0.15.0.md)
 
 [Assistent verwenden](ASSISTENT.md) · [Prüfbericht 0.16.0](PRUEFUNG-0.16.0.md)
 
 [Prüfbericht 0.17.0](PRUEFUNG-0.17.0.md) · [Anthropic einrichten](ANBIETER.md#anthropic-seit-0170)
+
+**0.18.0:** Gleichzeitig eingerichtete Anbieter-/Modellprofile, unabhängige geordnete Fallbacks für alle Rollen und erhaltene Sitzungsschlüssel. Assistenten-Fallbacks sind implementiert; Fachausführung für Generator/Rigging und dauerhafte Schlüsselablage bleiben offen. [Aktuelle Anbieteranleitung](ANBIETER.md).

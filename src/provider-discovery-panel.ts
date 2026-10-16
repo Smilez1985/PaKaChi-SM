@@ -24,7 +24,7 @@ export function mountDiscoveryPanel(host:HTMLElement,connection:()=>ProviderConn
  host.append(tokenLabel,target,note,check,cancel,clear,selectLabel,status);
  let controller:AbortController|undefined,sequence=0,models:string[]|null=null,error:DiscoveryErrorCode|undefined;
  function render(){
-  tokenCaption.textContent=t('API-Schlüssel / Token (optional, nur bis Dialogschluss)','API key / token (optional, until dialog closes)');
+  tokenCaption.textContent=t('API-Schlüssel / Token (optional, für dieses Profil in der Sitzung)','API key / token (optional, for this profile in this session)');
   note.textContent=t('Nur Modellliste abrufen; keine Prompts oder Bilder senden. Der Schlüssel geht ausschließlich an die angezeigte Adresse.','Fetch the model list only; no prompts or images are sent. The key is sent only to the displayed URL.');
   try{target.textContent=`${t('Empfänger','Recipient')}: ${modelListURL(connection())}`;check.disabled=!!controller;}catch(e){target.textContent=e instanceof DiscoveryError&&e.code==='unsupported-adapter'?t(...errors['unsupported-adapter']):t('Zuerst Schnittstelle und gültige Basisadresse wählen.','Choose an interface and valid base URL first.');check.disabled=true;}
   check.textContent=t('Verbindung prüfen & Modelle laden','Check connection & load models');cancel.textContent=t('Abfrage abbrechen','Cancel request');clear.textContent=t('Schlüssel vergessen','Forget key');cancel.disabled=!controller;
@@ -41,5 +41,5 @@ export function mountDiscoveryPanel(host:HTMLElement,connection:()=>ProviderConn
  };
  cancel.onclick=()=>{invalidate(false);error='cancelled';render();};clear.onclick=()=>invalidate();token.oninput=()=>invalidate(false);
  select.onchange=()=>{if(select.value)choose(select.value);};render();
- return {render,invalidate,dispose:()=>{sequence++;controller?.abort();controller=undefined;token.value='';}};
+ return {render,invalidate,getToken:()=>token.value,setToken:(value:string)=>{invalidate(false);token.value=value;},dispose:()=>{sequence++;controller?.abort();controller=undefined;token.value='';}};
 }

@@ -33,7 +33,7 @@ export async function runAssistant(input:{profile:ProviderProfile;prompt:string;
    controller.signal.throwIfAborted();
    const body=anthropic?anthropicRequest(profile.model,messages,ASSISTANT_TOOLS):{model:profile.model,messages,tools:ASSISTANT_TOOLS,stream:false,...(ollama?{options:{num_ctx:4096,num_predict:1024},keep_alive:'30s'}:{max_tokens:1024,parallel_tool_calls:false})};
    if(JSON.stringify(body).length>100000)throw new Error('context-too-large');
-   const response=await (input.fetcher??fetch)(url,{method:'POST',headers:{'Content-Type':'application/json',Accept:'application/json',...(anthropic?anthropicHeaders(token):token?{Authorization:`Bearer ${token}`}:{})},body:JSON.stringify(body),signal:controller.signal,credentials:'omit',redirect:'error',cache:'no-store',referrerPolicy:'no-referrer'});
+   const response=await (input.fetcher??fetch)(url,{method:'POST',headers:{'Content-Type':'application/json',Accept:'application/json',...(anthropic?anthropicHeaders(token):token?{Authorization:`Bearer ${token}`}:{})},body:JSON.stringify(body),signal:controller.signal,credentials:'omit',redirect:'error',cache:'no-store',referrerPolicy:'no-referrer'}).catch(()=>{throw new Error('network');});
    if(!response.ok){void response.body?.cancel().catch(()=>{});throw new Error(response.status===401||response.status===403?'unauthorized':'provider-error');}
    const raw=await readJSON(response,controller.signal) as any;controller.signal.throwIfAborted();
    if(observed){const current=input.rpc('get_studio') as any;if(current.session!==observed.session||current.revision!==observed.revision)throw new Error('stale-studio');}

@@ -57,14 +57,14 @@ test('discovery UI invalidates late replies, clears tokens and keeps model IDs o
  const select=host.querySelector<HTMLSelectElement>('#provider-model-list')!;select.value='<b>model</b>';select.dispatchEvent(new w.Event('change') as unknown as Event);assert.equal(chosen,'<b>model</b>');
  language='en';panel.render();assert.match(host.textContent!,/capabilities have not been checked/);assert.equal(select.value,'<b>model</b>');panel.dispose();w.happyDOM.abort();
 });
-test('dialog close clears token; editing endpoints and saving profiles never persists credentials',()=>{
+test('dialog close retains token in session; credentials never enter profile storage',()=>{
  const {w,host}=dom(),dialog=document.createElement('dialog');host.append(dialog);const panelHost=document.createElement('section');dialog.append(panelHost);
  const dispose=mountProviderPanel(panelHost,()=> 'de',w.localStorage);
  const input=(id:string,value:string)=>{panelHost.querySelector<HTMLInputElement>(`#${id}`)!.value=value;};
- input('provider-token','close-secret');dialog.dispatchEvent(new w.Event('close') as unknown as Event);assert.equal(panelHost.querySelector<HTMLInputElement>('#provider-token')!.value,'');
+ input('provider-token','close-secret');dialog.dispatchEvent(new w.Event('close') as unknown as Event);assert.equal(panelHost.querySelector<HTMLInputElement>('#provider-token')!.value,'close-secret');
  input('provider-name','Profile');input('provider-endpoint','http://localhost:11434');input('provider-model','model');input('provider-token','save-secret');
  panelHost.querySelector('form')!.dispatchEvent(new w.Event('submit',{cancelable:true}) as unknown as Event);assert.doesNotMatch(w.localStorage.getItem('pakachi-providers-v1')!,/secret|token/);assert.equal(panelHost.querySelector<HTMLInputElement>('#provider-token')!.value,'');
- input('provider-token','change-secret');panelHost.querySelector('#provider-endpoint')!.dispatchEvent(new w.Event('input') as unknown as Event);assert.equal(panelHost.querySelector<HTMLInputElement>('#provider-token')!.value,'');dispose();w.happyDOM.abort();
+ input('provider-token','change-secret');input('provider-endpoint','https://new.example');panelHost.querySelector('#provider-endpoint')!.dispatchEvent(new w.Event('input') as unknown as Event);assert.equal(panelHost.querySelector<HTMLInputElement>('#provider-token')!.value,'');dispose();w.happyDOM.abort();
 });
 test('discovery UI displays sanitized errors and supports explicit cancellation',async()=>{
  const {w,host}=dom();const panel=mountDiscoveryPanel(host,()=>conn,()=> 'de',()=>{},async()=>{throw new DiscoveryError('unauthorized');});

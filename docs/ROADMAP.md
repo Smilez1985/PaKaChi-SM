@@ -1,6 +1,6 @@
 # Roadmap – was kommt
 
-**Softwarestand: 0.17.1 · Abgleich: 16.10.2026.** Teil der [Blaupause](README.md).
+**Softwarestand: 0.18.0 · Abgleich: 16.10.2026.** Teil der [Blaupause](README.md).
 
 Ein Häkchen bedeutet implementiert; es ersetzt keine visuelle oder externe Live-Abnahme. Die Nachweise und Prüfgrenzen stehen im [Prüfstand](PRUEFUNG.md). Die Versionshistorie gehört ins [Changelog](CHANGELOG.md).
 
@@ -155,3 +155,12 @@ Details: [Modellauswahl](LOKALE-MODELLE.md). Die aktuelle Ollama-Kuration ist ei
 - [x] Editierbare Standardadressen und schnittstellenbezogene Adressentwürfe ergänzen (0.17.1).
 
 - [x] Sechs Einrichtungsvorlagen für Anthropic, OpenAI, OpenRouter, DeepInfra, Ollama und LM Studio (0.17.1); echte Konto-/Modellabnahme bleibt offen.
+
+## 11. Mehranbieter-Routen (0.18.0)
+
+- [x] Gleichzeitig gespeicherte Anbieter-/Modellprofile mit unabhängigem Hauptprofil und sortierbaren Fallbacks für alle drei Rollen.
+- [x] Profilbezogene Sitzungsschlüssel und Modellwahl beim Umschalten erhalten.
+- [x] Assistent führt konfigurierte Route mit passendem Schlüssel je Profil aus; Abbruch und Studio-Konflikte stoppen sie.
+- [ ] Geschützte dauerhafte Schlüsselablage über Seitenneustarts hinweg.
+- [ ] Generator-/Rigging-Routen an produktive Fachadapter und deren Auftrags-/Fallback-Ausführung anschließen.
+- [ ] Echte Anbieter-/Kontoabnahme der Fallbacks.
