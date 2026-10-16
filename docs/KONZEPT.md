@@ -4,7 +4,7 @@ Teil der [Blaupause](README.md) · [Roadmap](ROADMAP.md) · [Changelog](CHANGELO
 
 ## Status und Begriffe
 
-Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.17.0: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau und KI-Generierung bleiben Entwicklungsziele.
+Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.17.1: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau und KI-Generierung bleiben Entwicklungsziele.
 
 - **PaKaChi:** Panda-KI-Chimera, das übergeordnete Projekt.
 - **PaKaChi-SM:** StateMaschine mit Avatar-Player und integriertem Studio.
@@ -237,3 +237,7 @@ Ein eigener, begrenzter Text-/Werkzeugablauf nutzt ausschließlich das gewählte
 ### Nativer Anthropic-Adapter (0.17.0)
 
 Anthropic ist eine zusätzliche Schnittstellenart für frei zuordenbare Profile. Modelllisten und Messages werden mit `x-api-key` und fester API-Protokollversion angesprochen. Der Assistent übersetzt ausschließlich das Transportformat; Werkzeugfreigabe, Sitzung/Revision, Rundenlimit und explizite Übernahme bleiben identisch. Text-, Werkzeug- und Thinking-Blöcke werden getrennt behandelt; Thinking-Blöcke werden für Folgerunden unverändert weitergereicht, nicht in der Antwort angezeigt. Abgeschnittene oder unbekannte Antwortformate lösen keine Änderung aus. Kein OAuth und keine neue Generator-/Rigging-Ausführung. [Einrichtung und Browsergrenzen](ANBIETER.md#anthropic-seit-0170).
+
+Seit 0.17.1: Die Verbindungsauswahl verwendet editierbare Vorgabeadressen für bekannte Schnittstellen (Anthropic, Ollama, LM Studio). Eigene Endpunkte bleiben je Schnittstellenentwurf erhalten; Profilbearbeitung erhält den gespeicherten Endpunkt. Ein Anbieterwechsel verwirft Schlüssel, Modellliste und Modell-ID, bevor erneut ausdrücklich eine Anfrage gestartet werden kann.
+
+Seit 0.17.1 ergänzen sechs explizite Anbietervorlagen die freie Schnittstellen-/Adressauswahl. Sie setzen lediglich Adapter und Endpunkt, verändern weder Rollenzuordnung noch Modellfähigkeiten und starten keine Anfrage. Anbieterprofile speichern weiterhin die tatsächliche Adresse; keine Schemaänderung erforderlich.

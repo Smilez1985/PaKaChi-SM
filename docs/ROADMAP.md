@@ -1,6 +1,6 @@
 # Roadmap – was kommt
 
-**Softwarestand: 0.17.0 · Abgleich: 16.10.2026.** Teil der [Blaupause](README.md).
+**Softwarestand: 0.17.1 · Abgleich: 16.10.2026.** Teil der [Blaupause](README.md).
 
 Ein Häkchen bedeutet implementiert; es ersetzt keine visuelle oder externe Live-Abnahme. Die Nachweise und Prüfgrenzen stehen im [Prüfstand](PRUEFUNG.md). Die Versionshistorie gehört ins [Changelog](CHANGELOG.md).
 
@@ -151,3 +151,7 @@ Details: [Modellauswahl](LOKALE-MODELLE.md). Die aktuelle Ollama-Kuration ist ei
 - [ ] Echter API-/Browserlauf mit Workspace-gebundenem Schlüssel und passendem Modell.
 - [ ] Workspace-Auswahl und paginierte Modelllisten bei Bedarf ergänzen.
 - [ ] Offiziell unterstütztes OAuth und geschützte dauerhafte Zugangsdatenverwaltung implementieren.
+
+- [x] Editierbare Standardadressen und schnittstellenbezogene Adressentwürfe ergänzen (0.17.1).
+
+- [x] Sechs Einrichtungsvorlagen für Anthropic, OpenAI, OpenRouter, DeepInfra, Ollama und LM Studio (0.17.1); echte Konto-/Modellabnahme bleibt offen.

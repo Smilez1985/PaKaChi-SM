@@ -1,6 +1,6 @@
 # Prüfstand und Abnahme
 
-**Softwarestand: 0.17.0 · Dokumentationsabgleich: 16.10.2026.**
+**Softwarestand: 0.17.1 · Dokumentationsabgleich: 16.10.2026.**
 
 ## Nachgewiesen
 
@@ -54,3 +54,5 @@ Nutzerrückmeldung zu 0.11.0: Mitteltasten-Drehung nach Zoom/Pan um Schulter sta
 [Prüfbericht 0.16.0](PRUEFUNG-0.16.0.md): begrenzter Assistentenablauf, Protokolle und DOM mit Testdoubles geprüft; echte Modell-/Cloud-Abnahme offen.
 
 [Prüfbericht 0.17.0](PRUEFUNG-0.17.0.md): native Anthropic-Protokolle mit Testdoubles geprüft; echte Kontoabnahme offen.
+
+[Prüfbericht 0.17.1](PRUEFUNG-0.17.1.md): Anbieter-Einrichtung, 14 relevante Tests und DOM-Bedienprüfung bestanden; Build geprüft. Letzter vollständiger Testlauf weiterhin 0.17.0.

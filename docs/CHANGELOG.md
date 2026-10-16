@@ -12,6 +12,18 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.17.1] - 2026-10-16
+
+Zeitstempel: 2026-10-16T19:56:25+02:00 (Europe/Berlin)
+
+### Added
+
+- Sechs Anbietervorlagen setzen Schnittstelle und editierbare Adresse ohne automatische Verbindung. OpenAI, OpenRouter und DeepInfra nutzen den vorhandenen OpenAI-kompatiblen Adapter.
+
+### Changed
+
+- Anbieterauswahl füllt die editierbare Standardadresse für Anthropic, Ollama und LM Studio aus. Eigene Adressentwürfe bleiben beim Wechsel der Schnittstelle erhalten; gespeicherte Profile behalten ihre Adresse. „Standardadresse einsetzen“ setzt sie ausdrücklich zurück. Ein Schnittstellenwechsel leert die bisherige Modell-ID und verwirft Schlüssel/Modellliste.
+
 ## [0.17.0] - 2026-10-16
 
 Zeitstempel: 2026-10-16T15:45:53+02:00 (Europe/Berlin)
@@ -379,6 +391,7 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 - Bestehendes Bedienkonzept ausdrücklich als Designdokument eingeordnet und mit Roadmap und Changelog verknüpft.
 
 [Unreleased]: https://github.com/Smilez1985/PaKaChi-SM/commits/main
+[0.17.1]: ./PRUEFUNG-0.17.1.md
 [0.17.0]: ./PRUEFUNG-0.17.0.md
 [0.16.0]: ./PRUEFUNG-0.16.0.md
 [0.15.0]: ./PRUEFUNG-0.15.0.md

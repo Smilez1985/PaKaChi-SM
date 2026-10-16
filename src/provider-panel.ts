@@ -4,6 +4,7 @@ import type {ProviderConfig,ProviderRole} from './ai-providers.ts';
 
 type Language='de'|'en';
 const labels:Record<ProviderRole,[string,string]>={assistant:['Assistent','Assistant'],generation:['3D-Generator','3D generator'],rigging:['Rigging-Dienst','Rigging service']};
+const defaultEndpoints:Partial<Record<typeof ADAPTERS[number],string>>={anthropic:'https://api.anthropic.com',ollama:'http://localhost:11434',lmstudio:'http://localhost:1234/v1'};
 const adapterNames=['OpenAI-compatible','Ollama','LM Studio','3D','Rigging','Anthropic'];
 export function mountProviderPanel(host:HTMLElement,language:()=>Language,storage:Pick<Storage,'getItem'|'setItem'>):()=>void {
   const loaded=readProviderConfig(storage);let config=loaded.config;
@@ -16,14 +17,39 @@ export function mountProviderPanel(host:HTMLElement,language:()=>Language,storag
   name.maxLength=160;endpoint.maxLength=2048;model.maxLength=160;endpoint.type='url';
   name.required=endpoint.required=model.required=true;
   name.id='provider-name';endpoint.id='provider-endpoint';model.id='provider-model';adapter.id='provider-adapter';
-  endpoint.placeholder='http://localhost:11434';model.placeholder=t('Modell-ID','Model ID');
+  endpoint.placeholder='https://…';model.placeholder=t('Modell-ID','Model ID');
   ADAPTERS.forEach((id,i)=>{const option=document.createElement('option');option.value=id;option.textContent=adapterNames[i];adapter.append(option);});
+  const presets=[
+    {name:'Anthropic',adapter:'anthropic',endpoint:'https://api.anthropic.com'},
+    {name:'OpenAI',adapter:'openai-compatible',endpoint:'https://api.openai.com/v1'},
+    {name:'OpenRouter',adapter:'openai-compatible',endpoint:'https://openrouter.ai/api/v1'},
+    {name:'DeepInfra',adapter:'openai-compatible',endpoint:'https://api.deepinfra.com/v1/openai'},
+    {name:'Ollama',adapter:'ollama',endpoint:'http://localhost:11434'},
+    {name:'LM Studio',adapter:'lmstudio',endpoint:'http://localhost:1234/v1'},
+  ];
+  const preset=document.createElement('select');preset.id='provider-preset';
+  const placeholder=document.createElement('option');placeholder.value='';preset.append(placeholder);
+  presets.forEach((p,i)=>{const option=document.createElement('option');option.value=String(i);option.textContent=p.name;preset.append(option);});
   const captions:[HTMLSpanElement,string,string][]=[];
   function field(control:HTMLElement,de:string,en:string){const label=document.createElement('label'),caption=document.createElement('span');caption.textContent=t(de,en);captions.push([caption,de,en]);label.append(caption,control);form.append(label);}
+  field(preset,'Anbietervorlage einsetzen','Apply provider preset');
   field(name,'Profilname','Profile name');field(adapter,'Schnittstelle','Interface');field(endpoint,'API-Basisadresse (ohne Zugangsdaten)','API base URL (without credentials)');field(model,'Modell-ID','Model ID');
   const discoveryHost=document.createElement('div');form.append(discoveryHost);
   const discovery=mountDiscoveryPanel(discoveryHost,()=>({adapter:adapter.value as typeof ADAPTERS[number],endpoint:endpoint.value}),language,id=>{model.value=id;});
-  endpoint.oninput=()=>discovery.invalidate();adapter.onchange=()=>discovery.invalidate();
+  // Keep an endpoint draft per interface; selecting another provider must not send to the previous one.
+  const endpointDrafts=new Map<string,string>();let previousAdapter=adapter.value;
+  const defaultEndpoint=()=>defaultEndpoints[adapter.value as typeof ADAPTERS[number]]??'';
+  function updateEndpointHint(){endpoint.placeholder=defaultEndpoint()||'https://…';}
+  endpoint.oninput=()=>{endpointDrafts.set(adapter.value,endpoint.value);discovery.invalidate();};
+  adapter.onchange=()=>{endpointDrafts.set(previousAdapter,endpoint.value);previousAdapter=adapter.value;endpoint.value=endpointDrafts.get(adapter.value)??defaultEndpoint();model.value='';updateEndpointHint();restoreEndpoint.hidden=!defaultEndpoint();discovery.invalidate();};
+  const restoreEndpoint=document.createElement('button');restoreEndpoint.type='button';restoreEndpoint.id='provider-default-endpoint';
+  restoreEndpoint.onclick=()=>{endpoint.value=defaultEndpoint();endpointDrafts.set(adapter.value,endpoint.value);updateEndpointHint();discovery.invalidate();};
+  endpoint.parentElement!.append(restoreEndpoint);updateEndpointHint();
+  preset.onchange=()=>{const choice=presets[Number(preset.value)];if(preset.value===''||!choice)return;
+    endpointDrafts.set(previousAdapter,endpoint.value);adapter.value=choice.adapter;previousAdapter=adapter.value;
+    endpoint.value=choice.endpoint;endpointDrafts.set(adapter.value,endpoint.value);model.value='';
+    updateEndpointHint();restoreEndpoint.hidden=!defaultEndpoint();discovery.invalidate();preset.value='';
+  };
   const dialog=host.closest('dialog');const onClose=()=>discovery.invalidate();dialog?.addEventListener('close',onClose);
   const submit=document.createElement('button');submit.type='submit';submit.className='button outline';
   const cancel=document.createElement('button');cancel.type='button';cancel.hidden=true;let editing:string|null=null;
@@ -33,9 +59,11 @@ export function mountProviderPanel(host:HTMLElement,language:()=>Language,storag
     try{saveProviderConfig(next,storage);config=next;window.dispatchEvent(new window.Event('pakachi-providers'));message('Gespeichert · noch nicht verbunden.','Saved · not connected yet.');return true;}
     catch{message('Speichern nicht möglich. Bisherige Einstellungen bleiben erhalten.','Could not save. Previous settings are preserved.');return false;}
   }
-  function reset(){editing=null;form.reset();discovery.invalidate();cancel.hidden=true;submit.textContent=t('Profil hinzufügen','Add profile');}
+  function reset(){editing=null;form.reset();endpointDrafts.clear();previousAdapter=adapter.value;endpoint.value=defaultEndpoint();updateEndpointHint();discovery.invalidate();cancel.hidden=true;submit.textContent=t('Profil hinzufügen','Add profile');}
   function render(){
     heading.textContent=t('KI-Anbieter','AI providers');
+    placeholder.textContent=t('Vorlage wählen …','Choose a preset …');
+    restoreEndpoint.textContent=t('Standardadresse einsetzen','Use default address');restoreEndpoint.hidden=!defaultEndpoint();
     intro.textContent=t('Profile bleiben in diesem Browser. Modelllisten können auf Knopfdruck geladen werden. Noch keine Generierung oder OAuth-Anmeldung. Schlüssel nur im gesonderten Tokenfeld eingeben. Eine Rollenzuordnung bestätigt keine Modellfähigkeit.','Profiles stay in this browser. Model lists can be fetched on request. Generation and OAuth login are not available yet. Enter keys only in the separate token field. Assigning a role does not verify model capabilities.');
     captions.forEach(([el,de,en])=>el.textContent=t(de,en));
     adapter.options[3].textContent=t('3D · eigener Dienst','3D · custom service');adapter.options[4].textContent=t('Rigging · eigener Dienst','Rigging · custom service');
@@ -45,7 +73,7 @@ export function mountProviderPanel(host:HTMLElement,language:()=>Language,storag
       const row=document.createElement('div');row.className='provider-row';const summary=document.createElement('p');
       summary.textContent=`${profile.name} · ${profile.model}\n${profile.endpoint}`;
       const edit=document.createElement('button');edit.type='button';edit.textContent=t('Bearbeiten','Edit');edit.setAttribute('aria-label',`${edit.textContent}: ${profile.name}`);
-      edit.onclick=()=>{editing=profile.id;name.value=profile.name;adapter.value=profile.adapter;endpoint.value=profile.endpoint;model.value=profile.model;discovery.invalidate();cancel.hidden=false;render();name.focus();};
+      edit.onclick=()=>{endpointDrafts.clear();editing=profile.id;name.value=profile.name;adapter.value=profile.adapter;endpoint.value=profile.endpoint;previousAdapter=adapter.value;endpointDrafts.set(adapter.value,endpoint.value);updateEndpointHint();model.value=profile.model;discovery.invalidate();cancel.hidden=false;render();name.focus();};
       const remove=document.createElement('button');remove.type='button';remove.textContent=t('Entfernen','Remove');remove.setAttribute('aria-label',`${remove.textContent}: ${profile.name}`);
       remove.onclick=()=>{if(persist(removeProviderProfile(config,profile.id))){if(editing===profile.id)reset();render();}};
       row.append(summary,edit,remove);list.append(row);
