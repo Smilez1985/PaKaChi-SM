@@ -4,7 +4,7 @@ Teil der [Blaupause](README.md) · [Roadmap](ROADMAP.md) · [Changelog](CHANGELO
 
 ## Status und Begriffe
 
-Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.18.0: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau und KI-Generierung bleiben Entwicklungsziele.
+Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.19.0: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau und KI-Generierung bleiben Entwicklungsziele.
 
 - **PaKaChi:** Panda-KI-Chimera, das übergeordnete Projekt.
 - **PaKaChi-SM:** StateMaschine mit Avatar-Player und integriertem Studio.
@@ -247,3 +247,9 @@ Seit 0.17.1 ergänzen sechs explizite Anbietervorlagen die freie Schnittstellen-
 Jede Rolle hat ein Hauptprofil und eine geordnete Liste weiterer Anbieter-/Modellprofile. Profile und Modellwahl bleiben gleichzeitig bestehen. Schlüssel werden getrennt pro Profil und Endpunkt in der Seitensitzung gehalten; Wechsel und Dialogschluss löschen sie nicht. Ältere Aussagen zur Löschung bei Anbieterwechsel sind damit abgelöst. Geschützte dauerhafte Ablage bleibt offen.
 
 Der Assistent führt ausdrücklich konfigurierte Fallbacks bei Anbieterfehlern aus. Das Senden autorisiert die vorab sichtbare komplette Route; keine weiteren Anbieter werden automatisch ergänzt. Ein Versuch darf nur lesende Werkzeuge ausführen und höchstens einen zu bestätigenden Vorschlag liefern. Abbruch, Studio-Konflikte oder ungültige Werkzeugbefehle beenden die Route. Für 3D und Rigging sind unabhängige Routen konfigurierbar; deren tatsächliche Fachausführung und Fallback-Integration bleiben offen. [Verbindliches aktuelles Bedienverhalten](ANBIETER.md).
+
+### Optionale dauerhafte Schlüsselablage (0.19.0; aktueller Stand)
+
+Zusätzlich zur Sitzung kann der Nutzer Schlüssel passwortverschlüsselt im lokalen Browserspeicher halten. AES-256-GCM und PBKDF2-SHA-256 (600.000 Iterationen, frischer Salt und IV) verwenden ausschließlich Web Crypto. Passwort und entschlüsselte Schlüssel werden nicht dauerhaft gespeichert. Nach Neustart wird ausdrücklich entsperrt. Profil-ID, Schnittstelle und tatsächliche Zieladresse binden jeden Schlüssel an seine Verbindung.
+
+Vor dem Überschreiben eines Tresors muss dessen Passwort erfolgreich entschlüsseln. Während der Sitzung unbekannte gespeicherte Schlüssel bleiben beim Speichern erhalten; ausdrückliche Löschungen und nicht mehr konfigurierte Zieladressen werden entfernt. Speicherfehler, Profil-/Tresoränderungen oder Dialogschluss während der Operation verhindern ihre Übernahme. Aktive Sitzungsschlüssel bleiben beim Entsperren maßgeblich. Keine Passwortwiederherstellung, keine automatische Synchronisierung, keine zusätzliche Sitzungssperre und kein Schutz vor schädlichem Code im entsperrten Browser. [Bedienung](ANBIETER.md).

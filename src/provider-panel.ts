@@ -1,3 +1,4 @@
+import {mountCredentialVault} from './credential-vault-panel.ts';
 import {getProviderKey,setProviderKey,forgetProviderKeys} from './provider-credentials.ts';
 import {mountDiscoveryPanel} from './provider-discovery-panel.ts';
 import {ADAPTERS,ROLES,parseProviderConfig,readProviderConfig,removeProviderProfile,saveProviderConfig} from './ai-providers.ts';
@@ -114,6 +115,7 @@ export function mountProviderPanel(host:HTMLElement,language:()=>Language,storag
     }catch{message('Profil ungültig: Name und Modell-ID angeben; HTTP(S)-Adresse ohne Anmeldung, Suchparameter oder Fragment verwenden. Maximal 64 Profile.','Invalid profile: enter name and model ID; use an HTTP(S) URL without credentials, query or fragment. Maximum 64 profiles.');}
   };
   const onLanguage=()=>{status.textContent='';render();discovery.render();};window.addEventListener('pakachi-options',onLanguage);render();
+  const disposeVault=mountCredentialVault(host,storage,language,remember,()=>{if(editing){const p=config.profiles.find(p=>p.id===editing);if(p&&adapter.value===p.adapter&&endpoint.value===p.endpoint)discovery.setToken(getProviderKey(p));}});
   if(loaded.error)message('Gespeicherte Anbieterprofile konnten nicht gelesen werden. Sie werden erst beim nächsten Speichern ersetzt.','Saved provider profiles could not be read. They will only be replaced when you save.');
-  return ()=>{window.removeEventListener('pakachi-options',onLanguage);dialog?.removeEventListener('close',onClose);discovery.dispose();};
+  return ()=>{disposeVault();window.removeEventListener('pakachi-options',onLanguage);dialog?.removeEventListener('close',onClose);discovery.dispose();};
 }

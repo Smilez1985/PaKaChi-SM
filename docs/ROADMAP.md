@@ -1,6 +1,6 @@
 # Roadmap – was kommt
 
-**Softwarestand: 0.18.0 · Abgleich: 16.10.2026.** Teil der [Blaupause](README.md).
+**Softwarestand: 0.19.0 · Abgleich: 16.10.2026.** Teil der [Blaupause](README.md).
 
 Ein Häkchen bedeutet implementiert; es ersetzt keine visuelle oder externe Live-Abnahme. Die Nachweise und Prüfgrenzen stehen im [Prüfstand](PRUEFUNG.md). Die Versionshistorie gehört ins [Changelog](CHANGELOG.md).
 
@@ -161,6 +161,13 @@ Details: [Modellauswahl](LOKALE-MODELLE.md). Die aktuelle Ollama-Kuration ist ei
 - [x] Gleichzeitig gespeicherte Anbieter-/Modellprofile mit unabhängigem Hauptprofil und sortierbaren Fallbacks für alle drei Rollen.
 - [x] Profilbezogene Sitzungsschlüssel und Modellwahl beim Umschalten erhalten.
 - [x] Assistent führt konfigurierte Route mit passendem Schlüssel je Profil aus; Abbruch und Studio-Konflikte stoppen sie.
-- [ ] Geschützte dauerhafte Schlüsselablage über Seitenneustarts hinweg.
+- [x] Optionaler passwortverschlüsselter lokaler Schlüsseltresor über Seitenneustarts hinweg (0.19.0).
 - [ ] Generator-/Rigging-Routen an produktive Fachadapter und deren Auftrags-/Fallback-Ausführung anschließen.
 - [ ] Echte Anbieter-/Kontoabnahme der Fallbacks.
+
+## 12. Schlüsseltresor
+
+- [x] Explizites verschlüsseltes Speichern und Entsperren passend zu mehreren Profilen und deren tatsächlichen Zieladressen (0.19.0).
+- [x] Falsches Passwort, manipulierte Daten, Speicherfehler und veraltete Operationen abweisen; bestehende Ablage erhalten.
+- [ ] Visuelle Browserabnahme sowie unabhängige Sicherheitsprüfung.
+- [ ] Passwortwechsel und ausdrückliche Sitzungssperre ergänzen; optional Betriebssystem-Schlüsselbund für spätere Desktop-Verpackung prüfen.

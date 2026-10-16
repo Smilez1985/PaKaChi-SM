@@ -1,6 +1,6 @@
 # Anbieter, Modelle und Fallbacks
 
-**Stand 0.18.0.** Alle Anbieter können gleichzeitig eingerichtet bleiben. Ein Profil bezeichnet eine konkrete Kombination aus Anzeigename, Schnittstelle, API-Adresse und Modell. Für mehrere Modelle desselben Anbieters mehrere Profile anlegen. Alle Profile lassen sich unabhängig den Rollen **Assistent**, **3D-Generator** und **Rigging-Dienst** zuordnen.
+**Stand 0.19.0.** Alle Anbieter können gleichzeitig eingerichtet bleiben. Ein Profil bezeichnet eine konkrete Kombination aus Anzeigename, Schnittstelle, API-Adresse und Modell. Für mehrere Modelle desselben Anbieters mehrere Profile anlegen. Alle Profile lassen sich unabhängig den Rollen **Assistent**, **3D-Generator** und **Rigging-Dienst** zuordnen.
 
 ## Einrichtung
 
@@ -23,9 +23,9 @@ Eigene 3D-/Rigging-Dienste bleiben zusätzlich konfigurierbar. Die Vorlagen star
 
 ## Schlüssel und Speicherung
 
-Profilkonfiguration und Rollenzuordnungen einschließlich Fallback-Reihenfolge bleiben im lokalen Browserspeicher. Das bestehende Profilformat wurde um optionale Fallback-Listen erweitert; ältere Konfigurationen sind weiterhin lesbar. Schlüssel stehen ausdrücklich nicht darin und nicht in Projektdateien.
+Profilkonfiguration und Rollenzuordnungen einschließlich Fallback-Reihenfolge bleiben im lokalen Browserspeicher. Das bestehende Profilformat wurde um optionale Fallback-Listen erweitert; ältere Konfigurationen sind weiterhin lesbar. Klartextschlüssel stehen nicht darin und nicht in Projektdateien; optional werden sie seit 0.19.0 in einer getrennten verschlüsselten Ablage gespeichert.
 
-API-Schlüssel bleiben **je Profil und tatsächlichem Endpunkt im Arbeitsspeicher der laufenden Seite**. Sie werden beim Bearbeiten wieder angezeigt und vom Assistenten für genau dieses Profil verwendet. Dialogschluss, Wechsel zum anderen Anbieter und Rollenumstellung löschen sie nicht. Ein Schlüssel wird nicht automatisch an eine neu eingetragene Adresse übertragen; beim Zurückwechseln steht der ursprüngliche Schlüssel wieder bereit. „Schlüssel vergessen“ und Entfernen eines Profils sind ausdrückliche Löschaktionen. Beim Neuladen/Beenden der Seite gehen Sitzungsschlüssel verloren; dauerhafte geschützte Schlüsselablage ist noch offen.
+API-Schlüssel bleiben **je Profil und tatsächlichem Endpunkt im Arbeitsspeicher der laufenden Seite**. Sie werden beim Bearbeiten wieder angezeigt und vom Assistenten für genau dieses Profil verwendet. Dialogschluss, Wechsel zum anderen Anbieter und Rollenumstellung löschen sie nicht. Ein Schlüssel wird nicht automatisch an eine neu eingetragene Adresse übertragen; beim Zurückwechseln steht der ursprüngliche Schlüssel wieder bereit. „Schlüssel vergessen“ und Entfernen eines Profils sind ausdrückliche Löschaktionen. Beim Neuladen/Beenden der Seite gehen Sitzungsschlüssel verloren; ein optional gespeicherter Tresor kann sie anschließend wiederherstellen.
 
 Nach dem Bearbeiten eines gespeicherten Schlüssels im Optionsdialog diesen Dialog schließen oder Profil speichern, damit der Assistent ihn verwendet. Unterschiedliche Profile können unterschiedliche Schlüssel besitzen, auch beim gleichen Anbieter. Rollen können ein Profil und damit dessen Schlüssel gemeinsam verwenden.
 
@@ -44,3 +44,18 @@ Anthropic verwendet `x-api-key`, `anthropic-version: 2023-06-01` und den Header 
 Der Browser spricht die angezeigte Adresse direkt an. CORS muss vom Dienst erlaubt werden; bei Ollama über `OLLAMA_ORIGINS`, bei LM Studio über die Servereinstellungen. Organisationsrichtlinien werden nicht umgangen. Schlüssel außerhalb von Loopback erfordern HTTPS. Große Modelllisten können an Antwortgrenzen scheitern. Echte Modell-/Konto-/Browserabnahme bleibt offen.
 
 [Assistent](ASSISTENT.md) · [Design](KONZEPT.md) · [Roadmap](ROADMAP.md)
+
+## Optionaler Schlüsseltresor seit 0.19.0
+
+1. Anbieterprofile und Schlüssel einrichten; Profile zuerst speichern.
+2. Unter **Schlüsseltresor** eine eigene lange Passphrase (12–1024 Zeichen) eingeben, beim erstmaligen Speichern wiederholen und **Schlüssel verschlüsselt speichern** wählen.
+3. Nach Seitenneustart dieselbe App-Adresse öffnen, unter Optionen das Tresorpasswort eingeben und **Gespeicherte Schlüssel entsperren** wählen. Gespeicherte Schlüssel werden den weiterhin passenden Profilen und Endpunkten zugeordnet. Neuere Sitzungsschlüssel werden dabei nicht überschrieben.
+4. Neue/geänderte Schlüssel und bewusste Löschungen mit **Schlüssel verschlüsselt speichern** erneut übernehmen. Ein bestehender Tresor erfordert sein bisheriges Passwort. Unbekannte Sitzungsschlüssel werden aus dem vorhandenen Tresor erhalten; entfernte Profile oder geänderte Zieladressen werden beim Speichern ausgesondert.
+
+Ohne Tresor bleibt die bisherige reine Sitzungsnutzung möglich. Ein falsch eingegebenes Passwort, beschädigter Tresor, fehlgeschlagenes Speichern oder zwischenzeitlich geänderte Profile ersetzen die vorhandene Ablage nicht. Dialogschluss verwirft noch laufende Tresoraktionen vor deren Übernahme und leert die Passwortfelder.
+
+Die Ablage verwendet Web Crypto: AES-256-GCM mit zufälliger 96-Bit-IV und authentifiziertem Formatkontext; PBKDF2-HMAC-SHA-256 mit 600.000 Iterationen und zufälligem 128-Bit-Salt. Im Browserspeicher liegen nur Formatparameter und verschlüsselter Inhalt unter `pakachi-credential-vault-v1`. Das Passwort wird weder gespeichert noch an Anbieter gesendet. Standardbibliotheken führen die Kryptografie aus; kein eigenes Verschlüsselungsverfahren.
+
+Die Verschlüsselung schützt die gespeicherte Ablage. Während der Nutzung liegen entschlüsselte Schlüssel im Arbeitsspeicher; sie schützt nicht vor schädlichem Code im bereits entsperrten Browser. Browserdaten löschen entfernt auch den Tresor. Andere Browser/Origins haben eigene Ablagen. Kein Passwortreset oder Passwortwechsel-Assistent vorhanden; ohne Passwort können gespeicherte Schlüssel nicht wiederhergestellt werden. Ein schwaches Passwort bleibt angreifbar. Die Benutzeroberfläche bietet derzeit keine Sitzungssperre; zum Beenden der entschlüsselten Sitzung Seite neu laden.
+
+[MDN Web Crypto](https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/deriveKey) · [OWASP Cryptographic Storage](https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html)

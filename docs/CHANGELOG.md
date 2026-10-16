@@ -12,6 +12,23 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.19.0] - 2026-10-16
+
+Zeitstempel: 2026-10-16T22:53:19+02:00 (Europe/Berlin)
+
+### Added
+
+- Optionaler lokaler Schlüsseltresor mit ausdrücklichem verschlüsseltem Speichern und Entsperren nach Seitenneustart. Profilbezogene Sitzungsschlüssel bleiben parallel nutzbar.
+- Web-Crypto-Verschlüsselung mit AES-256-GCM und PBKDF2-SHA-256 (600.000 Iterationen); Passwort wird nicht gespeichert. Bestehender Tresor muss vor Aktualisierung erfolgreich entschlüsselt werden.
+- Erhalt unbekannter gespeicherter Schlüssel, Berücksichtigung ausdrücklicher Löschungen und Entfernen nicht mehr konfigurierter Profil-/Endpunktbindungen beim Speichern.
+- Sechs Tests mit echter Web Crypto für Roundtrip, Zufallswerte, Manipulation, falsche Passwörter, Speicherfehler, veraltete Operationen und Entsperren in der Profiloberfläche.
+
+### Changed
+
+- README, Blaupause, Roadmap, Anbieter-/Assistentenanleitung und Prüfstand auf die optionale dauerhafte Ablage aktualisiert.
+
+**Grenzen:** Kein Passwortreset/-wechsel, keine Sitzungssperre und keine unabhängige Sicherheits-/visuelle Browserabnahme. Entschlüsselte Schlüssel bleiben während der Seitensitzung im Arbeitsspeicher. Fachgenerierung und OAuth bleiben offen.
+
 ## [0.18.0] - 2026-10-16
 
 Zeitstempel: 2026-10-16T21:26:33+02:00 (Europe/Berlin)
@@ -412,6 +429,7 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 - Bestehendes Bedienkonzept ausdrücklich als Designdokument eingeordnet und mit Roadmap und Changelog verknüpft.
 
 [Unreleased]: https://github.com/Smilez1985/PaKaChi-SM/commits/main
+[0.19.0]: ./PRUEFUNG-0.19.0.md
 [0.18.0]: ./PRUEFUNG-0.18.0.md
 [0.17.1]: ./PRUEFUNG-0.17.1.md
 [0.17.0]: ./PRUEFUNG-0.17.0.md

@@ -2,7 +2,7 @@
 
 **SM steht für StateMaschine.** PaKaChi ist die **Panda-KI-Chimera**, das übergeordnete Projekt. PaKaChi-SM vereint Avatar-Player, Model Zoo und das fest integrierte **PaKaChi-Avatar-Studio**.
 
-**Softwarestand: 0.18.0 · Entwicklungsstand, keine fertige Bild-zu-3D-Lösung.**
+**Softwarestand: 0.19.0 · Entwicklungsstand, keine fertige Bild-zu-3D-Lösung.**
 
 Der bestehende PaKaChi mit Tierform, humanoider Arbeitsform und allen 72 Transformationsbildern ist erhalten und beim Start ausgewählt. Mika und Nori sind separate technische 3D-Testavatare. Ein 3D-Modell des Original-PaKaChi und die KI-Generierung stehen noch aus.
 
@@ -31,7 +31,7 @@ Seit 0.12.0 gibt es `npm run generate:model` für eine eingerichtete lokale Trip
 
 ## Anbieter und Modelle
 
-**Seit 0.18.0:** Mehrere Anbieter-/Modellprofile gleichzeitig einrichten. Jede Rolle hat ein Hauptprofil und eine eigene geordnete Fallback-Liste (↑/↓). Schlüssel und Modellwahl bleiben beim Wechsel erhalten. Mehrere Modelle desselben Anbieters werden als eigene Profile angelegt. Der Assistent versucht bei Anbieterfehlern die ausdrücklich eingetragenen Fallbacks der Reihe nach; Generator-/Rigging-Routen sind konfigurierbar, deren Ausführung bleibt offen. Schlüssel überleben Dialogwechsel, aber noch kein Neuladen der Seite. [Profile und Fallbacks](docs/ANBIETER.md).
+**Seit 0.18.0:** Mehrere Anbieter-/Modellprofile gleichzeitig einrichten. Jede Rolle hat ein Hauptprofil und eine eigene geordnete Fallback-Liste (↑/↓). Schlüssel und Modellwahl bleiben beim Wechsel erhalten. Mehrere Modelle desselben Anbieters werden als eigene Profile angelegt. Der Assistent versucht bei Anbieterfehlern die ausdrücklich eingetragenen Fallbacks der Reihe nach; Generator-/Rigging-Routen sind konfigurierbar, deren Ausführung bleibt offen. Seit 0.19.0 lassen sich Schlüssel optional verschlüsselt im Browser speichern und nach Neuladen mit einem Tresorpasswort entsperren. [Profile und Fallbacks](docs/ANBIETER.md).
 
 
 Seit 0.17.1: **Anbietervorlage einsetzen** bietet Anthropic, OpenAI, OpenRouter, DeepInfra, Ollama und LM Studio mit editierbaren Adressen. Eigene Endpunkte bleiben möglich. Die Vorlagen lösen keine Anfrage aus und bestätigen keine Modellfähigkeit.
@@ -48,7 +48,7 @@ Seit 0.14.0 besteht zusätzlich der interne [Auftragskern](docs/AUFTRAE.md): fes
 
 ## Was aktuell funktioniert
 
-| Bereich | Stand 0.18.0 |
+| Bereich | Stand 0.19.0 |
 | --- | --- |
 | Player | Avatar-Auswahl, tatsächliche Bewegungen anzeigen, abspielen, pausieren, Tempo und Abspielposition ändern. |
 | Modelle | Mika/Nori mit Skeletten und Clips; eigene eigenständige GLB-Dateien laden oder hineinziehen, bis 50 MiB, lokal für die Sitzung. |
@@ -126,7 +126,7 @@ npx playwright install chromium
 npm run test:e2e
 ```
 
-Für 0.18.0 sind 102 Tests und der Build bestanden. Die unveränderten Original-Testprogramme wurden zuletzt in 0.9.0 geprüft. Die visuelle WebGL-/Mausabnahme ist wegen der Chromium-Startbeschränkung der bisherigen Ausführungsumgebung noch offen. Die reale Python-MCP-/MQTT-Integration mit Studio-Editor wurde zuletzt in 0.10.0 erfolgreich geprüft. Details und frühere Nachweise stehen im [Prüfstand](docs/PRUEFUNG.md).
+Für 0.19.0 sind 108 Tests und der Build bestanden. Die unveränderten Original-Testprogramme wurden zuletzt in 0.9.0 geprüft. Die visuelle WebGL-/Mausabnahme ist wegen der Chromium-Startbeschränkung der bisherigen Ausführungsumgebung noch offen. Die reale Python-MCP-/MQTT-Integration mit Studio-Editor wurde zuletzt in 0.10.0 erfolgreich geprüft. Details und frühere Nachweise stehen im [Prüfstand](docs/PRUEFUNG.md).
 
 ## Lizenz
 
