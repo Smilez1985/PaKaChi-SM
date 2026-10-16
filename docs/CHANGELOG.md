@@ -12,6 +12,22 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.17.0] - 2026-10-16
+
+Zeitstempel: 2026-10-16T15:45:53+02:00 (Europe/Berlin)
+
+### Added
+
+- Native Anthropic-Schnittstelle für frei zuordenbare Anbieterprofile, Modelllisten mit API-Schlüssel und Assistentenaufrufe über Messages.
+- Übersetzung von Werkzeugdefinitionen und `tool_use`-/`tool_result`-Blöcken in den bestehenden begrenzten Assistentenablauf. Thinking-Blöcke für Folgerunden erhalten, aber nicht als Antwort anzeigen.
+- Fünf Tests für Profile, Header, Modelllisten, native Werkzeugfolgen, Fehlerkennzeichnung und ungültige/abgeschnittene Antworten.
+
+### Changed
+
+- README, Anbieter-/Assistentenanleitung, Design, Roadmap und Prüfstand auf 0.17.0 aktualisiert.
+
+**Grenzen:** 97 Tests und Produktionsbuild bestanden; keine echte Anthropic-Konto-/Browserabnahme. Noch kein OAuth, Workspace-Auswahl oder automatische Modelllisten-Pagination. Generator-/Rigging-Ausführung weiterhin offen. Keine API-Schlüssel gespeichert.
+
 ## [0.16.0] - 2026-10-16
 
 Zeitstempel: 2026-10-16T02:20:27+02:00 (Europe/Berlin)
@@ -363,6 +379,7 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 - Bestehendes Bedienkonzept ausdrücklich als Designdokument eingeordnet und mit Roadmap und Changelog verknüpft.
 
 [Unreleased]: https://github.com/Smilez1985/PaKaChi-SM/commits/main
+[0.17.0]: ./PRUEFUNG-0.17.0.md
 [0.16.0]: ./PRUEFUNG-0.16.0.md
 [0.15.0]: ./PRUEFUNG-0.15.0.md
 [0.14.0]: ./PRUEFUNG-0.14.0.md

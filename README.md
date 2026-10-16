@@ -2,7 +2,7 @@
 
 **SM steht für StateMaschine.** PaKaChi ist die **Panda-KI-Chimera**, das übergeordnete Projekt. PaKaChi-SM vereint Avatar-Player, Model Zoo und das fest integrierte **PaKaChi-Avatar-Studio**.
 
-**Softwarestand: 0.16.0 · Entwicklungsstand, keine fertige Bild-zu-3D-Lösung.**
+**Softwarestand: 0.17.0 · Entwicklungsstand, keine fertige Bild-zu-3D-Lösung.**
 
 Der bestehende PaKaChi mit Tierform, humanoider Arbeitsform und allen 72 Transformationsbildern ist erhalten und beim Start ausgewählt. Mika und Nori sind separate technische 3D-Testavatare. Ein 3D-Modell des Original-PaKaChi und die KI-Generierung stehen noch aus.
 
@@ -33,17 +33,17 @@ Seit 0.12.0 gibt es `npm run generate:model` für eine eingerichtete lokale Trip
 
 **Alle drei Rollen sind unabhängig wählbar:** Assistent, 3D-Generator und Rigging-Dienst können jeweils lokal oder in der Cloud laufen. Vorhandene Dienste und eigene Modelle sollen über passende Adapter nutzbar sein. Entscheidend ist die nachgewiesene Aufgabenfähigkeit, nicht der Anbietername.
 
-Seit 0.15.0 können unter **Optionen → KI-Anbieter** Modelllisten von Ollama, LM Studio und OpenAI-kompatiblen Endpunkten ausdrücklich abgerufen werden. Optionaler Bearer-Schlüssel gilt nur im offenen Dialog. Modelllisten bestätigen noch keine Rollenfähigkeit; Assistentenaufrufe sind seit 0.16.0 verfügbar; native Cloud-Adapter und OAuth folgen. [Anleitung](docs/ANBIETER.md).
+Seit 0.15.0 können unter **Optionen → KI-Anbieter** Modelllisten von Ollama, LM Studio und OpenAI-kompatiblen Endpunkten ausdrücklich abgerufen werden. Der optionale API-Schlüssel gilt nur im offenen Dialog. Modelllisten bestätigen noch keine Rollenfähigkeit; Assistentenaufrufe sind seit 0.16.0 verfügbar; Anthropic ist seit 0.17.0 nativ angebunden; OAuth folgt. [Anleitung](docs/ANBIETER.md).
 
 Für die optionale lokale Ollama-Einrichtung: **Ollama-Einrichten.cmd** oder `npm run setup:ollama`. Der Helfer misst RAM, dedizierten VRAM und freien Modellspeicher, bietet passende Kandidaten an und fragt vor Download und Ladetest nach. Eigene Tags bleiben möglich. Der aktuelle kuratierte Satz betrifft Assistentenmodelle; er beschränkt die freie Anbieterwahl für keine Rolle. [Aufgabenbezogene Auswahl und Hardwaregrenzen](docs/LOKALE-MODELLE.md).
 
-Seit **0.16.0** gibt es unterhalb der Agentensteuerung den aufklappbaren **KI-Assistenten**: Aufgabe an das zugeordnete Modell senden, Studio-Metadaten bei Bedarf abfragen lassen und einen konkreten Änderungsvorschlag prüfen. Erst **Übernehmen** führt ihn mit Studio-Freigabe und Revisionsprüfung aus; Undo bleibt verfügbar. Ollama sowie LM Studio und passende OpenAI-kompatible APIs werden unterstützt. Keine Bilder, keine automatische 3D-/Rigging-Ausführung. [Bedienung und Grenzen](docs/ASSISTENT.md).
+Seit **0.16.0** gibt es unterhalb der Agentensteuerung den aufklappbaren **KI-Assistenten**: Aufgabe an das zugeordnete Modell senden, Studio-Metadaten bei Bedarf abfragen lassen und einen konkreten Änderungsvorschlag prüfen. Erst **Übernehmen** führt ihn mit Studio-Freigabe und Revisionsprüfung aus; Undo bleibt verfügbar. Ollama, LM Studio, passende OpenAI-kompatible APIs sowie seit 0.17.0 Anthropic Messages werden unterstützt. Keine Bilder, keine automatische 3D-/Rigging-Ausführung. [Bedienung und Grenzen](docs/ASSISTENT.md).
 
 Seit 0.14.0 besteht zusätzlich der interne [Auftragskern](docs/AUFTRAE.md): feste Anbieterwahl pro Auftrag, Fortschritt, Zeitlimit, Abbruch, Ergebnisprüfung und revisionsgeschützte Übernahme. Er ist mit simulierten Adaptern geprüft; die sichtbare Generierungs-/Vorschauoberfläche und echte Dienste sind noch nicht angeschlossen.
 
 ## Was aktuell funktioniert
 
-| Bereich | Stand 0.16.0 |
+| Bereich | Stand 0.17.0 |
 | --- | --- |
 | Player | Avatar-Auswahl, tatsächliche Bewegungen anzeigen, abspielen, pausieren, Tempo und Abspielposition ändern. |
 | Modelle | Mika/Nori mit Skeletten und Clips; eigene eigenständige GLB-Dateien laden oder hineinziehen, bis 50 MiB, lokal für die Sitzung. |
@@ -121,7 +121,7 @@ npx playwright install chromium
 npm run test:e2e
 ```
 
-Für 0.16.0 sind 92 Tests und der Build bestanden. Die unveränderten Original-Testprogramme wurden zuletzt in 0.9.0 geprüft. Die visuelle WebGL-/Mausabnahme ist wegen der Chromium-Startbeschränkung der bisherigen Ausführungsumgebung noch offen. Die reale Python-MCP-/MQTT-Integration mit Studio-Editor wurde zuletzt in 0.10.0 erfolgreich geprüft. Details und frühere Nachweise stehen im [Prüfstand](docs/PRUEFUNG.md).
+Für 0.17.0 sind 97 Tests und der Build bestanden. Die unveränderten Original-Testprogramme wurden zuletzt in 0.9.0 geprüft. Die visuelle WebGL-/Mausabnahme ist wegen der Chromium-Startbeschränkung der bisherigen Ausführungsumgebung noch offen. Die reale Python-MCP-/MQTT-Integration mit Studio-Editor wurde zuletzt in 0.10.0 erfolgreich geprüft. Details und frühere Nachweise stehen im [Prüfstand](docs/PRUEFUNG.md).
 
 ## Lizenz
 

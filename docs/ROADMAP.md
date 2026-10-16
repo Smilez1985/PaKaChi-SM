@@ -1,6 +1,6 @@
 # Roadmap – was kommt
 
-**Softwarestand: 0.16.0 · Abgleich: 16.10.2026.** Teil der [Blaupause](README.md).
+**Softwarestand: 0.17.0 · Abgleich: 16.10.2026.** Teil der [Blaupause](README.md).
 
 Ein Häkchen bedeutet implementiert; es ersetzt keine visuelle oder externe Live-Abnahme. Die Nachweise und Prüfgrenzen stehen im [Prüfstand](PRUEFUNG.md). Die Versionshistorie gehört ins [Changelog](CHANGELOG.md).
 
@@ -129,7 +129,8 @@ Three.js, glTF/GLB, JSON-Katalog und Studio-Projektformat 1 sind bereits die Imp
 - [ ] Reale Hardwareabnahme und komplexe deutsche/englische Studio-Aufgaben einschließlich Bilder pro Quantisierung prüfen.
 - [ ] AMD/Intel/Apple und mehrere GPUs zuverlässig messen; LM-Studio-Modellinstallation prüfen.
 - [ ] Für jede Rolle lokale und Cloud-Ausführung integrieren: direkte Fachmodelle sowie LLM-gesteuerte Werkzeugketten, soweit nachweislich geeignet.
-- [ ] Anthropic, OpenAI, DeepInfra und OpenRouter mit den jeweils unterstützten Authentifizierungswegen anbinden; keine pauschale OAuth- oder Abonnement-Kompatibilität versprechen.
+- [x] Native Anthropic-Modelllisten und Messages mit API-Schlüssel anbinden (0.17.0; Protokolltests).
+- [ ] Reale Kontoabnahme für Anthropic, OpenAI, DeepInfra und OpenRouter; weitere Authentifizierungswege nur nach offizieller Unterstützung.
 - [ ] Fachverfahren für Geometrie und Rigging live validieren und über austauschbare Adapter zugänglich machen. Recherche nur nach diesen Aufgaben, kein Gesamtkatalogscan.
 
 Details: [Modellauswahl](LOKALE-MODELLE.md). Die aktuelle Ollama-Kuration ist eine Einstiegshilfe für die lokale Assistentenrolle und keine Einschränkung der anderen Rollen.
@@ -142,3 +143,11 @@ Details: [Modellauswahl](LOKALE-MODELLE.md). Die aktuelle Ollama-Kuration ist ei
 - [ ] Reale Anbieter- und Modellabnahme einschließlich deutscher/englischer Studio-Aufgaben und Browser-CORS.
 - [ ] Mehrschrittige Vorschau, Bildkontext und zusammenhängende Änderungstransaktionen ergänzen.
 - [ ] Native Cloud-Adapter, geschützte Anmeldung und Generator-/Rigging-Ausführung unabhängig von der Assistentenrolle integrieren.
+
+## 10. Anthropic-Abnahme
+
+- [x] Frei zuordenbare Anthropic-Profile, native Modellliste und Assistenten-Werkzeugablauf (0.17.0).
+- [x] API-Schlüssel nur in Headern, unbekannte/abgeschnittene Antworten abweisen, bestehende Studio-Prüfungen erhalten.
+- [ ] Echter API-/Browserlauf mit Workspace-gebundenem Schlüssel und passendem Modell.
+- [ ] Workspace-Auswahl und paginierte Modelllisten bei Bedarf ergänzen.
+- [ ] Offiziell unterstütztes OAuth und geschützte dauerhafte Zugangsdatenverwaltung implementieren.

@@ -3,7 +3,7 @@ import {z} from 'zod';
 
 export const ROLES = ['assistant','generation','rigging'] as const;
 export type ProviderRole = typeof ROLES[number];
-export const ADAPTERS = ['openai-compatible','ollama','lmstudio','custom-generation','custom-rigging'] as const;
+export const ADAPTERS = ['openai-compatible','ollama','lmstudio','custom-generation','custom-rigging','anthropic'] as const;
 export const PROVIDER_STORAGE_KEY = 'pakachi-providers-v1';
 const text = z.string().trim().min(1).max(160);
 const endpoint = z.string().trim().max(2048).transform((value,ctx)=>{

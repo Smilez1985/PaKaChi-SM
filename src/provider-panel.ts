@@ -4,7 +4,7 @@ import type {ProviderConfig,ProviderRole} from './ai-providers.ts';
 
 type Language='de'|'en';
 const labels:Record<ProviderRole,[string,string]>={assistant:['Assistent','Assistant'],generation:['3D-Generator','3D generator'],rigging:['Rigging-Dienst','Rigging service']};
-const adapterNames=['OpenAI-compatible','Ollama','LM Studio','3D','Rigging'];
+const adapterNames=['OpenAI-compatible','Ollama','LM Studio','3D','Rigging','Anthropic'];
 export function mountProviderPanel(host:HTMLElement,language:()=>Language,storage:Pick<Storage,'getItem'|'setItem'>):()=>void {
   const loaded=readProviderConfig(storage);let config=loaded.config;
   const t=(de:string,en:string)=>language()==='de'?de:en;

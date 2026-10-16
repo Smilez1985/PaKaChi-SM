@@ -1,3 +1,4 @@
+import {anthropicHeaders} from './anthropic.ts';
 import {parseProviderConfig} from './ai-providers.ts';
 import type {ProviderProfile} from './ai-providers.ts';
 
@@ -14,7 +15,7 @@ export function modelListURL(connection:ProviderConnection):string {
   catch{throw new DiscoveryError('invalid-endpoint');}
   const url=new URL(profile.endpoint),path=url.pathname.replace(/\/+$/,'');
   if(profile.adapter==='ollama')url.pathname=path.endsWith('/api')?`${path}/tags`:`${path}/api/tags`;
-  else if(profile.adapter==='lmstudio'||profile.adapter==='openai-compatible')url.pathname=`${path||'/v1'}/models`;
+  else if(profile.adapter==='lmstudio'||profile.adapter==='openai-compatible'||profile.adapter==='anthropic')url.pathname=`${path||'/v1'}/models`;
   else throw new DiscoveryError('unsupported-adapter');
   return url.href;
 }
@@ -44,11 +45,13 @@ export async function discoverModels(connection:ProviderConnection,options:{toke
   const cancelled=new Promise<never>((_resolve,reject)=>{rejectAbort=()=>reject(new DiscoveryError(timedOut?'timeout':'cancelled'));controller.signal.addEventListener('abort',rejectAbort,{once:true});});
   try{
     const request=(async()=>{
-      const headers:Record<string,string>={Accept:'application/json'};if(token)headers.Authorization=`Bearer ${token}`;
-      const response=await (options.fetcher??fetch)(url,{method:'GET',headers,signal:controller.signal,credentials:'omit',redirect:'error',cache:'no-store',referrerPolicy:'no-referrer'});
+      const headers:Record<string,string>={Accept:'application/json'};if(connection.adapter==='anthropic')Object.assign(headers,anthropicHeaders(token));else if(token)headers.Authorization=`Bearer ${token}`;
+      const requestURL=new URL(url);if(connection.adapter==='anthropic')requestURL.searchParams.set('limit','1000');
+      const response=await (options.fetcher??fetch)(requestURL.href,{method:'GET',headers,signal:controller.signal,credentials:'omit',redirect:'error',cache:'no-store',referrerPolicy:'no-referrer'});
       if(!response.ok){void response.body?.cancel().catch(()=>{});throw new DiscoveryError(response.status===401||response.status===403?'unauthorized':response.status===404?'not-found':response.status===429?'rate-limited':'http-error');}
       const raw=await readJSON(response,controller.signal);
       if(!raw||typeof raw!=='object')throw new DiscoveryError('invalid-response');
+      if(connection.adapter==='anthropic'&&((raw as {has_more?:unknown}).has_more!==false))throw new DiscoveryError('invalid-response');
       const rows=connection.adapter==='ollama'?(raw as {models?:unknown}).models:(raw as {data?:unknown}).data;
       if(!Array.isArray(rows)||rows.length>1000)throw new DiscoveryError('invalid-response');
       const ids=rows.map(row=>{
