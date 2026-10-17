@@ -1,3 +1,5 @@
+import {mountGenerationPanel} from './generation-panel.ts';
+import type {ProjectRevision} from './ai-jobs.ts';
 import {mountAssistantPanel} from './assistant-panel.ts';
 import {options} from './options.ts';
 import {moveReview} from './studio-review.ts';
@@ -22,7 +24,7 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
       <button id="player-tab" class="nav-button active" aria-pressed="true"><span>◉</span> Player</button>
       <button id="studio-tab" class="nav-button" aria-pressed="false"><span>◇</span> Avatar-Studio</button>
     </nav>
-    <div class="rail-bottom"><span class="online-dot"></span> Lokal auf deinem Gerät<p>Entwicklungsstand 0.21.0<br>KI-Anbieter · Vorbereitung</p></div>
+    <div class="rail-bottom"><span class="online-dot"></span> Lokal auf deinem Gerät<p>Entwicklungsstand 0.22.0<br>KI-Anbieter · Vorbereitung</p></div>
   </aside>
   <main>
     <header><div><p class="eyebrow">PAKACHI-SM / <span id="section-label">PLAYER</span></p><h1 id="page-title">Dein Model Zoo<span>.</span></h1><p id="page-intro">Eine Figur auswählen. Eine Bewegung starten. Leben einhauchen.</p></div><button id="project-open" class="button outline">Projekt laden</button><input id="project-file" type="file" accept=".json" hidden><button id="import-button" class="button outline">＋ GLB laden</button><input id="file-input" type="file" accept=".glb" hidden></header>
@@ -48,6 +50,7 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
           <label class="timeline-label" for="timeline"><span>Abspielposition</span><output id="time">0,0 / 0,0 s</output></label><input id="timeline" type="range" min="0" max="1000" value="0" disabled>
           <details class="legend"><summary>Schlagworte & Fähigkeiten</summary><ul id="capabilities"></ul></details>
         </div>
+        <div id="generation-host" hidden></div>
         <div id="studio-controls" hidden>
           <p class="subtle">Dein Editor, direkt im Player.</p>
           <label class="check"><input type="checkbox" id="skeleton"> Skelett anzeigen</label>
@@ -69,6 +72,8 @@ let playback: Playback | null = null;
 let catalog: Avatar[] = [];
 let loaded: Avatar | null = null;
 let studio = false;
+let modelEpoch=0;
+function generationTarget():ProjectRevision {const info=editor?.inspect();return info?{session:info.session,revision:info.revision}:{session:`model-${modelEpoch}`,revision:0};}
 let editor: StudioEditor | null = null;
 const transport = () => editor?.playing ? editor : playback;
 function mayReplace(): boolean { return !editor?.dirty || window.confirm(translate("Ungespeicherte Studio-Änderungen verwerfen? Mit Abbrechen kannst du zuerst das Projekt speichern.")); }
@@ -137,6 +142,7 @@ function changeView(edit: boolean): void {
   window.dispatchEvent(new Event("pakachi-sm:change"));
   el('player-controls').hidden = edit || original;
   el('studio-controls').hidden = !edit || original;
+  el('generation-host').hidden = !edit;
   el('legacy-controls').hidden = !original;
   for (const [id, active] of [['player-tab', !edit], ['studio-tab', edit]] as const) {
     el(id).classList.toggle('active', active);
@@ -208,7 +214,7 @@ function showOriginal(): void {
   editor?.dispose();editor=null;
   request++; fetchController?.abort(); busy = false;
   playback?.dispose(); playback = null; viewer?.clear(); loaded = null;
-  original = true; machine.unbind();
+  original = true; modelEpoch++; machine.unbind();
   el('legacy-frame').parentElement!.classList.add('legacy');
   const frame = el<HTMLIFrameElement>('legacy-frame');
   frame.onload = connectOriginal;
@@ -218,8 +224,8 @@ function showOriginal(): void {
   message('PaKaChi · Originalstand wiederhergestellt · 72 Bilder · Tierform ↔ Arbeitsform');
 }
 
-async function loadAvatar(avatar?: Avatar, file?: File, project?: StudioProject): Promise<void> {
-  if(!mayReplace()){renderCatalog();return;}
+async function loadAvatar(avatar?: Avatar, file?: File, project?: StudioProject, valid:()=>boolean=()=>true): Promise<boolean> {
+  if(!valid()||!mayReplace()||!valid()){renderCatalog();return false;}
   const token = ++request;
   fetchController?.abort();
   fetchController = new AbortController();
@@ -240,7 +246,7 @@ async function loadAvatar(avatar?: Avatar, file?: File, project?: StudioProject)
       buffer = await response.arrayBuffer();
     }
     const gltf = await parseModel(buffer);
-    if (token !== request) { disposeModel(gltf.scene); return; }
+    if (token !== request||!valid()) { disposeModel(gltf.scene); return false; }
     const next: Avatar = project ? {...project.avatar,id:'local-import',model:'',rigVersion:'studio-1'} : file ? importedAvatar(file.name, gltf.animations.map(c => c.name)) : avatar!;
     const moves = availableMoves(next, gltf.animations.map(c => c.name));
     // Validate visible geometry before replacing a working avatar.
@@ -249,15 +255,15 @@ async function loadAvatar(avatar?: Avatar, file?: File, project?: StudioProject)
     // Check studio/model compatibility before replacing the current avatar.
     let bones=0, meshes=0;gltf.scene.traverse(n=>{if(n.type==='Bone')bones++;if('isMesh' in n)meshes++;});
     if(bones>256 || project && (project.studio.boneRest.length!==bones || project.studio.points.some(p=>p.mesh!==undefined && p.mesh>=meshes))) {disposeModel(gltf.scene);throw new Error('Studio-Daten passen nicht zum Modell oder das Modell hat mehr als 256 Gelenke.');}
+    const rig = new StudioRig(gltf.scene, project?.studio);
+    const projectSource = {format:'pakachi-studio' as const,version:1 as const,model:project?.model ?? encodeModel(buffer),avatar:{...next,moves}};
     editor?.dispose();editor=null;
     playback?.dispose(); playback = null;
     viewer.show(gltf.scene);
-    loaded = next; original = false;
+    loaded = next; original = false; modelEpoch++;
     el('legacy-frame').parentElement!.classList.remove('legacy');
     el<HTMLIFrameElement>('legacy-frame').removeAttribute('src');
     changeView(studio);
-    const rig = new StudioRig(gltf.scene, project?.studio);
-    const projectSource = {format:'pakachi-studio' as const,version:1 as const,model:project?.model ?? encodeModel(buffer),avatar:{...next,moves}};
     editor = new StudioEditor(rig,viewer.createStudioView(rig),el('studio-editor'),projectSource,{suspend:()=>playback?.suspend(),resume:resumeBase,changed:refreshCapabilities,feedback:s=>message(s)});
     rig.restoreSource();
     playback = new Playback(gltf.scene, gltf.animations, moves, next.defaultMove, syncPlayback);
@@ -276,10 +282,11 @@ async function loadAvatar(avatar?: Avatar, file?: File, project?: StudioProject)
     if(studio)editor.enter();
     const missing = next.moves.length - moves.length;
     message(missing ? `${missing} deklarierte Bewegung(en) fehlen in der Modelldatei und werden nicht angeboten.` : `${next.name} bereit · ${moves.length} Bewegungen · ${(buffer.byteLength / 1024 / 1024).toFixed(2).replace('.', ',')} MB`);
+    return true;
   } catch (error) {
-    if (token !== request) return;
+    if (token !== request) return false;
     message(`Laden fehlgeschlagen: ${error instanceof Error ? error.message : String(error)}`, true);
-    renderCatalog();
+    renderCatalog();return false;
   } finally {
     if (token === request) { busy = false; syncPlayback();window.dispatchEvent(new Event("pakachi-sm:change")); }
   }
@@ -288,6 +295,14 @@ async function loadAvatar(avatar?: Avatar, file?: File, project?: StudioProject)
 async function boot(): Promise<void> {
   const agents = mountAgentPanel(rpc);
   mountAssistantPanel(document.querySelector('.agent-panel')!,rpc,()=>options.language,localStorage);
+  const generation=mountGenerationPanel(el('generation-host'),{
+    target:()=>studio&&!busy&&!editor?.interactionActive?generationTarget():null,
+    adopt:(bytes,expected,valid)=>{
+      if(busy)return Promise.resolve(false);
+      const guard=()=>{const now=generationTarget();return valid()&&studio&&!editor?.interactionActive&&now.session===expected.session&&now.revision===expected.revision;};
+      return loadAvatar(undefined,new File([Uint8Array.from(bytes).buffer],'3D-Entwurf.glb',{type:'model/gltf-binary'}),undefined,guard);
+    },
+  },()=>options.language,localStorage);
   try { viewer = new Viewer(el('viewport')); }
   catch { message('3D ist ohne WebGL2 nicht verfügbar. Der Originalplayer kann verwendet werden.', true); }
   if (viewer) viewer.onFrame = delta => {
@@ -328,12 +343,13 @@ async function boot(): Promise<void> {
     el<HTMLInputElement>('file-input').value = '';
   };
   let dragDepth = 0;
+  document.addEventListener('drop',()=>{dragDepth=0;document.body.classList.remove('dragging');},true);
   document.addEventListener('dragover', event => event.preventDefault());
   document.addEventListener('dragenter', event => { event.preventDefault(); dragDepth++; document.body.classList.add('dragging'); });
   document.addEventListener('dragleave', () => { if (--dragDepth <= 0) document.body.classList.remove('dragging'); });
   document.addEventListener('drop', event => {
     event.preventDefault(); dragDepth = 0; document.body.classList.remove('dragging');
-    const file = event.dataTransfer?.files[0]; if (file) void loadAvatar(undefined, file);
+    const file = event.dataTransfer?.files[0]; if(file&&['image/png','image/jpeg'].includes(file.type)){changeView(true);generation.select(file);}else if (file) void loadAvatar(undefined, file);
   });
   try {
     const response = await fetch(`${import.meta.env.BASE_URL}model-zoo/catalog.json`);

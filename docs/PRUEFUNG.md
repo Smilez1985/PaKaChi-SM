@@ -1,16 +1,16 @@
 # Prüfstand und Abnahme
 
-**Softwarestand: 0.21.0 · Dokumentationsabgleich: 17.10.2026.**
+**Softwarestand: 0.22.0 · Dokumentationsabgleich: 17.10.2026.**
 
 ## Nachgewiesen
 
 | Prüfung | Letzter Nachweis | Umfang und Grenze |
 | --- | --- | --- |
-| `npm test` | 0.21.0: 118 Tests bestanden | Player, Router, Studio-Daten, reale Three.js-Geometrie, DOM/Ereignisse mit happy-dom, Node-MCP und Erhaltungsprüfung. Kein gerenderter Browser. |
+| `npm test` | 0.22.0: 124 Tests bestanden | Player, Router, Studio-Daten, reale Three.js-Geometrie, DOM/Ereignisse mit happy-dom, Node-MCP und Erhaltungsprüfung. Kein gerenderter Browser. |
 | `npm run test:legacy` | 0.9.0: beide Programme bestanden | Originalplayer-Steuerung, MQTT-Verhalten und Lebenszyklus. |
-| `npm run build` | 0.21.0: bestanden | TypeScript und Produktionsbuild; Vite meldet weiterhin das große gemeinsame JS-Bundle (rund 1,26 MB / 345 kB gzip). |
+| `npm run build` | 0.22.0: bestanden | TypeScript und Produktionsbuild; Vite meldet weiterhin das große gemeinsame JS-Bundle (rund 1,28 MB / 352 kB gzip). |
 | `npm run test:python` mit `PAKACHI_PYTHON` | 0.10.0: Integration bestanden | Echter Python-MCP-Prozess, eingebetteter aMQTT-Broker, produktiver MQTT-Client, Router und Studio-Editor. Acht Tools, Studio-Änderungen einschließlich gültiger/ungültiger Skalierung, fehlende Freigabe und Revisionskonflikte geprüft. |
-| Originaldateien | 0.21.0: bytegenau erhalten | 83 wiederhergestellte Dateien einschließlich exakt 72 Transformationsbildern. |
+| Originaldateien | 0.22.0: bytegenau erhalten | 83 wiederhergestellte Dateien einschließlich exakt 72 Transformationsbildern. |
 
 Vier neue Tests in 0.11.0 prüfen Hand-/Fußziele, feste Knochenabstände, den ganzen erkannten Körper, Hals/Kopf und Rumpf, tatsächliche Hautverformung, gespeicherte Posen sowie direktes Ziehen/Drehen mit Undo. Nutzertest von 0.10.0 meldete auseinanderziehbare Knochen und Probleme mit der Ausrichtung; die visuelle Nachprüfung der Korrektur 0.11.0 steht aus.
 
@@ -19,7 +19,7 @@ Vier neue Tests in 0.11.0 prüfen Hand-/Fußziele, feste Knochenabstände, den g
 - Gerenderte WebGL-Ansicht und tatsächliches Mausgefühl: Chromium konnte in der bisherigen Ausführungsumgebung nicht starten. Die DOM-/Geometrietests ersetzen diese Prüfung nicht.
 - Vollständiger Ablauf in einem konkreten externen KI-/MCP-Host sowie Anbindung eines externen NanoMQ-Brokers.
 - Gesamter Bedienablauf mit Nutzern ohne 3D-Vorkenntnisse und die Verträglichkeit unterschiedlich aufgebauter Importmodelle.
-- KI-Generierung, vollständiger Knochenumbau und Optimierung sind noch nicht implementiert und besitzen daher keine Funktionsabnahme.
+- Lokale KI-Generierung ist an die Oberfläche angeschlossen, besitzt aber noch keine echte GPU-/Qualitätsabnahme. Vollständiger Knochenumbau und Optimierung bleiben Entwicklungsziele.
 
 ## Visuelle Abnahme durchführen
 
@@ -66,3 +66,5 @@ Zwischenprüfung vor 0.20.0 (17.10.2026): Acht Tresortests einschließlich zweie
 [Prüfbericht 0.20.0](PRUEFUNG-0.20.0.md): Passwortwechsel und Sitzungssperre zusammen geprüft; 113 Tests und Build bestanden.
 
 [Prüfbericht 0.21.0](PRUEFUNG-0.21.0.md): echter lokaler Generatortransport mit synthetischem Inferenzbackend; keine GPU-/Qualitätsabnahme.
+
+[Prüfbericht 0.22.0](PRUEFUNG-0.22.0.md): Bildauswahl, Vorschau-Lebenszyklus, Importfreigabe und Sperren geprüft; Playwright-Start wegen fehlender Chromium-Datei blockiert.

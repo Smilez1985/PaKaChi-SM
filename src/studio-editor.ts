@@ -27,6 +27,7 @@ export class StudioEditor {
   private timeline:{move:Move;time:number;preview:boolean}|null=null;
   private gesture:Snapshot|null=null;
   private gesturePosition:T.Vector3|null=null;
+  get interactionActive(){return this.playing||!!this.gesture;}
   readonly session=crypto.randomUUID();
   private revision=0;
   private agentEditing=false;

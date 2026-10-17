@@ -4,7 +4,7 @@ Teil der [Blaupause](README.md) · [Roadmap](ROADMAP.md) · [Changelog](CHANGELO
 
 ## Status und Begriffe
 
-Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.21.0: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau und KI-Generierung bleiben Entwicklungsziele.
+Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.22.0: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau und KI-Generierung bleiben Entwicklungsziele.
 
 - **PaKaChi:** Panda-KI-Chimera, das übergeordnete Projekt.
 - **PaKaChi-SM:** StateMaschine mit Avatar-Player und integriertem Studio.
@@ -267,3 +267,11 @@ Der lokale TripoSR-Wrapper ist über einen ausdrücklich gestarteten Loopback-HT
 Der separat registrierbare `custom-generation`-Adapter prüft das Protokoll und das Modell `triposr`, liefert GLB-Bytes an den bestehenden Auftragskern und verwendet dessen verpflichtende Ergebnisprüfung sowie Revisionsschutz. Er behauptet weder Rigging noch Promptverständnis: TripoSR rekonstruiert aus einem Bild; der Auftrags-Prompt ist nur eine Bezeichnung. Fähigkeiten bestätigen den Transportvertrag, nicht installierte Gewichte oder eine erfolgreiche Inferenz. Die Laufzeitvorprüfung erfolgt vor jedem Generierungslauf.
 
 Abbruch beendet das lokale Warten und signalisiert dem gestarteten Python-Prozess das Ende, bei Bedarf gefolgt von erzwungener Beendigung. Ein vollständiger Prozessbaum-Stopp ist nicht garantiert; der Auftragskern behält daher seine vorsichtige Abbruchmeldung. Noch keine Registrierung in der sichtbaren Studio-Oberfläche, keine automatische Anbieterfallback-Ausführung für Geometrie, keine Live-Inferenzabnahme. Als Nächstes: Bildauswahl, getrennte Modellvorschau und ausdrückliche Projektübernahme integrieren.
+
+### Generierungsoberfläche (0.22.0)
+
+Im integrierten Studio, auch bei ausgewähltem Original-Bildplayer, nimmt ein eigener Abschnitt PNG/JPEG bis 20 MiB an. Bildauswahl und Drag & Drop lösen keine Übertragung aus. Erst der Startbutton sendet an das angezeigte Hauptprofil der Generatorrolle. Die Vorlage „TripoSR (lokal)“ füllt Adresse und bei leerer Modellwahl `triposr` vor; bestehende Anbieterprofile und Schlüssel bleiben erhalten.
+
+Das Ergebnis durchläuft den echten GLTFLoader sowie Grenzen für Geometrie, Vertices und Knochen. Eine zweite Viewer-Instanz stellt den Entwurf unabhängig vom aktuellen Avatar dar. Verwerfen, Abbruch, Profilwechsel und Tresorsperre räumen Ergebnis/Vorschau auf; späte Antworten sind unwirksam. Schlüssel werden je Auftrag festgehalten und nicht in Projekte geschrieben. Die Tresorsperre invalidiert auch eine bereits vorbereitete Übernahme.
+
+„Als neuen Avatar laden“ nutzt den bestehenden GLB-Import mit zusätzlichem Sitzungs-/Revisionsvergleich vor und nach asynchronem Laden. Laufende Studio-Gesten oder Wiedergabe blockieren die Übernahme. Ungespeicherte Änderungen lösen weiterhin die vorhandene Rückfrage aus. **Dies ist ein revisionsgeschützter Modellimport, keine atomare projektübergreifende Undo-Transaktion.** Vorher speichern bleibt erforderlich. Automatisches Rigging, Cloud-Geometrieadapter, Fach-Fallbacks, Korrekturprompts und komplette Undo-Übernahme bleiben eigene Roadmap-Punkte.

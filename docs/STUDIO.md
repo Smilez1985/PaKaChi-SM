@@ -1,4 +1,4 @@
-# Avatar-Studio – 0.12.0
+# Avatar-Studio – 0.22.0
 
 Das Studio ist Teil des Players. Mika, Nori und eigene GLB-Modelle können bearbeitet werden. Der Original-PaKaChi bleibt mit beiden Formen und 72 Bildern erhalten; für ihn fehlt weiterhin das entsprechende 3D-Modell. Seine Bilder werden durch den Editor nicht verändert.
 
@@ -135,3 +135,7 @@ Mika und Nori enthalten im Beispiel-Rig 2 zusätzlich Hand-, Knie-, Fuß- und Ha
 ### Drehpunkt nach Zoom und Verschieben
 
 Seit 0.11.1 bestimmt die aktuelle Modellgeometrie den Mittelpunkt für die mittlere Maustaste. Das zuletzt angeklickte Gelenk und das verschobene Kamera-Ziel bestimmen ihn nicht. Beim Drücken wird der Mittelpunkt einmal ermittelt und für die gesamte Ziehgeste beibehalten. Der gezoomte/verschobene Bildausschnitt bleibt erhalten; es erfolgt kein Sprung zur Bildmitte. Nach einer Änderung der Figur wird bei der nächsten Geste deren neuer Mittelpunkt verwendet.
+
+## Bild zu 3D-Entwurf (0.22.0)
+
+Der Abschnitt **Bild → 3D-Entwurf** ist auch bei ausgewähltem Original-PaKaChi im Studio sichtbar. Er benötigt einen separat eingerichteten lokalen TripoSR-Dienst und das passende Generatorprofil. PNG/JPEG auswählen oder hineinziehen, ausdrücklich generieren, dann die getrennte 3D-Vorschau drehen und zoomen. Erst **Als neuen Avatar laden** ersetzt den aktuellen Projektstand. Vorher speichern: Der vollständige Modellwechsel hat noch kein Undo. **Ergebnis verwerfen** lässt das bisherige Modell bestehen. Anatomisches Rigging erfolgt noch nicht automatisch. [Einrichtung, Schritte und Prüfgrenzen](KI-GENERIERUNG.md#bedienung-im-studio-seit-0220).

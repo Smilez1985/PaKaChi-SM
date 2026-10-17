@@ -1,6 +1,6 @@
-# Lokaler Bild-zu-3D-Testlauf – 0.12.0
+# Lokale Bild-zu-3D-Generierung – 0.22.0
 
-**Experimentelles Entwicklerwerkzeug, noch keine Generierungsfunktion in der Studio-Oberfläche.** Es wurde hier kein KI-Modell erzeugt. Vorprüfung und Ablauf sind getestet; für echte Inferenz fehlt in der Ausführungsumgebung die eingerichtete Python-/CUDA-Pipeline. Anatomisches Rigging, beide 3D-Formen und ihre Transformation bleiben offen.
+**Experimenteller lokaler Generator mit Studio-Oberfläche seit 0.22.0.** Es wurde hier kein KI-Modell erzeugt. Vorprüfung und Ablauf sind getestet; für echte Inferenz fehlt in der Ausführungsumgebung die eingerichtete Python-/CUDA-Pipeline. Anatomisches Rigging, beide 3D-Formen und ihre Transformation bleiben offen.
 
 ## Auswahl des ersten Testkandidaten
 
@@ -81,7 +81,7 @@ Der gesamte Backend-Code und die Gewichte sind noch nicht auf feste Revisionen g
 
 ## Lokaler Generierungsdienst seit 0.21.0
 
-Für Entwickler verbindet `server/generation.mjs` den bestehenden Wrapper mit dem Auftragskern. **Es gibt dafür noch keinen Generierungsbutton im Studio.** Installation, Python-Umgebung und Modellqualität unterliegen weiterhin den oben beschriebenen Voraussetzungen. Der Start installiert nichts und startet keine Inferenz. Der erste tatsächliche Auftrag kann weiterhin Gewichte herunterladen.
+Für Entwickler verbindet `server/generation.mjs` den bestehenden Wrapper mit dem Auftragskern. Seit 0.22.0 ist der Dienst an die unten beschriebene Studio-Oberfläche angeschlossen. Installation, Python-Umgebung und Modellqualität unterliegen weiterhin den oben beschriebenen Voraussetzungen. Der Start installiert nichts und startet keine Inferenz. Der erste tatsächliche Auftrag kann weiterhin Gewichte herunterladen.
 
 Beispiel für Bash, nach Einrichtung und Prüfung der TripoSR-Umgebung:
 
@@ -103,4 +103,18 @@ PNG-/JPEG-Signaturen werden vor dem Backend geprüft; die Bilddekodierung übern
 
 Der Browseradapter `createLocalGenerationAdapter` kann in einer eigenen `ProviderRegistry` registriert werden; [Auftragsvertrag](AUFTRAE.md#lokaler-fachadapter). Er prüft Zieladresse, Modell, Protokoll, Antwortgröße und GLB-Header; die verpflichtende vollständige Ergebnisprüfung bleibt beim Auftrag. Der aktuelle Adapter unterstützt ausschließlich diesen lokalen Vertrag, keine beliebigen Dienste mit dem Namen `custom-generation`. Cloud-Fachadapter bleiben separat zu implementieren.
 
-**Nachweis:** Echter Loopback-HTTP-Verkehr vom Adapter durch den Dienst und den bestehenden Wrapper bis zur GLB-Prüfung; das Python-Inferenzbackend wird im Test durch eine synthetische Dreiecksdatei ersetzt. Damit sind weder TripoSR-Ausgabequalität, GPU-Betrieb noch Browser-CORS-/WebGL-Bedienung live abgenommen. Nächster Schritt ist die sichtbare Bildauswahl mit getrennter Ergebnisvorschau und ausdrücklicher Übernahme.
+**Nachweis:** Echter Loopback-HTTP-Verkehr vom Adapter durch den Dienst und den bestehenden Wrapper bis zur GLB-Prüfung; das Python-Inferenzbackend wird im Test durch eine synthetische Dreiecksdatei ersetzt. Damit sind weder TripoSR-Ausgabequalität, GPU-Betrieb noch Browser-CORS-/WebGL-Bedienung live abgenommen. Die sichtbare Bildauswahl mit getrennter Ergebnisvorschau und ausdrücklicher Übernahme wurde in 0.22.0 ergänzt.
+
+## Bedienung im Studio seit 0.22.0
+
+1. Dienst wie oben starten; den Browser über den exakt als `--origin` konfigurierten lokalen Host öffnen.
+2. In **Optionen** die Vorlage **TripoSR (lokal)** wählen. Sie trägt `http://127.0.0.1:8766` ein und setzt bei leerem Modellfeld `triposr`. Einen Profilnamen und den Dienst-Token im Schlüssel-/Tokenfeld eintragen, speichern und der Rolle **3D-Generator** zuordnen. Die allgemeine Modelllistenabfrage ist für diesen Fachadapter noch nicht implementiert; die Modell-ID ist bekannt.
+3. **Avatar-Studio → Bild → 3D-Entwurf** öffnen. Ein PNG/JPEG auswählen oder ins Fenster ziehen. Bilder bis 20 MiB; die Auswahl allein sendet nichts.
+4. **3D-Entwurf erzeugen** startet ausdrücklich einen Auftrag an das angezeigte Hauptprofil. Kein automatischer Wechsel auf Fallbackprofile und kein zusätzlicher Assistentenaufruf. Phasen werden angezeigt, keine erfundenen Prozentangaben.
+5. Die separate Vorschau mit der Maus drehen und zoomen. Das bestehende Modell bleibt währenddessen erhalten. **Ergebnis verwerfen** entfernt den Entwurf; **Als neuen Avatar laden** importiert ihn nach erneutem Vergleich des Projektstands. Ein zwischenzeitlich verändertes Projekt muss durch einen neuen Auftrag berücksichtigt werden.
+
+Vorhandenes Projekt vor der Übernahme speichern. Der neue Avatar ersetzt den geladenen Projektstand und ist **nicht über projektübergreifendes Undo rückgängig machbar**. Ungespeicherte Änderungen werden durch die bisherige Rückfrage geschützt. Änderungen während der asynchronen Importvorbereitung oder eine inzwischen gesperrte Sitzung verhindern die Übernahme. Der Original-PaKaChi im Model Zoo wird nicht verändert und bleibt auswählbar.
+
+**Abbrechen** beendet das lokale Warten; ein vollständiger Stopp des Dienstes ist nicht bestätigt. Anbieter-/Schlüsselwechsel und Tresorsperre verwerfen laufende Aufträge und Vorschauen. Deutsch/English folgt der Optionssprache. TripoSR liefert einen Geometrieentwurf ohne zugesichertes Rig; ein Korrekturprompt und automatische Anatomieerkennung sind nicht Teil dieses Verfahrens.
+
+Die DOM-Bedienlogik und echte GLB-Prüfung sind automatisiert getestet. Ein zusätzlicher Playwright-Ablauftest ist vorhanden, konnte hier jedoch wegen fehlender Chromium-Programmdatei nicht starten. Echte GPU-Inferenz und gerenderte Browserabnahme sind weiterhin ausstehend.

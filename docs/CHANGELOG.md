@@ -12,6 +12,24 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.22.0] - 2026-10-17
+
+Zeitstempel: 2026-10-17T12:25:46+02:00 (Europe/Berlin)
+
+### Added
+
+- Integrierter Studio-Abschnitt für PNG/JPEG-Auswahl und Drag & Drop, ausdrücklichen lokalen TripoSR-Aufruf, Phasenstatus, Abbruch und getrennte dreh-/zoombare Ergebnisvorschau.
+- Echte GLB-/Geometrieprüfung vor der Vorschau; Verwerfen oder ausdrücklich als neuen Avatar importieren. Zielrevision und laufende Bediengesten schützen zwischenzeitliche Änderungen; Tresorsperre invalidiert auch vorbereitete Importe.
+- Anbietervorlage „TripoSR (lokal)“ mit vorausgefüllter Adresse und Modell-ID bei leerer Auswahl. Bestehende Profile und Schlüssel bleiben erhalten.
+- Sechs DOM-/Geometrie-Integrationstests und ein vorbereiteter Playwright-Ablauftest für die neue Oberfläche.
+
+### Changed
+
+- GLB-Import meldet Erfolg/Ablehnung und prüft einen optionalen Übernahmeschutz vor und nach asynchronem Laden. Rig und Projektquelle werden vor dem Austausch vorbereitet.
+- README, Blaupause, Auftragsvertrag, Anbieteranleitung, Generierungsanleitung und Prüfstand aktualisiert.
+
+**Grenzen:** 124 Tests und Build bestanden. Playwright konnte wegen fehlender Chromium-Programmdatei nicht starten. Keine echte GPU-Inferenz-/Qualitätsabnahme, kein automatisches Rigging, kein Generator-Fallback und noch kein projektübergreifendes Undo für den Modellimport.
+
 ## [0.21.0] - 2026-10-17
 
 Zeitstempel: 2026-10-17T12:07:48+02:00 (Europe/Berlin)
@@ -482,3 +500,5 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 [0.0.1]: https://github.com/Smilez1985/PaKaChi-SM/tree/2fd20e09bb518f1e3edde27e060209c57a56f103
 
 [0.21.0]: ./PRUEFUNG-0.21.0.md
+
+[0.22.0]: ./PRUEFUNG-0.22.0.md

@@ -28,6 +28,7 @@ export function mountProviderPanel(host:HTMLElement,language:()=>Language,storag
     {name:'DeepInfra',adapter:'openai-compatible',endpoint:'https://api.deepinfra.com/v1/openai'},
     {name:'Ollama',adapter:'ollama',endpoint:'http://localhost:11434'},
     {name:'LM Studio',adapter:'lmstudio',endpoint:'http://localhost:1234/v1'},
+    {name:'TripoSR (lokal)',adapter:'custom-generation',endpoint:'http://127.0.0.1:8766'},
   ];
   const preset=document.createElement('select');preset.id='provider-preset';
   const placeholder=document.createElement('option');placeholder.value='';preset.append(placeholder);
@@ -54,6 +55,7 @@ export function mountProviderPanel(host:HTMLElement,language:()=>Language,storag
   preset.onchange=()=>{const choice=presets[Number(preset.value)];if(preset.value===''||!choice)return;
     remember();endpointDrafts.set(previousAdapter,endpoint.value);adapter.value=choice.adapter;previousAdapter=adapter.value;
     endpoint.value=choice.endpoint;endpointDrafts.set(adapter.value,endpoint.value);restore();
+    if(choice.adapter==='custom-generation'&&!model.value)model.value='triposr';
     updateEndpointHint();restoreEndpoint.hidden=!defaultEndpoint();preset.value='';
   };
   const dialog=host.closest('dialog');const onClose=()=>{remember();discovery.invalidate(false);};dialog?.addEventListener('close',onClose);

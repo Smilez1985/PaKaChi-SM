@@ -2,9 +2,9 @@
 
 **SM steht für StateMaschine.** PaKaChi ist die **Panda-KI-Chimera**, das übergeordnete Projekt. PaKaChi-SM vereint Avatar-Player, Model Zoo und das fest integrierte **PaKaChi-Avatar-Studio**.
 
-**Softwarestand: 0.21.0 · Entwicklungsstand, keine fertige Bild-zu-3D-Lösung.**
+**Softwarestand: 0.22.0 · Entwicklungsstand, keine fertige Bild-zu-3D-Lösung.**
 
-Der bestehende PaKaChi mit Tierform, humanoider Arbeitsform und allen 72 Transformationsbildern ist erhalten und beim Start ausgewählt. Mika und Nori sind separate technische 3D-Testavatare. Ein 3D-Modell des Original-PaKaChi und die KI-Generierung stehen noch aus.
+Der bestehende PaKaChi mit Tierform, humanoider Arbeitsform und allen 72 Transformationsbildern ist erhalten und beim Start ausgewählt. Mika und Nori sind separate technische 3D-Testavatare. Ein 3D-Modell des Original-PaKaChi und die Qualitätsabnahme echter KI-Ergebnisse stehen noch aus.
 
 ## Schnellstart
 
@@ -27,16 +27,16 @@ Mika/Nori frisch auswählen: Hand ziehen beugt Schulter/Ellenbogen, Fuß ziehen 
 
 ## Experimenteller Bild-zu-3D-Testlauf
 
-Seit 0.21.0 ergänzt `npm run serve:generator` einen tokengeschützten lokalen TripoSR-Dienst und einen Adapter für den Auftragskern. Noch keine Bedienoberfläche dafür; [Einrichtung und Entwicklervertrag](docs/KI-GENERIERUNG.md#lokaler-generierungsdienst-seit-0210).
+Seit 0.21.0 ergänzt `npm run serve:generator` einen tokengeschützten lokalen TripoSR-Dienst und einen Adapter für den Auftragskern. Seit 0.22.0 gibt es im Avatar-Studio eine Bildauswahl, getrennte Ergebnisvorschau und ausdrückliche Übernahme; [Einrichtung und Entwicklervertrag](docs/KI-GENERIERUNG.md#lokaler-generierungsdienst-seit-0210).
 
-Seit 0.12.0 gibt es `npm run generate:model` für eine eingerichtete lokale TripoSR-Umgebung: Vorprüfung, Generierungsaufruf und GLB-/Ergebnisbericht. **Noch keine Studio-Generierungsoberfläche und noch kein erzeugter Original-PaKaChi in 3D.** Hier wurde der Ablauf mit Testdaten geprüft; echte Inferenz ist mangels KI-Laufzeit/GPU offen. [Einrichtung, beide Vorlagen und genaue Prüfgrenzen](docs/KI-GENERIERUNG.md).
+Seit 0.12.0 gibt es `npm run generate:model` für eine eingerichtete lokale TripoSR-Umgebung: Vorprüfung, Generierungsaufruf und GLB-/Ergebnisbericht. **Noch kein erzeugter Original-PaKaChi in 3D und keine reale Inferenzabnahme.** Hier wurde der Ablauf mit Testdaten geprüft; echte Inferenz ist mangels KI-Laufzeit/GPU offen. [Einrichtung, beide Vorlagen und genaue Prüfgrenzen](docs/KI-GENERIERUNG.md).
 
 ## Anbieter und Modelle
 
 Seit **0.20.0** kann das Tresorpasswort geändert und die **Schlüsselsitzung gesperrt** werden. Sperren leert Sitzungsschlüssel und Schlüsselentwürfe, bricht lokales Warten auf Anfragen ab und verwirft Vorschläge. Anbieter, Modelle, Fallbacks und verschlüsselte Ablage bleiben erhalten. Danach lassen sich gespeicherte Schlüssel erneut entsperren. Ungespeicherte Schlüssel gehen beim Sperren verloren.
 
 
-**Seit 0.18.0:** Mehrere Anbieter-/Modellprofile gleichzeitig einrichten. Jede Rolle hat ein Hauptprofil und eine eigene geordnete Fallback-Liste (↑/↓). Schlüssel und Modellwahl bleiben beim Wechsel erhalten. Mehrere Modelle desselben Anbieters werden als eigene Profile angelegt. Der Assistent versucht bei Anbieterfehlern die ausdrücklich eingetragenen Fallbacks der Reihe nach; Generator-/Rigging-Routen sind konfigurierbar, deren Ausführung bleibt offen. Seit 0.19.0 lassen sich Schlüssel optional verschlüsselt im Browser speichern und nach Neuladen mit einem Tresorpasswort entsperren. [Profile und Fallbacks](docs/ANBIETER.md).
+**Seit 0.18.0:** Mehrere Anbieter-/Modellprofile gleichzeitig einrichten. Jede Rolle hat ein Hauptprofil und eine eigene geordnete Fallback-Liste (↑/↓). Schlüssel und Modellwahl bleiben beim Wechsel erhalten. Mehrere Modelle desselben Anbieters werden als eigene Profile angelegt. Der Assistent versucht bei Anbieterfehlern die ausdrücklich eingetragenen Fallbacks der Reihe nach; Generator-/Rigging-Routen sind konfigurierbar, deren automatische Fallback-Ausführung bleibt offen. Seit 0.19.0 lassen sich Schlüssel optional verschlüsselt im Browser speichern und nach Neuladen mit einem Tresorpasswort entsperren. [Profile und Fallbacks](docs/ANBIETER.md).
 
 
 Seit 0.17.1: **Anbietervorlage einsetzen** bietet Anthropic, OpenAI, OpenRouter, DeepInfra, Ollama und LM Studio mit editierbaren Adressen. Eigene Endpunkte bleiben möglich. Die Vorlagen lösen keine Anfrage aus und bestätigen keine Modellfähigkeit.
@@ -49,11 +49,11 @@ Für die optionale lokale Ollama-Einrichtung: **Ollama-Einrichten.cmd** oder `np
 
 Seit **0.16.0** gibt es unterhalb der Agentensteuerung den aufklappbaren **KI-Assistenten**: Aufgabe an das zugeordnete Modell senden, Studio-Metadaten bei Bedarf abfragen lassen und einen konkreten Änderungsvorschlag prüfen. Erst **Übernehmen** führt ihn mit Studio-Freigabe und Revisionsprüfung aus; Undo bleibt verfügbar. Ollama, LM Studio, passende OpenAI-kompatible APIs sowie seit 0.17.0 Anthropic Messages werden unterstützt. Keine Bilder, keine automatische 3D-/Rigging-Ausführung. [Bedienung und Grenzen](docs/ASSISTENT.md).
 
-Seit 0.14.0 besteht zusätzlich der interne [Auftragskern](docs/AUFTRAE.md): feste Anbieterwahl pro Auftrag, Fortschritt, Zeitlimit, Abbruch, Ergebnisprüfung und revisionsgeschützte Übernahme. Seit 0.21.0 verbindet ein lokaler HTTP-Dienst den vorhandenen TripoSR-Wrapper mit einem Fachadapter für diesen Kern. Der Transport ist mit echtem HTTP und einer synthetischen Backend-Ausgabe geprüft; GPU-Inferenz und die sichtbare Generierungs-/Vorschauoberfläche stehen aus.
+Seit 0.14.0 besteht zusätzlich der interne [Auftragskern](docs/AUFTRAE.md): feste Anbieterwahl pro Auftrag, Fortschritt, Zeitlimit, Abbruch, Ergebnisprüfung und revisionsgeschützte Übernahme. Seit 0.21.0 verbindet ein lokaler HTTP-Dienst den vorhandenen TripoSR-Wrapper mit einem Fachadapter für diesen Kern. Der Transport ist mit echtem HTTP und einer synthetischen Backend-Ausgabe geprüft; Die Generierungs-/Vorschauoberfläche ist seit 0.22.0 angeschlossen; GPU-Inferenz und visuelle Browserabnahme stehen aus.
 
 ## Was aktuell funktioniert
 
-| Bereich | Stand 0.21.0 |
+| Bereich | Stand 0.22.0 |
 | --- | --- |
 | Player | Avatar-Auswahl, tatsächliche Bewegungen anzeigen, abspielen, pausieren, Tempo und Abspielposition ändern. |
 | Modelle | Mika/Nori mit Skeletten und Clips; eigene eigenständige GLB-Dateien laden oder hineinziehen, bis 50 MiB, lokal für die Sitzung. |
@@ -101,9 +101,9 @@ GLB-Importe bleiben in der Browsersitzung. **Projekte herunterladen, um die Arbe
 
 Ältere Projektdateien bleiben lesbar. Dateien mit Gesamtpositionsspur benötigen mindestens 0.6.0, mit Gesamtdrehung mindestens 0.8.0, mit Skalierung mindestens 0.10.0. Ältere Versionen ignorieren die Skalierung. Ein Projekt ist kein GLB-Export.
 
-Offen sind insbesondere Bild-zu-3D, anatomische KI-Erkennung, vollständiger Knochenumbau und Hautgewichte, anatomische Winkelgrenzen, Ganzkörper-IK und Modelloptimierung. Originalplayer, Modellbeschreibungen und einige technische Meldungen sind noch nicht vollständig englisch lokalisiert.
+Offen sind insbesondere echte Bild-zu-3D-Inferenz-/Qualitätsabnahme, anatomische KI-Erkennung, vollständiger Knochenumbau und Hautgewichte, anatomische Winkelgrenzen, Ganzkörper-IK und Modelloptimierung. Originalplayer, Modellbeschreibungen und einige technische Meldungen sind noch nicht vollständig englisch lokalisiert.
 
-Das Ziel bleibt: **Bild hineinziehen → 3D-Avatar erzeugen → korrigieren → Bewegungen speichern → per Agent auslösen.** Der Bildimport und die Generierung sind noch nicht implementiert. Der Original-Bildstand hat bekannte Proportions- und Materialschwankungen; [Referenzen und korrigierter Stilanker](docs/references/README.md) sind erhalten.
+Das Ziel bleibt: **Bild hineinziehen → 3D-Avatar erzeugen → korrigieren → Bewegungen speichern → per Agent auslösen.** Bildimport und lokaler Generierungsaufruf mit Vorschau sind seit 0.22.0 implementiert. Rigging und echte Inferenz-/Qualitätsabnahme bleiben offen. Der Original-Bildstand hat bekannte Proportions- und Materialschwankungen; [Referenzen und korrigierter Stilanker](docs/references/README.md) sind erhalten.
 
 ## Dokumentation
 
@@ -131,8 +131,17 @@ npx playwright install chromium
 npm run test:e2e
 ```
 
-Für 0.21.0 sind 118 Tests und der Build bestanden. Die unveränderten Original-Testprogramme wurden zuletzt in 0.9.0 geprüft. Die visuelle WebGL-/Mausabnahme ist wegen der Chromium-Startbeschränkung der bisherigen Ausführungsumgebung noch offen. Die reale Python-MCP-/MQTT-Integration mit Studio-Editor wurde zuletzt in 0.10.0 erfolgreich geprüft. Details und frühere Nachweise stehen im [Prüfstand](docs/PRUEFUNG.md).
+Für 0.22.0 sind 124 Tests und der Build bestanden. Die unveränderten Original-Testprogramme wurden zuletzt in 0.9.0 geprüft. Die visuelle WebGL-/Mausabnahme ist wegen der Chromium-Startbeschränkung der bisherigen Ausführungsumgebung noch offen. Die reale Python-MCP-/MQTT-Integration mit Studio-Editor wurde zuletzt in 0.10.0 erfolgreich geprüft. Details und frühere Nachweise stehen im [Prüfstand](docs/PRUEFUNG.md).
 
 ## Lizenz
 
 Noch nicht festgelegt.
+
+## Bild zu 3D ausprobieren (0.22.0)
+
+1. TripoSR-Laufzeit einrichten und den [lokalen Generierungsdienst](docs/KI-GENERIERUNG.md#lokaler-generierungsdienst-seit-0210) starten.
+2. Optionen → Anbietervorlage **TripoSR (lokal)**: Adresse `http://127.0.0.1:8766`, Modell `triposr`, Dienst-Token eintragen und Profil der Rolle **3D-Generator** zuordnen. Alle anderen Anbieter bleiben erhalten.
+3. **Avatar-Studio → Bild → 3D-Entwurf**: PNG/JPEG auswählen oder hineinziehen; „3D-Entwurf erzeugen“ ausdrücklich starten.
+4. Getrennte Vorschau drehen/zoomen und entweder verwerfen oder **„Als neuen Avatar laden“** wählen. Vorhandene Projekte vorher speichern: Ein Modellwechsel hat noch kein projektübergreifendes Undo.
+
+TripoSR liefert bildbasierte Geometrie, kein fertiges Skelett und keine promptgesteuerte Korrektur. Der lokale Dienst muss separat laufen. Keine automatischen Generator-Fallbacks. Die Bedienlogik ist automatisiert geprüft; WebGL-Browserprüfung und tatsächliche GPU-Inferenz sind noch offen.
