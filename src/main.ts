@@ -1,3 +1,5 @@
+import {prepareAvatar} from './avatar-candidate.ts';
+import {checkpointElements,disposeAll,installAtomically} from './avatar-installation.ts';
 import {ModelSwitchHistory} from './model-switch-history.ts';
 import {mountGenerationPanel} from './generation-panel.ts';
 import type {ProjectRevision} from './ai-jobs.ts';
@@ -7,7 +9,6 @@ import {moveReview} from './studio-review.ts';
 import './style.css';
 import {mountOptions,translate} from './options.ts';
 import { StudioEditor, encodeModel, decodeModel } from './studio-editor.ts';
-import { StudioRig } from './studio-rig.ts';
 import { parseProject } from './studio-data.ts';
 import type { StudioProject } from './studio-data.ts';
 import { StateMachine, STATES } from './control.ts';
@@ -25,7 +26,7 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
       <button id="player-tab" class="nav-button active" aria-pressed="true"><span>◉</span> Player</button>
       <button id="studio-tab" class="nav-button" aria-pressed="false"><span>◇</span> Avatar-Studio</button>
     </nav>
-    <div class="rail-bottom"><span class="online-dot"></span> Lokal auf deinem Gerät<p>Entwicklungsstand 0.23.0<br>KI-Anbieter · Vorbereitung</p></div>
+    <div class="rail-bottom"><span class="online-dot"></span> Lokal auf deinem Gerät<p>Entwicklungsstand 0.24.0<br>KI-Anbieter · Vorbereitung</p></div>
   </aside>
   <main>
     <header><div><p class="eyebrow">PAKACHI-SM / <span id="section-label">PLAYER</span></p><h1 id="page-title">Dein Model Zoo<span>.</span></h1><p id="page-intro">Eine Figur auswählen. Eine Bewegung starten. Leben einhauchen.</p></div><button id="project-open" class="button outline">Projekt laden</button><input id="project-file" type="file" accept=".json" hidden><button id="import-button" class="button outline">＋ GLB laden</button><input id="file-input" type="file" accept=".glb" hidden></header>
@@ -268,6 +269,7 @@ async function loadAvatar(avatar?: Avatar, file?: File, project?: StudioProject,
   fetchController = new AbortController();
   busy = true; syncPlayback();window.dispatchEvent(new Event("pakachi-sm:change"));
   message(`${file?.name ?? avatar?.name ?? 'Avatar'} wird geladen …`);
+  let parsed:Awaited<ReturnType<typeof parseModel>>|undefined,candidate:ReturnType<typeof prepareAvatar>|undefined,installed=false;
   try {
     if (!viewer) throw new Error('3D benötigt WebGL2/Hardwarebeschleunigung. Der Originalplayer bleibt verfügbar.');
     let buffer: ArrayBuffer;
@@ -282,54 +284,58 @@ async function loadAvatar(avatar?: Avatar, file?: File, project?: StudioProject,
       if (!response.ok) throw new Error(`Modelldatei konnte nicht geladen werden (${response.status}).`);
       buffer = await response.arrayBuffer();
     }
-    const gltf = await parseModel(buffer);
-    if (token !== request||!valid()) { disposeModel(gltf.scene); return false; }
+    const gltf = parsed = await parseModel(buffer);
+    if (token !== request||!valid()) { return false; }
     const next: Avatar = project ? {...project.avatar,id:restore.identity?.id??'local-import',model:restore.identity?.model??'',rigVersion:restore.identity?.rigVersion??'studio-1'} : file ? importedAvatar(file.name, gltf.animations.map(c => c.name)) : avatar!;
     const moves = availableMoves(next, gltf.animations.map(c => c.name));
     // Validate visible geometry before replacing a working avatar.
     const hasMesh = gltf.scene.getObjectsByProperty('isMesh', true).length > 0;
-    if (!hasMesh) { disposeModel(gltf.scene); throw new Error('Das Modell enthält keine sichtbare Geometrie.'); }
+    if (!hasMesh) { throw new Error('Das Modell enthält keine sichtbare Geometrie.'); }
     // Check studio/model compatibility before replacing the current avatar.
     let bones=0, meshes=0;gltf.scene.traverse(n=>{if(n.type==='Bone')bones++;if('isMesh' in n)meshes++;});
-    if(bones>256 || project && (project.studio.boneRest.length!==bones || project.studio.points.some(p=>p.mesh!==undefined && p.mesh>=meshes))) {disposeModel(gltf.scene);throw new Error('Studio-Daten passen nicht zum Modell oder das Modell hat mehr als 256 Gelenke.');}
-    try{modelBounds(gltf.scene);}catch(error){disposeModel(gltf.scene);throw error;}
+    if(bones>256 || project && (project.studio.boneRest.length!==bones || project.studio.points.some(p=>p.mesh!==undefined && p.mesh>=meshes))) {throw new Error('Studio-Daten passen nicht zum Modell oder das Modell hat mehr als 256 Gelenke.');}
+    modelBounds(gltf.scene);
     let commitHistory:(()=>void)|undefined;
-    try{if(editor?.interactionActive)throw new Error('Studio-Bewegung zuerst beenden.');const before=restore.remember!==false?captureModel():null;if(before)commitHistory=modelHistory.checkpoint(before);}catch(error){disposeModel(gltf.scene);throw error;}
-    const rig = new StudioRig(gltf.scene, project?.studio);
+    if(editor?.interactionActive)throw new Error('Studio-Bewegung zuerst beenden.');
+    const before=restore.remember!==false?captureModel():null;if(before)commitHistory=modelHistory.checkpoint(before);
     const projectSource = {format:'pakachi-studio' as const,version:1 as const,model:project?.model ?? encodeModel(buffer),avatar:{...next,moves}};
-    editor?.dispose();editor=null;
-    playback?.dispose(); playback = null;
-    viewer.show(gltf.scene);
-    loaded = next; original = false; modelEpoch++;
-    el('legacy-frame').parentElement!.classList.remove('legacy');
-    el<HTMLIFrameElement>('legacy-frame').removeAttribute('src');
-    changeView(studio);
-    editor = new StudioEditor(rig,viewer.createStudioView(rig),el('studio-editor'),projectSource,{suspend:()=>playback?.suspend(),resume:resumeBase,changed:refreshCapabilities,feedback:s=>message(s)});
-    rig.restoreSource();
-    playback = new Playback(gltf.scene, gltf.animations, moves, next.defaultMove, syncPlayback);
-    playback.setSpeed(Number(el<HTMLSelectElement>('speed').value));
-    renderMoves(moves); renderCatalog();
-    el('avatar-name').textContent = next.name;
-    el('avatar-description').textContent = next.description;
-    el('model-type').textContent = next.id==='local-import' ? '3D · EIGENER IMPORT' : '3D · TESTAVATAR';
-    viewer?.showSkeleton(studio && el<HTMLInputElement>('skeleton').checked);
-    const states = Object.fromEntries(Object.entries(next.states ?? {}).filter(([,id])=>moves.some(m=>m.id===id)));
-    machine.bind({capability:{id:next.id,name:next.name,moves,states:Object.keys(states)},
-      setState:state=>playback!.setBaseMove(states[state]), playMove:id=>{playback!.play(id);}}, null);
-    if (states.idle) machine.execute({state:'idle'});
-    else if (next.defaultMove && moves.some(m => m.id === next.defaultMove)) playback.play(next.defaultMove);
-    loaded = {...next,moves};refreshCapabilities();
-    if(studio)editor.enter();
-    editor.restoreDirty(restore.dirty??false);
-    commitHistory?.();
-    const missing = next.moves.length - moves.length;
-    message(missing ? `${missing} deklarierte Bewegung(en) fehlen in der Modelldatei und werden nicht angeboten.` : `${next.name} bereit · ${moves.length} Bewegungen · ${(buffer.byteLength / 1024 / 1024).toFixed(2).replace('.', ',')} MB`);
+    parsed=undefined; // Ownership passes to the candidate, including preparation failures.
+    const prepared=candidate=prepareAvatar({model:gltf,avatar:next,moves,source:projectSource,data:project?.studio,studio,speed:Number(el<HTMLSelectElement>('speed').value),dirty:restore.dirty??false,skeleton:el<HTMLInputElement>('skeleton').checked,resume:resumeBase,changed:refreshCapabilities,feedback:text=>message(text),playbackChanged:syncPlayback});
+    // No await between the final target check and publication of the prepared candidate.
+    if(token!==request||!valid()){prepared.dispose();return false;}
+    const previous={viewer,editor,playback,loaded,original,modelEpoch};
+    prepared.viewer.onFrame=viewer.onFrame;
+    const restoreBinding=machine.checkpointBinding();
+    const restoreUI=checkpointElements(['viewport','studio-editor','moves','capabilities','move-count','avatar-cards','avatar-select','avatar-count','avatar-name','avatar-description','model-type','player-controls','studio-controls','legacy-controls','pause','timeline','activity','model-undo','model-redo','model-history-note','message'].map(id=>el(id)));
+    const legacyStage=el('legacy-frame').parentElement!,wasLegacy=legacyStage.classList.contains('legacy');
+    const cleanupErrors=installAtomically(()=>{
+      viewer=prepared.viewer as Viewer;editor=prepared.editor;playback=prepared.playback;loaded={...next,moves};original=false;modelEpoch++;
+      el('viewport').replaceChildren(prepared.stage);el('studio-editor').replaceChildren(prepared.editorHost);
+      legacyStage.classList.remove('legacy');el('player-controls').hidden=studio;el('studio-controls').hidden=!studio;el('legacy-controls').hidden=true;
+      renderCatalog();el('avatar-name').textContent=next.name;el('avatar-description').textContent=next.description;
+      el('model-type').textContent=next.id==='local-import'?'3D · EIGENER IMPORT':'3D · TESTAVATAR';
+      const states=Object.fromEntries(Object.entries(next.states??{}).filter(([,id])=>moves.some(m=>m.id===id)));
+      machine.bind({capability:{id:next.id,name:next.name,moves,states:Object.keys(states)},setState:state=>playback!.setBaseMove(states[state]),playMove:id=>{playback!.play(id);}},prepared.initialState);
+      refreshCapabilities();
+      const missing=next.moves.length-moves.length;
+      message(missing?`${missing} deklarierte Bewegung(en) fehlen in der Modelldatei und werden nicht angeboten.`:`${next.name} bereit · ${moves.length} Bewegungen · ${(buffer.byteLength/1024/1024).toFixed(2).replace('.',',')} MB`);
+      commitHistory?.();prepared.activate();
+    },()=>{
+      viewer=previous.viewer;editor=previous.editor;playback=previous.playback;loaded=previous.loaded;original=previous.original;modelEpoch=previous.modelEpoch;
+      restoreBinding();legacyStage.classList.toggle('legacy',wasLegacy);restoreUI();
+    },()=>prepared.dispose(),()=>{
+      const errors=disposeAll([()=>previous.editor?.dispose(),()=>previous.playback?.dispose(),()=>previous.viewer?.dispose(),()=>el<HTMLIFrameElement>('legacy-frame').removeAttribute('src')]);
+      if(errors.length)throw new AggregateError(errors,'previous-avatar-cleanup-failed');
+    });
+    installed=true;
+    if(cleanupErrors.length)message('Avatar geladen; alte Ressourcen konnten nicht vollständig freigegeben werden. Projekt speichern und Seite bei Bedarf neu laden.',true);
     return true;
   } catch (error) {
     if (token !== request) return false;
     message(`Laden fehlgeschlagen: ${error instanceof Error ? error.message : String(error)}`, true);
     renderCatalog();return false;
   } finally {
+    if(!installed)disposeAll([()=>candidate?.dispose(),()=>{if(parsed)disposeModel(parsed.scene);}]);
     if (token === request) { busy = false; syncPlayback();window.dispatchEvent(new Event("pakachi-sm:change")); }
   }
 }

@@ -1,4 +1,4 @@
-# Avatar-Studio – 0.23.0
+# Avatar-Studio – 0.24.0
 
 Das Studio ist Teil des Players. Mika, Nori und eigene GLB-Modelle können bearbeitet werden. Der Original-PaKaChi bleibt mit beiden Formen und 72 Bildern erhalten; für ihn fehlt weiterhin das entsprechende 3D-Modell. Seine Bilder werden durch den Editor nicht verändert.
 
@@ -153,4 +153,8 @@ Der Rücksprung erhält Modellbytes, Avataridentität, Gelenk-/Gesichtspunkte, V
 - Die Wiederherstellung eröffnet eine neue Editorsitzung. Einzelne frühere Undo-Schritte, Auswahl, Kameraposition und temporäre KI-Bearbeitungsfreigabe werden nicht wiederhergestellt. Die Projektinhalte bleiben erhalten.
 - Beim Original-Bildplayer wird die Originalansicht neu gestartet; dessen aktuelle Form-/Abspielposition wird nicht aufgezeichnet. Die 72 Bilder und beide Formen bleiben unverändert verfügbar.
 
-Der Verlauf ist kein dauerhafter Versionsspeicher und keine vollständige atomare Transaktion für beliebige Fehler nach dem eigentlichen Modelltausch. Laden, Zielvergleich, Snapshot-Erzeugung und Geometriegrenzen werden vor dem Austausch geprüft; ein vollumfänglicher Rollback bleibt ein eigener Entwicklungsschritt.
+Der Verlauf ist kein dauerhafter Versionsspeicher. Seit 0.24.0 werden neue 3D-Ansicht und Editor vor dem Austausch vollständig vorbereitet. Bei Fehlern während der synchronen Übergabe werden die bisherige Editorsitzung und Ansicht wieder eingesetzt; der Verlauf wird dabei nicht verbraucht. Prozessabstürze, GPU-Kontextverlust und der separate Originalplayer-Neustart sind davon nicht abgedeckt.
+
+### Hinweis zu älteren Projektständen
+
+0.24.0 baut den Rig wieder nach der sichtbaren Modellnormalisierung auf. In 0.22.0/0.23.0 geschah dies davor. In diesen Versionen gespeicherte freie Oberflächenpunkte und Posen sollten deshalb an einer Kopie visuell kontrolliert werden; das unveränderte Projektformat 1 enthält keinen Versionsmarker, aus dem sich ihre Koordinatenherkunft sicher ableiten ließe. Eine automatische Migration wird nicht behauptet.

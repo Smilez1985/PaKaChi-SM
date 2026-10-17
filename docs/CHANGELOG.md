@@ -12,6 +12,27 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.24.0] - 2026-10-18
+
+Zeitstempel: 2026-10-18T00:55:06+02:00 (Europe/Berlin)
+
+### Added
+
+- Separate Vorbereitung von 3D-Viewer, Editor und Playback vor der Übernahme. Bestehende Instanzen bleiben bis zur erfolgreichen Veröffentlichung erhalten.
+- Rückabwicklung synchroner Übergabefehler mit Wiederherstellung bisheriger DOM-Knoten, Editorsitzung, Viewer und StateMachine-Bindung. Fehlgeschlagene Kandidaten werden freigegeben; der Modellwechsel-Verlauf bleibt unverändert.
+- Fünf Tests für DOM-/Binding-Rollback, Vorbereitungsfehler, Cleanup-Reihenfolge, isolierte Kandidaten und normalisierte Rig-Koordinaten. Browser-Test für fehlgeschlagene Veröffentlichung vorbereitet.
+
+### Fixed
+
+- Rig-Aufbau wieder nach der Viewer-Normalisierung, damit Oberflächenpunkte und sichtbare Geometrie dieselben Weltkoordinaten verwenden. Projektstände aus 0.22.0/0.23.0 benötigen bei freien Punkten/Posen eine visuelle Kontrolle; keine automatische Koordinatenmigration.
+- Fehler beim Aufräumen des bisherigen Avatars machen eine bereits erfolgreiche Übernahme nicht rückgängig; Cleanup versucht die übrigen Ressourcen weiterhin freizugeben.
+
+### Changed
+
+- README, Design, Roadmap, Studio-/Generierungsanleitung, Auftragsvertrag und Prüfstand aktualisiert.
+
+**Prüfung:** 135 Tests und Build bestanden. Chromium installiert; beide vorbereiteten Browserabläufe scheitern vor dem Anwendungsstart am hier verbotenen Socket-Systemaufruf. Keine gerenderte Browser-, GPU-Inferenz- oder Rigging-Abnahme. Schutz umfasst die 3D-Ladestrecke; Originalplayer-Neustart, Prozessabsturz und GPU-Kontextverlust sind nicht abgedeckt.
+
 ## [0.23.0] - 2026-10-17
 
 Zeitstempel: 2026-10-17T17:12:59+02:00 (Europe/Berlin)
@@ -522,3 +543,5 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 [0.22.0]: ./PRUEFUNG-0.22.0.md
 
 [0.23.0]: ./PRUEFUNG-0.23.0.md
+
+[0.24.0]: ./PRUEFUNG-0.24.0.md

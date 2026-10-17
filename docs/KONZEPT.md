@@ -4,7 +4,7 @@ Teil der [Blaupause](README.md) · [Roadmap](ROADMAP.md) · [Changelog](CHANGELO
 
 ## Status und Begriffe
 
-Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.23.0: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau und KI-Generierung bleiben Entwicklungsziele.
+Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.24.0: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau und KI-Generierung bleiben Entwicklungsziele.
 
 - **PaKaChi:** Panda-KI-Chimera, das übergeordnete Projekt.
 - **PaKaChi-SM:** StateMaschine mit Avatar-Player und integriertem Studio.
@@ -281,3 +281,11 @@ Das Ergebnis durchläuft den echten GLTFLoader sowie Grenzen für Geometrie, Ver
 Modellwechsel besitzen einen separaten, auf genau einen vorherigen Stand begrenzten Sitzungsverlauf. Vor dem Austausch wird eine isolierte Projektaufnahme mit Entwurfspose, Punkten/Verbindungen, Posen/Moves, Avataridentität und Ungespeichert-Markierung vorbereitet. Nur ein erfolgreicher Austausch aktiviert den neuen Rücksprungpunkt. Zurück/Wiederholen tauscht den gespeicherten Stand mit dem aktuellen Projekt; dadurch bleiben auch spätere Änderungen am jeweils anderen Modell erhalten. Fehlgeschlagene oder veraltete Wiederherstellung verbraucht den Verlauf nicht.
 
 Der Snapshot wird vor dem Austausch gegen eine geschätzte 160-MiB-Grenze geprüft. Original-Bildplayer wird als eigener Zieltyp geführt; seine aktuelle Animationsphase wird nicht gesichert. Wiederherstellung erstellt eine neue Editorsitzung und erteilt keine frühere KI-Freigabe erneut. Einzelgesten-Undo, Kamera und Auswahl werden nicht rekonstruiert. Der Modellwechsel ist reversibel, aber noch keine vollständig atomare Host-Transaktion mit Rollback beliebiger Fehler während der Installation.
+
+### Vorbereitete 3D-Übernahme mit Rückabwicklung (0.24.0)
+
+Ein 3D-Kandidat erhält einen eigenen, zunächst nicht montierten Viewer, Editor und Playback. Die bisherige Instanz bleibt während der Vorbereitung unverändert. Der neue Rig wird nach der Viewer-Normalisierung aufgebaut, damit Oberflächenpunkte dieselben Weltkoordinaten wie die sichtbare Figur verwenden. Vor Veröffentlichung wird das Ziel nochmals geprüft; zwischen dieser Prüfung und dem synchronen Austausch liegt kein asynchroner Schritt.
+
+Für die Übergabe werden alte Instanzen, echte DOM-Knoten samt Ereignisbehandlung und StateMachine-Bindung gehalten. Bei Fehlern werden diese wieder eingesetzt und nur Kandidatenressourcen verworfen. Erst eine erfolgreiche Veröffentlichung aktiviert neue Editor-Rückmeldungen und den Modellwechsel-Verlauf; anschließend werden alte Ressourcen freigegeben. Ein Fehler beim anschließenden Aufräumen macht den gültig übernommenen Avatar nicht wieder ungültig und wird separat gemeldet.
+
+Der Schutz gilt für die 3D-Ladestrecke einschließlich Import, Generierungsübernahme und 3D-Wiederherstellung. Er ist keine Zusage gegen Prozessabsturz, Speichermangel, GPU-Kontextverlust oder einen selbst scheiternden Rollback. Der separate Neustart des archivierten Original-Bildplayers besitzt weiterhin seinen bisherigen Ablauf. Gerenderte Abnahme steht aus; die Vorbereitungsphase benötigt vorübergehend zusätzliche CPU-/GPU-Ressourcen für alten und neuen Viewer.

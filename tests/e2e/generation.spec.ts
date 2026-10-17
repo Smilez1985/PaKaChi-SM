@@ -21,3 +21,26 @@ test('image generation keeps original until explicit import of the rendered prev
  await page.locator('#model-undo').click();await expect(page.locator('#avatar-name')).toContainText('PaKaChi');
  await page.locator('#model-redo').click();await expect(page.locator('#avatar-name')).toContainText('3D-Entwurf');
 });
+
+test('failed publication retains the live editor, canvas, dirty project and agent permission',async({page})=>{
+ await page.goto('/');await page.locator('#avatar-select').selectOption('mika');await expect(page.locator('#message')).toContainText('Mika bereit');
+ await page.locator('#studio-tab').click();await page.locator('#studio-agent-edit').check();
+ await page.locator('#studio-points').selectOption('bone-0');await page.locator('#point-name').fill('Unsaved joint');await page.locator('#point-name').press('Tab');
+ page.on('dialog',dialog=>dialog.accept());
+ const before=await page.evaluate(()=>{
+  const api=(window as any).PaKaChiSM;const info=api.call('get_studio');
+  (window as any).__oldCanvas=document.querySelector('#viewport canvas');
+  return info;
+ });
+ await page.evaluate(()=>{
+  const element=document.getElementById('avatar-cards')!;const original=element.replaceChildren.bind(element);
+  element.replaceChildren=(..._nodes)=>{element.replaceChildren=original;throw new Error('injected publication failure');};
+ });
+ await page.locator('#file-input').setInputFiles({name:'candidate.glb',mimeType:'model/gltf-binary',buffer:glb()});
+ await expect(page.locator('#message')).toContainText('injected publication failure');
+ await expect(page.locator('#avatar-name')).toContainText('Mika');await expect(page.locator('#studio-agent-edit')).toBeChecked();
+ const after=await page.evaluate(()=>({info:(window as any).PaKaChiSM.call('get_studio'),sameCanvas:(window as any).__oldCanvas===document.querySelector('#viewport canvas')}));
+ expect(after.sameCanvas).toBe(true);expect(after.info.session).toBe(before.session);expect(after.info.revision).toBe(before.revision);expect(after.info.counts).toEqual(before.counts);expect(after.info.dirty).toBe(true);
+ await expect(page.locator('#point-name')).toHaveValue('Unsaved joint');
+ await expect(page.locator('#model-undo')).toBeEnabled();await page.locator('#model-undo').click();await expect(page.locator('#avatar-name')).toContainText('PaKaChi');
+});

@@ -38,6 +38,8 @@ export class StateMachine {
     this.adapter = adapter; this.state = initial; this.changed();
   }
   unbind(): void { this.adapter = null; this.state = null; this.changed(); }
+  /** Internal host rollback; retains the exact adapter, without emitting an intermediate state. */
+  checkpointBinding():()=>void {const adapter=this.adapter,state=this.state;return ()=>{this.adapter=adapter;this.state=state;};}
   get capability(): Capability | null { return this.adapter ? structuredClone(this.adapter.capability) : null; }
   observe(state: string): void {
     if (this.adapter?.capability.states.includes(state) && state !== this.state) { this.state = state; this.changed(); }

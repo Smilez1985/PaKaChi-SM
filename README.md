@@ -2,7 +2,7 @@
 
 **SM steht für StateMaschine.** PaKaChi ist die **Panda-KI-Chimera**, das übergeordnete Projekt. PaKaChi-SM vereint Avatar-Player, Model Zoo und das fest integrierte **PaKaChi-Avatar-Studio**.
 
-**Softwarestand: 0.23.0 · Entwicklungsstand, keine fertige Bild-zu-3D-Lösung.**
+**Softwarestand: 0.24.0 · Entwicklungsstand, keine fertige Bild-zu-3D-Lösung.**
 
 Der bestehende PaKaChi mit Tierform, humanoider Arbeitsform und allen 72 Transformationsbildern ist erhalten und beim Start ausgewählt. Mika und Nori sind separate technische 3D-Testavatare. Ein 3D-Modell des Original-PaKaChi und die Qualitätsabnahme echter KI-Ergebnisse stehen noch aus.
 
@@ -53,7 +53,7 @@ Seit 0.14.0 besteht zusätzlich der interne [Auftragskern](docs/AUFTRAE.md): fes
 
 ## Was aktuell funktioniert
 
-| Bereich | Stand 0.23.0 |
+| Bereich | Stand 0.24.0 |
 | --- | --- |
 | Player | Avatar-Auswahl, tatsächliche Bewegungen anzeigen, abspielen, pausieren, Tempo und Abspielposition ändern. |
 | Modelle | Mika/Nori mit Skeletten und Clips; eigene eigenständige GLB-Dateien laden oder hineinziehen, bis 50 MiB, lokal für die Sitzung. |
@@ -131,7 +131,7 @@ npx playwright install chromium
 npm run test:e2e
 ```
 
-Für 0.23.0 sind 130 Tests und der Build bestanden. Die unveränderten Original-Testprogramme wurden zuletzt in 0.9.0 geprüft. Die visuelle WebGL-/Mausabnahme ist wegen der Chromium-Startbeschränkung der bisherigen Ausführungsumgebung noch offen. Die reale Python-MCP-/MQTT-Integration mit Studio-Editor wurde zuletzt in 0.10.0 erfolgreich geprüft. Details und frühere Nachweise stehen im [Prüfstand](docs/PRUEFUNG.md).
+Für 0.24.0 sind 135 Tests und der Build bestanden. Die unveränderten Original-Testprogramme wurden zuletzt in 0.9.0 geprüft. Die visuelle WebGL-/Mausabnahme ist wegen der Chromium-Startbeschränkung der bisherigen Ausführungsumgebung noch offen. Die reale Python-MCP-/MQTT-Integration mit Studio-Editor wurde zuletzt in 0.10.0 erfolgreich geprüft. Details und frühere Nachweise stehen im [Prüfstand](docs/PRUEFUNG.md).
 
 ## Lizenz
 
@@ -147,3 +147,5 @@ Noch nicht festgelegt.
 TripoSR liefert bildbasierte Geometrie, kein fertiges Skelett und keine promptgesteuerte Korrektur. Der lokale Dienst muss separat laufen. Keine automatischen Generator-Fallbacks. Die Bedienlogik ist automatisiert geprüft; WebGL-Browserprüfung und tatsächliche GPU-Inferenz sind noch offen.
 
 Der Modellwechsel-Verlauf hält genau einen vorherigen Projektstand in der aktuellen Seitensitzung: Modellbytes, Kontrollpunkte, Entwurfspose, gespeicherte Posen/Moves und Ungespeichert-Markierung. Eine weitere neue Auswahl ersetzt diesen Rücksprungpunkt. Auch zum Original-Bildplayer lässt sich zurückkehren; dessen laufende Animation wird dabei neu gestartet. Der Verlauf überlebt F5 nicht. [Details und Grenzen](docs/STUDIO.md#modellwechsel-zurück-und-wiederholen-0230).
+
+Seit **0.24.0** wird ein neuer 3D-Avatar mit eigener Ansicht, Editor und Wiedergabe vorbereitet, bevor er den bisherigen Stand ersetzt. Fehler bei Vorbereitung oder Übergabe erhalten beziehungsweise restaurieren den alten Editor und seine Steuerungsbindung. Die bisherigen Ressourcen werden erst nach erfolgreichem Wechsel freigegeben. Die gerenderte Browserprüfung bleibt blockiert: Chromium wurde installiert, startet hier jedoch wegen eines verbotenen Socket-Systemaufrufs nicht.

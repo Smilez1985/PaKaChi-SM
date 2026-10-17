@@ -1,6 +1,6 @@
 # Interner Auftragskern
 
-**Stand 0.23.0.** Der lokale TripoSR-Transportadapter ist für diese Entwicklungsschnittstelle implementiert und per HTTP getestet. Die sichtbare Generierungsoberfläche registriert diesen Adapter seit 0.22.0; echte GPU-Inferenz- und Browserabnahme stehen aus. Die Anbieteroberfläche kann inzwischen Modelllisten abrufen; diese Abfrage ist unabhängig vom Auftragskern und startet keine Inferenz.
+**Stand 0.24.0.** Der lokale TripoSR-Transportadapter ist für diese Entwicklungsschnittstelle implementiert und per HTTP getestet. Die sichtbare Generierungsoberfläche registriert diesen Adapter seit 0.22.0; echte GPU-Inferenz- und Browserabnahme stehen aus. Die Anbieteroberfläche kann inzwischen Modelllisten abrufen; diese Abfrage ist unabhängig vom Auftragskern und startet keine Inferenz.
 
 ## Ablauf
 
@@ -38,7 +38,7 @@ Diese atomare Host-Anbindung ist noch nicht implementiert; seit 0.22.0 besteht s
 
 - Echte Inferenzabnahme des lokalen TripoSR-Adapters sowie weitere lokale und externe Fachadapter.
 - Auftragsliste/Verlauf und Korrekturprompt; Empfängeranzeige und Einzelauftragsvorschau sind seit 0.22.0 vorhanden.
-- Anatomische Rigging-Prüfung und vollständig atomarer Modellwechsel mit Fehler-Rollback; Geometrieprüfung seit 0.22.0 und ein begrenzter Modellwechsel-Rücksprung seit 0.23.0 sind angeschlossen.
+- Anatomische Rigging-Prüfung und gerenderte Abnahme der seit 0.24.0 abgesicherten 3D-Übernahme; Geometrieprüfung und Modellwechsel-Rücksprung sind angeschlossen.
 - Fernseitige Abbruchbestätigung, Wiederaufnahme nach App-Neustart und begrenzte Auftragshistorie.
 
 [Roadmap](ROADMAP.md#7-studio-harness-und-anbieteranbindung) · [Prüfbericht](PRUEFUNG-0.14.0.md)
@@ -52,3 +52,5 @@ Die Rolle ist ausschließlich `generation`; PNG/JPEG sind erforderlich. `input.p
 ## Studio-Anbindung (0.22.0)
 
 `mountGenerationPanel` registriert den lokalen Adapter mit einem festen Schlüsselsnapshot und nutzt `ProviderJob` bis zur geprüften Vorschau. `validateGeneration` lädt echte Modellbytes und begrenzt Knochen/Vertices; `showGenerationPreview` hält einen getrennten Viewer. Modellwechsel gehen anschließend über den asynchronen Import des Players mit erneutem Zielvergleich und Operationsschutz. Das synchrone `ProviderJob.accept()` wird für diesen Import bewusst nicht als atomare Transaktion ausgegeben; seit 0.23.0 ergänzt ein separater Sitzungsverlauf den Rücksprung zum vorherigen Projekt. Siehe [Bedienung](KI-GENERIERUNG.md#bedienung-im-studio-seit-0220).
+
+Seit 0.24.0 besitzt der asynchron vorbereitete Import eine synchrone Veröffentlichung mit Rückabwicklung über `avatar-installation.ts`. Er verwendet weiterhin nicht den synchronen `ProviderJob.accept()`-Vertrag: GLB-Laden und Kandidatenaufbau laufen zuvor, die Host-Übergabe erfolgt anschließend mit erneuter Zielprüfung. Bei Fehlschlag bleibt die Generierungsvorschau zur erneuten Entscheidung erhalten; die bisherige Editorsitzung wird restauriert.

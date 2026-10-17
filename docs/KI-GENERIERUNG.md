@@ -117,4 +117,6 @@ Vorhandenes Projekt vor der Übernahme speichern. Der neue Avatar ersetzt den ge
 
 **Abbrechen** beendet das lokale Warten; ein vollständiger Stopp des Dienstes ist nicht bestätigt. Anbieter-/Schlüsselwechsel und Tresorsperre verwerfen laufende Aufträge und Vorschauen. Deutsch/English folgt der Optionssprache. TripoSR liefert einen Geometrieentwurf ohne zugesichertes Rig; ein Korrekturprompt und automatische Anatomieerkennung sind nicht Teil dieses Verfahrens.
 
-Die DOM-Bedienlogik und echte GLB-Prüfung sind automatisiert getestet. Ein zusätzlicher Playwright-Ablauftest ist vorhanden, konnte hier jedoch wegen fehlender Chromium-Programmdatei nicht starten. Echte GPU-Inferenz und gerenderte Browserabnahme sind weiterhin ausstehend.
+Die DOM-Bedienlogik und echte GLB-Prüfung sind automatisiert getestet. Ein zusätzlicher Playwright-Ablauftest ist vorhanden, konnte hier jedoch wegen fehlender Chromium-Programmdatei nicht starten (0.22.0); in 0.24.0 wurde Chromium installiert, scheitert hier aber beim Start an einer Socket-Beschränkung. Echte GPU-Inferenz und gerenderte Browserabnahme sind weiterhin ausstehend.
+
+Seit 0.24.0 bleibt die alte 3D-Editorsitzung bis zur erfolgreichen Übergabe erhalten. Ein Fehler während der Vorbereitung/Veröffentlichung verwirft nur den Kandidaten beziehungsweise setzt den bisherigen Stand wieder ein. Der Entwurf kann anschließend erneut übernommen oder verworfen werden.
