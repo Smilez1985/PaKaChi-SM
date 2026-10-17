@@ -1,6 +1,6 @@
 # Interner Auftragskern
 
-**Stand 0.16.0.** Diese Entwicklungsschnittstelle ist noch nicht an die sichtbare Generierungsoberfläche oder einen echten KI-Dienst angeschlossen. Die Anbieteroberfläche kann inzwischen Modelllisten abrufen; diese Abfrage ist unabhängig vom Auftragskern und startet keine Inferenz.
+**Stand 0.21.0.** Der lokale TripoSR-Transportadapter ist für diese Entwicklungsschnittstelle implementiert und per HTTP getestet. Die sichtbare Generierungsoberfläche und die echte GPU-Inferenzabnahme stehen aus. Die Anbieteroberfläche kann inzwischen Modelllisten abrufen; diese Abfrage ist unabhängig vom Auftragskern und startet keine Inferenz.
 
 ## Ablauf
 
@@ -42,3 +42,9 @@ Diese Host-Anbindung ist noch nicht implementiert. Die Tests prüfen die Abweisu
 - Fernseitige Abbruchbestätigung, Wiederaufnahme nach App-Neustart und begrenzte Auftragshistorie.
 
 [Roadmap](ROADMAP.md#7-studio-harness-und-anbieteranbindung) · [Prüfbericht](PRUEFUNG-0.14.0.md)
+
+## Lokaler Fachadapter
+
+`createLocalGenerationAdapter(tokenFor, fetcher?)` aus `src/generation-adapter.ts` wird explizit in einer `ProviderRegistry` registriert. Das Profil verwendet `adapter: 'custom-generation'`, `endpoint: 'http://127.0.0.1:8766'` und `model: 'triposr'`. Der Dienststart und sein Zugriffstoken sind in [KI-GENERIERUNG.md](KI-GENERIERUNG.md#lokaler-generierungsdienst-seit-0210) beschrieben. Die Tokenfunktion gehört ausschließlich zur Laufzeit; für einen Auftrag soll der Aufrufer einen festen Schlüsselsnapshot übergeben. Ein Schlüsselsperren muss der spätere UI-Host zusätzlich mit `job.cancel()` verbinden.
+
+Die Rolle ist ausschließlich `generation`; PNG/JPEG sind erforderlich. `input.prompt` benennt den Auftrag, steuert TripoSR aber nicht. Fortschritt zeigt `running`, keinen erfundenen Prozentwert. Für längere Rekonstruktionen `timeoutMs` ausdrücklich passend zum Dienst setzen (maximal eine Stunde). `validate` muss weiterhin das vollständige GLB mit dem tatsächlichen Loader prüfen. Eine erfolgreiche HTTP-Antwort ersetzt weder Formatprüfung noch visuelle Vorschau und Freigabe. Der Adapter registriert sich nicht selbst in der Anwendung und führt keine automatischen Fallbacks aus.

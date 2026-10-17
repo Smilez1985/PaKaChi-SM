@@ -1,6 +1,6 @@
 # Roadmap – was kommt
 
-**Softwarestand: 0.20.0 · Abgleich: 17.10.2026.** Teil der [Blaupause](README.md).
+**Softwarestand: 0.21.0 · Abgleich: 17.10.2026.** Teil der [Blaupause](README.md).
 
 Ein Häkchen bedeutet implementiert; es ersetzt keine visuelle oder externe Live-Abnahme. Die Nachweise und Prüfgrenzen stehen im [Prüfstand](PRUEFUNG.md). Die Versionshistorie gehört ins [Changelog](CHANGELOG.md).
 
@@ -9,7 +9,7 @@ Ein Häkchen bedeutet implementiert; es ersetzt keine visuelle oder externe Live
 1. **Korrekturen 0.11.0/0.11.1 visuell nachprüfen:** Drehung um die Figurenmitte auch nach Zoom/Pan sowie vollständige Körperverbindungen, Hand-/Fußziele, Rumpfbewegung und direktes Drehen. Nutzertest 0.10.0 meldete auseinanderziehbare Knochen und unbrauchbare Ausrichtung; diese Fehler sind technisch korrigiert, die erneute Nutzerabnahme steht aus. Anschließend Mausnavigation, kleine Gesichtspunkte, Gesamtverschiebung, Speichern/Laden und Agentensteuerung in einer lauffähigen Browserumgebung prüfen.
 2. **Gelenkbearbeitung vervollständigen:** echte Quellknochen hinzufügen/löschen, Hautgewichte zuordnen und vorhandene Moves nach Änderungen prüfen. Erst damit wird das Beispiel „fehlendes Knie ergänzen und beugen“ vollständig erfüllt.
 3. **Studio-Harness anbinden:** auf den Profilen und der Rollen-/Fähigkeitsprüfung aus 0.13.0 aufbauen; Modellauflistung ist seit 0.15.0 vorhanden. Assistenten-Inferenz für Ollama/OpenAI-kompatible APIs ist seit 0.16.0 vorhanden. Als Nächstes reale Modell-/Werkzeugqualität prüfen sowie native Cloud-Anmeldung und Fachadapter ergänzen. Details und Abnahme in Abschnitt 7.
-4. **Aufträge und KI-Verfahren integrieren:** den Auftragskern aus 0.14.0 an geeignete Generator-/Rigging-Adapter und den Studio-Editor anschließen, echte Inferenz und Qualität prüfen, anschließend Korrekturvorschau und Übernahme integrieren. Vorhandene Skelettdaten auszulesen ist bereits möglich, aber keine KI-Anatomieerkennung.
+4. **Aufträge und KI-Verfahren integrieren:** den lokalen TripoSR-Transportadapter aus 0.21.0 an die sichtbare Bildauswahl und den Studio-Editor anschließen, weitere Generator-/Rigging-Adapter ergänzen, echte Inferenz und Qualität prüfen, anschließend Korrekturvorschau und Übernahme integrieren. Vorhandene Skelettdaten auszulesen ist bereits möglich, aber keine KI-Anatomieerkennung.
 
 Diese Reihenfolge ist ein Umsetzungsvorschlag, kein Terminversprechen. Lokale und externe Dienste sowie getrennte Anbieter je Rolle sind als Architektur festgelegt. Die konkreten zuerst unterstützten Verfahren, Hardwareanforderungen und Lizenzen sind noch zu prüfen.
 
@@ -69,6 +69,7 @@ Diese Reihenfolge ist ein Umsetzungsvorschlag, kein Terminversprechen. Lokale un
 ## 5. Bild zu 3D und KI-Korrektur
 
 - [ ] Bestehenden PaKaChi anhand seiner erhaltenen Tierform und korrigierten humanoiden Stilreferenz in 3D nachbilden; beide Formen und die Transformation erhalten.
+- [x] Lokalen TripoSR-HTTP-Dienst und Fachadapter mit Auftragskern verbinden (0.21.0; Transporttest mit synthetischem Backend, keine GPU-Abnahme).
 - [x] Technische Vorauswahl und lokales TripoSR-Testwerkzeug mit Vorprüfung/GLB-Berichten vorbereiten (0.12.0).
 - [ ] Geeignete Generierungs-/Rigging-Verfahren an echten Testfiguren bewerten. **Echte Inferenz und Qualitätsvergleich stehen weiterhin aus.** [Testlauf](KI-GENERIERUNG.md).
 - [ ] Bildimport per Drag & Drop, tatsächliche Generierung, Fortschritt und Fehlermeldungen anschließen.

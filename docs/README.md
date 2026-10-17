@@ -1,6 +1,6 @@
 # Blaupause – PaKaChi-SM
 
-**Softwarestand: 0.20.0 · Dokumentation abgeglichen am 17.10.2026.**
+**Softwarestand: 0.21.0 · Dokumentation abgeglichen am 17.10.2026.**
 
 Die Blaupause besteht aus drei Dokumenten. Das Designdokument beschreibt das Produktziel, die Roadmap die Umsetzung und das Changelog die bereits erfolgten Änderungen.
 
@@ -20,7 +20,7 @@ Das Original-PaKaChi mit beiden Formen und 72 Transformationsbildern bleibt unve
 
 Das Studio soll als spezialisierter **KI-Harness** den Arbeitsablauf koordinieren. **Assistent, 3D-Generator und Rigging-Dienst** erhalten unabhängig wählbare Anbieter, Modelle und mehrere Verbindungsprofile. Geplant sind Cloud-APIs, offiziell unterstützte OAuth-Anmeldungen und lokale Dienste wie Ollama oder LM Studio über geeignete Adapter. Sprachmodelle koordinieren Werkzeuge; tatsächliche Geometrie und Hautgewichte benötigen passende Fachverfahren.
 
-Seit 0.13.0 sind lokale Anbieterprofile, unabhängige Rollenzuordnung im Optionsmenü und eine interne Adapter-/Fähigkeitsprüfung vorhanden. Seit 0.14.0 ergänzt ein interner Auftragskern Fortschritt, Abbruch, Zeitlimit und eine revisionsgeprüfte Übernahme. Seit 0.15.0 sind Modelllisten-Abfragen mit optionalem Sitzungsschlüssel und ein hardwaregeprüfter Ollama-Einrichtungshelfer vorhanden. Seit 0.16.0 ist der Assistent mit Ollama/OpenAI-kompatibler Inferenz und einzeln bestätigten Studio-Vorschlägen nutzbar. Seit 0.17.0 ergänzt ein nativer Anthropic-Adapter Modelllisten und Assistentenaufrufe mit API-Schlüssel. OAuth, Generator-/Rigging-Adapter und deren Vorschau bleiben offen. Lokal oder Cloud ist für ALLE drei Rollen unabhängig wählbar; der Ollama-Katalog schränkt diese Wahl nicht ein. Außerdem bestehen die MCP-Studio-Werkzeuge und der experimentelle TripoSR-Testlauf. [Design und Grenzen](KONZEPT.md#11-studio-als-ki-harness-und-freie-anbieterwahl) sowie [Umsetzungsschritte und Abnahme](ROADMAP.md#7-studio-harness-und-anbieteranbindung) sind jetzt Bestandteil der Blaupause.
+Seit 0.13.0 sind lokale Anbieterprofile, unabhängige Rollenzuordnung im Optionsmenü und eine interne Adapter-/Fähigkeitsprüfung vorhanden. Seit 0.14.0 ergänzt ein interner Auftragskern Fortschritt, Abbruch, Zeitlimit und eine revisionsgeprüfte Übernahme. Seit 0.15.0 sind Modelllisten-Abfragen mit optionalem Sitzungsschlüssel und ein hardwaregeprüfter Ollama-Einrichtungshelfer vorhanden. Seit 0.16.0 ist der Assistent mit Ollama/OpenAI-kompatibler Inferenz und einzeln bestätigten Studio-Vorschlägen nutzbar. Seit 0.17.0 ergänzt ein nativer Anthropic-Adapter Modelllisten und Assistentenaufrufe mit API-Schlüssel. Seit 0.21.0 besteht ein lokaler TripoSR-HTTP-Dienst samt Auftragsadapter. OAuth, Cloud-Fachadapter, Rigging und die sichtbare Generierungsvorschau bleiben offen. Lokal oder Cloud ist für ALLE drei Rollen unabhängig wählbar; der Ollama-Katalog schränkt diese Wahl nicht ein. Außerdem bestehen die MCP-Studio-Werkzeuge und der experimentelle TripoSR-Testlauf. [Design und Grenzen](KONZEPT.md#11-studio-als-ki-harness-und-freie-anbieterwahl) sowie [Umsetzungsschritte und Abnahme](ROADMAP.md#7-studio-harness-und-anbieteranbindung) sind jetzt Bestandteil der Blaupause.
 
 ## Anleitungen und technische Dokumente
 
@@ -38,7 +38,7 @@ Seit 0.13.0 sind lokale Anbieterprofile, unabhängige Rollenzuordnung im Options
 | Testergebnisse und offene Abnahme | [Prüfstand](PRUEFUNG.md) |
 | Originaldesign und Herkunft der erhaltenen Bilder | [Referenzen](references/README.md) |
 
-Softwareversion, Projektformat und historischer Prüfstand sind unterschiedliche Angaben: Die Software steht auf 0.20.0, das Projektformat weiterhin auf Version 1. Ältere Projekte sind lesbar; Dateien mit Gesamtpositionsspur benötigen Software ab 0.6.0; Gesamtdrehung benötigt mindestens 0.8.0; Skalierung mindestens 0.10.0. Ältere Software ignoriert die neue Skalierung. Historische Prüfberichte behalten ihren damaligen Stand.
+Softwareversion, Projektformat und historischer Prüfstand sind unterschiedliche Angaben: Die Software steht auf 0.21.0, das Projektformat weiterhin auf Version 1. Ältere Projekte sind lesbar; Dateien mit Gesamtpositionsspur benötigen Software ab 0.6.0; Gesamtdrehung benötigt mindestens 0.8.0; Skalierung mindestens 0.10.0. Ältere Software ignoriert die neue Skalierung. Historische Prüfberichte behalten ihren damaligen Stand.
 
 [Aufgabenbezogene Modellwahl und lokale Einrichtung](LOKALE-MODELLE.md) · [Prüfbericht 0.15.0](PRUEFUNG-0.15.0.md)
 
@@ -51,3 +51,5 @@ Softwareversion, Projektformat und historischer Prüfstand sind unterschiedliche
 **0.19.0:** Passwortgeschützter lokaler Schlüsseltresor mit ausdrücklichem Speichern/Entsperren; keine Klartextschlüssel im Browserspeicher. [Anleitung und Grenzen](ANBIETER.md#optionaler-schlüsseltresor-seit-0190).
 
 **0.20.0:** Tresorpasswortwechsel mit Erhalt des gespeicherten Bestands und ausdrückliche Sitzungssperre einschließlich Anfrageabbruch. [Anleitung](ANBIETER.md) · [Prüfbericht](PRUEFUNG-0.20.0.md).
+
+**0.21.0:** Lokaler TripoSR-Dienst und Auftragsadapter; echter HTTP-Transport, synthetisches Backend im Test. Keine GPU-/Qualitätsabnahme und noch keine Generierungsoberfläche. [Einrichtung](KI-GENERIERUNG.md#lokaler-generierungsdienst-seit-0210) · [Prüfbericht](PRUEFUNG-0.21.0.md).

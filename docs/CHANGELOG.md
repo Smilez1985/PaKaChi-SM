@@ -12,6 +12,23 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.21.0] - 2026-10-17
+
+Zeitstempel: 2026-10-17T12:07:48+02:00 (Europe/Berlin)
+
+### Added
+
+- Ausdrücklich startbarer lokaler TripoSR-HTTP-Dienst (`npm run serve:generator`) mit Token, exaktem Origin-/Hostabgleich, begrenzten PNG-/JPEG-Uploads, einem aktiven Auftrag und unveränderten lokalen Ergebnisberichten.
+- Separat registrierbarer `custom-generation`-Adapter für den Auftragskern: Fähigkeiten-/Modellprüfung, begrenzte GLB-Antwort, Abbruchsignal und weiterhin verpflichtende Ergebnisvalidierung. Kein automatischer Projektwechsel.
+- Fünf Integrationstests für echten HTTP-Transport bis zur GLB-Prüfung, Zugriffsschutz, Fehlerantworten, parallele Aufträge, Verbindungsabbruch, Antwortgrenzen und Subprozessabbruch. Inferenzbackend im Test synthetisch.
+
+### Changed
+
+- Lokaler Generatorprozess und Python-Vorprüfung nehmen Abbruchsignale entgegen; Zeitlimit/Abbruch signalisiert Prozessende mit erzwungener Beendigung als Rückfall.
+- README, Design, Roadmap, Auftragsvertrag, Einrichtung und Prüfstand auf den Transport-Meilenstein abgeglichen.
+
+**Grenzen:** Noch keine Generierungsoberfläche, echte GPU-Inferenz, Qualitätsabnahme oder Rigging. TripoSR ist bildgeführt; Prompts steuern dieses Verfahren nicht. Keine Garantie für vollständigen Prozessbaum-Stopp. 118 Tests und Produktionsbuild bestanden.
+
 ## [0.20.0] - 2026-10-17
 
 Zeitstempel: 2026-10-17T03:02:46+02:00 (Europe/Berlin)
@@ -463,3 +480,5 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 [0.2.0]: https://github.com/Smilez1985/PaKaChi-SM/compare/4c54448062977dbee105fe553f5ce1617a788f7f...379e517b58280e3aa94b5a2b382002faf7f8befe
 [0.1.0]: https://github.com/Smilez1985/PaKaChi-SM/compare/2fd20e09bb518f1e3edde27e060209c57a56f103...4c54448062977dbee105fe553f5ce1617a788f7f
 [0.0.1]: https://github.com/Smilez1985/PaKaChi-SM/tree/2fd20e09bb518f1e3edde27e060209c57a56f103
+
+[0.21.0]: ./PRUEFUNG-0.21.0.md

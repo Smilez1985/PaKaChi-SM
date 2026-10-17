@@ -16,7 +16,7 @@
     "vite": "8.3.4"
   },
   "name": "pakachi-sm",
-  "version": "0.20.0",
+  "version": "0.21.0",
   "private": true,
   "type": "module",
   "description": "PaKaChi StateMaschine \u2013 lokaler Avatar-Player und integriertes Studio",
@@ -36,6 +36,7 @@
     "mcp:legacy": "node server/mcp.mjs",
     "test:python": "node --test tests/integration/*.test.ts",
     "generate:model": "node scripts/generate-model.mjs",
-    "setup:ollama": "node scripts/setup-ollama.mjs"
+    "setup:ollama": "node scripts/setup-ollama.mjs",
+    "serve:generator": "node server/generation.mjs"
   }
 }

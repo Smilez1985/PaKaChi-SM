@@ -1,6 +1,6 @@
 # Anbieter, Modelle und Fallbacks
 
-**Stand 0.20.0.** Alle Anbieter können gleichzeitig eingerichtet bleiben. Ein Profil bezeichnet eine konkrete Kombination aus Anzeigename, Schnittstelle, API-Adresse und Modell. Für mehrere Modelle desselben Anbieters mehrere Profile anlegen. Alle Profile lassen sich unabhängig den Rollen **Assistent**, **3D-Generator** und **Rigging-Dienst** zuordnen.
+**Stand 0.21.0.** Alle Anbieter können gleichzeitig eingerichtet bleiben. Ein Profil bezeichnet eine konkrete Kombination aus Anzeigename, Schnittstelle, API-Adresse und Modell. Für mehrere Modelle desselben Anbieters mehrere Profile anlegen. Alle Profile lassen sich unabhängig den Rollen **Assistent**, **3D-Generator** und **Rigging-Dienst** zuordnen.
 
 ## Einrichtung
 
@@ -35,7 +35,7 @@ Die Reihenfolge lautet Hauptprofil → erster Fallback → zweiter Fallback usw.
 
 Der Assistent wechselt bei Netzwerk-/HTTP-Fehlern, fehlender Anmeldung, Zeitlimit, leerer/abgeschnittener Antwort oder nicht unterstütztem Adapter zum nächsten eingetragenen Profil. Bei Abbruch, veraltetem Studio-Stand oder ungültigen Werkzeugbefehlen erfolgt **kein** Fallback. Pro Profil gelten bis zu fünf API-Runden; ein Zeitlimit kann serverseitige Arbeit nicht zurücknehmen. Deshalb können fehlgeschlagene Cloud-Versuche bereits Kosten verursacht haben. Keine zusätzlichen Anbieter außerhalb der konfigurierten Liste werden gewählt.
 
-Für Generator und Rigging werden eigene Routen gespeichert. Deren produktive Fachadapter und Fallback-Ausführung sind noch nicht integriert. Eine Rollenzuordnung macht aus einem Sprachmodell keinen Fachgenerator.
+Für Generator und Rigging werden eigene Routen gespeichert. Seit 0.21.0 gibt es einen separat registrierbaren lokalen TripoSR-Adapter für den Auftragskern; seine Studio-Bedienoberfläche, Rigging und die Fach-Fallback-Ausführung sind noch nicht integriert. [Lokaler Dienst](KI-GENERIERUNG.md#lokaler-generierungsdienst-seit-0210). Eine Rollenzuordnung macht aus einem Sprachmodell keinen Fachgenerator.
 
 ## Anthropic und Verbindungsgrenzen
 

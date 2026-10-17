@@ -43,7 +43,7 @@ export function removeProviderProfile(config:ProviderConfig,id:string):ProviderC
 }
 
 // Adapter transport and credentials belong outside the persisted profile.
-// No built-in network adapters are installed; execution is supplied by each adapter.
+// Registration is explicit; e.g. generation-adapter supplies the local image-to-3D transport.
 export type Capability = 'tool-calling'|'image-to-3d'|'rigging';
 export interface ProviderAdapter {
   id:ProviderProfile['adapter'];

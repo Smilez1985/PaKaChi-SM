@@ -4,7 +4,7 @@ Teil der [Blaupause](README.md) · [Roadmap](ROADMAP.md) · [Changelog](CHANGELO
 
 ## Status und Begriffe
 
-Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.20.0: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau und KI-Generierung bleiben Entwicklungsziele.
+Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.21.0: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau und KI-Generierung bleiben Entwicklungsziele.
 
 - **PaKaChi:** Panda-KI-Chimera, das übergeordnete Projekt.
 - **PaKaChi-SM:** StateMaschine mit Avatar-Player und integriertem Studio.
@@ -259,3 +259,11 @@ Seit 0.20.0: Ein expliziter Tresorpasswortwechsel entschlüsselt ausschließlich
 ### Sitzungssperre (0.20.0)
 
 Die explizite Sperre löscht den verwendbaren Schlüsselzustand der aktuellen Seite einschließlich Entwürfen, leert Passwortfelder und invalidiert laufende Tresoroperationen sowie Modelllisten- und Assistentenantworten. Sie verändert weder gespeicherte Profile noch den verschlüsselten Tresor. Neues Entsperren stellt gespeicherte Schlüssel wieder her; ungespeicherte Sitzungsschlüssel sind verloren. Bereits gesendete Serveranfragen können weiterlaufen. Keine Tab-übergreifende Anwendungssperre und keine zugesicherte physische Speicherlöschung. Ältere Angaben zu fehlendem Passwortwechsel bzw. fehlender Sitzungssperre sind durch 0.20.0 abgelöst.
+
+### Lokaler Generatortransport (0.21.0)
+
+Der lokale TripoSR-Wrapper ist über einen ausdrücklich gestarteten Loopback-HTTP-Dienst erreichbar. Python-Pfad, Backend-Ordner, Gerät und Auflösung bestimmt der Betreiber beim Start; Browseranfragen enthalten ausschließlich PNG-/JPEG-Bytes. Token, exakter Studio-Origin und Hostprüfung begrenzen den Zugriff. Pro Dienst läuft höchstens eine Generierung; Berichte und Ergebnisse bleiben in getrennten lokalen Auftragsordnern.
+
+Der separat registrierbare `custom-generation`-Adapter prüft das Protokoll und das Modell `triposr`, liefert GLB-Bytes an den bestehenden Auftragskern und verwendet dessen verpflichtende Ergebnisprüfung sowie Revisionsschutz. Er behauptet weder Rigging noch Promptverständnis: TripoSR rekonstruiert aus einem Bild; der Auftrags-Prompt ist nur eine Bezeichnung. Fähigkeiten bestätigen den Transportvertrag, nicht installierte Gewichte oder eine erfolgreiche Inferenz. Die Laufzeitvorprüfung erfolgt vor jedem Generierungslauf.
+
+Abbruch beendet das lokale Warten und signalisiert dem gestarteten Python-Prozess das Ende, bei Bedarf gefolgt von erzwungener Beendigung. Ein vollständiger Prozessbaum-Stopp ist nicht garantiert; der Auftragskern behält daher seine vorsichtige Abbruchmeldung. Noch keine Registrierung in der sichtbaren Studio-Oberfläche, keine automatische Anbieterfallback-Ausführung für Geometrie, keine Live-Inferenzabnahme. Als Nächstes: Bildauswahl, getrennte Modellvorschau und ausdrückliche Projektübernahme integrieren.

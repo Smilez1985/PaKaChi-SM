@@ -78,3 +78,29 @@ Der gesamte Backend-Code und die Gewichte sind noch nicht auf feste Revisionen g
 - Umgebungsprüfung ausgeführt: Python vorhanden; TripoSR, PyTorch und weitere Generierungsabhängigkeiten fehlen, CUDA nicht verfügbar.
 - Vier automatisierte Tests prüfen mit synthetischer Geometrie die echte Player-Ladung und mit simuliertem Backend den Ablauf, getrennte Ergebnisordner, Vorprüfungsblockaden und Fehlerberichte.
 - **Nicht durchgeführt:** TripoSR-Inferenz, Qualitätsvergleich, anatomisches Rigging, 3D-Transformation, visuelle Freigabe.
+
+## Lokaler Generierungsdienst seit 0.21.0
+
+Für Entwickler verbindet `server/generation.mjs` den bestehenden Wrapper mit dem Auftragskern. **Es gibt dafür noch keinen Generierungsbutton im Studio.** Installation, Python-Umgebung und Modellqualität unterliegen weiterhin den oben beschriebenen Voraussetzungen. Der Start installiert nichts und startet keine Inferenz. Der erste tatsächliche Auftrag kann weiterhin Gewichte herunterladen.
+
+Beispiel für Bash, nach Einrichtung und Prüfung der TripoSR-Umgebung:
+
+```bash
+export PAKACHI_GENERATION_TOKEN="$(node -e "process.stdout.write(require('node:crypto').randomBytes(32).toString('hex'))")"
+npm run serve:generator -- --repo /pfad/zu/TripoSR --python /pfad/zur/venv/bin/python --origin http://127.0.0.1:5173
+```
+
+Der Schlüssel wird nicht vom Dienst ausgegeben. Der aufrufende Client braucht denselben Token; nicht in Projektdateien oder Git speichern. Standardadresse: `http://127.0.0.1:8766`. Mit `--port`, `--output`, `--device cpu`, `--resolution` und `--timeout` lassen sich Port, Ergebnisordner, expliziter CPU-Betrieb, Rekonstruktionsauflösung und Prozesszeitlimit ändern. Voreinstellung: CUDA, Auflösung 256, 1800 Sekunden. Dienst-Zeitlimit höchstens 3600 Sekunden. Falls Vite einen anderen Port nutzt oder über `localhost` geöffnet wird, `--origin` exakt entsprechend setzen. Der Dienst bindet ausschließlich an IPv4-Loopback; kein LAN-/Cloud-Server.
+
+| Anfrage | Vertrag |
+| --- | --- |
+| `GET /capabilities` | Mit `Authorization: Bearer TOKEN`; Protokoll `pakachi-generation-v1`, Modell `triposr`, Fähigkeit `image-to-3d`; keine Laufzeit-/GPU-Zusage. |
+| `POST /generate` | Derselbe Header; Content-Type `image/png` oder `image/jpeg`, rohe Bildbytes bis 20 MiB. Keine Dateipfade, Shellbefehle oder Backendparameter aus dem Browser. |
+| Erfolg | Eigenständige, durch den Wrapper geladene GLB, Content-Type `model/gltf-binary`, höchstens 50 MiB. Weiterhin visuell ungeprüft und ohne zugesichertes Rig. |
+| Fehler | Generischer JSON-Fehler ohne Python-Pfade, Logs oder Zugangsdaten; 401 bei fehlendem Token, 403 bei falschem Origin/Host, 409 bei belegtem Generator, 413/415 bei unzulässiger Eingabe, 502 bei Backendfehlern. Details stehen lokal in vorhandenen Auftragsberichten. |
+
+PNG-/JPEG-Signaturen werden vor dem Backend geprüft; die Bilddekodierung übernimmt anschließend TripoSR. Nur der konfigurierte Browser-Origin erhält CORS-Freigabe. CLI-Clients ohne Origin brauchen ebenfalls den Token. Die Hostprüfung erwartet `127.0.0.1:PORT`. Pro Dienst gibt es einen aktiven Auftrag und keine Warteschlange. Beim Verbindungsabbruch wird der Prozessabbruch ausgelöst; ein vollständiger Stopp möglicher Kindprozesse wird nicht zugesichert. Temporäre Uploadordner werden nach dem Auftrag entfernt; Quellenkopien, Berichte und Modelle bleiben wie beim bisherigen CLI unter `generated/` erhalten.
+
+Der Browseradapter `createLocalGenerationAdapter` kann in einer eigenen `ProviderRegistry` registriert werden; [Auftragsvertrag](AUFTRAE.md#lokaler-fachadapter). Er prüft Zieladresse, Modell, Protokoll, Antwortgröße und GLB-Header; die verpflichtende vollständige Ergebnisprüfung bleibt beim Auftrag. Der aktuelle Adapter unterstützt ausschließlich diesen lokalen Vertrag, keine beliebigen Dienste mit dem Namen `custom-generation`. Cloud-Fachadapter bleiben separat zu implementieren.
+
+**Nachweis:** Echter Loopback-HTTP-Verkehr vom Adapter durch den Dienst und den bestehenden Wrapper bis zur GLB-Prüfung; das Python-Inferenzbackend wird im Test durch eine synthetische Dreiecksdatei ersetzt. Damit sind weder TripoSR-Ausgabequalität, GPU-Betrieb noch Browser-CORS-/WebGL-Bedienung live abgenommen. Nächster Schritt ist die sichtbare Bildauswahl mit getrennter Ergebnisvorschau und ausdrücklicher Übernahme.

@@ -2,7 +2,7 @@
 
 **SM steht für StateMaschine.** PaKaChi ist die **Panda-KI-Chimera**, das übergeordnete Projekt. PaKaChi-SM vereint Avatar-Player, Model Zoo und das fest integrierte **PaKaChi-Avatar-Studio**.
 
-**Softwarestand: 0.20.0 · Entwicklungsstand, keine fertige Bild-zu-3D-Lösung.**
+**Softwarestand: 0.21.0 · Entwicklungsstand, keine fertige Bild-zu-3D-Lösung.**
 
 Der bestehende PaKaChi mit Tierform, humanoider Arbeitsform und allen 72 Transformationsbildern ist erhalten und beim Start ausgewählt. Mika und Nori sind separate technische 3D-Testavatare. Ein 3D-Modell des Original-PaKaChi und die KI-Generierung stehen noch aus.
 
@@ -27,6 +27,8 @@ Mika/Nori frisch auswählen: Hand ziehen beugt Schulter/Ellenbogen, Fuß ziehen 
 
 ## Experimenteller Bild-zu-3D-Testlauf
 
+Seit 0.21.0 ergänzt `npm run serve:generator` einen tokengeschützten lokalen TripoSR-Dienst und einen Adapter für den Auftragskern. Noch keine Bedienoberfläche dafür; [Einrichtung und Entwicklervertrag](docs/KI-GENERIERUNG.md#lokaler-generierungsdienst-seit-0210).
+
 Seit 0.12.0 gibt es `npm run generate:model` für eine eingerichtete lokale TripoSR-Umgebung: Vorprüfung, Generierungsaufruf und GLB-/Ergebnisbericht. **Noch keine Studio-Generierungsoberfläche und noch kein erzeugter Original-PaKaChi in 3D.** Hier wurde der Ablauf mit Testdaten geprüft; echte Inferenz ist mangels KI-Laufzeit/GPU offen. [Einrichtung, beide Vorlagen und genaue Prüfgrenzen](docs/KI-GENERIERUNG.md).
 
 ## Anbieter und Modelle
@@ -47,11 +49,11 @@ Für die optionale lokale Ollama-Einrichtung: **Ollama-Einrichten.cmd** oder `np
 
 Seit **0.16.0** gibt es unterhalb der Agentensteuerung den aufklappbaren **KI-Assistenten**: Aufgabe an das zugeordnete Modell senden, Studio-Metadaten bei Bedarf abfragen lassen und einen konkreten Änderungsvorschlag prüfen. Erst **Übernehmen** führt ihn mit Studio-Freigabe und Revisionsprüfung aus; Undo bleibt verfügbar. Ollama, LM Studio, passende OpenAI-kompatible APIs sowie seit 0.17.0 Anthropic Messages werden unterstützt. Keine Bilder, keine automatische 3D-/Rigging-Ausführung. [Bedienung und Grenzen](docs/ASSISTENT.md).
 
-Seit 0.14.0 besteht zusätzlich der interne [Auftragskern](docs/AUFTRAE.md): feste Anbieterwahl pro Auftrag, Fortschritt, Zeitlimit, Abbruch, Ergebnisprüfung und revisionsgeschützte Übernahme. Er ist mit simulierten Adaptern geprüft; die sichtbare Generierungs-/Vorschauoberfläche und echte Dienste sind noch nicht angeschlossen.
+Seit 0.14.0 besteht zusätzlich der interne [Auftragskern](docs/AUFTRAE.md): feste Anbieterwahl pro Auftrag, Fortschritt, Zeitlimit, Abbruch, Ergebnisprüfung und revisionsgeschützte Übernahme. Seit 0.21.0 verbindet ein lokaler HTTP-Dienst den vorhandenen TripoSR-Wrapper mit einem Fachadapter für diesen Kern. Der Transport ist mit echtem HTTP und einer synthetischen Backend-Ausgabe geprüft; GPU-Inferenz und die sichtbare Generierungs-/Vorschauoberfläche stehen aus.
 
 ## Was aktuell funktioniert
 
-| Bereich | Stand 0.20.0 |
+| Bereich | Stand 0.21.0 |
 | --- | --- |
 | Player | Avatar-Auswahl, tatsächliche Bewegungen anzeigen, abspielen, pausieren, Tempo und Abspielposition ändern. |
 | Modelle | Mika/Nori mit Skeletten und Clips; eigene eigenständige GLB-Dateien laden oder hineinziehen, bis 50 MiB, lokal für die Sitzung. |
@@ -129,7 +131,7 @@ npx playwright install chromium
 npm run test:e2e
 ```
 
-Für 0.20.0 sind 113 Tests und der Build bestanden. Die unveränderten Original-Testprogramme wurden zuletzt in 0.9.0 geprüft. Die visuelle WebGL-/Mausabnahme ist wegen der Chromium-Startbeschränkung der bisherigen Ausführungsumgebung noch offen. Die reale Python-MCP-/MQTT-Integration mit Studio-Editor wurde zuletzt in 0.10.0 erfolgreich geprüft. Details und frühere Nachweise stehen im [Prüfstand](docs/PRUEFUNG.md).
+Für 0.21.0 sind 118 Tests und der Build bestanden. Die unveränderten Original-Testprogramme wurden zuletzt in 0.9.0 geprüft. Die visuelle WebGL-/Mausabnahme ist wegen der Chromium-Startbeschränkung der bisherigen Ausführungsumgebung noch offen. Die reale Python-MCP-/MQTT-Integration mit Studio-Editor wurde zuletzt in 0.10.0 erfolgreich geprüft. Details und frühere Nachweise stehen im [Prüfstand](docs/PRUEFUNG.md).
 
 ## Lizenz
 
