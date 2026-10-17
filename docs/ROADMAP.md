@@ -1,6 +1,6 @@
 # Roadmap – was kommt
 
-**Softwarestand: 0.22.0 · Abgleich: 17.10.2026.** Teil der [Blaupause](README.md).
+**Softwarestand: 0.23.0 · Abgleich: 17.10.2026.** Teil der [Blaupause](README.md).
 
 Ein Häkchen bedeutet implementiert; es ersetzt keine visuelle oder externe Live-Abnahme. Die Nachweise und Prüfgrenzen stehen im [Prüfstand](PRUEFUNG.md). Die Versionshistorie gehört ins [Changelog](CHANGELOG.md).
 
@@ -9,7 +9,7 @@ Ein Häkchen bedeutet implementiert; es ersetzt keine visuelle oder externe Live
 1. **Korrekturen 0.11.0/0.11.1 visuell nachprüfen:** Drehung um die Figurenmitte auch nach Zoom/Pan sowie vollständige Körperverbindungen, Hand-/Fußziele, Rumpfbewegung und direktes Drehen. Nutzertest 0.10.0 meldete auseinanderziehbare Knochen und unbrauchbare Ausrichtung; diese Fehler sind technisch korrigiert, die erneute Nutzerabnahme steht aus. Anschließend Mausnavigation, kleine Gesichtspunkte, Gesamtverschiebung, Speichern/Laden und Agentensteuerung in einer lauffähigen Browserumgebung prüfen.
 2. **Gelenkbearbeitung vervollständigen:** echte Quellknochen hinzufügen/löschen, Hautgewichte zuordnen und vorhandene Moves nach Änderungen prüfen. Erst damit wird das Beispiel „fehlendes Knie ergänzen und beugen“ vollständig erfüllt.
 3. **Studio-Harness anbinden:** auf den Profilen und der Rollen-/Fähigkeitsprüfung aus 0.13.0 aufbauen; Modellauflistung ist seit 0.15.0 vorhanden. Assistenten-Inferenz für Ollama/OpenAI-kompatible APIs ist seit 0.16.0 vorhanden. Als Nächstes reale Modell-/Werkzeugqualität prüfen sowie native Cloud-Anmeldung und Fachadapter ergänzen. Details und Abnahme in Abschnitt 7.
-4. **Aufträge und KI-Verfahren integrieren:** den seit 0.22.0 sichtbaren lokalen Generierungsablauf live prüfen, projektübergreifendes Undo ergänzen, weitere Generator-/Rigging-Adapter ergänzen, echte Inferenz und Qualität prüfen, anschließend Korrekturvorschau und Übernahme integrieren. Vorhandene Skelettdaten auszulesen ist bereits möglich, aber keine KI-Anatomieerkennung.
+4. **Aufträge und KI-Verfahren integrieren:** den seit 0.22.0 sichtbaren lokalen Generierungsablauf live prüfen, den Modellwechsel-Rücksprung aus 0.23.0 visuell prüfen und vollständigen Fehler-Rollback ergänzen, weitere Generator-/Rigging-Adapter ergänzen, echte Inferenz und Qualität prüfen, anschließend Korrekturvorschau und Übernahme integrieren. Vorhandene Skelettdaten auszulesen ist bereits möglich, aber keine KI-Anatomieerkennung.
 
 Diese Reihenfolge ist ein Umsetzungsvorschlag, kein Terminversprechen. Lokale und externe Dienste sowie getrennte Anbieter je Rolle sind als Architektur festgelegt. Die konkreten zuerst unterstützten Verfahren, Hardwareanforderungen und Lizenzen sind noch zu prüfen.
 
@@ -75,7 +75,8 @@ Diese Reihenfolge ist ein Umsetzungsvorschlag, kein Terminversprechen. Lokale un
 - [x] Bildimport per Drag & Drop, lokalen Generatoraufruf, Phasenstatus und Fehlermeldungen anschließen (0.22.0; Inferenz-/Browserabnahme offen).
 - [ ] Freien Korrekturprompt und „Skelett neu versuchen“ integrieren.
 - [x] Getrennte Vorschau übernehmen/verwerfen und bisheriges Modell bis dahin erhalten (0.22.0; Übernahme als revisionsgeschützter Import).
-- [ ] Projektübergreifendes Undo für vollständige Modellwechsel und atomare Übernahme ergänzen.
+- [x] Separaten Rücksprung/Wiederholen für den letzten vollständigen Modellwechsel mit Projektinhalten bereitstellen (0.23.0; ein Sitzungs-Snapshot).
+- [ ] Vollständig atomare Modellübernahme mit Rollback aller bereits erfolgten Host-Änderungen bei Fehlern ergänzen.
 
 **Abnahme:** Ein Bild wird tatsächlich zu einem überprüfbaren, beweglichen Modell. Platzhalter oder nur geladene Skelettdaten erfüllen dieses Ziel nicht.
 
@@ -110,7 +111,7 @@ Beschlossenes Design: [Anbieter, Rollen und Auftragsablauf](KONZEPT.md#11-studio
 - [ ] Optionalen integrierten Assistenten an die validierten Studio-Werkzeuge anschließen; externe MCP-Clients weiter unabhängig unterstützen. Direkte Generierung ohne zusätzlichen LLM-Aufruf ermöglichen.
 - [x] Interne Ergebnisprüfung und Übernehmen/Verwerfen mit Sitzungs-/Revisionsabgleich bereitstellen (0.14.0; noch keine Studio-Transaktion).
 - [x] Formatspezifische Geometrieprüfung und sichtbare Vorschau mit revisionsgeschütztem Import anschließen (0.22.0; DOM-/Geometrietests).
-- [ ] Korrekturprompt und atomare Studio-Übernahme samt projektübergreifendem Undo ergänzen; gesamten Ablauf visuell prüfen.
+- [ ] Korrekturprompt und vollständig atomare Studio-Übernahme ergänzen; den bereits vorhandenen Modellwechsel-Rücksprung im gesamten Ablauf visuell prüfen.
 
 **Abnahme:** Ein Nutzer kann drei unterschiedliche geeignete Dienste konfigurieren, Modelle je Rolle wählen und einen vollständigen Bild-zu-Avatar-Auftrag ausführen. Ein lokaler Ablauf benötigt keinen Cloud-Zugang. Fehler, Abbruch oder ein veraltetes Ergebnis überschreiben keine manuellen Änderungen; Neuversuche wechseln nicht unbemerkt Anbieter oder Kostenquelle. Exporte enthalten keine Zugangsdaten. Die Vorschau zeigt ein tatsächlich bewegliches Modell und wird erst nach Übernahme zum Projektstand.
 

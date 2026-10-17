@@ -1,3 +1,4 @@
+import {ModelSwitchHistory} from './model-switch-history.ts';
 import {mountGenerationPanel} from './generation-panel.ts';
 import type {ProjectRevision} from './ai-jobs.ts';
 import {mountAssistantPanel} from './assistant-panel.ts';
@@ -14,7 +15,7 @@ import { mountAgentPanel } from './agent-panel.ts';
 import { availableMoves, importedAvatar, parseCatalog } from './catalog.ts';
 import type { Avatar, Move } from './catalog.ts';
 import { Playback } from './playback.ts';
-import { disposeModel, parseModel, Viewer } from './viewer.ts';
+import { disposeModel, parseModel, modelBounds, Viewer } from './viewer.ts';
 
 document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
   <aside class="rail">
@@ -24,10 +25,11 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
       <button id="player-tab" class="nav-button active" aria-pressed="true"><span>◉</span> Player</button>
       <button id="studio-tab" class="nav-button" aria-pressed="false"><span>◇</span> Avatar-Studio</button>
     </nav>
-    <div class="rail-bottom"><span class="online-dot"></span> Lokal auf deinem Gerät<p>Entwicklungsstand 0.22.0<br>KI-Anbieter · Vorbereitung</p></div>
+    <div class="rail-bottom"><span class="online-dot"></span> Lokal auf deinem Gerät<p>Entwicklungsstand 0.23.0<br>KI-Anbieter · Vorbereitung</p></div>
   </aside>
   <main>
     <header><div><p class="eyebrow">PAKACHI-SM / <span id="section-label">PLAYER</span></p><h1 id="page-title">Dein Model Zoo<span>.</span></h1><p id="page-intro">Eine Figur auswählen. Eine Bewegung starten. Leben einhauchen.</p></div><button id="project-open" class="button outline">Projekt laden</button><input id="project-file" type="file" accept=".json" hidden><button id="import-button" class="button outline">＋ GLB laden</button><input id="file-input" type="file" accept=".glb" hidden></header>
+    <div class="model-history" data-user-text><button id="model-undo" disabled>Modellwechsel zurück</button><button id="model-redo" disabled>Modellwechsel wiederholen</button><span id="model-history-note"></span></div>
     <div class="notice identity-note"><span>✦</span><p><strong>Dein PaKaChi bleibt PaKaChi.</strong> Beide Formen und alle 72 Transformationsbilder sind im Originalplayer erhalten. Mika und Nori sind ausschließlich technische Testavatare.</p></div>
     <div id="message" role="status" aria-live="polite">Model Zoo wird geladen …</div>
     <div class="workspace">
@@ -75,6 +77,34 @@ let studio = false;
 let modelEpoch=0;
 function generationTarget():ProjectRevision {const info=editor?.inspect();return info?{session:info.session,revision:info.revision}:{session:`model-${modelEpoch}`,revision:0};}
 let editor: StudioEditor | null = null;
+type ModelSnapshot={kind:'original'}|{kind:'project';project:StudioProject;dirty:boolean;identity:Pick<Avatar,'id'|'model'|'rigVersion'>};
+const modelHistory=new ModelSwitchHistory<ModelSnapshot>(value=>JSON.stringify(value).length*2);
+function captureModel():ModelSnapshot|null {
+  if(editor&&loaded)return {kind:'project',project:editor.exportProject(),dirty:editor.dirty,identity:{id:loaded.id,model:loaded.model,rigVersion:loaded.rigVersion}};
+  return original?{kind:'original'}:null;
+}
+function renderModelHistory(){
+  const blocked=busy||!!editor?.interactionActive;
+  el<HTMLButtonElement>('model-undo').disabled=blocked||!modelHistory.canUndo;
+  el<HTMLButtonElement>('model-redo').disabled=blocked||!modelHistory.canRedo;
+  el('model-undo').textContent=options.language==='de'?'Modellwechsel zurück':'Undo model switch';
+  el('model-redo').textContent=options.language==='de'?'Modellwechsel wiederholen':'Redo model switch';
+  el('model-history-note').textContent=options.language==='de'?'Letzter Modellwechsel · nur diese Sitzung':'Last model switch · this session only';
+}
+async function travelModel(direction:'undo'|'redo'){
+  if(busy||editor?.interactionActive)return;
+  try{
+    const current=captureModel();if(!current)return;
+    const expected=generationTarget();
+    const accepted=await modelHistory.travel(direction,current,async(snapshot,valid)=>{
+      const guard=()=>{const now=generationTarget();return valid()&&!editor?.interactionActive&&now.session===expected.session&&now.revision===expected.revision;};
+      if(snapshot.kind==='original')return guard()&&showOriginal(false);
+      return loadAvatar(undefined,undefined,snapshot.project,guard,{remember:false,confirm:false,dirty:snapshot.dirty,identity:snapshot.identity});
+    });
+    if(!accepted)message(options.language==='de'?'Modellwechsel nicht ausgeführt; Projektstand prüfen.':'Model switch not applied; check the project state.',true);
+  }catch{message(options.language==='de'?'Modellwechsel konnte nicht wiederhergestellt werden.':'Could not restore the model switch.',true);}
+  finally{renderModelHistory();}
+}
 const transport = () => editor?.playing ? editor : playback;
 function mayReplace(): boolean { return !editor?.dirty || window.confirm(translate("Ungespeicherte Studio-Änderungen verwerfen? Mit Abbrechen kannst du zuerst das Projekt speichern.")); }
 function resumeBase(): void {
@@ -155,6 +185,7 @@ function changeView(edit: boolean): void {
 }
 
 function syncPlayback(): void {
+  renderModelHistory();
   el<HTMLButtonElement>('pause').disabled = busy || !transport()?.current;
   el<HTMLInputElement>('timeline').disabled = busy || !transport()?.current;
   el('pause').textContent = transport()?.paused ? '▶ Weiter' : 'Ⅱ Pause';
@@ -174,7 +205,7 @@ function renderCatalog(): void {
   el('avatar-cards').replaceChildren();
   const originalCard = document.createElement('button'); originalCard.className = `avatar-card original-card ${original ? 'selected' : ''}`;
   originalCard.textContent = '✦ PaKaChi · beide Formen'; originalCard.setAttribute('aria-pressed', String(original));
-  originalCard.onclick = showOriginal; el('avatar-cards').append(originalCard);
+  originalCard.onclick = ()=>{showOriginal();}; el('avatar-cards').append(originalCard);
   catalog.forEach(avatar => {
     select.add(new Option(avatar.name, avatar.id));
     const button = document.createElement('button');
@@ -209,8 +240,12 @@ function renderMoves(moves: Move[]): void {
   if (!moves.length) el('moves').textContent = 'Dieses Modell enthält keine abspielbaren Bewegungen.';
 }
 
-function showOriginal(): void {
-  if(!mayReplace()){renderCatalog();return;}
+function showOriginal(remember=true): boolean {
+  if(original&&!busy)return true;
+  if(editor?.interactionActive){message('Studio-Bewegung zuerst beenden.',true);return false;}
+  if(remember&&!mayReplace()){renderCatalog();return false;}
+  let commitHistory:(()=>void)|undefined;
+  try{const before=remember?captureModel():null;if(before)commitHistory=modelHistory.checkpoint(before);}catch{message('Modellwechsel konnte nicht gesichert werden.',true);return false;}
   editor?.dispose();editor=null;
   request++; fetchController?.abort(); busy = false;
   playback?.dispose(); playback = null; viewer?.clear(); loaded = null;
@@ -222,10 +257,12 @@ function showOriginal(): void {
   connectOriginal();
   renderCatalog(); changeView(studio);
   message('PaKaChi · Originalstand wiederhergestellt · 72 Bilder · Tierform ↔ Arbeitsform');
+  commitHistory?.();renderModelHistory();return true;
 }
 
-async function loadAvatar(avatar?: Avatar, file?: File, project?: StudioProject, valid:()=>boolean=()=>true): Promise<boolean> {
-  if(!valid()||!mayReplace()||!valid()){renderCatalog();return false;}
+async function loadAvatar(avatar?: Avatar, file?: File, project?: StudioProject, valid:()=>boolean=()=>true, restore:{remember?:boolean;confirm?:boolean;dirty?:boolean;identity?:Pick<Avatar,'id'|'model'|'rigVersion'>}={}): Promise<boolean> {
+  if(editor?.interactionActive){message('Studio-Bewegung zuerst beenden.',true);return false;}
+  if(!valid()||(restore.confirm!==false&&!mayReplace())||!valid()){renderCatalog();return false;}
   const token = ++request;
   fetchController?.abort();
   fetchController = new AbortController();
@@ -247,7 +284,7 @@ async function loadAvatar(avatar?: Avatar, file?: File, project?: StudioProject,
     }
     const gltf = await parseModel(buffer);
     if (token !== request||!valid()) { disposeModel(gltf.scene); return false; }
-    const next: Avatar = project ? {...project.avatar,id:'local-import',model:'',rigVersion:'studio-1'} : file ? importedAvatar(file.name, gltf.animations.map(c => c.name)) : avatar!;
+    const next: Avatar = project ? {...project.avatar,id:restore.identity?.id??'local-import',model:restore.identity?.model??'',rigVersion:restore.identity?.rigVersion??'studio-1'} : file ? importedAvatar(file.name, gltf.animations.map(c => c.name)) : avatar!;
     const moves = availableMoves(next, gltf.animations.map(c => c.name));
     // Validate visible geometry before replacing a working avatar.
     const hasMesh = gltf.scene.getObjectsByProperty('isMesh', true).length > 0;
@@ -255,6 +292,9 @@ async function loadAvatar(avatar?: Avatar, file?: File, project?: StudioProject,
     // Check studio/model compatibility before replacing the current avatar.
     let bones=0, meshes=0;gltf.scene.traverse(n=>{if(n.type==='Bone')bones++;if('isMesh' in n)meshes++;});
     if(bones>256 || project && (project.studio.boneRest.length!==bones || project.studio.points.some(p=>p.mesh!==undefined && p.mesh>=meshes))) {disposeModel(gltf.scene);throw new Error('Studio-Daten passen nicht zum Modell oder das Modell hat mehr als 256 Gelenke.');}
+    try{modelBounds(gltf.scene);}catch(error){disposeModel(gltf.scene);throw error;}
+    let commitHistory:(()=>void)|undefined;
+    try{if(editor?.interactionActive)throw new Error('Studio-Bewegung zuerst beenden.');const before=restore.remember!==false?captureModel():null;if(before)commitHistory=modelHistory.checkpoint(before);}catch(error){disposeModel(gltf.scene);throw error;}
     const rig = new StudioRig(gltf.scene, project?.studio);
     const projectSource = {format:'pakachi-studio' as const,version:1 as const,model:project?.model ?? encodeModel(buffer),avatar:{...next,moves}};
     editor?.dispose();editor=null;
@@ -271,7 +311,7 @@ async function loadAvatar(avatar?: Avatar, file?: File, project?: StudioProject,
     renderMoves(moves); renderCatalog();
     el('avatar-name').textContent = next.name;
     el('avatar-description').textContent = next.description;
-    el('model-type').textContent = file ? '3D · EIGENER IMPORT' : '3D · TESTAVATAR';
+    el('model-type').textContent = next.id==='local-import' ? '3D · EIGENER IMPORT' : '3D · TESTAVATAR';
     viewer?.showSkeleton(studio && el<HTMLInputElement>('skeleton').checked);
     const states = Object.fromEntries(Object.entries(next.states ?? {}).filter(([,id])=>moves.some(m=>m.id===id)));
     machine.bind({capability:{id:next.id,name:next.name,moves,states:Object.keys(states)},
@@ -280,6 +320,8 @@ async function loadAvatar(avatar?: Avatar, file?: File, project?: StudioProject,
     else if (next.defaultMove && moves.some(m => m.id === next.defaultMove)) playback.play(next.defaultMove);
     loaded = {...next,moves};refreshCapabilities();
     if(studio)editor.enter();
+    editor.restoreDirty(restore.dirty??false);
+    commitHistory?.();
     const missing = next.moves.length - moves.length;
     message(missing ? `${missing} deklarierte Bewegung(en) fehlen in der Modelldatei und werden nicht angeboten.` : `${next.name} bereit · ${moves.length} Bewegungen · ${(buffer.byteLength / 1024 / 1024).toFixed(2).replace('.', ',')} MB`);
     return true;
@@ -293,6 +335,8 @@ async function loadAvatar(avatar?: Avatar, file?: File, project?: StudioProject,
 }
 
 async function boot(): Promise<void> {
+  el('model-undo').onclick=()=>{void travelModel('undo');};el('model-redo').onclick=()=>{void travelModel('redo');};
+  window.addEventListener('pakachi-options',renderModelHistory);
   const agents = mountAgentPanel(rpc);
   mountAssistantPanel(document.querySelector('.agent-panel')!,rpc,()=>options.language,localStorage);
   const generation=mountGenerationPanel(el('generation-host'),{

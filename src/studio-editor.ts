@@ -216,9 +216,15 @@ export class StudioEditor {
     }
     this.hooks.feedback('Studio-Änderung durch KI übernommen.');return {accepted:true,session:this.session,revision:this.revision,...(resultId?{id:resultId}:{})};
   }
+  restoreDirty(value:boolean){this.dirty=value;this.render();}
+  exportProject():StudioProject {
+    if(this.interactionActive)throw new Error('Studio-Bewegung zuerst beenden.');
+    const studio=structuredClone(this.data);
+    if(this.active)studio.draft=this.rig.capture();
+    return {...structuredClone(this.project),studio};
+  }
   save(){
-    this.data.draft=this.rig.capture();
-    const value:StudioProject={...this.project,studio:structuredClone(this.data)};
+    const value=this.exportProject();
     const url=URL.createObjectURL(new Blob([JSON.stringify(value)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download=`${this.project.avatar.id}.pakachi.json`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);this.dirty=false;this.render();this.hooks.feedback('Studio-Projekt mit Modell, Kontrollpunkten, Posen und Bewegungen heruntergeladen.');
   }
   dispose(){this.view.dispose();this.host.replaceChildren();}

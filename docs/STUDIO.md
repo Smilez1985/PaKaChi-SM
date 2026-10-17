@@ -1,4 +1,4 @@
-# Avatar-Studio – 0.22.0
+# Avatar-Studio – 0.23.0
 
 Das Studio ist Teil des Players. Mika, Nori und eigene GLB-Modelle können bearbeitet werden. Der Original-PaKaChi bleibt mit beiden Formen und 72 Bildern erhalten; für ihn fehlt weiterhin das entsprechende 3D-Modell. Seine Bilder werden durch den Editor nicht verändert.
 
@@ -138,4 +138,19 @@ Seit 0.11.1 bestimmt die aktuelle Modellgeometrie den Mittelpunkt für die mittl
 
 ## Bild zu 3D-Entwurf (0.22.0)
 
-Der Abschnitt **Bild → 3D-Entwurf** ist auch bei ausgewähltem Original-PaKaChi im Studio sichtbar. Er benötigt einen separat eingerichteten lokalen TripoSR-Dienst und das passende Generatorprofil. PNG/JPEG auswählen oder hineinziehen, ausdrücklich generieren, dann die getrennte 3D-Vorschau drehen und zoomen. Erst **Als neuen Avatar laden** ersetzt den aktuellen Projektstand. Vorher speichern: Der vollständige Modellwechsel hat noch kein Undo. **Ergebnis verwerfen** lässt das bisherige Modell bestehen. Anatomisches Rigging erfolgt noch nicht automatisch. [Einrichtung, Schritte und Prüfgrenzen](KI-GENERIERUNG.md#bedienung-im-studio-seit-0220).
+Der Abschnitt **Bild → 3D-Entwurf** ist auch bei ausgewähltem Original-PaKaChi im Studio sichtbar. Er benötigt einen separat eingerichteten lokalen TripoSR-Dienst und das passende Generatorprofil. PNG/JPEG auswählen oder hineinziehen, ausdrücklich generieren, dann die getrennte 3D-Vorschau drehen und zoomen. Erst **Als neuen Avatar laden** ersetzt den aktuellen Projektstand. Seit 0.23.0 lässt sich der letzte vollständige Modellwechsel separat rückgängig machen; Projekte zusätzlich speichern. **Ergebnis verwerfen** lässt das bisherige Modell bestehen. Anatomisches Rigging erfolgt noch nicht automatisch. [Einrichtung, Schritte und Prüfgrenzen](KI-GENERIERUNG.md#bedienung-im-studio-seit-0220).
+
+## Modellwechsel zurück und wiederholen (0.23.0)
+
+Oberhalb der Ansicht stehen **Modellwechsel zurück** und **Modellwechsel wiederholen**. Sie beziehen sich auf den letzten Wechsel zwischen Avataren, GLB-/Projektimporten oder einem übernommenen Generierungsentwurf. Die gewohnten Studio-Buttons **Zurück/Wiederholen** bleiben für einzelne Bearbeitungsschritte zuständig.
+
+Der Rücksprung erhält Modellbytes, Avataridentität, Gelenk-/Gesichtspunkte, Verbindungen, aktuelle Entwurfspose, gespeicherte Posen/Moves und die Ungespeichert-Markierung. Beim Wiederholen wird auch der zuletzt bearbeitete Stand der jeweils anderen Figur wieder geladen. Beispielsweise: A bearbeiten → B laden → B bearbeiten → Modellwechsel zurück zu A → Modellwechsel wiederholen zu B einschließlich der neuen B-Änderungen.
+
+- Genau ein Modellwechsel wird gehalten. Eine neue Auswahl oder ein neuer Import ersetzt den älteren Verlauf. Ein fehlgeschlagener Ladeversuch tut das nicht.
+- Nur Arbeitsspeicher dieser Seite; F5/Schließen entfernt den Verlauf. Zusätzlich als Projektdatei speichern.
+- Speichergrenze pro gesichertem Stand: geschätzte 160 MiB (JSON-Zeichenanzahl × 2). Das begrenzt den gespeicherten Snapshot, nicht den gesamten Browser- oder GPU-Speicher. Ein zu großer Stand blockiert den Wechsel, bevor das aktuelle Modell ersetzt wird.
+- Während Studio-Wiedergabe oder einer laufenden Mausgeste erst stoppen/loslassen. Änderungen während asynchroner Wiederherstellung verhindern die veraltete Übernahme.
+- Die Wiederherstellung eröffnet eine neue Editorsitzung. Einzelne frühere Undo-Schritte, Auswahl, Kameraposition und temporäre KI-Bearbeitungsfreigabe werden nicht wiederhergestellt. Die Projektinhalte bleiben erhalten.
+- Beim Original-Bildplayer wird die Originalansicht neu gestartet; dessen aktuelle Form-/Abspielposition wird nicht aufgezeichnet. Die 72 Bilder und beide Formen bleiben unverändert verfügbar.
+
+Der Verlauf ist kein dauerhafter Versionsspeicher und keine vollständige atomare Transaktion für beliebige Fehler nach dem eigentlichen Modelltausch. Laden, Zielvergleich, Snapshot-Erzeugung und Geometriegrenzen werden vor dem Austausch geprüft; ein vollumfänglicher Rollback bleibt ein eigener Entwicklungsschritt.

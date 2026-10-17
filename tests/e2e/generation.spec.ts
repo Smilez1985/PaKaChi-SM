@@ -18,4 +18,6 @@ test('image generation keeps original until explicit import of the rendered prev
  await expect(page.locator('.generation-preview canvas')).toBeVisible();await expect(page.locator('#avatar-name')).toContainText('PaKaChi');
  await page.screenshot({path:'/tmp/pakachi-generation-preview.png',fullPage:true});
  await page.locator('#generation-apply').click();await expect(page.locator('#avatar-name')).toContainText('3D-Entwurf');await expect(page.locator('#generation-apply')).toBeHidden();
+ await page.locator('#model-undo').click();await expect(page.locator('#avatar-name')).toContainText('PaKaChi');
+ await page.locator('#model-redo').click();await expect(page.locator('#avatar-name')).toContainText('3D-Entwurf');
 });

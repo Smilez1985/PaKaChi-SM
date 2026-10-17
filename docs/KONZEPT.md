@@ -4,7 +4,7 @@ Teil der [Blaupause](README.md) · [Roadmap](ROADMAP.md) · [Changelog](CHANGELO
 
 ## Status und Begriffe
 
-Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.22.0: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau und KI-Generierung bleiben Entwicklungsziele.
+Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.23.0: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau und KI-Generierung bleiben Entwicklungsziele.
 
 - **PaKaChi:** Panda-KI-Chimera, das übergeordnete Projekt.
 - **PaKaChi-SM:** StateMaschine mit Avatar-Player und integriertem Studio.
@@ -274,4 +274,10 @@ Im integrierten Studio, auch bei ausgewähltem Original-Bildplayer, nimmt ein ei
 
 Das Ergebnis durchläuft den echten GLTFLoader sowie Grenzen für Geometrie, Vertices und Knochen. Eine zweite Viewer-Instanz stellt den Entwurf unabhängig vom aktuellen Avatar dar. Verwerfen, Abbruch, Profilwechsel und Tresorsperre räumen Ergebnis/Vorschau auf; späte Antworten sind unwirksam. Schlüssel werden je Auftrag festgehalten und nicht in Projekte geschrieben. Die Tresorsperre invalidiert auch eine bereits vorbereitete Übernahme.
 
-„Als neuen Avatar laden“ nutzt den bestehenden GLB-Import mit zusätzlichem Sitzungs-/Revisionsvergleich vor und nach asynchronem Laden. Laufende Studio-Gesten oder Wiedergabe blockieren die Übernahme. Ungespeicherte Änderungen lösen weiterhin die vorhandene Rückfrage aus. **Dies ist ein revisionsgeschützter Modellimport, keine atomare projektübergreifende Undo-Transaktion.** Vorher speichern bleibt erforderlich. Automatisches Rigging, Cloud-Geometrieadapter, Fach-Fallbacks, Korrekturprompts und komplette Undo-Übernahme bleiben eigene Roadmap-Punkte.
+„Als neuen Avatar laden“ nutzt den bestehenden GLB-Import mit zusätzlichem Sitzungs-/Revisionsvergleich vor und nach asynchronem Laden. Laufende Studio-Gesten oder Wiedergabe blockieren die Übernahme. Ungespeicherte Änderungen lösen weiterhin die vorhandene Rückfrage aus. **Dies ist ein revisionsgeschützter Modellimport, keine atomare projektübergreifende Undo-Transaktion.** Vorher speichern bleibt erforderlich. Automatisches Rigging, Cloud-Geometrieadapter, Fach-Fallbacks, Korrekturprompts und vollständig atomare Übernahme bleiben eigene Roadmap-Punkte. Ein separater Rücksprung für den letzten Modellwechsel ist seit 0.23.0 vorhanden.
+
+### Reversibler Modellwechsel (0.23.0)
+
+Modellwechsel besitzen einen separaten, auf genau einen vorherigen Stand begrenzten Sitzungsverlauf. Vor dem Austausch wird eine isolierte Projektaufnahme mit Entwurfspose, Punkten/Verbindungen, Posen/Moves, Avataridentität und Ungespeichert-Markierung vorbereitet. Nur ein erfolgreicher Austausch aktiviert den neuen Rücksprungpunkt. Zurück/Wiederholen tauscht den gespeicherten Stand mit dem aktuellen Projekt; dadurch bleiben auch spätere Änderungen am jeweils anderen Modell erhalten. Fehlgeschlagene oder veraltete Wiederherstellung verbraucht den Verlauf nicht.
+
+Der Snapshot wird vor dem Austausch gegen eine geschätzte 160-MiB-Grenze geprüft. Original-Bildplayer wird als eigener Zieltyp geführt; seine aktuelle Animationsphase wird nicht gesichert. Wiederherstellung erstellt eine neue Editorsitzung und erteilt keine frühere KI-Freigabe erneut. Einzelgesten-Undo, Kamera und Auswahl werden nicht rekonstruiert. Der Modellwechsel ist reversibel, aber noch keine vollständig atomare Host-Transaktion mit Rollback beliebiger Fehler während der Installation.

@@ -12,6 +12,24 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.23.0] - 2026-10-17
+
+Zeitstempel: 2026-10-17T17:12:59+02:00 (Europe/Berlin)
+
+### Added
+
+- „Modellwechsel zurück“ und „Modellwechsel wiederholen“ für den letzten Avatar-/Projektwechsel, einschließlich übernommener Generierungsentwürfe und Rückkehr zum Original-Bildplayer.
+- Begrenzter Sitzungsverlauf mit vollständigen Projektinhalten, Entwurfspose, Avataridentität und Ungespeichert-Markierung. Änderungen nach einem Wechsel bleiben beim Zurück-/Wiederholen erhalten; fehlgeschlagene Wiederherstellung verbraucht den Verlauf nicht.
+- Sechs neue Tests für Verlauf, Race-/Fehlerfälle, Speichergrenze, Projektaufnahme/-rekonstruktion und Geometrieabweisung vor Viewer-Freigabe. Vorbereiteter Browserablauf um Zurück/Wiederholen erweitert.
+
+### Changed
+
+- Isolierte Studio-Projektaufnahme ohne Download oder Dirty-Reset; Wiederherstellung lädt eine neue Editorsitzung und bewahrt die Avataridentität.
+- Modellgrenzen werden vor dem Freigeben der bestehenden Viewer-Figur geprüft. Neue Wechsel werden erst nach erfolgreicher Installation in den Verlauf eingetragen.
+- README, Blaupause, Studio-/Generierungsanleitung, Architektur und Prüfstand aktualisiert.
+
+**Grenzen:** 130 Tests und Build bestanden. Genau ein Rücksprungpunkt im Arbeitsspeicher, keine Wiederherstellung nach F5; Snapshotgrenze geschätzt 160 MiB. Keine alte Einzelgesten-Historie, Kamera, Agentenfreigabe oder Originalplayer-Abspielposition. Vollständig atomarer Fehler-Rollback, Browserabnahme, echte GPU-Inferenz und Rigging bleiben offen.
+
 ## [0.22.0] - 2026-10-17
 
 Zeitstempel: 2026-10-17T12:25:46+02:00 (Europe/Berlin)
@@ -502,3 +520,5 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 [0.21.0]: ./PRUEFUNG-0.21.0.md
 
 [0.22.0]: ./PRUEFUNG-0.22.0.md
+
+[0.23.0]: ./PRUEFUNG-0.23.0.md

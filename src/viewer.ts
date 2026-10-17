@@ -50,6 +50,12 @@ export async function parseModel(buffer: ArrayBuffer): Promise<GLTF> {
   return gltf;
 }
 
+export function modelBounds(root:THREE.Object3D):THREE.Box3 {
+  root.updateMatrixWorld(true);const bounds=new THREE.Box3().setFromObject(root),size=bounds.getSize(new THREE.Vector3());
+  if(!Number.isFinite(size.length())||size.length()===0)throw new Error('Das Modell enthält keine sichtbare Geometrie.');
+  return bounds;
+}
+
 export class Viewer {
   private readonly renderer: THREE.WebGLRenderer;
   private readonly scene = new THREE.Scene();
@@ -115,12 +121,10 @@ export class Viewer {
   }
 
   show(root: THREE.Object3D): void {
+    const bounds = modelBounds(root);
     this.clear();
-    root.updateMatrixWorld(true);
-    const bounds = new THREE.Box3().setFromObject(root);
     const size = bounds.getSize(new THREE.Vector3());
     const center = bounds.getCenter(new THREE.Vector3());
-    if (!Number.isFinite(size.length()) || size.length() === 0) throw new Error('Das Modell enthält keine sichtbare Geometrie.');
     // Normalize through a parent, preserving root animation coordinates and skeleton binding.
     const scale = 2.4 / Math.max(size.x, size.y, size.z);
     this.holder.scale.setScalar(scale);
