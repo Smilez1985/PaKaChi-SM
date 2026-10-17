@@ -31,3 +31,5 @@ Anthropic nutzt nativ `/v1/messages` mit API-Schlüssel. Werkzeug- und Thinking-
 Seit 0.18.0 zeigt der Assistent die vollständige konfigurierte Route vor dem Senden und den tatsächlich antwortenden Anbieter danach. Schlüssel werden aus den jeweiligen Profilen übernommen. [Einrichtung und genaue Fallback-Regeln](ANBIETER.md).
 
 Zum dauerhaften Speichern und späteren Entsperren der Profilschlüssel dient der optionale [Schlüsseltresor](ANBIETER.md#optionaler-schlüsseltresor-seit-0190). Der Assistent und seine Fallbacks verwenden danach dieselben Profilschlüssel ohne erneute Eingabe pro Anbieter.
+
+Seit 0.20.0 bricht **Schlüsselsitzung sperren** den lokalen Assistentenlauf ab und verwirft offene/verspätete Vorschläge. Kein weiterer Fallback wird danach gestartet. Der Anbieter kann bereits gesendete Anfragen trotzdem weiterverarbeiten. Profile und Routen bleiben erhalten.

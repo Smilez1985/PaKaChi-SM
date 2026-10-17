@@ -36,3 +36,11 @@ export async function saveVault(profiles:Omit<VaultEntry,'token'>[],session:(pro
  if(!valid()||storage.getItem(VAULT_STORAGE_KEY)!==before)throw new Error('vault-changed');
  storage.setItem(VAULT_STORAGE_KEY,encrypted);return selected.length;
 }
+
+/** Re-encrypt the stored snapshot; do not silently save unrelated session edits. */
+export async function changeVaultPassword(oldPassword:string,newPassword:string,storage:Pick<Storage,'getItem'|'setItem'>,valid=()=>true){
+ const before=storage.getItem(VAULT_STORAGE_KEY);if(!before)throw new Error('missing');
+ const saved=await decryptVault(before,oldPassword),encrypted=await encryptVault(saved,newPassword);
+ if(!valid()||storage.getItem(VAULT_STORAGE_KEY)!==before)throw new Error('vault-changed');
+ storage.setItem(VAULT_STORAGE_KEY,encrypted);return saved.length;
+}

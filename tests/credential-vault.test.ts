@@ -38,3 +38,15 @@ test('unlock restores a saved profile key after restart without exposing it in c
  const deadline=Date.now()+5000;while(host.querySelector<HTMLButtonElement>('#vault-unlock')!.disabled&&Date.now()<deadline)await new Promise(r=>setTimeout(r,10));
  assert.equal(getProviderKey(p),'restored-secret');assert.equal(host.querySelector<HTMLInputElement>('#provider-token')!.value,'restored-secret');assert.ok(!w.localStorage.getItem('pakachi-providers-v1')!.includes('restored-secret'));assert.equal(host.querySelector<HTMLInputElement>('#vault-password')!.value,'');dispose();w.happyDOM.abort();
 });
+
+test('password rotation preserves every stored entry, invalidates old password and rejects stale writes',async()=>{
+ const {changeVaultPassword}=await import('../src/credential-vault.ts');const originalEntries=[entry,{...entry,id:'other',token:'another-secret'}];let raw=await encryptVault(originalEntries,password);const storage={getItem:()=>raw,setItem(_k:string,value:string){raw=value;}};const nextPassword='another long vault password';
+ await changeVaultPassword(password,nextPassword,storage);assert.deepEqual(await decryptVault(raw,nextPassword),originalEntries);await assert.rejects(decryptVault(raw,password));
+ const snapshot=raw;await assert.rejects(changeVaultPassword('wrong long password',password,storage));assert.equal(raw,snapshot);await assert.rejects(changeVaultPassword(nextPassword,password,storage,()=>false));assert.equal(raw,snapshot);
+ await assert.rejects(changeVaultPassword(nextPassword,password,{getItem:()=>raw,setItem(){throw new Error('quota');}}));assert.equal(raw,snapshot);
+});
+test('password change UI rejects mismatched confirmation and wipes new passwords on close',async()=>{
+ const w=new Window();Object.assign(globalThis,{window:w,document:w.document});const host=document.createElement('dialog');document.body.append(host);const dispose=mountCredentialVault(host,w.localStorage,()=> 'en',()=>{},()=>{});
+ host.querySelector<HTMLInputElement>('#vault-password')!.value=password;host.querySelector<HTMLInputElement>('#vault-new-password')!.value='new long passphrase';host.querySelector<HTMLInputElement>('#vault-new-confirm')!.value='another passphrase';host.querySelector<HTMLButtonElement>('#vault-change-password')!.click();await new Promise(r=>setTimeout(r,0));assert.match(host.textContent!,/Passwords do not match/);assert.equal(w.localStorage.getItem(VAULT_STORAGE_KEY),null);
+ host.querySelector<HTMLInputElement>('#vault-new-password')!.value='new long passphrase';host.dispatchEvent(new w.Event('close') as unknown as Event);assert.equal(host.querySelector<HTMLInputElement>('#vault-new-password')!.value,'');dispose();w.happyDOM.abort();
+});

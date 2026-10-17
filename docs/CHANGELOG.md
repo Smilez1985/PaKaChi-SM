@@ -12,6 +12,17 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.20.0] - 2026-10-17
+
+Zeitstempel: 2026-10-17T03:02:46+02:00 (Europe/Berlin)
+
+### Added
+
+- Schlüsselsitzung ausdrücklich sperren: Sitzungsschlüssel, Schlüsselentwürfe und Passwortfelder leeren; Modelllistenabfragen und Assistenten lokal abbrechen, offene/verspätete Vorschläge verwerfen und laufende Tresoroperationen invalidieren. Profile, Modellwahl, Fallbacks und verschlüsselte Ablage erhalten.
+- Drei Integrationstests für Sperre, Anfrageabbruch, späte Vorschläge und erneutes Entsperren.
+- Passwortwechsel für den Schlüsseltresor: bisheriges Passwort prüfen, neues Passwort bestätigen und den vollständig gespeicherten Schlüsselbestand neu verschlüsseln. Fehlgeschlagene oder veraltete Operationen ersetzen die bestehende Ablage nicht. Ungespeicherte Sitzungsänderungen werden nicht nebenbei übernommen.
+- Zwei Tests für Passwortwechsel, Erhalt aller gespeicherten Schlüssel, Abweisung des bisherigen Passworts, Fehler-/Konfliktschutz und Passwortfelder in der Oberfläche.
+
 ## [0.19.0] - 2026-10-16
 
 Zeitstempel: 2026-10-16T22:53:19+02:00 (Europe/Berlin)
@@ -429,6 +440,7 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 - Bestehendes Bedienkonzept ausdrücklich als Designdokument eingeordnet und mit Roadmap und Changelog verknüpft.
 
 [Unreleased]: https://github.com/Smilez1985/PaKaChi-SM/commits/main
+[0.20.0]: ./PRUEFUNG-0.20.0.md
 [0.19.0]: ./PRUEFUNG-0.19.0.md
 [0.18.0]: ./PRUEFUNG-0.18.0.md
 [0.17.1]: ./PRUEFUNG-0.17.1.md

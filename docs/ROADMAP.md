@@ -1,6 +1,6 @@
 # Roadmap – was kommt
 
-**Softwarestand: 0.19.0 · Abgleich: 16.10.2026.** Teil der [Blaupause](README.md).
+**Softwarestand: 0.20.0 · Abgleich: 17.10.2026.** Teil der [Blaupause](README.md).
 
 Ein Häkchen bedeutet implementiert; es ersetzt keine visuelle oder externe Live-Abnahme. Die Nachweise und Prüfgrenzen stehen im [Prüfstand](PRUEFUNG.md). Die Versionshistorie gehört ins [Changelog](CHANGELOG.md).
 
@@ -170,4 +170,6 @@ Details: [Modellauswahl](LOKALE-MODELLE.md). Die aktuelle Ollama-Kuration ist ei
 - [x] Explizites verschlüsseltes Speichern und Entsperren passend zu mehreren Profilen und deren tatsächlichen Zieladressen (0.19.0).
 - [x] Falsches Passwort, manipulierte Daten, Speicherfehler und veraltete Operationen abweisen; bestehende Ablage erhalten.
 - [ ] Visuelle Browserabnahme sowie unabhängige Sicherheitsprüfung.
-- [ ] Passwortwechsel und ausdrückliche Sitzungssperre ergänzen; optional Betriebssystem-Schlüsselbund für spätere Desktop-Verpackung prüfen.
+- [x] Passwortwechsel mit Prüfung des bisherigen Passworts und Erhalt des gespeicherten Schlüsselbestands (0.20.0).
+- [x] Ausdrückliche Sitzungssperre mit Löschen der Sitzungsschlüssel/Schlüsselentwürfe und Verwerfen laufender Ergebnisse (0.20.0).
+- [ ] Optional Betriebssystem-Schlüsselbund für spätere Desktop-Verpackung prüfen.

@@ -7,3 +7,5 @@ export function setProviderKey(p:Pick<ProviderProfile,'id'|'adapter'|'endpoint'>
 export function forgetProviderKeys(id:string){for(const key of keys.keys())if(JSON.parse(key)[0]===id)keys.set(key,'');}
 
 export function peekProviderKey(p:Pick<ProviderProfile,'id'|'adapter'|'endpoint'>){return keys.get(identity(p));}
+
+export function lockProviderSession(){keys.clear();window.dispatchEvent(new window.Event('pakachi-vault-lock'));}

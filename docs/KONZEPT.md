@@ -4,7 +4,7 @@ Teil der [Blaupause](README.md) · [Roadmap](ROADMAP.md) · [Changelog](CHANGELO
 
 ## Status und Begriffe
 
-Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.19.0: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau und KI-Generierung bleiben Entwicklungsziele.
+Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.20.0: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau und KI-Generierung bleiben Entwicklungsziele.
 
 - **PaKaChi:** Panda-KI-Chimera, das übergeordnete Projekt.
 - **PaKaChi-SM:** StateMaschine mit Avatar-Player und integriertem Studio.
@@ -253,3 +253,9 @@ Der Assistent führt ausdrücklich konfigurierte Fallbacks bei Anbieterfehlern a
 Zusätzlich zur Sitzung kann der Nutzer Schlüssel passwortverschlüsselt im lokalen Browserspeicher halten. AES-256-GCM und PBKDF2-SHA-256 (600.000 Iterationen, frischer Salt und IV) verwenden ausschließlich Web Crypto. Passwort und entschlüsselte Schlüssel werden nicht dauerhaft gespeichert. Nach Neustart wird ausdrücklich entsperrt. Profil-ID, Schnittstelle und tatsächliche Zieladresse binden jeden Schlüssel an seine Verbindung.
 
 Vor dem Überschreiben eines Tresors muss dessen Passwort erfolgreich entschlüsseln. Während der Sitzung unbekannte gespeicherte Schlüssel bleiben beim Speichern erhalten; ausdrückliche Löschungen und nicht mehr konfigurierte Zieladressen werden entfernt. Speicherfehler, Profil-/Tresoränderungen oder Dialogschluss während der Operation verhindern ihre Übernahme. Aktive Sitzungsschlüssel bleiben beim Entsperren maßgeblich. Keine Passwortwiederherstellung, keine automatische Synchronisierung, keine zusätzliche Sitzungssperre und kein Schutz vor schädlichem Code im entsperrten Browser. [Bedienung](ANBIETER.md).
+
+Seit 0.20.0: Ein expliziter Tresorpasswortwechsel entschlüsselt ausschließlich den gespeicherten Bestand mit dem bisherigen Passwort und verschlüsselt ihn mit frischem Salt/IV unter dem bestätigten neuen Passwort. Vor dem Ersetzen wird auf veraltete Operationen geprüft. Sitzungsänderungen bleiben davon getrennt; kein Passwortreset.
+
+### Sitzungssperre (0.20.0)
+
+Die explizite Sperre löscht den verwendbaren Schlüsselzustand der aktuellen Seite einschließlich Entwürfen, leert Passwortfelder und invalidiert laufende Tresoroperationen sowie Modelllisten- und Assistentenantworten. Sie verändert weder gespeicherte Profile noch den verschlüsselten Tresor. Neues Entsperren stellt gespeicherte Schlüssel wieder her; ungespeicherte Sitzungsschlüssel sind verloren. Bereits gesendete Serveranfragen können weiterlaufen. Keine Tab-übergreifende Anwendungssperre und keine zugesicherte physische Speicherlöschung. Ältere Angaben zu fehlendem Passwortwechsel bzw. fehlender Sitzungssperre sind durch 0.20.0 abgelöst.

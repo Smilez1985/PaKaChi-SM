@@ -1,6 +1,6 @@
 # Anbieter, Modelle und Fallbacks
 
-**Stand 0.19.0.** Alle Anbieter können gleichzeitig eingerichtet bleiben. Ein Profil bezeichnet eine konkrete Kombination aus Anzeigename, Schnittstelle, API-Adresse und Modell. Für mehrere Modelle desselben Anbieters mehrere Profile anlegen. Alle Profile lassen sich unabhängig den Rollen **Assistent**, **3D-Generator** und **Rigging-Dienst** zuordnen.
+**Stand 0.20.0.** Alle Anbieter können gleichzeitig eingerichtet bleiben. Ein Profil bezeichnet eine konkrete Kombination aus Anzeigename, Schnittstelle, API-Adresse und Modell. Für mehrere Modelle desselben Anbieters mehrere Profile anlegen. Alle Profile lassen sich unabhängig den Rollen **Assistent**, **3D-Generator** und **Rigging-Dienst** zuordnen.
 
 ## Einrichtung
 
@@ -56,6 +56,20 @@ Ohne Tresor bleibt die bisherige reine Sitzungsnutzung möglich. Ein falsch eing
 
 Die Ablage verwendet Web Crypto: AES-256-GCM mit zufälliger 96-Bit-IV und authentifiziertem Formatkontext; PBKDF2-HMAC-SHA-256 mit 600.000 Iterationen und zufälligem 128-Bit-Salt. Im Browserspeicher liegen nur Formatparameter und verschlüsselter Inhalt unter `pakachi-credential-vault-v1`. Das Passwort wird weder gespeichert noch an Anbieter gesendet. Standardbibliotheken führen die Kryptografie aus; kein eigenes Verschlüsselungsverfahren.
 
-Die Verschlüsselung schützt die gespeicherte Ablage. Während der Nutzung liegen entschlüsselte Schlüssel im Arbeitsspeicher; sie schützt nicht vor schädlichem Code im bereits entsperrten Browser. Browserdaten löschen entfernt auch den Tresor. Andere Browser/Origins haben eigene Ablagen. Kein Passwortreset oder Passwortwechsel-Assistent vorhanden; ohne Passwort können gespeicherte Schlüssel nicht wiederhergestellt werden. Ein schwaches Passwort bleibt angreifbar. Die Benutzeroberfläche bietet derzeit keine Sitzungssperre; zum Beenden der entschlüsselten Sitzung Seite neu laden.
+Die Verschlüsselung schützt die gespeicherte Ablage. Während der Nutzung liegen entschlüsselte Schlüssel im Arbeitsspeicher; sie schützt nicht vor schädlichem Code im bereits entsperrten Browser. Browserdaten löschen entfernt auch den Tresor. Andere Browser/Origins haben eigene Ablagen. Kein Passwortreset vorhanden; ohne Passwort können gespeicherte Schlüssel nicht wiederhergestellt werden. Ein schwaches Passwort bleibt angreifbar. Seit 0.20.0 beendet „Schlüsselsitzung sperren“ die aktive Schlüsselsitzung ausdrücklich.
 
 [MDN Web Crypto](https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/deriveKey) · [OWASP Cryptographic Storage](https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html)
+
+### Passwort wechseln (0.20.0)
+
+Im Tresorbereich das **bisherige Tresorpasswort**, das **neue Tresorpasswort** und dessen Wiederholung eingeben, dann **Tresorpasswort ändern** wählen. Das bisherige Passwort muss stimmen; das neue benötigt ebenfalls 12–1024 Zeichen. Erst nach erfolgreicher Neuverschlüsselung wird die Ablage ersetzt. Danach entsperrt nur noch das neue Passwort diesen Tresor.
+
+Der gesamte bisher gespeicherte Schlüsselbestand bleibt erhalten, unabhängig von ungespeicherten Änderungen der aktuellen Sitzung. Diese bei Bedarf anschließend separat mit dem neuen Passwort speichern. Bei falschem Passwort, abweichender Bestätigung, Speicherfehler oder zwischenzeitlicher Änderung bleiben die bisherigen verschlüsselten Daten erhalten. Ein Passwortwechsel ist keine Wiederherstellung eines vergessenen Passworts. Bereits früher kopierte Tresordateien werden dadurch nicht nachträglich geändert.
+
+### Schlüsselsitzung sperren (0.20.0)
+
+**Schlüsselsitzung sperren** leert alle aktuell verwendbaren Profilschlüssel, Schlüsselentwürfe und Tresorpasswortfelder. Laufende Modelllistenabfragen und Assistentenaufrufe werden lokal abgebrochen; offene Änderungsvorschläge und verspätete Antworten verworfen. Eine noch laufende Entsperrung, Speicherung oder Passwortänderung darf danach keine Daten übernehmen.
+
+Profilnamen, Modellwahl, Adressen, Fallback-Reihenfolgen und verschlüsselte Ablage bleiben unverändert. Gespeicherte Schlüssel lassen sich anschließend mit dem Tresorpasswort wieder entsperren. **Nicht in den Tresor gespeicherte Schlüssel werden verworfen.** Neue Schlüssel können nach dem Sperren auch manuell eingegeben werden; die Sperre ist keine Anwendungssperre. Lokale Dienste ohne Anmeldung sind weiterhin nutzbar.
+
+Bereits an einen Anbieter gesendete Anfragen können dort weiterlaufen und Kosten verursachen. Die Funktion entfernt die Schlüssel aus dem verwendbaren Sitzungszustand; eine garantierte physische Überschreibung aller Kopien im JavaScript-/Browser-Speicher wird nicht zugesichert. Die Sperre betrifft die aktuelle Seite, nicht andere gleichzeitig geöffnete Tabs.
