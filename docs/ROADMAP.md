@@ -1,6 +1,6 @@
 # Roadmap – was kommt
 
-**Softwarestand: 0.25.0 · Abgleich: 18.10.2026.** Teil der [Blaupause](README.md).
+**Softwarestand: 0.26.0 · Abgleich: 18.10.2026.** Teil der [Blaupause](README.md).
 
 Ein Häkchen bedeutet implementiert; es ersetzt keine visuelle oder externe Live-Abnahme. Die Nachweise und Prüfgrenzen stehen im [Prüfstand](PRUEFUNG.md). Die Versionshistorie gehört ins [Changelog](CHANGELOG.md).
 
@@ -19,7 +19,9 @@ Diese Reihenfolge ist ein Umsetzungsvorschlag, kein Terminversprechen. Lokale un
 - [x] Geriggte 3D-Testmodelle laden und tatsächliche Animationsclips anbieten.
 - [x] Original-PaKaChi mit beiden Formen und 72 Bildern bewahren.
 - [x] Eigenständige GLB-Dateien lokal importieren; glTF/GLB und JSON-Katalog als aktuelle Formate festlegen.
-- [ ] Bearbeitete Projekte in den gemeinsamen Model Zoo exportieren.
+- [x] Vollständige 3D-Projektkopien in einer lokalen Browsersammlung speichern, auswählen, laden und bestätigt löschen (0.26.0; separate Auswahl neben dem mitgelieferten Katalog).
+- [ ] IndexedDB-Persistenz über F5, Speichergrenzen und mehrere Tabs in einem echten Browser prüfen.
+- [ ] Bearbeitete Projekte in den gemeinsamen veröffentlichten Model Zoo exportieren; Katalog-/MCP-Einbindung und Austausch ergänzen.
 - [ ] Separate Move-Dateien und deren Austausch ergänzen.
 
 **Abnahme:** Avatar auswählen und vorhandene Bewegungen abspielen. Code und automatisierte Prüfungen vorhanden; visuelle Abnahme offen.

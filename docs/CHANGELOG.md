@@ -12,7 +12,15 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
-Dokumentationsabgleich: 2026-10-18T12:27:10+02:00 (Europe/Berlin); Softwarestand bleibt 0.25.0.
+## [0.26.0] - 2026-10-18
+
+Zeitstempel: 2026-10-18T12:38:23+02:00 (Europe/Berlin)
+
+### Added
+
+- Lokaler Model Zoo für benannte 3D-Projektkopien mit Modell, Punkten, Posen, Moves und Entwurfspose. IndexedDB-Ablage mit gemeinsamen Transaktionen für Metadaten und Projekt; maximal 50 Einträge und 80 MiB pro Projekt.
+- Eigene Auswahl mit Speichern, Laden, Aktualisieren und bestätigtem Löschen. Revisionsgeschütztes Laden nutzt die bestehende Modellübernahme; gleiche Namen überschreiben keine Kopie.
+- Sieben Tests für isolierte Projektkopien, ungültige Eingaben, fehlenden Speicher, DOM-Bedienung, Speicherfehler, veraltete Ladevorgänge, Löschbestätigung und Transaktionsabschluss/-abbruch.
 
 ### Changed
 
@@ -22,6 +30,8 @@ Dokumentationsabgleich: 2026-10-18T12:27:10+02:00 (Europe/Berlin); Softwarestand
 ### Fixed
 
 - Widersprüchliche Offen-Markierungen bereits implementierter Funktionen und veraltete Aussagen zu Schlüsselverlust, fehlender Generatoroberfläche und Fallback-Verhalten korrigiert. Ausstehende Browser-/GPU-Abnahme, Cloud-Fachadapter und Rigging bleiben ausdrücklich offen.
+
+**Prüfung:** 147 Tests und Build bestanden. DOM- und Speicher-Testdoubles ersetzen keine echte IndexedDB-/F5-/Kontingentabnahme. Gerenderte Browser- und GPU-Abnahme bleiben offen. Sammlung bleibt browsergebunden; keine gemeinsame Veröffentlichung oder Cloud-Synchronisierung.
 
 ## [0.25.0] - 2026-10-18
 
@@ -541,7 +551,7 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 
 - Bestehendes Bedienkonzept ausdrücklich als Designdokument eingeordnet und mit Roadmap und Changelog verknüpft.
 
-[Unreleased]: https://github.com/Smilez1985/PaKaChi-SM/compare/cc21e5f2c78c566f9faf8ca0a89ec7d9e690d2be...main
+[Unreleased]: https://github.com/Smilez1985/PaKaChi-SM/commits/main
 [0.20.0]: ./PRUEFUNG-0.20.0.md
 [0.19.0]: ./PRUEFUNG-0.19.0.md
 [0.18.0]: ./PRUEFUNG-0.18.0.md
@@ -575,3 +585,5 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 [0.24.0]: ./PRUEFUNG-0.24.0.md
 
 [0.25.0]: PRUEFUNG-0.25.0.md
+
+[0.26.0]: PRUEFUNG-0.26.0.md

@@ -4,7 +4,7 @@ Teil der [Blaupause](README.md) · [Roadmap](ROADMAP.md) · [Changelog](CHANGELO
 
 ## Status und Begriffe
 
-Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.25.0: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau, automatische Anatomieerkennung und die Qualitätsabnahme der angeschlossenen lokalen KI-Generierung bleiben offen.
+Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.26.0: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau, automatische Anatomieerkennung und die Qualitätsabnahme der angeschlossenen lokalen KI-Generierung bleiben offen.
 
 - **PaKaChi:** Panda-KI-Chimera, das übergeordnete Projekt.
 - **PaKaChi-SM:** StateMaschine mit Avatar-Player und integriertem Studio.
@@ -24,7 +24,7 @@ Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich gen
 | Generierung | Lokaler TripoSR-Dienst, Bildauswahl, getrennte Vorschau, Vorprüfungs-Fallbacks, expliziter weiterer Auftrag | Echte GPU-/Qualitätsabnahme, Cloud-Generatoren, Korrekturprompts und Rigging |
 | Übernahme | Revisionsschutz, ein Modellwechsel-Rücksprung, vorbereitete 3D-Installation mit Rückabwicklung | Gerenderte Abnahme, Originalplayer-Neustart und GPU-Kontextverlust |
 
-Prüfnachweis für Software 0.25.0: **140 Tests und Build bestanden**. Das belegt keine gerenderte Browser-, Anbieter- oder GPU-Abnahme. Projektformat bleibt Version 1. Freie Punkte/Posen aus 0.22.0/0.23.0 benötigen wegen der korrigierten Normalisierungsreihenfolge eine visuelle Kontrolle; keine automatische Migration. [Prüfbericht](PRUEFUNG-0.25.0.md).
+Prüfnachweis für Software 0.26.0: **147 Tests und Build bestanden**. Das belegt keine gerenderte Browser-, Anbieter- oder GPU-Abnahme. Projektformat bleibt Version 1. Freie Punkte/Posen aus 0.22.0/0.23.0 benötigen wegen der korrigierten Normalisierungsreihenfolge eine visuelle Kontrolle; keine automatische Migration. [Prüfbericht](PRUEFUNG-0.26.0.md).
 
 ## Bestehender PaKaChi-Avatar
 
@@ -176,7 +176,7 @@ Die logische Struktur des Model Zoo:
 - Ein eigener **moves/**-Ordner mit den Bewegungen dieses Avatars.
 - Zustandszuordnungen und bearbeitbare Studio-Daten.
 
-Implementiert sind Three.js für die Darstellung, glTF/GLB für Modelle, ein JSON-Katalog und `.pakachi.json` für bearbeitbare Projekte mit eingebettetem Modell. Der vorgeschlagene separate moves/-Ordner und der gemeinsame Export bearbeiteter Projekte in den Model Zoo stehen noch aus.
+Implementiert sind Three.js für die Darstellung, glTF/GLB für Modelle, ein JSON-Katalog und `.pakachi.json` für bearbeitbare Projekte mit eingebettetem Modell. Seit 0.26.0 ergänzt eine lokale IndexedDB-Sammlung die Katalogauswahl mit vollständigen Projektkopien. Separate Move-Dateien und der gemeinsame Export in den veröffentlichten Katalog stehen noch aus.
 
 ## 10. Bedienziel
 
@@ -312,3 +312,9 @@ Die Studio-Oberfläche zeigt vor dem Start die vollständige konfigurierte Gener
 Nach Beginn einer Generierung gibt es keinen automatischen weiteren Auftrag, auch nicht bei Zeitlimit oder ungültigem Ergebnis. Falls weitere Profile vorhanden sind, bietet **Nächsten Anbieter versuchen** einen ausdrücklich ausgelösten neuen Versuch mit der verbleibenden Route an. Der vorherige Dienst könnte noch arbeiten. Ein Fehler beim Anzeigen der Vorschau bietet keinen Anbieterwechsel an. Projektänderungen sperren die Wiederholung; Änderungen an Profilen/Schlüsseln, Tresorsperre, Abbruch oder Bildwechsel verwerfen sie.
 
 Der ausführbare Fachadapter bleibt der lokale TripoSR-Dienst. Cloud-Generatoren und automatische Rigging-Dienste sind damit noch nicht implementiert. Bestehende Profile und gespeicherte Schlüssel werden nicht gelöscht.
+
+## Lokale Projektkopien im Model Zoo (0.26.0)
+
+Der Nutzer speichert bewusst eine benannte Kopie des aktuellen 3D-Projekts. Jede Kopie bekommt eine eigene ID; gleiche Namen überschreiben nichts. Metadaten und vollständiges Projekt werden gemeinsam in IndexedDB gespeichert. Die Sammlung gilt pro Browserprofil und Origin und bleibt nach Seitenneuladen verfügbar. Grenzen: 50 Einträge, 80 MiB JSON je Projekt, zusätzlich Browserkontingent. Es werden nur die Metadaten der Sammlung für die Auswahl geladen.
+
+Laden verwendet die vorhandenen Projekt-/Geometrieprüfungen und die vorbereitete Modellübernahme mit Rückabwicklung. Zwischenzeitliche Projektänderungen verhindern einen veralteten Import. Löschen erfordert Bestätigung und entfernt nur die gespeicherte Kopie. Weitere Bearbeitungen werden nicht automatisch gespeichert; die Ungespeichert-Markierung des aktiven Projekts bleibt erhalten. Originalplayer, mitgelieferter Katalog, MCP-Katalogliste und Anbieterprofile werden nicht durch die Sammlung verändert. Browserdatenlöschung kann sie entfernen, daher zusätzlich Projektdateien sichern. Veröffentlichung, Synchronisierung und echte Browser-Persistenzabnahme bleiben offen. [Anleitung](LOKALER-MODEL-ZOO.md).

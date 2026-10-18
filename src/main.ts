@@ -1,3 +1,4 @@
+import {mountLocalZoo} from './local-zoo-panel.ts';
 import {prepareAvatar} from './avatar-candidate.ts';
 import {checkpointElements,disposeAll,installAtomically} from './avatar-installation.ts';
 import {ModelSwitchHistory} from './model-switch-history.ts';
@@ -26,7 +27,7 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
       <button id="player-tab" class="nav-button active" aria-pressed="true"><span>◉</span> Player</button>
       <button id="studio-tab" class="nav-button" aria-pressed="false"><span>◇</span> Avatar-Studio</button>
     </nav>
-    <div class="rail-bottom"><span class="online-dot"></span> Lokal auf deinem Gerät<p>Entwicklungsstand 0.25.0<br>KI-Anbieter · Vorbereitung</p></div>
+    <div class="rail-bottom"><span class="online-dot"></span> Lokal auf deinem Gerät<p>Entwicklungsstand 0.26.0<br>KI-Anbieter · Vorbereitung</p></div>
   </aside>
   <main>
     <header><div><p class="eyebrow">PAKACHI-SM / <span id="section-label">PLAYER</span></p><h1 id="page-title">Dein Model Zoo<span>.</span></h1><p id="page-intro">Eine Figur auswählen. Eine Bewegung starten. Leben einhauchen.</p></div><button id="project-open" class="button outline">Projekt laden</button><input id="project-file" type="file" accept=".json" hidden><button id="import-button" class="button outline">＋ GLB laden</button><input id="file-input" type="file" accept=".glb" hidden></header>
@@ -43,7 +44,7 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
       <aside class="control-panel">
         <div class="panel-heading"><span class="eyebrow">MODEL ZOO</span><span id="avatar-count" class="count">0</span></div>
         <label for="avatar-select">Avatar auswählen</label><select id="avatar-select" disabled></select>
-        <div id="avatar-cards" class="avatar-cards"></div>
+        <div id="avatar-cards" class="avatar-cards"></div><div id="local-zoo-host"></div>
         <div class="divider"></div>
         <div id="legacy-controls" hidden><h2>PaKaChi · Original</h2><p class="legacy-notice">Dein bestehender Avatar mit beiden Formen, 72 Transformationsbildern und optionalem MQTT. Die originale Darstellung und Steuerung bleiben erhalten.</p><p class="legacy-notice">Wähle links „Arbeiten“ oder „Normaler Chat“. Die Endform bleibt bis zum nächsten Signal stehen.</p><p class="legacy-notice">Der Bildstand ist ein Entwurf mit bekannten Proportions- und Materialschwankungen. Die 3D-Übertragung dieses Designs steht noch aus.</p></div><div id="player-controls">
           <div class="panel-heading"><h2>Bewegungen</h2><span id="move-count" class="count">0</span></div>
@@ -343,6 +344,7 @@ async function loadAvatar(avatar?: Avatar, file?: File, project?: StudioProject,
 async function boot(): Promise<void> {
   el('model-undo').onclick=()=>{void travelModel('undo');};el('model-redo').onclick=()=>{void travelModel('redo');};
   window.addEventListener('pakachi-options',renderModelHistory);
+  const zoo=mountLocalZoo(el('local-zoo-host'),{ready:()=>!busy&&!editor?.interactionActive,canSave:()=>!!editor,target:()=>!editor?.interactionActive?generationTarget():null,capture:()=>!busy&&editor&&!editor.interactionActive?editor.exportProject():null,load:(project,valid)=>busy?Promise.resolve(false):loadAvatar(undefined,undefined,project,valid)},()=>options.language);
   const agents = mountAgentPanel(rpc);
   mountAssistantPanel(document.querySelector('.agent-panel')!,rpc,()=>options.language,localStorage);
   const generation=mountGenerationPanel(el('generation-host'),{
@@ -407,6 +409,6 @@ async function boot(): Promise<void> {
     catalog = parseCatalog(await response.json()); renderCatalog();
     showOriginal();
   } catch (error) { message(`Model Zoo: ${error instanceof Error ? error.message : String(error)}`, true); }
-  window.addEventListener('pagehide', () => { agents.dispose(); editor?.dispose(); fetchController?.abort(); request++; playback?.dispose(); viewer?.dispose(); }, { once: true });
+  window.addEventListener('pagehide', () => { zoo.dispose();agents.dispose(); editor?.dispose(); fetchController?.abort(); request++; playback?.dispose(); viewer?.dispose(); }, { once: true });
 }
 void boot();
