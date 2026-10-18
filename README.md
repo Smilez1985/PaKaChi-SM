@@ -108,7 +108,7 @@ Das Ziel bleibt: **Bild hineinziehen → 3D-Avatar erzeugen → korrigieren → 
 ## Dokumentation
 
 - [Blaupause und Dokumentationsübersicht](docs/README.md)
-- [Designdokument: Produktziel und Anforderungen](docs/KONZEPT.md)
+- [Designdokument: Produktziel und Anforderungen](docs/Design.md)
 - [Roadmap: umgesetzt, offen und nächste Schritte](docs/ROADMAP.md)
 - [Changelog: Versionen und Zeitstempel](docs/CHANGELOG.md)
 - [Technische Architektur und Projektformat](docs/ARCHITEKTUR.md)

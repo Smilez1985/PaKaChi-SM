@@ -8,8 +8,8 @@ Ein Häkchen bedeutet implementiert; es ersetzt keine visuelle oder externe Live
 
 1. **Korrekturen 0.11.0/0.11.1 visuell nachprüfen:** Drehung um die Figurenmitte auch nach Zoom/Pan sowie vollständige Körperverbindungen, Hand-/Fußziele, Rumpfbewegung und direktes Drehen. Nutzertest 0.10.0 meldete auseinanderziehbare Knochen und unbrauchbare Ausrichtung; diese Fehler sind technisch korrigiert, die erneute Nutzerabnahme steht aus. Anschließend Mausnavigation, kleine Gesichtspunkte, Gesamtverschiebung, Speichern/Laden und Agentensteuerung in einer lauffähigen Browserumgebung prüfen.
 2. **Gelenkbearbeitung vervollständigen:** echte Quellknochen hinzufügen/löschen, Hautgewichte zuordnen und vorhandene Moves nach Änderungen prüfen. Erst damit wird das Beispiel „fehlendes Knie ergänzen und beugen“ vollständig erfüllt.
-3. **Studio-Harness anbinden:** auf den Profilen und der Rollen-/Fähigkeitsprüfung aus 0.13.0 aufbauen; Modellauflistung ist seit 0.15.0 vorhanden. Assistenten-Inferenz für Ollama/OpenAI-kompatible APIs ist seit 0.16.0 vorhanden. Als Nächstes reale Modell-/Werkzeugqualität prüfen sowie native Cloud-Anmeldung und Fachadapter ergänzen. Details und Abnahme in Abschnitt 7.
-4. **Aufträge und KI-Verfahren integrieren:** den seit 0.22.0 sichtbaren lokalen Generierungsablauf live prüfen, den Modellwechsel-Rücksprung und die abgesicherte 3D-Übernahme aus 0.24.0 visuell prüfen, weitere Generator-/Rigging-Adapter ergänzen, echte Inferenz und Qualität prüfen, anschließend Korrekturvorschau und Übernahme integrieren. Vorhandene Skelettdaten auszulesen ist bereits möglich, aber keine KI-Anatomieerkennung.
+3. **Studio-Harness anbinden:** auf den Profilen und der Rollen-/Fähigkeitsprüfung aus 0.13.0 aufbauen; Modellauflistung ist seit 0.15.0 vorhanden. Assistenten-Inferenz für Ollama/OpenAI-kompatible APIs ist seit 0.16.0 vorhanden. Als Nächstes reale Modell-/Werkzeugqualität prüfen sowie weitere Fachadapter und offiziell unterstützte OAuth-Verfahren ergänzen. Anthropic und der optionale verschlüsselte Schlüsseltresor sind bereits angebunden. Details und Abnahme in Abschnitt 7.
+4. **Aufträge und KI-Verfahren integrieren:** den seit 0.22.0 sichtbaren lokalen Generierungsablauf live prüfen, den Modellwechsel-Rücksprung und die abgesicherte 3D-Übernahme aus 0.24.0 visuell prüfen, weitere Generator-/Rigging-Adapter ergänzen, echte Inferenz und Qualität prüfen, die Generator-Fallbacks aus 0.25.0 live prüfen und anschließend gezielte Skelettkorrekturen mit Vorschau integrieren. Vorhandene Skelettdaten auszulesen ist bereits möglich, aber keine KI-Anatomieerkennung.
 
 Diese Reihenfolge ist ein Umsetzungsvorschlag, kein Terminversprechen. Lokale und externe Dienste sowie getrennte Anbieter je Rolle sind als Architektur festgelegt. Die konkreten zuerst unterstützten Verfahren, Hardwareanforderungen und Lizenzen sind noch zu prüfen.
 
@@ -96,20 +96,21 @@ Diese Reihenfolge ist ein Umsetzungsvorschlag, kein Terminversprechen. Lokale un
 
 ## 7. Studio-Harness und Anbieteranbindung
 
-Beschlossenes Design: [Anbieter, Rollen und Auftragsablauf](KONZEPT.md#11-studio-als-ki-harness-und-freie-anbieterwahl). Die Konfigurationsgrundlage ist seit 0.13.0 umgesetzt; die verbleibenden Schritte bauen darauf auf. Ein gespeichertes Profil ist noch keine geprüfte Verbindung.
+Beschlossenes Design: [Anbieter, Rollen und Auftragsablauf](Design.md#11-studio-als-ki-harness-und-freie-anbieterwahl). Die Konfigurationsgrundlage ist seit 0.13.0 umgesetzt; die verbleibenden Schritte bauen darauf auf. Ein gespeichertes Profil ist noch keine geprüfte Verbindung.
 
 - [x] Profilformat, Adaptervertrag für Probe/Modellliste und interne Prüfung von Modellidentität und Rollenfähigkeit definieren (0.13.0; mit Testadaptern geprüft).
 - [x] Internen Ausführungsvertrag mit Fortschrittsmeldungen, Abbruchsignal und Ergebnis sowie einen Auftragskern ergänzen (0.14.0; Testadapter).
 - [ ] Produktive Adapter implementieren; Fähigkeiten und Auftragsabläufe gegen echte Dienste prüfen.
 - [x] Mehrere benannte Profile mit Schnittstelle, Serveradresse und Modell-ID lokal speichern, bearbeiten, entfernen und unabhängig den Rollen zuordnen (0.13.0).
-- [ ] Geschützte Zugangsdatenverwaltung ergänzen; Profile enthalten bislang bewusst keine Authentifizierungsfelder.
+- [x] Optionalen passwortverschlüsselten Browsertresor ergänzen (0.19.0), einschließlich Passwortwechsel und Sitzungssperre (0.20.0); Schlüssel bleiben von Profilen und Projekten getrennt.
 - [x] Modelllisten und Verbindungsprüfung für Ollama, LM Studio und OpenAI-kompatible APIs mit optionalem Sitzungsschlüssel; manuelle Modell-ID weiterhin möglich (0.15.0).
-- [ ] Dauerhafte geschützte Zugangsdatenverwaltung, native Cloud-Adapter und offiziell unterstützte OAuth-Verfahren ergänzen.
-- [ ] Adapter für passende OpenAI-kompatible Dienste einschließlich lokaler Ollama-/LM-Studio-Anbindungen und erforderliche native Anbieteradapter entwickeln; unterstützte Fähigkeiten und getestete Modelle dokumentieren.
-- [x] Internen Auftragskern mit festem Anbieter/Modell, Fortschritt, Fehlern, Zeitlimit und Abbruch umsetzen; späte Antworten verwerfen und weder automatisch wiederholen noch den Anbieter wechseln (0.14.0).
-- [ ] Auftragsoberfläche mit Empfängeranzeige vor Datenübertragung, ausdrücklichem Neuversuch und fernseitigem Abbruchstatus anbinden.
+- [ ] Weitere native Cloud-Adapter und offiziell unterstützte OAuth-Verfahren ergänzen; Tresor und nativer Anthropic-Adapter sind implementiert.
+- [x] Assistententransporte für Ollama, LM Studio, OpenAI-kompatible APIs und Anthropic implementieren (0.16.0/0.17.0; Protokolltests).
+- [ ] Unterstützte Fähigkeiten und Modellqualität an realen lokalen Diensten und Cloud-Konten abnehmen.
+- [x] Internen Auftragskern mit festem Anbieter/Modell, Fortschritt, Fehlern, Zeitlimit und Abbruch umsetzen; späte Antworten verwerfen und höchstens einmal ausführen (0.14.0); optionale Vorprüfungs-Fallbacks seit 0.25.0.
+- [x] Generatoroberfläche mit sichtbarer Route, Phasenstatus, Abbruchhinweis, getrennter Vorschau und ausdrücklichem Versuch beim nächsten Anbieter anbinden (0.22.0/0.25.0).
 - [ ] Geeignete lokale und externe 3D- sowie Rigging-Adapter mit echten Eingaben prüfen. Geometrie, vollständige Körperhierarchie und Hautgewichte getrennt bewerten; Original-PaKaChi in beiden Formen und die Transformation zusätzlich prüfen.
-- [ ] Optionalen integrierten Assistenten an die validierten Studio-Werkzeuge anschließen; externe MCP-Clients weiter unabhängig unterstützen. Direkte Generierung ohne zusätzlichen LLM-Aufruf ermöglichen.
+- [x] Optionalen integrierten Assistenten an validierte Studio-Werkzeuge anschließen (0.16.0); externe MCP-Clients bleiben unabhängig. Direkte lokale Generierung benötigt keinen zusätzlichen LLM-Aufruf (0.22.0).
 - [x] Interne Ergebnisprüfung und Übernehmen/Verwerfen mit Sitzungs-/Revisionsabgleich bereitstellen (0.14.0; noch keine Studio-Transaktion).
 - [x] Formatspezifische Geometrieprüfung und sichtbare Vorschau mit revisionsgeschütztem Import anschließen (0.22.0; DOM-/Geometrietests).
 - [ ] Korrekturprompt ergänzen und abgesicherte 3D-Übernahme samt Modellwechsel-Rücksprung im gesamten Ablauf visuell prüfen.
@@ -120,7 +121,7 @@ Beschlossenes Design: [Anbieter, Rollen und Auftragsablauf](KONZEPT.md#11-studio
 
 - Desktop-Verpackung und tatsächlich geprüfte Betriebssysteme.
 - Priorität und geprüfter Funktionsumfang konkreter lokaler und externer Anbieteradapter, Modelle, Hardwarebedarf und Lizenzen.
-- Geschützte lokale Zugangsdatenverwaltung und anbieterspezifisch verfügbare OAuth-Verfahren.
+- Betriebssystem-Schlüsselbund für eine mögliche Desktop-Fassung und anbieterspezifisch verfügbare OAuth-Verfahren; der optionale Browsertresor ist implementiert.
 - Lizenz.
 - Erweiterungen der Exportformate und der sicheren Remote-Anbindung.
 
@@ -144,10 +145,10 @@ Details: [Modellauswahl](LOKALE-MODELLE.md). Die aktuelle Ollama-Kuration ist ei
 
 - [x] Aufgaben an das unabhängig gewählte Assistentenprofil senden (Ollama, LM Studio, OpenAI-kompatible Chat-API; 0.16.0).
 - [x] Begrenzte lesende Werkzeugschleife und konkrete, einzeln bestätigte Studio-Vorschläge mit bestehender Freigabe, Sitzung/Revision und Undo.
-- [x] Ziel/Datenumfang anzeigen; keine persistenten Schlüssel oder Chatverläufe, Abbruch und späte Antworten absichern.
+- [x] Ziel/Datenumfang anzeigen; keine gespeicherten Chatverläufe; Schlüssel optional im getrennten verschlüsselten Tresor, Abbruch und späte Antworten absichern.
 - [ ] Reale Anbieter- und Modellabnahme einschließlich deutscher/englischer Studio-Aufgaben und Browser-CORS.
 - [ ] Mehrschrittige Vorschau, Bildkontext und zusammenhängende Änderungstransaktionen ergänzen.
-- [ ] Native Cloud-Adapter, geschützte Anmeldung und Generator-/Rigging-Ausführung unabhängig von der Assistentenrolle integrieren.
+- [ ] Weitere Cloud-Fachadapter und Rigging-Ausführung unabhängig von der Assistentenrolle integrieren; Anthropic, Tresor und lokaler Generator sind vorhanden.
 
 ## 10. Anthropic-Abnahme
 
@@ -155,7 +156,7 @@ Details: [Modellauswahl](LOKALE-MODELLE.md). Die aktuelle Ollama-Kuration ist ei
 - [x] API-Schlüssel nur in Headern, unbekannte/abgeschnittene Antworten abweisen, bestehende Studio-Prüfungen erhalten.
 - [ ] Echter API-/Browserlauf mit Workspace-gebundenem Schlüssel und passendem Modell.
 - [ ] Workspace-Auswahl und paginierte Modelllisten bei Bedarf ergänzen.
-- [ ] Offiziell unterstütztes OAuth und geschützte dauerhafte Zugangsdatenverwaltung implementieren.
+- [ ] Offiziell unterstütztes OAuth implementieren; API-Schlüssel können bereits optional im Browsertresor gespeichert werden.
 
 - [x] Editierbare Standardadressen und schnittstellenbezogene Adressentwürfe ergänzen (0.17.1).
 

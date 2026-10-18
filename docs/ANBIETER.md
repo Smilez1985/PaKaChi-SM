@@ -43,7 +43,7 @@ Anthropic verwendet `x-api-key`, `anthropic-version: 2023-06-01` und den Header 
 
 Der Browser spricht die angezeigte Adresse direkt an. CORS muss vom Dienst erlaubt werden; bei Ollama über `OLLAMA_ORIGINS`, bei LM Studio über die Servereinstellungen. Organisationsrichtlinien werden nicht umgangen. Schlüssel außerhalb von Loopback erfordern HTTPS. Große Modelllisten können an Antwortgrenzen scheitern. Echte Modell-/Konto-/Browserabnahme bleibt offen.
 
-[Assistent](ASSISTENT.md) · [Design](KONZEPT.md) · [Roadmap](ROADMAP.md)
+[Assistent](ASSISTENT.md) · [Design](Design.md) · [Roadmap](ROADMAP.md)
 
 ## Optionaler Schlüsseltresor seit 0.19.0
 

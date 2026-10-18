@@ -12,6 +12,17 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+Dokumentationsabgleich: 2026-10-18T12:27:10+02:00 (Europe/Berlin); Softwarestand bleibt 0.25.0.
+
+### Changed
+
+- Blaupause unter `docs/Design.md`, `docs/ROADMAP.md` und `docs/CHANGELOG.md` zusammengeführt; bisheriger Designpfad verweist auf das aktuelle Dokument.
+- Design und Roadmap auf den tatsächlichen Stand von Mehranbieter-Routen, Schlüsseltresor, Assistent, lokaler Generierung, Vorschau und Modellübernahme abgeglichen. README-Verweise aktualisiert.
+
+### Fixed
+
+- Widersprüchliche Offen-Markierungen bereits implementierter Funktionen und veraltete Aussagen zu Schlüsselverlust, fehlender Generatoroberfläche und Fallback-Verhalten korrigiert. Ausstehende Browser-/GPU-Abnahme, Cloud-Fachadapter und Rigging bleiben ausdrücklich offen.
+
 ## [0.25.0] - 2026-10-18
 
 Zeitstempel: 2026-10-18T04:55:02+02:00 (Europe/Berlin)
@@ -530,7 +541,7 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 
 - Bestehendes Bedienkonzept ausdrücklich als Designdokument eingeordnet und mit Roadmap und Changelog verknüpft.
 
-[Unreleased]: https://github.com/Smilez1985/PaKaChi-SM/commits/main
+[Unreleased]: https://github.com/Smilez1985/PaKaChi-SM/compare/cc21e5f2c78c566f9faf8ca0a89ec7d9e690d2be...main
 [0.20.0]: ./PRUEFUNG-0.20.0.md
 [0.19.0]: ./PRUEFUNG-0.19.0.md
 [0.18.0]: ./PRUEFUNG-0.18.0.md
