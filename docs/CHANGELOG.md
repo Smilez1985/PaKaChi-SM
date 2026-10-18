@@ -12,6 +12,23 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.25.0] - 2026-10-18
+
+Zeitstempel: 2026-10-18T04:55:02+02:00 (Europe/Berlin)
+
+### Added
+
+- Generator-Fallbacks während der Fähigkeitsprüfung mit zehn Sekunden Zeitlimit je Profil und Schutz vor verspäteten Antworten.
+- „Nächsten Anbieter versuchen“ nach fehlgeschlagener gestarteter Generierung: ausdrücklicher neuer Auftrag mit verbleibender Route und passenden Schlüsseln je Profil.
+- Fünf zusätzliche Tests für Fallback-Grenzen, Zeitlimit, Abbruch, Revisionsschutz, getrennte Schlüssel und bewusste Wiederholung.
+
+### Changed
+
+- Vollständige Generatorroute vor dem Start sichtbar; ausgewählter Anbieter im Auftragsstatus. Projektänderungen sperren Wiederholungen, Tresorsperre und Konfigurationswechsel verwerfen sie.
+- README, Design, Roadmap, Anbieter-/Generierungsanleitung und Auftragsvertrag nachgezogen.
+
+**Prüfung:** 140 Tests und Build bestanden. Keine neue Browser- oder GPU-Abnahme; ausführbarer Generator bleibt lokales TripoSR. Keine automatische zweite Generierung nach Ausführungsbeginn.
+
 ## [0.24.0] - 2026-10-18
 
 Zeitstempel: 2026-10-18T00:55:06+02:00 (Europe/Berlin)
@@ -545,3 +562,5 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 [0.23.0]: ./PRUEFUNG-0.23.0.md
 
 [0.24.0]: ./PRUEFUNG-0.24.0.md
+
+[0.25.0]: PRUEFUNG-0.25.0.md

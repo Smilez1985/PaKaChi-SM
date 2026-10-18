@@ -1,6 +1,6 @@
 # Interner Auftragskern
 
-**Stand 0.24.0.** Der lokale TripoSR-Transportadapter ist für diese Entwicklungsschnittstelle implementiert und per HTTP getestet. Die sichtbare Generierungsoberfläche registriert diesen Adapter seit 0.22.0; echte GPU-Inferenz- und Browserabnahme stehen aus. Die Anbieteroberfläche kann inzwischen Modelllisten abrufen; diese Abfrage ist unabhängig vom Auftragskern und startet keine Inferenz.
+**Stand 0.25.0.** Der lokale TripoSR-Transportadapter ist für diese Entwicklungsschnittstelle implementiert und per HTTP getestet. Die sichtbare Generierungsoberfläche registriert diesen Adapter seit 0.22.0; echte GPU-Inferenz- und Browserabnahme stehen aus. Die Anbieteroberfläche kann inzwischen Modelllisten abrufen; diese Abfrage ist unabhängig vom Auftragskern und startet keine Inferenz.
 
 ## Ablauf
 
@@ -20,7 +20,7 @@
 
 ## Adaptervertrag
 
-`ProviderAdapter.run(request)` ist optional; fehlt er, scheitert der Auftrag mit `execution-missing`. Der Aufruf enthält Auftrag-ID, Rolle, eingefrorenes Profil, kopierte Eingabe, ein `AbortSignal` und eine Fortschrittsfunktion. Eine Anbieter-API mit Auftrag-ID und Statusabfrage kann ihr Polling innerhalb dieses Adapters durchführen. Es gibt keine automatische zweite Anfrage, Wiederholung oder Ausweichverbindung im Kern.
+`ProviderAdapter.run(request)` ist optional; fehlt er, scheitert der Auftrag mit `execution-missing`. Der Aufruf enthält Auftrag-ID, Rolle, eingefrorenes Profil, kopierte Eingabe, ein `AbortSignal` und eine Fortschrittsfunktion. Eine Anbieter-API mit Auftrag-ID und Statusabfrage kann ihr Polling innerhalb dieses Adapters durchführen. Pro Auftrag wird höchstens einmal run aufgerufen. Optional kann die Fähigkeitsprüfung weitere konfigurierte Profile prüfen (siehe 0.25.0 unten).
 
 Assistenten liefern Text; Generator und Rigging liefern Modellbytes. Eingaben dürfen einen Prompt und optional PNG/JPEG oder GLB enthalten. Grenzen: Prompt 16.000 Zeichen, Bild 20 MiB, Modell 50 MiB, Textresultat 1.048.576 Zeichen. Diese Größen-/Typprüfung bestätigt noch keine gültige Geometrie. Der zwingende `validate`-Callback muss das tatsächliche Format prüfen; die Studio-Anbindung verwendet seit 0.22.0 den produktiven Modelllader und Geometriegrenzen; anatomische Rigging-Prüfungen bleiben offen. In den Lebenszyklustests sind Validatoren und Dienste simuliert.
 
@@ -54,3 +54,9 @@ Die Rolle ist ausschließlich `generation`; PNG/JPEG sind erforderlich. `input.p
 `mountGenerationPanel` registriert den lokalen Adapter mit einem festen Schlüsselsnapshot und nutzt `ProviderJob` bis zur geprüften Vorschau. `validateGeneration` lädt echte Modellbytes und begrenzt Knochen/Vertices; `showGenerationPreview` hält einen getrennten Viewer. Modellwechsel gehen anschließend über den asynchronen Import des Players mit erneutem Zielvergleich und Operationsschutz. Das synchrone `ProviderJob.accept()` wird für diesen Import bewusst nicht als atomare Transaktion ausgegeben; seit 0.23.0 ergänzt ein separater Sitzungsverlauf den Rücksprung zum vorherigen Projekt. Siehe [Bedienung](KI-GENERIERUNG.md#bedienung-im-studio-seit-0220).
 
 Seit 0.24.0 besitzt der asynchron vorbereitete Import eine synchrone Veröffentlichung mit Rückabwicklung über `avatar-installation.ts`. Er verwendet weiterhin nicht den synchronen `ProviderJob.accept()`-Vertrag: GLB-Laden und Kandidatenaufbau laufen zuvor, die Host-Übergabe erfolgt anschließend mit erneuter Zielprüfung. Bei Fehlschlag bleibt die Generierungsvorschau zur erneuten Entscheidung erhalten; die bisherige Editorsitzung wird restauriert.
+
+## Optionale Vorprüfung mehrerer Profile (0.25.0)
+
+`preflightFallbacks` ist standardmäßig false; das Generatorpanel setzt es auf true. `probeTimeoutMs` begrenzt jede Fähigkeitsprüfung (Standard 10.000 ms, zulässig 1 bis 120.000 ms), zusätzlich zum gesamten Auftragszeitlimit. Ein eigener AbortController und ein Promise-Race beenden das Warten auch auf nicht kooperative Adapter. Abbruch verhindert weitere Kandidaten. `mayRun` prüft unmittelbar vor der einzigen Ausführung den Hostzustand; false beendet den Auftrag als stale. `executionStarted` bleibt nach Beginn true, damit die Oberfläche eine bewusste weitere Ausführung unterscheiden kann. Der Snapshot zeigt das gerade geprüfte beziehungsweise ausgeführte Profil. Fehlertexte enthalten keine rohen Dienstantworten.
+
+`remainingProviderConfig` liefert eine validierte Konfigurationskopie mit dem nächsten Profil und der restlichen Route. Die Studio-Wiederholung nutzt diese Kopie und die ursprünglichen Eingabe-/Schlüsselsnapshots; sie ändert keine gespeicherten Rollenzuordnungen.

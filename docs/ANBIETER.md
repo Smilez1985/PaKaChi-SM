@@ -35,7 +35,7 @@ Die Reihenfolge lautet Hauptprofil → erster Fallback → zweiter Fallback usw.
 
 Der Assistent wechselt bei Netzwerk-/HTTP-Fehlern, fehlender Anmeldung, Zeitlimit, leerer/abgeschnittener Antwort oder nicht unterstütztem Adapter zum nächsten eingetragenen Profil. Bei Abbruch, veraltetem Studio-Stand oder ungültigen Werkzeugbefehlen erfolgt **kein** Fallback. Pro Profil gelten bis zu fünf API-Runden; ein Zeitlimit kann serverseitige Arbeit nicht zurücknehmen. Deshalb können fehlgeschlagene Cloud-Versuche bereits Kosten verursacht haben. Keine zusätzlichen Anbieter außerhalb der konfigurierten Liste werden gewählt.
 
-Für Generator und Rigging werden eigene Routen gespeichert. Seit 0.21.0 gibt es einen separat registrierbaren lokalen TripoSR-Adapter für den Auftragskern; seit 0.22.0 ist seine Studio-Bedienoberfläche angeschlossen. Rigging und die Fach-Fallback-Ausführung sind noch nicht integriert. [Lokaler Dienst](KI-GENERIERUNG.md#lokaler-generierungsdienst-seit-0210). Eine Rollenzuordnung macht aus einem Sprachmodell keinen Fachgenerator.
+Für Generator und Rigging werden eigene Routen gespeichert. Seit 0.21.0 gibt es einen separat registrierbaren lokalen TripoSR-Adapter für den Auftragskern; seit 0.22.0 ist seine Studio-Bedienoberfläche angeschlossen. Rigging-Fallbacks sind noch nicht integriert. Für den Generator gilt seit 0.25.0 das unten beschriebene Prüfungs-/Wiederholungsverhalten. [Lokaler Dienst](KI-GENERIERUNG.md#lokaler-generierungsdienst-seit-0210). Eine Rollenzuordnung macht aus einem Sprachmodell keinen Fachgenerator.
 
 ## Anthropic und Verbindungsgrenzen
 
@@ -73,3 +73,11 @@ Der gesamte bisher gespeicherte Schlüsselbestand bleibt erhalten, unabhängig v
 Profilnamen, Modellwahl, Adressen, Fallback-Reihenfolgen und verschlüsselte Ablage bleiben unverändert. Gespeicherte Schlüssel lassen sich anschließend mit dem Tresorpasswort wieder entsperren. **Nicht in den Tresor gespeicherte Schlüssel werden verworfen.** Neue Schlüssel können nach dem Sperren auch manuell eingegeben werden; die Sperre ist keine Anwendungssperre. Lokale Dienste ohne Anmeldung sind weiterhin nutzbar.
 
 Bereits an einen Anbieter gesendete Anfragen können dort weiterlaufen und Kosten verursachen. Die Funktion entfernt die Schlüssel aus dem verwendbaren Sitzungszustand; eine garantierte physische Überschreibung aller Kopien im JavaScript-/Browser-Speicher wird nicht zugesichert. Die Sperre betrifft die aktuelle Seite, nicht andere gleichzeitig geöffnete Tabs.
+
+## Generator-Fallbacks (0.25.0)
+
+Die Studio-Oberfläche zeigt vor dem Start die vollständige konfigurierte Generatorroute. Profile, Reihenfolge, Bild, Zielrevision und Schlüssel je Profil werden für diesen Versuch festgehalten. Nicht unterstützte oder nicht erreichbare Profile werden ausschließlich während der Fähigkeitsprüfung übersprungen. Jede Prüfung hat ein Zeitlimit von zehn Sekunden; verspätete Antworten starten keinen Auftrag. Unmittelbar vor der Ausführung wird die Studio-Zielrevision erneut geprüft.
+
+Nach Beginn einer Generierung gibt es keinen automatischen weiteren Auftrag, auch nicht bei Zeitlimit oder ungültigem Ergebnis. Falls weitere Profile vorhanden sind, bietet **Nächsten Anbieter versuchen** einen ausdrücklich ausgelösten neuen Versuch mit der verbleibenden Route an. Der vorherige Dienst könnte noch arbeiten. Ein Fehler beim Anzeigen der Vorschau bietet keinen Anbieterwechsel an. Projektänderungen sperren die Wiederholung; Änderungen an Profilen/Schlüsseln, Tresorsperre, Abbruch oder Bildwechsel verwerfen sie.
+
+Der ausführbare Fachadapter bleibt der lokale TripoSR-Dienst. Cloud-Generatoren und automatische Rigging-Dienste sind damit noch nicht implementiert. Bestehende Profile und gespeicherte Schlüssel werden nicht gelöscht.

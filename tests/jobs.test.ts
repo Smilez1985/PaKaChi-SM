@@ -76,3 +76,30 @@ test('consumer rejection or throw cannot silently mark a result accepted',async(
  assert.throws(()=>job.accept(()=>revision,()=>{throw new Error('transaction rejected');}),/transaction rejected/);assert.equal(job.snapshot.status,'preview');
  assert.equal(job.accept(()=>revision,()=>false),false);assert.equal(job.snapshot.status,'stale');
 });
+
+function fallbackOptions():JobOptions {
+ const opts=options();opts.config.profiles.push({...opts.config.profiles[0],id:'second'});
+ opts.config.fallbacks={assistant:['second'],generation:[],rigging:[]};return {...opts,preflightFallbacks:true};
+}
+test('preflight fallback is opt-in and never retries an executed or invalid job',async()=>{
+ for(const enabled of [false,true]){
+  const probes:string[]=[],runs:string[]=[],r=new ProviderRegistry();r.register({id:'ollama',probe:async p=>{probes.push(p.id);if(p.id==='local')throw Error('secret');return {model:p.model,capabilities:['tool-calling']};},run:async request=>{runs.push(request.profile.id);return {kind:'text',text:'ok'};}});
+  const job=new ProviderJob(r,{...fallbackOptions(),preflightFallbacks:enabled}).start();await job.done;
+  assert.deepEqual(probes,enabled?['local','second']:['local']);assert.deepEqual(runs,enabled?['second']:[]);assert.equal(job.snapshot.executionStarted,enabled);
+ }
+ for(const validate of [false,true]){
+  let runs=0;const job=new ProviderJob(registry(async()=>{runs++;if(!validate)throw Error('secret');return {kind:'text',text:'ok'};}),{...fallbackOptions(),validate:async()=>{throw Error('bad');}}).start();
+  await job.done;assert.equal(runs,1);assert.equal(job.snapshot.executionStarted,true);assert.equal(job.snapshot.status,'failed');
+ }
+});
+test('unresponsive probe times out; late probe cannot execute and stale project blocks execution',async()=>{
+ const gate=deferred<{model:string;capabilities:['tool-calling']}>();const runs:string[]=[];let firstSignal:AbortSignal|undefined;
+ const r=new ProviderRegistry();r.register({id:'ollama',probe:async(p,signal)=>{if(p.id==='local'){firstSignal=signal;return gate.promise;}return {model:p.model,capabilities:['tool-calling']};},run:async request=>{runs.push(request.profile.id);return {kind:'text',text:'ok'};}});
+ const job=new ProviderJob(r,{...fallbackOptions(),probeTimeoutMs:10}).start();await job.done;assert.deepEqual(runs,['second']);assert.ok(firstSignal?.aborted);
+ gate.resolve({model:'chosen',capabilities:['tool-calling']});await tick();assert.deepEqual(runs,['second']);
+ const stale=new ProviderJob(r,{...fallbackOptions(),mayRun:()=>false}).start();await stale.done;assert.equal(stale.snapshot.status,'stale');assert.equal(stale.snapshot.executionStarted,false);assert.deepEqual(runs,['second']);
+});
+test('cancelling preflight prevents fallback, including cancellation from an observer',async()=>{
+ let probes=0,runs=0;const r=new ProviderRegistry();r.register({id:'ollama',probe:async()=>{probes++;throw Error('offline');},run:async()=>{runs++;return {kind:'text',text:'ok'};}});
+ const job=new ProviderJob(r,fallbackOptions());job.subscribe(state=>{if(state.profile.id==='second')job.cancel();});job.start();await job.done;assert.equal(job.snapshot.status,'cancelled');assert.equal(probes,1);assert.equal(runs,0);
+});

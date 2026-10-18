@@ -83,3 +83,13 @@ export class ProviderRegistry {
 }
 
 export function providerRoute(config:ProviderConfig,role:ProviderRole):ProviderProfile[]{const valid=parseProviderConfig(config);const primary=valid.assignments[role];if(!primary)return [];return [primary,...(valid.fallbacks?.[role]??[])].map(id=>valid.profiles.find(p=>p.id===id)!);}
+
+/** A detached route tail for an explicitly requested further attempt. */
+export function remainingProviderConfig(config:ProviderConfig,role:ProviderRole,afterId:string):ProviderConfig|null {
+  const next=parseProviderConfig(config),route=providerRoute(next,role),index=route.findIndex(p=>p.id===afterId);
+  if(index<0||index+1>=route.length)return null;
+  next.assignments[role]=route[index+1].id;
+  next.fallbacks??={assistant:[],generation:[],rigging:[]};
+  next.fallbacks[role]=route.slice(index+2).map(p=>p.id);
+  return next;
+}

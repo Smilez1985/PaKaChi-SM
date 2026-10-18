@@ -1,4 +1,4 @@
-import {parseProviderConfig,ProviderRegistry,ProviderUnavailable} from './ai-providers.ts';
+import {parseProviderConfig,providerRoute,ProviderRegistry,ProviderUnavailable} from './ai-providers.ts';
 import type {ProviderConfig,ProviderProfile,ProviderRole} from './ai-providers.ts';
 import type {JobInput,JobOutput,JobProgress} from './ai-job-types.ts';
 
@@ -6,13 +6,14 @@ export interface ProjectRevision {session:string;revision:number}
 export type JobStatus='checking'|'queued'|'running'|'validating'|'preview'|'accepted'|'discarded'|'stale'|'failed'|'cancelled'|'timed-out';
 export interface JobSnapshot {
   id:string;role:ProviderRole;profile:Readonly<ProviderProfile>;target:ProjectRevision;
-  status:JobStatus;progress:number|null;error?:string;
+  status:JobStatus;progress:number|null;error?:string;executionStarted:boolean;
   // Aborting our wait never proves that a remote, potentially billable job stopped.
   remoteStop:'not-requested'|'unconfirmed';
 }
 export interface JobOptions {
   config:ProviderConfig;role:ProviderRole;input:JobInput;target:ProjectRevision;
   timeoutMs?:number;
+  preflightFallbacks?:boolean;probeTimeoutMs?:number;mayRun?:()=>boolean;
   // Mandatory format-specific validation (e.g. production GLB loader). No automatic acceptance.
   validate:(output:JobOutput,signal:AbortSignal)=>Promise<void>;
 }
@@ -38,7 +39,7 @@ function copyOutput(output:JobOutput,role:ProviderRole):JobOutput {
   return {kind:'model',bytes:output.bytes.slice()};
 }
 
-/** One explicit invocation. No retries, provider fallback, persistence or project writes. */
+/** At most one execution; optional fallbacks apply only to capability checks. */
 export class ProviderJob {
   readonly done:Promise<JobSnapshot>;
   private state:JobSnapshot;
@@ -54,6 +55,9 @@ export class ProviderJob {
   private timeoutMs:number;
   private validate:JobOptions['validate'];
   private registry:ProviderRegistry;
+  private preflightFallbacks:boolean;
+  private probeTimeoutMs:number;
+  private mayRun:()=>boolean;
 
   constructor(registry:ProviderRegistry,options:JobOptions){
     this.registry=registry;this.config=parseProviderConfig(options.config);
@@ -63,8 +67,12 @@ export class ProviderJob {
     this.timeoutMs=options.timeoutMs??120000;
     if(!Number.isSafeInteger(this.timeoutMs)||this.timeoutMs<1||this.timeoutMs>3600000)throw new Error('invalid-timeout');
     if(typeof options.validate!=='function')throw new Error('validator-required');
+    this.preflightFallbacks=options.preflightFallbacks??false;
+    this.probeTimeoutMs=options.probeTimeoutMs??10000;
+    if(!Number.isSafeInteger(this.probeTimeoutMs)||this.probeTimeoutMs<1||this.probeTimeoutMs>120000)throw new Error('invalid-probe-timeout');
+    this.mayRun=options.mayRun??(()=>true);
     this.validate=options.validate;this.input=copyInput(options.input);
-    this.state={id:crypto.randomUUID(),role:options.role,profile:{...profile},target:{...options.target},status:'checking',progress:null,remoteStop:'not-requested'};
+    this.state={id:crypto.randomUUID(),role:options.role,profile:{...profile},target:{...options.target},status:'checking',progress:null,executionStarted:false,remoteStop:'not-requested'};
     this.done=new Promise(resolve=>{this.complete=resolve;});
   }
   get snapshot():JobSnapshot{return structuredClone(this.state);}
@@ -97,13 +105,39 @@ export class ProviderJob {
     if(value.percent!==undefined&&Number.isFinite(value.percent))this.state.progress=Math.max(this.state.progress??0,Math.min(100,Math.max(0,value.percent)));
     this.notify();
   }
+  private async resolve(){
+    const route=providerRoute(this.config,this.state.role);
+    let last:unknown;
+    for(const profile of this.preflightFallbacks?route:route.slice(0,1)){
+      this.controller.signal.throwIfAborted();
+      this.state.profile={...profile};this.notify();
+      this.controller.signal.throwIfAborted();
+      const config=parseProviderConfig(this.config);config.assignments[this.state.role]=profile.id;
+      if(config.fallbacks)config.fallbacks[this.state.role]=[];
+      const controller=new AbortController();
+      let timer:ReturnType<typeof setTimeout>|undefined,abort:()=>void=()=>{};
+      try{
+        return await Promise.race([
+          new Promise<never>((_,reject)=>{
+            abort=()=>{controller.abort();reject(new Error('probe-aborted'));};
+            this.controller.signal.addEventListener('abort',abort,{once:true});
+            timer=setTimeout(()=>{controller.abort();reject(new Error('probe-timeout'));},this.probeTimeoutMs);
+          }),
+          this.registry.resolveJob(config,this.state.role,controller.signal),
+        ]);
+      }catch(error){last=error;this.controller.signal.throwIfAborted();}
+      finally{clearTimeout(timer);this.controller.signal.removeEventListener('abort',abort);}
+    }
+    throw last;
+  }
   private async execute(){
     try{
-      const {profile,run}=await this.registry.resolveJob(this.config,this.state.role,this.controller.signal);
+      const {profile,run}=await this.resolve();
       if(!active(this.state.status))return;
       this.state.status='queued';this.notify();
       if(!active(this.state.status))return;
-      this.remotePending=true;
+      if(!this.mayRun()){this.finish('stale');return;}
+      this.state.executionStarted=true;this.remotePending=true;
       const output=await run({id:this.state.id,role:this.state.role,profile,input:this.input,signal:this.controller.signal,progress:value=>this.report(value)});
       if(!active(this.state.status))return;
       this.remotePending=false;

@@ -1,6 +1,6 @@
 # Roadmap – was kommt
 
-**Softwarestand: 0.24.0 · Abgleich: 18.10.2026.** Teil der [Blaupause](README.md).
+**Softwarestand: 0.25.0 · Abgleich: 18.10.2026.** Teil der [Blaupause](README.md).
 
 Ein Häkchen bedeutet implementiert; es ersetzt keine visuelle oder externe Live-Abnahme. Die Nachweise und Prüfgrenzen stehen im [Prüfstand](PRUEFUNG.md). Die Versionshistorie gehört ins [Changelog](CHANGELOG.md).
 
@@ -167,7 +167,8 @@ Details: [Modellauswahl](LOKALE-MODELLE.md). Die aktuelle Ollama-Kuration ist ei
 - [x] Profilbezogene Sitzungsschlüssel und Modellwahl beim Umschalten erhalten.
 - [x] Assistent führt konfigurierte Route mit passendem Schlüssel je Profil aus; Abbruch und Studio-Konflikte stoppen sie.
 - [x] Optionaler passwortverschlüsselter lokaler Schlüsseltresor über Seitenneustarts hinweg (0.19.0).
-- [ ] Generator-/Rigging-Routen an produktive Fachadapter und deren Auftrags-/Fallback-Ausführung anschließen.
+- [x] Generatorroute: automatische Fallbacks während der Fähigkeitsprüfung, begrenzte Probezeit, Revisionsschutz vor Ausführung und ausdrücklicher Versuch beim nächsten Anbieter nach Auftragsfehler (0.25.0; lokaler TripoSR-Adapter).
+- [ ] Weitere Cloud-Generator-/Rigging-Fachadapter und Rigging-Fallback-Ausführung anschließen.
 - [ ] Echte Anbieter-/Kontoabnahme der Fallbacks.
 
 ## 12. Schlüsseltresor

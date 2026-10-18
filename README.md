@@ -2,7 +2,7 @@
 
 **SM steht für StateMaschine.** PaKaChi ist die **Panda-KI-Chimera**, das übergeordnete Projekt. PaKaChi-SM vereint Avatar-Player, Model Zoo und das fest integrierte **PaKaChi-Avatar-Studio**.
 
-**Softwarestand: 0.24.0 · Entwicklungsstand, keine fertige Bild-zu-3D-Lösung.**
+**Softwarestand: 0.25.0 · Entwicklungsstand, keine fertige Bild-zu-3D-Lösung.**
 
 Der bestehende PaKaChi mit Tierform, humanoider Arbeitsform und allen 72 Transformationsbildern ist erhalten und beim Start ausgewählt. Mika und Nori sind separate technische 3D-Testavatare. Ein 3D-Modell des Original-PaKaChi und die Qualitätsabnahme echter KI-Ergebnisse stehen noch aus.
 
@@ -36,7 +36,7 @@ Seit 0.12.0 gibt es `npm run generate:model` für eine eingerichtete lokale Trip
 Seit **0.20.0** kann das Tresorpasswort geändert und die **Schlüsselsitzung gesperrt** werden. Sperren leert Sitzungsschlüssel und Schlüsselentwürfe, bricht lokales Warten auf Anfragen ab und verwirft Vorschläge. Anbieter, Modelle, Fallbacks und verschlüsselte Ablage bleiben erhalten. Danach lassen sich gespeicherte Schlüssel erneut entsperren. Ungespeicherte Schlüssel gehen beim Sperren verloren.
 
 
-**Seit 0.18.0:** Mehrere Anbieter-/Modellprofile gleichzeitig einrichten. Jede Rolle hat ein Hauptprofil und eine eigene geordnete Fallback-Liste (↑/↓). Schlüssel und Modellwahl bleiben beim Wechsel erhalten. Mehrere Modelle desselben Anbieters werden als eigene Profile angelegt. Der Assistent versucht bei Anbieterfehlern die ausdrücklich eingetragenen Fallbacks der Reihe nach; Generator-/Rigging-Routen sind konfigurierbar, deren automatische Fallback-Ausführung bleibt offen. Seit 0.19.0 lassen sich Schlüssel optional verschlüsselt im Browser speichern und nach Neuladen mit einem Tresorpasswort entsperren. [Profile und Fallbacks](docs/ANBIETER.md).
+**Seit 0.18.0:** Mehrere Anbieter-/Modellprofile gleichzeitig einrichten. Jede Rolle hat ein Hauptprofil und eine eigene geordnete Fallback-Liste (↑/↓). Schlüssel und Modellwahl bleiben beim Wechsel erhalten. Mehrere Modelle desselben Anbieters werden als eigene Profile angelegt. Der Assistent versucht bei Anbieterfehlern die ausdrücklich eingetragenen Fallbacks der Reihe nach; Generator-Routen unterstützen seit 0.25.0 automatische Fallbacks ausschließlich vor Ausführungsbeginn; Rigging-Fallbacks bleiben offen. Seit 0.19.0 lassen sich Schlüssel optional verschlüsselt im Browser speichern und nach Neuladen mit einem Tresorpasswort entsperren. [Profile und Fallbacks](docs/ANBIETER.md).
 
 
 Seit 0.17.1: **Anbietervorlage einsetzen** bietet Anthropic, OpenAI, OpenRouter, DeepInfra, Ollama und LM Studio mit editierbaren Adressen. Eigene Endpunkte bleiben möglich. Die Vorlagen lösen keine Anfrage aus und bestätigen keine Modellfähigkeit.
@@ -53,7 +53,7 @@ Seit 0.14.0 besteht zusätzlich der interne [Auftragskern](docs/AUFTRAE.md): fes
 
 ## Was aktuell funktioniert
 
-| Bereich | Stand 0.24.0 |
+| Bereich | Stand 0.25.0 |
 | --- | --- |
 | Player | Avatar-Auswahl, tatsächliche Bewegungen anzeigen, abspielen, pausieren, Tempo und Abspielposition ändern. |
 | Modelle | Mika/Nori mit Skeletten und Clips; eigene eigenständige GLB-Dateien laden oder hineinziehen, bis 50 MiB, lokal für die Sitzung. |
@@ -131,7 +131,7 @@ npx playwright install chromium
 npm run test:e2e
 ```
 
-Für 0.24.0 sind 135 Tests und der Build bestanden. Die unveränderten Original-Testprogramme wurden zuletzt in 0.9.0 geprüft. Die visuelle WebGL-/Mausabnahme ist wegen der Chromium-Startbeschränkung der bisherigen Ausführungsumgebung noch offen. Die reale Python-MCP-/MQTT-Integration mit Studio-Editor wurde zuletzt in 0.10.0 erfolgreich geprüft. Details und frühere Nachweise stehen im [Prüfstand](docs/PRUEFUNG.md).
+Für 0.25.0 sind 140 Tests und der Build bestanden. Die unveränderten Original-Testprogramme wurden zuletzt in 0.9.0 geprüft. Die visuelle WebGL-/Mausabnahme ist wegen der Chromium-Startbeschränkung der bisherigen Ausführungsumgebung noch offen. Die reale Python-MCP-/MQTT-Integration mit Studio-Editor wurde zuletzt in 0.10.0 erfolgreich geprüft. Details und frühere Nachweise stehen im [Prüfstand](docs/PRUEFUNG.md).
 
 ## Lizenz
 
@@ -144,7 +144,7 @@ Noch nicht festgelegt.
 3. **Avatar-Studio → Bild → 3D-Entwurf**: PNG/JPEG auswählen oder hineinziehen; „3D-Entwurf erzeugen“ ausdrücklich starten.
 4. Getrennte Vorschau drehen/zoomen und entweder verwerfen oder **„Als neuen Avatar laden“** wählen. Der letzte Modellwechsel lässt sich mit **„Modellwechsel zurück“** und **„Modellwechsel wiederholen“** zurücknehmen und wiederholen (seit 0.23.0). Projekte zusätzlich auf Datenträger speichern.
 
-TripoSR liefert bildbasierte Geometrie, kein fertiges Skelett und keine promptgesteuerte Korrektur. Der lokale Dienst muss separat laufen. Keine automatischen Generator-Fallbacks. Die Bedienlogik ist automatisiert geprüft; WebGL-Browserprüfung und tatsächliche GPU-Inferenz sind noch offen.
+TripoSR liefert bildbasierte Geometrie, kein fertiges Skelett und keine promptgesteuerte Korrektur. Der lokale Dienst muss separat laufen. Generator-Fallbacks erfolgen nur bei fehlgeschlagener Anbieterprüfung vor dem Start. Nach Ausführungsbeginn erfordert der nächste Anbieter einen ausdrücklichen Klick. Die Bedienlogik ist automatisiert geprüft; WebGL-Browserprüfung und tatsächliche GPU-Inferenz sind noch offen.
 
 Der Modellwechsel-Verlauf hält genau einen vorherigen Projektstand in der aktuellen Seitensitzung: Modellbytes, Kontrollpunkte, Entwurfspose, gespeicherte Posen/Moves und Ungespeichert-Markierung. Eine weitere neue Auswahl ersetzt diesen Rücksprungpunkt. Auch zum Original-Bildplayer lässt sich zurückkehren; dessen laufende Animation wird dabei neu gestartet. Der Verlauf überlebt F5 nicht. [Details und Grenzen](docs/STUDIO.md#modellwechsel-zurück-und-wiederholen-0230).
 

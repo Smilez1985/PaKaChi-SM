@@ -289,3 +289,11 @@ Ein 3D-Kandidat erhält einen eigenen, zunächst nicht montierten Viewer, Editor
 Für die Übergabe werden alte Instanzen, echte DOM-Knoten samt Ereignisbehandlung und StateMachine-Bindung gehalten. Bei Fehlern werden diese wieder eingesetzt und nur Kandidatenressourcen verworfen. Erst eine erfolgreiche Veröffentlichung aktiviert neue Editor-Rückmeldungen und den Modellwechsel-Verlauf; anschließend werden alte Ressourcen freigegeben. Ein Fehler beim anschließenden Aufräumen macht den gültig übernommenen Avatar nicht wieder ungültig und wird separat gemeldet.
 
 Der Schutz gilt für die 3D-Ladestrecke einschließlich Import, Generierungsübernahme und 3D-Wiederherstellung. Er ist keine Zusage gegen Prozessabsturz, Speichermangel, GPU-Kontextverlust oder einen selbst scheiternden Rollback. Der separate Neustart des archivierten Original-Bildplayers besitzt weiterhin seinen bisherigen Ablauf. Gerenderte Abnahme steht aus; die Vorbereitungsphase benötigt vorübergehend zusätzliche CPU-/GPU-Ressourcen für alten und neuen Viewer.
+
+## Generator-Fallbacks (0.25.0)
+
+Die Studio-Oberfläche zeigt vor dem Start die vollständige konfigurierte Generatorroute. Profile, Reihenfolge, Bild, Zielrevision und Schlüssel je Profil werden für diesen Versuch festgehalten. Nicht unterstützte oder nicht erreichbare Profile werden ausschließlich während der Fähigkeitsprüfung übersprungen. Jede Prüfung hat ein Zeitlimit von zehn Sekunden; verspätete Antworten starten keinen Auftrag. Unmittelbar vor der Ausführung wird die Studio-Zielrevision erneut geprüft.
+
+Nach Beginn einer Generierung gibt es keinen automatischen weiteren Auftrag, auch nicht bei Zeitlimit oder ungültigem Ergebnis. Falls weitere Profile vorhanden sind, bietet **Nächsten Anbieter versuchen** einen ausdrücklich ausgelösten neuen Versuch mit der verbleibenden Route an. Der vorherige Dienst könnte noch arbeiten. Ein Fehler beim Anzeigen der Vorschau bietet keinen Anbieterwechsel an. Projektänderungen sperren die Wiederholung; Änderungen an Profilen/Schlüsseln, Tresorsperre, Abbruch oder Bildwechsel verwerfen sie.
+
+Der ausführbare Fachadapter bleibt der lokale TripoSR-Dienst. Cloud-Generatoren und automatische Rigging-Dienste sind damit noch nicht implementiert. Bestehende Profile und gespeicherte Schlüssel werden nicht gelöscht.

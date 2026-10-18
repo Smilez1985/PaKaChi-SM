@@ -10,15 +10,15 @@ import {setProviderKey,lockProviderSession} from '../src/provider-credentials.ts
 import {glb} from './generation-fixture.mjs';
 const bytes=Uint8Array.from(glb());
 async function until(check:()=>boolean){for(let i=0;i<100;i++){if(check())return;await new Promise(r=>setTimeout(r,5));}assert.fail('UI did not settle');}
-function fixture(t:TestContext,run?:ProviderAdapter['run']){
+function fixture(t:TestContext,run?:ProviderAdapter['run'],fallback=false){
  const w=new Window();Object.assign(globalThis,{window:w,document:w.document});
  const host=document.createElement('div');document.body.append(host);
  const profile={id:'gen',name:'Local',adapter:'custom-generation' as const,endpoint:'http://127.0.0.1:8766',model:'triposr'};
- saveProviderConfig({version:1,profiles:[profile],assignments:{assistant:null,generation:'gen',rigging:null}},w.localStorage);setProviderKey(profile,'x'.repeat(48));
+ saveProviderConfig({version:1,profiles:fallback?[profile,{...profile,id:'backup',name:'Backup'}]:[profile],fallbacks:{assistant:[],generation:fallback?['backup']:[],rigging:[]},assignments:{assistant:null,generation:'gen',rigging:null}},w.localStorage);setProviderKey(profile,'x'.repeat(48));if(fallback)setProviderKey({...profile,id:'backup'},'y'.repeat(48));
  let beforeAdopt:(()=>Promise<void>)|undefined;
  let target={session:'one',revision:1},calls=0,adoptions=0,cleanups=0,previewCalls=0;
  const panel=mountGenerationPanel(host,{target:()=>target,adopt:async(_bytes,expected,valid)=>{await beforeAdopt?.();if(!valid()||expected.session!==target.session||expected.revision!==target.revision)return false;adoptions++;return true;}},()=> 'de',w.localStorage,{
-  adapter:key=>{assert.equal(key,'x'.repeat(48));return {id:'custom-generation',probe:async()=>({model:'triposr',capabilities:['image-to-3d']}),run:async request=>{calls++;return run?run(request):{kind:'model',bytes};}};
+  adapter:(key,p)=>{assert.equal(key,(p.id==='backup'?'y':'x').repeat(48));return {id:'custom-generation',probe:async()=>({model:'triposr',capabilities:['image-to-3d']}),run:async request=>{calls++;return run?run(request):{kind:'model',bytes};}};
   },validate:validateGeneration,preview:async()=>{previewCalls++;return ()=>{cleanups++;};},
  });
  t.after(()=>{panel.dispose();w.happyDOM.abort();});
@@ -47,4 +47,14 @@ test('provider configuration change discards preview; original source can be ret
 
 test('locking while asynchronous import prepares invalidates its commit guard',async t=>{
  const f=fixture(t);let release!:()=>void;f.delayImport(()=>new Promise<void>(resolve=>{release=resolve;}));f.choose();f.button('start').click();await until(()=>!f.button('apply').hidden);f.button('apply').click();await until(()=>!!release);lockProviderSession();release();await new Promise(r=>setTimeout(r,5));assert.equal(f.adoptions,0);assert.ok(f.button('apply').hidden);assert.equal(f.cleanups,1);
+});
+
+test('execution failure requires explicit next-provider click with its own credentials',async t=>{
+ const seen:string[]=[];const f=fixture(t,async request=>{seen.push(request.profile.id);if(request.profile.id==='gen')throw Error('offline');return {kind:'model',bytes};},true);
+ f.choose();f.button('start').click();await until(()=>!f.button('retry').hidden&&!f.button('retry').disabled);
+ assert.deepEqual(seen,['gen']);assert.equal(f.adoptions,0);f.button('retry').click();await until(()=>!f.button('apply').hidden);assert.deepEqual(seen,['gen','backup']);assert.ok(f.button('retry').hidden);
+});
+test('stale project disables retry and vault lock removes pending retry',async t=>{
+ const f=fixture(t,async()=>{throw Error('offline');},true);f.choose();f.button('start').click();await until(()=>!f.button('retry').hidden&&!f.button('retry').disabled);
+ f.change();assert.ok(f.button('retry').disabled);f.button('retry').click();assert.equal(f.calls,1);lockProviderSession();assert.ok(f.button('retry').hidden);
 });
