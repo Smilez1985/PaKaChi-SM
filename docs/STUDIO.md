@@ -158,3 +158,7 @@ Der Verlauf ist kein dauerhafter Versionsspeicher. Seit 0.24.0 werden neue 3D-An
 ### Hinweis zu älteren Projektständen
 
 0.24.0 baut den Rig wieder nach der sichtbaren Modellnormalisierung auf. In 0.22.0/0.23.0 geschah dies davor. In diesen Versionen gespeicherte freie Oberflächenpunkte und Posen sollten deshalb an einer Kopie visuell kontrolliert werden; das unveränderte Projektformat 1 enthält keinen Versionsmarker, aus dem sich ihre Koordinatenherkunft sicher ableiten ließe. Eine automatische Migration wird nicht behauptet.
+
+## Move-Dateien austauschen (0.27.0)
+
+Unter **Eigene Bewegungen** einen Studio-Move auswählen und **Move exportieren** anklicken. **Move importieren** ergänzt eine passende Datei samt Posen, ohne bestehende Bewegungen zu überschreiben. Modell und bewegungsrelevante Gelenkstruktur müssen identisch sein. Der Import ist als Ganzes rückgängig machbar; Wiedergabe startet erst über Vorschau. [Anleitung und Grenzen](MOVE-DATEIEN.md).

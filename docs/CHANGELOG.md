@@ -12,6 +12,23 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.27.0] - 2026-10-18
+
+Zeitstempel: 2026-10-18T13:47:58+02:00 (Europe/Berlin)
+
+### Added
+
+- Export und Import einzelner eigener Studio-Moves als `.pakachi-move.json`, einschließlich benötigter Posen, Gesamtspuren, Schleife und Prüfhinweisen.
+- Konservative Kompatibilitätsprüfung über SHA-256 von Modell und Gelenkstruktur. Neue Posen-IDs und freie Schlagworte verhindern Überschreiben vorhandener Daten.
+- Import als einzelner Undo-/Redo-Schritt mit Revisionsprüfung nach asynchronem Dateilesen und Hashen; keine automatische Wiedergabe.
+- Sieben Tests zu Format, Kompatibilität, Konflikten, Wiederholungsposen, Grenzen, Undo/Redo und veralteten Importen.
+
+### Changed
+
+- Studio-Bedienelemente für Move-Dateien auf Deutsch/Englisch; README, Design, Roadmap, Studio-Anleitung und Prüfstand nachgezogen.
+
+**Prüfung:** 154 Tests und Build bestanden. Kein Retargeting oder Export eingebetteter GLB-Clips. Browser-Dateidialog, Download und gerenderte Vorschau bleiben unabgenommen.
+
 ## [0.26.0] - 2026-10-18
 
 Zeitstempel: 2026-10-18T12:38:23+02:00 (Europe/Berlin)
@@ -587,3 +604,5 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 [0.25.0]: PRUEFUNG-0.25.0.md
 
 [0.26.0]: PRUEFUNG-0.26.0.md
+
+[0.27.0]: PRUEFUNG-0.27.0.md

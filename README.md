@@ -2,7 +2,7 @@
 
 **SM steht für StateMaschine.** PaKaChi ist die **Panda-KI-Chimera**, das übergeordnete Projekt. PaKaChi-SM vereint Avatar-Player, Model Zoo und das fest integrierte **PaKaChi-Avatar-Studio**.
 
-**Softwarestand: 0.26.0 · Entwicklungsstand, keine fertige Bild-zu-3D-Lösung.**
+**Softwarestand: 0.27.0 · Entwicklungsstand, keine fertige Bild-zu-3D-Lösung.**
 
 Der bestehende PaKaChi mit Tierform, humanoider Arbeitsform und allen 72 Transformationsbildern ist erhalten und beim Start ausgewählt. Mika und Nori sind separate technische 3D-Testavatare. Ein 3D-Modell des Original-PaKaChi und die Qualitätsabnahme echter KI-Ergebnisse stehen noch aus.
 
@@ -53,7 +53,7 @@ Seit 0.14.0 besteht zusätzlich der interne [Auftragskern](docs/AUFTRAE.md): fes
 
 ## Was aktuell funktioniert
 
-| Bereich | Stand 0.26.0 |
+| Bereich | Stand 0.27.0 |
 | --- | --- |
 | Player | Avatar-Auswahl, tatsächliche Bewegungen anzeigen, abspielen, pausieren, Tempo und Abspielposition ändern. |
 | Modelle | Mika/Nori mit Skeletten und Clips; eigene eigenständige GLB-Dateien laden oder hineinziehen, bis 50 MiB, lokal für die Sitzung. |
@@ -97,7 +97,7 @@ Seit 0.9.0 kann MCP mit zusätzlicher Freigabe auch Punkte, Verbindungen, Posen 
 
 ## Dateien und Grenzen
 
-GLB-Importe bleiben in der Browsersitzung. **Projekte herunterladen, um die Arbeit dauerhaft zu sichern.** Es gibt keine automatische Projektspeicherung und keinen automatischen Eintrag in den gemeinsamen Model Zoo. Eigene Moves liegen derzeit in der Projektdatei, nicht in separaten `moves/`-Dateien.
+GLB-Importe bleiben in der Browsersitzung. **Projekte herunterladen, um die Arbeit dauerhaft zu sichern.** Es gibt keine automatische Projektspeicherung und keinen automatischen Eintrag in den gemeinsamen Model Zoo. Eigene Moves bleiben im Projekt erhalten und können seit 0.27.0 zusätzlich als einzelne `.pakachi-move.json`-Dateien ausgetauscht werden; ein verwalteter gemeinsamer `moves/`-Ordner bleibt offen.
 
 Ältere Projektdateien bleiben lesbar. Dateien mit Gesamtpositionsspur benötigen mindestens 0.6.0, mit Gesamtdrehung mindestens 0.8.0, mit Skalierung mindestens 0.10.0. Ältere Versionen ignorieren die Skalierung. Ein Projekt ist kein GLB-Export.
 
@@ -131,7 +131,7 @@ npx playwright install chromium
 npm run test:e2e
 ```
 
-Für 0.26.0 sind 147 Tests und der Build bestanden. Die unveränderten Original-Testprogramme wurden zuletzt in 0.9.0 geprüft. Die visuelle WebGL-/Mausabnahme ist wegen der Chromium-Startbeschränkung der bisherigen Ausführungsumgebung noch offen. Die reale Python-MCP-/MQTT-Integration mit Studio-Editor wurde zuletzt in 0.10.0 erfolgreich geprüft. Details und frühere Nachweise stehen im [Prüfstand](docs/PRUEFUNG.md).
+Für 0.27.0 sind 154 Tests und der Build bestanden. Die unveränderten Original-Testprogramme wurden zuletzt in 0.9.0 geprüft. Die visuelle WebGL-/Mausabnahme ist wegen der Chromium-Startbeschränkung der bisherigen Ausführungsumgebung noch offen. Die reale Python-MCP-/MQTT-Integration mit Studio-Editor wurde zuletzt in 0.10.0 erfolgreich geprüft. Details und frühere Nachweise stehen im [Prüfstand](docs/PRUEFUNG.md).
 
 ## Lizenz
 
@@ -151,3 +151,5 @@ Der Modellwechsel-Verlauf hält genau einen vorherigen Projektstand in der aktue
 Seit **0.24.0** wird ein neuer 3D-Avatar mit eigener Ansicht, Editor und Wiedergabe vorbereitet, bevor er den bisherigen Stand ersetzt. Fehler bei Vorbereitung oder Übergabe erhalten beziehungsweise restaurieren den alten Editor und seine Steuerungsbindung. Die bisherigen Ressourcen werden erst nach erfolgreichem Wechsel freigegeben. Die gerenderte Browserprüfung bleibt blockiert: Chromium wurde installiert, startet hier jedoch wegen eines verbotenen Socket-Systemaufrufs nicht.
 
 Seit **0.26.0** lassen sich vollständige 3D-Projektkopien im **lokalen Model Zoo** speichern, auswählen, laden und nach Bestätigung löschen. Die browsergebundene Sammlung bleibt nach F5 erhalten; Projektdateien zusätzlich sichern. Kein gemeinsamer Repository-Export oder Cloud-Sync. [Anleitung und Grenzen](docs/LOKALER-MODEL-ZOO.md).
+
+Seit **0.27.0**: **Move exportieren / Move importieren** im Studio. Austausch zwischen identischem Modell und gleicher Gelenkstruktur, neue Posen-IDs statt Überschreiben und ein Undo-Schritt pro Import. [Anleitung und Kompatibilitätsgrenzen](docs/MOVE-DATEIEN.md).

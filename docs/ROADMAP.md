@@ -1,6 +1,6 @@
 # Roadmap – was kommt
 
-**Softwarestand: 0.26.0 · Abgleich: 18.10.2026.** Teil der [Blaupause](README.md).
+**Softwarestand: 0.27.0 · Abgleich: 18.10.2026.** Teil der [Blaupause](README.md).
 
 Ein Häkchen bedeutet implementiert; es ersetzt keine visuelle oder externe Live-Abnahme. Die Nachweise und Prüfgrenzen stehen im [Prüfstand](PRUEFUNG.md). Die Versionshistorie gehört ins [Changelog](CHANGELOG.md).
 
@@ -22,7 +22,9 @@ Diese Reihenfolge ist ein Umsetzungsvorschlag, kein Terminversprechen. Lokale un
 - [x] Vollständige 3D-Projektkopien in einer lokalen Browsersammlung speichern, auswählen, laden und bestätigt löschen (0.26.0; separate Auswahl neben dem mitgelieferten Katalog).
 - [ ] IndexedDB-Persistenz über F5, Speichergrenzen und mehrere Tabs in einem echten Browser prüfen.
 - [ ] Bearbeitete Projekte in den gemeinsamen veröffentlichten Model Zoo exportieren; Katalog-/MCP-Einbindung und Austausch ergänzen.
-- [ ] Separate Move-Dateien und deren Austausch ergänzen.
+- [x] Eigene Studio-Moves als separate Dateien exportieren/importieren, nur bei identischem Modell und gleicher Bewegungsstruktur; Konflikte ohne Überschreiben lösen und gesamten Import rückgängig machen (0.27.0).
+- [ ] Dateidialog, Download und importierte Bewegung im gerenderten Browser prüfen.
+- [ ] Verwaltete gemeinsame moves/-Sammlung, GLB-Clip-Export und Retargeting auf andere Rigs ergänzen.
 
 **Abnahme:** Avatar auswählen und vorhandene Bewegungen abspielen. Code und automatisierte Prüfungen vorhanden; visuelle Abnahme offen.
 

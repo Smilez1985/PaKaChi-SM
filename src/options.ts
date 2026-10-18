@@ -5,6 +5,16 @@ export function readOptions(storage?:Pick<Storage,'getItem'>):Options {
 }
 export const options=readOptions();
 const translations:Record<string,string>={
+  'Move exportieren':'Export move','Move importieren':'Import move',
+  'Move-Dateien benötigen dasselbe Modell und dieselbe Gelenkstruktur. Kein automatisches Retargeting.':'Move files require the same model and joint structure. No automatic retargeting.',
+  'Bewegung und Posen importiert. Vorschau prüfen; Zurück macht den Import rückgängig.':'Move and poses imported. Review the preview; Undo reverts the import.',
+  'Studio-Stand hat sich geändert. Move erneut importieren.':'Studio changed. Import the move again.',
+  'Studio ist beschäftigt oder geschlossen.':'Studio is busy or closed.',
+  'Bewegung passt nicht zu Modell und Gelenkstruktur.':'Move does not match the model and joint structure.',
+  'Move-Datei ist größer als 8 MiB.':'Move file exceeds 8 MiB.',
+  'Eigene Bewegung auswählen.':'Select a custom move.',
+  'Move-Datei enthält unbenutzte Posen.':'Move file contains unused poses.',
+
   'Gelenke · Maussteuerung':'Joints · Mouse controls','Höchstens 2048 Verbindungen.':'At most 2048 connections.',
   'Gesamte Figur':'Whole figure','Gesamte Figur verschieben':'Move whole figure','Gesamte Figur verschieben. Diese Position wird in jeder Pose gespeichert.':'Move the whole figure. This position is saved in every pose.',
   'Posen · Gesamtbewegung':'Poses · Whole-figure motion',

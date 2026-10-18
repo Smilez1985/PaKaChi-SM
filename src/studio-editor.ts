@@ -1,3 +1,4 @@
+import {exportMoveFile,importMoveFile,MAX_MOVE_FILE} from './move-file.ts';
 import {parseStudioCommand} from './studio-command.ts';
 import {flagAffectedPoses,moveReview,reviewLabels} from './studio-review.ts';
 import * as T from 'three';
@@ -31,6 +32,7 @@ export class StudioEditor {
   readonly session=crypto.randomUUID();
   private revision=0;
   private agentEditing=false;
+  private disposed=false;
   dirty=false;
   paused=false;
   speed=1;
@@ -113,7 +115,7 @@ export class StudioEditor {
     <label>Übergang zu dieser Pose (Sekunden)<input id="pose-seconds" type="number" min="0.1" max="30" step="0.1" value="1"></label><div class="studio-actions"><button id="pose-up">↑ Früher</button><button id="pose-down">↓ Später</button></div>
     <p class="subtle">Eine Bewegung nutzt alle Posen in dieser Reihenfolge. Bei Schleifen bestimmt die Zeit der ersten Pose den Rückweg.</p>
     <label>Bewegungsname<input id="move-name" maxlength="100" placeholder="z. B. Lächeln"></label><label>Schlagwort<input id="move-id" maxlength="100" placeholder="z. B. laecheln"></label><label class="check"><input id="move-loop" type="checkbox"> Als Schleife</label><button id="move-add" ${poses.length>=2?'':'disabled'}>Bewegung speichern</button>
-    <label for="studio-moves">Eigene Bewegungen</label><select id="studio-moves"></select><p id="move-review" class="studio-review" hidden>Diese Bewegung enthält Posen mit Prüfhinweisen. Vorschau ansehen und die markierten Posen prüfen.</p><div class="studio-actions"><button id="move-preview">Vorschau</button><button id="move-stop">Stopp</button><button id="move-delete">Löschen</button></div></div>
+    <label for="studio-moves">Eigene Bewegungen</label><select id="studio-moves"></select><p id="move-review" class="studio-review" hidden>Diese Bewegung enthält Posen mit Prüfhinweisen. Vorschau ansehen und die markierten Posen prüfen.</p><div class="studio-actions"><button id="move-preview">Vorschau</button><button id="move-stop">Stopp</button><button id="move-delete">Löschen</button></div><div class="studio-actions"><button id="move-export">Move exportieren</button><button id="move-import">Move importieren</button><input id="move-file" type="file" accept=".json,.pakachi-move.json" hidden></div><p class="subtle">Move-Dateien benötigen dasselbe Modell und dieselbe Gelenkstruktur. Kein automatisches Retargeting.</p></div>
     <p class="subtle">Projekt laden: „Projekt laden“ oben. Mausrad: Nahzoom · rechts ziehen: Ansicht verschieben.</p>`;
     const q=<E extends HTMLElement=HTMLElement>(id:string)=>this.host.querySelector<E>(`#${id}`)!;
     const input=(id:string)=>q<HTMLInputElement>(id);
@@ -172,6 +174,10 @@ export class StudioEditor {
     moves.onchange=()=>{const m=this.data.moves.find(m=>m.id===moves.value);q('move-review').hidden=!m||!moveReview(this.data,m).needsReview;};moves.onchange(new Event('change'));
     for(const id of ['pose-name','move-name','move-id'])input(id).value=remembered[id];input('move-loop').checked=loop;
     on('move-preview',()=>this.play(moves.value,true));on('move-stop',()=>this.stopPreview());on('move-delete',()=>this.mutate(()=>this.data.moves=this.data.moves.filter(m=>m.id!==moves.value)));
+    q<HTMLButtonElement>('move-export').disabled=!moves.value;
+    q<HTMLButtonElement>('move-export').onclick=()=>{void this.exportMove(moves.value).then(value=>{if(this.disposed)return;const url=URL.createObjectURL(new Blob([JSON.stringify(value)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download=value.move.id+'.pakachi-move.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}).catch(error=>{if(!this.disposed)this.hooks.feedback(error instanceof Error?error.message:'Move-Export fehlgeschlagen.');});};
+    on('move-import',()=>input('move-file').click());
+    input('move-file').onchange=()=>{const file=input('move-file').files?.[0],revision=this.revision;input('move-file').value='';if(!file)return;void (async()=>{if(file.size>MAX_MOVE_FILE)throw Error('Move-Datei ist größer als 8 MiB.');await this.importMove(JSON.parse(await file.text()),revision);})().catch(error=>{if(!this.disposed)this.hooks.feedback(error instanceof Error?error.message:'Move-Import fehlgeschlagen.');});};
     if(this.playing){this.host.querySelectorAll<HTMLButtonElement|HTMLInputElement|HTMLSelectElement>('button,input,select').forEach(e=>e.disabled=e.id!=='move-stop'&&e.id!=='studio-agent-edit');}
     this.view.setFigureEnabled(!this.edit);this.view.setRotation(this.rotate && !this.edit);this.view.select(this.selected);this.refreshNumbers();
   }
@@ -216,6 +222,16 @@ export class StudioEditor {
     }
     this.hooks.feedback('Studio-Änderung durch KI übernommen.');return {accepted:true,session:this.session,revision:this.revision,...(resultId?{id:resultId}:{})};
   }
+  async exportMove(id:string){if(this.disposed||!this.active||this.interactionActive)throw Error('Studio ist beschäftigt oder geschlossen.');return exportMoveFile(this.exportProject(),id);}
+  async importMove(value:unknown,expectedRevision=this.revision){
+    const valid=()=>!this.disposed&&this.active&&!this.interactionActive&&this.revision===expectedRevision;
+    if(!valid())throw Error('Studio-Stand hat sich geändert. Move erneut importieren.');
+    const data=await importMoveFile(value,this.exportProject());
+    if(!valid())throw Error('Studio-Stand hat sich geändert. Move erneut importieren.');
+    this.mutate(()=>{this.rig.data=data;});
+    const moves=this.host.querySelector<HTMLSelectElement>('#studio-moves');if(moves){moves.value=data.moves.at(-1)!.id;moves.dispatchEvent(new Event('change'));}
+    this.hooks.feedback('Bewegung und Posen importiert. Vorschau prüfen; Zurück macht den Import rückgängig.');
+  }
   restoreDirty(value:boolean){this.dirty=value;this.render();}
   exportProject():StudioProject {
     if(this.interactionActive)throw new Error('Studio-Bewegung zuerst beenden.');
@@ -227,7 +243,7 @@ export class StudioEditor {
     const value=this.exportProject();
     const url=URL.createObjectURL(new Blob([JSON.stringify(value)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download=`${this.project.avatar.id}.pakachi.json`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);this.dirty=false;this.render();this.hooks.feedback('Studio-Projekt mit Modell, Kontrollpunkten, Posen und Bewegungen heruntergeladen.');
   }
-  dispose(){this.view.dispose();this.host.replaceChildren();}
+  dispose(){this.disposed=true;this.view.dispose();this.host.replaceChildren();}
 }
 export function encodeModel(buffer:ArrayBuffer):string {let s='';const bytes=new Uint8Array(buffer);for(let i=0;i<bytes.length;i+=16384)s+=String.fromCharCode(...bytes.subarray(i,i+16384));return btoa(s);}
 export function decodeModel(base64:string):ArrayBuffer {return Uint8Array.from(atob(base64),c=>c.charCodeAt(0)).buffer;}

@@ -35,3 +35,17 @@ test('mouse scale is one undoable gesture, blocks racing MCP, persists poses and
  for(const scale of [0,-1,6,NaN,Infinity,'2']){const before=rig.capture(),rev=editor.inspect().revision;assert.throws(()=>run({action:'update_point',id:'$figure',scale}));assert.deepEqual(rig.capture(),before);assert.equal(editor.inspect().revision,rev);}
  run({action:'set_mode',mode:'rig'});const id=run({action:'add_point',position:[0,0,0]}).id!;run({action:'set_mode',mode:'pose'});assert.throws(()=>run({action:'update_point',id,scale:2}));editor.dispose();f.w.happyDOM.abort();
 });
+
+test('move import is a single undoable editor action with no automatic playback or changed pose',async()=>{
+ const f=fixture(),{editor,run,rig,host}=f;editor.enter();f.grant();const a=run({action:'save_pose'}).id!,b=run({action:'save_pose'}).id!;run({action:'create_move',id:'wave',name:'Wave',poses:[a,b]});
+ const file=await editor.exportMove('wave'),before=structuredClone(rig.data),pose=rig.capture(),revision=editor.inspect().revision;
+ assert.ok(host.querySelector('#move-export'));assert.ok(host.querySelector('#move-import'));await editor.importMove(file);assert.equal(editor.inspect().revision,revision+1);assert.equal(rig.data.moves[1].id,'wave-2');assert.equal(host.querySelector<HTMLSelectElement>('#studio-moves')!.value,'wave-2');assert.equal(editor.playing,false);assert.deepEqual(rig.capture(),pose);assert.equal(editor.dirty,true);
+ run({action:'undo'});assert.deepEqual(rig.data,before);run({action:'redo'});assert.equal(rig.data.moves.length,2);editor.dispose();f.w.happyDOM.abort();
+});
+test('manual edits, gestures, leaving or disposal invalidate an asynchronous move import',async()=>{
+ for(const action of ['edit','gesture','leave','dispose']){
+  const f=fixture(),{editor,run,rig}=f;editor.enter();f.grant();const a=run({action:'save_pose'}).id!,b=run({action:'save_pose'}).id!;run({action:'create_move',id:'wave',name:'Wave',poses:[a,b]});const file=await editor.exportMove('wave');
+  const pending=editor.importMove(file);if(action==='edit')run({action:'save_pose'});else if(action==='gesture')f.view.onStart();else if(action==='leave')editor.leave();else editor.dispose();
+  await assert.rejects(()=>pending,/Stand hat sich geändert/);assert.equal(rig.data.moves.length,1);if(action!=='dispose')editor.dispose();f.w.happyDOM.abort();
+ }
+});

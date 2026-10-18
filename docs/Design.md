@@ -4,7 +4,7 @@ Teil der [Blaupause](README.md) · [Roadmap](ROADMAP.md) · [Changelog](CHANGELO
 
 ## Status und Begriffe
 
-Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.26.0: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau, automatische Anatomieerkennung und die Qualitätsabnahme der angeschlossenen lokalen KI-Generierung bleiben offen.
+Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.27.0: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau, automatische Anatomieerkennung und die Qualitätsabnahme der angeschlossenen lokalen KI-Generierung bleiben offen.
 
 - **PaKaChi:** Panda-KI-Chimera, das übergeordnete Projekt.
 - **PaKaChi-SM:** StateMaschine mit Avatar-Player und integriertem Studio.
@@ -24,7 +24,7 @@ Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich gen
 | Generierung | Lokaler TripoSR-Dienst, Bildauswahl, getrennte Vorschau, Vorprüfungs-Fallbacks, expliziter weiterer Auftrag | Echte GPU-/Qualitätsabnahme, Cloud-Generatoren, Korrekturprompts und Rigging |
 | Übernahme | Revisionsschutz, ein Modellwechsel-Rücksprung, vorbereitete 3D-Installation mit Rückabwicklung | Gerenderte Abnahme, Originalplayer-Neustart und GPU-Kontextverlust |
 
-Prüfnachweis für Software 0.26.0: **147 Tests und Build bestanden**. Das belegt keine gerenderte Browser-, Anbieter- oder GPU-Abnahme. Projektformat bleibt Version 1. Freie Punkte/Posen aus 0.22.0/0.23.0 benötigen wegen der korrigierten Normalisierungsreihenfolge eine visuelle Kontrolle; keine automatische Migration. [Prüfbericht](PRUEFUNG-0.26.0.md).
+Prüfnachweis für Software 0.27.0: **154 Tests und Build bestanden**. Das belegt keine gerenderte Browser-, Anbieter- oder GPU-Abnahme. Projektformat bleibt Version 1. Freie Punkte/Posen aus 0.22.0/0.23.0 benötigen wegen der korrigierten Normalisierungsreihenfolge eine visuelle Kontrolle; keine automatische Migration. [Prüfbericht](PRUEFUNG-0.27.0.md).
 
 ## Bestehender PaKaChi-Avatar
 
@@ -113,7 +113,7 @@ Als Schutzkonzept ist eine Vorschau mit Übernehmen oder Verwerfen vorgesehen. D
 
 Die Anzahl drei bis zehn beschreibt den typischen Arbeitsablauf, keine bereits festgelegte technische Obergrenze.
 
-Eine Bewegung enthält Zeitpunkte, Gelenktransformationen, gegebenenfalls Gesichtsparameter und die Gesamtposition. Sie benötigt keine Sammlung separat gezeichneter Einzelbilder. Die erste Umsetzung speichert Posen und Moves textbasiert in versionierten `.pakachi.json`-Projekten. Seit 0.6.0 enthält jede neue Pose zusätzlich die globale Verschiebung der gesamten Figur, auch bei Modellen ohne Knochen. Seit 0.8.0 wird auch die Gesamtdrehung um den ursprünglichen Modellmittelpunkt gespeichert und interpoliert. Seit 0.10.0 enthält die Gesamtspur außerdem eine proportionale Skalierung von 10 % bis 500 %, per Mausregler bearbeitbar und zwischen Posen linear interpoliert. Separate Move-Dateien bleiben offen.
+Eine Bewegung enthält Zeitpunkte, Gelenktransformationen, gegebenenfalls Gesichtsparameter und die Gesamtposition. Sie benötigt keine Sammlung separat gezeichneter Einzelbilder. Die erste Umsetzung speichert Posen und Moves textbasiert in versionierten `.pakachi.json`-Projekten. Seit 0.6.0 enthält jede neue Pose zusätzlich die globale Verschiebung der gesamten Figur, auch bei Modellen ohne Knochen. Seit 0.8.0 wird auch die Gesamtdrehung um den ursprünglichen Modellmittelpunkt gespeichert und interpoliert. Seit 0.10.0 enthält die Gesamtspur außerdem eine proportionale Skalierung von 10 % bis 500 %, per Mausregler bearbeitbar und zwischen Posen linear interpoliert. Seit 0.27.0 können eigene Studio-Moves als separate Dateien zwischen kompatiblen Projektkopien ausgetauscht werden.
 
 Glatte Interpolation allein garantiert keine natürlichen Bewegungen oder Kollisionsfreiheit. Gelenkgrenzen und geeignete Übergänge sind Teil der Umsetzung.
 
@@ -176,7 +176,7 @@ Die logische Struktur des Model Zoo:
 - Ein eigener **moves/**-Ordner mit den Bewegungen dieses Avatars.
 - Zustandszuordnungen und bearbeitbare Studio-Daten.
 
-Implementiert sind Three.js für die Darstellung, glTF/GLB für Modelle, ein JSON-Katalog und `.pakachi.json` für bearbeitbare Projekte mit eingebettetem Modell. Seit 0.26.0 ergänzt eine lokale IndexedDB-Sammlung die Katalogauswahl mit vollständigen Projektkopien. Separate Move-Dateien und der gemeinsame Export in den veröffentlichten Katalog stehen noch aus.
+Implementiert sind Three.js für die Darstellung, glTF/GLB für Modelle, ein JSON-Katalog und `.pakachi.json` für bearbeitbare Projekte mit eingebettetem Modell. Seit 0.26.0 ergänzt eine lokale IndexedDB-Sammlung die Katalogauswahl mit vollständigen Projektkopien. Separate Move-Dateien sind seit 0.27.0 vorhanden; gemeinsame Veröffentlichung und ein verwalteter moves/-Ordner bleiben offen.
 
 ## 10. Bedienziel
 
@@ -318,3 +318,9 @@ Der ausführbare Fachadapter bleibt der lokale TripoSR-Dienst. Cloud-Generatoren
 Der Nutzer speichert bewusst eine benannte Kopie des aktuellen 3D-Projekts. Jede Kopie bekommt eine eigene ID; gleiche Namen überschreiben nichts. Metadaten und vollständiges Projekt werden gemeinsam in IndexedDB gespeichert. Die Sammlung gilt pro Browserprofil und Origin und bleibt nach Seitenneuladen verfügbar. Grenzen: 50 Einträge, 80 MiB JSON je Projekt, zusätzlich Browserkontingent. Es werden nur die Metadaten der Sammlung für die Auswahl geladen.
 
 Laden verwendet die vorhandenen Projekt-/Geometrieprüfungen und die vorbereitete Modellübernahme mit Rückabwicklung. Zwischenzeitliche Projektänderungen verhindern einen veralteten Import. Löschen erfordert Bestätigung und entfernt nur die gespeicherte Kopie. Weitere Bearbeitungen werden nicht automatisch gespeichert; die Ungespeichert-Markierung des aktiven Projekts bleibt erhalten. Originalplayer, mitgelieferter Katalog, MCP-Katalogliste und Anbieterprofile werden nicht durch die Sammlung verändert. Browserdatenlöschung kann sie entfernen, daher zusätzlich Projektdateien sichern. Veröffentlichung, Synchronisierung und echte Browser-Persistenzabnahme bleiben offen. [Anleitung](LOKALER-MODEL-ZOO.md).
+
+## Austausch eigener Moves (0.27.0)
+
+Eine separate `.pakachi-move.json`-Datei enthält genau eine Studio-Bewegung und ihre verwendeten Posen einschließlich Prüfhinweisen und Gesamtspuren. Modell und bewegungsrelevante Rig-Struktur werden durch SHA-256-Fingerabdrücke gebunden; Geometrie und Anbieterzugänge werden nicht exportiert. Die Bindung ist eine konservative Kompatibilitätsprüfung, kein Retargeting und kein Echtheitsnachweis. Kosmetische Punktnamen und Anzeigegrößen dürfen abweichen; unterschiedliche Modelle, Grundstellungen, Einflussbereiche und Verbindungen werden abgewiesen.
+
+Der Import kopiert Posen unter neue IDs und ergänzt bei Schlagwortkonflikten ein freies Suffix. Vorhandene Daten bleiben erhalten. Vor der einzigen Editoränderung werden Dateiformat, Projektgrenzen und der aktuelle Bearbeitungsstand geprüft. Import ist ein Undo-/Redo-Schritt, markiert das Projekt als geändert und startet keine Wiedergabe. Eingebettete GLB-Clips, automatische Übertragung auf andere Rigs und gemeinsame Veröffentlichung bleiben ausgenommen. [Dateiformat und Bedienung](MOVE-DATEIEN.md).
