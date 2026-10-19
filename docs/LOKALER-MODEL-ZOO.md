@@ -28,3 +28,7 @@ Gesichert werden eingebettetes Modell, Avatarbeschreibung, vorhandene Clips/Zust
 ## Prüfstand
 
 DOM-Verhalten und Projektkopien sind automatisiert geprüft; IndexedDB-Commit, Abort und Eintragsgrenze sind mit einem Transaktions-Testdouble geprüft. Eine echte Browserprüfung der Persistenz über F5, Kontingentfehler und mehrere Tabs steht aus. Die bisherige Umgebung konnte Chromium wegen einer Socket-Beschränkung nicht starten.
+
+## Bewusst weitergeben
+
+Die Browsersammlung bleibt lokal. Für ein statisches Veröffentlichungspaket zuerst den gewünschten Avatar laden, als Projektdatei speichern und anschließend den [Model-Zoo-Export](MODEL-ZOO-EXPORT.md) ausführen. Das Werkzeug liest keine Browserdaten und veröffentlicht nichts automatisch.

@@ -12,6 +12,24 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.29.0] - 2026-10-19
+
+Zeitstempel: 2026-10-19T16:46:59+02:00 (Europe/Berlin)
+
+### Added
+
+- `export:zoo` erstellt aus einer Projektdatei einen neuen statischen Model-Zoo-Ordner mit Projekt, Katalogeintrag und Übernahmehinweisen. Reservierte IDs und bestehende Ausgabeordner werden abgewiesen; nur bekannte Projektfelder werden übernommen.
+- Katalogeinträge können vollständige Studio-Projekte statt GLB/glTF referenzieren. Eigene Punkte, Posen und Moves bleiben erhalten; Projekt- und Katalog-ID müssen übereinstimmen.
+- Begrenztes Streaming für Katalogprojekte, sichere relative Quellen und Abbruchprüfung vor der Modellübernahme.
+- Sechs Tests für Paket-/GLB-Roundtrip, Pfad-/ID-Prüfungen, ungültige Antworten, tatsächliche Streamgrenzen, Überschreibschutz und realen CLI-Aufruf.
+
+### Changed
+
+- Katalogkarten unterscheiden veröffentlichte Katalogavatare von gespeicherten lokalen Kopien; mitgelieferte Testfiguren bleiben erhalten.
+- README, Design, Roadmap, Exportanleitung und Prüfstand aktualisiert.
+
+**Prüfung:** 165 Tests und Build bestanden; Export-/Ladetests zusätzlich gezielt geprüft. Neue Projektquellen benötigen Player ab 0.29.0. Kein automatischer Katalog-Merge oder Deployment; visuelle Abnahme und Modellqualität bleiben offen.
+
 ## [0.28.0] - 2026-10-19
 
 Zeitstempel: 2026-10-19T16:09:32+02:00 (Europe/Berlin)
@@ -629,3 +647,5 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 [0.27.0]: PRUEFUNG-0.27.0.md
 
 [0.28.0]: PRUEFUNG-0.28.0.md
+
+[0.29.0]: PRUEFUNG-0.29.0.md

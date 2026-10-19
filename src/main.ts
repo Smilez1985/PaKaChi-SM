@@ -1,3 +1,4 @@
+import {loadCatalogProject} from './catalog-project.ts';
 import type {ZooEntry} from './local-zoo.ts';
 import {mountLocalZoo} from './local-zoo-panel.ts';
 import {prepareAvatar} from './avatar-candidate.ts';
@@ -28,7 +29,7 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
       <button id="player-tab" class="nav-button active" aria-pressed="true"><span>◉</span> Player</button>
       <button id="studio-tab" class="nav-button" aria-pressed="false"><span>◇</span> Avatar-Studio</button>
     </nav>
-    <div class="rail-bottom"><span class="online-dot"></span> Lokal auf deinem Gerät<p>Entwicklungsstand 0.28.0<br>KI-Anbieter · Vorbereitung</p></div>
+    <div class="rail-bottom"><span class="online-dot"></span> Lokal auf deinem Gerät<p>Entwicklungsstand 0.29.0<br>KI-Anbieter · Vorbereitung</p></div>
   </aside>
   <main>
     <header><div><p class="eyebrow">PAKACHI-SM / <span id="section-label">PLAYER</span></p><h1 id="page-title">Dein Model Zoo<span>.</span></h1><p id="page-intro">Eine Figur auswählen. Eine Bewegung starten. Leben einhauchen.</p></div><button id="project-open" class="button outline">Projekt laden</button><input id="project-file" type="file" accept=".json" hidden><button id="import-button" class="button outline">＋ GLB laden</button><input id="file-input" type="file" accept=".glb" hidden></header>
@@ -210,7 +211,7 @@ function syncPlayback(): void {
 function renderCatalog(): void {
   const select=el<HTMLSelectElement>('avatar-select'),items=choices();select.replaceChildren();el('avatar-cards').replaceChildren();
   for(const item of items){
-    const source=options.language==='de'?{original:'Original (2D)',builtin:'3D-Testavatar',saved:'Gespeichert · lokal',session:'Nur diese Sitzung'}:{original:'Original (2D)',builtin:'3D test avatar',saved:'Saved · local',session:'This session only'};
+    const source=options.language==='de'?{original:'Original (2D)',builtin:'Katalogavatar',saved:'Gespeichert · lokal',session:'Nur diese Sitzung'}:{original:'Original (2D)',builtin:'Catalog avatar',saved:'Saved · local',session:'This session only'};
     select.add(new Option(item.name+' · '+source[item.source],item.id));
     const button=document.createElement('button');button.className='avatar-card'+(item.source==='original'?' original-card':'')+(item.selected?' selected':'');button.setAttribute('aria-pressed',String(item.selected));button.disabled=busy||zooPending||item.source==='session';
     const initial=document.createElement('span');initial.className='avatar-initial '+item.id;initial.textContent=item.source==='original'?'✦':item.name[0];const title=document.createElement('strong'),type=document.createElement('small');title.textContent=item.name;type.textContent=source[item.source];button.append(initial,title,type);button.onclick=()=>selectAvatar(item.id);el('avatar-cards').append(button);
@@ -265,6 +266,7 @@ async function loadAvatar(avatar?: Avatar, file?: File, project?: StudioProject,
   let parsed:Awaited<ReturnType<typeof parseModel>>|undefined,candidate:ReturnType<typeof prepareAvatar>|undefined,installed=false;
   try {
     if (!viewer) throw new Error('3D benötigt WebGL2/Hardwarebeschleunigung. Der Originalplayer bleibt verfügbar.');
+    if(!project&&!file&&avatar?.project){project=await loadCatalogProject(avatar,import.meta.env.BASE_URL,fetchController.signal);if(token!==request||!valid())return false;}
     let buffer: ArrayBuffer;
     if (project) {buffer = decodeModel(project.model);if(buffer.byteLength>50*1024*1024)throw new Error("Das enthaltene Modell ist größer als 50 MB.");}
     else if (file) {
@@ -279,7 +281,7 @@ async function loadAvatar(avatar?: Avatar, file?: File, project?: StudioProject,
     }
     const gltf = parsed = await parseModel(buffer);
     if (token !== request||!valid()) { return false; }
-    const next: Avatar = project ? {...project.avatar,id:restore.identity?.id??'local-import',model:restore.identity?.model??'',rigVersion:restore.identity?.rigVersion??'studio-1'} : file ? importedAvatar(file.name, gltf.animations.map(c => c.name)) : avatar!;
+    const next: Avatar = project ? {...project.avatar,id:restore.identity?.id??avatar?.id??'local-import',model:restore.identity?.model??avatar?.model??'',rigVersion:restore.identity?.rigVersion??avatar?.rigVersion??'studio-1'} : file ? importedAvatar(file.name, gltf.animations.map(c => c.name)) : avatar!;
     const moves = availableMoves(next, gltf.animations.map(c => c.name));
     // Validate visible geometry before replacing a working avatar.
     const hasMesh = gltf.scene.getObjectsByProperty('isMesh', true).length > 0;
@@ -306,7 +308,7 @@ async function loadAvatar(avatar?: Avatar, file?: File, project?: StudioProject,
       el('viewport').replaceChildren(prepared.stage);el('studio-editor').replaceChildren(prepared.editorHost);
       legacyStage.classList.remove('legacy');el('player-controls').hidden=studio;el('studio-controls').hidden=!studio;el('legacy-controls').hidden=true;
       renderCatalog();el('avatar-name').textContent=next.name;el('avatar-description').textContent=next.description;
-      el('model-type').textContent=next.id.startsWith('saved-')?'3D · EIGENER AVATAR':next.id==='local-import'?'3D · EIGENER IMPORT':'3D · TESTAVATAR';
+      el('model-type').textContent=next.id.startsWith('saved-')?'3D · EIGENER AVATAR':next.id==='local-import'?'3D · EIGENER IMPORT':'3D · KATALOGAVATAR';
       const states=Object.fromEntries(Object.entries(next.states??{}).filter(([,id])=>moves.some(m=>m.id===id)));
       machine.bind({capability:{id:next.id,name:next.name,moves,states:Object.keys(states)},setState:state=>playback!.setBaseMove(states[state]),playMove:id=>{playback!.play(id);}},prepared.initialState);
       refreshCapabilities();

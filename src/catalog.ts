@@ -12,6 +12,7 @@ export interface Avatar {
   name: string;
   description: string;
   model: string;
+  project?: string;
   rigVersion: string;
   moves: Move[];
   defaultMove?: string;
@@ -29,9 +30,9 @@ export function parseCatalog(data: unknown): Avatar[] {
   const ids = new Set<string>();
   return data.avatars.map((raw): Avatar => {
     if (!object(raw) || !safeId(raw.id) || ids.has(raw.id) || !text(raw.name) ||
-        !text(raw.description) || !text(raw.rigVersion) || !text(raw.model) ||
-        !/^model-zoo\/[a-z0-9_/-]+\.(gltf|glb)$/.test(raw.model) ||
-        raw.model.includes('..') || !Array.isArray(raw.moves)) {
+        !text(raw.description) || !text(raw.rigVersion) ||
+        !((raw.project===undefined&&text(raw.model)&&/^model-zoo\/[a-z0-9_/-]+\.(gltf|glb)$/.test(raw.model)&&!raw.model.includes('..')) ||
+          ((raw.model===undefined||raw.model==='')&&text(raw.project)&&/^model-zoo\/[a-z0-9_/-]+\.pakachi\.json$/.test(raw.project)&&!raw.project.includes('..'))) || !Array.isArray(raw.moves)) {
       throw new Error('Ein Avatar-Eintrag im Model Zoo ist ungültig.');
     }
     ids.add(raw.id);
@@ -55,7 +56,7 @@ export function parseCatalog(data: unknown): Avatar[] {
         states[state] = move;
       }
     }
-    return { id: raw.id, name: raw.name, description: raw.description, model: raw.model,
+    return { id: raw.id, name: raw.name, description: raw.description, model: raw.project ? '' : raw.model as string, ...(raw.project?{project:raw.project as string}:{}),
       rigVersion: raw.rigVersion, moves, defaultMove: raw.defaultMove as string | undefined, states };
   });
 }

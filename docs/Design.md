@@ -4,7 +4,7 @@ Teil der [Blaupause](README.md) · [Roadmap](ROADMAP.md) · [Changelog](CHANGELO
 
 ## Status und Begriffe
 
-Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.28.0: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau, automatische Anatomieerkennung und die Qualitätsabnahme der angeschlossenen lokalen KI-Generierung bleiben offen.
+Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.29.0: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau, automatische Anatomieerkennung und die Qualitätsabnahme der angeschlossenen lokalen KI-Generierung bleiben offen.
 
 - **PaKaChi:** Panda-KI-Chimera, das übergeordnete Projekt.
 - **PaKaChi-SM:** StateMaschine mit Avatar-Player und integriertem Studio.
@@ -24,7 +24,7 @@ Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich gen
 | Generierung | Lokaler TripoSR-Dienst, Bildauswahl, getrennte Vorschau, Vorprüfungs-Fallbacks, expliziter weiterer Auftrag | Echte GPU-/Qualitätsabnahme, Cloud-Generatoren, Korrekturprompts und Rigging |
 | Übernahme | Revisionsschutz, ein Modellwechsel-Rücksprung, vorbereitete 3D-Installation mit Rückabwicklung | Gerenderte Abnahme, Originalplayer-Neustart und GPU-Kontextverlust |
 
-Prüfnachweis für Software 0.28.0: **159 Tests und Build bestanden**. Das belegt keine gerenderte Browser-, Anbieter- oder GPU-Abnahme. Projektformat bleibt Version 1. Freie Punkte/Posen aus 0.22.0/0.23.0 benötigen wegen der korrigierten Normalisierungsreihenfolge eine visuelle Kontrolle; keine automatische Migration. [Prüfbericht](PRUEFUNG-0.28.0.md).
+Prüfnachweis für Software 0.29.0: **165 Tests und Build bestanden**. Das belegt keine gerenderte Browser-, Anbieter- oder GPU-Abnahme. Projektformat bleibt Version 1. Freie Punkte/Posen aus 0.22.0/0.23.0 benötigen wegen der korrigierten Normalisierungsreihenfolge eine visuelle Kontrolle; keine automatische Migration. [Prüfbericht](PRUEFUNG-0.29.0.md).
 
 ## Bestehender PaKaChi-Avatar
 
@@ -176,7 +176,7 @@ Die logische Struktur des Model Zoo:
 - Ein eigener **moves/**-Ordner mit den Bewegungen dieses Avatars.
 - Zustandszuordnungen und bearbeitbare Studio-Daten.
 
-Implementiert sind Three.js für die Darstellung, glTF/GLB für Modelle, ein JSON-Katalog und `.pakachi.json` für bearbeitbare Projekte mit eingebettetem Modell. Seit 0.26.0 ergänzt eine lokale IndexedDB-Sammlung die Katalogauswahl mit vollständigen Projektkopien. Separate Move-Dateien sind seit 0.27.0 vorhanden; gemeinsame Veröffentlichung und ein verwalteter moves/-Ordner bleiben offen.
+Implementiert sind Three.js für die Darstellung, glTF/GLB für Modelle, ein JSON-Katalog und `.pakachi.json` für bearbeitbare Projekte mit eingebettetem Modell. Seit 0.26.0 ergänzt eine lokale IndexedDB-Sammlung die Katalogauswahl mit vollständigen Projektkopien. Separate Move-Dateien sind seit 0.27.0 vorhanden. Seit 0.29.0 erzeugt ein CLI-Werkzeug statische Katalogprojektpakete. Automatisches Zusammenführen/Veröffentlichen und ein verwalteter moves/-Ordner bleiben offen.
 
 ## 10. Bedienziel
 
@@ -332,3 +332,11 @@ Eine gemeinsame Katalogfunktion verbindet Originalplayer, mitgelieferte Avatare,
 Metadaten werden beim Start und bei ausdrücklicher Aktualisierung eingelesen; Speichern/Löschen aktualisiert sie nach Abschluss der Speicheroperation. Ungültige oder verspätete Listen ersetzen den bisherigen Katalog nicht. Geladene Kopien behalten ihre gespeicherte ID in StateMachine und Modellwechsel-Verlauf. Wird die Kopie gelöscht, bleibt die geladene Instanz mit derselben ID als Sitzungsavatar verfügbar. Erst ein späterer Wechsel entfernt diesen nicht mehr gespeicherten Eintrag aus der laufenden Auswahl.
 
 Fähigkeiten und Moves werden erst nach tatsächlichem Laden über die vorhandenen Prüfungen bekanntgegeben. Die KI darf dadurch keine unbekannte gespeicherte Kopie automatisch laden oder neue Fähigkeiten voraussetzen. Eine andere Avatar-ID erfordert weiterhin die bewusste Auswahl im Player. Kein neuer MCP-Schreibbefehl, keine Tab-Synchronisierung und keine gemeinsame Veröffentlichung.
+
+## Statische Katalogprojekte und Export (0.29.0)
+
+Ein Katalogeintrag kann alternativ zur GLB/glTF-Quelle ein vollständiges `.pakachi.json`-Projekt unter der Anwendungsbasis referenzieren. Dadurch bleiben bearbeitete Kontrollpunkte, Posen, Moves und Entwurfspose im veröffentlichten Avatar erhalten. Die Katalog-ID muss mit der Projekt-ID übereinstimmen und wird bei der Installation beibehalten. Modell- und Projektquelle gleichzeitig sind ungültig. Die Erweiterung bleibt in Katalogschema 1, benötigt aber einen Player ab 0.29.0.
+
+Das Exportskript erhält eine heruntergeladene Projektdatei, eine nicht reservierte Ziel-ID und einen neuen Ausgabeordner. Es erzeugt eine Projektdatei, einen einzelnen Katalogeintrag und Hinweise zur Übernahme. Explizite Feldlisten übernehmen nur bekannte Projektinhalte. Bestehende Ordner werden nicht überschrieben. Katalog-Merge, Veröffentlichung und visuelle Qualität bleiben bewusst eigene Schritte.
+
+Der Player begrenzt Projektabrufe auf tatsächliche 80 MiB, verbietet externe Katalogpfade und Redirects, sendet keine Credentials und prüft IDs/Struktur vor dem bestehenden Modellimport. Geometrie, Modell-/Rig-Kompatibilität und Revisionsschutz werden weiterhin beim Laden geprüft. Skriptvalidierung ist keine Garantie für ein anatomisch korrektes oder visuell geprüftes Modell. [Bedienung und Grenzen](MODEL-ZOO-EXPORT.md).
