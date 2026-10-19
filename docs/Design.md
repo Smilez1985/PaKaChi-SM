@@ -4,7 +4,7 @@ Teil der [Blaupause](README.md) · [Roadmap](ROADMAP.md) · [Changelog](CHANGELO
 
 ## Status und Begriffe
 
-Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.29.0: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau, automatische Anatomieerkennung und die Qualitätsabnahme der angeschlossenen lokalen KI-Generierung bleiben offen.
+Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.30.0: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau, automatische Anatomieerkennung und die Qualitätsabnahme der angeschlossenen lokalen KI-Generierung bleiben offen.
 
 - **PaKaChi:** Panda-KI-Chimera, das übergeordnete Projekt.
 - **PaKaChi-SM:** StateMaschine mit Avatar-Player und integriertem Studio.
@@ -24,7 +24,7 @@ Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich gen
 | Generierung | Lokaler TripoSR-Dienst, Bildauswahl, getrennte Vorschau, Vorprüfungs-Fallbacks, expliziter weiterer Auftrag | Echte GPU-/Qualitätsabnahme, Cloud-Generatoren, Korrekturprompts und Rigging |
 | Übernahme | Revisionsschutz, ein Modellwechsel-Rücksprung, vorbereitete 3D-Installation mit Rückabwicklung | Gerenderte Abnahme, Originalplayer-Neustart und GPU-Kontextverlust |
 
-Prüfnachweis für Software 0.29.0: **165 Tests und Build bestanden**. Das belegt keine gerenderte Browser-, Anbieter- oder GPU-Abnahme. Projektformat bleibt Version 1. Freie Punkte/Posen aus 0.22.0/0.23.0 benötigen wegen der korrigierten Normalisierungsreihenfolge eine visuelle Kontrolle; keine automatische Migration. [Prüfbericht](PRUEFUNG-0.29.0.md).
+Prüfnachweis für Software 0.30.0: **171 Tests und Build bestanden**. Das belegt keine gerenderte Browser-, Anbieter- oder GPU-Abnahme. Projektformat bleibt Version 1. Freie Punkte/Posen aus 0.22.0/0.23.0 benötigen wegen der korrigierten Normalisierungsreihenfolge eine visuelle Kontrolle; keine automatische Migration. [Prüfbericht](PRUEFUNG-0.30.0.md).
 
 ## Bestehender PaKaChi-Avatar
 
@@ -176,7 +176,7 @@ Die logische Struktur des Model Zoo:
 - Ein eigener **moves/**-Ordner mit den Bewegungen dieses Avatars.
 - Zustandszuordnungen und bearbeitbare Studio-Daten.
 
-Implementiert sind Three.js für die Darstellung, glTF/GLB für Modelle, ein JSON-Katalog und `.pakachi.json` für bearbeitbare Projekte mit eingebettetem Modell. Seit 0.26.0 ergänzt eine lokale IndexedDB-Sammlung die Katalogauswahl mit vollständigen Projektkopien. Separate Move-Dateien sind seit 0.27.0 vorhanden. Seit 0.29.0 erzeugt ein CLI-Werkzeug statische Katalogprojektpakete. Automatisches Zusammenführen/Veröffentlichen und ein verwalteter moves/-Ordner bleiben offen.
+Implementiert sind Three.js für die Darstellung, glTF/GLB für Modelle, ein JSON-Katalog und `.pakachi.json` für bearbeitbare Projekte mit eingebettetem Modell. Seit 0.26.0 ergänzt eine lokale IndexedDB-Sammlung die Katalogauswahl mit vollständigen Projektkopien. Separate Move-Dateien sind seit 0.27.0 vorhanden. Seit 0.29.0 erzeugt ein CLI-Werkzeug statische Katalogprojektpakete. Seit 0.30.0 führt ein weiteres CLI-Werkzeug Kataloge in einem neuen Ausgabeordner zusammen. Veröffentlichung und ein verwalteter moves/-Ordner bleiben offen.
 
 ## 10. Bedienziel
 
@@ -340,3 +340,9 @@ Ein Katalogeintrag kann alternativ zur GLB/glTF-Quelle ein vollständiges `.paka
 Das Exportskript erhält eine heruntergeladene Projektdatei, eine nicht reservierte Ziel-ID und einen neuen Ausgabeordner. Es erzeugt eine Projektdatei, einen einzelnen Katalogeintrag und Hinweise zur Übernahme. Explizite Feldlisten übernehmen nur bekannte Projektinhalte. Bestehende Ordner werden nicht überschrieben. Katalog-Merge, Veröffentlichung und visuelle Qualität bleiben bewusst eigene Schritte.
 
 Der Player begrenzt Projektabrufe auf tatsächliche 80 MiB, verbietet externe Katalogpfade und Redirects, sendet keine Credentials und prüft IDs/Struktur vor dem bestehenden Modellimport. Geometrie, Modell-/Rig-Kompatibilität und Revisionsschutz werden weiterhin beim Laden geprüft. Skriptvalidierung ist keine Garantie für ein anatomisch korrektes oder visuell geprüftes Modell. [Bedienung und Grenzen](MODEL-ZOO-EXPORT.md).
+
+## Zusammenführen statischer Kataloge (0.30.0)
+
+`merge:zoo` liest zwei Paketwurzeln und schreibt ausschließlich in einen neuen Ordner außerhalb beider Quellen. Alle referenzierten Dateien werden vor dem Schreiben validiert und eingelesen. Doppelte IDs, reservierte IDs, normalisierte Pfadkonflikte, fehlende Dateien, entweichende Symlinks und externe Modellressourcen werden abgewiesen. Projekte müssen zur Katalog-ID passen.
+
+Grenzen: 100 Einträge, je Katalog 1 MiB, je Projekt 80 MiB, je Modell 50 MiB und zusammen 256 MiB referenzierte Quelldateien. Der Arbeitsspeicherbedarf liegt wegen Parsing und Kopien darüber. Modelle/Projekte werden bytegenau kopiert; zusätzliche Projektfelder werden dabei nicht entfernt. Der neue Katalog wird normalisiert. Ein Bericht enthält IDs, Dateigrößen und SHA-256-Prüfsummen. Die Ausgabe ist kein vollständiger Player und enthält keine sonstigen public-Dateien. Ein Schreibfehler kann einen unvollständigen neuen Ordner hinterlassen. GLB/glTF-Container- und Ressourcenprüfungen ersetzen weder vollständige Loader-Prüfung noch visuelle Qualitätsabnahme; Veröffentlichung bleibt ein eigener Schritt.

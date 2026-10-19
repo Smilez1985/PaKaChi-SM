@@ -21,15 +21,26 @@ Das Paket enthält:
 
 Das Skript prüft Projektstruktur, IDs und maximal 80 MiB Projekt-JSON. Es übernimmt nur bekannte Projektfelder; zusätzliche Felder außerhalb des Projektformats werden nicht exportiert. Ein Ausgabefehler kann einen unvollständigen neuen Ordner hinterlassen; dieser wird nicht automatisch gelöscht. Eine korrigierte Ausführung benötigt einen neuen Ausgabeordner.
 
-## In einen bestehenden Player übernehmen
+## Kataloge zusammenführen und übernehmen
 
-1. Eine im Zielkatalog noch nicht vorhandene ID wählen; Namensgleichheit ist kein Ersatz für eindeutige IDs.
-2. Die Projektdatei nach `public/model-zoo/projects/` der Zielanwendung kopieren. Bestehende Dateien nicht ungeprüft überschreiben.
-3. Den einzelnen Eintrag aus dem erzeugten `avatars`-Array in das vorhandene `public/model-zoo/catalog.json` übernehmen. **Nicht den vorhandenen Katalog durch das Eintragspaket ersetzen.**
-4. Den Player mit Version 0.29.0 oder neuer starten. Den Avatar auswählen, Geometrie/Rig prüfen, eigene Moves abspielen und ein gespeichertes Projekt erneut laden.
-5. Erst nach dieser Prüfung die eigenen Dateien mit dem gewünschten Hosting-/Repository-Verfahren veröffentlichen.
+Ab 0.30.0 im Repository ausführen:
 
-Es gibt noch keinen automatischen Katalog-Merger, Upload oder Deployment. Die Paketdateien können bewusst weitergegeben werden; sie enthalten das vollständige Modell und sämtliche Studio-Daten. Nur dafür geeignete Inhalte veröffentlichen.
+```sh
+npm run merge:zoo -- --base public --package "/pfad/neues-avatar-paket" --output "/pfad/neuer-katalog"
+```
+
+Beide Quellordner müssen `model-zoo/catalog.json` enthalten. Der Ausgabeordner darf nicht existieren und muss außerhalb beider Quellen liegen; sein Elternordner muss vorhanden sein. Quellen bleiben unverändert. Doppelte IDs oder normalisierte Dateipfade werden abgewiesen, auch bei identischen Dateien. Eine eindeutige ID bereits beim Export wählen.
+
+Vor dem Schreiben prüft das Werkzeug beide Kataloge, referenzierte Dateien, Projekt-IDs, Modellcontainer und externe Ressourcen. Symlinks außerhalb der jeweiligen Quelle werden abgewiesen. Unterstützt werden eigenständige GLB/glTF-Dateien und eingebettete Projektmodelle; zusätzliche externe Texturen/Binärdateien werden nicht mitgenommen. Grenzen: 100 Einträge, 1 MiB je Katalog, 80 MiB je Projekt, 50 MiB je Modell, zusammen 256 MiB referenzierte Quelldateien. Parsing und Kopien benötigen zusätzlichen Arbeitsspeicher.
+
+Die Ausgabe enthält `model-zoo/`, `merge-report.json` mit Größen und SHA-256-Prüfsummen sowie `README.txt`. Modelle und Projekte bleiben bytegenau erhalten, einschließlich eventuell vorhandener zusätzlicher Projektfelder. **Dies ist kein vollständiger Player und kein Ersatz für den ganzen public-Ordner.** Nicht referenzierte Dateien werden nicht kopiert. Ein Schreibfehler kann einen unvollständigen neuen Ausgabeordner hinterlassen; er wird nicht automatisch entfernt.
+
+1. Bericht und zusammengeführten Katalog kontrollieren.
+2. Den erzeugten `model-zoo/`-Ordner in einer separaten Testkopie des Players ab 0.29.0 einsetzen. Übrige Anwendungsdateien und Original-PaKaChi-Referenzen beibehalten.
+3. Alle Avatare auswählen, Geometrie/Rig/Texturen prüfen, Moves abspielen und Projekte speichern/erneut laden.
+4. Erst nach dieser Abnahme den geprüften Katalog mit dem eigenen Hosting-/Repository-Verfahren veröffentlichen.
+
+Manuelles Kopieren der Projektdatei und Ergänzen ihres Eintrags im bestehenden Katalog bleibt möglich. Ein einzelnes Exportpaket darf nicht ungeprüft den vorhandenen Katalog ersetzen. Kein Upload oder Deployment erfolgt automatisch. Paketdateien enthalten das vollständige Modell und sämtliche Studio-Daten. [Prüfbericht zum Merger](PRUEFUNG-0.30.0.md).
 
 ## Katalogformat und Laden
 

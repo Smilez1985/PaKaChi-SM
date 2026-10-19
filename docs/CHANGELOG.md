@@ -12,6 +12,22 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.30.0] - 2026-10-19
+
+Zeitstempel: 2026-10-19T21:58:46+02:00 (Europe/Berlin)
+
+### Added
+
+- `merge:zoo` führt zwei statische Model-Zoo-Kataloge in einem neuen Ausgabeordner zusammen. Quelldateien bleiben unverändert; vorhandene Ausgaben werden nicht überschrieben.
+- Vorprüfung von IDs, normalisierten Pfaden, Projektzuordnung, Quelldateien, Größen und externen Modellressourcen; Bericht mit Dateigrößen und SHA-256-Prüfsummen.
+- Sechs Tests mit echten Dateien und CLI-Unterprozess für Zusammenführung, Konflikte, ungültige Quellen und Überschreibschutz.
+
+### Changed
+
+- README, Design, Roadmap, Export-/Merge-Anleitung und Prüfstand auf den implementierten Ablauf abgeglichen.
+
+**Prüfung:** 171 Tests und Build bestanden. Die Ausgabe enthält nur referenzierte Modelle/Projekte. Visuelle Abnahme und Veröffentlichung bleiben separate, offene Schritte.
+
 ## [0.29.0] - 2026-10-19
 
 Zeitstempel: 2026-10-19T16:46:59+02:00 (Europe/Berlin)
@@ -649,3 +665,5 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 [0.28.0]: PRUEFUNG-0.28.0.md
 
 [0.29.0]: PRUEFUNG-0.29.0.md
+
+[0.30.0]: PRUEFUNG-0.30.0.md

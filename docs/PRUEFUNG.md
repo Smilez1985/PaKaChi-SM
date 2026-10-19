@@ -1,16 +1,16 @@
 # Prüfstand und Abnahme
 
-**Softwarestand: 0.29.0 · Dokumentationsabgleich: 19.10.2026.**
+**Softwarestand: 0.30.0 · Dokumentationsabgleich: 19.10.2026.**
 
 ## Nachgewiesen
 
 | Prüfung | Letzter Nachweis | Umfang und Grenze |
 | --- | --- | --- |
-| `npm test` | 0.29.0: 165 Tests bestanden | Player, Router, Studio-Daten, reale Three.js-Geometrie, DOM/Ereignisse mit happy-dom, Node-MCP und Erhaltungsprüfung. Kein gerenderter Browser. |
+| `npm test` | 0.30.0: 171 Tests bestanden | Player, Router, Studio-Daten, reale Three.js-Geometrie, DOM/Ereignisse mit happy-dom, Node-MCP und Erhaltungsprüfung. Kein gerenderter Browser. |
 | `npm run test:legacy` | 0.9.0: beide Programme bestanden | Originalplayer-Steuerung, MQTT-Verhalten und Lebenszyklus. |
-| `npm run build` | 0.29.0: bestanden | TypeScript und Produktionsbuild; Vite meldet weiterhin das große gemeinsame JS-Bundle (rund 1,30 MB / 359 kB gzip). |
+| `npm run build` | 0.30.0: bestanden | TypeScript und Produktionsbuild; Vite meldet weiterhin das große gemeinsame JS-Bundle (rund 1,30 MB / 359 kB gzip). |
 | `npm run test:python` mit `PAKACHI_PYTHON` | 0.10.0: Integration bestanden | Echter Python-MCP-Prozess, eingebetteter aMQTT-Broker, produktiver MQTT-Client, Router und Studio-Editor. Acht Tools, Studio-Änderungen einschließlich gültiger/ungültiger Skalierung, fehlende Freigabe und Revisionskonflikte geprüft. |
-| Originaldateien | 0.29.0: bytegenau erhalten | 83 wiederhergestellte Dateien einschließlich exakt 72 Transformationsbildern. |
+| Originaldateien | 0.30.0: bytegenau erhalten | 83 wiederhergestellte Dateien einschließlich exakt 72 Transformationsbildern. |
 
 Vier neue Tests in 0.11.0 prüfen Hand-/Fußziele, feste Knochenabstände, den ganzen erkannten Körper, Hals/Kopf und Rumpf, tatsächliche Hautverformung, gespeicherte Posen sowie direktes Ziehen/Drehen mit Undo. Nutzertest von 0.10.0 meldete auseinanderziehbare Knochen und Probleme mit der Ausrichtung; die visuelle Nachprüfung der Korrektur 0.11.0 steht aus.
 
@@ -82,3 +82,5 @@ Zwischenprüfung vor 0.20.0 (17.10.2026): Acht Tresortests einschließlich zweie
 [Prüfbericht 0.28.0](PRUEFUNG-0.28.0.md): gemeinsamer Katalog, Metadatenvalidierung, gespeicherte Ladeidentität und Sitzungsreste nach Löschen geprüft; Browser-/MCP-Liveabnahme offen.
 
 [Prüfbericht 0.29.0](PRUEFUNG-0.29.0.md): Exportpaket, realer CLI-Prozess, GLB-Roundtrip, relative Katalogpfade und begrenzte Projektabrufe geprüft; gerenderter Veröffentlichungsablauf offen.
+
+[Prüfbericht 0.30.0](PRUEFUNG-0.30.0.md): sechs neue Tests mit echten Dateien und CLI-Prozess für Zusammenführung, Konflikte, Quellenprüfung und Überschreibschutz. 171 Tests und Build bestanden; visuelle Veröffentlichung weiterhin offen.
