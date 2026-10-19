@@ -2,6 +2,15 @@ import {parseProject} from './studio-data.ts';
 import type {StudioProject} from './studio-data.ts';
 
 export interface ZooEntry {id:string;name:string;createdAt:string;bytes:number}
+/** Validate metadata before it becomes a selectable or agent-visible identity. */
+export function parseZooEntries(value:unknown):ZooEntry[]{
+ if(!Array.isArray(value)||value.length>50)throw Error('invalid-zoo-entries');
+ const ids=new Set<string>();
+ return value.map(item=>{
+  if(!item||typeof item!=='object'||typeof item.id!=='string'||!/^saved-[a-f0-9]{8}(-[a-f0-9]{4}){3}-[a-f0-9]{12}$/.test(item.id)||ids.has(item.id)||typeof item.name!=='string'||!item.name.trim()||item.name.length>100||typeof item.createdAt!=='string'||!Number.isFinite(Date.parse(item.createdAt))||!Number.isSafeInteger(item.bytes)||item.bytes<1||item.bytes>80*1024*1024)throw Error('invalid-zoo-entry');
+  ids.add(item.id);return {id:item.id,name:item.name,createdAt:item.createdAt,bytes:item.bytes};
+ });
+}
 export interface LocalZoo {
  list():Promise<ZooEntry[]>;
  add(name:string,project:StudioProject):Promise<ZooEntry>;
@@ -38,7 +47,7 @@ export class IndexedDBZoo implements LocalZoo {
    try{work(tx,value=>{result=value;});}catch(error){tx.abort();reject(error);}
   });}finally{db.close();}
  }
- list(){return this.transaction<ZooEntry[]>('readonly',(tx,done)=>{const request=tx.objectStore('entries').getAll();request.onsuccess=()=>done((request.result as ZooEntry[]).sort((a,b)=>b.createdAt.localeCompare(a.createdAt)));});}
+ async list(){const value=await this.transaction<unknown>('readonly',(tx,done)=>{const request=tx.objectStore('entries').getAll();request.onsuccess=()=>done(request.result);});return parseZooEntries(value).sort((a,b)=>b.createdAt.localeCompare(a.createdAt));}
  async add(name:string,project:StudioProject){
   const snapshot=zooSnapshot(name,project);
   return this.transaction<ZooEntry>('readwrite',(tx,done)=>{

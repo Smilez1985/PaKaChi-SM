@@ -12,6 +12,27 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.28.0] - 2026-10-19
+
+Zeitstempel: 2026-10-19T16:09:32+02:00 (Europe/Berlin)
+
+### Added
+
+- Lokal gespeicherte Avatare in gemeinsamer Auswahl, Karten, Zähler und `list_avatars`; dieselbe Katalogfunktion versorgt Player und RPC-Abfrage.
+- Validierung gespeicherter Metadaten vor Aufnahme in den Katalog. Liste und Ladeidentität werden nach Speicheroperationen aktualisiert; konkurrierende Auswahl ist währenddessen gesperrt.
+- Fünf Tests für gemeinsame IDs, Metadatenumfang, gelöschte aktive Kopien, validierte Listensnapshots und Auswahl über gespeicherte IDs.
+
+### Fixed
+
+- Geladene gespeicherte Avatare behalten ihre eigene ID statt `local-import`; diese Identität wird auch für Fähigkeiten, Befehlsadressierung und Modellwechsel-Verlauf verwendet.
+- Gelöschte, bereits geladene Kopien bleiben als Sitzungsavatar sichtbar und nutzbar, ohne fälschlich als gespeichert ausgewiesen zu werden.
+
+### Changed
+
+- README, Design, Roadmap, lokale Sammlung, Agentensteuerung und Prüfstand abgeglichen.
+
+**Prüfung:** 159 Tests und Build bestanden. Browser-/MCP-Liveabnahme bleibt offen; keine automatische Avatarwahl durch KI, keine Tab-Synchronisierung und keine Veröffentlichung der Sammlung.
+
 ## [0.27.0] - 2026-10-18
 
 Zeitstempel: 2026-10-18T13:47:58+02:00 (Europe/Berlin)
@@ -606,3 +627,5 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 [0.26.0]: PRUEFUNG-0.26.0.md
 
 [0.27.0]: PRUEFUNG-0.27.0.md
+
+[0.28.0]: PRUEFUNG-0.28.0.md

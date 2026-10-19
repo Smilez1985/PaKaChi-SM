@@ -2,7 +2,7 @@ import {test} from 'node:test';
 import type {TestContext} from 'node:test';
 import assert from 'node:assert/strict';
 import {Window} from 'happy-dom';
-import {zooSnapshot,IndexedDBZoo} from '../src/local-zoo.ts';
+import {zooSnapshot,IndexedDBZoo,parseZooEntries} from '../src/local-zoo.ts';
 import type {LocalZoo,ZooEntry} from '../src/local-zoo.ts';
 import {mountLocalZoo} from '../src/local-zoo-panel.ts';
 import {emptyStudio,parseProject} from '../src/studio-data.ts';
@@ -19,11 +19,11 @@ class MemoryZoo implements LocalZoo {
 }
 function fixture(t:TestContext,store=new MemoryZoo()){
  const w=new Window();Object.assign(globalThis,{window:w,document:w.document});const host=document.createElement('div');document.body.append(host);
- let revision=0,loads=0,ready=true;const source=project();
- const panel=mountLocalZoo(host,{ready:()=>ready,canSave:()=>true,target:()=>({session:'one',revision}),capture:()=>structuredClone(source),load:async(p,valid)=>{ready=false;w.dispatchEvent(new w.Event('pakachi-sm:change'));assert.ok(valid(),'own loading status must not invalidate import');parseProject(p);loads++;ready=true;return true;}},()=> 'de',store);
+ let revision=0,loads=0,ready=true;const source=project();const notifications:ZooEntry[][]=[],pendingStates:boolean[]=[],loadedEntries:ZooEntry[]=[];
+ const panel=mountLocalZoo(host,{entriesChanged:entries=>{notifications.push(entries);},pendingChanged:value=>{pendingStates.push(value);},ready:()=>ready,canSave:()=>true,target:()=>({session:'one',revision}),capture:()=>structuredClone(source),load:async(p,valid,entry)=>{loadedEntries.push(entry);ready=false;w.dispatchEvent(new w.Event('pakachi-sm:change'));assert.ok(valid(),'own loading status must not invalidate import');parseProject(p);loads++;ready=true;return true;}},()=> 'de',store);
  t.after(()=>{panel.dispose();w.happyDOM.abort();});const button=(id:string)=>host.querySelector<HTMLButtonElement>('#zoo-'+id)!;
  const name=host.querySelector<HTMLInputElement>('#zoo-name')!,list=host.querySelector<HTMLSelectElement>('#zoo-list')!;
- return {store,panel,w,host,name,list,source,button,get loads(){return loads;},change(){revision++;w.dispatchEvent(new w.Event('pakachi-sm:change'));},async settle(){await until(()=>!button('refresh').disabled);},async save(){await this.settle();name.value='Copy';name.dispatchEvent(new w.Event('input') as unknown as Event);button('save').click();await this.settle();}};
+ return {store,panel,w,host,name,list,source,button,notifications,pendingStates,loadedEntries,get loads(){return loads;},change(){revision++;w.dispatchEvent(new w.Event('pakachi-sm:change'));},async settle(){await until(()=>!button('refresh').disabled);},async save(){await this.settle();name.value='Copy';name.dispatchEvent(new w.Event('input') as unknown as Event);button('save').click();await this.settle();}};
 }
 test('zoo snapshots are independent valid projects, preserve studio data and use unique identities',()=>{
  const source=project();source.studio.draft={$figure:{position:[1,2,3],rotation:[0,0,0,1]}};
@@ -62,4 +62,17 @@ test('IndexedDB save waits for transaction commit and rejects aborted or full tr
   await until(()=>!!tx);if(mode!=='full'){assert.equal(settled,false);assert.equal(writes,2);if(mode==='commit')tx!.oncomplete?.call(tx!,new Event('complete'));else tx!.onabort?.call(tx!,new Event('abort'));}
   const result=await outcome;if(mode==='commit')assert.ok(!(result instanceof Error));else assert.ok(result instanceof Error);assert.equal(closed,1);if(mode==='full')assert.equal(writes,0);
  }
+});
+
+test('saved metadata publishes only validated detached identities',()=>{
+ const entry=zooSnapshot('Avatar',project()).entry,raw={...entry,secret:'not metadata'};const parsed=parseZooEntries([raw]);assert.deepEqual(parsed,[entry]);parsed[0].name='Changed';assert.equal(raw.name,'Avatar');
+ for(const patch of [{id:'pakachi-original'},{name:''},{bytes:Infinity},{createdAt:'invalid'}])assert.throws(()=>parseZooEntries([{...entry,...patch}]));assert.throws(()=>parseZooEntries([entry,entry]));assert.throws(()=>parseZooEntries(Array(51).fill(entry)));
+});
+test('shared selection loads the exact saved identity and publishes committed list changes',async t=>{
+ const f=fixture(t);await f.save();const id=f.list.value;assert.equal(f.notifications.at(-1)![0].id,id);assert.equal(f.panel.load('unknown'),false);assert.equal(f.panel.load(id),true);assert.equal(f.panel.load(id),false,'concurrent shared selection blocked');await f.settle();assert.equal(f.loadedEntries[0].id,id);assert.equal(f.loadedEntries[0].name,'Copy');assert.equal(f.pendingStates.at(-1),false);
+ Object.assign(f.w,{confirm:()=>true});f.button('remove').click();await f.settle();assert.deepEqual(f.notifications.at(-1),[]);assert.equal(f.panel.load(id),false);assert.equal(f.loads,1);
+});
+test('failed list refresh never publishes an unvalidated or late catalog',async t=>{
+ const f=fixture(t);await f.save();const count=f.notifications.length;f.store.list=async()=>[{id:'mika',name:'Invalid',bytes:1,createdAt:new Date().toISOString()}];f.button('refresh').click();await f.settle();assert.equal(f.notifications.length,count);
+ let release!:(value:ZooEntry[])=>void;f.store.list=()=>new Promise(resolve=>{release=resolve;});f.button('refresh').click();await until(()=>!!release);f.panel.dispose();release([]);await new Promise(r=>setTimeout(r,10));assert.equal(f.notifications.length,count);
 });

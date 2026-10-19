@@ -4,7 +4,7 @@ Teil der [Blaupause](README.md) · [Roadmap](ROADMAP.md) · [Changelog](CHANGELO
 
 ## Status und Begriffe
 
-Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.27.0: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau, automatische Anatomieerkennung und die Qualitätsabnahme der angeschlossenen lokalen KI-Generierung bleiben offen.
+Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.28.0: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau, automatische Anatomieerkennung und die Qualitätsabnahme der angeschlossenen lokalen KI-Generierung bleiben offen.
 
 - **PaKaChi:** Panda-KI-Chimera, das übergeordnete Projekt.
 - **PaKaChi-SM:** StateMaschine mit Avatar-Player und integriertem Studio.
@@ -24,7 +24,7 @@ Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich gen
 | Generierung | Lokaler TripoSR-Dienst, Bildauswahl, getrennte Vorschau, Vorprüfungs-Fallbacks, expliziter weiterer Auftrag | Echte GPU-/Qualitätsabnahme, Cloud-Generatoren, Korrekturprompts und Rigging |
 | Übernahme | Revisionsschutz, ein Modellwechsel-Rücksprung, vorbereitete 3D-Installation mit Rückabwicklung | Gerenderte Abnahme, Originalplayer-Neustart und GPU-Kontextverlust |
 
-Prüfnachweis für Software 0.27.0: **154 Tests und Build bestanden**. Das belegt keine gerenderte Browser-, Anbieter- oder GPU-Abnahme. Projektformat bleibt Version 1. Freie Punkte/Posen aus 0.22.0/0.23.0 benötigen wegen der korrigierten Normalisierungsreihenfolge eine visuelle Kontrolle; keine automatische Migration. [Prüfbericht](PRUEFUNG-0.27.0.md).
+Prüfnachweis für Software 0.28.0: **159 Tests und Build bestanden**. Das belegt keine gerenderte Browser-, Anbieter- oder GPU-Abnahme. Projektformat bleibt Version 1. Freie Punkte/Posen aus 0.22.0/0.23.0 benötigen wegen der korrigierten Normalisierungsreihenfolge eine visuelle Kontrolle; keine automatische Migration. [Prüfbericht](PRUEFUNG-0.28.0.md).
 
 ## Bestehender PaKaChi-Avatar
 
@@ -317,10 +317,18 @@ Der ausführbare Fachadapter bleibt der lokale TripoSR-Dienst. Cloud-Generatoren
 
 Der Nutzer speichert bewusst eine benannte Kopie des aktuellen 3D-Projekts. Jede Kopie bekommt eine eigene ID; gleiche Namen überschreiben nichts. Metadaten und vollständiges Projekt werden gemeinsam in IndexedDB gespeichert. Die Sammlung gilt pro Browserprofil und Origin und bleibt nach Seitenneuladen verfügbar. Grenzen: 50 Einträge, 80 MiB JSON je Projekt, zusätzlich Browserkontingent. Es werden nur die Metadaten der Sammlung für die Auswahl geladen.
 
-Laden verwendet die vorhandenen Projekt-/Geometrieprüfungen und die vorbereitete Modellübernahme mit Rückabwicklung. Zwischenzeitliche Projektänderungen verhindern einen veralteten Import. Löschen erfordert Bestätigung und entfernt nur die gespeicherte Kopie. Weitere Bearbeitungen werden nicht automatisch gespeichert; die Ungespeichert-Markierung des aktiven Projekts bleibt erhalten. Originalplayer, mitgelieferter Katalog, MCP-Katalogliste und Anbieterprofile werden nicht durch die Sammlung verändert. Browserdatenlöschung kann sie entfernen, daher zusätzlich Projektdateien sichern. Veröffentlichung, Synchronisierung und echte Browser-Persistenzabnahme bleiben offen. [Anleitung](LOKALER-MODEL-ZOO.md).
+Laden verwendet die vorhandenen Projekt-/Geometrieprüfungen und die vorbereitete Modellübernahme mit Rückabwicklung. Zwischenzeitliche Projektänderungen verhindern einen veralteten Import. Löschen erfordert Bestätigung und entfernt nur die gespeicherte Kopie. Weitere Bearbeitungen werden nicht automatisch gespeichert; die Ungespeichert-Markierung des aktiven Projekts bleibt erhalten. Originalplayer, mitgelieferte Katalogdateien und Anbieterprofile bleiben unverändert. Seit 0.28.0 ergänzt die Sammlung den gemeinsamen Laufzeitkatalog und dessen MCP-Abfrage. Browserdatenlöschung kann sie entfernen, daher zusätzlich Projektdateien sichern. Veröffentlichung, Synchronisierung und echte Browser-Persistenzabnahme bleiben offen. [Anleitung](LOKALER-MODEL-ZOO.md).
 
 ## Austausch eigener Moves (0.27.0)
 
 Eine separate `.pakachi-move.json`-Datei enthält genau eine Studio-Bewegung und ihre verwendeten Posen einschließlich Prüfhinweisen und Gesamtspuren. Modell und bewegungsrelevante Rig-Struktur werden durch SHA-256-Fingerabdrücke gebunden; Geometrie und Anbieterzugänge werden nicht exportiert. Die Bindung ist eine konservative Kompatibilitätsprüfung, kein Retargeting und kein Echtheitsnachweis. Kosmetische Punktnamen und Anzeigegrößen dürfen abweichen; unterschiedliche Modelle, Grundstellungen, Einflussbereiche und Verbindungen werden abgewiesen.
 
 Der Import kopiert Posen unter neue IDs und ergänzt bei Schlagwortkonflikten ein freies Suffix. Vorhandene Daten bleiben erhalten. Vor der einzigen Editoränderung werden Dateiformat, Projektgrenzen und der aktuelle Bearbeitungsstand geprüft. Import ist ein Undo-/Redo-Schritt, markiert das Projekt als geändert und startet keine Wiedergabe. Eingebettete GLB-Clips, automatische Übertragung auf andere Rigs und gemeinsame Veröffentlichung bleiben ausgenommen. [Dateiformat und Bedienung](MOVE-DATEIEN.md).
+
+## Gemeinsame Auswahl und Agentenidentität (0.28.0)
+
+Eine gemeinsame Katalogfunktion verbindet Originalplayer, mitgelieferte Avatare, validierte Metadaten gespeicherter Kopien und gegebenenfalls einen nur geladenen Sitzungsavatar. Dropdown, Karten, Zähler und `list_avatars` verwenden dieselbe Liste. Die RPC-Antwort bleibt bei `id`, `name` und `selected`; sie enthält weder Projektbytes noch gespeicherte Zugangsdaten.
+
+Metadaten werden beim Start und bei ausdrücklicher Aktualisierung eingelesen; Speichern/Löschen aktualisiert sie nach Abschluss der Speicheroperation. Ungültige oder verspätete Listen ersetzen den bisherigen Katalog nicht. Geladene Kopien behalten ihre gespeicherte ID in StateMachine und Modellwechsel-Verlauf. Wird die Kopie gelöscht, bleibt die geladene Instanz mit derselben ID als Sitzungsavatar verfügbar. Erst ein späterer Wechsel entfernt diesen nicht mehr gespeicherten Eintrag aus der laufenden Auswahl.
+
+Fähigkeiten und Moves werden erst nach tatsächlichem Laden über die vorhandenen Prüfungen bekanntgegeben. Die KI darf dadurch keine unbekannte gespeicherte Kopie automatisch laden oder neue Fähigkeiten voraussetzen. Eine andere Avatar-ID erfordert weiterhin die bewusste Auswahl im Player. Kein neuer MCP-Schreibbefehl, keine Tab-Synchronisierung und keine gemeinsame Veröffentlichung.

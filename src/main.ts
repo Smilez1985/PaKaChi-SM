@@ -1,3 +1,4 @@
+import type {ZooEntry} from './local-zoo.ts';
 import {mountLocalZoo} from './local-zoo-panel.ts';
 import {prepareAvatar} from './avatar-candidate.ts';
 import {checkpointElements,disposeAll,installAtomically} from './avatar-installation.ts';
@@ -14,7 +15,7 @@ import { parseProject } from './studio-data.ts';
 import type { StudioProject } from './studio-data.ts';
 import { StateMachine, STATES } from './control.ts';
 import { mountAgentPanel } from './agent-panel.ts';
-import { availableMoves, importedAvatar, parseCatalog } from './catalog.ts';
+import { availableMoves, importedAvatar, parseCatalog, catalogChoices } from './catalog.ts';
 import type { Avatar, Move } from './catalog.ts';
 import { Playback } from './playback.ts';
 import { disposeModel, parseModel, modelBounds, Viewer } from './viewer.ts';
@@ -27,7 +28,7 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
       <button id="player-tab" class="nav-button active" aria-pressed="true"><span>◉</span> Player</button>
       <button id="studio-tab" class="nav-button" aria-pressed="false"><span>◇</span> Avatar-Studio</button>
     </nav>
-    <div class="rail-bottom"><span class="online-dot"></span> Lokal auf deinem Gerät<p>Entwicklungsstand 0.27.0<br>KI-Anbieter · Vorbereitung</p></div>
+    <div class="rail-bottom"><span class="online-dot"></span> Lokal auf deinem Gerät<p>Entwicklungsstand 0.28.0<br>KI-Anbieter · Vorbereitung</p></div>
   </aside>
   <main>
     <header><div><p class="eyebrow">PAKACHI-SM / <span id="section-label">PLAYER</span></p><h1 id="page-title">Dein Model Zoo<span>.</span></h1><p id="page-intro">Eine Figur auswählen. Eine Bewegung starten. Leben einhauchen.</p></div><button id="project-open" class="button outline">Projekt laden</button><input id="project-file" type="file" accept=".json" hidden><button id="import-button" class="button outline">＋ GLB laden</button><input id="file-input" type="file" accept=".glb" hidden></header>
@@ -74,6 +75,16 @@ let viewer: Viewer | undefined;
 let original = false;
 let playback: Playback | null = null;
 let catalog: Avatar[] = [];
+let zooEntries:ZooEntry[]=[];
+let zooPending=false;
+let zooPanel:ReturnType<typeof mountLocalZoo>|undefined;
+function choices(){return catalogChoices(catalog,zooEntries,loaded,original);}
+function selectAvatar(id:string){
+ if(zooPending||busy)return;
+ if(id==='pakachi-original'){showOriginal();return;}
+ if(zooEntries.some(entry=>entry.id===id)){zooPanel?.load(id);return;}
+ const avatar=catalog.find(a=>a.id===id);if(avatar)void loadAvatar(avatar);
+}
 let loaded: Avatar | null = null;
 let studio = false;
 let modelEpoch=0;
@@ -129,11 +140,7 @@ let busy = false;
 const machine = new StateMachine(() => window.dispatchEvent(new Event('pakachi-sm:change')));
 function rpc(method: string, args: Record<string, unknown> = {}): unknown {
   if (!args || typeof args !== 'object' || Array.isArray(args)) throw new Error('Ungültige Argumente.');
-  if (method === 'list_avatars') return [
-    {id:'pakachi-original',name:'PaKaChi Original',selected:original},
-    ...catalog.map(a => ({id:a.id,name:a.name,selected:loaded?.id===a.id})),
-    ...(loaded?.id==='local-import' ? [{id:loaded.id,name:loaded.name,selected:true}] : []),
-  ];
+  if (method === 'list_avatars') return choices().map(({id,name,selected})=>({id,name,selected}));
   if (method === 'get_state') return {state:machine.state, capability:machine.capability, ready:!busy && !studio && !!machine.capability};
   if (busy) throw new Error('Avatar wird geladen. Bitte erneut versuchen.');
   if(method==='get_studio'||method==='edit_studio'){if(!editor||original)throw new Error('Zuerst einen 3D-Avatar laden.');if(method==='get_studio')return editor.inspect(args);if(Object.keys(args).some(k=>k!=='command'))throw new Error('Ungültige Studio-Argumente.');return editor.execute(args.command);}
@@ -201,30 +208,15 @@ function syncPlayback(): void {
 }
 
 function renderCatalog(): void {
-  const select = el<HTMLSelectElement>('avatar-select');
-  select.replaceChildren();
-  select.add(new Option('PaKaChi · Original (2D)', 'pakachi-original'));
-  el('avatar-cards').replaceChildren();
-  const originalCard = document.createElement('button'); originalCard.className = `avatar-card original-card ${original ? 'selected' : ''}`;
-  originalCard.textContent = '✦ PaKaChi · beide Formen'; originalCard.setAttribute('aria-pressed', String(original));
-  originalCard.onclick = ()=>{showOriginal();}; el('avatar-cards').append(originalCard);
-  catalog.forEach(avatar => {
-    select.add(new Option(avatar.name, avatar.id));
-    const button = document.createElement('button');
-    button.className = `avatar-card ${avatar.id === loaded?.id ? 'selected' : ''}`;
-    button.setAttribute('aria-label', `${avatar.name} auswählen`);
-    button.setAttribute('aria-pressed', String(avatar.id === loaded?.id));
-    const initial = document.createElement('span'); initial.className = `avatar-initial ${avatar.id}`; initial.textContent = avatar.name[0];
-    const title = document.createElement('strong'); title.textContent = avatar.name;
-    const type = document.createElement('small'); type.textContent = '3D-Testavatar';
-    button.append(initial, title, type);
-    button.onclick = () => void loadAvatar(avatar);
-    el('avatar-cards').append(button);
-  });
-  if (loaded?.id === 'local-import') select.add(new Option(`${loaded.name} · Import`, loaded.id));
-  if (original) select.value = 'pakachi-original'; else if (loaded) select.value = loaded.id;
-  select.disabled = false;
-  el('avatar-count').textContent = String(1 + catalog.length + (loaded?.id === 'local-import' ? 1 : 0));
+  const select=el<HTMLSelectElement>('avatar-select'),items=choices();select.replaceChildren();el('avatar-cards').replaceChildren();
+  for(const item of items){
+    const source=options.language==='de'?{original:'Original (2D)',builtin:'3D-Testavatar',saved:'Gespeichert · lokal',session:'Nur diese Sitzung'}:{original:'Original (2D)',builtin:'3D test avatar',saved:'Saved · local',session:'This session only'};
+    select.add(new Option(item.name+' · '+source[item.source],item.id));
+    const button=document.createElement('button');button.className='avatar-card'+(item.source==='original'?' original-card':'')+(item.selected?' selected':'');button.setAttribute('aria-pressed',String(item.selected));button.disabled=busy||zooPending||item.source==='session';
+    const initial=document.createElement('span');initial.className='avatar-initial '+item.id;initial.textContent=item.source==='original'?'✦':item.name[0];const title=document.createElement('strong'),type=document.createElement('small');title.textContent=item.name;type.textContent=source[item.source];button.append(initial,title,type);button.onclick=()=>selectAvatar(item.id);el('avatar-cards').append(button);
+  }
+  const selected=items.find(item=>item.selected);if(selected)select.value=selected.id;
+  select.disabled=busy||zooPending;el('avatar-count').textContent=String(items.length);
 }
 
 function renderMoves(moves: Move[]): void {
@@ -314,7 +306,7 @@ async function loadAvatar(avatar?: Avatar, file?: File, project?: StudioProject,
       el('viewport').replaceChildren(prepared.stage);el('studio-editor').replaceChildren(prepared.editorHost);
       legacyStage.classList.remove('legacy');el('player-controls').hidden=studio;el('studio-controls').hidden=!studio;el('legacy-controls').hidden=true;
       renderCatalog();el('avatar-name').textContent=next.name;el('avatar-description').textContent=next.description;
-      el('model-type').textContent=next.id==='local-import'?'3D · EIGENER IMPORT':'3D · TESTAVATAR';
+      el('model-type').textContent=next.id.startsWith('saved-')?'3D · EIGENER AVATAR':next.id==='local-import'?'3D · EIGENER IMPORT':'3D · TESTAVATAR';
       const states=Object.fromEntries(Object.entries(next.states??{}).filter(([,id])=>moves.some(m=>m.id===id)));
       machine.bind({capability:{id:next.id,name:next.name,moves,states:Object.keys(states)},setState:state=>playback!.setBaseMove(states[state]),playMove:id=>{playback!.play(id);}},prepared.initialState);
       refreshCapabilities();
@@ -337,14 +329,21 @@ async function loadAvatar(avatar?: Avatar, file?: File, project?: StudioProject,
     renderCatalog();return false;
   } finally {
     if(!installed)disposeAll([()=>candidate?.dispose(),()=>{if(parsed)disposeModel(parsed.scene);}]);
-    if (token === request) { busy = false; syncPlayback();window.dispatchEvent(new Event("pakachi-sm:change")); }
+    if (token === request) { busy = false; renderCatalog();syncPlayback();window.dispatchEvent(new Event("pakachi-sm:change")); }
   }
 }
 
 async function boot(): Promise<void> {
   el('model-undo').onclick=()=>{void travelModel('undo');};el('model-redo').onclick=()=>{void travelModel('redo');};
   window.addEventListener('pakachi-options',renderModelHistory);
-  const zoo=mountLocalZoo(el('local-zoo-host'),{ready:()=>!busy&&!editor?.interactionActive,canSave:()=>!!editor,target:()=>!editor?.interactionActive?generationTarget():null,capture:()=>!busy&&editor&&!editor.interactionActive?editor.exportProject():null,load:(project,valid)=>busy?Promise.resolve(false):loadAvatar(undefined,undefined,project,valid)},()=>options.language);
+  const zoo=zooPanel=mountLocalZoo(el('local-zoo-host'),{
+    ready:()=>!busy&&!editor?.interactionActive,canSave:()=>!!editor,target:()=>!editor?.interactionActive?generationTarget():null,
+    capture:()=>!busy&&editor&&!editor.interactionActive?editor.exportProject():null,
+    entriesChanged:entries=>{zooEntries=entries;renderCatalog();window.dispatchEvent(new Event('pakachi-sm:change'));},
+    pendingChanged:pending=>{zooPending=pending;renderCatalog();},
+    load:(project,valid,entry)=>busy?Promise.resolve(false):loadAvatar(undefined,undefined,project,valid,{identity:{id:entry.id,model:'',rigVersion:'studio-1'}}),
+  },()=>options.language);
+  window.addEventListener('pakachi-options',renderCatalog);
   const agents = mountAgentPanel(rpc);
   mountAssistantPanel(document.querySelector('.agent-panel')!,rpc,()=>options.language,localStorage);
   const generation=mountGenerationPanel(el('generation-host'),{
@@ -376,11 +375,7 @@ async function boot(): Promise<void> {
   el('pause').onclick = () => {transport()?.togglePause();syncPlayback();};
   el('speed').onchange = () => {const value=Number(el<HTMLSelectElement>('speed').value);playback?.setSpeed(value);editor?.setSpeed(value);};
   el('timeline').oninput = () => transport()?.seek(Number(el<HTMLInputElement>('timeline').value) / 1000);
-  el('avatar-select').onchange = () => {
-    if (el<HTMLSelectElement>('avatar-select').value === 'pakachi-original') { showOriginal(); return; }
-    const avatar = catalog.find(a => a.id === el<HTMLSelectElement>('avatar-select').value);
-    if (avatar) void loadAvatar(avatar);
-  };
+  el('avatar-select').onchange=()=>selectAvatar(el<HTMLSelectElement>('avatar-select').value);
   el('project-open').onclick = () => el<HTMLInputElement>('project-file').click();
   el('project-file').onchange = async () => {
     const file=el<HTMLInputElement>('project-file').files?.[0];el<HTMLInputElement>('project-file').value='';if(!file)return;

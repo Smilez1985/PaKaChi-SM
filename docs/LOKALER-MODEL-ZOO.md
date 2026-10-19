@@ -1,6 +1,6 @@
 # Eigene Avatare im lokalen Model Zoo
 
-Seit 0.26.0 speichert der Bereich **Eigene Avatare · lokal** im Player und Studio vollständige Projektkopien im Browser. Er ergänzt die mitgelieferten Avatare; Original-PaKaChi und seine Referenzdateien werden nicht verändert.
+Seit 0.26.0 speichert der Bereich **Eigene Avatare · lokal** im Player und Studio vollständige Projektkopien im Browser. Seit 0.28.0 erscheinen diese Einträge außerdem in der gemeinsamen Avatar-Auswahl und in `list_avatars`. Die Sammlung ergänzt die mitgelieferten Avatare; Original-PaKaChi und seine Referenzdateien werden nicht verändert.
 
 ## Speichern und laden
 
@@ -19,7 +19,10 @@ Gesichert werden eingebettetes Modell, Avatarbeschreibung, vorhandene Clips/Zust
 - Nur Metadaten werden für die Auswahlliste geladen. Bei Änderungen in einem anderen Tab **Liste aktualisieren** verwenden.
 - Browserdatenlöschung, privater Modus oder Speicherbereinigung können Einträge entfernen. **Projektdateien zusätzlich herunterladen und sichern.** Kein Backup, kein zugesicherter dauerhafter Speicher und keine Cloud-Synchronisierung.
 - Der Original-Bildplayer ist keine bearbeitbare 3D-Projektdatei und kann hier nicht als neues 3D-Modell gespeichert werden.
-- Die Sammlung ist eine eigene Auswahl neben dem mitgelieferten Katalog. Sie schreibt keine Dateien nach `public/model-zoo`, besitzt keinen gemeinsamen Veröffentlichungsweg und erweitert nicht automatisch die MCP-Katalogliste. Geladene Kopien werden als eigener Import mit ihren verfügbaren Moves behandelt.
+- Gemeinsames Dropdown, Avatar-Karten, Zähler und `list_avatars` enthalten seit 0.28.0 auch gespeicherte Kopien. Die zusätzliche Verwaltung unter **Eigene Avatare · lokal** bleibt für Speichern/Löschen/Aktualisieren erhalten. Beim Laden bleibt die gespeicherte ID erhalten. Die Sammlung schreibt keine Dateien nach `public/model-zoo` und besitzt keinen gemeinsamen Veröffentlichungsweg.
+- Nach dem Löschen bleibt eine bereits geladene Kopie unter ihrer ID als **Nur diese Sitzung** sichtbar und steuerbar. Nach Wechsel zu einer anderen Figur ist sie ohne Sicherungsdatei nicht erneut ladbar; der begrenzte Modellwechsel-Verlauf kann sie innerhalb derselben Sitzung noch enthalten.
+- Katalogabfragen liefern nur IDs, Namen und Auswahlstatus. Fähigkeiten und Moves gibt es weiterhin nur für den tatsächlich geladenen Avatar. Ein Agent kann über diese Ergänzung keinen Modellwechsel auslösen.
+- Während einer Speicher-/Ladeoperation ist die gemeinsame Auswahl vorübergehend gesperrt. Das verhindert konkurrierende Auswahlen während des Lesens einer gespeicherten Kopie.
 - Während einer Studio-Geste oder eines Modellwechsels ist Speichern/Laden blockiert. Eine Projektänderung während des asynchronen Lesens verhindert die Übernahme des veralteten Ladevorgangs.
 
 ## Prüfstand

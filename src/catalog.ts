@@ -72,3 +72,13 @@ export function importedAvatar(filename: string, clipNames: string[]): Avatar {
     moves: clipNames.map((clip, i) => ({ id: `clip-${i + 1}`, name: clip || `Bewegung ${i + 1}`, clip, loop: false })),
   };
 }
+
+export interface AvatarChoice {id:string;name:string;selected:boolean;source:'original'|'builtin'|'saved'|'session'}
+/** One list for the player and list_avatars; no geometry or stored capabilities are advertised. */
+export function catalogChoices(builtins:Pick<Avatar,'id'|'name'>[],saved:{id:string;name:string}[],current:Pick<Avatar,'id'|'name'>|null,original:boolean):AvatarChoice[]{
+ const selected=original?'pakachi-original':current?.id;
+ const choices:AvatarChoice[]=[{id:'pakachi-original',name:'PaKaChi Original',selected:original,source:'original'},...builtins.map(a=>({id:a.id,name:a.name,selected:a.id===selected,source:'builtin' as const})),...saved.map(a=>({id:a.id,name:a.name,selected:a.id===selected,source:'saved' as const}))];
+ if(new Set(choices.map(a=>a.id)).size!==choices.length)throw Error('duplicate-avatar-id');
+ if(!original&&current&&!choices.some(a=>a.id===current.id))choices.push({id:current.id,name:current.name,selected:true,source:'session'});
+ return choices;
+}

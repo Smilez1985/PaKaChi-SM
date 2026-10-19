@@ -114,3 +114,9 @@ MCP und MQTT können gleichzeitig aktiviert werden. Es gibt keine versteckte Pri
 ## Prüfstand
 
 Router und Node-MCP sind Bestandteil der regulären Tests; der Python-Weg wurde in 0.10.0 mit realen Prozessen, aMQTT, produktivem MQTT-Client und Studio-Editor integriert getestet. Eine konkrete externe Host-/NanoMQ-Abnahme und die visuelle Browserabnahme stehen aus. Vollständige Übersicht: [Prüfstand](PRUEFUNG.md).
+
+## Lokale Avatare im Katalog (0.28.0)
+
+`list_avatars` liefert denselben Laufzeitkatalog wie die gemeinsame Player-Auswahl: Original, mitgelieferte Avatare, lokal gespeicherte Kopien und gegebenenfalls einen nur geladenen Sitzungsavatar. Antwortfelder bleiben `id`, `name`, `selected`. Gespeicherte Kopien behalten beim Laden ihre `saved-…`-ID; `get_state`, Fähigkeiten und adressierte Zustands-/Move-Befehle verwenden diese ID.
+
+Es gibt weiterhin keinen automatischen Avatarwechsel durch diese Abfrage. Für `get_avatar_capabilities`, `list_moves`, `set_state` oder `play_move` muss die gewünschte Figur geladen sein; andere IDs werden abgewiesen. Der Katalog beschreibt keine ungeprüften Fähigkeiten gespeicherter Dateien. Metadaten werden beim Start, nach Speichern/Löschen und über **Liste aktualisieren** abgeglichen; keine automatische Tab-Synchronisierung.
