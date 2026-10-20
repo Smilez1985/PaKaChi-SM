@@ -12,6 +12,24 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.32.0] - 2026-10-20
+
+Zeitstempel: 2026-10-20T15:51:31+02:00 (Europe/Berlin)
+
+### Added
+
+- `merge:moves` kombiniert zwei statische Move-Sammlungen in einem neuen Ordner, mit Konflikt-, Quellen- und Größenprüfung vor dem Schreiben.
+- Bytegenaue Übernahme referenzierter Dateien und Bericht mit Größen/SHA-256-Prüfsummen; keine automatische Veröffentlichung.
+- Eigenständige Move-Strukturprüfung für Posen, Transformationen, Fingerabdruckformat und Referenzen; tatsächliche Modell-/Rig-Kompatibilität bleibt eine Prüfung beim Import.
+- Sieben Tests mit echten Dateien und CLI-Unterprozess, einschließlich Gesamtgrößenlimit und fortbestehender Modellbindung.
+
+### Changed
+
+- Studio-Dateiimport nutzt die gemeinsame Strukturprüfung zusätzlich zur Zielprojektprüfung.
+- README, Design, Roadmap, Sammlungsanleitung und Prüfstand abgeglichen.
+
+**Prüfung:** 185 Tests und Build bestanden. Browserpflege, gerenderte Abnahme, GLB-Clip-Export und Retargeting bleiben offen.
+
 ## [0.31.0] - 2026-10-20
 
 Zeitstempel: 2026-10-20T14:03:31+02:00 (Europe/Berlin)
@@ -686,3 +704,5 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 [0.30.0]: PRUEFUNG-0.30.0.md
 
 [0.31.0]: PRUEFUNG-0.31.0.md
+
+[0.32.0]: PRUEFUNG-0.32.0.md

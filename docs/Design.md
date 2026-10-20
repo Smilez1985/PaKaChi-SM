@@ -4,7 +4,7 @@ Teil der [Blaupause](README.md) · [Roadmap](ROADMAP.md) · [Changelog](CHANGELO
 
 ## Status und Begriffe
 
-Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.31.0: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau, automatische Anatomieerkennung und die Qualitätsabnahme der angeschlossenen lokalen KI-Generierung bleiben offen.
+Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.32.0: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau, automatische Anatomieerkennung und die Qualitätsabnahme der angeschlossenen lokalen KI-Generierung bleiben offen.
 
 - **PaKaChi:** Panda-KI-Chimera, das übergeordnete Projekt.
 - **PaKaChi-SM:** StateMaschine mit Avatar-Player und integriertem Studio.
@@ -24,7 +24,7 @@ Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich gen
 | Generierung | Lokaler TripoSR-Dienst, Bildauswahl, getrennte Vorschau, Vorprüfungs-Fallbacks, expliziter weiterer Auftrag | Echte GPU-/Qualitätsabnahme, Cloud-Generatoren, Korrekturprompts und Rigging |
 | Übernahme | Revisionsschutz, ein Modellwechsel-Rücksprung, vorbereitete 3D-Installation mit Rückabwicklung | Gerenderte Abnahme, Originalplayer-Neustart und GPU-Kontextverlust |
 
-Prüfnachweis für Software 0.31.0: **178 Tests und Build bestanden**. Das belegt keine gerenderte Browser-, Anbieter- oder GPU-Abnahme. Projektformat bleibt Version 1. Freie Punkte/Posen aus 0.22.0/0.23.0 benötigen wegen der korrigierten Normalisierungsreihenfolge eine visuelle Kontrolle; keine automatische Migration. [Prüfbericht](PRUEFUNG-0.31.0.md).
+Prüfnachweis für Software 0.32.0: **185 Tests und Build bestanden**. Das belegt keine gerenderte Browser-, Anbieter- oder GPU-Abnahme. Projektformat bleibt Version 1. Freie Punkte/Posen aus 0.22.0/0.23.0 benötigen wegen der korrigierten Normalisierungsreihenfolge eine visuelle Kontrolle; keine automatische Migration. [Prüfbericht](PRUEFUNG-0.32.0.md).
 
 ## Bestehender PaKaChi-Avatar
 
@@ -353,4 +353,12 @@ Grenzen: 100 Einträge, je Katalog 1 MiB, je Projekt 80 MiB, je Modell 50 MiB un
 
 Abrufe erfolgen relativ zur Anwendungsbasis, ohne Zugangsdaten und Redirects. Der Katalog ist auf 256 KiB begrenzt, jede Move-Datei auf 8 MiB; tatsächliche Streambytes werden gezählt. Editoroperationen haben 30 Sekunden Zeitlimit und werden beim Verlassen/Entsorgen abgebrochen. Vor und nach asynchroner Importvalidierung gelten Sitzungszustand und Revision. Der bestehende einzelne Undo-/Redo-Schritt bleibt erhalten.
 
-Das CLI exportiert sämtliche eigenen Moves eines Projekts in einen neuen Ordner, prüft alles vor dem Schreiben und überschreibt keine vorhandene Ausgabe. Grenze: 80 MiB Quellprojekt, 64 MiB exportierte Move-Dateien zusammen. Daten werden im Speicher vorbereitet. Kein Export eingebetteter Originalclips, kein Retargeting, kein automatisches Zusammenführen oder Deployment. Browsergestützte Pflege der gemeinsamen Dateien bleibt offen.
+Das CLI exportiert sämtliche eigenen Moves eines Projekts in einen neuen Ordner, prüft alles vor dem Schreiben und überschreibt keine vorhandene Ausgabe. Grenze: 80 MiB Quellprojekt, 64 MiB exportierte Move-Dateien zusammen. Daten werden im Speicher vorbereitet. Kein Export eingebetteter Originalclips, kein Retargeting oder Deployment. Seit 0.32.0 ergänzt merge:moves das Zusammenführen zweier Sammlungen in einem neuen Ordner. Browsergestützte Pflege der gemeinsamen Dateien bleibt offen.
+
+## Move-Sammlungen zusammenführen (0.32.0)
+
+`merge:moves` liest zwei Paketwurzeln mit moves/catalog.json und schreibt ausschließlich in einen neuen Ordner außerhalb beider Quellen. Kataloge und Dateien werden vollständig geprüft und eingelesen, bevor die Ausgabe angelegt wird. Gemeinsame IDs oder Dateipfade werden auch bei identischen Inhalten abgewiesen; keine stillen Ersetzungen oder Umbenennungen. Dateien werden bytegenau kopiert, der kombinierte Katalog normalisiert. Ein Bericht enthält IDs, Pfade, Größen und SHA-256-Prüfsummen.
+
+Die gemeinsame Strukturprüfung für einzelne Move-Dateien überprüft Version, Fingerabdruckformat, Posen/Spuren, Transformationen, Zeitgrenzen und Posenreferenzen. Dafür erzeugte interne Prüfdeskriptoren sind kein Rig und werden nicht exportiert. Die Prüfung bestätigt keine Modellkompatibilität oder Anatomie; dafür gilt weiterhin der vollständige Import gegen das tatsächliche Zielprojekt. Verschiedene Modellbindungen dürfen in einer Sammlung koexistieren. Zusätzliche Felder in Quelldateien bleiben beim bytegenauen Kopieren erhalten.
+
+Grenzen: 100 Einträge, 256 KiB je Katalog, 8 MiB je Move-Datei und 64 MiB Move-Dateien insgesamt. Entweichende Dateisymlinks und nicht reguläre Dateien werden abgewiesen. Snapshots und Parsing benötigen zusätzlichen Arbeitsspeicher. Schreibfehler können eine unvollständige neue Ausgabe hinterlassen. Kein Playerpaket und keine automatische Veröffentlichung; Browserpflege und gerenderte Abnahme bleiben offen.

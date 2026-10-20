@@ -22,8 +22,21 @@ export async function exportMoveFile(input:StudioProject,id:string):Promise<Move
  const result:MoveFile={format:'pakachi-move',version:1,binding:await binding(project),move:structuredClone(move),poses:structuredClone(poses)};
  size(result);return result;
 }
+/** Validate a standalone move structurally; compatibility still needs the real target project. */
+export function parseMoveFile(input:unknown):MoveFile{
+ size(input);const file=schema.parse(input);
+ const first=z.object({values:z.record(z.string(),z.unknown())}).parse(file.poses[0]);
+ const keys=Object.keys(first.values).filter(id=>id!=='$figure');
+ // Temporary surface descriptors let the project validator check the same pose/track rules.
+ // They are neither an inferred rig nor part of the returned move file.
+ const points=keys.map(id=>({id,name:id,kind:'surface',rest:[0,0,0],size:.01,radius:.1}));
+ const validated=parseProject({format:'pakachi-studio',version:1,model:'AAAA',avatar:{id:'validation',name:'Validation',description:'',moves:[]},studio:{points,links:[],boneRest:[],poses:file.poses,moves:[file.move]}}).studio;
+ const needed=new Set(validated.moves[0].poses);
+ if(validated.poses.some(p=>!needed.has(p.id)))throw Error('Move-Datei enthält unbenutzte Posen.');
+ return {format:'pakachi-move',version:1,binding:file.binding,move:validated.moves[0],poses:validated.poses};
+}
 export async function importMoveFile(input:unknown,targetInput:StudioProject):Promise<StudioData>{
- size(input);const file=schema.parse(input),target=parseProject(targetInput),expected=await binding(target);
+ const file=parseMoveFile(input),target=parseProject(targetInput),expected=await binding(target);
  if(file.binding.model!==expected.model||file.binding.rig!==expected.rig)throw Error('Bewegung passt nicht zu Modell und Gelenkstruktur.');
  const incoming=parseProject({...target,avatar:{...target.avatar,moves:[],defaultMove:undefined,states:undefined},studio:{...target.studio,draft:undefined,poses:file.poses,moves:[file.move]}}).studio;
  const move=incoming.moves[0],needed=new Set(move.poses);
