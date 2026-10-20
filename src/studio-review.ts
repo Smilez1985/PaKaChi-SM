@@ -1,7 +1,8 @@
 import type {ControlPoint,Pose,StudioData,StudioMove,Transform} from './studio-data.ts';
-export const REVIEW_REASONS=['bone-rest','surface-rest','surface-radius','point-removed'] as const;
+export const REVIEW_REASONS=['bone-rest','surface-rest','surface-radius','point-removed','bend-limit'] as const;
 export type ReviewReason=typeof REVIEW_REASONS[number];
 export const reviewLabels:Record<ReviewReason,string>={
+  'bend-limit':'IK-Beugegrenze geändert. Gespeicherte Bewegung prüfen.',
   'bone-rest':'Skelett-Grundstellung oder Drehpunkt geändert.',
   'surface-rest':'Grundposition eines Oberflächenpunkts geändert.',
   'surface-radius':'Einflussbereich eines bewegten Oberflächenpunkts geändert.',
@@ -21,6 +22,7 @@ export function flagAffectedPoses(before:StudioData,after:StudioData):void {
     if(bonesChanged)reasons.add('bone-rest');
     for(const point of before.points){const next=current.get(point.id);
       if(!next){if(active(previous,before,point))reasons.add('point-removed');continue;}
+      if(JSON.stringify(point.bendLimit)!==JSON.stringify(next.bendLimit))reasons.add('bend-limit');
       if(point.kind==='surface'&&next.kind==='surface'){
         if(!sameVector(point.rest,next.rest))reasons.add('surface-rest');
         if(Math.abs(point.radius-next.radius)>1e-8&&(active(previous,before,point)||active(pose,after,next)))reasons.add('surface-radius');

@@ -1,6 +1,6 @@
 # Blaupause – PaKaChi-SM
 
-**Softwarestand: 0.32.0 · Dokumentation abgeglichen am 20.10.2026.**
+**Softwarestand: 0.33.0 · Dokumentation abgeglichen am 20.10.2026.**
 
 Die Blaupause besteht aus drei Dokumenten. Das Designdokument beschreibt das Produktziel, die Roadmap die Umsetzung und das Changelog die bereits erfolgten Änderungen.
 
@@ -38,7 +38,7 @@ Seit 0.13.0 sind lokale Anbieterprofile, unabhängige Rollenzuordnung im Options
 | Testergebnisse und offene Abnahme | [Prüfstand](PRUEFUNG.md) |
 | Originaldesign und Herkunft der erhaltenen Bilder | [Referenzen](references/README.md) |
 
-Softwareversion, Projektformat und historischer Prüfstand sind unterschiedliche Angaben: Die Software steht auf 0.32.0, das Projektformat weiterhin auf Version 1. Ältere Projekte sind lesbar; Dateien mit Gesamtpositionsspur benötigen Software ab 0.6.0; Gesamtdrehung benötigt mindestens 0.8.0; Skalierung mindestens 0.10.0. Ältere Software ignoriert die neue Skalierung. Historische Prüfberichte behalten ihren damaligen Stand.
+Softwareversion, Projektformat und historischer Prüfstand sind unterschiedliche Angaben: Die Software steht auf 0.33.0, das Projektformat weiterhin auf Version 1. Ältere Projekte sind lesbar; Dateien mit Gesamtpositionsspur benötigen Software ab 0.6.0; Gesamtdrehung benötigt mindestens 0.8.0; Skalierung mindestens 0.10.0. Ältere Software ignoriert die neue Skalierung. Historische Prüfberichte behalten ihren damaligen Stand.
 
 [Aufgabenbezogene Modellwahl und lokale Einrichtung](LOKALE-MODELLE.md) · [Prüfbericht 0.15.0](PRUEFUNG-0.15.0.md)
 
@@ -77,3 +77,5 @@ Die folgenden Einträge beschreiben den jeweiligen Meilenstein; der aktuelle Sta
 **0.31.0:** Gemeinsame statische Move-Sammlung, CLI-Export und Import im Studio mit Kompatibilitäts-/Revisionsprüfung und Undo. [Anleitung](MOVE-SAMMLUNG.md) · [Prüfbericht](PRUEFUNG-0.31.0.md).
 
 **0.32.0:** Zwei Move-Sammlungen mit Quellenprüfung, Konfliktabweisung und Prüfsummen zusammenführen. [Anleitung](MOVE-SAMMLUNG.md#sammlungen-zusammenführen) · [Prüfbericht](PRUEFUNG-0.32.0.md).
+
+**0.33.0:** Manuelle IK-Beugegrenzen für Zweiglied-Ketten mit Undo, Projekt-/Katalogexport, MCP-Bearbeitung und Posen-Prüfhinweisen. [Studio](STUDIO.md#ik-beugegrenzen-0330) · [Prüfbericht](PRUEFUNG-0.33.0.md).

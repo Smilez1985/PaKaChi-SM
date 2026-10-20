@@ -69,3 +69,7 @@ Beispiel für eine Größenänderung: `update_point` mit `id: "$figure"` und `sc
 ## Positionsziele am Skelett ab 0.11.0
 
 Bei `update_point` im Modus `pose` bedeutet `position` für einen Skelettpunkt ein IK-Ziel. Die verbundene Kette folgt durch Rotation; der tatsächlich erreichte Punkt kann bei begrenzter Reichweite abweichen. Danach `get_studio` lesen. `rotation` allein richtet den Punkt aus, ohne ihn zu verschieben; mit beiden Feldern folgt die Ausrichtung nach der Zielberechnung. Ein Wurzelpunkt verschiebt die ganze Figur. `connect_points` verbindet Knochen nur entlang tatsächlicher direkter Eltern-Kind-Kanten; freie Punkte bleiben untereinander gruppierbar. Ein Ziel ohne nutzbare Kette wird nicht aus dem Skelett herausgezogen.
+
+## Beugegrenzen (ab 0.33.0)
+
+`get_studio` mit section=points liefert konfigurierte `bendLimit`-Werte. Im Rig-Modus kann `update_point` an einem Knochen `bendLimit: {"min": 20, "max": 110}` setzen oder mit `bendLimit: null` entfernen. Endliche Gradwerte von 0 bis 175 und min ≤ max sind erforderlich. Die Grenze wird am mittleren Knochen einer Zweiglied-Kette ausgewertet, wenn deren Endpunkt gezogen wird. Direkte Drehung und gespeicherte Moves werden nicht begrenzt. Sitzung, Revision, Freigabe und Undo gelten unverändert. Python- und Node-MCP sowie der integrierte Assistent transportieren das Feld; die vollständige Semantik prüft der Studio-Router.

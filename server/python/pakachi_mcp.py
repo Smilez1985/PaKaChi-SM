@@ -16,6 +16,11 @@ from pydantic import BaseModel, ConfigDict, Field
 
 STATES = Literal['idle', 'talking', 'thinking', 'working', 'waiting', 'review', 'error', 'sleeping']
 
+class BendLimit(BaseModel):
+    model_config = ConfigDict(extra='forbid', strict=True)
+    min: float = Field(ge=0, le=175)
+    max: float = Field(ge=0, le=175)
+
 class StudioCommand(BaseModel):
     model_config = ConfigDict(extra='forbid', strict=True)
     session: str = Field(max_length=100)
@@ -27,6 +32,7 @@ class StudioCommand(BaseModel):
     name: str | None = Field(default=None, min_length=1, max_length=100)
     position: list[float] | None = Field(default=None, min_length=3, max_length=3)
     rotation: list[float] | None = Field(default=None, min_length=4, max_length=4)
+    bendLimit: BendLimit | None = None
     scale: float | None = Field(default=None, ge=.1, le=5)
     size: float | None = Field(default=None, ge=.003, le=.15)
     radius: float | None = Field(default=None, ge=.005, le=.6)
@@ -199,13 +205,17 @@ def build_server(uri=None, embedded=True, tcp_port=1883, ws_port=8083):
     async def edit_studio(command: StudioCommand) -> dict:
         """Freigegebenes geöffnetes Studio bearbeiten. session/expectedRevision aus get_studio verwenden.
         set_mode: mode=pose/rig. add_point: position, optional name/mesh/size/radius.
+        bendLimit: nur Knochen im Rig-Modus, {min,max} Grad 0–175, min<=max; null entfernt. Nur Zweiglied-IK-Ziehen.
         update_point: id und name/position/rotation/scale/size/radius (scale nur $figure, 0.1–5); $figure ist die ganze Figur.
         delete_point: id. connect_points/disconnect_points: id,target.
         save_pose: optional name,seconds. apply_pose/replace_pose: id.
         create_move: id,name,poses,optional loop. undo/redo ohne weitere Felder.
         Keine Dateizugriffe; Konflikte oder Timeouts zuerst mit get_studio aufklären.
         """
-        return await request('edit_studio', {'command': command.model_dump(exclude_none=True)})
+        payload = command.model_dump(exclude_none=True)
+        if 'bendLimit' in command.model_fields_set and command.bendLimit is None:
+            payload['bendLimit'] = None
+        return await request('edit_studio', {'command': payload})
 
     return server
 

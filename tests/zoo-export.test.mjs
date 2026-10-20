@@ -40,3 +40,8 @@ test('invalid projects fail before output creation; command-line export accepts 
  const root=await mkdtemp(join(tmpdir(),'pakachi-zoo-cli-'));t.after(()=>rm(root,{recursive:true,force:true}));const source=join(root,'source.json'),output=join(root,'out');await writeFile(source,'{}');await assert.rejects(()=>exportZoo({project:source,id:'own',output}));assert.deepEqual(await readdir(root),['source.json']);await writeFile(source,JSON.stringify(fixture()));
  const result=spawnSync(process.execPath,['scripts/export-zoo.mjs','--project',source,'--id','own','--output',output],{encoding:'utf8'});assert.equal(result.status,0,result.stderr);assert.equal(JSON.parse(await readFile(join(output,'model-zoo/catalog.json'),'utf8')).avatars[0].id,'own');
 });
+
+test('catalog project export retains configured bend limits and pose review reasons',()=>{
+ const input=fixture(),rest={position:[0,0,0],rotation:[0,0,0,1]};input.studio.boneRest=[rest];input.studio.points=[{id:'elbow',name:'Elbow',kind:'bone',bone:0,rest:[0,0,0],size:.025,radius:.18,bendLimit:{min:20,max:100}}];for(const pose of input.studio.poses){pose.values.elbow=rest;pose.review=['bend-limit'];}
+ const result=JSON.parse(zooPackage(input,'limited').project);assert.deepEqual(result.studio.points[0].bendLimit,{min:20,max:100});assert.deepEqual(result.studio.poses[0].review,['bend-limit']);
+});

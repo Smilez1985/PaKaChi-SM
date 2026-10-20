@@ -166,3 +166,17 @@ Unter **Eigene Bewegungen** einen Studio-Move auswählen und **Move exportieren*
 ## Gemeinsame Move-Sammlung (0.31.0)
 
 Unter den eigenen Bewegungen **Sammlung laden** wählen, einen Katalogeintrag auswählen und **Aus Sammlung importieren** anklicken. Der Import prüft Modell und Gelenkstruktur, ergänzt Posen und Move ohne Überschreiben und lässt sich mit Zurück rückgängig machen. Es startet keine Wiedergabe. Die mitgelieferte Sammlung ist leer. [Sammlung vorbereiten und Grenzen](MOVE-SAMMLUNG.md).
+
+## IK-Beugegrenzen (0.33.0)
+
+1. **Gelenke bearbeiten** öffnen und den mittleren Skelettpunkt einer Zweiglied-Kette auswählen, beispielsweise Ellenbogen zwischen Schulter und Hand oder Knie zwischen Hüfte und Fuß.
+2. **IK-Beugegrenze** einschalten. Mit den beiden Mausreglern minimale und maximale Beugung festlegen. 0° bedeutet gestreckt; erlaubt sind 0–175° mit Minimum ≤ Maximum. Die Ausgangseinstellung 0–175° ist keine anatomische Empfehlung.
+3. Zu **Figur bewegen** wechseln und Hand beziehungsweise Fuß ziehen. Bei unerreichbarem Ziel bleibt der Endpunkt an der durch Knochenlängen und Beugegrenze bestimmten Reichweite.
+
+Der Grenzwert liegt am mittleren Knochen, nicht an Hand/Fuß. Beide tatsächlichen Eltern-Kind-Verbindungen müssen vorhanden sein; die bestehende Erkennung begrenzt IK auf Ein-/Zweiglied-Ketten ohne verzweigende Anker. Die Beugung wird im Koordinatenraum des Anker-Elternobjekts bestimmt. Uniforme Figurgröße und Drehung sind geprüft; beliebige nichtuniforme Skalierungen und komplexe Rigs sind nicht anatomisch abgenommen.
+
+Regleränderungen und Abschalten lassen sich rückgängig machen. Projekt, lokale Kopien und Katalogprojekt-Export behalten die Grenzen. Änderungen markieren vorhandene Posen konservativ zur Prüfung; gespeicherte Bewegungen werden nicht umgeschrieben. Move-Dateien zählen Beugegrenzen zur Rig-Kompatibilität. Ohne konfigurierte Grenze bleibt das bisherige Verhalten erhalten.
+
+**Geltungsbereich:** Nur Ziehen des Endpunkts einer Zweiglied-IK-Kette. Direkte Drehung, vorhandene Animationsclips, gespeicherte Posen und deren Zwischenbilder werden nicht begrenzt. Es gibt keine automatische Anatomie-/Beugerichtungserkennung, keine Twistgrenzen, keine Kollisionsprüfung und keine Ganzkörper-IK. Die bisherige Beugeseite wird beibehalten; bei gestreckter Kette wird eine stabile geometrische Ersatzrichtung verwendet.
+
+Projektformat bleibt 1. Für die Auswertung von `bendLimit` und neuen Prüfhinweisen ist Software ab 0.33.0 nötig; ältere Versionen können Grenzen ignorieren oder den neuen Prüfgrund ablehnen. [Prüfbericht](PRUEFUNG-0.33.0.md).

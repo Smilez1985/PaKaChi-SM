@@ -12,6 +12,23 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.33.0] - 2026-10-20
+
+Zeitstempel: 2026-10-20T22:20:33+02:00 (Europe/Berlin)
+
+### Added
+
+- Einstellbare IK-Beugegrenzen am mittleren Knochen einer Zweiglied-Kette; Endpunktziehen hält begrenzte Reichweite und Knochenlängen ein.
+- Mausregler im Rig-Modus, Undo/Redo, Projekt-/Exportpersistenz und MCP-/Assistentenfeld zum Setzen oder Entfernen von Grenzen.
+- Posen-Prüfgrund bei Grenzänderungen; Grenzen werden in der Move-Strukturbindung berücksichtigt.
+- Sieben Tests einschließlich tatsächlicher Mika-/Nori-Geometrie und Katalogprojekt-Export; Node-MCP-Transportprüfung erweitert.
+
+### Changed
+
+- README, Design, Roadmap, Studio-/MCP-/Move-Anleitungen und Prüfstand aktualisiert.
+
+**Prüfung:** 192 Tests und Build bestanden. Python-Datenmodell separat geprüft, kein neuer Python-MCP-Livelauf. Grenzen gelten nur für Zweiglied-IK-Ziehen; direkte Drehungen, gespeicherte Moves, Anatomieerkennung und visuelle Abnahme bleiben offen. Neue Grenzwerte/Prüfgründe erfordern für vollständige Interpretation Software ab 0.33.0.
+
 ## [0.32.0] - 2026-10-20
 
 Zeitstempel: 2026-10-20T15:51:31+02:00 (Europe/Berlin)
@@ -706,3 +723,5 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 [0.31.0]: PRUEFUNG-0.31.0.md
 
 [0.32.0]: PRUEFUNG-0.32.0.md
+
+[0.33.0]: PRUEFUNG-0.33.0.md

@@ -27,3 +27,5 @@ Während Wiedergabe oder Ziehgesten ist der Import nicht verfügbar. Ändert sic
 Automatisiert geprüft sind Dateiformat, echte SHA-256-Berechnung, Kompatibilitätsgrenzen, Kollisionen, Posenreihenfolge, Gesamtspuren, Projektlimits, Editor-Undo/Redo und veraltete asynchrone Importe. Der tatsächliche Browser-Dateidialog und Download sowie eine gerenderte Bewegungsvorschau sind noch nicht abgenommen. [Prüfbericht](PRUEFUNG-0.27.0.md).
 
 Seit 0.31.0 lassen sich dieselben Move-Dateien über einen gemeinsamen statischen Katalog auswählen und importieren. [Move-Sammlung einrichten](MOVE-SAMMLUNG.md).
+
+Seit 0.33.0 gehören konfigurierte IK-Beugegrenzen zur Strukturbindung einer Move-Datei. Das nachträgliche Setzen, Ändern oder Entfernen einer Grenze kann daher einen Import als inkompatibel abweisen. Ohne Grenzen bleiben bisherige Fingerabdrücke unverändert. Neue Posen-Prüfhinweise zu Beugegrenzen benötigen Software ab 0.33.0.

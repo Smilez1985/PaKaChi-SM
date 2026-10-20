@@ -5,7 +5,7 @@ import {parseStudioCommand} from './studio-command.ts';
 import {flagAffectedPoses,moveReview,reviewLabels} from './studio-review.ts';
 import * as T from 'three';
 import {detectJoints,detectConnections,edgeKey} from './studio-detection.ts';
-import { connectedPoints, StudioHistory, FIGURE_TRACK, validFigureScale } from './studio-data.ts';
+import { connectedPoints, StudioHistory, FIGURE_TRACK, validFigureScale, validBendLimit } from './studio-data.ts';
 import type { StudioData, StudioProject, Transform, ControlPoint } from './studio-data.ts';
 import { StudioRig } from './studio-rig.ts';
 import type { StudioView } from './studio-view.ts';
@@ -105,7 +105,7 @@ export class StudioEditor {
     <label for="studio-points">Gelenk / Gesichtspunkt</label><select id="studio-points"><option value="">Punkt auswählen …</option></select>
     <div class="studio-actions" ${this.edit?'':'hidden'}><button id="point-add">＋ Punkt setzen</button><button id="point-connect" ${this.point?'':'disabled'}>Verbinden / lösen</button></div>
     <div id="point-fields" ${this.point?'':'hidden'}><label>Name<input id="point-name" maxlength="100"></label><label>Punktgröße<input id="point-size" type="range" min="0.003" max="0.15" step="0.001"></label>
-    <label id="radius-label">Einflussbereich<input id="point-radius" type="range" min="0.005" max="0.6" step="0.005"></label>
+    <div id="bend-fields" hidden><label class="check"><input id="bend-enabled" type="checkbox"> IK-Beugegrenze</label><label>Minimale Beugung <output id="bend-min-value"></output><input id="bend-min" type="range" min="0" max="175" step="1"></label><label>Maximale Beugung <output id="bend-max-value"></output><input id="bend-max" type="range" min="0" max="175" step="1"></label><p class="subtle">0° ist gestreckt. Gilt beim Ziehen des Endpunkts einer Zweiglied-Kette. Direkte Drehung und gespeicherte Moves bleiben unverändert.</p></div><label id="radius-label">Einflussbereich<input id="point-radius" type="range" min="0.005" max="0.6" step="0.005"></label>
     <div class="point-xyz">${['x','y','z'].map(a=>`<label>${a.toUpperCase()}<input id="point-${a}" type="number" step="0.005" min="-100" max="100"></label>`).join('')}</div>
     <label id="figure-scale-label" hidden>Figurgröße <output id="figure-scale-value"></output><input id="figure-scale" type="range" min="0.1" max="5" step="0.01"></label>
     <label id="rotation-label">Griffe<select id="point-transform"><option value="translate">Verschieben</option><option value="rotate">Drehen</option></select></label>
@@ -155,6 +155,9 @@ export class StudioEditor {
       q('point-kind').textContent=whole?'Gesamte Figur verschieben, drehen oder gleichmäßig skalieren. Alles wird in jeder Pose gespeichert.':p.kind==='bone'?'Skelettpunkt: Ziehen beugt die verbundene Kette, ohne Knochen zu verlängern. Drehen ändert die Ausrichtung.':'Freier Oberflächenpunkt. Verbindungen gruppieren Punkte, ohne eine Gelenkkette vorauszusetzen.';
       input('point-name').onchange=()=>{const v=input('point-name').value.trim();if(v)this.mutate(()=>p.name=v);};
       input('point-size').onchange=()=>this.mutate(()=>p.size=Number(input('point-size').value));
+      q('bend-fields').hidden=!this.edit||p.kind!=='bone';input('bend-enabled').checked=!!p.bendLimit;
+      for(const key of ['min','max'] as const){const field=input('bend-'+key);field.value=String(p.bendLimit?.[key]??(key==='min'?0:175));field.disabled=!p.bendLimit;q('bend-'+key+'-value').textContent=field.value+'°';field.oninput=()=>{q('bend-'+key+'-value').textContent=field.value+'°';};field.onchange=()=>{const limit={min:Number(input('bend-min').value),max:Number(input('bend-max').value)};if(!validBendLimit(limit)){this.hooks.feedback('Ungültige IK-Beugegrenze.');this.render();return;}this.mutate(()=>{p.bendLimit=limit;});};}
+      input('bend-enabled').onchange=()=>{const enabled=input('bend-enabled').checked;this.mutate(()=>{if(enabled)p.bendLimit={min:0,max:175};else delete p.bendLimit;});};
       input('point-radius').onchange=()=>this.mutate(()=>{p.radius=Number(input('point-radius').value);this.rig.apply(this.rig.capture());});
       ['x','y','z'].forEach((axis,i)=>{input(`point-${axis}`).onchange=()=>{const v=Number(input(`point-${axis}`).value);if(!Number.isFinite(v)||Math.abs(v)>100)return;this.mutate(()=>{const pos=this.rig.position(p).toArray();pos[i]=v;this.rig.setPoint(p,new T.Vector3().fromArray(pos),this.rig.rotation(p),this.edit,'translate');});};});
       q<HTMLSelectElement>('point-transform').value=this.rotate?'rotate':'translate';
@@ -216,8 +219,8 @@ export class StudioEditor {
         this.mutate(()=>{const p:ControlPoint={id:uid(),name:c.name?.trim()||`Punkt ${this.data.points.length+1}`,kind:'surface',rest:[...c.position!],size:c.size??.015,radius:c.radius??.12,...(c.mesh!==undefined?{mesh:c.mesh}:{})};this.data.points.push(p);for(const pose of this.data.poses)pose.values[p.id]={position:[...p.rest],rotation:[0,0,0,1]};if(this.data.draft)this.data.draft[p.id]={position:[...p.rest],rotation:[0,0,0,1]};this.selected=p.id;resultId=p.id;this.rig.reset();});break;
       }
       case 'update_point':{
-        require(point);const p=point!;require(p.id!==FIGURE_TRACK||!this.edit);require(c.rotation===undefined||!this.edit&&(p.kind==='bone'||p.id===FIGURE_TRACK));require(p.id!==FIGURE_TRACK||(c.size===undefined&&c.radius===undefined&&c.name===undefined));require(c.radius===undefined||p.kind==='surface');require(c.scale===undefined||p.id===FIGURE_TRACK&&!this.edit);require(['name','position','rotation','scale','size','radius'].some(k=>k in c));
-        this.mutate(()=>{if(c.name!==undefined)p.name=c.name.trim();if(c.size!==undefined)p.size=c.size;if(c.radius!==undefined)p.radius=c.radius;if(c.position||c.rotation)this.rig.setPoint(p,c.position?new T.Vector3().fromArray(c.position):this.rig.position(p),c.rotation?new T.Quaternion().fromArray(c.rotation):this.rig.rotation(p),this.edit,c.position?(c.rotation?'both':'translate'):'rotate');else this.rig.apply(this.rig.capture());if(c.scale!==undefined)this.rig.setFigureScale(c.scale);this.selected=p.id;});break;
+        require(point);const p=point!;require(p.id!==FIGURE_TRACK||!this.edit);require(c.rotation===undefined||!this.edit&&(p.kind==='bone'||p.id===FIGURE_TRACK));require(p.id!==FIGURE_TRACK||(c.size===undefined&&c.radius===undefined&&c.name===undefined));require(c.radius===undefined||p.kind==='surface');require(c.scale===undefined||p.id===FIGURE_TRACK&&!this.edit);require(c.bendLimit===undefined||this.edit&&p.kind==='bone');require(['name','position','rotation','scale','size','radius','bendLimit'].some(k=>k in c));
+        this.mutate(()=>{if(c.bendLimit!==undefined){if(c.bendLimit===null)delete p.bendLimit;else p.bendLimit=structuredClone(c.bendLimit);}if(c.name!==undefined)p.name=c.name.trim();if(c.size!==undefined)p.size=c.size;if(c.radius!==undefined)p.radius=c.radius;if(c.position||c.rotation)this.rig.setPoint(p,c.position?new T.Vector3().fromArray(c.position):this.rig.position(p),c.rotation?new T.Quaternion().fromArray(c.rotation):this.rig.rotation(p),this.edit,c.position?(c.rotation?'both':'translate'):'rotate');else this.rig.apply(this.rig.capture());if(c.scale!==undefined)this.rig.setFigureScale(c.scale);this.selected=p.id;});break;
       }
       case 'delete_point':require(this.edit&&point&&point.id!==FIGURE_TRACK);this.mutate(()=>{this.data.points=this.data.points.filter(p=>p.id!==c.id);this.data.links=this.data.links.filter(l=>!l.includes(c.id!));for(const p of this.data.poses)delete p.values[c.id!];if(this.data.draft)delete this.data.draft[c.id!];this.selected=null;this.rig.reset();});break;
       case 'connect_points':case 'disconnect_points':{

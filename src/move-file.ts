@@ -11,7 +11,7 @@ function canonical(value:unknown):string {
 }
 async function digest(value:string){const result=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(value));return Array.from(new Uint8Array(result),b=>b.toString(16).padStart(2,'0')).join('');}
 async function binding(project:StudioProject){
- const d=project.studio,rig={boneRest:d.boneRest,points:d.points.map(({id,kind,bone,mesh,rest,radius})=>({id,kind,bone,mesh,rest,radius})).sort((a,b)=>a.id<b.id?-1:a.id>b.id?1:0),links:d.links.map(l=>[...l].sort()).sort((a,b)=>canonical(a)<canonical(b)?-1:canonical(a)>canonical(b)?1:0)};
+ const d=project.studio,rig={boneRest:d.boneRest,points:d.points.map(({id,kind,bone,mesh,rest,radius,bendLimit})=>({id,kind,bone,mesh,rest,radius,bendLimit})).sort((a,b)=>a.id<b.id?-1:a.id>b.id?1:0),links:d.links.map(l=>[...l].sort()).sort((a,b)=>canonical(a)<canonical(b)?-1:canonical(a)>canonical(b)?1:0)};
  const [model,layout]=await Promise.all([digest(project.model),digest(canonical(rig))]);return {model,rig:layout};
 }
 function size(value:unknown){if(new Blob([JSON.stringify(value)]).size>MAX_MOVE_FILE)throw Error('Move-Datei ist größer als 8 MiB.');}

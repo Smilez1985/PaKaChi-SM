@@ -138,7 +138,7 @@ export class StudioRig {
         const mode=intent??(position.distanceTo(this.position(p))>1e-7?'both':'rotate');
         if(mode!=='rotate'){
           if(!(bone.parent instanceof T.Bone))this.setFigureOffset(this.figureOffset.clone().add(position.clone().sub(this.position(p))));
-          else solveLimb(bone,this.poseChain(p),position);
+          else {const chain=this.poseChain(p),middle=this.data.points.find(q=>q.kind==='bone'&&this.bones[q.bone!]===chain[0]);solveLimb(bone,chain,position,chain.length===2?middle?.bendLimit:undefined);}
         }
         if(mode!=='translate'){const parentQ=bone.parent!.getWorldQuaternion(new T.Quaternion());bone.quaternion.copy(parentQ.invert().multiply(rotation));}
         this.root.updateWorldMatrix(true,true);this.root.updateMatrixWorld(true);this.deform();return;

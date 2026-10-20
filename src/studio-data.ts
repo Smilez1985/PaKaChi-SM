@@ -8,7 +8,7 @@ export const neutralFigure=():Transform=>({position:[0,0,0],rotation:[0,0,0,1]})
 export interface Transform { position: Vec3; rotation: Quat; /** Uniform whole-figure scale only; absent means 1. */ scale?: number }
 export interface ControlPoint {
   id: string; name: string; kind: 'bone' | 'surface'; bone?: number; mesh?: number;
-  rest: Vec3; size: number; radius: number;
+  rest: Vec3; size: number; radius: number; bendLimit?: {min:number;max:number};
 }
 export interface Pose { id: string; name: string; seconds: number; values: Record<string, Transform>; review?: ReviewReason[] }
 export interface StudioMove { id: string; name: string; loop: boolean; poses: string[] }
@@ -26,6 +26,7 @@ const name = (v: unknown): v is string => typeof v==='string' && v.trim().length
 const id = (v: unknown): v is string => name(v) && /^[a-z0-9][a-z0-9_-]*$/.test(v);
 const finite = (v: unknown): v is number => typeof v==='number' && Number.isFinite(v) && Math.abs(v)<=10000;
 const vector = (v:unknown,n:number) => Array.isArray(v) && v.length===n && v.every(finite);
+export function validBendLimit(v:unknown):v is {min:number;max:number}{return obj(v)&&Object.keys(v).every(k=>k==='min'||k==='max')&&typeof v.min==='number'&&typeof v.max==='number'&&Number.isFinite(v.min)&&Number.isFinite(v.max)&&v.min>=0&&v.max<=175&&v.min<=v.max;}
 export const validFigureScale = (v:unknown):v is number => typeof v==='number' && Number.isFinite(v) && v>=.1 && v<=5;
 const transform = (v:unknown,figure=false) => obj(v) && (v.scale===undefined || figure && validFigureScale(v.scale)) && vector(v.position,3) && vector(v.rotation,4) && Math.abs((v.rotation as number[]).reduce((s,x)=>s+x*x,0)-1)<.01;
 function require(condition:unknown, message='Ungültige Studio-Projektdatei.'): asserts condition { if(!condition) throw new Error(message); }
@@ -41,6 +42,7 @@ export function parseProject(input: unknown): StudioProject {
   const ids=new Set<string>(), bones=new Set<number>();
   for(const p of d.points) {
     require(obj(p) && id(p.id) && !ids.has(p.id) && name(p.name) && ['bone','surface'].includes(p.kind as string) && vector(p.rest,3) && finite(p.size) && p.size>=.003 && p.size<=.15 && finite(p.radius) && p.radius>=.005 && p.radius<=2);
+    require(p.bendLimit===undefined || p.kind==='bone'&&validBendLimit(p.bendLimit),'Ungültige IK-Beugegrenze.');
     if(p.kind==='bone') {require(Number.isInteger(p.bone) && (p.bone as number)>=0 && (p.bone as number)<d.boneRest.length && !bones.has(p.bone as number));bones.add(p.bone as number);}
     else require(p.mesh===undefined || Number.isInteger(p.mesh) && (p.mesh as number)>=0 && (p.mesh as number)<2048);
     ids.add(p.id);

@@ -19,5 +19,6 @@ test('real MCP stdio handshake lists tools and round-trips browser commands',asy
  ws.on('message',raw=>{const m=JSON.parse(raw);ws.send(JSON.stringify({type:'result',id:m.id,result:{method:m.method,state:m.args.state??'idle',command:m.args.command}}));});
  const reply=await client.callTool({name:'set_state',arguments:{state:'working'}});assert.notEqual(reply.isError,true);assert.equal(JSON.parse(reply.content[0].text).state,'working');
  const studioReply=await client.callTool({name:'edit_studio',arguments:{command:{session:'test',expectedRevision:0,action:'set_mode',mode:'rig'}}});assert.notEqual(studioReply.isError,true);assert.equal(JSON.parse(studioReply.content[0].text).command.action,'set_mode');
+ for(const bendLimit of [{min:20,max:110},null]){const result=await client.callTool({name:'edit_studio',arguments:{command:{session:'test',expectedRevision:0,action:'update_point',id:'bone-1',bendLimit}}});assert.notEqual(result.isError,true);assert.deepEqual(JSON.parse(result.content[0].text).command.bendLimit,bendLimit);}
  const invalid=await client.callTool({name:'set_state',arguments:{state:'invented'}});assert.equal(invalid.isError,true);
 });

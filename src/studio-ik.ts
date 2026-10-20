@@ -1,4 +1,5 @@
 import * as T from 'three';
+import {validBendLimit} from './studio-data.ts';
 
 /** Rotate a joint towards a target without ever changing a bone's local translation. */
 function aim(joint:T.Bone, endpoint:T.Bone, target:T.Vector3) {
@@ -11,7 +12,8 @@ function aim(joint:T.Bone, endpoint:T.Bone, target:T.Vector3) {
 }
 
 /** One or two segments; anchor position is fixed. Targets outside reach never stretch bones. */
-export function solveLimb(endpoint:T.Bone,joints:T.Bone[],target:T.Vector3) {
+export function solveLimb(endpoint:T.Bone,joints:T.Bone[],target:T.Vector3,limit?:{min:number;max:number}) {
+  if(limit&&!validBendLimit(limit))throw Error('Ungültige IK-Beugegrenze.');
   if(!joints.length)return;
   if(joints.length===1){aim(joints[0],endpoint,target);return;}
   const elbow=joints[0],anchor=joints[1],space=anchor.parent!;
@@ -26,7 +28,11 @@ export function solveLimb(endpoint:T.Bone,joints:T.Bone[],target:T.Vector3) {
   const pole=b.clone().sub(a).addScaledVector(axis,-b.clone().sub(a).dot(axis));
   if(pole.lengthSq()<1e-12){pole.set(0,0,1);pole.addScaledVector(axis,-pole.dot(axis));if(pole.lengthSq()<1e-12)pole.set(1,0,0);}
   pole.normalize();
-  const distance=T.MathUtils.clamp(a.distanceTo(goal),Math.abs(l1-l2)+1e-7,l1+l2-1e-7);
+  const reach=(degrees:number)=>Math.sqrt(Math.max(0,l1*l1+l2*l2+2*l1*l2*Math.cos(T.MathUtils.degToRad(degrees))));
+  // Flexion: 0° is straight. Restrict reach, preserving both local bone lengths.
+  const minimum=limit?reach(limit.max):Math.abs(l1-l2)+1e-7;
+  const maximum=limit?reach(limit.min):l1+l2-1e-7;
+  const distance=T.MathUtils.clamp(a.distanceTo(goal),minimum,maximum);
   const along=(l1*l1-l2*l2+distance*distance)/(2*distance),height=Math.sqrt(Math.max(0,l1*l1-along*along));
   const desiredElbow=a.clone().addScaledVector(axis,along).addScaledVector(pole,height);
   const desiredEnd=a.clone().addScaledVector(axis,distance);

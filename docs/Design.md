@@ -4,7 +4,7 @@ Teil der [Blaupause](README.md) · [Roadmap](ROADMAP.md) · [Changelog](CHANGELO
 
 ## Status und Begriffe
 
-Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.32.0: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau, automatische Anatomieerkennung und die Qualitätsabnahme der angeschlossenen lokalen KI-Generierung bleiben offen.
+Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.33.0: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau, automatische Anatomieerkennung und die Qualitätsabnahme der angeschlossenen lokalen KI-Generierung bleiben offen.
 
 - **PaKaChi:** Panda-KI-Chimera, das übergeordnete Projekt.
 - **PaKaChi-SM:** StateMaschine mit Avatar-Player und integriertem Studio.
@@ -24,7 +24,7 @@ Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich gen
 | Generierung | Lokaler TripoSR-Dienst, Bildauswahl, getrennte Vorschau, Vorprüfungs-Fallbacks, expliziter weiterer Auftrag | Echte GPU-/Qualitätsabnahme, Cloud-Generatoren, Korrekturprompts und Rigging |
 | Übernahme | Revisionsschutz, ein Modellwechsel-Rücksprung, vorbereitete 3D-Installation mit Rückabwicklung | Gerenderte Abnahme, Originalplayer-Neustart und GPU-Kontextverlust |
 
-Prüfnachweis für Software 0.32.0: **185 Tests und Build bestanden**. Das belegt keine gerenderte Browser-, Anbieter- oder GPU-Abnahme. Projektformat bleibt Version 1. Freie Punkte/Posen aus 0.22.0/0.23.0 benötigen wegen der korrigierten Normalisierungsreihenfolge eine visuelle Kontrolle; keine automatische Migration. [Prüfbericht](PRUEFUNG-0.32.0.md).
+Prüfnachweis für Software 0.33.0: **192 Tests und Build bestanden**. Das belegt keine gerenderte Browser-, Anbieter- oder GPU-Abnahme. Projektformat bleibt Version 1. Freie Punkte/Posen aus 0.22.0/0.23.0 benötigen wegen der korrigierten Normalisierungsreihenfolge eine visuelle Kontrolle; keine automatische Migration. [Prüfbericht](PRUEFUNG-0.33.0.md).
 
 ## Bestehender PaKaChi-Avatar
 
@@ -362,3 +362,13 @@ Das CLI exportiert sämtliche eigenen Moves eines Projekts in einen neuen Ordner
 Die gemeinsame Strukturprüfung für einzelne Move-Dateien überprüft Version, Fingerabdruckformat, Posen/Spuren, Transformationen, Zeitgrenzen und Posenreferenzen. Dafür erzeugte interne Prüfdeskriptoren sind kein Rig und werden nicht exportiert. Die Prüfung bestätigt keine Modellkompatibilität oder Anatomie; dafür gilt weiterhin der vollständige Import gegen das tatsächliche Zielprojekt. Verschiedene Modellbindungen dürfen in einer Sammlung koexistieren. Zusätzliche Felder in Quelldateien bleiben beim bytegenauen Kopieren erhalten.
 
 Grenzen: 100 Einträge, 256 KiB je Katalog, 8 MiB je Move-Datei und 64 MiB Move-Dateien insgesamt. Entweichende Dateisymlinks und nicht reguläre Dateien werden abgewiesen. Snapshots und Parsing benötigen zusätzlichen Arbeitsspeicher. Schreibfehler können eine unvollständige neue Ausgabe hinterlassen. Kein Playerpaket und keine automatische Veröffentlichung; Browserpflege und gerenderte Abnahme bleiben offen.
+
+## Beugegrenzen für Zweiglied-IK (0.33.0)
+
+Skelettpunkte erhalten optional `bendLimit: {min,max}` in Grad. Werte sind endlich, 0 ≤ min ≤ max ≤ 175; Oberflächenpunkte dürfen diese Eigenschaft nicht tragen. Der IK-Löser verwendet die Grenze des mittleren Knochens und beschränkt die Zielentfernung anhand des Kosinussatzes. Lokale Knochenverschiebungen bleiben unverändert. Ohne Grenze bleibt die bestehende Lösung erhalten.
+
+Grenzen sind reine Regeln für das interaktive IK-Ziehen, keine Änderung der Quellgeometrie oder eines physischen Gelenks. Direkte Drehungen und Clip-/Posenwiedergabe sind bewusst nicht automatisch korrigiert. Allgemeine Dreh-/Twistgrenzen, anatomische Erkennung, Fußfixierung und Ganzkörper-IK bleiben offen. Nichtuniform skalierte Hierarchien sind nicht als anatomisch korrekt abgenommen.
+
+Editoränderungen sind einzelne Undo-Schritte. Projektdateien und Katalogprojekt-Export erhalten die Werte; Move-Kompatibilität berücksichtigt sie. Geänderte oder entfernte Grenzen markieren vorhandene Posen mit `bend-limit`, ohne deren Transformationen zu ändern. Der Agent darf Grenzen über update_point nur an Knochen im Rig-Modus bearbeiten, mit der bestehenden Freigabe, Sitzung und Revision. null entfernt die Grenze. Assistent und beide MCP-Transporte kennen das Feld; die finale Prüfung bleibt im Studio.
+
+Projektformat 1 ist additiv erweitert. Ohne Grenzen bleiben bisherige Move-Fingerabdrücke gleich. Dateien mit neuen Grenzen/Prüfgründen benötigen für vollständige Interpretation Software 0.33.0; ältere Versionen können Grenzen ignorieren oder neue Prüfgründe ablehnen. Gerenderte Bedienabnahme steht aus.
