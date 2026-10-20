@@ -5,6 +5,10 @@ export function readOptions(storage?:Pick<Storage,'getItem'>):Options {
 }
 export const options=readOptions();
 const translations:Record<string,string>={
+  'Gemeinsame Move-Sammlung':'Shared move collection','Sammlung laden':'Load collection','Aus Sammlung importieren':'Import from collection',
+  'Die Sammlung gehört zur Anwendung. Import nur bei passendem Modell und Rig.':'The collection belongs to this application. Import requires a matching model and rig.',
+  'Move-Sammlung geladen.':'Move collection loaded.','Die Move-Sammlung ist leer.':'The move collection is empty.',
+  'Move-Sammlung nicht erreichbar.':'Move collection unavailable.','Move-Sammlung: Datei zu groß.':'Move collection: file too large.','Move-ID passt nicht zum Katalog.':'Move ID does not match the catalog.',
   'Move exportieren':'Export move','Move importieren':'Import move',
   'Move-Dateien benötigen dasselbe Modell und dieselbe Gelenkstruktur. Kein automatisches Retargeting.':'Move files require the same model and joint structure. No automatic retargeting.',
   'Bewegung und Posen importiert. Vorschau prüfen; Zurück macht den Import rückgängig.':'Move and poses imported. Review the preview; Undo reverts the import.',

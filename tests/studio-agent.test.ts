@@ -49,3 +49,18 @@ test('manual edits, gestures, leaving or disposal invalidate an asynchronous mov
   await assert.rejects(()=>pending,/Stand hat sich geändert/);assert.equal(rig.data.moves.length,1);if(action!=='dispose')editor.dispose();f.w.happyDOM.abort();
  }
 });
+
+test('shared move selection imports through the editor with undo and literal catalog labels',async()=>{
+ const f=fixture(),{editor,run,host,rig}=f;editor.enter();f.grant();const a=run({action:'save_pose'}).id!,b=run({action:'save_pose'}).id!;run({action:'create_move',id:'wave',name:'Wave',poses:[a,b]});const file=await editor.exportMove('wave'),item={id:'wave',name:'<img src=x>',file:'moves/wave.pakachi-move.json'};
+ const fetcher=(async(url:string)=>new Response(JSON.stringify(url.endsWith('catalog.json')?{schemaVersion:1,moves:[item]}:file))) as typeof fetch;
+ await editor.refreshMoveLibrary('/',fetcher);assert.equal(host.querySelector('#library-moves option')!.textContent,item.name);assert.equal(host.querySelector('#library-moves img'),null);const before=structuredClone(rig.data);
+ await editor.importLibraryMove(item,'/',fetcher);assert.equal(rig.data.moves.length,2);assert.equal(editor.playing,false);run({action:'undo'});assert.deepEqual(rig.data,before);editor.dispose();f.w.happyDOM.abort();
+});
+test('delayed shared move download cannot overwrite edits or a closed studio',async()=>{
+ for(const action of ['edit','leave','dispose']){
+  const f=fixture(),{editor,run,rig}=f;editor.enter();f.grant();const a=run({action:'save_pose'}).id!,b=run({action:'save_pose'}).id!;run({action:'create_move',id:'wave',name:'Wave',poses:[a,b]});const file=await editor.exportMove('wave');let finish!:(r:Response)=>void;
+  const fetcher=(()=>new Promise<Response>(resolve=>{finish=resolve;})) as typeof fetch;
+  const pending=editor.importLibraryMove({id:'wave',name:'Wave',file:'moves/wave.pakachi-move.json'},'/',fetcher);
+  if(action==='edit')run({action:'save_pose'});else if(action==='leave')editor.leave();else editor.dispose();finish(new Response(JSON.stringify(file)));await assert.rejects(()=>pending);assert.equal(rig.data.moves.length,1);if(action!=='dispose')editor.dispose();f.w.happyDOM.abort();
+ }
+});

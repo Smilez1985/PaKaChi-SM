@@ -162,3 +162,7 @@ Der Verlauf ist kein dauerhafter Versionsspeicher. Seit 0.24.0 werden neue 3D-An
 ## Move-Dateien austauschen (0.27.0)
 
 Unter **Eigene Bewegungen** einen Studio-Move auswählen und **Move exportieren** anklicken. **Move importieren** ergänzt eine passende Datei samt Posen, ohne bestehende Bewegungen zu überschreiben. Modell und bewegungsrelevante Gelenkstruktur müssen identisch sein. Der Import ist als Ganzes rückgängig machbar; Wiedergabe startet erst über Vorschau. [Anleitung und Grenzen](MOVE-DATEIEN.md).
+
+## Gemeinsame Move-Sammlung (0.31.0)
+
+Unter den eigenen Bewegungen **Sammlung laden** wählen, einen Katalogeintrag auswählen und **Aus Sammlung importieren** anklicken. Der Import prüft Modell und Gelenkstruktur, ergänzt Posen und Move ohne Überschreiben und lässt sich mit Zurück rückgängig machen. Es startet keine Wiedergabe. Die mitgelieferte Sammlung ist leer. [Sammlung vorbereiten und Grenzen](MOVE-SAMMLUNG.md).

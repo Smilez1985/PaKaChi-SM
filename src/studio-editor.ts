@@ -1,3 +1,5 @@
+import {loadMoveLibrary,loadLibraryMove} from './move-library.ts';
+import type {LibraryMove} from './move-library.ts';
 import {exportMoveFile,importMoveFile,MAX_MOVE_FILE} from './move-file.ts';
 import {parseStudioCommand} from './studio-command.ts';
 import {flagAffectedPoses,moveReview,reviewLabels} from './studio-review.ts';
@@ -33,6 +35,8 @@ export class StudioEditor {
   private revision=0;
   private agentEditing=false;
   private disposed=false;
+  private library:LibraryMove[]=[];
+  private libraryRequest:AbortController|null=null;
   dirty=false;
   paused=false;
   speed=1;
@@ -63,7 +67,7 @@ export class StudioEditor {
   private mark(){this.revision++;this.dirty=true;this.hooks.changed();}
   private mutate(fn:()=>void){const before=this.snapshot();fn();flagAffectedPoses(before.data,this.data);this.history.push(before);this.mark();this.render();}
   enter(){this.revision++;this.hooks.suspend();this.stopMove();this.active=true;this.rig.reset();if(this.data.draft)this.rig.apply(this.data.draft);this.view.setEnabled(true);this.render();}
-  leave(){this.agentEditing=false;this.revision++;if(this.active&&!this.playing)this.data.draft=this.rig.capture();this.active=false;this.stopMove();this.view.setEnabled(false);this.rig.restoreSource();this.hooks.resume();}
+  leave(){this.libraryRequest?.abort();this.agentEditing=false;this.revision++;if(this.active&&!this.playing)this.data.draft=this.rig.capture();this.active=false;this.stopMove();this.view.setEnabled(false);this.rig.restoreSource();this.hooks.resume();}
   stopMove(){this.timeline=null;this.paused=false;this.view.setEnabled(this.active);}
   stopPreview(){this.stopMove();this.render();}
   play(id:string,preview=false):boolean {
@@ -89,7 +93,7 @@ export class StudioEditor {
   }
   private refreshNumbers(){const label=this.host.querySelector('#figure-scale-value');if(label)label.textContent=`${Math.round(this.rig.scale*100)} %`;const p=this.point;if(!p)return;const pos=this.rig.position(p);['x','y','z'].forEach((axis,i)=>{const input=this.host.querySelector<HTMLInputElement>(`#point-${axis}`);if(input)input.value=pos.toArray()[i].toFixed(3);});}
   private render(){
-    const remembered = Object.fromEntries(['pose-name','move-name','move-id','pose-list','studio-moves'].map(id=>[id,this.host.querySelector<HTMLInputElement>(`#${id}`)?.value ?? '']));
+    const remembered = Object.fromEntries(['pose-name','move-name','move-id','pose-list','studio-moves','library-moves'].map(id=>[id,this.host.querySelector<HTMLInputElement>(`#${id}`)?.value ?? '']));
     const loop = this.host.querySelector<HTMLInputElement>('#move-loop')?.checked ?? false;
     const selected=this.selected;const poses=this.data.poses;
     this.host.innerHTML=`<h2>Avatar-Studio</h2><label class="check"><input id="studio-agent-edit" type="checkbox" ${this.agentEditing?'checked':''}> KI darf dieses Studio bearbeiten</label><p class="subtle">Nur für diese Sitzung. Änderungen sind rückgängig machbar.</p><div class="studio-file-actions"><button id="studio-new">Neu</button><button id="studio-save">Speichern${this.dirty?' *':''}</button></div>
@@ -115,7 +119,7 @@ export class StudioEditor {
     <label>Übergang zu dieser Pose (Sekunden)<input id="pose-seconds" type="number" min="0.1" max="30" step="0.1" value="1"></label><div class="studio-actions"><button id="pose-up">↑ Früher</button><button id="pose-down">↓ Später</button></div>
     <p class="subtle">Eine Bewegung nutzt alle Posen in dieser Reihenfolge. Bei Schleifen bestimmt die Zeit der ersten Pose den Rückweg.</p>
     <label>Bewegungsname<input id="move-name" maxlength="100" placeholder="z. B. Lächeln"></label><label>Schlagwort<input id="move-id" maxlength="100" placeholder="z. B. laecheln"></label><label class="check"><input id="move-loop" type="checkbox"> Als Schleife</label><button id="move-add" ${poses.length>=2?'':'disabled'}>Bewegung speichern</button>
-    <label for="studio-moves">Eigene Bewegungen</label><select id="studio-moves"></select><p id="move-review" class="studio-review" hidden>Diese Bewegung enthält Posen mit Prüfhinweisen. Vorschau ansehen und die markierten Posen prüfen.</p><div class="studio-actions"><button id="move-preview">Vorschau</button><button id="move-stop">Stopp</button><button id="move-delete">Löschen</button></div><div class="studio-actions"><button id="move-export">Move exportieren</button><button id="move-import">Move importieren</button><input id="move-file" type="file" accept=".json,.pakachi-move.json" hidden></div><p class="subtle">Move-Dateien benötigen dasselbe Modell und dieselbe Gelenkstruktur. Kein automatisches Retargeting.</p></div>
+    <label for="studio-moves">Eigene Bewegungen</label><select id="studio-moves"></select><p id="move-review" class="studio-review" hidden>Diese Bewegung enthält Posen mit Prüfhinweisen. Vorschau ansehen und die markierten Posen prüfen.</p><div class="studio-actions"><button id="move-preview">Vorschau</button><button id="move-stop">Stopp</button><button id="move-delete">Löschen</button></div><div class="studio-actions"><button id="move-export">Move exportieren</button><button id="move-import">Move importieren</button><input id="move-file" type="file" accept=".json,.pakachi-move.json" hidden></div><label for="library-moves">Gemeinsame Move-Sammlung</label><select id="library-moves" data-user-text></select><div class="studio-actions"><button id="library-refresh">Sammlung laden</button><button id="library-import">Aus Sammlung importieren</button></div><p class="subtle">Die Sammlung gehört zur Anwendung. Import nur bei passendem Modell und Rig.</p><p class="subtle">Move-Dateien benötigen dasselbe Modell und dieselbe Gelenkstruktur. Kein automatisches Retargeting.</p></div>
     <p class="subtle">Projekt laden: „Projekt laden“ oben. Mausrad: Nahzoom · rechts ziehen: Ansicht verschieben.</p>`;
     const q=<E extends HTMLElement=HTMLElement>(id:string)=>this.host.querySelector<E>(`#${id}`)!;
     const input=(id:string)=>q<HTMLInputElement>(id);
@@ -177,6 +181,12 @@ export class StudioEditor {
     q<HTMLButtonElement>('move-export').disabled=!moves.value;
     q<HTMLButtonElement>('move-export').onclick=()=>{void this.exportMove(moves.value).then(value=>{if(this.disposed)return;const url=URL.createObjectURL(new Blob([JSON.stringify(value)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download=value.move.id+'.pakachi-move.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}).catch(error=>{if(!this.disposed)this.hooks.feedback(error instanceof Error?error.message:'Move-Export fehlgeschlagen.');});};
     on('move-import',()=>input('move-file').click());
+    const library=q<HTMLSelectElement>('library-moves');this.library.forEach(m=>library.add(new Option(m.name,m.id)));library.value=this.library.some(m=>m.id===remembered['library-moves'])?remembered['library-moves']:(this.library[0]?.id??'');
+    const report=(error:unknown)=>{if(!this.disposed&&this.active&&!(error instanceof Error&&error.name==='AbortError'))this.hooks.feedback(error instanceof Error?error.message:'Move-Sammlung nicht erreichbar.');};
+    q<HTMLButtonElement>('library-refresh').disabled=!!this.libraryRequest;
+    q<HTMLButtonElement>('library-import').disabled=!!this.libraryRequest||!library.value;
+    q<HTMLButtonElement>('library-refresh').onclick=()=>{void this.refreshMoveLibrary().catch(report);};
+    q<HTMLButtonElement>('library-import').onclick=()=>{const item=this.library.find(m=>m.id===library.value);if(item)void this.importLibraryMove(item).catch(report);};
     input('move-file').onchange=()=>{const file=input('move-file').files?.[0],revision=this.revision;input('move-file').value='';if(!file)return;void (async()=>{if(file.size>MAX_MOVE_FILE)throw Error('Move-Datei ist größer als 8 MiB.');await this.importMove(JSON.parse(await file.text()),revision);})().catch(error=>{if(!this.disposed)this.hooks.feedback(error instanceof Error?error.message:'Move-Import fehlgeschlagen.');});};
     if(this.playing){this.host.querySelectorAll<HTMLButtonElement|HTMLInputElement|HTMLSelectElement>('button,input,select').forEach(e=>e.disabled=e.id!=='move-stop'&&e.id!=='studio-agent-edit');}
     this.view.setFigureEnabled(!this.edit);this.view.setRotation(this.rotate && !this.edit);this.view.select(this.selected);this.refreshNumbers();
@@ -222,9 +232,21 @@ export class StudioEditor {
     }
     this.hooks.feedback('Studio-Änderung durch KI übernommen.');return {accepted:true,session:this.session,revision:this.revision,...(resultId?{id:resultId}:{})};
   }
+  private async withLibrary<T>(work:(signal:AbortSignal)=>Promise<T>):Promise<T>{
+    if(this.disposed||!this.active||this.interactionActive||this.libraryRequest)throw Error('Studio ist beschäftigt oder geschlossen.');
+    const request=new AbortController();this.libraryRequest=request;const timeout=setTimeout(()=>request.abort(),30000);this.render();
+    try{return await work(request.signal);}finally{clearTimeout(timeout);if(this.libraryRequest===request)this.libraryRequest=null;if(!this.disposed&&this.active)this.render();}
+  }
+  async refreshMoveLibrary(base=import.meta.env?.BASE_URL??'/',fetcher:typeof fetch=fetch){
+    return this.withLibrary(async signal=>{const entries=await loadMoveLibrary(base,signal,fetcher);signal.throwIfAborted();this.library=entries;this.hooks.feedback(entries.length?'Move-Sammlung geladen.':'Die Move-Sammlung ist leer.');});
+  }
+  async importLibraryMove(item:LibraryMove,base=import.meta.env?.BASE_URL??'/',fetcher:typeof fetch=fetch){
+    const revision=this.revision;
+    return this.withLibrary(async signal=>{const file=await loadLibraryMove(item,base,signal,fetcher);signal.throwIfAborted();await this.importMove(file,revision,signal);});
+  }
   async exportMove(id:string){if(this.disposed||!this.active||this.interactionActive)throw Error('Studio ist beschäftigt oder geschlossen.');return exportMoveFile(this.exportProject(),id);}
-  async importMove(value:unknown,expectedRevision=this.revision){
-    const valid=()=>!this.disposed&&this.active&&!this.interactionActive&&this.revision===expectedRevision;
+  async importMove(value:unknown,expectedRevision=this.revision,signal?:AbortSignal){
+    const valid=()=>!signal?.aborted&&!this.disposed&&this.active&&!this.interactionActive&&this.revision===expectedRevision;
     if(!valid())throw Error('Studio-Stand hat sich geändert. Move erneut importieren.');
     const data=await importMoveFile(value,this.exportProject());
     if(!valid())throw Error('Studio-Stand hat sich geändert. Move erneut importieren.');
@@ -243,7 +265,7 @@ export class StudioEditor {
     const value=this.exportProject();
     const url=URL.createObjectURL(new Blob([JSON.stringify(value)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download=`${this.project.avatar.id}.pakachi.json`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);this.dirty=false;this.render();this.hooks.feedback('Studio-Projekt mit Modell, Kontrollpunkten, Posen und Bewegungen heruntergeladen.');
   }
-  dispose(){this.disposed=true;this.view.dispose();this.host.replaceChildren();}
+  dispose(){this.libraryRequest?.abort();this.disposed=true;this.view.dispose();this.host.replaceChildren();}
 }
 export function encodeModel(buffer:ArrayBuffer):string {let s='';const bytes=new Uint8Array(buffer);for(let i=0;i<bytes.length;i+=16384)s+=String.fromCharCode(...bytes.subarray(i,i+16384));return btoa(s);}
 export function decodeModel(base64:string):ArrayBuffer {return Uint8Array.from(atob(base64),c=>c.charCodeAt(0)).buffer;}

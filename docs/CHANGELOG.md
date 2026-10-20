@@ -12,6 +12,23 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.31.0] - 2026-10-20
+
+Zeitstempel: 2026-10-20T14:03:31+02:00 (Europe/Berlin)
+
+### Added
+
+- Gemeinsame statische Move-Sammlung unter `moves/` mit Katalogauswahl und ausdrücklichem Import im Studio. Die mitgelieferte Sammlung ist leer.
+- `export:moves` exportiert eigene Bewegungen eines Projekts als neues Katalogpaket; Quellen und vorhandene Ausgabeordner bleiben unverändert.
+- Begrenzte Katalog-/Move-Abrufe, ID-Prüfung, Zeitlimit und Abbruch beim Verlassen des Editors; bestehende Kompatibilitätsprüfung und Undo/Redo bleiben erhalten.
+- Sieben Tests für Katalog, Transportgrenzen, tatsächlichen CLI-Export, Editorimport und veraltete Downloads.
+
+### Changed
+
+- README, Design, Roadmap, Studio-/Move-Anleitungen und Prüfstand nachgezogen; neue Sammlungselemente auf Deutsch und Englisch.
+
+**Prüfung:** 178 Tests und Build bestanden. Gerenderte Bedienabnahme, Browserpflege der gemeinsamen Sammlung, GLB-Clip-Export und Retargeting bleiben offen.
+
 ## [0.30.0] - 2026-10-19
 
 Zeitstempel: 2026-10-19T21:58:46+02:00 (Europe/Berlin)
@@ -667,3 +684,5 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 [0.29.0]: PRUEFUNG-0.29.0.md
 
 [0.30.0]: PRUEFUNG-0.30.0.md
+
+[0.31.0]: PRUEFUNG-0.31.0.md

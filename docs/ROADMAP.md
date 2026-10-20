@@ -1,6 +1,6 @@
 # Roadmap – was kommt
 
-**Softwarestand: 0.30.0 · Abgleich: 19.10.2026.** Teil der [Blaupause](README.md).
+**Softwarestand: 0.31.0 · Abgleich: 20.10.2026.** Teil der [Blaupause](README.md).
 
 Ein Häkchen bedeutet implementiert; es ersetzt keine visuelle oder externe Live-Abnahme. Die Nachweise und Prüfgrenzen stehen im [Prüfstand](PRUEFUNG.md). Die Versionshistorie gehört ins [Changelog](CHANGELOG.md).
 
@@ -28,7 +28,8 @@ Diese Reihenfolge ist ein Umsetzungsvorschlag, kein Terminversprechen. Lokale un
 - [ ] Veröffentlichungsablauf ergänzen und zusammengeführte Exportpakete im gerenderten Player abnehmen.
 - [x] Eigene Studio-Moves als separate Dateien exportieren/importieren, nur bei identischem Modell und gleicher Bewegungsstruktur; Konflikte ohne Überschreiben lösen und gesamten Import rückgängig machen (0.27.0).
 - [ ] Dateidialog, Download und importierte Bewegung im gerenderten Browser prüfen.
-- [ ] Verwaltete gemeinsame moves/-Sammlung, GLB-Clip-Export und Retargeting auf andere Rigs ergänzen.
+- [x] Gemeinsame statische moves/-Sammlung mit Katalog, Export eigener Projekt-Moves und revisionsgeschütztem Studio-Import ergänzen (0.31.0).
+- [ ] Sammlung im Browser bearbeiten/zusammenführen und visuell abnehmen; GLB-Clip-Export und Retargeting auf andere Rigs ergänzen.
 
 **Abnahme:** Avatar auswählen und vorhandene Bewegungen abspielen. Code und automatisierte Prüfungen vorhanden; visuelle Abnahme offen.
 
