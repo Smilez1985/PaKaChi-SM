@@ -96,7 +96,7 @@ export class StudioEditor {
   }
   private refreshNumbers(){const label=this.host.querySelector('#figure-scale-value');if(label)label.textContent=`${Math.round(this.rig.scale*100)} %`;const p=this.point;if(!p)return;const pos=this.rig.position(p);['x','y','z'].forEach((axis,i)=>{const input=this.host.querySelector<HTMLInputElement>(`#point-${axis}`);if(input)input.value=pos.toArray()[i].toFixed(3);});}
   private render(){
-    const remembered = Object.fromEntries(['pose-name','move-name','move-id','pose-list','studio-moves','library-moves'].map(id=>[id,this.host.querySelector<HTMLInputElement>(`#${id}`)?.value ?? '']));
+    const remembered = Object.fromEntries(['pose-name','move-name','move-id','pose-list','studio-moves','library-moves','move-steps'].map(id=>[id,this.host.querySelector<HTMLInputElement>(`#${id}`)?.value ?? '']));
     const loop = this.host.querySelector<HTMLInputElement>('#move-loop')?.checked ?? false;
     const selected=this.selected;const poses=this.data.poses;
     this.host.innerHTML=`<h2>Avatar-Studio</h2><label class="check"><input id="studio-agent-edit" type="checkbox" ${this.agentEditing?'checked':''}> KI darf dieses Studio bearbeiten</label><p class="subtle">Nur für diese Sitzung. Änderungen sind rückgängig machbar.</p><div class="studio-file-actions"><button id="studio-new">Neu</button><button id="studio-save">Speichern${this.dirty?' *':''}</button></div>
@@ -122,7 +122,7 @@ export class StudioEditor {
     <label>Übergang zu dieser Pose (Sekunden)<input id="pose-seconds" type="number" min="0.1" max="30" step="0.1" value="1"></label><div class="studio-actions"><button id="pose-up">↑ Früher</button><button id="pose-down">↓ Später</button></div>
     <p class="subtle">Eine Bewegung nutzt alle Posen in dieser Reihenfolge. Bei Schleifen bestimmt die Zeit der ersten Pose den Rückweg.</p>
     <label>Bewegungsname<input id="move-name" maxlength="100" placeholder="z. B. Lächeln"></label><label>Schlagwort<input id="move-id" maxlength="100" placeholder="z. B. laecheln"></label><label class="check"><input id="move-loop" type="checkbox"> Als Schleife</label><button id="move-add" ${poses.length>=2?'':'disabled'}>Bewegung speichern</button>
-    <label for="studio-moves">Eigene Bewegungen</label><select id="studio-moves"></select><p id="move-review" class="studio-review" hidden>Diese Bewegung enthält Posen mit Prüfhinweisen. Vorschau ansehen und die markierten Posen prüfen.</p><div class="studio-actions"><button id="move-preview">Vorschau</button><button id="move-stop">Stopp</button><button id="move-inspect-save" ${this.inspectionOrigin?'':'hidden'}>Prüfbild als neue Pose übernehmen</button><button id="move-delete">Löschen</button></div><div class="studio-actions"><button id="move-check-limits">Beugegrenzen der Bewegung prüfen</button><button id="move-check-cancel">Prüfung abbrechen</button></div><div id="move-limit-result" role="status"></div><div class="studio-actions"><button id="move-export">Move exportieren</button><button id="move-import">Move importieren</button><input id="move-file" type="file" accept=".json,.pakachi-move.json" hidden></div><label for="library-moves">Gemeinsame Move-Sammlung</label><select id="library-moves" data-user-text></select><div class="studio-actions"><button id="library-refresh">Sammlung laden</button><button id="library-import">Aus Sammlung importieren</button></div><p class="subtle">Die Sammlung gehört zur Anwendung. Import nur bei passendem Modell und Rig.</p><p class="subtle">Move-Dateien benötigen dasselbe Modell und dieselbe Gelenkstruktur. Kein automatisches Retargeting.</p></div>
+    <label for="studio-moves">Eigene Bewegungen</label><select id="studio-moves"></select><label for="move-steps">Posenfolge dieser Bewegung</label><select id="move-steps" data-user-text></select><div class="studio-actions"><button id="move-step-up">Schritt nach vorne</button><button id="move-step-down">Schritt nach hinten</button><button id="move-step-remove">Schritt entfernen</button></div><div class="studio-actions"><button id="move-step-add">Ausgewählte Pose einfügen</button><button id="move-step-replace">Schritt durch ausgewählte Pose ersetzen</button></div><p class="subtle">Die Pose oben auswählen. Wiederholungen sind einzelne Schritte; Posen bleiben im Projekt erhalten.</p><p id="move-review" class="studio-review" hidden>Diese Bewegung enthält Posen mit Prüfhinweisen. Vorschau ansehen und die markierten Posen prüfen.</p><div class="studio-actions"><button id="move-preview">Vorschau</button><button id="move-stop">Stopp</button><button id="move-inspect-save" ${this.inspectionOrigin?'':'hidden'}>Prüfbild als neue Pose übernehmen</button><button id="move-delete">Löschen</button></div><div class="studio-actions"><button id="move-check-limits">Beugegrenzen der Bewegung prüfen</button><button id="move-check-cancel">Prüfung abbrechen</button></div><div id="move-limit-result" role="status"></div><div class="studio-actions"><button id="move-export">Move exportieren</button><button id="move-import">Move importieren</button><input id="move-file" type="file" accept=".json,.pakachi-move.json" hidden></div><label for="library-moves">Gemeinsame Move-Sammlung</label><select id="library-moves" data-user-text></select><div class="studio-actions"><button id="library-refresh">Sammlung laden</button><button id="library-import">Aus Sammlung importieren</button></div><p class="subtle">Die Sammlung gehört zur Anwendung. Import nur bei passendem Modell und Rig.</p><p class="subtle">Move-Dateien benötigen dasselbe Modell und dieselbe Gelenkstruktur. Kein automatisches Retargeting.</p></div>
     <p class="subtle">Projekt laden: „Projekt laden“ oben. Mausrad: Nahzoom · rechts ziehen: Ansicht verschieben.</p>`;
     const q=<E extends HTMLElement=HTMLElement>(id:string)=>this.host.querySelector<E>(`#${id}`)!;
     const input=(id:string)=>q<HTMLInputElement>(id);
@@ -186,8 +186,26 @@ export class StudioEditor {
     on('move-add',()=>{const id=input('move-id').value.trim(),name=input('move-name').value.trim();if(!/^[a-z0-9][a-z0-9_-]{0,99}$/.test(id)||!name)throw new Error('Name und eindeutiges Schlagwort angeben (a–z, 0–9, _ oder -).');if(this.project.avatar.moves.some(m=>m.id===id)||this.data.moves.some(m=>m.id===id))throw new Error('Dieses Schlagwort ist bereits vergeben.');if(this.data.moves.length>=100)throw new Error('Höchstens 100 Bewegungen.');const loop=input('move-loop').checked;this.mutate(()=>this.data.moves.push({id,name,loop,poses:poses.map(p=>p.id)}));});
     const moves=q<HTMLSelectElement>('studio-moves');this.data.moves.forEach(m=>moves.add(new Option(`${moveReview(this.data,m).needsReview?'⚠ ':''}${m.name}`,m.id)));
     moves.value=this.data.moves.some(m=>m.id===remembered['studio-moves'])?remembered['studio-moves']:(this.data.moves[0]?.id??'');
-    moves.onchange=()=>{q('move-limit-result').replaceChildren();q<HTMLButtonElement>('move-check-limits').disabled=!!this.moveCheck||!moves.value;q<HTMLButtonElement>('move-check-cancel').disabled=!this.moveCheck;const m=this.data.moves.find(m=>m.id===moves.value);q('move-review').hidden=!m||!moveReview(this.data,m).needsReview;};moves.onchange(new Event('change'));
+    const steps=q<HTMLSelectElement>('move-steps');
+    const stepButtons=()=>{const m=this.data.moves.find(m=>m.id===moves.value),index=Number(steps.value),locked=this.edit||this.interactionActive;
+      q<HTMLButtonElement>('move-step-up').disabled=locked||!m||index<=0;
+      q<HTMLButtonElement>('move-step-down').disabled=locked||!m||index>=m.poses.length-1;
+      q<HTMLButtonElement>('move-step-remove').disabled=locked||!m||m.poses.length<=2;
+      q<HTMLButtonElement>('move-step-add').disabled=locked||!m||m.poses.length>=100||!pose();
+      q<HTMLButtonElement>('move-step-replace').disabled=locked||!m||!pose();
+    };
+    steps.onchange=stepButtons;
+    const poseChange=list.onchange;list.onchange=event=>{poseChange?.call(list,event);stepButtons();};
+    const rebuildSteps=(selected=0)=>{steps.replaceChildren();const m=this.data.moves.find(m=>m.id===moves.value);m?.poses.forEach((id,i)=>{const p=this.data.poses.find(p=>p.id===id)!;steps.add(new Option(`${i+1}. ${p.name} [${id}] · ${p.seconds} s`,String(i)));});steps.value=String(Math.max(0,Math.min(selected,(m?.poses.length??1)-1)));stepButtons();};
+    moves.onchange=()=>{rebuildSteps();q('move-limit-result').replaceChildren();q<HTMLButtonElement>('move-check-limits').disabled=!!this.moveCheck||!moves.value;q<HTMLButtonElement>('move-check-cancel').disabled=!this.moveCheck;const m=this.data.moves.find(m=>m.id===moves.value);q('move-review').hidden=!m||!moveReview(this.data,m).needsReview;};moves.onchange(new Event('change'));rebuildSteps(Number(remembered['move-steps'])||0);
     for(const id of ['pose-name','move-name','move-id'])input(id).value=remembered[id];input('move-loop').checked=loop;
+    const changeStep=(operation:'up'|'down'|'remove'|'add'|'replace')=>{const move=this.data.moves.find(m=>m.id===moves.value);if(!move)return;const sequence=[...move.poses];let index=Number(steps.value);if(!Number.isInteger(index)||index<0||index>=sequence.length)return;
+      if(operation==='up'||operation==='down'){const target=index+(operation==='up'?-1:1);if(target<0||target>=sequence.length)return;[sequence[index],sequence[target]]=[sequence[target],sequence[index]];index=target;}
+      else if(operation==='remove')sequence.splice(index,1);
+      else {const selected=pose();if(!selected)return;if(operation==='add'){index++;sequence.splice(index,0,selected.id);}else sequence[index]=selected.id;}
+      this.updateMoveSequence(move.id,sequence);const select=this.host.querySelector<HTMLSelectElement>('#move-steps');if(select){select.value=String(Math.min(index,sequence.length-1));select.dispatchEvent(new Event('change'));}
+    };
+    for(const [id,operation] of [['move-step-up','up'],['move-step-down','down'],['move-step-remove','remove'],['move-step-add','add'],['move-step-replace','replace']] as const)on(id,()=>changeStep(operation));
     on('move-preview',()=>this.play(moves.value,true));on('move-stop',()=>this.stopPreview());on('move-delete',()=>this.mutate(()=>this.data.moves=this.data.moves.filter(m=>m.id!==moves.value)));
     on('move-inspect-save',()=>this.captureInspectionPose());
     q<HTMLButtonElement>('move-check-limits').onclick=()=>{const id=moves.value,revision=this.revision;void this.checkMoveLimits(id).then(report=>{
@@ -273,6 +291,13 @@ export class StudioEditor {
     this.mutate(()=>{this.rig.data=data;});
     const moves=this.host.querySelector<HTMLSelectElement>('#studio-moves');if(moves){moves.value=data.moves.at(-1)!.id;moves.dispatchEvent(new Event('change'));}
     this.hooks.feedback('Bewegung und Posen importiert. Vorschau prüfen; Zurück macht den Import rückgängig.');
+  }
+  updateMoveSequence(id:string,poses:string[],expectedRevision=this.revision){
+    if(this.disposed||!this.active||this.edit||this.interactionActive||this.revision!==expectedRevision)throw Error('Studio ist beschäftigt oder der Stand hat sich geändert.');
+    const move=this.data.moves.find(m=>m.id===id);
+    if(!move||!Array.isArray(poses)||poses.length<2||poses.length>100||poses.some(id=>typeof id!=='string'||!this.data.poses.some(p=>p.id===id)))throw Error('Eine Bewegung benötigt 2 bis 100 vorhandene Posen.');
+    if(move.poses.length===poses.length&&move.poses.every((id,i)=>id===poses[i]))return;
+    const sequence=[...poses];this.mutate(()=>{move.poses=sequence;});
   }
   previewMoveAt(id:string,time:number,expectedRevision=this.revision){
     if(this.disposed||!this.active||this.gesture||this.moveCheck||this.revision!==expectedRevision)throw Error('Studio-Stand hat sich geändert. Prüfung erneut starten.');

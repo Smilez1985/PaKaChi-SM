@@ -209,3 +209,18 @@ Der Bericht zeigt Stichprobenzahl, gemessenen Winkelbereich je Gelenk, eingestel
 Die neue Pose wird nicht automatisch in einen bestehenden Move eingefügt. Sie ist auch nicht automatisch korrigiert oder als geprüft bestätigt. Im Modus „Figur bewegen“ bei Bedarf manuell korrigieren und ersetzen, anschließend erneut prüfen. Die bisherigen gespeicherten Posen und Moves bleiben erhalten. Bei bereits 100 Posen wird keine weitere angelegt.
 
 Veraltete Berichte, ungültige Zeitpunkte und geschlossene Studios werden abgewiesen. Die Vorschau verwendet die bestehende Interpolation und bleibt von der Stichprobenbegrenzung der Prüfung abhängig. Stopp bezieht sich hier auf die Prüfbildvorschau; die normale Vorschau behält ihr bisheriges Verhalten. Gerenderte Bedienabnahme steht aus. [Prüfbericht](PRUEFUNG-0.36.0.md).
+
+## Bestehende Posenfolge bearbeiten (0.37.0)
+
+Im Modus **Figur bewegen** einen eigenen Move auswählen. **Posenfolge dieser Bewegung** zeigt dessen tatsächliche Reihenfolge, einschließlich mehrfach verwendeter Posen. Jeder Eintrag enthält Positionsnummer, Posenname, ID und die für diese Pose gespeicherte Übergangszeit.
+
+- **Schritt nach vorne/hinten** verschiebt das ausgewählte Vorkommen um eine Position.
+- **Schritt entfernen** entfernt nur dieses Vorkommen aus dem Move. Die Pose bleibt im Projekt; mindestens zwei Schritte sind erforderlich.
+- Oben in der Posenliste eine Pose auswählen und **Ausgewählte Pose einfügen** wählen: Sie wird nach dem ausgewählten Schritt eingefügt, auch als Wiederholung.
+- **Schritt durch ausgewählte Pose ersetzen** tauscht nur den ausgewählten Verweis aus.
+
+So kann eine zuvor übernommene Prüfpose gezielt an die Stelle einer bisherigen Pose treten. Jede tatsächliche Änderung ist ein einzelner Undo-/Redo-Schritt. Andere Moves, gespeicherte Posenwerte, Schleifeneinstellung und die aktuelle Figurenstellung bleiben erhalten. Vorschau und Beugegrenzenprüfung verwenden sofort die neue Folge; laufende Prüfungen werden verworfen.
+
+Erlaubt sind 2–100 Verweise auf vorhandene Projektposen. Während Wiedergabe/Ziehgesten und im Modus „Gelenke bearbeiten“ ist die Sequenzbearbeitung gesperrt. Die Reihenfolge der allgemeinen Projekt-Posenliste ist davon unabhängig. Neue Moves werden weiterhin zunächst aus der allgemeinen Posenliste erstellt.
+
+Die Zeit gehört weiterhin zur referenzierten Pose: Ändern ihrer Dauer betrifft alle Vorkommen und Moves, die diese Pose verwenden. Bei Schleifen gilt die Dauer der ersten Pose für den Rückweg. Es gibt keine unabhängigen Zeiten pro Vorkommen. Sequenzbearbeitung korrigiert keine Gelenkwinkel automatisch; Vorschau und Prüfung anschließend erneut ausführen. MCP/Assistentenbearbeitung bestehender Sequenzen und gerenderte Abnahme stehen aus. [Prüfbericht](PRUEFUNG-0.37.0.md).

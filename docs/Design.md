@@ -4,7 +4,7 @@ Teil der [Blaupause](README.md) · [Roadmap](ROADMAP.md) · [Changelog](CHANGELO
 
 ## Status und Begriffe
 
-Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.36.0: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau, automatische Anatomieerkennung und die Qualitätsabnahme der angeschlossenen lokalen KI-Generierung bleiben offen.
+Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.37.0: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau, automatische Anatomieerkennung und die Qualitätsabnahme der angeschlossenen lokalen KI-Generierung bleiben offen.
 
 - **PaKaChi:** Panda-KI-Chimera, das übergeordnete Projekt.
 - **PaKaChi-SM:** StateMaschine mit Avatar-Player und integriertem Studio.
@@ -24,7 +24,7 @@ Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich gen
 | Generierung | Lokaler TripoSR-Dienst, Bildauswahl, getrennte Vorschau, Vorprüfungs-Fallbacks, expliziter weiterer Auftrag | Echte GPU-/Qualitätsabnahme, Cloud-Generatoren, Korrekturprompts und Rigging |
 | Übernahme | Revisionsschutz, ein Modellwechsel-Rücksprung, vorbereitete 3D-Installation mit Rückabwicklung | Gerenderte Abnahme, Originalplayer-Neustart und GPU-Kontextverlust |
 
-Prüfnachweis für Software 0.36.0: **206 Tests und Build bestanden**. Das belegt keine gerenderte Browser-, Anbieter- oder GPU-Abnahme. Projektformat bleibt Version 1. Freie Punkte/Posen aus 0.22.0/0.23.0 benötigen wegen der korrigierten Normalisierungsreihenfolge eine visuelle Kontrolle; keine automatische Migration. [Prüfbericht](PRUEFUNG-0.36.0.md).
+Prüfnachweis für Software 0.37.0: **210 Tests und Build bestanden**. Das belegt keine gerenderte Browser-, Anbieter- oder GPU-Abnahme. Projektformat bleibt Version 1. Freie Punkte/Posen aus 0.22.0/0.23.0 benötigen wegen der korrigierten Normalisierungsreihenfolge eine visuelle Kontrolle; keine automatische Migration. [Prüfbericht](PRUEFUNG-0.37.0.md).
 
 ## Bestehender PaKaChi-Avatar
 
@@ -394,3 +394,11 @@ Dies ist eine begrenzte Stichprobe, keine kontinuierliche Garantie und keine ana
 Ein auffälliger Stichprobenzeitpunkt kann direkt aus dem Bericht als pausierte Vorschau geöffnet werden. Vor dem Öffnen werden aktives Studio, Revision, Interaktionszustand, Move-ID und Zeitbereich geprüft. Die gespeicherte Bearbeitungspose wird als flüchtiger Snapshot erhalten; Stopp oder Wechsel der Wiedergabe stellt sie wieder her. Abtastung erfolgt am exakten Zeitpunkt, auch am Ende eines nicht schleifenden Moves; bei Schleifen gilt die bestehende Rückkehr zur Startpose.
 
 Eine ausdrückliche Übernahme liest das aktuelle pausierte Prüfbild, beendet die Vorschau und erstellt über die bestehende Änderungshistorie eine neue Pose. Undo/Redo umfasst Daten und angezeigte Bearbeitungspose. Bestehende Moves, Posen und Prüfhinweise werden nicht umgeschrieben. Maximal 100 Posen; keine Übernahme bei laufender Wiedergabe oder fehlender Prüfvorschau. Kein automatisches Einfügen, keine Korrektur und kein neuer MCP-Befehl. Die visuelle Abnahme bleibt offen.
+
+## Bearbeiten bestehender Move-Sequenzen (0.37.0)
+
+Die Posenfolge eines eigenen Moves wird als Liste von Vorkommen angeboten. Auswahl und Bearbeitung verwenden den Listenindex, damit wiederholte Posen unabhängig verschoben, ersetzt oder entfernt werden können. Einfügen/Ersetzen verwendet die ausgewählte Projektpose. Nur das poses-Array des Ziel-Moves wird geändert; andere Moves, Posenwerte und Schleifeneinstellung bleiben erhalten.
+
+Vor jeder Änderung werden aktive Sitzung, Pose-Modus, Interaktionszustand, Revision, Ziel-Move, Anzahl 2–100 und Existenz aller Posen geprüft. Die Folge wird kopiert; ein identischer Auftrag erzeugt keinen Undo-Eintrag. Die bestehende Mutation stellt einen Undo-/Redo-Schritt bereit und invalidiert laufende Prüfergebnisse. Das Dateiformat bleibt unverändert; Export und Wiedergabe verwenden die aktualisierte Folge.
+
+Zeitwerte bleiben Eigentum der Projektpose und gelten für jedes ihrer Vorkommen. Keine automatische Zeitaufteilung oder Anpassung anderer Moves. Keine automatische Gelenkkorrektur. Erweiterung der Agentenwerkzeuge und gerenderte Bedienabnahme bleiben offen.

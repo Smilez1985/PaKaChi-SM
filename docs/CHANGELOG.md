@@ -12,6 +12,22 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.37.0] - 2026-10-21
+
+Zeitstempel: 2026-10-21T23:41:43+02:00 (Europe/Berlin)
+
+### Added
+
+- Bearbeitung bestehender Studio-Move-Folgen: einzelne Posenverweise verschieben, entfernen, einfügen oder ersetzen; wiederholte Posen bleiben einzeln auswählbar.
+- Validierung von Ziel, Revision, Bearbeitungsmodus und 2–100 vorhandenen Posen; ein Undo-/Redo-Schritt je Änderung.
+- Vier Tests für isolierte Sequenzänderungen, Export, DOM-Bedienung, Prüfposen und veraltete Bewegungsprüfungen.
+
+### Changed
+
+- README, Design, Roadmap, Studio-Anleitung und Prüfstand aktualisiert.
+
+**Prüfung:** 210 Tests und Build bestanden. Zeitwerte bleiben an Projektposen gebunden; Agenten-Sequenzbearbeitung und gerenderte Abnahme sind offen.
+
 ## [0.36.0] - 2026-10-21
 
 Zeitstempel: 2026-10-21T07:49:39+02:00 (Europe/Berlin)
@@ -780,3 +796,5 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 [0.35.0]: PRUEFUNG-0.35.0.md
 
 [0.36.0]: PRUEFUNG-0.36.0.md
+
+[0.37.0]: PRUEFUNG-0.37.0.md
