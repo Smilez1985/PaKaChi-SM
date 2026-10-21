@@ -25,7 +25,7 @@ class StudioCommand(BaseModel):
     model_config = ConfigDict(extra='forbid', strict=True)
     session: str = Field(max_length=100)
     expectedRevision: int = Field(ge=0)
-    action: Literal['set_mode', 'add_point', 'update_point', 'delete_point', 'connect_points', 'disconnect_points', 'save_pose', 'apply_pose', 'replace_pose', 'create_move', 'undo', 'redo']
+    action: Literal['set_mode', 'add_point', 'update_point', 'delete_point', 'connect_points', 'disconnect_points', 'save_pose', 'apply_pose', 'replace_pose', 'create_move', 'update_move', 'undo', 'redo']
     mode: Literal['pose', 'rig'] | None = None
     id: str | None = Field(default=None, max_length=100)
     target: str | None = Field(default=None, max_length=100)
@@ -209,7 +209,8 @@ def build_server(uri=None, embedded=True, tcp_port=1883, ws_port=8083):
         update_point: id und name/position/rotation/scale/size/radius (scale nur $figure, 0.1–5); $figure ist die ganze Figur.
         delete_point: id. connect_points/disconnect_points: id,target.
         save_pose: optional name,seconds. apply_pose/replace_pose: id.
-        create_move: id,name,poses,optional loop. undo/redo ohne weitere Felder.
+        create_move: id,name,poses,optional loop.
+        update_move: id,poses (vollständige Folge, 2–100 vorhandene Posen; Wiederholungen erlaubt; nur Posenmodus). Vorher get_studio section=moves lesen. undo/redo ohne weitere Felder.
         Keine Dateizugriffe; Konflikte oder Timeouts zuerst mit get_studio aufklären.
         """
         payload = command.model_dump(exclude_none=True)

@@ -73,3 +73,18 @@ Bei `update_point` im Modus `pose` bedeutet `position` für einen Skelettpunkt e
 ## Beugegrenzen (ab 0.33.0)
 
 `get_studio` mit section=points liefert konfigurierte `bendLimit`-Werte. Im Rig-Modus kann `update_point` an einem Knochen `bendLimit: {"min": 20, "max": 110}` setzen oder mit `bendLimit: null` entfernen. Endliche Gradwerte von 0 bis 175 und min ≤ max sind erforderlich. Die Grenze wird am mittleren Knochen einer Zweiglied-Kette ausgewertet, wenn deren Endpunkt gezogen wird. Direkte Drehung und gespeicherte Moves werden nicht begrenzt. Sitzung, Revision, Freigabe und Undo gelten unverändert. Python- und Node-MCP sowie der integrierte Assistent transportieren das Feld; die vollständige Semantik prüft der Studio-Router.
+
+
+## Bestehende Sequenzen (ab 0.38.0)
+
+1. `get_studio` mit `section: "moves"` aufrufen. Die Einträge enthalten jetzt `poses`, eine geordnete Liste von Posen-IDs. Für weitere Seiten `nextOffset` als `offset` verwenden, bis es `null` ist.
+2. Bei Bedarf `section: "poses"` lesen, um Namen und Dauern zuzuordnen.
+3. Im Posenmodus und nach Studio-Freigabe mit der zuletzt gelesenen Sitzung und Revision ändern:
+
+```json
+{"command":{"session":"SITZUNG_AUS_GET_STUDIO","expectedRevision":12,"action":"update_move","id":"wave","poses":["pose-b","pose-a","pose-b"]}}
+```
+
+Die Beispiel-IDs und Revision durch tatsächliche Werte ersetzen. `poses` ist die vollständige neue Folge, kein Patch. Erlaubt sind 2–100 bestehende Posenverweise; Wiederholungen sind möglich. Name und Schleifenflag werden durch diesen Befehl nicht geändert. Jede tatsächliche Änderung ist mit `undo`/`redo` rückgängig beziehungsweise wiederherstellbar. Eine identische Folge ist ohne neue Revision erfolgreich.
+
+Bei Revisionskonflikten erneut lesen und den Vorschlag neu bewerten. Während Wiedergabe, Ziehgesten und im Rig-Modus ist die Änderung gesperrt. Node- und Python-MCP deklarieren den Befehl; die verbindliche Prüfung erfolgt im Editor. Der integrierte Assistent schlägt ihn nach dem Lesen zur ausdrücklichen Bestätigung vor.

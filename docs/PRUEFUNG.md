@@ -1,16 +1,16 @@
 # Prüfstand und Abnahme
 
-**Softwarestand: 0.37.0 · Dokumentationsabgleich: 21.10.2026.**
+**Softwarestand: 0.38.0 · Dokumentationsabgleich: 21.10.2026.**
 
 ## Nachgewiesen
 
 | Prüfung | Letzter Nachweis | Umfang und Grenze |
 | --- | --- | --- |
-| `npm test` | 0.37.0: 210 Tests bestanden | Player, Router, Studio-Daten, reale Three.js-Geometrie, DOM/Ereignisse mit happy-dom, Node-MCP und Erhaltungsprüfung. Kein gerenderter Browser. |
+| `npm test` | 0.38.0: 214 Tests bestanden | Player, Router, Studio-Daten, reale Three.js-Geometrie, DOM/Ereignisse mit happy-dom, Node-MCP und Erhaltungsprüfung. Kein gerenderter Browser. |
 | `npm run test:legacy` | 0.9.0: beide Programme bestanden | Originalplayer-Steuerung, MQTT-Verhalten und Lebenszyklus. |
-| `npm run build` | 0.37.0: bestanden | TypeScript und Produktionsbuild; Vite meldet weiterhin das große gemeinsame JS-Bundle (rund 1,33 MB / 367 kB gzip). |
+| `npm run build` | 0.38.0: bestanden | TypeScript und Produktionsbuild; Vite meldet weiterhin das große gemeinsame JS-Bundle (rund 1,33 MB / 367 kB gzip). |
 | `npm run test:python` mit `PAKACHI_PYTHON` | 0.10.0: Integration bestanden | Echter Python-MCP-Prozess, eingebetteter aMQTT-Broker, produktiver MQTT-Client, Router und Studio-Editor. Acht Tools, Studio-Änderungen einschließlich gültiger/ungültiger Skalierung, fehlende Freigabe und Revisionskonflikte geprüft. |
-| Originaldateien | 0.37.0: bytegenau erhalten | 83 wiederhergestellte Dateien einschließlich exakt 72 Transformationsbildern. |
+| Originaldateien | 0.38.0: bytegenau erhalten | 83 wiederhergestellte Dateien einschließlich exakt 72 Transformationsbildern. |
 
 Vier neue Tests in 0.11.0 prüfen Hand-/Fußziele, feste Knochenabstände, den ganzen erkannten Körper, Hals/Kopf und Rumpf, tatsächliche Hautverformung, gespeicherte Posen sowie direktes Ziehen/Drehen mit Undo. Nutzertest von 0.10.0 meldete auseinanderziehbare Knochen und Probleme mit der Ausrichtung; die visuelle Nachprüfung der Korrektur 0.11.0 steht aus.
 
@@ -98,3 +98,6 @@ Zwischenprüfung vor 0.20.0 (17.10.2026): Acht Tresortests einschließlich zweie
 [Prüfbericht 0.36.0](PRUEFUNG-0.36.0.md): vier neue Tests für exakte pausierte Inspektion, Wiederherstellung, Posenübernahme/Undo und den tatsächlichen DOM-Ablauf vom Bericht. 206 Tests und Build bestanden; gerenderte Abnahme offen.
 
 [Prüfbericht 0.37.0](PRUEFUNG-0.37.0.md): vier neue Tests zu isolierter Sequenzänderung, Export/Undo, Grenzen, Mausbedienung und übernommenen Prüfposen. 210 Tests und Build bestanden; gerenderte Abnahme und Agenten-Sequenzbearbeitung offen.
+
+
+**0.38.0:** 214 Tests und Build bestanden; vier neue Tests sowie erweiterter Node-MCP-Transporttest für Sequenzänderungen. Python-DTO isoliert geprüft, kein neuer Python-MCP-Livelauf. [Prüfbericht](PRUEFUNG-0.38.0.md).

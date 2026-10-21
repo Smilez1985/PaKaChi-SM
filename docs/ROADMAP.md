@@ -1,6 +1,6 @@
 # Roadmap – was kommt
 
-**Softwarestand: 0.37.0 · Abgleich: 21.10.2026.** Teil der [Blaupause](README.md).
+**Softwarestand: 0.38.0 · Abgleich: 21.10.2026.** Teil der [Blaupause](README.md).
 
 Ein Häkchen bedeutet implementiert; es ersetzt keine visuelle oder externe Live-Abnahme. Die Nachweise und Prüfgrenzen stehen im [Prüfstand](PRUEFUNG.md). Die Versionshistorie gehört ins [Changelog](CHANGELOG.md).
 
@@ -53,7 +53,8 @@ Diese Reihenfolge ist ein Umsetzungsvorschlag, kein Terminversprechen. Lokale un
 - [x] Gesamtposition als eigene Spur bearbeiten, auch ohne Skelett (0.6.0).
 - [x] Eigene Moves mit Schlagwort, Vorschau und Wiedergabe im Player.
 - [x] Bestehende Move-Posenfolgen per Maus bearbeiten: Einfügen, Ersetzen, Umordnen und Entfernen einzelner Vorkommen mit Undo/Redo (0.37.0).
-- [ ] Sequenzbearbeitung im gerenderten Studio abnehmen und über MCP-/Assistentenwerkzeuge zugänglich machen.
+- [x] Bestehende Sequenzen über MCP und Assistent auslesen und mit `update_move` ändern, einschließlich Freigabe, Revisionsprüfung und Undo (0.38.0).
+- [ ] Sequenzbearbeitung im gerenderten Studio und mit externem KI-/MCP-Host abnehmen.
 - [x] Neu/Laden/Speichern für vollständige `.pakachi.json`-Projekte; Undo/Redo.
 - [x] Gesamtrotation als interpolierte Bewegungsspur ergänzen (0.8.0).
 - [x] Gleichmäßige Skalierung als Bewegungsspur mit Mausregler, Posen, Undo/Redo und MCP ergänzen (0.10.0).

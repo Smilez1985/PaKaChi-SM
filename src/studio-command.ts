@@ -1,8 +1,8 @@
 import {validFigureScale,validBendLimit} from './studio-data.ts';
-export const STUDIO_ACTIONS=['set_mode','add_point','update_point','delete_point','connect_points','disconnect_points','save_pose','apply_pose','replace_pose','create_move','undo','redo'] as const;
+export const STUDIO_ACTIONS=['set_mode','add_point','update_point','delete_point','connect_points','disconnect_points','save_pose','apply_pose','replace_pose','create_move','update_move','undo','redo'] as const;
 export type StudioAction=typeof STUDIO_ACTIONS[number];
 export interface StudioCommand {session:string;expectedRevision:number;action:StudioAction;mode?:'pose'|'rig';id?:string;target?:string;name?:string;position?:[number,number,number];rotation?:[number,number,number,number];scale?:number;bendLimit?:{min:number;max:number}|null;size?:number;radius?:number;mesh?:number;seconds?:number;loop?:boolean;poses?:string[]}
-const fields:Record<StudioAction,string[]>={set_mode:['mode'],add_point:['name','position','mesh','size','radius'],update_point:['id','name','position','rotation','scale','size','radius','bendLimit'],delete_point:['id'],connect_points:['id','target'],disconnect_points:['id','target'],save_pose:['name','seconds'],apply_pose:['id'],replace_pose:['id'],create_move:['id','name','poses','loop'],undo:[],redo:[]};
+const fields:Record<StudioAction,string[]>={set_mode:['mode'],add_point:['name','position','mesh','size','radius'],update_point:['id','name','position','rotation','scale','size','radius','bendLimit'],delete_point:['id'],connect_points:['id','target'],disconnect_points:['id','target'],save_pose:['name','seconds'],apply_pose:['id'],replace_pose:['id'],create_move:['id','name','poses','loop'],update_move:['id','poses'],undo:[],redo:[]};
 export function parseStudioCommand(value:unknown):StudioCommand {
  const fail=()=>{throw new Error('Ungültiger Studio-Befehl.');};
  if(!value||typeof value!=='object'||Array.isArray(value))return fail();const v=value as Record<string,unknown>;

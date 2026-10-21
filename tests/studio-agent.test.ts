@@ -64,3 +64,22 @@ test('delayed shared move download cannot overwrite edits or a closed studio',as
   if(action==='edit')run({action:'save_pose'});else if(action==='leave')editor.leave();else editor.dispose();finish(new Response(JSON.stringify(file)));await assert.rejects(()=>pending);assert.equal(rig.data.moves.length,1);if(action!=='dispose')editor.dispose();f.w.happyDOM.abort();
  }
 });
+
+test('agent updates a read move sequence atomically with undo, repeated poses and isolated snapshots',()=>{
+ const f=fixture(),{editor,rig,run}=f;editor.enter();f.grant();const a=run({action:'save_pose'}).id!,b=run({action:'save_pose'}).id!;run({action:'create_move',id:'wave',name:'Wave',poses:[a,b],loop:true});
+ const snapshot=editor.inspect({section:'moves'}) as any;assert.deepEqual(snapshot.items[0].poses,[a,b]);snapshot.items[0].poses.reverse();assert.deepEqual(rig.data.moves[0].poses,[a,b]);
+ const poses=structuredClone(rig.data.poses),figure=rig.capture(),revision=editor.inspect().revision;
+ const result=run({action:'update_move',id:'wave',poses:[b,a,b]});assert.equal(result.id,'wave');assert.equal(result.revision,revision+1);assert.deepEqual(rig.data.moves[0],{id:'wave',name:'Wave',loop:true,poses:[b,a,b]});assert.deepEqual(rig.data.poses,poses);assert.deepEqual(rig.capture(),figure);
+ run({action:'update_move',id:'wave',poses:[b,a,b]});assert.equal(editor.inspect().revision,revision+1);run({action:'undo'});assert.deepEqual(rig.data.moves[0].poses,[a,b]);run({action:'redo'});assert.deepEqual(rig.data.moves[0].poses,[b,a,b]);editor.dispose();f.w.happyDOM.abort();
+});
+test('agent sequence edits reject invalid commands, missing permission, races and busy studio without mutation',()=>{
+ const f=fixture(),{editor,rig,run}=f;editor.enter();f.grant();const a=run({action:'save_pose'}).id!;run({action:'create_move',id:'wave',name:'Wave',poses:[a,a]});
+ const reject=(extra:Record<string,unknown>)=>{const before=JSON.stringify(rig.data),rev=editor.inspect().revision;assert.throws(()=>run({action:'update_move',id:'wave',poses:[a,a,a],...extra}));assert.equal(JSON.stringify(rig.data),before);assert.equal(editor.inspect().revision,rev);};
+ for(const extra of [{id:'missing'},{poses:[a,'missing']},{poses:[a]},{poses:Array(101).fill(a)},{poses:undefined},{id:undefined},{name:'rename'},{loop:false},{expectedRevision:0},{session:'other'}])reject(extra);
+ f.grant(false);reject({});f.grant();f.view.onStart();reject({});f.view.onEnd();editor.play('wave',true);reject({});editor.stopPreview();run({action:'set_mode',mode:'rig'});reject({});editor.dispose();f.w.happyDOM.abort();
+});
+test('move snapshots paginate maximum sequences within transport size without dropping moves',()=>{
+ const f=fixture();f.editor.enter();const id='顔'.repeat(100);f.rig.data.poses.push({id,name:'Pose',seconds:1,values:f.rig.capture()});
+ for(let i=0;i<100;i++)f.rig.data.moves.push({id:`move-${i}`,name:'Move',loop:false,poses:Array(100).fill(id)});
+ let offset=0,total=0;do{const page=f.editor.inspect({section:'moves',offset,limit:32}) as any;assert.ok(new TextEncoder().encode(JSON.stringify(page)).length<65536);assert.ok(page.items.length>0);for(const item of page.items)assert.deepEqual(item.poses,Array(100).fill(id));total+=page.items.length;offset=page.nextOffset;}while(offset!==null);assert.equal(total,100);f.editor.dispose();f.w.happyDOM.abort();
+});

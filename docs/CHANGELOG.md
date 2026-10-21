@@ -12,6 +12,23 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.38.0] - 2026-10-21
+
+Zeitstempel: 2026-10-21T23:49:26+02:00 (Europe/Berlin)
+
+### Added
+
+- `update_move` für bestehende Posenfolgen über MCP und Assistent, mit Freigabe, Revisionsprüfung und gemeinsamem Undo-/Redo-Pfad.
+- Vollständige, isolierte Posenverweise in paginierten Move-Abfragen.
+- Vier Tests für Sequenzbearbeitung, Ablehnungen, Seitengrößen und Assistentenvorschläge; Node-MCP-Transporttest erweitert.
+
+### Changed
+
+- Node-/Python-MCP-Schemata und Assistentenbeschreibung ergänzt; README, Design, Roadmap, Studio-/MCP-Anleitung und Prüfberichte nachgezogen.
+
+**Prüfung:** 214 Tests und Build bestanden. Python-DTO isoliert geprüft; gerenderte Abnahme und externer Anbieter-/Host-Lauf bleiben offen.
+
+
 ## [0.37.0] - 2026-10-21
 
 Zeitstempel: 2026-10-21T23:41:43+02:00 (Europe/Berlin)
@@ -798,3 +815,5 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 [0.36.0]: PRUEFUNG-0.36.0.md
 
 [0.37.0]: PRUEFUNG-0.37.0.md
+
+[0.38.0]: PRUEFUNG-0.38.0.md

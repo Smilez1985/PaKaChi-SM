@@ -55,3 +55,11 @@ test('panel sends only explicitly, escapes responses, applies once, retains prof
 test('profile change invalidates an in-flight answer and pending edit',async()=>{
  const {w,host}=setup();let release!:(r:any)=>void;const panel=mountAssistantPanel(host,()=>{},()=> 'en',w.localStorage,()=>new Promise(resolve=>{release=resolve;}));host.querySelector<HTMLTextAreaElement>('textarea')!.value='task';host.querySelector('form')!.dispatchEvent(new w.Event('submit',{cancelable:true}) as any);w.dispatchEvent(new w.Event('pakachi-providers'));release({text:'late',proposal,reads:1});await new Promise(r=>setTimeout(r,0));assert.ok(!host.textContent?.includes('late'));assert.equal(host.querySelector<HTMLButtonElement>('#assistant-apply')!.hidden,true);panel.dispose();w.happyDOM.abort();
 });
+
+test('assistant reads a move sequence and returns update_move only as an approval proposal',async()=>{
+ const command={session:info.session,expectedRevision:info.revision,action:'update_move',id:'wave',poses:['b','a','b']};let requests=0;const methods:string[]=[];
+ const result=await runAssistant({profile:local,prompt:'Reverse and repeat',rpc(method){methods.push(method);return {...info,items:[{id:'wave',poses:['a','b']}]};},fetcher:async(_url,init)=>{
+  if(requests++){const body=JSON.parse(String(init?.body));assert.deepEqual(JSON.parse(body.messages.at(-1).content).items[0].poses,['a','b']);return response(call('edit_studio',{command}));}
+  return response(call('get_studio',{section:'moves'}));
+ }});assert.deepEqual(result.proposal,command);assert.ok(!methods.includes('edit_studio'));
+});

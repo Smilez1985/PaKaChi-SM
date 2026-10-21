@@ -4,7 +4,7 @@ Teil der [Blaupause](README.md) · [Roadmap](ROADMAP.md) · [Changelog](CHANGELO
 
 ## Status und Begriffe
 
-Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.37.0: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau, automatische Anatomieerkennung und die Qualitätsabnahme der angeschlossenen lokalen KI-Generierung bleiben offen.
+Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.38.0: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau, automatische Anatomieerkennung und die Qualitätsabnahme der angeschlossenen lokalen KI-Generierung bleiben offen.
 
 - **PaKaChi:** Panda-KI-Chimera, das übergeordnete Projekt.
 - **PaKaChi-SM:** StateMaschine mit Avatar-Player und integriertem Studio.
@@ -24,7 +24,7 @@ Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich gen
 | Generierung | Lokaler TripoSR-Dienst, Bildauswahl, getrennte Vorschau, Vorprüfungs-Fallbacks, expliziter weiterer Auftrag | Echte GPU-/Qualitätsabnahme, Cloud-Generatoren, Korrekturprompts und Rigging |
 | Übernahme | Revisionsschutz, ein Modellwechsel-Rücksprung, vorbereitete 3D-Installation mit Rückabwicklung | Gerenderte Abnahme, Originalplayer-Neustart und GPU-Kontextverlust |
 
-Prüfnachweis für Software 0.37.0: **210 Tests und Build bestanden**. Das belegt keine gerenderte Browser-, Anbieter- oder GPU-Abnahme. Projektformat bleibt Version 1. Freie Punkte/Posen aus 0.22.0/0.23.0 benötigen wegen der korrigierten Normalisierungsreihenfolge eine visuelle Kontrolle; keine automatische Migration. [Prüfbericht](PRUEFUNG-0.37.0.md).
+Prüfnachweis für Software 0.38.0: **214 Tests und Build bestanden**. Das belegt keine gerenderte Browser-, Anbieter- oder GPU-Abnahme. Projektformat bleibt Version 1. Freie Punkte/Posen aus 0.22.0/0.23.0 benötigen wegen der korrigierten Normalisierungsreihenfolge eine visuelle Kontrolle; keine automatische Migration. [Prüfbericht](PRUEFUNG-0.38.0.md).
 
 ## Bestehender PaKaChi-Avatar
 
@@ -402,3 +402,12 @@ Die Posenfolge eines eigenen Moves wird als Liste von Vorkommen angeboten. Auswa
 Vor jeder Änderung werden aktive Sitzung, Pose-Modus, Interaktionszustand, Revision, Ziel-Move, Anzahl 2–100 und Existenz aller Posen geprüft. Die Folge wird kopiert; ein identischer Auftrag erzeugt keinen Undo-Eintrag. Die bestehende Mutation stellt einen Undo-/Redo-Schritt bereit und invalidiert laufende Prüfergebnisse. Das Dateiformat bleibt unverändert; Export und Wiedergabe verwenden die aktualisierte Folge.
 
 Zeitwerte bleiben Eigentum der Projektpose und gelten für jedes ihrer Vorkommen. Keine automatische Zeitaufteilung oder Anpassung anderer Moves. Keine automatische Gelenkkorrektur. Erweiterung der Agentenwerkzeuge und gerenderte Bedienabnahme bleiben offen.
+
+
+## Agentenbearbeitung bestehender Sequenzen (0.38.0)
+
+`get_studio(section: "moves")` liefert die geordnete Kopie der Posen-IDs einschließlich wiederholter Vorkommen. Die bisherigen Grenzen für Anzahl und UTF-8-Größe je Seite bleiben erhalten; Clients folgen `nextOffset`.
+
+`update_move` ersetzt ausschließlich die Folge eines vorhandenen Moves durch 2–100 Verweise auf vorhandene Projektposen. Derselbe Editorpfad bedient Maus und Agenten. Namen, Schleifenflag, Posenwerte und aktuelle Figur bleiben erhalten. Identische Folgen ändern weder Revision noch Undo-Verlauf. Ein echter Austausch ist ein einzelner Undo-/Redo-Schritt.
+
+Externe Agenten benötigen die Studio-Freigabe und eine aktuelle Sitzung/Revision. Der integrierte Assistent liest zunächst den Stand und legt nur einen Vorschlag zur ausdrücklichen Bestätigung vor. Rig-Modus, laufende Wiedergabe und Ziehgesten sperren Änderungen. Automatische Korrektur, separate Zeitwerte je Vorkommen und gerenderte/Live-Anbieter-Abnahme bleiben offen.
