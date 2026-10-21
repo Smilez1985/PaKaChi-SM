@@ -195,6 +195,17 @@ Unter **Eigene Bewegungen** einen Move auswählen und **Beugegrenzen der Bewegun
 
 Jeder Übergang wird in 16 gleichmäßigen Schritten geprüft, zusätzlich die erste Pose. Unterschiedliche Posendauern und wiederholte Posen bleiben erhalten; bei Schleifen wird auch der Rückweg zur ersten Pose geprüft. Höchstens 1601 Stichproben pro Aufruf. Das ist keine feste Bildrate und kein lückenloser Nachweis: kurze Verletzungen zwischen Stichproben können unentdeckt bleiben.
 
-Der Bericht zeigt Stichprobenzahl, gemessenen Winkelbereich je Gelenk, eingestellte Grenzen und den ersten auffälligen Zeitpunkt in Sekunden ab Bewegungsstart. Nicht messbare Segmente und nicht verbundene Ketten werden nicht als bestanden behandelt. Der Zeitwert ist ein Hinweis zum manuellen Aufsuchen, kein automatischer Sprung.
+Der Bericht zeigt Stichprobenzahl, gemessenen Winkelbereich je Gelenk, eingestellte Grenzen und den ersten auffälligen Zeitpunkt in Sekunden ab Bewegungsstart. Nicht messbare Segmente und nicht verbundene Ketten werden nicht als bestanden behandelt. Seit 0.36.0 öffnet „Auffälliges Bild ansehen“ den gemeldeten Zeitpunkt direkt als pausierte Vorschau.
 
 Änderungen, Verlassen oder Schließen des Studios machen laufende Ergebnisse ungültig. Während Wiedergabe und Ziehgesten startet keine Prüfung. Die Berechnung gibt regelmäßig die Oberfläche frei. Berichte sind flüchtig und werden bei Auswahlwechsel oder Neudarstellung entfernt. Es werden keine Prüfmarkierungen gelöscht und keine Korrekturen ausgeführt. Originalclips, Kollisionen, Twistgrenzen und allgemeine Anatomie bleiben ungeprüft. [Prüfbericht](PRUEFUNG-0.35.0.md).
+
+## Prüfbilder ansehen und übernehmen (0.36.0)
+
+1. Einen eigenen Move auf Beugegrenzen prüfen.
+2. Bei einem auffälligen Gelenk **Auffälliges Bild ansehen** anklicken. Die Vorschau öffnet exakt den gemeldeten Zeitpunkt und bleibt pausiert. Der Bericht wird beim Wechsel zur Vorschau entfernt.
+3. Mit **Stopp** zur vorherigen Bearbeitungspose zurückkehren. Das reine Ansehen speichert keine neue Pose und verändert den Move nicht.
+4. Alternativ **Prüfbild als neue Pose übernehmen** wählen. Die Vorschau endet; das sichtbare Bild wird als neue Pose mit einer Sekunde Dauer angelegt und ausgewählt. Zurück/Wiederholen nimmt die Übernahme als Ganzes zurück beziehungsweise stellt sie wieder her, einschließlich der angezeigten Pose.
+
+Die neue Pose wird nicht automatisch in einen bestehenden Move eingefügt. Sie ist auch nicht automatisch korrigiert oder als geprüft bestätigt. Im Modus „Figur bewegen“ bei Bedarf manuell korrigieren und ersetzen, anschließend erneut prüfen. Die bisherigen gespeicherten Posen und Moves bleiben erhalten. Bei bereits 100 Posen wird keine weitere angelegt.
+
+Veraltete Berichte, ungültige Zeitpunkte und geschlossene Studios werden abgewiesen. Die Vorschau verwendet die bestehende Interpolation und bleibt von der Stichprobenbegrenzung der Prüfung abhängig. Stopp bezieht sich hier auf die Prüfbildvorschau; die normale Vorschau behält ihr bisheriges Verhalten. Gerenderte Bedienabnahme steht aus. [Prüfbericht](PRUEFUNG-0.36.0.md).

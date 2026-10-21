@@ -4,7 +4,7 @@ Teil der [Blaupause](README.md) · [Roadmap](ROADMAP.md) · [Changelog](CHANGELO
 
 ## Status und Begriffe
 
-Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.35.0: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau, automatische Anatomieerkennung und die Qualitätsabnahme der angeschlossenen lokalen KI-Generierung bleiben offen.
+Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.36.0: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau, automatische Anatomieerkennung und die Qualitätsabnahme der angeschlossenen lokalen KI-Generierung bleiben offen.
 
 - **PaKaChi:** Panda-KI-Chimera, das übergeordnete Projekt.
 - **PaKaChi-SM:** StateMaschine mit Avatar-Player und integriertem Studio.
@@ -24,7 +24,7 @@ Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich gen
 | Generierung | Lokaler TripoSR-Dienst, Bildauswahl, getrennte Vorschau, Vorprüfungs-Fallbacks, expliziter weiterer Auftrag | Echte GPU-/Qualitätsabnahme, Cloud-Generatoren, Korrekturprompts und Rigging |
 | Übernahme | Revisionsschutz, ein Modellwechsel-Rücksprung, vorbereitete 3D-Installation mit Rückabwicklung | Gerenderte Abnahme, Originalplayer-Neustart und GPU-Kontextverlust |
 
-Prüfnachweis für Software 0.35.0: **202 Tests und Build bestanden**. Das belegt keine gerenderte Browser-, Anbieter- oder GPU-Abnahme. Projektformat bleibt Version 1. Freie Punkte/Posen aus 0.22.0/0.23.0 benötigen wegen der korrigierten Normalisierungsreihenfolge eine visuelle Kontrolle; keine automatische Migration. [Prüfbericht](PRUEFUNG-0.35.0.md).
+Prüfnachweis für Software 0.36.0: **206 Tests und Build bestanden**. Das belegt keine gerenderte Browser-, Anbieter- oder GPU-Abnahme. Projektformat bleibt Version 1. Freie Punkte/Posen aus 0.22.0/0.23.0 benötigen wegen der korrigierten Normalisierungsreihenfolge eine visuelle Kontrolle; keine automatische Migration. [Prüfbericht](PRUEFUNG-0.36.0.md).
 
 ## Bestehender PaKaChi-Avatar
 
@@ -388,3 +388,9 @@ Auf der lesenden Posenmessung baut eine Prüfung eigener Studio-Moves auf. Die Z
 Die Prüfung verändert keine Szene, Pose, Revision, Undo-Historie oder Prüfmarkierungen. Je Gelenk werden kleinster/größter gemessener Winkel, Verletzungs-/Nichtmessbarkeitszähler und erster auffälliger Zeitpunkt zusammengefasst. Nicht passende Ketten bleiben separat ausgewiesen. Nach jeweils acht Stichproben wird die Ereignisschleife freigegeben und Abbruch, aktive Sitzung, Revision und Interaktionsstatus geprüft. Ein expliziter Abbruch sowie Bearbeitungen/Verlassen/Entsorgen verhindern Ergebnisübernahme. Nur eine solche Prüfung darf je Editor laufen.
 
 Dies ist eine begrenzte Stichprobe, keine kontinuierliche Garantie und keine anatomische Bewertung. Zwischen den Zeitpunkten können Verletzungen unentdeckt bleiben. Keine Prüfung eingebetteter Originalclips, keine Kollisionen, keine automatische Korrektur, keine neue MCP-Funktion und keine Formatänderung. Gerenderte Bedienabnahme bleibt offen.
+
+## Prüfbildvorschau und Posenübernahme (0.36.0)
+
+Ein auffälliger Stichprobenzeitpunkt kann direkt aus dem Bericht als pausierte Vorschau geöffnet werden. Vor dem Öffnen werden aktives Studio, Revision, Interaktionszustand, Move-ID und Zeitbereich geprüft. Die gespeicherte Bearbeitungspose wird als flüchtiger Snapshot erhalten; Stopp oder Wechsel der Wiedergabe stellt sie wieder her. Abtastung erfolgt am exakten Zeitpunkt, auch am Ende eines nicht schleifenden Moves; bei Schleifen gilt die bestehende Rückkehr zur Startpose.
+
+Eine ausdrückliche Übernahme liest das aktuelle pausierte Prüfbild, beendet die Vorschau und erstellt über die bestehende Änderungshistorie eine neue Pose. Undo/Redo umfasst Daten und angezeigte Bearbeitungspose. Bestehende Moves, Posen und Prüfhinweise werden nicht umgeschrieben. Maximal 100 Posen; keine Übernahme bei laufender Wiedergabe oder fehlender Prüfvorschau. Kein automatisches Einfügen, keine Korrektur und kein neuer MCP-Befehl. Die visuelle Abnahme bleibt offen.

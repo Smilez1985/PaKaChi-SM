@@ -12,6 +12,22 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.36.0] - 2026-10-21
+
+Zeitstempel: 2026-10-21T07:49:39+02:00 (Europe/Berlin)
+
+### Added
+
+- Direkter Sprung vom Bewegungsbericht zum exakten auffälligen Zeitpunkt als pausierte Vorschau.
+- Wiederherstellung der vorherigen Bearbeitungspose bei Stopp; ausdrückliche Übernahme eines Prüfbilds als neue Pose mit Undo/Redo.
+- Vier Tests für Vorschau, Wiederherstellung, Posenlimits, veraltete Aufrufe und DOM-Bedienablauf.
+
+### Changed
+
+- README, Design, Roadmap, Studio-Anleitung und Prüfstand nachgezogen.
+
+**Prüfung:** 206 Tests und Build bestanden. Bestehende Moves werden nicht automatisch verändert; Korrekturen und gerenderte Abnahme bleiben offen.
+
 ## [0.35.0] - 2026-10-21
 
 Zeitstempel: 2026-10-21T07:45:49+02:00 (Europe/Berlin)
@@ -762,3 +778,5 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 [0.34.0]: PRUEFUNG-0.34.0.md
 
 [0.35.0]: PRUEFUNG-0.35.0.md
+
+[0.36.0]: PRUEFUNG-0.36.0.md

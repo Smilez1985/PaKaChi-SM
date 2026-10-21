@@ -1,6 +1,6 @@
 # Roadmap – was kommt
 
-**Softwarestand: 0.35.0 · Abgleich: 21.10.2026.** Teil der [Blaupause](README.md).
+**Softwarestand: 0.36.0 · Abgleich: 21.10.2026.** Teil der [Blaupause](README.md).
 
 Ein Häkchen bedeutet implementiert; es ersetzt keine visuelle oder externe Live-Abnahme. Die Nachweise und Prüfgrenzen stehen im [Prüfstand](PRUEFUNG.md). Die Versionshistorie gehört ins [Changelog](CHANGELOG.md).
 
@@ -73,7 +73,8 @@ Diese Reihenfolge ist ein Umsetzungsvorschlag, kein Terminversprechen. Lokale un
 - [ ] Anatomische Gelenkketten aus ungeriggter Oberfläche erzeugen; allgemeine Dreh-/Twistgrenzen, fixierte Füße und gekoppelte Ganzkörper-IK ergänzen.
 - [x] Gespeicherte Einzelposen lesend gegen konfigurierte IK-Beugegrenzen prüfen; Winkel, Verletzungen und nicht auswertbare Ketten anzeigen (0.34.0).
 - [x] Eigene Studio-Moves einschließlich Zwischenbildern und Schleifenrückweg stichprobenartig gegen Beugegrenzen prüfen; Abbruch und Schutz vor veralteten Ergebnissen (0.35.0).
-- [ ] Beugegrenzen, Posen- und Bewegungsprüfung im gerenderten Studio abnehmen; lückenlose Bewegungsprüfung, direkte Drehgrenzen und Korrekturen ergänzen.
+- [x] Auffällige Stichproben direkt pausiert ansehen, vorherige Bearbeitungspose bei Stopp wiederherstellen und Prüfbilder ausdrücklich als neue Pose übernehmen (0.36.0; ein Undo-Schritt).
+- [ ] Beugegrenzen, Posen- und Bewegungsprüfung samt Prüfbildübernahme im gerenderten Studio abnehmen; lückenlose Bewegungsprüfung, direkte Drehgrenzen und Korrekturen ergänzen.
 - [ ] Bewegungsfähige Rigs unterschiedlicher Körperformen systematisch prüfen.
 - [x] Betroffene Posen/Moves nach Änderungen an Skelett-Grundstellung, freien Punktpositionen und Einflussbereichen zur Prüfung markieren (0.7.0).
 - [ ] Bewegungen geometrisch auf Fehlstellungen, Gelenkgrenzen und Kollisionen prüfen und automatisch korrigieren.

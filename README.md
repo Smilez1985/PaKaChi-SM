@@ -2,7 +2,7 @@
 
 **SM steht für StateMaschine.** PaKaChi ist die **Panda-KI-Chimera**, das übergeordnete Projekt. PaKaChi-SM vereint Avatar-Player, Model Zoo und das fest integrierte **PaKaChi-Avatar-Studio**.
 
-**Softwarestand: 0.35.0 · Entwicklungsstand, keine fertige Bild-zu-3D-Lösung.**
+**Softwarestand: 0.36.0 · Entwicklungsstand, keine fertige Bild-zu-3D-Lösung.**
 
 Der bestehende PaKaChi mit Tierform, humanoider Arbeitsform und allen 72 Transformationsbildern ist erhalten und beim Start ausgewählt. Mika und Nori sind separate technische 3D-Testavatare. Ein 3D-Modell des Original-PaKaChi und die Qualitätsabnahme echter KI-Ergebnisse stehen noch aus.
 
@@ -53,7 +53,7 @@ Seit 0.14.0 besteht zusätzlich der interne [Auftragskern](docs/AUFTRAE.md): fes
 
 ## Was aktuell funktioniert
 
-| Bereich | Stand 0.35.0 |
+| Bereich | Stand 0.36.0 |
 | --- | --- |
 | Player | Avatar-Auswahl, tatsächliche Bewegungen anzeigen, abspielen, pausieren, Tempo und Abspielposition ändern. |
 | Modelle | Mika/Nori mit Skeletten und Clips; eigene eigenständige GLB-Dateien laden oder hineinziehen, bis 50 MiB, lokal für die Sitzung. |
@@ -131,7 +131,7 @@ npx playwright install chromium
 npm run test:e2e
 ```
 
-Für 0.35.0 sind 202 Tests und der Build bestanden. Die unveränderten Original-Testprogramme wurden zuletzt in 0.9.0 geprüft. Die visuelle WebGL-/Mausabnahme ist wegen der Chromium-Startbeschränkung der bisherigen Ausführungsumgebung noch offen. Die reale Python-MCP-/MQTT-Integration mit Studio-Editor wurde zuletzt in 0.10.0 erfolgreich geprüft. Details und frühere Nachweise stehen im [Prüfstand](docs/PRUEFUNG.md).
+Für 0.36.0 sind 206 Tests und der Build bestanden. Die unveränderten Original-Testprogramme wurden zuletzt in 0.9.0 geprüft. Die visuelle WebGL-/Mausabnahme ist wegen der Chromium-Startbeschränkung der bisherigen Ausführungsumgebung noch offen. Die reale Python-MCP-/MQTT-Integration mit Studio-Editor wurde zuletzt in 0.10.0 erfolgreich geprüft. Details und frühere Nachweise stehen im [Prüfstand](docs/PRUEFUNG.md).
 
 ## Lizenz
 
@@ -169,3 +169,5 @@ Seit **0.33.0** lassen sich im Modus **Gelenke bearbeiten** am Ellenbogen-/Kniep
 Seit **0.34.0** prüft **Beugegrenzen der Pose prüfen** eine ausgewählte gespeicherte Pose. Der Bericht zeigt Winkel, Grenzverletzungen und nicht auswertbare Ketten, ohne Projekt oder aktuelle Pose zu ändern. Zwischenbilder und Kollisionen bleiben ungeprüft. [Bedienung](docs/STUDIO.md#gespeicherte-pose-prüfen-0340).
 
 Seit **0.35.0** prüft **Beugegrenzen der Bewegung prüfen** eigene Studio-Moves mit 16 Stichprobenschritten je Übergang, einschließlich Schleifenrückweg. Der abbrechbare Bericht zeigt Winkelbereich und ersten auffälligen Zeitpunkt. Kein lückenloser Nachweis oder automatische Korrektur. [Anleitung](docs/STUDIO.md#bewegung-stichprobenartig-prüfen-0350).
+
+Seit **0.36.0** öffnet **Auffälliges Bild ansehen** eine pausierte Vorschau direkt aus dem Bewegungsbericht. Stopp stellt die vorherige Bearbeitungspose wieder her; **Prüfbild als neue Pose übernehmen** legt ausdrücklich eine rückgängig machbare Pose an. [Anleitung](docs/STUDIO.md#prüfbilder-ansehen-und-übernehmen-0360).
