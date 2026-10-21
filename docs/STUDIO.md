@@ -188,3 +188,13 @@ Eine gespeicherte Pose auswählen und **Beugegrenzen der Pose prüfen** anklicke
 Die Messung liest gespeicherte Transformationen; sie zeigt die Pose nicht automatisch an und verändert weder die aktuelle Figur noch Projekt, Undo-Verlauf oder bestehende Prüfmarkierungen. Ein erfolgreicher Einzeltest bedeutet nicht, dass die Bewegung insgesamt geprüft ist. Die Anzeige wird bei neuer Auswahl oder Editor-Neudarstellung verworfen; nach Änderungen erneut prüfen. Während Wiedergabe oder Ziehgesten ist die Prüfung gesperrt.
 
 Gemessen wird im selben Anker-Elternraum wie beim IK-Ziehen, mit den ursprünglichen lokalen Knochenskalierungen. Eine Toleranz von 0,0001 Grad verhindert falsche Grenzverletzungen durch Rundung. Segmente ohne messbare Länge werden nicht als bestanden behandelt. Es werden nur gespeicherte Einzelposen geprüft: keine Zwischenbilder, Originalclips, Twistgrenzen, Kollisionen oder allgemeine Anatomie. **Keine automatische Korrektur.** Pose bei Bedarf anzeigen, manuell korrigieren, ersetzen und erneut prüfen. Der Bericht wird nicht gespeichert. [Prüfbericht](PRUEFUNG-0.34.0.md).
+
+## Bewegung stichprobenartig prüfen (0.35.0)
+
+Unter **Eigene Bewegungen** einen Move auswählen und **Beugegrenzen der Bewegung prüfen** anklicken. **Prüfung abbrechen** beendet den laufenden Vorgang. Das Studio verwendet dieselbe Interpolation wie bei der Wiedergabe, ohne die Figur zu bewegen oder Projektdaten zu ändern.
+
+Jeder Übergang wird in 16 gleichmäßigen Schritten geprüft, zusätzlich die erste Pose. Unterschiedliche Posendauern und wiederholte Posen bleiben erhalten; bei Schleifen wird auch der Rückweg zur ersten Pose geprüft. Höchstens 1601 Stichproben pro Aufruf. Das ist keine feste Bildrate und kein lückenloser Nachweis: kurze Verletzungen zwischen Stichproben können unentdeckt bleiben.
+
+Der Bericht zeigt Stichprobenzahl, gemessenen Winkelbereich je Gelenk, eingestellte Grenzen und den ersten auffälligen Zeitpunkt in Sekunden ab Bewegungsstart. Nicht messbare Segmente und nicht verbundene Ketten werden nicht als bestanden behandelt. Der Zeitwert ist ein Hinweis zum manuellen Aufsuchen, kein automatischer Sprung.
+
+Änderungen, Verlassen oder Schließen des Studios machen laufende Ergebnisse ungültig. Während Wiedergabe und Ziehgesten startet keine Prüfung. Die Berechnung gibt regelmäßig die Oberfläche frei. Berichte sind flüchtig und werden bei Auswahlwechsel oder Neudarstellung entfernt. Es werden keine Prüfmarkierungen gelöscht und keine Korrekturen ausgeführt. Originalclips, Kollisionen, Twistgrenzen und allgemeine Anatomie bleiben ungeprüft. [Prüfbericht](PRUEFUNG-0.35.0.md).

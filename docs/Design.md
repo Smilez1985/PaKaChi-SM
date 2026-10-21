@@ -4,7 +4,7 @@ Teil der [Blaupause](README.md) · [Roadmap](ROADMAP.md) · [Changelog](CHANGELO
 
 ## Status und Begriffe
 
-Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.34.0: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau, automatische Anatomieerkennung und die Qualitätsabnahme der angeschlossenen lokalen KI-Generierung bleiben offen.
+Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.35.0: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau, automatische Anatomieerkennung und die Qualitätsabnahme der angeschlossenen lokalen KI-Generierung bleiben offen.
 
 - **PaKaChi:** Panda-KI-Chimera, das übergeordnete Projekt.
 - **PaKaChi-SM:** StateMaschine mit Avatar-Player und integriertem Studio.
@@ -24,7 +24,7 @@ Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich gen
 | Generierung | Lokaler TripoSR-Dienst, Bildauswahl, getrennte Vorschau, Vorprüfungs-Fallbacks, expliziter weiterer Auftrag | Echte GPU-/Qualitätsabnahme, Cloud-Generatoren, Korrekturprompts und Rigging |
 | Übernahme | Revisionsschutz, ein Modellwechsel-Rücksprung, vorbereitete 3D-Installation mit Rückabwicklung | Gerenderte Abnahme, Originalplayer-Neustart und GPU-Kontextverlust |
 
-Prüfnachweis für Software 0.34.0: **197 Tests und Build bestanden**. Das belegt keine gerenderte Browser-, Anbieter- oder GPU-Abnahme. Projektformat bleibt Version 1. Freie Punkte/Posen aus 0.22.0/0.23.0 benötigen wegen der korrigierten Normalisierungsreihenfolge eine visuelle Kontrolle; keine automatische Migration. [Prüfbericht](PRUEFUNG-0.34.0.md).
+Prüfnachweis für Software 0.35.0: **202 Tests und Build bestanden**. Das belegt keine gerenderte Browser-, Anbieter- oder GPU-Abnahme. Projektformat bleibt Version 1. Freie Punkte/Posen aus 0.22.0/0.23.0 benötigen wegen der korrigierten Normalisierungsreihenfolge eine visuelle Kontrolle; keine automatische Migration. [Prüfbericht](PRUEFUNG-0.35.0.md).
 
 ## Bestehender PaKaChi-Avatar
 
@@ -380,3 +380,11 @@ Gespeicherte Einzelposen lassen sich gegen vorhandene Beugegrenzen prüfen. Der 
 Pro konfiguriertem mittlerem Gelenk werden Winkel, Bereich und Ergebnis gemeldet; nicht passende Ketten und degenerierte Segmente gelten nicht als bestanden. Die Toleranz beträgt 0,0001 Grad. Das UI zeigt ausschließlich einen flüchtigen Bericht; Auswahlwechsel und Neudarstellung entfernen ihn. Es werden keine Prüfhinweise gelöscht, keine Revision erhöht und keine Undo-Aktion erzeugt. Fehlende/geschlossene oder interaktiv beschäftigte Studios weisen die Prüfung ab.
 
 Die Prüfung ist keine vollständige Bewegungsabnahme. Zwischenbilder, Originalclips, Kollisionen, Twistgrenzen und automatische Korrekturen bleiben offen. Keine Formatänderung, keine neue MCP-Funktion und keine anatomische Garantie; gerenderte Browserabnahme steht aus.
+
+## Stichprobenprüfung eigener Bewegungen (0.35.0)
+
+Auf der lesenden Posenmessung baut eine Prüfung eigener Studio-Moves auf. Die Zeitliste enthält die erste Pose sowie 16 gleichmäßig verteilte Schritte je Übergang einschließlich Endpunkt; Schleifen schließen den Rückweg ein. Mit höchstens 100 Posenreferenzen entstehen maximal 1601 Stichproben. rig.sample liefert dieselben Zwischenwerte wie die Wiedergabe. Die Kettenauswahl verwendet innerhalb einer Einzelmessung vorbereitete Punkt-/Verbindungsindizes.
+
+Die Prüfung verändert keine Szene, Pose, Revision, Undo-Historie oder Prüfmarkierungen. Je Gelenk werden kleinster/größter gemessener Winkel, Verletzungs-/Nichtmessbarkeitszähler und erster auffälliger Zeitpunkt zusammengefasst. Nicht passende Ketten bleiben separat ausgewiesen. Nach jeweils acht Stichproben wird die Ereignisschleife freigegeben und Abbruch, aktive Sitzung, Revision und Interaktionsstatus geprüft. Ein expliziter Abbruch sowie Bearbeitungen/Verlassen/Entsorgen verhindern Ergebnisübernahme. Nur eine solche Prüfung darf je Editor laufen.
+
+Dies ist eine begrenzte Stichprobe, keine kontinuierliche Garantie und keine anatomische Bewertung. Zwischen den Zeitpunkten können Verletzungen unentdeckt bleiben. Keine Prüfung eingebetteter Originalclips, keine Kollisionen, keine automatische Korrektur, keine neue MCP-Funktion und keine Formatänderung. Gerenderte Bedienabnahme bleibt offen.

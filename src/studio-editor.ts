@@ -1,3 +1,4 @@
+import {checkMoveBends} from './move-limit-check.ts';
 import {loadMoveLibrary,loadLibraryMove} from './move-library.ts';
 import type {LibraryMove} from './move-library.ts';
 import {exportMoveFile,importMoveFile,MAX_MOVE_FILE} from './move-file.ts';
@@ -35,6 +36,7 @@ export class StudioEditor {
   private revision=0;
   private agentEditing=false;
   private disposed=false;
+  private moveCheck:AbortController|null=null;
   private library:LibraryMove[]=[];
   private libraryRequest:AbortController|null=null;
   dirty=false;
@@ -64,10 +66,10 @@ export class StudioEditor {
   get progress(){return this.duration ? this.timeline!.time/this.duration:0;}
   private snapshot():Snapshot{return {data:structuredClone(this.data),values:this.rig.capture()};}
   private restore(s:Snapshot){this.rig.data=structuredClone(s.data);this.rig.reset();this.rig.apply(s.values);this.mark();this.render();}
-  private mark(){this.revision++;this.dirty=true;this.hooks.changed();}
+  private mark(){this.moveCheck?.abort();this.revision++;this.dirty=true;this.hooks.changed();}
   private mutate(fn:()=>void){const before=this.snapshot();fn();flagAffectedPoses(before.data,this.data);this.history.push(before);this.mark();this.render();}
   enter(){this.revision++;this.hooks.suspend();this.stopMove();this.active=true;this.rig.reset();if(this.data.draft)this.rig.apply(this.data.draft);this.view.setEnabled(true);this.render();}
-  leave(){this.libraryRequest?.abort();this.agentEditing=false;this.revision++;if(this.active&&!this.playing)this.data.draft=this.rig.capture();this.active=false;this.stopMove();this.view.setEnabled(false);this.rig.restoreSource();this.hooks.resume();}
+  leave(){this.moveCheck?.abort();this.libraryRequest?.abort();this.agentEditing=false;this.revision++;if(this.active&&!this.playing)this.data.draft=this.rig.capture();this.active=false;this.stopMove();this.view.setEnabled(false);this.rig.restoreSource();this.hooks.resume();}
   stopMove(){this.timeline=null;this.paused=false;this.view.setEnabled(this.active);}
   stopPreview(){this.stopMove();this.render();}
   play(id:string,preview=false):boolean {
@@ -119,7 +121,7 @@ export class StudioEditor {
     <label>Übergang zu dieser Pose (Sekunden)<input id="pose-seconds" type="number" min="0.1" max="30" step="0.1" value="1"></label><div class="studio-actions"><button id="pose-up">↑ Früher</button><button id="pose-down">↓ Später</button></div>
     <p class="subtle">Eine Bewegung nutzt alle Posen in dieser Reihenfolge. Bei Schleifen bestimmt die Zeit der ersten Pose den Rückweg.</p>
     <label>Bewegungsname<input id="move-name" maxlength="100" placeholder="z. B. Lächeln"></label><label>Schlagwort<input id="move-id" maxlength="100" placeholder="z. B. laecheln"></label><label class="check"><input id="move-loop" type="checkbox"> Als Schleife</label><button id="move-add" ${poses.length>=2?'':'disabled'}>Bewegung speichern</button>
-    <label for="studio-moves">Eigene Bewegungen</label><select id="studio-moves"></select><p id="move-review" class="studio-review" hidden>Diese Bewegung enthält Posen mit Prüfhinweisen. Vorschau ansehen und die markierten Posen prüfen.</p><div class="studio-actions"><button id="move-preview">Vorschau</button><button id="move-stop">Stopp</button><button id="move-delete">Löschen</button></div><div class="studio-actions"><button id="move-export">Move exportieren</button><button id="move-import">Move importieren</button><input id="move-file" type="file" accept=".json,.pakachi-move.json" hidden></div><label for="library-moves">Gemeinsame Move-Sammlung</label><select id="library-moves" data-user-text></select><div class="studio-actions"><button id="library-refresh">Sammlung laden</button><button id="library-import">Aus Sammlung importieren</button></div><p class="subtle">Die Sammlung gehört zur Anwendung. Import nur bei passendem Modell und Rig.</p><p class="subtle">Move-Dateien benötigen dasselbe Modell und dieselbe Gelenkstruktur. Kein automatisches Retargeting.</p></div>
+    <label for="studio-moves">Eigene Bewegungen</label><select id="studio-moves"></select><p id="move-review" class="studio-review" hidden>Diese Bewegung enthält Posen mit Prüfhinweisen. Vorschau ansehen und die markierten Posen prüfen.</p><div class="studio-actions"><button id="move-preview">Vorschau</button><button id="move-stop">Stopp</button><button id="move-delete">Löschen</button></div><div class="studio-actions"><button id="move-check-limits">Beugegrenzen der Bewegung prüfen</button><button id="move-check-cancel">Prüfung abbrechen</button></div><div id="move-limit-result" role="status"></div><div class="studio-actions"><button id="move-export">Move exportieren</button><button id="move-import">Move importieren</button><input id="move-file" type="file" accept=".json,.pakachi-move.json" hidden></div><label for="library-moves">Gemeinsame Move-Sammlung</label><select id="library-moves" data-user-text></select><div class="studio-actions"><button id="library-refresh">Sammlung laden</button><button id="library-import">Aus Sammlung importieren</button></div><p class="subtle">Die Sammlung gehört zur Anwendung. Import nur bei passendem Modell und Rig.</p><p class="subtle">Move-Dateien benötigen dasselbe Modell und dieselbe Gelenkstruktur. Kein automatisches Retargeting.</p></div>
     <p class="subtle">Projekt laden: „Projekt laden“ oben. Mausrad: Nahzoom · rechts ziehen: Ansicht verschieben.</p>`;
     const q=<E extends HTMLElement=HTMLElement>(id:string)=>this.host.querySelector<E>(`#${id}`)!;
     const input=(id:string)=>q<HTMLInputElement>(id);
@@ -183,9 +185,17 @@ export class StudioEditor {
     on('move-add',()=>{const id=input('move-id').value.trim(),name=input('move-name').value.trim();if(!/^[a-z0-9][a-z0-9_-]{0,99}$/.test(id)||!name)throw new Error('Name und eindeutiges Schlagwort angeben (a–z, 0–9, _ oder -).');if(this.project.avatar.moves.some(m=>m.id===id)||this.data.moves.some(m=>m.id===id))throw new Error('Dieses Schlagwort ist bereits vergeben.');if(this.data.moves.length>=100)throw new Error('Höchstens 100 Bewegungen.');const loop=input('move-loop').checked;this.mutate(()=>this.data.moves.push({id,name,loop,poses:poses.map(p=>p.id)}));});
     const moves=q<HTMLSelectElement>('studio-moves');this.data.moves.forEach(m=>moves.add(new Option(`${moveReview(this.data,m).needsReview?'⚠ ':''}${m.name}`,m.id)));
     moves.value=this.data.moves.some(m=>m.id===remembered['studio-moves'])?remembered['studio-moves']:(this.data.moves[0]?.id??'');
-    moves.onchange=()=>{const m=this.data.moves.find(m=>m.id===moves.value);q('move-review').hidden=!m||!moveReview(this.data,m).needsReview;};moves.onchange(new Event('change'));
+    moves.onchange=()=>{q('move-limit-result').replaceChildren();q<HTMLButtonElement>('move-check-limits').disabled=!!this.moveCheck||!moves.value;q<HTMLButtonElement>('move-check-cancel').disabled=!this.moveCheck;const m=this.data.moves.find(m=>m.id===moves.value);q('move-review').hidden=!m||!moveReview(this.data,m).needsReview;};moves.onchange(new Event('change'));
     for(const id of ['pose-name','move-name','move-id'])input(id).value=remembered[id];input('move-loop').checked=loop;
     on('move-preview',()=>this.play(moves.value,true));on('move-stop',()=>this.stopPreview());on('move-delete',()=>this.mutate(()=>this.data.moves=this.data.moves.filter(m=>m.id!==moves.value)));
+    q<HTMLButtonElement>('move-check-limits').onclick=()=>{const id=moves.value;void this.checkMoveLimits(id).then(report=>{
+      if(this.disposed||!this.active||this.host.querySelector<HTMLSelectElement>('#studio-moves')?.value!==id)return;
+      const host=q('move-limit-result');host.replaceChildren();const summary=document.createElement('p');summary.textContent='Stichprobe: 16 Schritte je Übergang. Kein lückenloser Nachweis; Kollisionen sind nicht geprüft.';host.append(summary);const count=document.createElement('p');count.dataset.userText='';const countLabel=document.createElement('span');countLabel.textContent='Geprüfte Stichproben';host.append(countLabel);count.textContent=String(report.samples);host.append(count);
+      if(!report.joints.length){const note=document.createElement('p');note.textContent='Keine auswertbaren Zweiglied-Ketten mit Beugegrenzen.';host.append(note);}
+      for(const item of report.joints){const row=document.createElement('p'),label=document.createElement('span'),status=document.createElement('strong');label.dataset.userText='';label.textContent=`${item.name} [${item.jointId}]: ${item.minimum?.toFixed(2)??'—'}–${item.maximum?.toFixed(2)??'—'}° (${item.min}–${item.max}°) · `;status.textContent=item.violations?'Grenze verletzt':item.unmeasurable?'Nicht messbar':'Keine Verletzung in den Stichproben';row.append(label,status);if(item.firstIssue!==null){const time=document.createElement('span');time.dataset.userText='';time.textContent=' · '+item.firstIssue.toFixed(3)+' s';row.append(time);}host.append(row);}
+      for(const point of report.unmatched){const row=document.createElement('p'),name=document.createElement('span'),status=document.createElement('strong');name.dataset.userText='';name.textContent=point.name+' ['+point.id+']: ';status.textContent='Keine passende verbundene Zweiglied-Kette';row.append(name,status);host.append(row);}
+    }).catch(error=>{if(!this.disposed&&this.active)this.hooks.feedback(error instanceof Error&&error.name==='AbortError'?'Prüfung abgebrochen.':error instanceof Error?error.message:'Prüfung fehlgeschlagen.');});};
+    q<HTMLButtonElement>('move-check-cancel').onclick=()=>this.moveCheck?.abort();
     q<HTMLButtonElement>('move-export').disabled=!moves.value;
     q<HTMLButtonElement>('move-export').onclick=()=>{void this.exportMove(moves.value).then(value=>{if(this.disposed)return;const url=URL.createObjectURL(new Blob([JSON.stringify(value)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download=value.move.id+'.pakachi-move.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}).catch(error=>{if(!this.disposed)this.hooks.feedback(error instanceof Error?error.message:'Move-Export fehlgeschlagen.');});};
     on('move-import',()=>input('move-file').click());
@@ -262,6 +272,13 @@ export class StudioEditor {
     const moves=this.host.querySelector<HTMLSelectElement>('#studio-moves');if(moves){moves.value=data.moves.at(-1)!.id;moves.dispatchEvent(new Event('change'));}
     this.hooks.feedback('Bewegung und Posen importiert. Vorschau prüfen; Zurück macht den Import rückgängig.');
   }
+  async checkMoveLimits(id:string){
+    if(this.disposed||!this.active||this.interactionActive||this.moveCheck)throw Error('Studio ist beschäftigt oder geschlossen.');
+    const move=this.data.moves.find(m=>m.id===id);if(!move)throw Error('Bewegung nicht gefunden.');
+    const request=new AbortController(),revision=this.revision;this.moveCheck=request;this.render();
+    try{return await checkMoveBends(this.rig,move,request.signal,()=>!this.disposed&&this.active&&!this.interactionActive&&this.revision===revision);}
+    finally{if(this.moveCheck===request)this.moveCheck=null;if(!this.disposed){const start=this.host.querySelector<HTMLButtonElement>('#move-check-limits'),cancel=this.host.querySelector<HTMLButtonElement>('#move-check-cancel');if(start)start.disabled=!this.host.querySelector<HTMLSelectElement>('#studio-moves')?.value;if(cancel)cancel.disabled=true;}}
+  }
   checkPoseLimits(id:string){
     if(this.disposed||!this.active||this.interactionActive)throw Error('Studio ist beschäftigt oder geschlossen.');
     const pose=this.data.poses.find(p=>p.id===id);if(!pose)throw Error('Pose nicht gefunden.');
@@ -278,7 +295,7 @@ export class StudioEditor {
     const value=this.exportProject();
     const url=URL.createObjectURL(new Blob([JSON.stringify(value)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download=`${this.project.avatar.id}.pakachi.json`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);this.dirty=false;this.render();this.hooks.feedback('Studio-Projekt mit Modell, Kontrollpunkten, Posen und Bewegungen heruntergeladen.');
   }
-  dispose(){this.libraryRequest?.abort();this.disposed=true;this.view.dispose();this.host.replaceChildren();}
+  dispose(){this.moveCheck?.abort();this.libraryRequest?.abort();this.disposed=true;this.view.dispose();this.host.replaceChildren();}
 }
 export function encodeModel(buffer:ArrayBuffer):string {let s='';const bytes=new Uint8Array(buffer);for(let i=0;i<bytes.length;i+=16384)s+=String.fromCharCode(...bytes.subarray(i,i+16384));return btoa(s);}
 export function decodeModel(base64:string):ArrayBuffer {return Uint8Array.from(atob(base64),c=>c.charCodeAt(0)).buffer;}

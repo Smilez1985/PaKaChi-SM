@@ -118,10 +118,10 @@ export class StudioRig {
     if((a.kind==='bone'||b.kind==='bone')&&!this.isBoneConnection(a,b))throw new Error('Gelenkketten verbinden benachbarte Quellknochen. Freie Punkte lassen sich untereinander gruppieren.');
   }
   /** Only actual connected parent bones drive IK; arbitrary lines never rewrite a source rig. */
-  poseChain(p:ControlPoint):T.Bone[] {
+  poseChain(p:ControlPoint,index?:{byBone:Map<T.Bone,ControlPoint>;edges:Set<string>}):T.Bone[] {
     if(p.kind!=='bone')return [];
-    const byBone=new Map(this.data.points.filter(p=>p.kind==='bone').map(p=>[this.bones[p.bone!],p]));
-    const edges=new Set(this.data.links.map(edgeKey)),result:T.Bone[]=[];
+    const byBone=index?.byBone??new Map(this.data.points.filter(p=>p.kind==='bone').map(p=>[this.bones[p.bone!],p]));
+    const edges=index?.edges??new Set(this.data.links.map(edgeKey)),result:T.Bone[]=[];
     let child=this.bones[p.bone!];
     while(result.length<2&&child.parent instanceof T.Bone){
       const parent=child.parent,a=byBone.get(child),b=byBone.get(parent);
@@ -187,8 +187,9 @@ export class StudioRig {
     const scale=new Map(this.originalNodes.map(item=>[item.node,item.scale]));
     const local=(point:ControlPoint)=>{const v=pose.values[point.id];if(!v)throw Error('Pose enthält nicht alle Gelenkspuren.');return new T.Matrix4().compose(new T.Vector3().fromArray(v.position),new T.Quaternion().fromArray(v.rotation),scale.get(this.bones[point.bone!])!);};
     const points=new Map(this.data.points.filter(p=>p.kind==='bone').map(p=>[this.bones[p.bone!],p]));
+    const index={byBone:points,edges:new Set(this.data.links.map(edgeKey))};
     for(const endpoint of this.data.points){
-      const chain=this.poseChain(endpoint);if(chain.length!==2)continue;
+      const chain=this.poseChain(endpoint,index);if(chain.length!==2)continue;
       const middle=points.get(chain[0])!,anchor=points.get(chain[1])!,limit=middle.bendLimit;if(!limit)continue;
       evaluated.add(middle.id);
       const am=local(anchor),bm=am.clone().multiply(local(middle)),cm=bm.clone().multiply(local(endpoint));

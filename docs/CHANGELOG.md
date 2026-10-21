@@ -12,6 +12,23 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.35.0] - 2026-10-21
+
+Zeitstempel: 2026-10-21T07:45:49+02:00 (Europe/Berlin)
+
+### Added
+
+- Beugegrenzenprüfung eigener Studio-Moves mit 16 Stichprobenschritten je Übergang, Schlüsselposen und Schleifenrückweg.
+- Abbrechbarer Bericht mit Winkelbereichen, erstem auffälligem Zeitpunkt und nicht auswertbaren Ketten; Revisions-/Sitzungsschutz gegen veraltete Ergebnisse.
+- Fünf Tests für Zwischenverletzungen, begrenzten Zeitplan, Abbruch, unverändertes Projekt und DOM-Bericht.
+
+### Changed
+
+- Wiederverwendete Punkt-/Verbindungsindizes innerhalb der lesenden Kettenmessung.
+- README, Design, Roadmap, Studio-Anleitung und Prüfstand nachgezogen.
+
+**Prüfung:** 202 Tests und Build bestanden. Stichproben liefern keinen lückenlosen Nachweis. Originalclips, Kollisionen, automatische Korrektur und gerenderte Bedienabnahme bleiben offen.
+
 ## [0.34.0] - 2026-10-21
 
 Zeitstempel: 2026-10-21T06:47:21+02:00 (Europe/Berlin)
@@ -743,3 +760,5 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 [0.33.0]: PRUEFUNG-0.33.0.md
 
 [0.34.0]: PRUEFUNG-0.34.0.md
+
+[0.35.0]: PRUEFUNG-0.35.0.md
