@@ -12,6 +12,22 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.34.0] - 2026-10-21
+
+Zeitstempel: 2026-10-21T06:47:21+02:00 (Europe/Berlin)
+
+### Added
+
+- Lesende Prüfung ausgewählter gespeicherter Posen gegen konfigurierte IK-Beugegrenzen.
+- Bericht mit Gelenkname/ID, gemessenem Winkel, erlaubtem Bereich und getrennten Ergebnissen für Verletzungen, degenerierte Segmente und fehlende Ketten.
+- Fünf Tests einschließlich tatsächlichem Mika-Modell, unverändertem Szenen-/Projektzustand und DOM-Bericht.
+
+### Changed
+
+- README, Design, Roadmap, Studio-Anleitung und Prüfstand aktualisiert.
+
+**Prüfung:** 197 Tests und Build bestanden. Keine automatische Korrektur oder Änderung von Prüfmarkierungen; Zwischenbilder, Kollisionen und gerenderte Bedienabnahme bleiben offen.
+
 ## [0.33.0] - 2026-10-20
 
 Zeitstempel: 2026-10-20T22:20:33+02:00 (Europe/Berlin)
@@ -725,3 +741,5 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 [0.32.0]: PRUEFUNG-0.32.0.md
 
 [0.33.0]: PRUEFUNG-0.33.0.md
+
+[0.34.0]: PRUEFUNG-0.34.0.md

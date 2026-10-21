@@ -1,6 +1,6 @@
 # Roadmap – was kommt
 
-**Softwarestand: 0.33.0 · Abgleich: 20.10.2026.** Teil der [Blaupause](README.md).
+**Softwarestand: 0.34.0 · Abgleich: 21.10.2026.** Teil der [Blaupause](README.md).
 
 Ein Häkchen bedeutet implementiert; es ersetzt keine visuelle oder externe Live-Abnahme. Die Nachweise und Prüfgrenzen stehen im [Prüfstand](PRUEFUNG.md). Die Versionshistorie gehört ins [Changelog](CHANGELOG.md).
 
@@ -71,7 +71,8 @@ Diese Reihenfolge ist ein Umsetzungsvorschlag, kein Terminversprechen. Lokale un
 - [x] Vorhandenes Gesamtskelett automatisch verbinden; beim Posieren Ein-/Zweiglied-Ketten mit erhaltenen Knochenlängen lösen (0.11.0).
 - [x] Manuell einstellbare Beugegrenzen am mittleren Knochen einer Zweiglied-IK-Kette berücksichtigen; Grenzen speichern, über MCP bearbeiten und betroffene Posen markieren (0.33.0).
 - [ ] Anatomische Gelenkketten aus ungeriggter Oberfläche erzeugen; allgemeine Dreh-/Twistgrenzen, fixierte Füße und gekoppelte Ganzkörper-IK ergänzen.
-- [ ] Beugegrenzen im gerenderten Studio abnehmen; gespeicherte Bewegungen und direkte Drehungen gegen Gelenkgrenzen prüfen/korrigieren.
+- [x] Gespeicherte Einzelposen lesend gegen konfigurierte IK-Beugegrenzen prüfen; Winkel, Verletzungen und nicht auswertbare Ketten anzeigen (0.34.0).
+- [ ] Beugegrenzen und Posenprüfung im gerenderten Studio abnehmen; Bewegungszwischenbilder und direkte Drehungen gegen Gelenkgrenzen prüfen/korrigieren.
 - [ ] Bewegungsfähige Rigs unterschiedlicher Körperformen systematisch prüfen.
 - [x] Betroffene Posen/Moves nach Änderungen an Skelett-Grundstellung, freien Punktpositionen und Einflussbereichen zur Prüfung markieren (0.7.0).
 - [ ] Bewegungen geometrisch auf Fehlstellungen, Gelenkgrenzen und Kollisionen prüfen und automatisch korrigieren.

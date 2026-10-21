@@ -4,7 +4,7 @@ Teil der [Blaupause](README.md) · [Roadmap](ROADMAP.md) · [Changelog](CHANGELO
 
 ## Status und Begriffe
 
-Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.33.0: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau, automatische Anatomieerkennung und die Qualitätsabnahme der angeschlossenen lokalen KI-Generierung bleiben offen.
+Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.34.0: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau, automatische Anatomieerkennung und die Qualitätsabnahme der angeschlossenen lokalen KI-Generierung bleiben offen.
 
 - **PaKaChi:** Panda-KI-Chimera, das übergeordnete Projekt.
 - **PaKaChi-SM:** StateMaschine mit Avatar-Player und integriertem Studio.
@@ -24,7 +24,7 @@ Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich gen
 | Generierung | Lokaler TripoSR-Dienst, Bildauswahl, getrennte Vorschau, Vorprüfungs-Fallbacks, expliziter weiterer Auftrag | Echte GPU-/Qualitätsabnahme, Cloud-Generatoren, Korrekturprompts und Rigging |
 | Übernahme | Revisionsschutz, ein Modellwechsel-Rücksprung, vorbereitete 3D-Installation mit Rückabwicklung | Gerenderte Abnahme, Originalplayer-Neustart und GPU-Kontextverlust |
 
-Prüfnachweis für Software 0.33.0: **192 Tests und Build bestanden**. Das belegt keine gerenderte Browser-, Anbieter- oder GPU-Abnahme. Projektformat bleibt Version 1. Freie Punkte/Posen aus 0.22.0/0.23.0 benötigen wegen der korrigierten Normalisierungsreihenfolge eine visuelle Kontrolle; keine automatische Migration. [Prüfbericht](PRUEFUNG-0.33.0.md).
+Prüfnachweis für Software 0.34.0: **197 Tests und Build bestanden**. Das belegt keine gerenderte Browser-, Anbieter- oder GPU-Abnahme. Projektformat bleibt Version 1. Freie Punkte/Posen aus 0.22.0/0.23.0 benötigen wegen der korrigierten Normalisierungsreihenfolge eine visuelle Kontrolle; keine automatische Migration. [Prüfbericht](PRUEFUNG-0.34.0.md).
 
 ## Bestehender PaKaChi-Avatar
 
@@ -372,3 +372,11 @@ Grenzen sind reine Regeln für das interaktive IK-Ziehen, keine Änderung der Qu
 Editoränderungen sind einzelne Undo-Schritte. Projektdateien und Katalogprojekt-Export erhalten die Werte; Move-Kompatibilität berücksichtigt sie. Geänderte oder entfernte Grenzen markieren vorhandene Posen mit `bend-limit`, ohne deren Transformationen zu ändern. Der Agent darf Grenzen über update_point nur an Knochen im Rig-Modus bearbeiten, mit der bestehenden Freigabe, Sitzung und Revision. null entfernt die Grenze. Assistent und beide MCP-Transporte kennen das Feld; die finale Prüfung bleibt im Studio.
 
 Projektformat 1 ist additiv erweitert. Ohne Grenzen bleiben bisherige Move-Fingerabdrücke gleich. Dateien mit neuen Grenzen/Prüfgründen benötigen für vollständige Interpretation Software 0.33.0; ältere Versionen können Grenzen ignorieren oder neue Prüfgründe ablehnen. Gerenderte Bedienabnahme steht aus.
+
+## Lesende Posenprüfung (0.34.0)
+
+Gespeicherte Einzelposen lassen sich gegen vorhandene Beugegrenzen prüfen. Der Prüfer ermittelt ausschließlich tatsächliche verbundene Zweiglied-Ketten über dieselbe Kettenauswahl wie der IK-Löser. Aus den gespeicherten lokalen Positionen/Quaternionen und ursprünglichen Knochenskalierungen werden temporäre Matrizen im Anker-Elternraum berechnet. Die lebende Szene, Hautbindungen, Geometrie und Studio-Daten werden nicht verändert.
+
+Pro konfiguriertem mittlerem Gelenk werden Winkel, Bereich und Ergebnis gemeldet; nicht passende Ketten und degenerierte Segmente gelten nicht als bestanden. Die Toleranz beträgt 0,0001 Grad. Das UI zeigt ausschließlich einen flüchtigen Bericht; Auswahlwechsel und Neudarstellung entfernen ihn. Es werden keine Prüfhinweise gelöscht, keine Revision erhöht und keine Undo-Aktion erzeugt. Fehlende/geschlossene oder interaktiv beschäftigte Studios weisen die Prüfung ab.
+
+Die Prüfung ist keine vollständige Bewegungsabnahme. Zwischenbilder, Originalclips, Kollisionen, Twistgrenzen und automatische Korrekturen bleiben offen. Keine Formatänderung, keine neue MCP-Funktion und keine anatomische Garantie; gerenderte Browserabnahme steht aus.

@@ -180,5 +180,25 @@ export class StudioRig {
     result[FIGURE_TRACK]={scale:T.MathUtils.lerp(x.scale??1,y.scale??1,ratio),position:new T.Vector3().fromArray(x.position).lerp(new T.Vector3().fromArray(y.position),ratio).toArray(),rotation:new T.Quaternion().fromArray(x.rotation).slerp(new T.Quaternion().fromArray(y.rotation),ratio).toArray()};
     return result;
   }
+  /** Read-only evaluation in the same anchor-parent space used by the two-link solver. */
+  checkPoseBends(pose:Pose){
+    const results:{jointId:string;name:string;endpointId:string;angle:number|null;min:number;max:number;status:'within'|'outside'|'unmeasurable'}[]=[];
+    const evaluated=new Set<string>();
+    const scale=new Map(this.originalNodes.map(item=>[item.node,item.scale]));
+    const local=(point:ControlPoint)=>{const v=pose.values[point.id];if(!v)throw Error('Pose enthält nicht alle Gelenkspuren.');return new T.Matrix4().compose(new T.Vector3().fromArray(v.position),new T.Quaternion().fromArray(v.rotation),scale.get(this.bones[point.bone!])!);};
+    const points=new Map(this.data.points.filter(p=>p.kind==='bone').map(p=>[this.bones[p.bone!],p]));
+    for(const endpoint of this.data.points){
+      const chain=this.poseChain(endpoint);if(chain.length!==2)continue;
+      const middle=points.get(chain[0])!,anchor=points.get(chain[1])!,limit=middle.bendLimit;if(!limit)continue;
+      evaluated.add(middle.id);
+      const am=local(anchor),bm=am.clone().multiply(local(middle)),cm=bm.clone().multiply(local(endpoint));
+      const a=new T.Vector3().setFromMatrixPosition(am),b=new T.Vector3().setFromMatrixPosition(bm),c=new T.Vector3().setFromMatrixPosition(cm);
+      const upper=b.clone().sub(a),lower=c.sub(b);
+      const angle=upper.lengthSq()<1e-16||lower.lengthSq()<1e-16?null:T.MathUtils.radToDeg(upper.angleTo(lower));
+      results.push({jointId:middle.id,name:middle.name,endpointId:endpoint.id,angle,min:limit.min,max:limit.max,status:angle===null?'unmeasurable':angle<limit.min-1e-4||angle>limit.max+1e-4?'outside':'within'});
+    }
+    const unmatched=this.data.points.filter(p=>p.bendLimit&&!evaluated.has(p.id)).map(p=>({id:p.id,name:p.name}));
+    return {poseId:pose.id,results,unmatched};
+  }
   duration(move:StudioMove){const poses=move.poses.map(id=>this.data.poses.find(p=>p.id===id)!);return poses.slice(1).reduce((sum,p)=>sum+p.seconds,0)+(move.loop ? poses[0].seconds : 0);}
 }
