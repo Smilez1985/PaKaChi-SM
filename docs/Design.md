@@ -4,7 +4,7 @@ Teil der [Blaupause](README.md) · [Roadmap](ROADMAP.md) · [Changelog](CHANGELO
 
 ## Status und Begriffe
 
-Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.38.0: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau, automatische Anatomieerkennung und die Qualitätsabnahme der angeschlossenen lokalen KI-Generierung bleiben offen.
+Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.39.0: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau, automatische Anatomieerkennung und die Qualitätsabnahme der angeschlossenen lokalen KI-Generierung bleiben offen.
 
 - **PaKaChi:** Panda-KI-Chimera, das übergeordnete Projekt.
 - **PaKaChi-SM:** StateMaschine mit Avatar-Player und integriertem Studio.
@@ -24,7 +24,7 @@ Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich gen
 | Generierung | Lokaler TripoSR-Dienst, Bildauswahl, getrennte Vorschau, Vorprüfungs-Fallbacks, expliziter weiterer Auftrag | Echte GPU-/Qualitätsabnahme, Cloud-Generatoren, Korrekturprompts und Rigging |
 | Übernahme | Revisionsschutz, ein Modellwechsel-Rücksprung, vorbereitete 3D-Installation mit Rückabwicklung | Gerenderte Abnahme, Originalplayer-Neustart und GPU-Kontextverlust |
 
-Prüfnachweis für Software 0.38.0: **214 Tests und Build bestanden**. Das belegt keine gerenderte Browser-, Anbieter- oder GPU-Abnahme. Projektformat bleibt Version 1. Freie Punkte/Posen aus 0.22.0/0.23.0 benötigen wegen der korrigierten Normalisierungsreihenfolge eine visuelle Kontrolle; keine automatische Migration. [Prüfbericht](PRUEFUNG-0.38.0.md).
+Prüfnachweis für Software 0.39.0: **219 Tests und Build bestanden**. Das belegt keine gerenderte Browser-, Anbieter- oder GPU-Abnahme. Projektformat bleibt Version 1. Freie Punkte/Posen aus 0.22.0/0.23.0 benötigen wegen der korrigierten Normalisierungsreihenfolge eine visuelle Kontrolle; keine automatische Migration. [Prüfbericht](PRUEFUNG-0.39.0.md).
 
 ## Bestehender PaKaChi-Avatar
 
@@ -411,3 +411,12 @@ Zeitwerte bleiben Eigentum der Projektpose und gelten für jedes ihrer Vorkommen
 `update_move` ersetzt ausschließlich die Folge eines vorhandenen Moves durch 2–100 Verweise auf vorhandene Projektposen. Derselbe Editorpfad bedient Maus und Agenten. Namen, Schleifenflag, Posenwerte und aktuelle Figur bleiben erhalten. Identische Folgen ändern weder Revision noch Undo-Verlauf. Ein echter Austausch ist ein einzelner Undo-/Redo-Schritt.
 
 Externe Agenten benötigen die Studio-Freigabe und eine aktuelle Sitzung/Revision. Der integrierte Assistent liest zunächst den Stand und legt nur einen Vorschlag zur ausdrücklichen Bestätigung vor. Rig-Modus, laufende Wiedergabe und Ziehgesten sperren Änderungen. Automatische Korrektur, separate Zeitwerte je Vorkommen und gerenderte/Live-Anbieter-Abnahme bleiben offen.
+
+
+## Paginierte Modellermittlung (0.39.0)
+
+Anthropic-Modelllisten folgen `has_more` und `last_id` als nächstem `after_id`, stets am konfigurierten Endpoint. Es werden keine vom Server gelieferten Folge-URLs aufgerufen. Schlüssel bleiben in Headern; Weiterleitungen sind gesperrt. Die endgültige Auswahl wird erst nach der letzten Seite sortiert und dedupliziert zurückgegeben.
+
+Ein gemeinsamer Timeout und Abbruch gelten für alle Seiten. Pro Antwort bleiben 1 MiB und 1000 Einträge erlaubt; insgesamt maximal zehn Seiten und 5000 empfangene Einträge vor Deduplizierung. Leere Folgeseiten mit Fortsetzungsflag, falsche oder wiederholte Cursor, HTTP-Fehler und Grenzüberschreitungen brechen die komplette Abfrage ab. Vorhandene Profil-/Modellauswahl bleibt über die bestehenden UI-Regeln erhalten. Für andere Schnittstellen bleibt die bisherige Einzelabfrage bestehen.
+
+Vertrag: [Anthropic Models API](https://platform.claude.com/docs/en/api/models/list), geprüft am 21.10.2026. Tests verwenden simulierte Antworten; echte Konto-/CORS-Abnahme und zusätzliche Workspace-Auswahl bleiben offen.

@@ -12,6 +12,23 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.39.0] - 2026-10-21
+
+Zeitstempel: 2026-10-21T23:54:27+02:00 (Europe/Berlin)
+
+### Added
+
+- Automatisches Nachladen paginierter Anthropic-Modelllisten über native Cursor mit gemeinsamem Timeout und Abbruch.
+- Schutz vor wiederholten/falschen Cursorn, mehr als zehn Seiten oder 5000 empfangenen Einträgen; nur vollständige Ergebnisse übernehmen.
+- Fünf Protokolltests für Seitenfolgen, Fehler, Grenzen und verspätete Antworten.
+
+### Changed
+
+- README, Anbieteranleitung, Design, Roadmap und Prüfstand aktualisiert.
+
+**Prüfung:** 219 Tests und Build bestanden. Echte Konto-/Browserabnahme und zusätzliche Workspace-Auswahl bleiben offen.
+
+
 ## [0.38.0] - 2026-10-21
 
 Zeitstempel: 2026-10-21T23:49:26+02:00 (Europe/Berlin)
@@ -817,3 +834,5 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 [0.37.0]: PRUEFUNG-0.37.0.md
 
 [0.38.0]: PRUEFUNG-0.38.0.md
+
+[0.39.0]: PRUEFUNG-0.39.0.md

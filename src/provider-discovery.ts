@@ -47,11 +47,14 @@ export async function discoverModels(connection:ProviderConnection,options:{toke
     const request=(async()=>{
       const headers:Record<string,string>={Accept:'application/json'};if(connection.adapter==='anthropic')Object.assign(headers,anthropicHeaders(token));else if(token)headers.Authorization=`Bearer ${token}`;
       const requestURL=new URL(url);if(connection.adapter==='anthropic')requestURL.searchParams.set('limit','1000');
+      const collected:string[]=[],cursors=new Set<string>();
+      for(let page=0;page<10;page++){
+      controller.signal.throwIfAborted();
       const response=await (options.fetcher??fetch)(requestURL.href,{method:'GET',headers,signal:controller.signal,credentials:'omit',redirect:'error',cache:'no-store',referrerPolicy:'no-referrer'});
       if(!response.ok){void response.body?.cancel().catch(()=>{});throw new DiscoveryError(response.status===401||response.status===403?'unauthorized':response.status===404?'not-found':response.status===429?'rate-limited':'http-error');}
       const raw=await readJSON(response,controller.signal);
       if(!raw||typeof raw!=='object')throw new DiscoveryError('invalid-response');
-      if(connection.adapter==='anthropic'&&((raw as {has_more?:unknown}).has_more!==false))throw new DiscoveryError('invalid-response');
+      if(connection.adapter==='anthropic'&&typeof (raw as {has_more?:unknown}).has_more!=='boolean')throw new DiscoveryError('invalid-response');
       const rows=connection.adapter==='ollama'?(raw as {models?:unknown}).models:(raw as {data?:unknown}).data;
       if(!Array.isArray(rows)||rows.length>1000)throw new DiscoveryError('invalid-response');
       const ids=rows.map(row=>{
@@ -59,7 +62,14 @@ export async function discoverModels(connection:ProviderConnection,options:{toke
         if(typeof id!=='string'||!id.trim()||id!==id.trim()||id.length>160||/[\x00-\x1f\x7f]/.test(id))throw new DiscoveryError('invalid-response');
         return id;
       });
-      return [...new Set(ids)].sort((a,b)=>a.localeCompare(b));
+      collected.push(...ids);
+      if(collected.length>5000)throw new DiscoveryError('response-too-large');
+      if(connection.adapter!=='anthropic'||!(raw as {has_more:boolean}).has_more)return [...new Set(collected)].sort((a,b)=>a.localeCompare(b));
+      const cursor=(raw as {last_id?:unknown}).last_id;
+      if(!ids.length||typeof cursor!=='string'||cursor!==ids.at(-1)||cursors.has(cursor))throw new DiscoveryError('invalid-response');
+      cursors.add(cursor);requestURL.searchParams.set('after_id',cursor);
+      }
+      throw new DiscoveryError('response-too-large');
     })();
     return await Promise.race([request,cancelled]);
   }catch(error){

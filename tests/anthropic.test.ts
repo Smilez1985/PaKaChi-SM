@@ -43,3 +43,30 @@ test('native tool failures are represented as is_error without leaking raw RPC e
   return new Response(JSON.stringify(reply([{type:'text',text:'Open studio first.'}],'end_turn')));
  }});assert.equal(result.text,'Open studio first.');
 });
+
+test('model discovery follows native cursors on the configured endpoint and deduplicates only after completion',async()=>{
+ let calls=0;const result=await discoverModels({...profile,endpoint:'https://example.com/proxy/v1'},{token:'secret',fetcher:async(url,init)=>{
+  const target=new URL(String(url));assert.equal(target.origin,'https://example.com');assert.equal(target.pathname,'/proxy/v1/models');assert.equal(target.searchParams.get('limit'),'1000');assert.equal(init?.redirect,'error');assert.equal((init?.headers as any)['x-api-key'],'secret');assert.ok(!String(url).includes('secret'));
+  if(calls++===0){assert.equal(target.searchParams.get('after_id'),null);return Response.json({data:[{id:'z'},{id:'a/b?x=1'}],has_more:true,last_id:'a/b?x=1'});}
+  assert.equal(target.searchParams.get('after_id'),'a/b?x=1');return Response.json({data:[{id:'z'},{id:'a'}],has_more:false});
+ }});assert.equal(calls,2);assert.deepEqual(result,['a','a/b?x=1','z']);
+});
+test('pagination rejects empty, mismatched, missing and repeating cursors rather than returning partial lists',async()=>{
+ for(const page of [{data:[],has_more:true,last_id:'x'},{data:[{id:'a'}],has_more:true,last_id:'x'},{data:[{id:'a'}],has_more:true},{data:[{id:'a'}],has_more:'true'}]){
+  let calls=0;await assert.rejects(discoverModels(profile,{fetcher:async()=>{calls++;return Response.json(page);}}),/invalid-response/);assert.equal(calls,1);
+ }
+ let calls=0;await assert.rejects(discoverModels(profile,{fetcher:async()=>{calls++;return Response.json({data:[{id:'a'}],has_more:true,last_id:'a'});}}),/invalid-response/);assert.equal(calls,2);
+});
+test('pagination bounds total rows and requests even if the provider keeps returning unique cursors',async()=>{
+ for(const rows of [1,1000]){let calls=0;await assert.rejects(discoverModels(profile,{fetcher:async()=>{const data=Array.from({length:rows},(_,i)=>({id:`page-${calls}-model-${i}`}));calls++;return Response.json({data,has_more:true,last_id:data.at(-1)!.id});}}),/response-too-large/);assert.equal(calls,rows===1?10:6);}
+});
+test('later page errors fail the whole discovery with the original classified error',async()=>{
+ for(const status of [401,429,500]){let calls=0;await assert.rejects(discoverModels(profile,{fetcher:async()=>calls++===0?Response.json({data:[{id:'a'}],has_more:true,last_id:'a'}):new Response('private details',{status})}),{message:status===401?'unauthorized':status===429?'rate-limited':'http-error'});assert.equal(calls,2);}
+});
+test('one cancellation and timeout cover all pages and late replies cannot trigger another request',async()=>{
+ for(const cancel of [true,false]){
+  const controller=new AbortController();let calls=0,finish!:(r:Response)=>void,started!:()=>void;const second=new Promise<void>(resolve=>{started=resolve;});
+  const pending=discoverModels(profile,{signal:controller.signal,timeoutMs:cancel?1000:30,fetcher:async()=>{if(calls++===0)return Response.json({data:[{id:'a'}],has_more:true,last_id:'a'});started();return new Promise<Response>(resolve=>{finish=resolve;});}});
+  await second;if(cancel)controller.abort();await assert.rejects(pending,{message:cancel?'cancelled':'timeout'});finish(Response.json({data:[{id:'b'}],has_more:true,last_id:'b'}));await new Promise(resolve=>setTimeout(resolve,0));assert.equal(calls,2);
+ }
+});

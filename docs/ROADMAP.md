@@ -1,6 +1,6 @@
 # Roadmap – was kommt
 
-**Softwarestand: 0.38.0 · Abgleich: 21.10.2026.** Teil der [Blaupause](README.md).
+**Softwarestand: 0.39.0 · Abgleich: 21.10.2026.** Teil der [Blaupause](README.md).
 
 Ein Häkchen bedeutet implementiert; es ersetzt keine visuelle oder externe Live-Abnahme. Die Nachweise und Prüfgrenzen stehen im [Prüfstand](PRUEFUNG.md). Die Versionshistorie gehört ins [Changelog](CHANGELOG.md).
 
@@ -173,7 +173,8 @@ Details: [Modellauswahl](LOKALE-MODELLE.md). Die aktuelle Ollama-Kuration ist ei
 - [x] Frei zuordenbare Anthropic-Profile, native Modellliste und Assistenten-Werkzeugablauf (0.17.0).
 - [x] API-Schlüssel nur in Headern, unbekannte/abgeschnittene Antworten abweisen, bestehende Studio-Prüfungen erhalten.
 - [ ] Echter API-/Browserlauf mit Workspace-gebundenem Schlüssel und passendem Modell.
-- [ ] Workspace-Auswahl und paginierte Modelllisten bei Bedarf ergänzen.
+- [x] Paginierte Anthropic-Modelllisten vollständig innerhalb fester Grenzen laden; Abbruch, gemeinsamer Timeout und Cursorprüfung (0.39.0).
+- [ ] Zusätzliche Workspace-Auswahl bei Bedarf ergänzen; paginierte Listen mit echtem Konto/Browser abnehmen.
 - [ ] Offiziell unterstütztes OAuth implementieren; API-Schlüssel können bereits optional im Browsertresor gespeichert werden.
 
 - [x] Editierbare Standardadressen und schnittstellenbezogene Adressentwürfe ergänzen (0.17.1).

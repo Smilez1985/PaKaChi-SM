@@ -39,7 +39,7 @@ Für Generator und Rigging werden eigene Routen gespeichert. Seit 0.21.0 gibt es
 
 ## Anthropic und Verbindungsgrenzen
 
-Anthropic verwendet `x-api-key`, `anthropic-version: 2023-06-01` und den Header für direkten Browserzugriff. Workspace-gebundene API-Schlüssel verwenden; zusätzliche Workspace-Auswahl ist noch offen. `/v1/models` fordert höchstens 1000 Einträge an; eine unvollständige Antwort wird abgewiesen. Modell-ID dann gegebenenfalls manuell eintragen. OAuth ist noch nicht umgesetzt; ein Chat-Abonnement bedeutet nicht automatisch API-Zugang.
+Anthropic verwendet `x-api-key`, `anthropic-version: 2023-06-01` und den Header für direkten Browserzugriff. Workspace-gebundene API-Schlüssel verwenden; zusätzliche Workspace-Auswahl ist noch offen. `/v1/models` lädt seit 0.39.0 Folgeseiten automatisch über `after_id` nach. Grenzen: 1000 Einträge je Seite, höchstens 10 Seiten und 5000 empfangene Einträge insgesamt (vor Deduplizierung), höchstens 1 MiB je Antwort. Der gemeinsame Timeout beträgt standardmäßig zehn Sekunden. Erst eine vollständige Liste wird übernommen; Fehler, Abbruch, wiederholte/falsche Cursor oder Grenzüberschreitungen verwerfen das gesamte Abfrageergebnis. Modell-IDs lassen sich weiterhin manuell eintragen. OAuth ist noch nicht umgesetzt; ein Chat-Abonnement bedeutet nicht automatisch API-Zugang.
 
 Der Browser spricht die angezeigte Adresse direkt an. CORS muss vom Dienst erlaubt werden; bei Ollama über `OLLAMA_ORIGINS`, bei LM Studio über die Servereinstellungen. Organisationsrichtlinien werden nicht umgangen. Schlüssel außerhalb von Loopback erfordern HTTPS. Große Modelllisten können an Antwortgrenzen scheitern. Echte Modell-/Konto-/Browserabnahme bleibt offen.
 
