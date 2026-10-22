@@ -12,6 +12,26 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.44.0] - 2026-10-22
+
+Zeitstempel: 2026-10-22T19:52:21+02:00 (Europe/Berlin)
+
+### Fixed
+
+- Originalwechsel aktualisiert Avatarname, Beschreibung und Modelltyp sowie 3D-Move-/Wiedergabeanzeige.
+- Animationen laufen bei niedriger Renderbildrate mit tatsächlich verstrichener Vordergrundzeit statt künstlicher Zeitlupe; Sichtbarkeitswechsel verhindern Nachholen von Hintergrundzeit.
+
+### Added
+
+- Zwei Tests für zeitgerechten Clip-Abschluss bei langsamen Frames und Zurücksetzen der Animationsuhr.
+
+### Changed
+
+- README, Design, Roadmap und Prüfberichte enthalten den ersten tatsächlichen GitHub-Browserbefund: zwei bestandene und fünf fehlgeschlagene Fälle, keine vollständige Abnahme.
+
+**Prüfung:** 235 Tests und Build bestanden. Browser-Folgelauf für die Korrekturen steht aus.
+
+
 ## [0.43.0] - 2026-10-22
 
 Zeitstempel: 2026-10-22T14:14:40+02:00 (Europe/Berlin)
@@ -912,3 +932,5 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 [0.42.0]: PRUEFUNG-0.42.0.md
 
 [0.43.0]: PRUEFUNG-0.43.0.md
+
+[0.44.0]: PRUEFUNG-0.44.0.md

@@ -1,16 +1,16 @@
 # Prüfstand und Abnahme
 
-**Softwarestand: 0.43.0 · Dokumentationsabgleich: 22.10.2026.**
+**Softwarestand: 0.44.0 · Dokumentationsabgleich: 22.10.2026.**
 
 ## Nachgewiesen
 
 | Prüfung | Letzter Nachweis | Umfang und Grenze |
 | --- | --- | --- |
-| `npm test` | 0.43.0: 233 Tests bestanden | Player, Router, Studio-Daten, reale Three.js-Geometrie, DOM/Ereignisse mit happy-dom, Node-MCP und Erhaltungsprüfung. Kein gerenderter Browser. |
+| `npm test` | 0.44.0: 235 Tests bestanden | Player, Router, Studio-Daten, reale Three.js-Geometrie, DOM/Ereignisse mit happy-dom, Node-MCP und Erhaltungsprüfung. Kein gerenderter Browser. |
 | `npm run test:legacy` | 0.9.0: beide Programme bestanden | Originalplayer-Steuerung, MQTT-Verhalten und Lebenszyklus. |
-| `npm run build` | 0.43.0: bestanden | TypeScript und Produktionsbuild; Vite meldet weiterhin das große gemeinsame JS-Bundle (rund 1,33 MB / 369 kB gzip). |
+| `npm run build` | 0.44.0: bestanden | TypeScript und Produktionsbuild; Vite meldet weiterhin das große gemeinsame JS-Bundle (rund 1,33 MB / 369 kB gzip). |
 | `npm run test:python` mit `PAKACHI_PYTHON` | 0.10.0: Integration bestanden | Echter Python-MCP-Prozess, eingebetteter aMQTT-Broker, produktiver MQTT-Client, Router und Studio-Editor. Acht Tools, Studio-Änderungen einschließlich gültiger/ungültiger Skalierung, fehlende Freigabe und Revisionskonflikte geprüft. |
-| Originaldateien | 0.43.0: bytegenau erhalten | 83 wiederhergestellte Dateien einschließlich exakt 72 Transformationsbildern. |
+| Originaldateien | 0.44.0: bytegenau erhalten | 83 wiederhergestellte Dateien einschließlich exakt 72 Transformationsbildern. |
 
 Vier neue Tests in 0.11.0 prüfen Hand-/Fußziele, feste Knochenabstände, den ganzen erkannten Körper, Hals/Kopf und Rumpf, tatsächliche Hautverformung, gespeicherte Posen sowie direktes Ziehen/Drehen mit Undo. Nutzertest von 0.10.0 meldete auseinanderziehbare Knochen und Probleme mit der Ausrichtung; die visuelle Nachprüfung der Korrektur 0.11.0 steht aus.
 
@@ -120,3 +120,10 @@ Zwischenprüfung vor 0.20.0 (17.10.2026): Acht Tresortests einschließlich zweie
 `npm run test:e2e` umfasst sieben Fälle in drei Dateien. `npx playwright test --list` erkennt alle sieben; TypeScript/Build bestehen. Sechs vorhandene Fälle wurden lokal gestartet, scheiterten aber vor dem Seitenaufruf beim Chromium-Prozessstart: `socket() failed: Operation not permitted`. Der Browser wurde zuvor erfolgreich vom zweiten Downloadserver installiert. Das ist ein Umgebungsfehler, kein bestandener Anwendungstest.
 
 Der neue Workflow [verify.yml](../.github/workflows/verify.yml) installiert Chromium samt Betriebssystemabhängigkeiten auf einem GitHub-Runner und stellt `browser-evidence` bereit. HTML-Bericht öffnen und bei Fehlern die Traces mit `npx playwright show-trace <datei.zip>` ansehen. Ein erfolgreicher Lauf muss zusätzlich auf sichtbare Fehler und brauchbares Mausgefühl geprüft werden. Echte Cloud-Inferenz wird von den simulierten Anbieterfällen nicht abgenommen. [Prüfbericht](PRUEFUNG-0.43.0.md).
+
+
+## Erster echter Chromium-Lauf und Korrektur 0.44.0
+
+[GitHub-Lauf 39776867884](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/39776867884) für 0.43.0: Node-Tests und Build erfolgreich; Browserstart erfolgreich, **2 von 7 E2E-Fällen bestanden**. Original-Transformation und KI-Sequenzvorschau sind damit erstmals im automatisierten Browser nachgewiesen. Fünf Fälle sind fehlgeschlagen; der Gesamtlauf ist rot.
+
+0.44.0 korrigiert die fehlenden Original-Metadaten und die bei niedriger Bildrate künstlich verlangsamte Animationszeit. 235 Node-Tests und Build bestehen. Der Folgelauf bleibt bis zur tatsächlichen Auswertung offen; die zwei bestandenen Fälle sind keine vollständige Maus-/UI-Abnahme. [Prüfbericht](PRUEFUNG-0.44.0.md).

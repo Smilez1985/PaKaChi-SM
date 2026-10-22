@@ -1,3 +1,4 @@
+import {AnimationClock} from './animation-clock.ts';
 import * as THREE from 'three';
 import { StudioView } from './studio-view.ts';
 import type { StudioRig } from './studio-rig.ts';
@@ -67,7 +68,8 @@ export class Viewer {
   private model: THREE.Object3D | null = null;
   private skeleton: THREE.SkeletonHelper | null = null;
   private frame = 0;
-  private last = performance.now();
+  private readonly clock = new AnimationClock(performance.now());
+  private readonly visibilityChanged = () => this.clock.reset(performance.now());
   private readonly resize: ResizeObserver;
   onFrame: (delta: number) => void = () => {};
 
@@ -109,10 +111,11 @@ export class Viewer {
       this.camera.updateProjectionMatrix();
     });
     this.resize.observe(container);
+    document.addEventListener('visibilitychange',this.visibilityChanged);
     const render = (now: number) => {
       this.frame = requestAnimationFrame(render);
-      const delta = Math.min((now - this.last) / 1000, 0.05);
-      this.last = now;
+      const elapsed = this.clock.tick(now);
+      const delta = document.hidden ? 0 : elapsed;
       this.onFrame(delta);
       this.controls.update();
       this.renderer.render(this.scene, this.camera);
@@ -171,6 +174,7 @@ export class Viewer {
   }
   dispose(): void {
     cancelAnimationFrame(this.frame);
+    document.removeEventListener('visibilitychange',this.visibilityChanged);
     this.resize.disconnect();
     this.mouse.dispose();
     this.controls.dispose();
