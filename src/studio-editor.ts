@@ -7,7 +7,7 @@ import {flagAffectedPoses,moveReview,reviewLabels} from './studio-review.ts';
 import * as T from 'three';
 import {detectJoints,detectConnections,edgeKey} from './studio-detection.ts';
 import { connectedPoints, StudioHistory, FIGURE_TRACK, validFigureScale, validBendLimit } from './studio-data.ts';
-import type { StudioData, StudioProject, Transform, ControlPoint } from './studio-data.ts';
+import type { StudioData, StudioProject, Transform, ControlPoint, StudioMove } from './studio-data.ts';
 import { StudioRig } from './studio-rig.ts';
 import type { StudioView } from './studio-view.ts';
 import type { Move } from './catalog.ts';
@@ -29,7 +29,8 @@ export class StudioEditor {
   private rotate=false;
   private gesturePositions=new Map<string,T.Vector3>();
   private inspectionOrigin:Record<string,Transform>|null=null;
-  private timeline:{move:Move;time:number;preview:boolean}|null=null;
+  private proposalOrigin:Record<string,Transform>|null=null;
+  private timeline:{move:Move;time:number;preview:boolean;sequence?:StudioMove}|null=null;
   private gesture:Snapshot|null=null;
   private gesturePosition:T.Vector3|null=null;
   get interactionActive(){return this.playing||!!this.gesture;}
@@ -63,27 +64,27 @@ export class StudioEditor {
   get data(){return this.rig.data;}
   get playing(){return !!this.timeline;}
   get current(){return this.timeline?.move ?? null;}
-  get duration(){const m=this.rig.data.moves.find(m=>m.id===this.timeline?.move.id);return m?this.rig.duration(m):0;}
+  get duration(){const m=this.timeline?.sequence??this.rig.data.moves.find(m=>m.id===this.timeline?.move.id);return m?this.rig.duration(m):0;}
   get progress(){return this.duration ? this.timeline!.time/this.duration:0;}
   private snapshot():Snapshot{return {data:structuredClone(this.data),values:this.rig.capture()};}
   private restore(s:Snapshot){this.rig.data=structuredClone(s.data);this.rig.reset();this.rig.apply(s.values);this.mark();this.render();}
   private mark(){this.moveCheck?.abort();this.revision++;this.dirty=true;this.hooks.changed();}
   private mutate(fn:()=>void){const before=this.snapshot();fn();flagAffectedPoses(before.data,this.data);this.history.push(before);this.mark();this.render();}
   enter(){this.revision++;this.hooks.suspend();this.stopMove();this.active=true;this.rig.reset();if(this.data.draft)this.rig.apply(this.data.draft);this.view.setEnabled(true);this.render();}
-  leave(){this.moveCheck?.abort();this.libraryRequest?.abort();this.agentEditing=false;this.revision++;if(this.active&&!this.playing)this.data.draft=this.rig.capture();this.active=false;this.stopMove();this.view.setEnabled(false);this.rig.restoreSource();this.hooks.resume();}
-  stopMove(){if(this.inspectionOrigin){this.rig.apply(this.inspectionOrigin);this.inspectionOrigin=null;this.view.refresh();}this.timeline=null;this.paused=false;this.view.setEnabled(this.active);}
+  leave(){this.moveCheck?.abort();this.libraryRequest?.abort();this.agentEditing=false;this.revision++;if(this.active&&this.proposalOrigin)this.data.draft=structuredClone(this.proposalOrigin);else if(this.active&&!this.playing)this.data.draft=this.rig.capture();this.active=false;this.stopMove();this.view.setEnabled(false);this.rig.restoreSource();this.hooks.resume();}
+  stopMove(){if(this.proposalOrigin){this.rig.apply(this.proposalOrigin);this.proposalOrigin=null;this.view.refresh();}if(this.inspectionOrigin){this.rig.apply(this.inspectionOrigin);this.inspectionOrigin=null;this.view.refresh();}this.timeline=null;this.paused=false;this.view.setEnabled(this.active);}
   stopPreview(){this.stopMove();this.render();}
   play(id:string,preview=false):boolean {
     const move=this.data.moves.find(m=>m.id===id);if(!move)return false;
     this.stopMove();this.hooks.suspend();this.rig.reset();this.timeline={move:{id:move.id,name:move.name,loop:move.loop,clip:move.id},time:0,preview};this.paused=false;
     this.rig.apply(this.rig.sample(move,0));this.view.setEnabled(false);this.render();return true;
   }
-  update(delta:number){if(!this.timeline||this.paused)return;const t=this.timeline,move=this.data.moves.find(m=>m.id===t.move.id)!;t.time+=delta*this.speed;const duration=this.rig.duration(move);
+  update(delta:number){if(!this.timeline||this.paused)return;const t=this.timeline,move=t.sequence??this.data.moves.find(m=>m.id===t.move.id)!;t.time+=delta*this.speed;const duration=this.rig.duration(move);
     if(t.time>=duration){if(move.loop)t.time%=duration;else {t.time=duration;this.rig.apply(this.rig.sample(move,duration));if(t.preview){this.paused=true;this.stopPreview();}else{this.stopMove();this.rig.restoreSource();this.hooks.resume();}return;}}
     this.rig.apply(this.rig.sample(move,t.time));
   }
   togglePause(){this.paused=!this.paused;}
-  seek(ratio:number){if(!this.timeline)return;const move=this.data.moves.find(m=>m.id===this.timeline!.move.id)!;this.timeline.time=T.MathUtils.clamp(ratio,0,.999999)*this.duration;this.rig.apply(this.rig.sample(move,this.timeline.time));}
+  seek(ratio:number){if(!this.timeline)return;const move=this.timeline.sequence??this.data.moves.find(m=>m.id===this.timeline!.move.id)!;this.timeline.time=T.MathUtils.clamp(ratio,0,.999999)*this.duration;this.rig.apply(this.rig.sample(move,this.timeline.time));}
   setSpeed(value:number){this.speed=T.MathUtils.clamp(value,.25,2);}
   private addPoint(position:T.Vector3,mesh?:number){if(!this.edit||this.playing)return;if(this.data.points.length>=256){this.hooks.feedback('Höchstens 256 Kontrollpunkte pro Projekt.');return;}
     this.mutate(()=>{const p:ControlPoint={id:uid(),name:`Punkt ${this.data.points.length+1}`,kind:'surface',rest:position.toArray(),size:.015,radius:.12,...(mesh!==undefined?{mesh}:{})};this.data.points.push(p);for(const pose of this.data.poses)pose.values[p.id]={position:[...p.rest],rotation:[0,0,0,1]};if(this.data.draft)this.data.draft[p.id]={position:[...p.rest],rotation:[0,0,0,1]};this.selected=p.id;this.rig.reset();});
@@ -309,6 +310,17 @@ export class StudioEditor {
     if(!changes.length)return;
     this.mutate(()=>{for(const {move,poses} of changes)move.poses=poses;});
   }
+  previewSequence(id:string,poses:string[],session:string,expectedRevision:number):()=>void {
+    if(this.disposed||!this.active||this.edit||this.interactionActive||this.moveCheck||session!==this.session||expectedRevision!==this.revision)throw Error('Studio ist beschäftigt oder der Stand hat sich geändert.');
+    const move=this.data.moves.find(m=>m.id===id);
+    if(!move||!validMoveSequenceUpdates([{id,poses}])||poses.some(id=>!this.data.poses.some(p=>p.id===id)))throw Error('Eine Bewegung benötigt 2 bis 100 vorhandene Posen.');
+    const sequence:StudioMove={...move,poses:[...poses]},values=this.rig.sample(sequence,0),origin=this.rig.capture();
+    this.hooks.suspend();this.rig.reset();this.proposalOrigin=origin;
+    const timeline=this.timeline={move:{id:move.id,name:move.name,loop:move.loop,clip:move.id},sequence,time:0,preview:true};
+    this.paused=false;this.rig.apply(values);this.view.setEnabled(false);this.render();
+    // Only stop this preview; a late panel cleanup must not interrupt a newer player action.
+    return ()=>{if(this.timeline===timeline)this.stopPreview();};
+  }
   previewMoveAt(id:string,time:number,expectedRevision=this.revision){
     if(this.disposed||!this.active||this.gesture||this.moveCheck||this.revision!==expectedRevision)throw Error('Studio-Stand hat sich geändert. Prüfung erneut starten.');
     const move=this.data.moves.find(m=>m.id===id);if(!move||!Number.isFinite(time)||time<0||time>this.rig.duration(move))throw Error('Ungültiger Prüfzeitpunkt.');
@@ -347,7 +359,7 @@ export class StudioEditor {
     const value=this.exportProject();
     const url=URL.createObjectURL(new Blob([JSON.stringify(value)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download=`${this.project.avatar.id}.pakachi.json`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);this.dirty=false;this.render();this.hooks.feedback('Studio-Projekt mit Modell, Kontrollpunkten, Posen und Bewegungen heruntergeladen.');
   }
-  dispose(){this.moveCheck?.abort();this.libraryRequest?.abort();this.disposed=true;this.view.dispose();this.host.replaceChildren();}
+  dispose(){if(this.proposalOrigin)this.stopMove();this.moveCheck?.abort();this.libraryRequest?.abort();this.disposed=true;this.view.dispose();this.host.replaceChildren();}
 }
 export function encodeModel(buffer:ArrayBuffer):string {let s='';const bytes=new Uint8Array(buffer);for(let i=0;i<bytes.length;i+=16384)s+=String.fromCharCode(...bytes.subarray(i,i+16384));return btoa(s);}
 export function decodeModel(base64:string):ArrayBuffer {return Uint8Array.from(atob(base64),c=>c.charCodeAt(0)).buffer;}

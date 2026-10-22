@@ -110,3 +110,25 @@ test('batch parser enforces count, total references and strict nested fields; ed
  for(const invalidUpdates of [undefined,null,[],[...updates,{id:'other',poses:[a,a]}],updates.map((v,i)=>i? v:{...v,poses:Array(26).fill(a)}),[{id:'move-0',poses:[a,a],commands:[]}],[null]])reject({updates:invalidUpdates});
  reject({id:'move-0'});reject({expectedRevision:0});reject({session:'stale'});f.grant(false);reject({});f.grant();f.view.onStart();reject({});f.view.onEnd();editor.play('move-0',true);reject({});editor.stopPreview();run({action:'set_mode',mode:'rig'});reject({});editor.dispose();f.w.happyDOM.abort();
 });
+
+test('proposal animation samples the temporary sequence and restores the editing pose without revision or history changes',()=>{
+ const f=fixture(),{editor,rig,run}=f;editor.enter();f.grant();run({action:'update_point',id:'$figure',position:[0,0,0]});const a=run({action:'save_pose',seconds:1}).id!;run({action:'update_point',id:'$figure',position:[1,0,0]});const b=run({action:'save_pose',seconds:2}).id!;run({action:'create_move',id:'wave',name:'Wave',poses:[a,b]});run({action:'update_point',id:'$figure',position:[.25,0,0]});
+ const before=structuredClone(rig.data),origin=rig.capture(),state=editor.inspect(),poses=[b,a,b];const stop=editor.previewSequence('wave',poses,state.session,state.revision);poses[0]=a;
+ assert.equal(editor.duration,3);assert.equal(rig.capture().$figure.position[0],1);editor.update(.5);assert.ok(Math.abs(rig.capture().$figure.position[0]-.5)<1e-6);editor.seek(2/3);assert.ok(Math.abs(rig.capture().$figure.position[0]-.5)<1e-6);editor.togglePause();const paused=rig.capture();editor.update(.1);assert.deepEqual(rig.capture(),paused);assert.throws(()=>run({action:'update_move',id:'wave',poses:[b,a]}));
+ stop();assert.deepEqual(rig.capture(),origin);assert.deepEqual(rig.data,before);assert.deepEqual(editor.inspect(),state);editor.dispose();f.w.happyDOM.abort();
+});
+test('preview completion, loop stop and late cleanup preserve the right playback ownership',()=>{
+ const f=fixture(),{editor,run,rig}=f;editor.enter();f.grant();const a=run({action:'save_pose'}).id!;run({action:'update_point',id:'$figure',position:[1,0,0]});const b=run({action:'save_pose'}).id!;run({action:'create_move',id:'once',name:'Once',poses:[a,b]});run({action:'create_move',id:'loop',name:'Loop',poses:[a,b],loop:true});const state=editor.inspect(),origin=rig.capture();
+ const oldStop=editor.previewSequence('once',[b,a],state.session,state.revision);editor.update(2);assert.equal(editor.playing,false);assert.deepEqual(rig.capture(),origin);
+ const stop=editor.previewSequence('loop',[b,a],state.session,state.revision);editor.update(3);assert.equal(editor.playing,true);oldStop();assert.equal(editor.playing,true);stop();assert.deepEqual(rig.capture(),origin);
+ editor.play('loop',true);stop();assert.equal(editor.playing,true);editor.stopPreview();editor.dispose();f.w.happyDOM.abort();
+});
+test('invalid, stale or busy proposal previews are rejected before changing the live pose',()=>{
+ const f=fixture(),{editor,run,rig}=f;editor.enter();f.grant();const a=run({action:'save_pose'}).id!;run({action:'create_move',id:'wave',name:'Wave',poses:[a,a]});const state=editor.inspect();
+ for(const [id,poses,session,revision] of [['missing',[a,a],state.session,state.revision],['wave',[a,'missing'],state.session,state.revision],['wave',[a],state.session,state.revision],['wave',[a,a],'old',state.revision],['wave',[a,a],state.session,0]] as const){const before=rig.capture();assert.throws(()=>editor.previewSequence(id,[...poses],session,revision));assert.deepEqual(rig.capture(),before);assert.equal(editor.playing,false);}
+ f.view.onStart();assert.throws(()=>editor.previewSequence('wave',[a,a],state.session,state.revision));f.view.onEnd();run({action:'set_mode',mode:'rig'});assert.throws(()=>editor.previewSequence('wave',[a,a],editor.session,editor.inspect().revision));editor.dispose();f.w.happyDOM.abort();
+});
+test('leaving and disposal end proposal previews without saving the preview as the editing draft',()=>{
+ for(const action of ['leave','dispose']){const f=fixture(),{editor,run,rig}=f;editor.enter();f.grant();const a=run({action:'save_pose'}).id!;run({action:'update_point',id:'$figure',position:[1,0,0]});const b=run({action:'save_pose'}).id!;run({action:'create_move',id:'wave',name:'Wave',poses:[a,b]});run({action:'update_point',id:'$figure',position:[.25,0,0]});const origin=rig.capture(),state=editor.inspect();editor.previewSequence('wave',[b,a],state.session,state.revision);
+ if(action==='leave'){editor.leave();editor.enter();assert.deepEqual(rig.capture(),origin);editor.dispose();}else{editor.dispose();assert.deepEqual(rig.capture(),origin);}assert.equal(editor.playing,false);f.w.happyDOM.abort();}
+});

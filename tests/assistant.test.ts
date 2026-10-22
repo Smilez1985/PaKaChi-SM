@@ -84,3 +84,12 @@ test('panel shows local before/after rows, applies once and blocks stale sequenc
   panel.dispose();w.happyDOM.abort();
  }
 });
+
+test('panel previews before/after locally, stops before applying and cleans up on profile changes',async()=>{
+ const {w,host}=setup();const events:string[]=[],command={session:'test',expectedRevision:2,action:'update_move' as const,id:'wave',poses:['b','a']};
+ const panel=mountAssistantPanel(host,(method,args)=>{if(method==='edit_studio'){events.push('apply');return {};}
+ const items=args?.section==='moves'?[{id:'wave',name:'Wave',poses:['a','b']}]:[{id:'a',name:'A'},{id:'b',name:'B'}];return {...info,open:true,items,total:items.length,nextOffset:null};},()=> 'de',w.localStorage,async()=>({text:'Proposal',proposal:command,reads:1}),(id,poses,session,revision)=>{assert.equal(id,'wave');assert.equal(session,'test');assert.equal(revision,2);events.push(poses.join(','));return ()=>{events.push('stop');};});
+ const send=async()=>{host.querySelector<HTMLTextAreaElement>('textarea')!.value='task';host.querySelector('form')!.dispatchEvent(new w.Event('submit',{cancelable:true}) as any);await new Promise(r=>setTimeout(r,0));};await send();assert.deepEqual(events,[]);
+ host.querySelector<HTMLButtonElement>('[data-sequence-preview="before"]')!.click();host.querySelector<HTMLButtonElement>('[data-sequence-preview="after"]')!.click();host.querySelector<HTMLButtonElement>('#assistant-apply')!.click();assert.deepEqual(events,['a,b','stop','b,a','stop','apply']);
+ await send();host.querySelector<HTMLButtonElement>('[data-sequence-preview="after"]')!.click();w.dispatchEvent(new w.Event('pakachi-providers'));assert.equal(events.at(-1),'stop');assert.equal(host.querySelector('#assistant-preview-stop'),null);panel.dispose();w.happyDOM.abort();
+});

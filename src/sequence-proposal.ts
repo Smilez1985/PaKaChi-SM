@@ -33,11 +33,12 @@ export function compareSequenceProposal(command:StudioCommand,rpc:AssistantRPC):
   return {id:update.id,name:move.name,before:steps(move.poses),after:steps(update.poses)};
  });
 }
-export function renderSequenceComparison(host:HTMLElement,rows:SequenceComparison[],language:'de'|'en'){
+export function renderSequenceComparison(host:HTMLElement,rows:SequenceComparison[],language:'de'|'en',preview?:(row:SequenceComparison,after:boolean)=>void){
  const t=(de:string,en:string)=>language==='de'?de:en;
  const title=document.createElement('h4');title.textContent=t('Posenfolgen: vorher und nachher','Pose sequences: before and after');host.append(title);
  for(const row of rows){
   const heading=document.createElement('h5');heading.textContent=`${row.name} [${row.id}]`;host.append(heading);
+  if(preview)for(const after of [false,true]){const button=document.createElement('button');button.type='button';button.dataset.sequencePreview=after?'after':'before';button.textContent=after?t('Nachher abspielen','Play after'):t('Vorher abspielen','Play before');button.onclick=()=>preview(row,after);host.append(button);}
   const table=document.createElement('table'),head=document.createElement('thead'),header=document.createElement('tr');
   for(const label of [t('Schritt','Step'),t('Vorher','Before'),t('Nachher','After')]){const cell=document.createElement('th');cell.scope='col';cell.textContent=label;header.append(cell);}head.append(header);table.append(head);
   const body=document.createElement('tbody');
@@ -46,5 +47,5 @@ export function renderSequenceComparison(host:HTMLElement,rows:SequenceCompariso
   }
   table.append(body);host.append(table);
  }
- const note=document.createElement('p');note.textContent=t('Vergleich der Reihenfolge, keine Bewegungsvorschau. Alle Änderungen werden gemeinsam übernommen und gemeinsam rückgängig gemacht.','Sequence comparison, not a motion preview. All edits are applied together and undone together.');host.append(note);
+ const note=document.createElement('p');note.textContent=preview?t('Vorschau verändert keine gespeicherte Bewegung. Vor dem Übernehmen wird die Bearbeitungspose wiederhergestellt.','Preview does not change saved motion. The editing pose is restored before applying.'):t('Vergleich der Reihenfolge, keine Bewegungsvorschau. Alle Änderungen werden gemeinsam übernommen und gemeinsam rückgängig gemacht.','Sequence comparison, not a motion preview. All edits are applied together and undone together.');host.append(note);
 }

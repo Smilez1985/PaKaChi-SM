@@ -12,6 +12,23 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.42.0] - 2026-10-22
+
+Zeitstempel: 2026-10-22T10:21:26+02:00 (Europe/Berlin)
+
+### Added
+
+- Lokale animierte Vorher-/Nachher-Vorschau für KI-Sequenzvorschläge am Studio-Modell, einschließlich vorhandener Tempo-/Pause-/Seek-Steuerung.
+- Temporäre kopierte Sequenz mit Sitzungs-/Revisionsprüfung; Bearbeitungspose nach Ende, Stopp, Panelwechsel und vor Übernahme wiederherstellen.
+- Fünf Tests für Sampling, Wiederherstellung, Konflikte, Lebenszyklus und Assistentenpanel.
+
+### Changed
+
+- README, Design, Roadmap, Studio-Anleitung und Prüfstand aktualisiert. Vorschauen ändern weder gespeicherte Moves noch Revision oder Undo-Verlauf.
+
+**Prüfung:** 233 Tests und Build bestanden. Visuelle Browser- und echte Anbieterabnahme bleiben offen.
+
+
 ## [0.41.0] - 2026-10-22
 
 Zeitstempel: 2026-10-22T08:31:15+02:00 (Europe/Berlin)
@@ -874,3 +891,5 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 [0.40.0]: PRUEFUNG-0.40.0.md
 
 [0.41.0]: PRUEFUNG-0.41.0.md
+
+[0.42.0]: PRUEFUNG-0.42.0.md

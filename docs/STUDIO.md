@@ -235,4 +235,13 @@ Der Assistent kann mehrere bestehende Moves in einem Vorschlag zusammenfassen. P
 
 Bei einzelnen oder gebündelten Sequenzänderungen zeigt der Assistent nun eine Tabelle je Bewegung: **Schritt**, **Vorher**, **Nachher**. Bewegungs- und Posennamen stehen mit ihren IDs dabei, damit gleichnamige Elemente unterscheidbar bleiben. Ein Gedankenstrich kennzeichnet einen fehlenden Schritt auf einer Seite. Wiederholte Posen erscheinen für jedes Vorkommen einzeln.
 
-Die Tabelle liest den aktuellen Stand lokal aus und bewegt die Figur nicht. Das vollständige Befehlspaket steht weiterhin darunter. Erst „Vorgeschlagene Änderung übernehmen“ führt es aus. Bei veraltetem Stand oder nicht mehr vorhandenen Posen wird keine Übernahme angeboten; Aufgabe erneut senden. Änderungen nach Anzeige werden beim Übernehmen nochmals über die Revision geprüft. Nach Übernahme oder Zurücksetzen des Assistenten wird die Vergleichsansicht entfernt. Die animierte Vorher-/Nachher-Vorschau steht noch aus.
+Die Tabelle liest den aktuellen Stand lokal aus und bewegt die Figur nicht. Das vollständige Befehlspaket steht weiterhin darunter. Erst „Vorgeschlagene Änderung übernehmen“ führt es aus. Bei veraltetem Stand oder nicht mehr vorhandenen Posen wird keine Übernahme angeboten; Aufgabe erneut senden. Änderungen nach Anzeige werden beim Übernehmen nochmals über die Revision geprüft. Nach Übernahme oder Zurücksetzen des Assistenten wird die Vergleichsansicht entfernt. Seit 0.42.0 ergänzen Abspielknöpfe die Vorschau am Modell; siehe folgenden Abschnitt.
+
+
+## KI-Sequenzvorschläge am Modell ansehen (0.42.0)
+
+Unter dem Bewegungsnamen im Vergleich stehen **Vorher abspielen** und **Nachher abspielen**. Öffne dazu das Studio im Modus „Figur bewegen“. Die Knöpfe spielen die jeweilige Folge direkt am Modell ab; bei mehreren vorgeschlagenen Moves wählst du jede Bewegung einzeln. Tempo, Pause und Abspielposition können über die vorhandene Wiedergabesteuerung benutzt werden.
+
+**Vorschau beenden** stellt die Bearbeitungspose vor der Vorschau wieder her. Ein nicht wiederholter Move beendet die Vorschau automatisch; eine Schleife läuft bis zum Stoppen. Ein Wechsel von Vorher zu Nachher beendet zunächst die bisherige Vorschau. Übernehmen, Schließen oder Zurücksetzen des Assistenten beendet ebenfalls dessen Vorschau. Der normale Studio-Stopp funktioniert weiterhin.
+
+Die Vorschau speichert nichts und benötigt keine KI-Schreibfreigabe. Übernehmen benötigt diese Freigabe weiterhin und prüft die Revision erneut. Während einer anderen Wiedergabe, einer Ziehgeste, einer Beugegrenzenprüfung oder im Gelenkbearbeitungsmodus startet die Vorschau nicht. Bei veraltetem Stand die Aufgabe erneut senden. Die Funktion ist technisch geprüft; die gerenderte Browserabnahme steht aus.

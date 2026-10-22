@@ -4,7 +4,7 @@ Teil der [Blaupause](README.md) · [Roadmap](ROADMAP.md) · [Changelog](CHANGELO
 
 ## Status und Begriffe
 
-Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.41.0: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau, automatische Anatomieerkennung und die Qualitätsabnahme der angeschlossenen lokalen KI-Generierung bleiben offen.
+Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.42.0: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau, automatische Anatomieerkennung und die Qualitätsabnahme der angeschlossenen lokalen KI-Generierung bleiben offen.
 
 - **PaKaChi:** Panda-KI-Chimera, das übergeordnete Projekt.
 - **PaKaChi-SM:** StateMaschine mit Avatar-Player und integriertem Studio.
@@ -24,7 +24,7 @@ Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich gen
 | Generierung | Lokaler TripoSR-Dienst, Bildauswahl, getrennte Vorschau, Vorprüfungs-Fallbacks, expliziter weiterer Auftrag | Echte GPU-/Qualitätsabnahme, Cloud-Generatoren, Korrekturprompts und Rigging |
 | Übernahme | Revisionsschutz, ein Modellwechsel-Rücksprung, vorbereitete 3D-Installation mit Rückabwicklung | Gerenderte Abnahme, Originalplayer-Neustart und GPU-Kontextverlust |
 
-Prüfnachweis für Software 0.41.0: **228 Tests und Build bestanden**. Das belegt keine gerenderte Browser-, Anbieter- oder GPU-Abnahme. Projektformat bleibt Version 1. Freie Punkte/Posen aus 0.22.0/0.23.0 benötigen wegen der korrigierten Normalisierungsreihenfolge eine visuelle Kontrolle; keine automatische Migration. [Prüfbericht](PRUEFUNG-0.41.0.md).
+Prüfnachweis für Software 0.42.0: **233 Tests und Build bestanden**. Das belegt keine gerenderte Browser-, Anbieter- oder GPU-Abnahme. Projektformat bleibt Version 1. Freie Punkte/Posen aus 0.22.0/0.23.0 benötigen wegen der korrigierten Normalisierungsreihenfolge eine visuelle Kontrolle; keine automatische Migration. [Prüfbericht](PRUEFUNG-0.42.0.md).
 
 ## Bestehender PaKaChi-Avatar
 
@@ -437,4 +437,15 @@ Vor der Freigabe von `update_move` oder `update_moves` liest das Assistentenpane
 
 Eine Tabelle je Bewegung zeigt Namen und IDs sowie Vorher-/Nachher-Schritte. Wiederholungen bleiben einzeln sichtbar; fehlende Gegenstücke beim Einfügen/Entfernen werden mit einem Gedankenstrich dargestellt. Projekttexte werden ausschließlich als Textknoten eingefügt. Tabellenbeschriftungen sind Deutsch/Englisch; benutzerdefinierte Namen werden nicht übersetzt. Das vollständige JSON bleibt zur Kontrolle verfügbar.
 
-Die Vergleichsansicht ist rein lesend und lokal, ohne zusätzlichen Anbieteraufruf oder Änderung der Figur. Bestätigung führt weiterhin genau den geprüften Vorschlag über den revisionsgeschützten Editorpfad aus. Eine zwischenzeitliche Änderung wird dort erneut abgewiesen. Die Tabelle ersetzt keine gerenderte Bewegungsvorschau; diese bleibt offen.
+Die Vergleichsansicht ist rein lesend und lokal, ohne zusätzlichen Anbieteraufruf oder Änderung der Figur. Bestätigung führt weiterhin genau den geprüften Vorschlag über den revisionsgeschützten Editorpfad aus. Eine zwischenzeitliche Änderung wird dort erneut abgewiesen. Die Tabelle bleibt ein Reihenfolgevergleich; seit 0.42.0 ergänzen lokale Abspielknöpfe die Vorschau am Modell (siehe folgenden Abschnitt).
+
+
+## Temporäre Sequenzvorschau am Modell (0.42.0)
+
+Der Vergleich jedes betroffenen Moves bietet lokales Abspielen seiner bisherigen oder vorgeschlagenen Folge. Das Studio hält dafür eine kopierte temporäre Sequenz in der Wiedergabezeitleiste; die gespeicherte Move-Liste bleibt unverändert. Dauer, Interpolation, Schleifen, Tempo, Pause und Abspielposition verwenden dieselben Studio-Verfahren wie normale Moves.
+
+Vor dem Start prüft der Editor Sitzung, Revision, geöffneten Posenmodus, Ziele und Posen sowie laufende Interaktionen/Beugegrenzenprüfung. Der Nutzer startet die lokale Vorschau ausdrücklich; dafür ist keine KI-Schreibfreigabe erforderlich. Das Speichern des Vorschlags benötigt weiterhin die bestehende Freigabe. Während der Vorschau sind Bearbeitungen gesperrt.
+
+Die bisherige Bearbeitungspose wird separat gehalten und bei Stopp, Ende eines nicht wiederholten Moves, Wechsel der Vorschauseite, Übernahme oder Panel-Reset wiederhergestellt. Beim Verlassen des Studios wird die vorherige Bearbeitungspose als Entwurf erhalten. Modellabbau beendet die Vorschau ebenfalls. Ein verspäteter Aufräumaufruf darf keine inzwischen gestartete andere Wiedergabe stoppen.
+
+Die Vorschau erzeugt keine Revision, keinen Undo-Schritt und keine Änderung an gespeicherten Moves/Posen. Pakete werden Bewegung für Bewegung angesehen und weiterhin gemeinsam übernommen. Es gibt keine parallele geteilte 3D-Ansicht und keine automatische Bewegungskorrektur. Geometrie-/DOM-Tests bestehen; visuelle Browserabnahme bleibt offen.
