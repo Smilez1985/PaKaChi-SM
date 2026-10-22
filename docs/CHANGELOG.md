@@ -12,6 +12,23 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.43.0] - 2026-10-22
+
+Zeitstempel: 2026-10-22T14:14:40+02:00 (Europe/Berlin)
+
+### Added
+
+- GitHub-Actions-Prüflauf für Node-Tests, Build und Chromium-End-to-End-Tests mit begrenzter Laufzeit und Browserberichten.
+- Browser-Szenario für lokale KI-Sequenzvorschau, Wiederherstellung, Übernahme und Undo mit simuliertem Anbieter.
+
+### Changed
+
+- Playwright speichert Fehler-Traces/Screenshots und erstellt in CI einen HTML-Bericht; exklusive Tests sind dort gesperrt.
+- README, Design, Roadmap und Prüfstand dokumentieren Einrichtung und tatsächliche Prüfgrenzen.
+
+**Prüfung:** 233 Tests und Build bestanden; sieben Browserfälle aufgelistet. Lokaler Chromium-Start bleibt durch Socket-Berechtigungen blockiert; kein erfolgreicher Browserlauf behauptet.
+
+
 ## [0.42.0] - 2026-10-22
 
 Zeitstempel: 2026-10-22T10:21:26+02:00 (Europe/Berlin)
@@ -893,3 +910,5 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 [0.41.0]: PRUEFUNG-0.41.0.md
 
 [0.42.0]: PRUEFUNG-0.42.0.md
+
+[0.43.0]: PRUEFUNG-0.43.0.md

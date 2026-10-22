@@ -2,7 +2,7 @@
 
 **SM steht für StateMaschine.** PaKaChi ist die **Panda-KI-Chimera**, das übergeordnete Projekt. PaKaChi-SM vereint Avatar-Player, Model Zoo und das fest integrierte **PaKaChi-Avatar-Studio**.
 
-**Softwarestand: 0.42.0 · Entwicklungsstand, keine fertige Bild-zu-3D-Lösung.**
+**Softwarestand: 0.43.0 · Entwicklungsstand, keine fertige Bild-zu-3D-Lösung.**
 
 Der bestehende PaKaChi mit Tierform, humanoider Arbeitsform und allen 72 Transformationsbildern ist erhalten und beim Start ausgewählt. Mika und Nori sind separate technische 3D-Testavatare. Ein 3D-Modell des Original-PaKaChi und die Qualitätsabnahme echter KI-Ergebnisse stehen noch aus.
 
@@ -53,7 +53,7 @@ Seit 0.14.0 besteht zusätzlich der interne [Auftragskern](docs/AUFTRAE.md): fes
 
 ## Was aktuell funktioniert
 
-| Bereich | Stand 0.42.0 |
+| Bereich | Stand 0.43.0 |
 | --- | --- |
 | Player | Avatar-Auswahl, tatsächliche Bewegungen anzeigen, abspielen, pausieren, Tempo und Abspielposition ändern. |
 | Modelle | Mika/Nori mit Skeletten und Clips; eigene eigenständige GLB-Dateien laden oder hineinziehen, bis 50 MiB, lokal für die Sitzung. |
@@ -131,7 +131,7 @@ npx playwright install chromium
 npm run test:e2e
 ```
 
-Für 0.42.0 sind 233 Tests und der Build bestanden. Die unveränderten Original-Testprogramme wurden zuletzt in 0.9.0 geprüft. Die visuelle WebGL-/Mausabnahme ist wegen der Chromium-Startbeschränkung der bisherigen Ausführungsumgebung noch offen. Die reale Python-MCP-/MQTT-Integration mit Studio-Editor wurde zuletzt in 0.10.0 erfolgreich geprüft. Details und frühere Nachweise stehen im [Prüfstand](docs/PRUEFUNG.md).
+Für 0.43.0 sind 233 Tests und der Build bestanden. Die unveränderten Original-Testprogramme wurden zuletzt in 0.9.0 geprüft. Die visuelle WebGL-/Mausabnahme ist wegen der Chromium-Startbeschränkung der bisherigen Ausführungsumgebung noch offen. Die reale Python-MCP-/MQTT-Integration mit Studio-Editor wurde zuletzt in 0.10.0 erfolgreich geprüft. Details und frühere Nachweise stehen im [Prüfstand](docs/PRUEFUNG.md).
 
 ## Lizenz
 
@@ -188,3 +188,6 @@ Seit **0.41.0** zeigt der Assistent vorgeschlagene Posenfolgen zusätzlich als *
 
 
 Seit **0.42.0** lassen sich KI-Sequenzvorschläge vor der Übernahme am Studio-Modell abspielen: **Vorher abspielen**, **Nachher abspielen** und **Vorschau beenden**. Die Vorschau verändert keine gespeicherten Moves; Stoppen und Übernehmen stellen zuerst die vorherige Bearbeitungspose wieder her. Die visuelle Browserabnahme bleibt offen.
+
+
+Seit **0.43.0** ist ein [GitHub-Actions-Prüflauf](.github/workflows/verify.yml) für Tests, Build und Chromium vorbereitet. Sieben Browserfälle umfassen Originalplayer, 3D/Studio, Generierung mit simuliertem Dienst und die KI-Sequenzvorschau. Berichte und Fehler-Traces werden als `browser-evidence` aufbewahrt. Lokal: `npx playwright install --with-deps chromium`, dann `npm run test:e2e`. **Die Browserabnahme ist weiterhin offen:** In der bisherigen Umgebung blockiert `socket() failed: Operation not permitted` den Chromium-Start.

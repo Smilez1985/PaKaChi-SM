@@ -4,7 +4,7 @@ Teil der [Blaupause](README.md) · [Roadmap](ROADMAP.md) · [Changelog](CHANGELO
 
 ## Status und Begriffe
 
-Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.42.0: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau, automatische Anatomieerkennung und die Qualitätsabnahme der angeschlossenen lokalen KI-Generierung bleiben offen.
+Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.43.0: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau, automatische Anatomieerkennung und die Qualitätsabnahme der angeschlossenen lokalen KI-Generierung bleiben offen.
 
 - **PaKaChi:** Panda-KI-Chimera, das übergeordnete Projekt.
 - **PaKaChi-SM:** StateMaschine mit Avatar-Player und integriertem Studio.
@@ -24,7 +24,7 @@ Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich gen
 | Generierung | Lokaler TripoSR-Dienst, Bildauswahl, getrennte Vorschau, Vorprüfungs-Fallbacks, expliziter weiterer Auftrag | Echte GPU-/Qualitätsabnahme, Cloud-Generatoren, Korrekturprompts und Rigging |
 | Übernahme | Revisionsschutz, ein Modellwechsel-Rücksprung, vorbereitete 3D-Installation mit Rückabwicklung | Gerenderte Abnahme, Originalplayer-Neustart und GPU-Kontextverlust |
 
-Prüfnachweis für Software 0.42.0: **233 Tests und Build bestanden**. Das belegt keine gerenderte Browser-, Anbieter- oder GPU-Abnahme. Projektformat bleibt Version 1. Freie Punkte/Posen aus 0.22.0/0.23.0 benötigen wegen der korrigierten Normalisierungsreihenfolge eine visuelle Kontrolle; keine automatische Migration. [Prüfbericht](PRUEFUNG-0.42.0.md).
+Prüfnachweis für Software 0.43.0: **233 Tests und Build bestanden**. Das belegt keine gerenderte Browser-, Anbieter- oder GPU-Abnahme. Projektformat bleibt Version 1. Freie Punkte/Posen aus 0.22.0/0.23.0 benötigen wegen der korrigierten Normalisierungsreihenfolge eine visuelle Kontrolle; keine automatische Migration. [Prüfbericht](PRUEFUNG-0.43.0.md).
 
 ## Bestehender PaKaChi-Avatar
 
@@ -449,3 +449,12 @@ Vor dem Start prüft der Editor Sitzung, Revision, geöffneten Posenmodus, Ziele
 Die bisherige Bearbeitungspose wird separat gehalten und bei Stopp, Ende eines nicht wiederholten Moves, Wechsel der Vorschauseite, Übernahme oder Panel-Reset wiederhergestellt. Beim Verlassen des Studios wird die vorherige Bearbeitungspose als Entwurf erhalten. Modellabbau beendet die Vorschau ebenfalls. Ein verspäteter Aufräumaufruf darf keine inzwischen gestartete andere Wiedergabe stoppen.
 
 Die Vorschau erzeugt keine Revision, keinen Undo-Schritt und keine Änderung an gespeicherten Moves/Posen. Pakete werden Bewegung für Bewegung angesehen und weiterhin gemeinsam übernommen. Es gibt keine parallele geteilte 3D-Ansicht und keine automatische Bewegungskorrektur. Geometrie-/DOM-Tests bestehen; visuelle Browserabnahme bleibt offen.
+
+
+## Reproduzierbare Browserprüfung (0.43.0)
+
+Der Workflow `.github/workflows/verify.yml` führt auf Ubuntu 24.04 mit Node 24 zuerst `npm ci`, Node-Tests und Build aus. Anschließend installiert er die zur gesperrten Playwright-Version passenden Chromium-Abhängigkeiten und führt die Browserfälle aus. Auslöser sind Push auf main, Pull Requests auf main und manueller Start. Ein neuer Lauf derselben Referenz ersetzt einen noch laufenden älteren Versuch; Zeitgrenze 20 Minuten.
+
+Die Tests verwenden lokale Testdaten und simulierte Anbieterantworten, keine Kontoschlüssel oder reale Inferenz. Workflow-Rechte sind auf Lesen der Repository-Inhalte begrenzt. HTML-Bericht, Fehler-Screenshots, Traces und explizite Testbilder werden als `browser-evidence` für 14 Tage bereitgestellt. In CI werden versehentlich exklusiv markierte Tests abgewiesen; ein Vite-Server wird für den Lauf frisch gestartet.
+
+Das neue Szenario prüft einen echten Studio-/Assistentenablauf bis zur Übernahme und zum Undo. Die bloße Definition und Auflistung dieser Tests ist kein Browsernachweis. Der lokale Chromium-Prozess bricht weiterhin vor dem Seitenstart mit einer Socket-Berechtigungssperre ab; ein erfolgreicher Runner-Lauf und visuelle Prüfung bleiben erforderlich.

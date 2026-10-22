@@ -1,8 +1,14 @@
 # Roadmap – was kommt
 
-**Softwarestand: 0.42.0 · Abgleich: 22.10.2026.** Teil der [Blaupause](README.md).
+**Softwarestand: 0.43.0 · Abgleich: 22.10.2026.** Teil der [Blaupause](README.md).
 
 Ein Häkchen bedeutet implementiert; es ersetzt keine visuelle oder externe Live-Abnahme. Die Nachweise und Prüfgrenzen stehen im [Prüfstand](PRUEFUNG.md). Die Versionshistorie gehört ins [Changelog](CHANGELOG.md).
+
+## Automatisierte Browserprüfung
+
+- [x] GitHub-Actions-Workflow für Node-Tests, Build und Chromium-E2E mit HTML-Bericht, Fehler-Screenshots und Traces ergänzen (0.43.0).
+- [x] E2E-Szenario für Assistentenvorschlag → Vorher/Nachher → Wiederherstellung → Übernahme → Undo vorbereiten (0.43.0).
+- [ ] Sieben Browserfälle erfolgreich auf einem zugelassenen Runner ausführen und visuell auswerten. Die lokale Ausführungsumgebung blockiert Chromium weiterhin beim Socket-Aufbau; Testauflistung ist kein bestandener Lauf.
 
 ## Nächste Arbeitspakete
 
