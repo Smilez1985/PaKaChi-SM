@@ -69,3 +69,18 @@ test('assistant returns a multi-move transaction for one explicit approval witho
  const result=await runAssistant({profile:local,prompt:'Change both moves together',rpc(method){methods.push(method);return {...info,items:[{id:'wave',poses:['a','b']},{id:'nod',poses:['b','a']}]};},fetcher:async()=>response(requests++?call('edit_studio',{command}):call('get_studio',{section:'moves'}))});
  assert.deepEqual(result.proposal,command);assert.ok(!methods.includes('edit_studio'));
 });
+
+test('panel shows local before/after rows, applies once and blocks stale sequence comparisons',async()=>{
+ for(const stale of [false,true]){
+  const {w,host}=setup();let edits=0;const command={session:'test',expectedRevision:2,action:'update_move' as const,id:'wave',poses:['b','a','b']};
+  const panel=mountAssistantPanel(host,(method,args)=>{
+   if(method==='edit_studio'){edits++;assert.deepEqual(args?.command,command);return {};}
+   const data=args?.section==='moves'?[{id:'wave',name:'Wave',poses:['a','b']}]:[{id:'a',name:'Neutral'},{id:'b',name:'Raised'}];return {...info,open:true,revision:stale?3:2,items:data,total:data.length,nextOffset:null};
+  },()=> 'en',w.localStorage,async()=>({text:'Proposal',proposal:command,reads:1}));
+  host.querySelector<HTMLTextAreaElement>('textarea')!.value='task';host.querySelector('form')!.dispatchEvent(new w.Event('submit',{cancelable:true}) as any);await new Promise(r=>setTimeout(r,0));
+  const apply=host.querySelector<HTMLButtonElement>('#assistant-apply')!;assert.equal(edits,0);assert.equal(apply.hidden,stale);
+  if(!stale){assert.ok(host.querySelector('#assistant-sequence-comparison')!.textContent!.includes('Neutral [a]'));assert.equal(host.querySelectorAll('#assistant-sequence-comparison tbody tr').length,3);apply.click();apply.click();assert.equal(edits,1);assert.equal(host.querySelector('#assistant-sequence-comparison')!.childElementCount,0);}
+  else{apply.click();assert.equal(edits,0);}
+  panel.dispose();w.happyDOM.abort();
+ }
+});

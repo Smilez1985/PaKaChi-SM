@@ -4,7 +4,7 @@ Teil der [Blaupause](README.md) · [Roadmap](ROADMAP.md) · [Changelog](CHANGELO
 
 ## Status und Begriffe
 
-Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.40.0: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau, automatische Anatomieerkennung und die Qualitätsabnahme der angeschlossenen lokalen KI-Generierung bleiben offen.
+Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.41.0: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau, automatische Anatomieerkennung und die Qualitätsabnahme der angeschlossenen lokalen KI-Generierung bleiben offen.
 
 - **PaKaChi:** Panda-KI-Chimera, das übergeordnete Projekt.
 - **PaKaChi-SM:** StateMaschine mit Avatar-Player und integriertem Studio.
@@ -24,7 +24,7 @@ Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich gen
 | Generierung | Lokaler TripoSR-Dienst, Bildauswahl, getrennte Vorschau, Vorprüfungs-Fallbacks, expliziter weiterer Auftrag | Echte GPU-/Qualitätsabnahme, Cloud-Generatoren, Korrekturprompts und Rigging |
 | Übernahme | Revisionsschutz, ein Modellwechsel-Rücksprung, vorbereitete 3D-Installation mit Rückabwicklung | Gerenderte Abnahme, Originalplayer-Neustart und GPU-Kontextverlust |
 
-Prüfnachweis für Software 0.40.0: **223 Tests und Build bestanden**. Das belegt keine gerenderte Browser-, Anbieter- oder GPU-Abnahme. Projektformat bleibt Version 1. Freie Punkte/Posen aus 0.22.0/0.23.0 benötigen wegen der korrigierten Normalisierungsreihenfolge eine visuelle Kontrolle; keine automatische Migration. [Prüfbericht](PRUEFUNG-0.40.0.md).
+Prüfnachweis für Software 0.41.0: **228 Tests und Build bestanden**. Das belegt keine gerenderte Browser-, Anbieter- oder GPU-Abnahme. Projektformat bleibt Version 1. Freie Punkte/Posen aus 0.22.0/0.23.0 benötigen wegen der korrigierten Normalisierungsreihenfolge eine visuelle Kontrolle; keine automatische Migration. [Prüfbericht](PRUEFUNG-0.41.0.md).
 
 ## Bestehender PaKaChi-Avatar
 
@@ -429,3 +429,12 @@ Vertrag: [Anthropic Models API](https://platform.claude.com/docs/en/api/models/l
 Die gesamte Änderung nutzt einen gemeinsamen Editorpfad mit der Einzelbearbeitung. Sitzung, Revision, Studio-Freigabe und Posenmodus gelten für das komplette Paket; Wiedergabe und Ziehgesten sperren es. Eine tatsächliche Änderung erhöht die Revision einmal und erzeugt einen gemeinsamen Undo-/Redo-Schritt. Ein unverändertes Paket ist ohne neue Revision erfolgreich. Abgewiesene Pakete verändern weder Daten noch Undo-/Redo-Verlauf. Namen, Schleifenflags, Posenwerte und aktuelle Figur bleiben erhalten.
 
 Der integrierte Assistent zeigt das vollständige Paket als JSON-Vorschlag an und benötigt einmal die ausdrückliche Übernahme. Externe MCP-Clients verwenden die bestehende Studio-Freigabe. Das ist eine Transaktion für Sequenzänderungen, keine allgemeine Aktionsliste, keine gerenderte Vorher-/Nachher-Vorschau und kein Skelettumbau.
+
+
+## Lesbare Sequenzvorschläge (0.41.0)
+
+Vor der Freigabe von `update_move` oder `update_moves` liest das Assistentenpanel die aktuellen Moves und Posen lokal über paginierte `get_studio`-Abfragen. Jede Seite und eine abschließende Statusabfrage müssen zur vorgeschlagenen Sitzung/Revision und einem geöffneten Studio gehören. Fehlende Ziele, Posen oder inkonsistente Seiten verhindern das Angebot zur Übernahme.
+
+Eine Tabelle je Bewegung zeigt Namen und IDs sowie Vorher-/Nachher-Schritte. Wiederholungen bleiben einzeln sichtbar; fehlende Gegenstücke beim Einfügen/Entfernen werden mit einem Gedankenstrich dargestellt. Projekttexte werden ausschließlich als Textknoten eingefügt. Tabellenbeschriftungen sind Deutsch/Englisch; benutzerdefinierte Namen werden nicht übersetzt. Das vollständige JSON bleibt zur Kontrolle verfügbar.
+
+Die Vergleichsansicht ist rein lesend und lokal, ohne zusätzlichen Anbieteraufruf oder Änderung der Figur. Bestätigung führt weiterhin genau den geprüften Vorschlag über den revisionsgeschützten Editorpfad aus. Eine zwischenzeitliche Änderung wird dort erneut abgewiesen. Die Tabelle ersetzt keine gerenderte Bewegungsvorschau; diese bleibt offen.

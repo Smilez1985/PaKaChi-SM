@@ -49,3 +49,8 @@ body.studio-active .control-panel{border-radius:0 18px 18px 0;min-width:0}
 .avatar-stage { width:100%; height:100%; }
 
 .local-zoo{display:grid;gap:.55rem;margin-block:1rem;padding:1rem;border:1px solid var(--line,#314238);border-radius:12px}.local-zoo p{font-size:.8rem;line-height:1.5}.local-zoo input,.local-zoo select{max-width:100%;min-width:0}
+
+#assistant-sequence-comparison { overflow-x: auto; }
+#assistant-sequence-comparison table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+#assistant-sequence-comparison th, #assistant-sequence-comparison td { padding: .45rem; text-align: left; vertical-align: top; border-bottom: 1px solid #70887855; overflow-wrap: anywhere; }
+#assistant-sequence-comparison th:first-child, #assistant-sequence-comparison td:first-child { width: 3.5rem; }

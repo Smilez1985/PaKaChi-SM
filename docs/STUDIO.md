@@ -229,3 +229,10 @@ Die Zeit gehört weiterhin zur referenzierten Pose: Ändern ihrer Dauer betrifft
 ## Gemeinsame KI-Änderungen an Bewegungsfolgen (0.40.0)
 
 Der Assistent kann mehrere bestehende Moves in einem Vorschlag zusammenfassen. Prüfe im angezeigten Paket die Ziel-IDs und vollständigen Posenfolgen. „Vorgeschlagene Änderung übernehmen“ führt das Paket nach Studio-Freigabe gemeinsam aus; „Zurück“ nimmt alle enthaltenen Änderungen gemeinsam zurück. Wenn eine Teiländerung ungültig ist oder sich der Studio-Stand geändert hat, wird nichts übernommen. Derzeit sind ausschließlich Sequenzänderungen kombinierbar; die manuelle Einzelbearbeitung bleibt unverändert.
+
+
+## Vorschläge vor der Übernahme vergleichen (0.41.0)
+
+Bei einzelnen oder gebündelten Sequenzänderungen zeigt der Assistent nun eine Tabelle je Bewegung: **Schritt**, **Vorher**, **Nachher**. Bewegungs- und Posennamen stehen mit ihren IDs dabei, damit gleichnamige Elemente unterscheidbar bleiben. Ein Gedankenstrich kennzeichnet einen fehlenden Schritt auf einer Seite. Wiederholte Posen erscheinen für jedes Vorkommen einzeln.
+
+Die Tabelle liest den aktuellen Stand lokal aus und bewegt die Figur nicht. Das vollständige Befehlspaket steht weiterhin darunter. Erst „Vorgeschlagene Änderung übernehmen“ führt es aus. Bei veraltetem Stand oder nicht mehr vorhandenen Posen wird keine Übernahme angeboten; Aufgabe erneut senden. Änderungen nach Anzeige werden beim Übernehmen nochmals über die Revision geprüft. Nach Übernahme oder Zurücksetzen des Assistenten wird die Vergleichsansicht entfernt. Die animierte Vorher-/Nachher-Vorschau steht noch aus.

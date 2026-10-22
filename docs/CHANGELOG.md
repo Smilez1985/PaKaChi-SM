@@ -12,6 +12,23 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.41.0] - 2026-10-22
+
+Zeitstempel: 2026-10-22T08:31:15+02:00 (Europe/Berlin)
+
+### Added
+
+- Lokaler Vorher-/Nachher-Vergleich für einzelne und gebündelte Sequenzvorschläge mit Bewegungs-/Posennamen, IDs und einzelnen wiederholten Schritten.
+- Revisionsprüfung für alle gelesenen Seiten und Abschlussstatus; ungültige/veraltete Vergleiche sperren die Übernahme.
+- Fünf Tests für paginierte Vergleiche, Datenfehler, Textdarstellung und Assistentenpanel.
+
+### Changed
+
+- Assistent zeigt bei Sequenzänderungen lesbare DE/EN-Tabellen zusätzlich zum vollständigen JSON. README, Design, Roadmap, Studio-Anleitung und Prüfstand aktualisiert.
+
+**Prüfung:** 228 Tests und Build bestanden. Animierte Vorschau und echte Browser-/Anbieterabnahme bleiben offen.
+
+
 ## [0.40.0] - 2026-10-22
 
 Zeitstempel: 2026-10-22T07:57:14+02:00 (Europe/Berlin)
@@ -855,3 +872,5 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 [0.39.0]: PRUEFUNG-0.39.0.md
 
 [0.40.0]: PRUEFUNG-0.40.0.md
+
+[0.41.0]: PRUEFUNG-0.41.0.md
