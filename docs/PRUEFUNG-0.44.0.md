@@ -15,4 +15,4 @@
 - Neuer Geometrielauf prüft echte Three.js-Clip-Wiedergabe und Rückkehr zur Grundbewegung bei 16, 250 und 500 ms Renderabstand.
 - Zweiter Test prüft Hintergrund-Zeitreset sowie ungültige/rückläufige Zeitstempel.
 
-Die Ursachen wurden anhand CI-Protokoll und Code identifiziert. Ein erfolgreicher kompletter Browser-Folgelauf wird erst nach tatsächlichem Ergebnis behauptet. Lokale Chromium-Ausführung bleibt durch Socket-Berechtigungen blockiert. Keine echte Cloud-Inferenz oder vollständige manuelle Mausabnahme.
+Die Ursachen wurden anhand CI-Protokoll und Code identifiziert. Der [vollständige Folgelauf](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/39826526209) für Commit `5474cb169515da8a2bb70d66176396f64770c09f` ist erfolgreich: **235 Tests, Build und alle sieben Chromium-E2E-Fälle bestanden**. Der Browserteil dauerte 1,8 Minuten; das Artefakt `browser-evidence` wurde erfolgreich hochgeladen. Lokale Chromium-Ausführung bleibt durch Socket-Berechtigungen blockiert. Keine echte Cloud-Inferenz oder vollständige manuelle Mausabnahme.

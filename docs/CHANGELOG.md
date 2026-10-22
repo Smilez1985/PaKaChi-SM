@@ -29,7 +29,7 @@ Zeitstempel: 2026-10-22T19:52:21+02:00 (Europe/Berlin)
 
 - README, Design, Roadmap und Prüfberichte enthalten den ersten tatsächlichen GitHub-Browserbefund: zwei bestandene und fünf fehlgeschlagene Fälle, keine vollständige Abnahme.
 
-**Prüfung:** 235 Tests und Build bestanden. Browser-Folgelauf für die Korrekturen steht aus.
+**Prüfung:** 235 Tests, Build und alle sieben Chromium-E2E-Fälle bestanden ([CI-Nachweis](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/39826526209)). Manuelle Maus-/UI-Abnahme und echte Anbieterinferenz bleiben offen.
 
 
 ## [0.43.0] - 2026-10-22

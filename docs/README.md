@@ -108,3 +108,5 @@ Die folgenden Einträge beschreiben den jeweiligen Meilenstein; der aktuelle Sta
 
 
 **0.44.0:** Erste echte CI-Browserbefunde ausgewertet; Original-Metadaten und bildratenabhängige Animationsverlangsamung korrigiert. [Prüfbericht](PRUEFUNG-0.44.0.md).
+
+**Browsernachweis 0.44.0:** [Alle sieben Chromium-E2E-Fälle bestanden](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/39826526209), einschließlich Sequenzvorschau, Übernahme/Undo und Modellwechsel-Rücksprung.

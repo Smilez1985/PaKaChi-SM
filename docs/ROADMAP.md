@@ -10,7 +10,8 @@ Ein Häkchen bedeutet implementiert; es ersetzt keine visuelle oder externe Live
 - [x] E2E-Szenario für Assistentenvorschlag → Vorher/Nachher → Wiederherstellung → Übernahme → Undo vorbereiten (0.43.0).
 - [x] Ersten echten Chromium-Lauf auf GitHub durchführen: Original-Transformation und KI-Sequenzvorschau bestehen; fünf weitere Fälle melden Fehler (0.43.0, Auswertung in 0.44.0).
 - [x] Erkannte Ursachen korrigieren: Original-Metadaten beim Wechsel aktualisieren und Animationszeit unabhängig von langsamer Renderbildrate fortschreiben (0.44.0).
-- [ ] Korrigierten Stand erneut auf GitHub ausführen, alle sieben Fälle bestehen lassen und visuell auswerten. Lokales Chromium bleibt beim Socket-Aufbau blockiert.
+- [x] Korrigierten Stand 0.44.0 erneut auf GitHub ausführen: alle sieben Chromium-E2E-Fälle bestanden ([Nachweis](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/39826526209)).
+- [ ] Screenshots und tatsächliches Mausgefühl manuell auswerten; gerenderte Automatisierung ersetzt diese Gesamtabnahme nicht. Lokales Chromium bleibt beim Socket-Aufbau blockiert.
 
 ## Nächste Arbeitspakete
 

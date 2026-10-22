@@ -7,6 +7,7 @@
 | Prüfung | Letzter Nachweis | Umfang und Grenze |
 | --- | --- | --- |
 | `npm test` | 0.44.0: 235 Tests bestanden | Player, Router, Studio-Daten, reale Three.js-Geometrie, DOM/Ereignisse mit happy-dom, Node-MCP und Erhaltungsprüfung. Kein gerenderter Browser. |
+| `npm run test:e2e` | 0.44.0: 7 Chromium-Fälle bestanden | GitHub-Runner mit Software-WebGL; simulierte Anbieter, keine manuelle Maus-/KI-Qualitätsabnahme. |
 | `npm run test:legacy` | 0.9.0: beide Programme bestanden | Originalplayer-Steuerung, MQTT-Verhalten und Lebenszyklus. |
 | `npm run build` | 0.44.0: bestanden | TypeScript und Produktionsbuild; Vite meldet weiterhin das große gemeinsame JS-Bundle (rund 1,33 MB / 369 kB gzip). |
 | `npm run test:python` mit `PAKACHI_PYTHON` | 0.10.0: Integration bestanden | Echter Python-MCP-Prozess, eingebetteter aMQTT-Broker, produktiver MQTT-Client, Router und Studio-Editor. Acht Tools, Studio-Änderungen einschließlich gültiger/ungültiger Skalierung, fehlende Freigabe und Revisionskonflikte geprüft. |
@@ -126,4 +127,4 @@ Der neue Workflow [verify.yml](../.github/workflows/verify.yml) installiert Chro
 
 [GitHub-Lauf 39776867884](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/39776867884) für 0.43.0: Node-Tests und Build erfolgreich; Browserstart erfolgreich, **2 von 7 E2E-Fällen bestanden**. Original-Transformation und KI-Sequenzvorschau sind damit erstmals im automatisierten Browser nachgewiesen. Fünf Fälle sind fehlgeschlagen; der Gesamtlauf ist rot.
 
-0.44.0 korrigiert die fehlenden Original-Metadaten und die bei niedriger Bildrate künstlich verlangsamte Animationszeit. 235 Node-Tests und Build bestehen. Der Folgelauf bleibt bis zur tatsächlichen Auswertung offen; die zwei bestandenen Fälle sind keine vollständige Maus-/UI-Abnahme. [Prüfbericht](PRUEFUNG-0.44.0.md).
+0.44.0 korrigiert die fehlenden Original-Metadaten und die bei niedriger Bildrate künstlich verlangsamte Animationszeit. 235 Node-Tests und Build bestehen. Der [Folgelauf](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/39826526209) für Commit `5474cb169515da8a2bb70d66176396f64770c09f` besteht **alle sieben Browserfälle** (1,8 Minuten). Das bestätigt die automatisierten Abläufe, ersetzt aber keine vollständige manuelle Maus-/UI-Abnahme. [Prüfbericht](PRUEFUNG-0.44.0.md).
