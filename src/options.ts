@@ -5,6 +5,7 @@ export function readOptions(storage?:Pick<Storage,'getItem'>):Options {
 }
 export const options=readOptions();
 const translations:Record<string,string>={
+  'Ungültiges Bewegungspaket. Maximal 8 Bewegungen und insgesamt 200 Posenverweise.':'Invalid motion batch. At most 8 motions and 200 pose references in total.',
   'Gemeinsame Move-Sammlung':'Shared move collection','Sammlung laden':'Load collection','Aus Sammlung importieren':'Import from collection',
   'Die Sammlung gehört zur Anwendung. Import nur bei passendem Modell und Rig.':'The collection belongs to this application. Import requires a matching model and rig.',
   'Move-Sammlung geladen.':'Move collection loaded.','Die Move-Sammlung ist leer.':'The move collection is empty.',

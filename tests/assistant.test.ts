@@ -63,3 +63,9 @@ test('assistant reads a move sequence and returns update_move only as an approva
   return response(call('get_studio',{section:'moves'}));
  }});assert.deepEqual(result.proposal,command);assert.ok(!methods.includes('edit_studio'));
 });
+
+test('assistant returns a multi-move transaction for one explicit approval without executing it',async()=>{
+ const command={session:info.session,expectedRevision:info.revision,action:'update_moves',updates:[{id:'wave',poses:['b','a']},{id:'nod',poses:['a','b','a']}]};let requests=0;const methods:string[]=[];
+ const result=await runAssistant({profile:local,prompt:'Change both moves together',rpc(method){methods.push(method);return {...info,items:[{id:'wave',poses:['a','b']},{id:'nod',poses:['b','a']}]};},fetcher:async()=>response(requests++?call('edit_studio',{command}):call('get_studio',{section:'moves'}))});
+ assert.deepEqual(result.proposal,command);assert.ok(!methods.includes('edit_studio'));
+});

@@ -224,3 +224,8 @@ So kann eine zuvor übernommene Prüfpose gezielt an die Stelle einer bisherigen
 Erlaubt sind 2–100 Verweise auf vorhandene Projektposen. Während Wiedergabe/Ziehgesten und im Modus „Gelenke bearbeiten“ ist die Sequenzbearbeitung gesperrt. Die Reihenfolge der allgemeinen Projekt-Posenliste ist davon unabhängig. Neue Moves werden weiterhin zunächst aus der allgemeinen Posenliste erstellt.
 
 Die Zeit gehört weiterhin zur referenzierten Pose: Ändern ihrer Dauer betrifft alle Vorkommen und Moves, die diese Pose verwenden. Bei Schleifen gilt die Dauer der ersten Pose für den Rückweg. Es gibt keine unabhängigen Zeiten pro Vorkommen. Sequenzbearbeitung korrigiert keine Gelenkwinkel automatisch; Vorschau und Prüfung anschließend erneut ausführen. Seit 0.38.0 können MCP-Clients und der Assistent bestehende Sequenzen auslesen und ändern; siehe [MCP-Anleitung](MCP-STUDIO.md#bestehende-sequenzen-ab-0380). Die gerenderte Abnahme steht aus. [Prüfbericht](PRUEFUNG-0.37.0.md).
+
+
+## Gemeinsame KI-Änderungen an Bewegungsfolgen (0.40.0)
+
+Der Assistent kann mehrere bestehende Moves in einem Vorschlag zusammenfassen. Prüfe im angezeigten Paket die Ziel-IDs und vollständigen Posenfolgen. „Vorgeschlagene Änderung übernehmen“ führt das Paket nach Studio-Freigabe gemeinsam aus; „Zurück“ nimmt alle enthaltenen Änderungen gemeinsam zurück. Wenn eine Teiländerung ungültig ist oder sich der Studio-Stand geändert hat, wird nichts übernommen. Derzeit sind ausschließlich Sequenzänderungen kombinierbar; die manuelle Einzelbearbeitung bleibt unverändert.

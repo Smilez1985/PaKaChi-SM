@@ -21,11 +21,16 @@ class BendLimit(BaseModel):
     min: float = Field(ge=0, le=175)
     max: float = Field(ge=0, le=175)
 
+class MoveSequenceUpdate(BaseModel):
+    model_config = ConfigDict(extra='forbid', strict=True)
+    id: str = Field(min_length=1, max_length=100)
+    poses: list[str] = Field(min_length=2, max_length=100)
+
 class StudioCommand(BaseModel):
     model_config = ConfigDict(extra='forbid', strict=True)
     session: str = Field(max_length=100)
     expectedRevision: int = Field(ge=0)
-    action: Literal['set_mode', 'add_point', 'update_point', 'delete_point', 'connect_points', 'disconnect_points', 'save_pose', 'apply_pose', 'replace_pose', 'create_move', 'update_move', 'undo', 'redo']
+    action: Literal['set_mode', 'add_point', 'update_point', 'delete_point', 'connect_points', 'disconnect_points', 'save_pose', 'apply_pose', 'replace_pose', 'create_move', 'update_move', 'update_moves', 'undo', 'redo']
     mode: Literal['pose', 'rig'] | None = None
     id: str | None = Field(default=None, max_length=100)
     target: str | None = Field(default=None, max_length=100)
@@ -40,6 +45,7 @@ class StudioCommand(BaseModel):
     seconds: float | None = Field(default=None, ge=.1, le=30)
     loop: bool | None = None
     poses: list[str] | None = Field(default=None, min_length=2, max_length=100)
+    updates: list[MoveSequenceUpdate] | None = Field(default=None, min_length=1, max_length=8)
 
 class MQTTBridge:
     def __init__(self, uri, player=None, timeout=5.0):
@@ -210,6 +216,7 @@ def build_server(uri=None, embedded=True, tcp_port=1883, ws_port=8083):
         delete_point: id. connect_points/disconnect_points: id,target.
         save_pose: optional name,seconds. apply_pose/replace_pose: id.
         create_move: id,name,poses,optional loop.
+        update_moves: updates=[{id,poses}], 1–8 verschiedene Moves, insgesamt maximal 200 Posenverweise; atomar, ein Undo-Schritt.
         update_move: id,poses (vollständige Folge, 2–100 vorhandene Posen; Wiederholungen erlaubt; nur Posenmodus). Vorher get_studio section=moves lesen. undo/redo ohne weitere Felder.
         Keine Dateizugriffe; Konflikte oder Timeouts zuerst mit get_studio aufklären.
         """

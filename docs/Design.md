@@ -4,7 +4,7 @@ Teil der [Blaupause](README.md) · [Roadmap](ROADMAP.md) · [Changelog](CHANGELO
 
 ## Status und Begriffe
 
-Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.39.0: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau, automatische Anatomieerkennung und die Qualitätsabnahme der angeschlossenen lokalen KI-Generierung bleiben offen.
+Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.40.0: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau, automatische Anatomieerkennung und die Qualitätsabnahme der angeschlossenen lokalen KI-Generierung bleiben offen.
 
 - **PaKaChi:** Panda-KI-Chimera, das übergeordnete Projekt.
 - **PaKaChi-SM:** StateMaschine mit Avatar-Player und integriertem Studio.
@@ -24,7 +24,7 @@ Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich gen
 | Generierung | Lokaler TripoSR-Dienst, Bildauswahl, getrennte Vorschau, Vorprüfungs-Fallbacks, expliziter weiterer Auftrag | Echte GPU-/Qualitätsabnahme, Cloud-Generatoren, Korrekturprompts und Rigging |
 | Übernahme | Revisionsschutz, ein Modellwechsel-Rücksprung, vorbereitete 3D-Installation mit Rückabwicklung | Gerenderte Abnahme, Originalplayer-Neustart und GPU-Kontextverlust |
 
-Prüfnachweis für Software 0.39.0: **219 Tests und Build bestanden**. Das belegt keine gerenderte Browser-, Anbieter- oder GPU-Abnahme. Projektformat bleibt Version 1. Freie Punkte/Posen aus 0.22.0/0.23.0 benötigen wegen der korrigierten Normalisierungsreihenfolge eine visuelle Kontrolle; keine automatische Migration. [Prüfbericht](PRUEFUNG-0.39.0.md).
+Prüfnachweis für Software 0.40.0: **223 Tests und Build bestanden**. Das belegt keine gerenderte Browser-, Anbieter- oder GPU-Abnahme. Projektformat bleibt Version 1. Freie Punkte/Posen aus 0.22.0/0.23.0 benötigen wegen der korrigierten Normalisierungsreihenfolge eine visuelle Kontrolle; keine automatische Migration. [Prüfbericht](PRUEFUNG-0.40.0.md).
 
 ## Bestehender PaKaChi-Avatar
 
@@ -420,3 +420,12 @@ Anthropic-Modelllisten folgen `has_more` und `last_id` als nächstem `after_id`,
 Ein gemeinsamer Timeout und Abbruch gelten für alle Seiten. Pro Antwort bleiben 1 MiB und 1000 Einträge erlaubt; insgesamt maximal zehn Seiten und 5000 empfangene Einträge vor Deduplizierung. Leere Folgeseiten mit Fortsetzungsflag, falsche oder wiederholte Cursor, HTTP-Fehler und Grenzüberschreitungen brechen die komplette Abfrage ab. Vorhandene Profil-/Modellauswahl bleibt über die bestehenden UI-Regeln erhalten. Für andere Schnittstellen bleibt die bisherige Einzelabfrage bestehen.
 
 Vertrag: [Anthropic Models API](https://platform.claude.com/docs/en/api/models/list), geprüft am 21.10.2026. Tests verwenden simulierte Antworten; echte Konto-/CORS-Abnahme und zusätzliche Workspace-Auswahl bleiben offen.
+
+
+## Gemeinsame Sequenztransaktionen (0.40.0)
+
+`update_moves` enthält 1–8 verschiedene bestehende Moves und ihre vollständigen neuen Posenfolgen. Je Move sind 2–100 Verweise auf vorhandene Posen erlaubt, zusammen höchstens 200 Verweise. Doppelte Ziel-IDs und unbekannte Felder werden abgewiesen. Vor der ersten Mutation werden alle Ziele und Posen geprüft und die Eingaben kopiert.
+
+Die gesamte Änderung nutzt einen gemeinsamen Editorpfad mit der Einzelbearbeitung. Sitzung, Revision, Studio-Freigabe und Posenmodus gelten für das komplette Paket; Wiedergabe und Ziehgesten sperren es. Eine tatsächliche Änderung erhöht die Revision einmal und erzeugt einen gemeinsamen Undo-/Redo-Schritt. Ein unverändertes Paket ist ohne neue Revision erfolgreich. Abgewiesene Pakete verändern weder Daten noch Undo-/Redo-Verlauf. Namen, Schleifenflags, Posenwerte und aktuelle Figur bleiben erhalten.
+
+Der integrierte Assistent zeigt das vollständige Paket als JSON-Vorschlag an und benötigt einmal die ausdrückliche Übernahme. Externe MCP-Clients verwenden die bestehende Studio-Freigabe. Das ist eine Transaktion für Sequenzänderungen, keine allgemeine Aktionsliste, keine gerenderte Vorher-/Nachher-Vorschau und kein Skelettumbau.

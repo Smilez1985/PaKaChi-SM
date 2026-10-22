@@ -88,3 +88,18 @@ Bei `update_point` im Modus `pose` bedeutet `position` für einen Skelettpunkt e
 Die Beispiel-IDs und Revision durch tatsächliche Werte ersetzen. `poses` ist die vollständige neue Folge, kein Patch. Erlaubt sind 2–100 bestehende Posenverweise; Wiederholungen sind möglich. Name und Schleifenflag werden durch diesen Befehl nicht geändert. Jede tatsächliche Änderung ist mit `undo`/`redo` rückgängig beziehungsweise wiederherstellbar. Eine identische Folge ist ohne neue Revision erfolgreich.
 
 Bei Revisionskonflikten erneut lesen und den Vorschlag neu bewerten. Während Wiedergabe, Ziehgesten und im Rig-Modus ist die Änderung gesperrt. Node- und Python-MCP deklarieren den Befehl; die verbindliche Prüfung erfolgt im Editor. Der integrierte Assistent schlägt ihn nach dem Lesen zur ausdrücklichen Bestätigung vor.
+
+
+## Gemeinsame Sequenzänderungen (ab 0.40.0)
+
+Nach `get_studio(section: "moves")` kann ein Paket mehrere vorhandene Moves gemeinsam ändern:
+
+```json
+{"command":{"session":"SITZUNG_AUS_GET_STUDIO","expectedRevision":12,"action":"update_moves","updates":[{"id":"wave","poses":["pose-b","pose-a"]},{"id":"nod","poses":["pose-a","pose-b","pose-a"]}]}}
+```
+
+Beispielwerte durch aktuelle Sitzung, Revision und vorhandene IDs ersetzen. Erlaubt sind 1–8 verschiedene Move-IDs, je 2–100 Posenverweise und insgesamt höchstens 200 Verweise. Jeder Eintrag ersetzt die vollständige Folge seines Moves. Wiederholte Posen sind erlaubt; doppelte Move-IDs und zusätzliche Felder sind ungültig.
+
+Alle Einträge werden vor der ersten Änderung geprüft. Ein Fehler verwirft das gesamte Paket. Eine tatsächliche Änderung erhöht die Revision einmal; `undo`/`redo` betrifft das ganze Paket. Identische Folgen verändern Revision und Verlauf nicht. Namen, Schleifenflag und Posenwerte bleiben erhalten. Studio-Freigabe, aktuelle Revision und Posenmodus sind erforderlich; während Wiedergabe oder Ziehen wird abgewiesen.
+
+Node- und Python-MCP deklarieren das Paket; der Editor prüft zusätzlich Existenz, Gesamtumfang und Zustand. Der integrierte Assistent liefert es als vollständigen Vorschlag zur einmaligen ausdrücklichen Bestätigung. Andere Aktionen lassen sich noch nicht zu Transaktionen kombinieren.

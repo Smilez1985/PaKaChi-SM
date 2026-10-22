@@ -12,6 +12,23 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.40.0] - 2026-10-22
+
+Zeitstempel: 2026-10-22T07:57:14+02:00 (Europe/Berlin)
+
+### Added
+
+- `update_moves` für gemeinsame Änderungen an bis zu acht bestehenden Bewegungsfolgen, mit vollständiger Vorprüfung, einer Revision und einem Undo-/Redo-Schritt.
+- Paketvorschläge im Assistenten und Pakettransport in Node-/Python-MCP; Freigabe und Revisionsprüfung gelten für alle Teiländerungen gemeinsam.
+- Vier Tests für gemeinsame Übernahme, vollständige Ablehnung, Grenzen und Assistentenvorschläge; Node-MCP-Transporttest erweitert.
+
+### Changed
+
+- Einzel- und Paketänderung verwenden denselben Editorpfad. README, Design, Roadmap, Studio-/MCP-Anleitung und Prüfstand nachgezogen.
+
+**Prüfung:** 223 Tests und Build bestanden. Python-DTO isoliert geprüft; Browser-/Anbieterabnahme und allgemeine Mehraktionstransaktionen bleiben offen.
+
+
 ## [0.39.0] - 2026-10-21
 
 Zeitstempel: 2026-10-21T23:54:27+02:00 (Europe/Berlin)
@@ -836,3 +853,5 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 [0.38.0]: PRUEFUNG-0.38.0.md
 
 [0.39.0]: PRUEFUNG-0.39.0.md
+
+[0.40.0]: PRUEFUNG-0.40.0.md

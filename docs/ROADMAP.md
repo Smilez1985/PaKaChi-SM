@@ -1,6 +1,6 @@
 # Roadmap – was kommt
 
-**Softwarestand: 0.39.0 · Abgleich: 21.10.2026.** Teil der [Blaupause](README.md).
+**Softwarestand: 0.40.0 · Abgleich: 22.10.2026.** Teil der [Blaupause](README.md).
 
 Ein Häkchen bedeutet implementiert; es ersetzt keine visuelle oder externe Live-Abnahme. Die Nachweise und Prüfgrenzen stehen im [Prüfstand](PRUEFUNG.md). Die Versionshistorie gehört ins [Changelog](CHANGELOG.md).
 
@@ -165,7 +165,8 @@ Details: [Modellauswahl](LOKALE-MODELLE.md). Die aktuelle Ollama-Kuration ist ei
 - [x] Begrenzte lesende Werkzeugschleife und konkrete, einzeln bestätigte Studio-Vorschläge mit bestehender Freigabe, Sitzung/Revision und Undo.
 - [x] Ziel/Datenumfang anzeigen; keine gespeicherten Chatverläufe; Schlüssel optional im getrennten verschlüsselten Tresor, Abbruch und späte Antworten absichern.
 - [ ] Reale Anbieter- und Modellabnahme einschließlich deutscher/englischer Studio-Aufgaben und Browser-CORS.
-- [ ] Mehrschrittige Vorschau, Bildkontext und zusammenhängende Änderungstransaktionen ergänzen.
+- [x] Mehrere bestehende Move-Sequenzen gemeinsam ändern: vollständig vorprüfen, einmal bestätigen und als einen Undo-/Redo-Schritt übernehmen (0.40.0).
+- [ ] Allgemeine mehrschrittige Vorschau, Bildkontext und Transaktionen für weitere Studio-Aktionen ergänzen; Sequenzpakete mit externem Anbieter und im Browser abnehmen.
 - [ ] Weitere Cloud-Fachadapter und Rigging-Ausführung unabhängig von der Assistentenrolle integrieren; Anthropic, Tresor und lokaler Generator sind vorhanden.
 
 ## 10. Anthropic-Abnahme

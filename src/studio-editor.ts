@@ -2,7 +2,7 @@ import {checkMoveBends} from './move-limit-check.ts';
 import {loadMoveLibrary,loadLibraryMove} from './move-library.ts';
 import type {LibraryMove} from './move-library.ts';
 import {exportMoveFile,importMoveFile,MAX_MOVE_FILE} from './move-file.ts';
-import {parseStudioCommand} from './studio-command.ts';
+import {parseStudioCommand,validMoveSequenceUpdates} from './studio-command.ts';
 import {flagAffectedPoses,moveReview,reviewLabels} from './studio-review.ts';
 import * as T from 'three';
 import {detectJoints,detectConnections,edgeKey} from './studio-detection.ts';
@@ -267,6 +267,7 @@ export class StudioEditor {
       case 'replace_pose':require(!this.edit&&pose);this.mutate(()=>{pose!.values=this.rig.capture();delete pose!.review;});break;
       case 'create_move':require(!this.edit&&c.id&&c.id!==FIGURE_TRACK&&c.name&&c.poses&&c.poses.every(id=>this.data.poses.some(p=>p.id===id))&&this.data.moves.length<100&&!this.data.moves.some(m=>m.id===c.id)&&!this.project.avatar.moves.some(m=>m.id===c.id));this.mutate(()=>{this.data.moves.push({id:c.id!,name:c.name!.trim(),poses:[...c.poses!],loop:c.loop??false});resultId=c.id;});break;
       case 'update_move':require(c.id&&c.poses);this.updateMoveSequence(c.id!,c.poses!,c.expectedRevision);resultId=c.id;break;
+      case 'update_moves':this.updateMoveSequences(c.updates!,c.expectedRevision);break;
       case 'undo':case 'redo':{const snapshot=c.action==='undo'?this.history.undo(this.snapshot()):this.history.redo(this.snapshot());require(snapshot,'Kein weiterer Bearbeitungsschritt.');this.restore(snapshot!);break;}
     }
     this.hooks.feedback('Studio-Änderung durch KI übernommen.');return {accepted:true,session:this.session,revision:this.revision,...(resultId?{id:resultId}:{})};
@@ -294,11 +295,19 @@ export class StudioEditor {
     this.hooks.feedback('Bewegung und Posen importiert. Vorschau prüfen; Zurück macht den Import rückgängig.');
   }
   updateMoveSequence(id:string,poses:string[],expectedRevision=this.revision){
+    this.updateMoveSequences([{id,poses}],expectedRevision);
+  }
+  updateMoveSequences(updates:{id:string;poses:string[]}[],expectedRevision=this.revision){
     if(this.disposed||!this.active||this.edit||this.interactionActive||this.revision!==expectedRevision)throw Error('Studio ist beschäftigt oder der Stand hat sich geändert.');
-    const move=this.data.moves.find(m=>m.id===id);
-    if(!move||!Array.isArray(poses)||poses.length<2||poses.length>100||poses.some(id=>typeof id!=='string'||!this.data.poses.some(p=>p.id===id)))throw Error('Eine Bewegung benötigt 2 bis 100 vorhandene Posen.');
-    if(move.poses.length===poses.length&&move.poses.every((id,i)=>id===poses[i]))return;
-    const sequence=[...poses];this.mutate(()=>{move.poses=sequence;});
+    if(!validMoveSequenceUpdates(updates))throw Error('Ungültiges Bewegungspaket. Maximal 8 Bewegungen und insgesamt 200 Posenverweise.');
+    // Resolve and copy every target before changing anything: a bad later entry cannot partially apply.
+    const changes=updates.map(update=>{
+      const move=this.data.moves.find(m=>m.id===update.id);
+      if(!move||update.poses.some(id=>!this.data.poses.some(p=>p.id===id)))throw Error('Eine Bewegung benötigt 2 bis 100 vorhandene Posen.');
+      return {move,poses:[...update.poses]};
+    }).filter(({move,poses})=>move.poses.length!==poses.length||move.poses.some((id,i)=>id!==poses[i]));
+    if(!changes.length)return;
+    this.mutate(()=>{for(const {move,poses} of changes)move.poses=poses;});
   }
   previewMoveAt(id:string,time:number,expectedRevision=this.revision){
     if(this.disposed||!this.active||this.gesture||this.moveCheck||this.revision!==expectedRevision)throw Error('Studio-Stand hat sich geändert. Prüfung erneut starten.');

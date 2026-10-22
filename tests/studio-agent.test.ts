@@ -83,3 +83,30 @@ test('move snapshots paginate maximum sequences within transport size without dr
  for(let i=0;i<100;i++)f.rig.data.moves.push({id:`move-${i}`,name:'Move',loop:false,poses:Array(100).fill(id)});
  let offset=0,total=0;do{const page=f.editor.inspect({section:'moves',offset,limit:32}) as any;assert.ok(new TextEncoder().encode(JSON.stringify(page)).length<65536);assert.ok(page.items.length>0);for(const item of page.items)assert.deepEqual(item.poses,Array(100).fill(id));total+=page.items.length;offset=page.nextOffset;}while(offset!==null);assert.equal(total,100);f.editor.dispose();f.w.happyDOM.abort();
 });
+
+test('sequence batch updates multiple moves as one revision and undo step without changing pose data',()=>{
+ const f=fixture(),{editor,rig,run}=f;editor.enter();f.grant();const a=run({action:'save_pose'}).id!,b=run({action:'save_pose'}).id!;
+ for(const id of ['wave','nod','stay'])run({action:'create_move',id,name:id,poses:[a,b],loop:true});
+ const before=structuredClone(rig.data),pose=rig.capture(),revision=editor.inspect().revision;
+ const updates=[{id:'wave',poses:[b,a,b]},{id:'nod',poses:[b,a]}];run({action:'update_moves',updates});updates[0].poses[0]=a;
+ assert.equal(editor.inspect().revision,revision+1);assert.deepEqual(rig.data.moves.map(m=>m.poses),[[b,a,b],[b,a],[a,b]]);assert.deepEqual(rig.data.poses,before.poses);assert.deepEqual(rig.capture(),pose);
+ const after=structuredClone(rig.data);run({action:'undo'});assert.deepEqual(rig.data,before);run({action:'redo'});assert.deepEqual(rig.data,after);
+ const rev=editor.inspect().revision;run({action:'update_moves',updates:[{id:'wave',poses:[b,a,b]},{id:'nod',poses:[b,a]}]});assert.equal(editor.inspect().revision,rev);editor.dispose();f.w.happyDOM.abort();
+});
+test('a bad later batch entry leaves all moves, revision, dirty status and redo untouched',()=>{
+ const f=fixture(),{editor,rig,run}=f;editor.enter();f.grant();const a=run({action:'save_pose'}).id!,b=run({action:'save_pose'}).id!;
+ for(const id of ['wave','nod'])run({action:'create_move',id,name:id,poses:[a,b]});run({action:'update_move',id:'wave',poses:[b,a]});run({action:'undo'});
+ const before=structuredClone(rig.data),state=editor.inspect();
+ for(const second of [{id:'missing',poses:[a,b]},{id:'nod',poses:[a,'missing']},{id:'wave',poses:[a,b]},{id:'nod',poses:[a]},{id:'nod',poses:[a,b],loop:true}]){
+  assert.throws(()=>run({action:'update_moves',updates:[{id:'wave',poses:[b,a]},second]}));assert.deepEqual(rig.data,before);assert.deepEqual(editor.inspect(),state);
+ }
+ run({action:'redo'});assert.deepEqual(rig.data.moves[0].poses,[b,a]);editor.dispose();f.w.happyDOM.abort();
+});
+test('batch parser enforces count, total references and strict nested fields; editor guards permissions and races',()=>{
+ const f=fixture(),{editor,run,rig}=f;editor.enter();f.grant();const a=run({action:'save_pose'}).id!;
+ for(let i=0;i<8;i++)run({action:'create_move',id:`move-${i}`,name:'Move',poses:[a,a]});
+ const updates=Array.from({length:8},(_,i)=>({id:`move-${i}`,poses:Array(25).fill(a)}));run({action:'update_moves',updates});assert.equal(rig.data.moves[7].poses.length,25);
+ const reject=(extra:Record<string,unknown>)=>{const before=structuredClone(rig.data),state=editor.inspect();assert.throws(()=>run({action:'update_moves',updates:[{id:'move-0',poses:[a,a]}],...extra}));assert.deepEqual(rig.data,before);assert.deepEqual(editor.inspect(),state);};
+ for(const invalidUpdates of [undefined,null,[],[...updates,{id:'other',poses:[a,a]}],updates.map((v,i)=>i? v:{...v,poses:Array(26).fill(a)}),[{id:'move-0',poses:[a,a],commands:[]}],[null]])reject({updates:invalidUpdates});
+ reject({id:'move-0'});reject({expectedRevision:0});reject({session:'stale'});f.grant(false);reject({});f.grant();f.view.onStart();reject({});f.view.onEnd();editor.play('move-0',true);reject({});editor.stopPreview();run({action:'set_mode',mode:'rig'});reject({});editor.dispose();f.w.happyDOM.abort();
+});
