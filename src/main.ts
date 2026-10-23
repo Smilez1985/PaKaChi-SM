@@ -292,7 +292,7 @@ async function loadAvatar(avatar?: Avatar, file?: File, project?: StudioProject,
     if (!hasMesh) { throw new Error('Das Modell enthält keine sichtbare Geometrie.'); }
     // Check studio/model compatibility before replacing the current avatar.
     let bones=0, meshes=0;gltf.scene.traverse(n=>{if(n.type==='Bone')bones++;if('isMesh' in n)meshes++;});
-    if(bones>256 || project && (project.studio.boneRest.length!==bones || project.studio.points.some(p=>p.mesh!==undefined && p.mesh>=meshes))) {throw new Error('Studio-Daten passen nicht zum Modell oder das Modell hat mehr als 256 Gelenke.');}
+    if(bones>256 || project && (project.studio.boneRest.length!==bones+(project.studio.boneInsertions?.length??0) || project.studio.points.some(p=>p.mesh!==undefined && p.mesh>=meshes))) {throw new Error('Studio-Daten passen nicht zum Modell oder das Modell hat mehr als 256 Gelenke.');}
     modelBounds(gltf.scene);
     let commitHistory:(()=>void)|undefined;
     if(editor?.interactionActive)throw new Error('Studio-Bewegung zuerst beenden.');

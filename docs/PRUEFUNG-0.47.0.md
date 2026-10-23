@@ -11,3 +11,7 @@ Fünf Tests prüfen echte Eltern-/Kindhierarchie, Skinning-Palette und normalisi
 Ein Browserfall für Mika prüft den sichtbaren Einfügeknopf, Undo/Redo, echten Download und erneutes Laden des Projekts. Er ist bis zum CI-Ergebnis nur vorbereitet.
 
 Die Gewichte werden geometrisch angenähert. Anatomische Qualität, manuelle Maus-/Darstellungskontrolle, beliebiges Löschen/Umhängen von Quellknochen und vollständiges Auto-Rigging bleiben offen. Die Original-PaKaChi-Bilddateien wurden nicht verändert.
+
+## Erster Browserlauf
+
+[Lauf 39956455038](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/39956455038): 242 Tests und Build bestanden; zehn bisherige Browserfälle bestanden. Der neue Fall bestätigte Einfügen, Undo/Redo und Download, scheiterte dann an der alten Knochenzahl-Vorprüfung im Projektladeweg. Diese berücksichtigt nun die gespeicherten Unterteilungen. Der erneute Browsernachweis steht aus.
