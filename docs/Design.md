@@ -4,7 +4,7 @@ Teil der [Blaupause](README.md) · [Roadmap](ROADMAP.md) · [Changelog](CHANGELO
 
 ## Status und Begriffe
 
-Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.45.0: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau, automatische Anatomieerkennung und die Qualitätsabnahme der angeschlossenen lokalen KI-Generierung bleiben offen.
+Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.46.0: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau, automatische Anatomieerkennung und die Qualitätsabnahme der angeschlossenen lokalen KI-Generierung bleiben offen.
 
 - **PaKaChi:** Panda-KI-Chimera, das übergeordnete Projekt.
 - **PaKaChi-SM:** StateMaschine mit Avatar-Player und integriertem Studio.
@@ -476,3 +476,7 @@ Nach einem erfolgreich abgeschlossenen IndexedDB-Speicher- oder Löschvorgang se
 Meldungen während einer laufenden Operation werden zu einer ausstehenden Aktualisierung zusammengefasst. Die ausgewählte gespeicherte ID bleibt erhalten, sofern sie weiter existiert. Zusätzlich wird bei Fensterfokus aktualisiert; bei fehlendem BroadcastChannel bleiben Fokus und manueller Aktualisierungsknopf verfügbar. Fehler beim Benachrichtigen machen einen bereits abgeschlossenen Speichervorgang nicht rückgängig. Beim Abbau werden Kanal und Ereignisbehandlung geschlossen.
 
 Die neuen Browserfälle bestätigen echte IndexedDB-Persistenz nach Reload einschließlich Posen, Move-Verweisen und gespeicherter Identität sowie zwei Tabs mit Löschbestätigung. Alle neun Chromium-Fälle bestehen im [CI-Lauf](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/39902736987). Die bestehenden Grenzen von 50 Einträgen/80 MiB je Projekt bleiben erhalten; reale Browserquoten sind damit nicht abgenommen.
+
+## Move-Dateiaustausch im Browser (0.46.0)
+
+Der zusätzliche End-to-End-Fall verwendet eine echte heruntergeladene Move-Datei und den Browser-Dateiauswahldialog. Er prüft neue Posen-IDs, den Erhalt wiederholter Posenverweise und die konfliktfreie Move-ID beim erneuten Import in dasselbe Modell. Die importierte Sequenz wird im Studio abgespielt und über die Zeitleiste positioniert. Undo entfernt den gesamten Import; eine anschließend abgewiesene Modellbindung darf den erhaltenen Redo-Schritt nicht verändern. Diese Prüfung ergänzt die bestehenden Daten-/Editor-Tests; sie führt kein Retargeting ein und ersetzt keine manuelle Qualitätsabnahme. Der CI-Nachweis steht noch aus.

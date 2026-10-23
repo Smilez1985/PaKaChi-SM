@@ -12,6 +12,20 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.46.0] - 2026-10-23
+
+Zeitstempel: 2026-10-23T08:34:20+02:00 (Europe/Berlin)
+
+### Added
+
+- Chromium-End-to-End-Prüfung für Move-Download und Dateiauswahl, Importkonflikte, wiederholte Posen, animierte Vorschau, Undo/Redo und abgewiesene Modellbindung.
+
+### Changed
+
+- README, Design, Roadmap und Prüfstand um die Move-Dateiaustauschprüfung ergänzt.
+
+**Prüfung:** Build bestanden; zehn Browserfälle aufgelistet, neuer CI-Nachweis steht aus.
+
 ## [0.45.0] - 2026-10-23
 
 Zeitstempel: 2026-10-23T06:51:03+02:00 (Europe/Berlin)
@@ -953,3 +967,5 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 [0.44.0]: PRUEFUNG-0.44.0.md
 
 [0.45.0]: PRUEFUNG-0.45.0.md
+
+[0.46.0]: PRUEFUNG-0.46.0.md
