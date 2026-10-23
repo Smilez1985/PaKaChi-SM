@@ -24,7 +24,7 @@ Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich gen
 | Generierung | Lokaler TripoSR-Dienst, Bildauswahl, getrennte Vorschau, Vorprüfungs-Fallbacks, expliziter weiterer Auftrag | Echte GPU-/Qualitätsabnahme, Cloud-Generatoren, Korrekturprompts und Rigging |
 | Übernahme | Revisionsschutz, ein Modellwechsel-Rücksprung, vorbereitete 3D-Installation mit Rückabwicklung | Gerenderte Abnahme, Originalplayer-Neustart und GPU-Kontextverlust |
 
-Prüfnachweis für Software 0.46.0: **237 Tests, Build und zehn Chromium-Fälle bestanden**. Separate Chromium-Nachweise stehen im Prüfbericht; echte Anbieter-/GPU-Inferenz und manuelle Mausabnahme bleiben offen. Projektformat bleibt Version 1. Freie Punkte/Posen aus 0.22.0/0.23.0 benötigen wegen der korrigierten Normalisierungsreihenfolge eine visuelle Kontrolle; keine automatische Migration. [Prüfbericht](PRUEFUNG-0.46.0.md).
+Prüfnachweis für Software 0.47.0: **242 Tests, Build und elf Chromium-Fälle bestanden**. Separate Chromium-Nachweise stehen im Prüfbericht; echte Anbieter-/GPU-Inferenz und manuelle Mausabnahme bleiben offen. Projektformat bleibt Version 1. Freie Punkte/Posen aus 0.22.0/0.23.0 benötigen wegen der korrigierten Normalisierungsreihenfolge eine visuelle Kontrolle; keine automatische Migration. [Prüfbericht](PRUEFUNG-0.47.0.md).
 
 ## Bestehender PaKaChi-Avatar
 
@@ -489,4 +489,4 @@ Für betroffene SkinnedMeshes wird der neue Knochen in die Skinning-Palette aufg
 
 Die Hierarchie und Gewichte werden aus Quellmodell und Unterteilungen reproduziert. Originalclips verwenden wieder das Quellskelett und die ursprünglichen Gewichte; eigene Studio-Moves stellen die Bearbeitungshierarchie wieder her. Undo/Redo umfasst Daten, Hierarchie und Gewichte. Projektdateien, lokale Sammlung und Katalogexport erhalten die Unterteilungen. Move-Kompatibilität berücksichtigt die Hierarchieänderungen. Projektformat bleibt 1; Projekte mit Unterteilungen benötigen Software ab 0.47.0.
 
-Grenzen: vorhandene Knochenstrecke erforderlich, höchstens 64 Unterteilungen und 256 Knochen/Kontrollpunkte. Kein vollständiges Auto-Rigging, kein beliebiges Löschen oder Umhängen von Quellknochen, kein eigenständiger GLB-Export. „Kontrollpunkt löschen“ entfernt weiterhin nur den Griff. Ein neuer Browserfall prüft Einfügen, Undo/Redo und Projekt-Download/-Import; der CI-Nachweis steht noch aus.
+Grenzen: vorhandene Knochenstrecke erforderlich, höchstens 64 Unterteilungen und 256 Knochen/Kontrollpunkte. Kein vollständiges Auto-Rigging, kein beliebiges Löschen oder Umhängen von Quellknochen, kein eigenständiger GLB-Export. „Kontrollpunkt löschen“ entfernt weiterhin nur den Griff. Der neue Browserfall bestätigt Einfügen, Undo/Redo und Projekt-Download/-Import. 242 Tests, Build und alle elf Chromium-Fälle bestanden ([CI-Nachweis](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/39957177749)).

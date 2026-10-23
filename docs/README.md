@@ -116,4 +116,4 @@ Die folgenden Einträge beschreiben den jeweiligen Meilenstein; der aktuelle Sta
 
 **0.46.0:** Move-Dateiaustausch einschließlich Wiedergabe und Undo/Redo im Browser nachgewiesen; alle zehn Chromium-Fälle bestanden. [Prüfbericht](PRUEFUNG-0.46.0.md).
 
-**0.47.0:** Echte Zwischengelenke mit Hautgewichten, Projektpersistenz und Undo/Redo. [Prüfbericht](PRUEFUNG-0.47.0.md).
+**0.47.0:** Echte Zwischengelenke mit Hautgewichten, Projektpersistenz und Undo/Redo. 242 Tests, Build und elf Chromium-Fälle bestanden. [Prüfbericht](PRUEFUNG-0.47.0.md).

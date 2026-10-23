@@ -131,7 +131,7 @@ npx playwright install chromium
 npm run test:e2e
 ```
 
-Für 0.46.0 sind 237 Tests, Build und alle zehn Chromium-Browserfälle bestanden. Die unveränderten Original-Testprogramme wurden zuletzt in 0.9.0 geprüft. Die manuelle WebGL-/Mausabnahme bleibt offen; automatisierte Browserprüfungen laufen auf GitHub. Die reale Python-MCP-/MQTT-Integration mit Studio-Editor wurde zuletzt in 0.10.0 erfolgreich geprüft. Details und frühere Nachweise stehen im [Prüfstand](docs/PRUEFUNG.md).
+Für 0.47.0 sind 242 Tests, Build und alle elf Chromium-Browserfälle bestanden. Die unveränderten Original-Testprogramme wurden zuletzt in 0.9.0 geprüft. Die manuelle WebGL-/Mausabnahme bleibt offen; automatisierte Browserprüfungen laufen auf GitHub. Die reale Python-MCP-/MQTT-Integration mit Studio-Editor wurde zuletzt in 0.10.0 erfolgreich geprüft. Details und frühere Nachweise stehen im [Prüfstand](docs/PRUEFUNG.md).
 
 ## Lizenz
 
@@ -201,3 +201,5 @@ Seit **0.45.0** aktualisiert sich die lokale Avatar-Liste auch in anderen geöff
 Seit **0.46.0** ergänzt ein Browserfall die Prüfung des Move-Dateiaustauschs: Download, Dateiauswahl, konfliktfreier Import, wiederholte Posen, Wiedergabe, Undo/Redo und Ablehnung einer unpassenden Modellbindung. 237 Tests, Build und alle zehn Chromium-Fälle bestanden ([CI-Nachweis](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/39913313594)).
 
 Seit **0.47.0** lassen sich im Modus „Gelenke bearbeiten“ echte Zwischengelenke einfügen: Endpunkt einer vorhandenen Knochenstrecke auswählen → „Knochen dazwischen einfügen“. Das Studio ergänzt den Knochen in der Mitte, verbindet beide Teilstrecken und verteilt vorhandene Hautgewichte um. Danach lässt sich das Gelenk verschieben und posieren. Die Änderung wird mit dem Projekt gespeichert und ist als ein Schritt rückgängig machbar. Freies Erzeugen eines ganzen Skeletts und beliebiges Löschen von Quellknochen bleiben offen. Projekte mit Zwischengelenken benötigen mindestens Version 0.47.0.
+
+242 Tests, Build und alle elf Chromium-Fälle bestanden ([CI-Nachweis](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/39957177749)).

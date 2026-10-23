@@ -27,7 +27,11 @@ Zeitstempel: 2026-10-23T14:50:26+02:00 (Europe/Berlin)
 - Vorhandene Posen erhalten die neue Gelenkspur und einen Prüfhinweis. Undo/Redo stellt Hierarchie und Gewichte gemeinsam wieder her.
 - README und Blaupause aktualisiert. Projekte mit Zwischengelenken benötigen Software ab 0.47.0.
 
-**Prüfung:** 242 Tests und Build bestanden; neuer CI-Nachweis steht aus. Gewichtsqualität erfordert manuelle Prüfung; vollständiges Auto-Rigging und beliebiges Knochenlöschen bleiben offen.
+### Fixed
+
+- Projektlade-Vorprüfung berücksichtigt eingefügte Knochen zusätzlich zum unveränderten Quellskelett; im ersten Browserlauf erkannt und korrigiert.
+
+**Prüfung:** 242 Tests, Build und alle elf Chromium-Fälle bestanden ([CI-Nachweis](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/39957177749)). Gewichtsqualität erfordert manuelle Prüfung; vollständiges Auto-Rigging und beliebiges Knochenlöschen bleiben offen.
 
 ## [0.46.0] - 2026-10-23
 
