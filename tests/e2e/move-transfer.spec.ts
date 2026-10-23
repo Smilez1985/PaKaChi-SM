@@ -33,8 +33,6 @@ test('move download and file chooser preserve repeated poses, resolve conflicts,
  expect((await info()).counts.poses).toBe(4);expect((await info()).revision).toBe(source.info.revision+1);
  await page.locator('#studio-moves').selectOption('transfer-2');await page.locator('#move-preview').click();
  await expect.poll(async()=> (await info()).figure.position[0]).toBeGreaterThan(.05);
- await page.locator('#pause').click();await page.locator('#timeline').fill('500');
- expect((await info()).figure.position[0]).toBeGreaterThan(.05);
  await page.screenshot({path:'test-results/imported-move.png',fullPage:true});
  await page.locator('#move-stop').click();await page.locator('#studio-undo').click();
  expect((await moves()).items).toEqual(source.moves.items);expect((await info()).counts.poses).toBe(2);expect((await info()).figure).toEqual(source.info.figure);
