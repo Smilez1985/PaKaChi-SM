@@ -2,7 +2,7 @@
 
 **SM steht für StateMaschine.** PaKaChi ist die **Panda-KI-Chimera**, das übergeordnete Projekt. PaKaChi-SM vereint Avatar-Player, Model Zoo und das fest integrierte **PaKaChi-Avatar-Studio**.
 
-**Softwarestand: 0.44.0 · Entwicklungsstand, keine fertige Bild-zu-3D-Lösung.**
+**Softwarestand: 0.45.0 · Entwicklungsstand, keine fertige Bild-zu-3D-Lösung.**
 
 Der bestehende PaKaChi mit Tierform, humanoider Arbeitsform und allen 72 Transformationsbildern ist erhalten und beim Start ausgewählt. Mika und Nori sind separate technische 3D-Testavatare. Ein 3D-Modell des Original-PaKaChi und die Qualitätsabnahme echter KI-Ergebnisse stehen noch aus.
 
@@ -53,7 +53,7 @@ Seit 0.14.0 besteht zusätzlich der interne [Auftragskern](docs/AUFTRAE.md): fes
 
 ## Was aktuell funktioniert
 
-| Bereich | Stand 0.44.0 |
+| Bereich | Stand 0.45.0 |
 | --- | --- |
 | Player | Avatar-Auswahl, tatsächliche Bewegungen anzeigen, abspielen, pausieren, Tempo und Abspielposition ändern. |
 | Modelle | Mika/Nori mit Skeletten und Clips; eigene eigenständige GLB-Dateien laden oder hineinziehen, bis 50 MiB, lokal für die Sitzung. |
@@ -131,7 +131,7 @@ npx playwright install chromium
 npm run test:e2e
 ```
 
-Für 0.44.0 sind 235 Tests und der Build bestanden. Die unveränderten Original-Testprogramme wurden zuletzt in 0.9.0 geprüft. Die visuelle WebGL-/Mausabnahme ist wegen der Chromium-Startbeschränkung der bisherigen Ausführungsumgebung noch offen. Die reale Python-MCP-/MQTT-Integration mit Studio-Editor wurde zuletzt in 0.10.0 erfolgreich geprüft. Details und frühere Nachweise stehen im [Prüfstand](docs/PRUEFUNG.md).
+Für 0.45.0 sind 237 Tests und der Build bestanden. Die unveränderten Original-Testprogramme wurden zuletzt in 0.9.0 geprüft. Die visuelle WebGL-/Mausabnahme ist wegen der Chromium-Startbeschränkung der bisherigen Ausführungsumgebung noch offen. Die reale Python-MCP-/MQTT-Integration mit Studio-Editor wurde zuletzt in 0.10.0 erfolgreich geprüft. Details und frühere Nachweise stehen im [Prüfstand](docs/PRUEFUNG.md).
 
 ## Lizenz
 
@@ -194,3 +194,6 @@ Seit **0.43.0** ist ein [GitHub-Actions-Prüflauf](.github/workflows/verify.yml)
 
 
 **Browserbefund 0.44.0:** Der erste echte GitHub-Chromium-Lauf besteht Original-Transformation und KI-Sequenzvorschau, meldet aber fünf weitere Fehler. Korrigiert sind die veraltete Beschriftung beim Originalwechsel und die verlangsamte Animation bei niedriger Bildrate. Der [Folgelauf](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/39826526209) besteht **alle sieben Chromium-E2E-Fälle**, zusätzlich zu 235 Tests und Build. Die manuelle Maus-/UI-Abnahme bleibt offen. [Prüfbericht](docs/PRUEFUNG-0.44.0.md).
+
+
+Seit **0.45.0** aktualisiert sich die lokale Avatar-Liste auch in anderen geöffneten Tabs nach Speichern oder Löschen. Beim erneuten Fensterfokus wird sie ebenfalls nachgeladen. Der aktuell geladene Avatar wird dadurch nicht ausgetauscht. Zwei neue Browserfälle prüfen F5-Persistenz und mehrere Tabs; ihr CI-Nachweis steht zunächst aus.

@@ -17,8 +17,8 @@ class MemoryZoo implements LocalZoo {
  async read(id:string){return structuredClone(this.values.get(id)!.project);}
  async remove(id:string){this.values.delete(id);}
 }
-function fixture(t:TestContext,store=new MemoryZoo()){
- const w=new Window();Object.assign(globalThis,{window:w,document:w.document});const host=document.createElement('div');document.body.append(host);
+function fixture(t:TestContext,store=new MemoryZoo(),configure?:(w:Window)=>void){
+ const w=new Window();configure?.(w);Object.assign(globalThis,{window:w,document:w.document});const host=document.createElement('div');document.body.append(host);
  let revision=0,loads=0,ready=true;const source=project();const notifications:ZooEntry[][]=[],pendingStates:boolean[]=[],loadedEntries:ZooEntry[]=[];
  const panel=mountLocalZoo(host,{entriesChanged:entries=>{notifications.push(entries);},pendingChanged:value=>{pendingStates.push(value);},ready:()=>ready,canSave:()=>true,target:()=>({session:'one',revision}),capture:()=>structuredClone(source),load:async(p,valid,entry)=>{loadedEntries.push(entry);ready=false;w.dispatchEvent(new w.Event('pakachi-sm:change'));assert.ok(valid(),'own loading status must not invalidate import');parseProject(p);loads++;ready=true;return true;}},()=> 'de',store);
  t.after(()=>{panel.dispose();w.happyDOM.abort();});const button=(id:string)=>host.querySelector<HTMLButtonElement>('#zoo-'+id)!;
@@ -75,4 +75,17 @@ test('shared selection loads the exact saved identity and publishes committed li
 test('failed list refresh never publishes an unvalidated or late catalog',async t=>{
  const f=fixture(t);await f.save();const count=f.notifications.length;f.store.list=async()=>[{id:'mika',name:'Invalid',bytes:1,createdAt:new Date().toISOString()}];f.button('refresh').click();await f.settle();assert.equal(f.notifications.length,count);
  let release!:(value:ZooEntry[])=>void;f.store.list=()=>new Promise(resolve=>{release=resolve;});f.button('refresh').click();await until(()=>!!release);f.panel.dispose();release([]);await new Promise(r=>setTimeout(r,10));assert.equal(f.notifications.length,count);
+});
+
+test('cross-tab notices refresh only metadata, queue behind writes and contain no project data',async t=>{
+ let listener:((event:{data:unknown})=>void)|null=null,closed=false;const sent:unknown[]=[];
+ class Channel {set onmessage(fn:(event:{data:unknown})=>void){listener=fn;}postMessage(value:unknown){sent.push(value);}close(){closed=true;}}
+ const f=fixture(t,new MemoryZoo(),w=>Object.assign(w,{BroadcastChannel:Channel}));await f.save();assert.deepEqual(sent,['changed']);const first=f.list.value;
+ await f.store.add('Other tab',project());listener!({data:'changed'});await f.settle();assert.equal(f.list.options.length,2);assert.equal(f.list.value,first);assert.equal(f.loads,0);
+ let release!:()=>void;const add=f.store.add.bind(f.store);f.store.add=async(name,p)=>{await new Promise<void>(r=>{release=r;});return add(name,p);};f.button('save').click();await until(()=>!!release);listener!({data:'changed'});release();await f.settle();assert.equal(f.list.options.length,3);assert.equal(f.loads,0);
+ f.panel.dispose();assert.equal(closed,true);const count=f.notifications.length;listener!({data:'changed'});assert.equal(f.notifications.length,count);
+});
+test('focus refresh does not load models and failed writes do not notify other tabs',async t=>{
+ const sent:unknown[]=[];class Channel {postMessage(value:unknown){sent.push(value);}close(){}}
+ const f=fixture(t,new MemoryZoo(),w=>Object.assign(w,{BroadcastChannel:Channel}));await f.settle();f.store.fail=true;await f.save();assert.deepEqual(sent,[]);f.store.fail=false;await f.store.add('External',project());f.w.dispatchEvent(new f.w.Event('focus'));await f.settle();assert.equal(f.list.options.length,1);assert.equal(f.loads,0);
 });

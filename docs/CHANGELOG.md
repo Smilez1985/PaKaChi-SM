@@ -12,6 +12,23 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.45.0] - 2026-10-23
+
+Zeitstempel: 2026-10-23T06:51:03+02:00 (Europe/Berlin)
+
+### Added
+
+- Automatische Aktualisierung der lokalen Avatar-Listen zwischen Tabs nach bestätigten Speicher-/Löschvorgängen; Fokusaktualisierung als Ergänzung.
+- Zwei DOM-Tests und zwei Browserfälle für Benachrichtigungen, F5-Persistenz und mehrere Tabs.
+
+### Changed
+
+- Laufende Vorgänge bündeln weitere Aktualisierungsanforderungen; geladener Avatar und Bearbeitungsstand bleiben erhalten.
+- README, Design, Roadmap, Studio-Anleitung und Prüfstand aktualisiert.
+
+**Prüfung:** 237 Tests und Build bestanden; neun Browserfälle vorbereitet, neuer CI-Nachweis steht aus. Reale Browserquoten bleiben offen.
+
+
 ## [0.44.0] - 2026-10-22
 
 Zeitstempel: 2026-10-22T19:52:21+02:00 (Europe/Berlin)
@@ -934,3 +951,5 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 [0.43.0]: PRUEFUNG-0.43.0.md
 
 [0.44.0]: PRUEFUNG-0.44.0.md
+
+[0.45.0]: PRUEFUNG-0.45.0.md

@@ -4,7 +4,7 @@ Teil der [Blaupause](README.md) · [Roadmap](ROADMAP.md) · [Changelog](CHANGELO
 
 ## Status und Begriffe
 
-Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.44.0: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau, automatische Anatomieerkennung und die Qualitätsabnahme der angeschlossenen lokalen KI-Generierung bleiben offen.
+Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.45.0: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau, automatische Anatomieerkennung und die Qualitätsabnahme der angeschlossenen lokalen KI-Generierung bleiben offen.
 
 - **PaKaChi:** Panda-KI-Chimera, das übergeordnete Projekt.
 - **PaKaChi-SM:** StateMaschine mit Avatar-Player und integriertem Studio.
@@ -24,7 +24,7 @@ Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich gen
 | Generierung | Lokaler TripoSR-Dienst, Bildauswahl, getrennte Vorschau, Vorprüfungs-Fallbacks, expliziter weiterer Auftrag | Echte GPU-/Qualitätsabnahme, Cloud-Generatoren, Korrekturprompts und Rigging |
 | Übernahme | Revisionsschutz, ein Modellwechsel-Rücksprung, vorbereitete 3D-Installation mit Rückabwicklung | Gerenderte Abnahme, Originalplayer-Neustart und GPU-Kontextverlust |
 
-Prüfnachweis für Software 0.44.0: **235 Tests und Build bestanden**. Das belegt keine gerenderte Browser-, Anbieter- oder GPU-Abnahme. Projektformat bleibt Version 1. Freie Punkte/Posen aus 0.22.0/0.23.0 benötigen wegen der korrigierten Normalisierungsreihenfolge eine visuelle Kontrolle; keine automatische Migration. [Prüfbericht](PRUEFUNG-0.44.0.md).
+Prüfnachweis für Software 0.45.0: **237 Tests und Build bestanden**. Das belegt keine gerenderte Browser-, Anbieter- oder GPU-Abnahme. Projektformat bleibt Version 1. Freie Punkte/Posen aus 0.22.0/0.23.0 benötigen wegen der korrigierten Normalisierungsreihenfolge eine visuelle Kontrolle; keine automatische Migration. [Prüfbericht](PRUEFUNG-0.45.0.md).
 
 ## Bestehender PaKaChi-Avatar
 
@@ -467,3 +467,12 @@ Der erste GitHub-Runner konnte Chromium mit WebGL starten. Zwei von sieben Fäll
 Der Viewer verwendet nun die tatsächlich vergangene Vordergrundzeit. Bei langsamem Software-Rendering laufen Clips dadurch nicht künstlich langsamer. Bei einem Sichtbarkeitswechsel wird die Uhr zurückgesetzt; verborgene Frames liefern null Animationsfortschritt. Damit wird keine lange Hintergrundpause beim Zurückkehren nachgeholt. Ungültige oder rückläufige Zeitstempel verändern die Uhr nicht.
 
 Originalwechsel aktualisieren Name, Beschreibung und Modelltyp, leeren die 3D-Move-Auswahl und synchronisieren die Wiedergabesteuerung. Die ursprünglichen Bilddateien bleiben unverändert. Der [Folgelauf](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/39826526209) für Commit `5474cb169515da8a2bb70d66176396f64770c09f` bestätigt die Korrekturen: alle sieben Chromium-E2E-Fälle bestanden. Die manuelle Maus-/UI-Abnahme und echte Inferenz bleiben offen.
+
+
+## Lokale Sammlung in mehreren Tabs (0.45.0)
+
+Nach einem erfolgreich abgeschlossenen IndexedDB-Speicher- oder Löschvorgang sendet das Panel über den gleichnamigen BroadcastChannel desselben Ursprungs nur die Nachricht `changed`. Es überträgt keine Projekt- oder Zugangsdaten. Empfänger lesen die validierte Metadatenliste erneut aus IndexedDB. Aktiver Avatar, Studio-Revision und Bearbeitungsstand werden nicht ersetzt.
+
+Meldungen während einer laufenden Operation werden zu einer ausstehenden Aktualisierung zusammengefasst. Die ausgewählte gespeicherte ID bleibt erhalten, sofern sie weiter existiert. Zusätzlich wird bei Fensterfokus aktualisiert; bei fehlendem BroadcastChannel bleiben Fokus und manueller Aktualisierungsknopf verfügbar. Fehler beim Benachrichtigen machen einen bereits abgeschlossenen Speichervorgang nicht rückgängig. Beim Abbau werden Kanal und Ereignisbehandlung geschlossen.
+
+Die neuen Browserfälle prüfen echte IndexedDB-Persistenz nach Reload einschließlich Posen, Move-Verweisen und gespeicherter Identität sowie zwei Tabs mit Löschbestätigung. Die bestehenden Grenzen von 50 Einträgen/80 MiB je Projekt bleiben erhalten; reale Browserquoten sind damit nicht abgenommen.

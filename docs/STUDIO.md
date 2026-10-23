@@ -245,3 +245,10 @@ Unter dem Bewegungsnamen im Vergleich stehen **Vorher abspielen** und **Nachher 
 **Vorschau beenden** stellt die Bearbeitungspose vor der Vorschau wieder her. Ein nicht wiederholter Move beendet die Vorschau automatisch; eine Schleife läuft bis zum Stoppen. Ein Wechsel von Vorher zu Nachher beendet zunächst die bisherige Vorschau. Übernehmen, Schließen oder Zurücksetzen des Assistenten beendet ebenfalls dessen Vorschau. Der normale Studio-Stopp funktioniert weiterhin.
 
 Die Vorschau speichert nichts und benötigt keine KI-Schreibfreigabe. Übernehmen benötigt diese Freigabe weiterhin und prüft die Revision erneut. Während einer anderen Wiedergabe, einer Ziehgeste, einer Beugegrenzenprüfung oder im Gelenkbearbeitungsmodus startet die Vorschau nicht. Bei veraltetem Stand die Aufgabe erneut senden. Die Funktion ist technisch geprüft; die gerenderte Browserabnahme steht aus.
+
+
+## Lokale Sammlung in mehreren Tabs (0.45.0)
+
+Speichern oder bestätigtes Löschen einer Kopie aktualisiert die Listen in anderen Tabs derselben Anwendung automatisch. Beim erneuten Aktivieren des Fensters wird ebenfalls nachgeladen. Falls der Browser keine Tab-Benachrichtigungen unterstützt, steht „Liste aktualisieren“ weiterhin bereit.
+
+Das Löschen einer gespeicherten Kopie entfernt ihre Ablage und Listenauswahl. Ein bereits geladener Avatar bleibt im anderen Tab erhalten und kann dort weiterbearbeitet oder neu gespeichert werden. Browserdaten zu löschen entfernt weiterhin die gesamte lokale Sammlung; Projektdateien dienen als unabhängige Sicherung.

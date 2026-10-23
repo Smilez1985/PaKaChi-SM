@@ -1,6 +1,6 @@
 # Roadmap – was kommt
 
-**Softwarestand: 0.44.0 · Abgleich: 22.10.2026.** Teil der [Blaupause](README.md).
+**Softwarestand: 0.45.0 · Abgleich: 23.10.2026.** Teil der [Blaupause](README.md).
 
 Ein Häkchen bedeutet implementiert; es ersetzt keine visuelle oder externe Live-Abnahme. Die Nachweise und Prüfgrenzen stehen im [Prüfstand](PRUEFUNG.md). Die Versionshistorie gehört ins [Changelog](CHANGELOG.md).
 
@@ -29,7 +29,9 @@ Diese Reihenfolge ist ein Umsetzungsvorschlag, kein Terminversprechen. Lokale un
 - [x] Original-PaKaChi mit beiden Formen und 72 Bildern bewahren.
 - [x] Eigenständige GLB-Dateien lokal importieren; glTF/GLB und JSON-Katalog als aktuelle Formate festlegen.
 - [x] Vollständige 3D-Projektkopien in einer lokalen Browsersammlung speichern, auswählen, laden und bestätigt löschen (0.26.0; separate Auswahl neben dem mitgelieferten Katalog).
-- [ ] IndexedDB-Persistenz über F5, Speichergrenzen und mehrere Tabs in einem echten Browser prüfen.
+- [x] Lokale Sammlungslisten nach bestätigten Speicher-/Löschvorgängen zwischen Tabs aktualisieren; beim Fensterfokus nachladen, wartende Meldungen bündeln (0.45.0).
+- [x] Zwei Browserfälle für F5-Persistenz einschließlich Posen/Moves und mehrere Tabs mit bestätigtem Löschen vorbereiten (0.45.0).
+- [ ] Neue IndexedDB-Browserfälle erfolgreich ausführen; tatsächliche Speichergrenzen und Quotenfehler weiterhin gesondert prüfen.
 - [x] Lokal gespeicherte Avatare in gemeinsame Auswahl, Zähler und `list_avatars` aufnehmen; gespeicherte ID beim Laden und in der Steuerung erhalten (0.28.0).
 - [ ] Gemeinsame Auswahl inklusive gespeicherter IDs mit echtem Browser/MCP-Host abnehmen.
 - [x] Bearbeitete Projekte als statisches Katalogprojektpaket exportieren und im Player laden (0.29.0; CLI erstellt neuen Ordner, kein automatisches Deployment).
