@@ -24,7 +24,7 @@ Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich gen
 | Generierung | Lokaler TripoSR-Dienst, Bildauswahl, getrennte Vorschau, Vorprüfungs-Fallbacks, expliziter weiterer Auftrag | Echte GPU-/Qualitätsabnahme, Cloud-Generatoren, Korrekturprompts und Rigging |
 | Übernahme | Revisionsschutz, ein Modellwechsel-Rücksprung, vorbereitete 3D-Installation mit Rückabwicklung | Gerenderte Abnahme, Originalplayer-Neustart und GPU-Kontextverlust |
 
-Prüfnachweis für Software 0.45.0: **237 Tests und Build bestanden**. Separate Chromium-Nachweise stehen im Prüfbericht; echte Anbieter-/GPU-Inferenz und manuelle Mausabnahme bleiben offen. Projektformat bleibt Version 1. Freie Punkte/Posen aus 0.22.0/0.23.0 benötigen wegen der korrigierten Normalisierungsreihenfolge eine visuelle Kontrolle; keine automatische Migration. [Prüfbericht](PRUEFUNG-0.45.0.md).
+Prüfnachweis für Software 0.46.0: **237 Tests, Build und zehn Chromium-Fälle bestanden**. Separate Chromium-Nachweise stehen im Prüfbericht; echte Anbieter-/GPU-Inferenz und manuelle Mausabnahme bleiben offen. Projektformat bleibt Version 1. Freie Punkte/Posen aus 0.22.0/0.23.0 benötigen wegen der korrigierten Normalisierungsreihenfolge eine visuelle Kontrolle; keine automatische Migration. [Prüfbericht](PRUEFUNG-0.46.0.md).
 
 ## Bestehender PaKaChi-Avatar
 
@@ -479,4 +479,4 @@ Die neuen Browserfälle bestätigen echte IndexedDB-Persistenz nach Reload einsc
 
 ## Move-Dateiaustausch im Browser (0.46.0)
 
-Der zusätzliche End-to-End-Fall verwendet eine echte heruntergeladene Move-Datei und den Browser-Dateiauswahldialog. Er prüft neue Posen-IDs, den Erhalt wiederholter Posenverweise und die konfliktfreie Move-ID beim erneuten Import in dasselbe Modell. Die importierte Sequenz wird im Studio abgespielt und über den sichtbaren Stoppknopf angehalten. Undo entfernt den gesamten Import; eine anschließend abgewiesene Modellbindung darf den erhaltenen Redo-Schritt nicht verändern. Diese Prüfung ergänzt die bestehenden Daten-/Editor-Tests; sie führt kein Retargeting ein und ersetzt keine manuelle Qualitätsabnahme. Der CI-Nachweis steht noch aus.
+Der zusätzliche End-to-End-Fall verwendet eine echte heruntergeladene Move-Datei und den Browser-Dateiauswahldialog. Er prüft neue Posen-IDs, den Erhalt wiederholter Posenverweise und die konfliktfreie Move-ID beim erneuten Import in dasselbe Modell. Die importierte Sequenz wird im Studio abgespielt und über den sichtbaren Stoppknopf angehalten. Undo entfernt den gesamten Import; eine anschließend abgewiesene Modellbindung darf den erhaltenen Redo-Schritt nicht verändern. Diese Prüfung ergänzt die bestehenden Daten-/Editor-Tests; sie führt kein Retargeting ein und ersetzt keine manuelle Qualitätsabnahme. 237 Tests, Build und alle zehn Chromium-Fälle bestanden ([CI-Nachweis](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/39913313594)).

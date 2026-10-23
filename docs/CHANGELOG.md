@@ -24,7 +24,7 @@ Zeitstempel: 2026-10-23T08:34:20+02:00 (Europe/Berlin)
 
 - README, Design, Roadmap und Prüfstand um die Move-Dateiaustauschprüfung ergänzt.
 
-**Prüfung:** Build bestanden; zehn Browserfälle aufgelistet, neuer CI-Nachweis steht aus.
+**Prüfung:** 237 Tests, Build und alle zehn Chromium-Fälle bestanden ([CI-Nachweis](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/39913313594)). Ein im ersten Lauf verwendeter, im Studio ausgeblendeter Player-Pauseknopf wurde im Test durch die sichtbare Studio-Bedienfolge ersetzt. Keine funktionale Änderung am Importcode.
 
 ## [0.45.0] - 2026-10-23
 

@@ -41,7 +41,7 @@ Diese Reihenfolge ist ein Umsetzungsvorschlag, kein Terminversprechen. Lokale un
 - [ ] Veröffentlichungsablauf ergänzen und zusammengeführte Exportpakete im gerenderten Player abnehmen.
 - [x] Eigene Studio-Moves als separate Dateien exportieren/importieren, nur bei identischem Modell und gleicher Bewegungsstruktur; Konflikte ohne Überschreiben lösen und gesamten Import rückgängig machen (0.27.0).
 - [x] Browserfall für Dateidialog, Download, Importkonflikte, wiederholte Posen, Wiedergabe, Undo/Redo und unpassende Modellbindung ergänzen (0.46.0).
-- [ ] Neuen Move-Dateiaustausch-Fall erfolgreich im gerenderten Browser ausführen.
+- [x] Move-Dateiaustausch-Fall im gerenderten Browser erfolgreich ausführen (0.46.0; [CI-Nachweis](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/39913313594)).
 - [x] Gemeinsame statische moves/-Sammlung mit Katalog, Export eigener Projekt-Moves und revisionsgeschütztem Studio-Import ergänzen (0.31.0).
 - [x] Zwei Move-Sammlungen per CLI mit Struktur-, Konflikt- und Größenprüfung zusammenführen, Quellen bytegenau erhalten und SHA-256-Bericht erzeugen (0.32.0).
 - [ ] Sammlung im Browser bearbeiten und visuell abnehmen; GLB-Clip-Export und Retargeting auf andere Rigs ergänzen.

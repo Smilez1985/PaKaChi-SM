@@ -114,4 +114,4 @@ Die folgenden Einträge beschreiben den jeweiligen Meilenstein; der aktuelle Sta
 
 **0.45.0:** Automatische Aktualisierung der lokalen Avatar-Sammlung zwischen Tabs; Alle neun Chromium-Fälle einschließlich F5-Persistenz und mehrerer Tabs bestanden. [Prüfbericht](PRUEFUNG-0.45.0.md).
 
-**0.46.0:** Browserprüfung des Move-Dateiaustauschs ergänzt. [Prüfbericht](PRUEFUNG-0.46.0.md).
+**0.46.0:** Move-Dateiaustausch einschließlich Wiedergabe und Undo/Redo im Browser nachgewiesen; alle zehn Chromium-Fälle bestanden. [Prüfbericht](PRUEFUNG-0.46.0.md).

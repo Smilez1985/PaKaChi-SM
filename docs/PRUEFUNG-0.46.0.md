@@ -2,7 +2,8 @@
 
 - Produktionsbuild und TypeScript-Prüfung bestanden; bekannte Bundle-Warnung.
 - Playwright listet zehn Browserfälle in fünf Dateien auf.
-- Neuer CI-Lauf einschließlich der 237 bestehenden Node-Tests steht aus.
+- 237 Tests, Build und alle zehn Chromium-Fälle bestanden ([CI-Nachweis](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/39913313594)).
+- Geprüfter Commit: `ecd8275e97fe5130c2e8a36eb8cfccf9bebb158d`; Chromium-Laufzeit 1,6 Minuten.
 
 ## Neuer Browserfall
 
@@ -10,8 +11,8 @@ Ein importiertes Test-GLB erhält zwei Posen und einen Move mit wiederholter Sta
 
 Ein Undo entfernt den gesamten Import und stellt die vorherige Figurpose wieder her. Der anschließende Import mit unpassender Modellbindung wird abgewiesen; Projektzustand und Redo bleiben erhalten. Redo stellt den gültigen Import wieder her.
 
-Dieser Fall ist bis zum tatsächlichen CI-Ergebnis nur vorbereitet. Manuelle Darstellungskontrolle, Mausgefühl, echte Speicherquoten und Anbieterinferenz bleiben offen. Die Original-Assets werden nicht verändert.
+Der korrigierte CI-Lauf bestätigt den gesamten Fall. Manuelle Darstellungskontrolle, Mausgefühl, echte Speicherquoten und Anbieterinferenz bleiben offen. Die Original-Assets werden nicht verändert.
 
 ## Erster CI-Lauf
 
-[Erster Lauf](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/39912344319): 237 Node-Tests und Build bestanden; neun Browserfälle bestanden, der neue Fall scheiterte beim Anklicken des im Studio ausgeblendeten Player-Pauseknopfs. Download, Import und laufende Figurenbewegung waren bereits erfolgreich geprüft. Der Test verwendet nun ausschließlich die sichtbaren Studio-Steuerungen; erneuter CI-Nachweis steht aus.
+[Erster Lauf](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/39912344319): 237 Node-Tests und Build bestanden; neun Browserfälle bestanden, der neue Fall scheiterte beim Anklicken des im Studio ausgeblendeten Player-Pauseknopfs. Download, Import und laufende Figurenbewegung waren bereits erfolgreich geprüft. Der Test verwendet nun ausschließlich die sichtbaren Studio-Steuerungen; der [Folgelauf](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/39913313594) besteht alle zehn Browserfälle.

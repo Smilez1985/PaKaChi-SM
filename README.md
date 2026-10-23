@@ -131,7 +131,7 @@ npx playwright install chromium
 npm run test:e2e
 ```
 
-Für 0.45.0 sind 237 Tests und der Build bestanden. Die unveränderten Original-Testprogramme wurden zuletzt in 0.9.0 geprüft. Die visuelle WebGL-/Mausabnahme ist wegen der Chromium-Startbeschränkung der bisherigen Ausführungsumgebung noch offen. Die reale Python-MCP-/MQTT-Integration mit Studio-Editor wurde zuletzt in 0.10.0 erfolgreich geprüft. Details und frühere Nachweise stehen im [Prüfstand](docs/PRUEFUNG.md).
+Für 0.46.0 sind 237 Tests, Build und alle zehn Chromium-Browserfälle bestanden. Die unveränderten Original-Testprogramme wurden zuletzt in 0.9.0 geprüft. Die manuelle WebGL-/Mausabnahme bleibt offen; automatisierte Browserprüfungen laufen auf GitHub. Die reale Python-MCP-/MQTT-Integration mit Studio-Editor wurde zuletzt in 0.10.0 erfolgreich geprüft. Details und frühere Nachweise stehen im [Prüfstand](docs/PRUEFUNG.md).
 
 ## Lizenz
 
@@ -198,4 +198,4 @@ Seit **0.43.0** ist ein [GitHub-Actions-Prüflauf](.github/workflows/verify.yml)
 
 Seit **0.45.0** aktualisiert sich die lokale Avatar-Liste auch in anderen geöffneten Tabs nach Speichern oder Löschen. Beim erneuten Fensterfokus wird sie ebenfalls nachgeladen. Der aktuell geladene Avatar wird dadurch nicht ausgetauscht. Alle neun Chromium-Browserfälle einschließlich F5-Persistenz und mehrerer Tabs sind bestanden ([CI-Nachweis](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/39902736987)).
 
-Seit **0.46.0** ergänzt ein Browserfall die Prüfung des Move-Dateiaustauschs: Download, Dateiauswahl, konfliktfreier Import, wiederholte Posen, Wiedergabe, Undo/Redo und Ablehnung einer unpassenden Modellbindung. Der neue CI-Nachweis steht noch aus.
+Seit **0.46.0** ergänzt ein Browserfall die Prüfung des Move-Dateiaustauschs: Download, Dateiauswahl, konfliktfreier Import, wiederholte Posen, Wiedergabe, Undo/Redo und Ablehnung einer unpassenden Modellbindung. 237 Tests, Build und alle zehn Chromium-Fälle bestanden ([CI-Nachweis](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/39913313594)).
