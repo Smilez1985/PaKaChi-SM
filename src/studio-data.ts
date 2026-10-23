@@ -13,6 +13,7 @@ export interface ControlPoint {
 export interface Pose { id: string; name: string; seconds: number; values: Record<string, Transform>; review?: ReviewReason[] }
 export interface StudioMove { id: string; name: string; loop: boolean; poses: string[] }
 export interface StudioData {
+  boneInsertions?: {child:number;ratio:number}[];
   points: ControlPoint[]; links: [string, string][]; boneRest: Transform[]; poses: Pose[]; moves: StudioMove[]; draft?: Record<string,Transform>;
 }
 export interface StudioProject {
@@ -39,6 +40,11 @@ export function parseProject(input: unknown): StudioProject {
   require(a.defaultMove===undefined || moveIds.has(a.defaultMove as string));
   if(a.states!==undefined) {require(obj(a.states));for(const [key,value] of Object.entries(a.states))require(['idle','talking','thinking','working','waiting','review','error','sleeping'].includes(key) && moveIds.has(value as string));}
   const d=input.studio; require(obj(d) && Array.isArray(d.points) && d.points.length<=256 && Array.isArray(d.links) && d.links.length<=2048 && Array.isArray(d.boneRest) && d.boneRest.length<=512 && d.boneRest.every(v=>transform(v)) && Array.isArray(d.poses) && d.poses.length<=100 && Array.isArray(d.moves) && d.moves.length<=100);
+  if(d.boneInsertions!==undefined){
+    require(Array.isArray(d.boneInsertions)&&d.boneInsertions.length<=64&&d.boneRest.length<=256,'Ungültige Knochenänderungen.');
+    const count=d.boneRest.length-d.boneInsertions.length;require(count>0);
+    d.boneInsertions.forEach((e,i)=>require(obj(e)&&Object.keys(e).every(k=>k==='child'||k==='ratio')&&Number.isInteger(e.child)&&(e.child as number)>=0&&(e.child as number)<count+i&&typeof e.ratio==='number'&&Number.isFinite(e.ratio)&&e.ratio>=.1&&e.ratio<=.9,'Ungültiges Zwischengelenk.'));
+  }
   const ids=new Set<string>(), bones=new Set<number>();
   for(const p of d.points) {
     require(obj(p) && id(p.id) && !ids.has(p.id) && name(p.name) && ['bone','surface'].includes(p.kind as string) && vector(p.rest,3) && finite(p.size) && p.size>=.003 && p.size<=.15 && finite(p.radius) && p.radius>=.005 && p.radius<=2);

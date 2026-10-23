@@ -252,3 +252,13 @@ Die Vorschau speichert nichts und benötigt keine KI-Schreibfreigabe. Übernehme
 Speichern oder bestätigtes Löschen einer Kopie aktualisiert die Listen in anderen Tabs derselben Anwendung automatisch. Beim erneuten Aktivieren des Fensters wird ebenfalls nachgeladen. Falls der Browser keine Tab-Benachrichtigungen unterstützt, steht „Liste aktualisieren“ weiterhin bereit.
 
 Das Löschen einer gespeicherten Kopie entfernt ihre Ablage und Listenauswahl. Ein bereits geladener Avatar bleibt im anderen Tab erhalten und kann dort weiterbearbeitet oder neu gespeichert werden. Browserdaten zu löschen entfernt weiterhin die gesamte lokale Sammlung; Projektdateien dienen als unabhängige Sicherung.
+
+## Echten Knochen dazwischen einfügen (0.47.0)
+
+1. „Gelenke bearbeiten“ öffnen und den Endpunkt einer vorhandenen Knochenstrecke auswählen, beispielsweise den Fuß einer Hüfte-Fuß-Strecke.
+2. „Knochen dazwischen einfügen“ anklicken. In der Mitte entsteht ein echtes Zwischengelenk mit zwei verbundenen Teilstrecken und angepassten Hautgewichten.
+3. Das neue Gelenk benennen und bei Bedarf in der Grundpose verschieben. Unter „Figur bewegen“ die Bewegung prüfen.
+4. Vorhandene Posen sind als prüfbedürftig markiert. Änderungen ansehen und gegebenenfalls Posen korrigieren.
+5. Das vollständige Projekt speichern. Es benötigt zum erneuten Laden mindestens Version 0.47.0. Undo/Redo nimmt den gesamten Einfügeschritt zurück beziehungsweise stellt ihn wieder her.
+
+Die Gewichtsverteilung ist geometrisch angenähert; die Oberfläche besonders an Gelenken kontrollieren. Der Knopf benötigt ein vorhandenes Skelett und erzeugt kein vollständiges Rig aus einer ungeriggten Figur. „Kontrollpunkt löschen“ entfernt weiterhin nur den Griff, nicht den Knochen. Die ursprünglichen Modellbytes bleiben erhalten.

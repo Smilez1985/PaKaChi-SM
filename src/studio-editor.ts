@@ -107,7 +107,7 @@ export class StudioEditor {
     <div class="studio-detection" ${this.edit?'':'hidden'}><button id="detect-joints">Joints automatisch erkennen</button><button id="detect-links">Joint-Verbindungen automatisch erkennen</button><p class="subtle">Erkennung verwendet vorhandene Skelettdaten. Für Modelle ohne Skelett ist KI-Rigging noch nicht verfügbar.</p></div>
     <button id="figure-select" ${this.edit?'hidden':''}>Gesamte Figur bewegen</button>
     <label for="studio-points">Gelenk / Gesichtspunkt</label><select id="studio-points"><option value="">Punkt auswählen …</option></select>
-    <div class="studio-actions" ${this.edit?'':'hidden'}><button id="point-add">＋ Punkt setzen</button><button id="point-connect" ${this.point?'':'disabled'}>Verbinden / lösen</button></div>
+    <div class="studio-actions" ${this.edit?'':'hidden'}><button id="bone-insert">Knochen dazwischen einfügen</button><button id="point-add">＋ Punkt setzen</button><button id="point-connect" ${this.point?'':'disabled'}>Verbinden / lösen</button></div>
     <div id="point-fields" ${this.point?'':'hidden'}><label>Name<input id="point-name" maxlength="100"></label><label>Punktgröße<input id="point-size" type="range" min="0.003" max="0.15" step="0.001"></label>
     <div id="bend-fields" hidden><label class="check"><input id="bend-enabled" type="checkbox"> IK-Beugegrenze</label><label>Minimale Beugung <output id="bend-min-value"></output><input id="bend-min" type="range" min="0" max="175" step="1"></label><label>Maximale Beugung <output id="bend-max-value"></output><input id="bend-max" type="range" min="0" max="175" step="1"></label><p class="subtle">0° ist gestreckt. Gilt beim Ziehen des Endpunkts einer Zweiglied-Kette. Direkte Drehung und gespeicherte Moves bleiben unverändert.</p></div><label id="radius-label">Einflussbereich<input id="point-radius" type="range" min="0.005" max="0.6" step="0.005"></label>
     <div class="point-xyz">${['x','y','z'].map(a=>`<label>${a.toUpperCase()}<input id="point-${a}" type="number" step="0.005" min="-100" max="100"></label>`).join('')}</div>
@@ -134,6 +134,8 @@ export class StudioEditor {
     on('figure-select',()=>{this.selected=FIGURE_TRACK;this.view.setAction('select');this.render();});
     on('mode-pose',()=>{this.revision++;this.edit=false;this.view.setAction('select');this.rig.reset();this.render();});
     on('mode-rig',()=>{this.revision++;this.edit=true;if(this.selected===FIGURE_TRACK)this.selected=null;this.view.setAction('select');this.rig.reset();this.render();});
+    q<HTMLButtonElement>('bone-insert').disabled=!this.edit||this.point?.kind!=='bone'||this.playing;
+    on('bone-insert',()=>{if(!this.edit||!this.point||this.interactionActive)return;try{this.mutate(()=>{this.selected=this.rig.insertJoint(this.point!).id;});this.hooks.feedback('Zwischengelenk eingefügt. Hautgewichte angepasst; vorhandene Posen prüfen.');}catch(error){this.hooks.feedback((error as Error).message);}});
     on('studio-undo',()=>{const s=this.history.undo(this.snapshot());if(s)this.restore(s);});on('studio-redo',()=>{const s=this.history.redo(this.snapshot());if(s)this.restore(s);});
     on('studio-new',()=>this.mutate(()=>{this.rig.data=structuredClone(this.initial);this.data.poses=[];this.data.moves=[];this.rig.reset();this.selected=null;}));
     on('studio-save',()=>this.save());
@@ -359,7 +361,7 @@ export class StudioEditor {
     const value=this.exportProject();
     const url=URL.createObjectURL(new Blob([JSON.stringify(value)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download=`${this.project.avatar.id}.pakachi.json`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);this.dirty=false;this.render();this.hooks.feedback('Studio-Projekt mit Modell, Kontrollpunkten, Posen und Bewegungen heruntergeladen.');
   }
-  dispose(){if(this.proposalOrigin)this.stopMove();this.moveCheck?.abort();this.libraryRequest?.abort();this.disposed=true;this.view.dispose();this.host.replaceChildren();}
+  dispose(){if(this.proposalOrigin)this.stopMove();this.moveCheck?.abort();this.libraryRequest?.abort();this.disposed=true;this.view.dispose();this.rig.dispose();this.host.replaceChildren();}
 }
 export function encodeModel(buffer:ArrayBuffer):string {let s='';const bytes=new Uint8Array(buffer);for(let i=0;i<bytes.length;i+=16384)s+=String.fromCharCode(...bytes.subarray(i,i+16384));return btoa(s);}
 export function decodeModel(base64:string):ArrayBuffer {return Uint8Array.from(atob(base64),c=>c.charCodeAt(0)).buffer;}

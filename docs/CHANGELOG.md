@@ -12,6 +12,23 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.47.0] - 2026-10-23
+
+Zeitstempel: 2026-10-23T14:50:26+02:00 (Europe/Berlin)
+
+### Added
+
+- Echte Zwischengelenke zwischen vorhandenen Knochen mit automatischer geometrischer Hautgewichtsverteilung und verbundenen Teilstrecken.
+- Fünf Geometrie-/Editor-/Persistenztests sowie ein Chromium-Fall für Einfügen, Undo/Redo und Projektdateiaustausch.
+
+### Changed
+
+- Projektdateien und Katalogexport speichern reproduzierbare Knochenunterteilungen; Move-Kompatibilität berücksichtigt die geänderte Hierarchie.
+- Vorhandene Posen erhalten die neue Gelenkspur und einen Prüfhinweis. Undo/Redo stellt Hierarchie und Gewichte gemeinsam wieder her.
+- README und Blaupause aktualisiert. Projekte mit Zwischengelenken benötigen Software ab 0.47.0.
+
+**Prüfung:** 242 Tests und Build bestanden; neuer CI-Nachweis steht aus. Gewichtsqualität erfordert manuelle Prüfung; vollständiges Auto-Rigging und beliebiges Knochenlöschen bleiben offen.
+
 ## [0.46.0] - 2026-10-23
 
 Zeitstempel: 2026-10-23T08:34:20+02:00 (Europe/Berlin)
@@ -969,3 +986,5 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 [0.45.0]: PRUEFUNG-0.45.0.md
 
 [0.46.0]: PRUEFUNG-0.46.0.md
+
+[0.47.0]: PRUEFUNG-0.47.0.md

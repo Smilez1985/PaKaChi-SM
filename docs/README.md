@@ -1,6 +1,6 @@
 # Blaupause – PaKaChi-SM
 
-**Softwarestand: 0.46.0 · Dokumentation abgeglichen am 23.10.2026.**
+**Softwarestand: 0.47.0 · Dokumentation abgeglichen am 23.10.2026.**
 
 Die Blaupause besteht aus drei Dokumenten. Das Designdokument beschreibt das Produktziel, die Roadmap die Umsetzung und das Changelog die bereits erfolgten Änderungen.
 
@@ -38,7 +38,7 @@ Seit 0.13.0 sind lokale Anbieterprofile, unabhängige Rollenzuordnung im Options
 | Testergebnisse und offene Abnahme | [Prüfstand](PRUEFUNG.md) |
 | Originaldesign und Herkunft der erhaltenen Bilder | [Referenzen](references/README.md) |
 
-Softwareversion, Projektformat und historischer Prüfstand sind unterschiedliche Angaben: Die Software steht auf 0.46.0, das Projektformat weiterhin auf Version 1. Ältere Projekte sind lesbar; Dateien mit Gesamtpositionsspur benötigen Software ab 0.6.0; Gesamtdrehung benötigt mindestens 0.8.0; Skalierung mindestens 0.10.0. Ältere Software ignoriert die neue Skalierung. Historische Prüfberichte behalten ihren damaligen Stand.
+Softwareversion, Projektformat und historischer Prüfstand sind unterschiedliche Angaben: Die Software steht auf 0.47.0, das Projektformat weiterhin auf Version 1. Ältere Projekte sind lesbar; Dateien mit Gesamtpositionsspur benötigen Software ab 0.6.0; Gesamtdrehung benötigt mindestens 0.8.0; Skalierung mindestens 0.10.0. Ältere Software ignoriert die neue Skalierung. Historische Prüfberichte behalten ihren damaligen Stand.
 
 [Aufgabenbezogene Modellwahl und lokale Einrichtung](LOKALE-MODELLE.md) · [Prüfbericht 0.15.0](PRUEFUNG-0.15.0.md)
 
@@ -115,3 +115,5 @@ Die folgenden Einträge beschreiben den jeweiligen Meilenstein; der aktuelle Sta
 **0.45.0:** Automatische Aktualisierung der lokalen Avatar-Sammlung zwischen Tabs; Alle neun Chromium-Fälle einschließlich F5-Persistenz und mehrerer Tabs bestanden. [Prüfbericht](PRUEFUNG-0.45.0.md).
 
 **0.46.0:** Move-Dateiaustausch einschließlich Wiedergabe und Undo/Redo im Browser nachgewiesen; alle zehn Chromium-Fälle bestanden. [Prüfbericht](PRUEFUNG-0.46.0.md).
+
+**0.47.0:** Echte Zwischengelenke mit Hautgewichten, Projektpersistenz und Undo/Redo. [Prüfbericht](PRUEFUNG-0.47.0.md).

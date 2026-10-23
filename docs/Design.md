@@ -4,7 +4,7 @@ Teil der [Blaupause](README.md) · [Roadmap](ROADMAP.md) · [Changelog](CHANGELO
 
 ## Status und Begriffe
 
-Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.46.0: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau, automatische Anatomieerkennung und die Qualitätsabnahme der angeschlossenen lokalen KI-Generierung bleiben offen.
+Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.47.0: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau, automatische Anatomieerkennung und die Qualitätsabnahme der angeschlossenen lokalen KI-Generierung bleiben offen.
 
 - **PaKaChi:** Panda-KI-Chimera, das übergeordnete Projekt.
 - **PaKaChi-SM:** StateMaschine mit Avatar-Player und integriertem Studio.
@@ -480,3 +480,13 @@ Die neuen Browserfälle bestätigen echte IndexedDB-Persistenz nach Reload einsc
 ## Move-Dateiaustausch im Browser (0.46.0)
 
 Der zusätzliche End-to-End-Fall verwendet eine echte heruntergeladene Move-Datei und den Browser-Dateiauswahldialog. Er prüft neue Posen-IDs, den Erhalt wiederholter Posenverweise und die konfliktfreie Move-ID beim erneuten Import in dasselbe Modell. Die importierte Sequenz wird im Studio abgespielt und über den sichtbaren Stoppknopf angehalten. Undo entfernt den gesamten Import; eine anschließend abgewiesene Modellbindung darf den erhaltenen Redo-Schritt nicht verändern. Diese Prüfung ergänzt die bestehenden Daten-/Editor-Tests; sie führt kein Retargeting ein und ersetzt keine manuelle Qualitätsabnahme. 237 Tests, Build und alle zehn Chromium-Fälle bestanden ([CI-Nachweis](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/39913313594)).
+
+## Echte Zwischengelenke (0.47.0)
+
+Das Studio speichert optionale `boneInsertions` als begrenzte Folge von Knochenstrecken-Unterteilungen neben dem unveränderten Quellmodell. Jede Unterteilung verweist auf den vorhandenen Kindknochen und einen Anteil zwischen 0,1 und 0,9; die Oberfläche fügt zunächst in der Mitte ein. Neue Knochen werden am Ende der stabilen Knochenliste geführt. Das Quellkind erhält den neuen Knochen als Elternknoten. Die Grundstellung bewahrt seine Weltposition; vorhandene Posen werden um die zusätzliche lokale Spur ergänzt und ihre Kindposition entsprechend umgerechnet. Alle vorhandenen Posen erhalten einen Prüfhinweis.
+
+Für betroffene SkinnedMeshes wird der neue Knochen in die Skinning-Palette aufgenommen. Vorhandene Einflüsse des Elternknochens werden anhand der projizierten Position auf der Strecke anteilig dem Zwischengelenk zugewiesen. Pro Vertex bleiben höchstens vier normalisierte Einflüsse erhalten; bei Überbelegung werden die stärksten vier verwendet. Das ist eine geometrische Gewichtsheuristik, keine anatomische Erkennung oder Gewichts-Maloberfläche. Die Qualität muss am jeweiligen Modell geprüft werden.
+
+Die Hierarchie und Gewichte werden aus Quellmodell und Unterteilungen reproduziert. Originalclips verwenden wieder das Quellskelett und die ursprünglichen Gewichte; eigene Studio-Moves stellen die Bearbeitungshierarchie wieder her. Undo/Redo umfasst Daten, Hierarchie und Gewichte. Projektdateien, lokale Sammlung und Katalogexport erhalten die Unterteilungen. Move-Kompatibilität berücksichtigt die Hierarchieänderungen. Projektformat bleibt 1; Projekte mit Unterteilungen benötigen Software ab 0.47.0.
+
+Grenzen: vorhandene Knochenstrecke erforderlich, höchstens 64 Unterteilungen und 256 Knochen/Kontrollpunkte. Kein vollständiges Auto-Rigging, kein beliebiges Löschen oder Umhängen von Quellknochen, kein eigenständiger GLB-Export. „Kontrollpunkt löschen“ entfernt weiterhin nur den Griff. Ein neuer Browserfall prüft Einfügen, Undo/Redo und Projekt-Download/-Import; der CI-Nachweis steht noch aus.

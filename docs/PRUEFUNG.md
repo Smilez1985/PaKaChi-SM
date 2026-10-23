@@ -1,6 +1,6 @@
 # Prüfstand und Abnahme
 
-**Softwarestand: 0.46.0 · Dokumentationsabgleich: 23.10.2026.**
+**Softwarestand: 0.47.0 · Dokumentationsabgleich: 23.10.2026.**
 
 ## Nachgewiesen
 
@@ -133,3 +133,5 @@ Der neue Workflow [verify.yml](../.github/workflows/verify.yml) installiert Chro
 **0.45.0:** 237 Tests, Build und alle neun Chromium-Fälle bestanden ([CI-Nachweis](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/39902736987)). Die beiden neuen Fälle bestätigen echte IndexedDB-Persistenz nach F5 und Listenänderungen zwischen zwei Tabs. [Prüfbericht](PRUEFUNG-0.45.0.md).
 
 **0.46.0:** 237 Tests, Build und alle zehn Chromium-Fälle bestanden ([CI-Nachweis](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/39913313594)). Der zusätzliche Fall bestätigt Move-Download, Dateiauswahl, konfliktfreien Import, Wiedergabe, Undo/Redo und Ablehnung einer unpassenden Modellbindung. [Prüfbericht](PRUEFUNG-0.46.0.md).
+
+**0.47.0:** 242 Tests und Build bestanden. Fünf neue Tests prüfen echte Knochen, Hautgewichte, Grundformerhalt, Beugung, Posen, Undo/Redo, Projekt-/Katalogpersistenz, mehrere Unterteilungen sowie Mika und Nori. Ein zusätzlicher Browserfall ist vorbereitet; neuer CI-Nachweis steht aus. [Prüfbericht](PRUEFUNG-0.47.0.md).

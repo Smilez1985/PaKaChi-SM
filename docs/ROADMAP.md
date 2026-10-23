@@ -1,6 +1,6 @@
 # Roadmap – was kommt
 
-**Softwarestand: 0.46.0 · Abgleich: 23.10.2026.** Teil der [Blaupause](README.md).
+**Softwarestand: 0.47.0 · Abgleich: 23.10.2026.** Teil der [Blaupause](README.md).
 
 Ein Häkchen bedeutet implementiert; es ersetzt keine visuelle oder externe Live-Abnahme. Die Nachweise und Prüfgrenzen stehen im [Prüfstand](PRUEFUNG.md). Die Versionshistorie gehört ins [Changelog](CHANGELOG.md).
 
@@ -84,7 +84,9 @@ Diese Reihenfolge ist ein Umsetzungsvorschlag, kein Terminversprechen. Lokale un
 - [x] Automatische und manuelle Verbindungen einzeln entfernen.
 - [x] Punktgröße, Auswahlfläche und Einflussradius getrennt behandeln.
 - [x] Freie Punktgruppen bewegen und lokale Oberflächenverformung mit Hautbindung nutzen.
-- [ ] Quellknochen tatsächlich hinzufügen/löschen und Hautgewichte neu zuordnen. Bisher entfernt Löschen eines Skelettpunkts nur den Griff.
+- [x] Echten Knochen zwischen vorhandenen Eltern-/Kindknochen einfügen; Hautgewichte anteilig umverteilen, Posen erweitern und markieren, Projektpersistenz und Undo/Redo (0.47.0).
+- [ ] Neue Zwischengelenk-Bedienung im Browser erfolgreich abnehmen; Gewichtsqualität manuell prüfen.
+- [ ] Quellknochen frei hinzufügen/löschen oder umhängen und Hautgewichte gezielt bearbeiten. Bisher entfernt Löschen eines Skelettpunkts nur den Griff.
 - [x] Vorhandenes Gesamtskelett automatisch verbinden; beim Posieren Ein-/Zweiglied-Ketten mit erhaltenen Knochenlängen lösen (0.11.0).
 - [x] Manuell einstellbare Beugegrenzen am mittleren Knochen einer Zweiglied-IK-Kette berücksichtigen; Grenzen speichern, über MCP bearbeiten und betroffene Posen markieren (0.33.0).
 - [ ] Anatomische Gelenkketten aus ungeriggter Oberfläche erzeugen; allgemeine Dreh-/Twistgrenzen, fixierte Füße und gekoppelte Ganzkörper-IK ergänzen.

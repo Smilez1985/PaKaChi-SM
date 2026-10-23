@@ -1,3 +1,4 @@
+import {StudioTopology} from './studio-topology.ts';
 import {solveLimb} from './studio-ik.ts';
 import {detectConnections,edgeKey} from './studio-detection.ts';
 import * as T from 'three';
@@ -27,6 +28,7 @@ export class StudioRig {
   private originalNodes:{node:T.Object3D;value:Transform;scale:T.Vector3}[]=[];
   private originalBoneRest:Transform[];
   private bindings:{mesh:T.SkinnedMesh;inverses:T.Matrix4[];bind:T.Matrix4}[]=[];
+  private topology:StudioTopology;
   private surfaceValues:Record<string,Transform>={};
   constructor(root:T.Object3D, saved?:StudioData) {
     this.root=root;root.updateWorldMatrix(true,true);this.rootMatrix=root.matrix.clone();this.rootWorld=root.matrixWorld.clone();this.rootAutoUpdate=root.matrixAutoUpdate;
@@ -46,17 +48,39 @@ export class StudioRig {
       this.surfaces.push({mesh:node,base,world,worldInverse:node.matrixWorld.clone().invert(),inverse:new T.Matrix3().setFromMatrix4(node.matrixWorld.clone().invert())});
     }});
     sourceGeometries.forEach(g=>g.dispose());
+    this.topology=new StudioTopology([...this.bones],root);
     this.initial={...emptyStudio(),boneRest:this.bones.map(read),points:this.bones.map((bone,i)=>({id:`bone-${i}`,kind:'bone',bone:i,name:(bone.name || `Gelenk ${i+1}`).slice(0,100),rest:bone.getWorldPosition(new T.Vector3()).toArray(),size:.025,radius:.18}))};
     this.data=saved ? structuredClone(saved) : structuredClone(this.initial);
     if(saved) {
-      if(saved.boneRest.length!==this.bones.length || saved.points.some(p=>p.mesh!==undefined && p.mesh>=this.surfaces.length))throw new Error('Studio-Daten passen nicht zum enthaltenen Modell.');
+      if(saved.boneRest.length!==this.bones.length+(saved.boneInsertions?.length??0) || saved.points.some(p=>p.mesh!==undefined && p.mesh>=this.surfaces.length))throw new Error('Studio-Daten passen nicht zum enthaltenen Modell.');
     }
     if(!saved){this.data.links=detectConnections(this);this.initial.links=structuredClone(this.data.links);}
     this.reset();
   }
+  insertJoint(point:ControlPoint,ratio=.5){
+    if(point.kind!=='bone'||!Number.isFinite(ratio)||ratio<.1||ratio>.9||this.data.points.length>=256||this.data.boneRest.length>=256||(this.data.boneInsertions?.length??0)>=64)throw Error('Zwischengelenk kann hier nicht eingefügt werden.');
+    const child=this.bones[point.bone!],parent=child.parent;
+    if(!(parent instanceof T.Bone)||this.data.boneRest[point.bone!].position.every(v=>Math.abs(v)<1e-8))throw Error('Einen Endpunkt mit vorhandener Knochenstrecke auswählen.');
+    const parentPoint=this.data.points.find(p=>p.kind==='bone'&&this.bones[p.bone!]===parent);
+    if(!parentPoint)throw Error('Zuerst die vorhandenen Gelenke erkennen.');
+    const before=structuredClone(this.data),values=this.capture(),originalValues=structuredClone(values);
+    try{
+      const offset=new T.Vector3().fromArray(this.data.boneRest[point.bone!].position).multiplyScalar(ratio),index=this.data.boneRest.length,id='joint-'+crypto.randomUUID();
+      this.data.boneInsertions=[...(this.data.boneInsertions??[]),{child:point.bone!,ratio}];
+      this.data.boneRest[point.bone!].position=new T.Vector3().fromArray(this.data.boneRest[point.bone!].position).sub(offset).toArray();
+      const rest:Transform={position:offset.toArray(),rotation:[0,0,0,1]};this.data.boneRest.push(rest);
+      const convert=(v:Record<string,Transform>)=>{if(v[point.id])v[point.id].position=new T.Vector3().fromArray(v[point.id].position).sub(offset).toArray();v[id]=structuredClone(rest);};
+      this.data.poses.forEach(p=>convert(p.values));if(this.data.draft)convert(this.data.draft);convert(values);
+      const added:ControlPoint={id,name:'Zwischengelenk',kind:'bone',bone:index,rest:[0,0,0],size:.025,radius:.18};this.data.points.push(added);
+      this.data.links=this.data.links.filter(l=>!(l.includes(point.id)&&l.includes(parentPoint.id)));this.data.links.push([parentPoint.id,id],[id,point.id]);
+      this.reset();added.rest=this.position(added).toArray();this.apply(values);return added;
+    }catch(error){this.data=before;this.reset();this.apply(originalValues);throw error;}
+  }
+  dispose(){this.topology.restore();}
   reset() {
     this.figureOffset.set(0,0,0);this.figureRotation.identity();this.figureScale=1;this.figureMatrix.identity();this.root.matrixAutoUpdate=this.rootAutoUpdate;this.root.matrix.copy(this.rootMatrix);
     for(const item of this.originalNodes){write(item.node,item.value);item.node.scale.copy(item.scale);}
+    const bones=this.topology.build(this.data.boneInsertions??[],this.data.boneRest);this.bones.splice(0,this.bones.length,...bones);
     this.bones.forEach((b,i)=>write(b,this.data.boneRest[i]));
     this.root.updateWorldMatrix(true,true);
     this.rebind();
@@ -65,7 +89,8 @@ export class StudioRig {
   }
   restoreSource() {
     this.figureOffset.set(0,0,0);this.figureRotation.identity();this.figureScale=1;this.figureMatrix.identity();this.root.matrixAutoUpdate=this.rootAutoUpdate;this.root.matrix.copy(this.rootMatrix);
-    this.bones.forEach((b,i)=>write(b,this.originalBoneRest[i]));
+    this.topology.restore();
+    this.bones.slice(0,this.originalBoneRest.length).forEach((b,i)=>write(b,this.originalBoneRest[i]));
     for(const item of this.originalNodes){write(item.node,item.value);item.node.scale.copy(item.scale);}
     this.root.updateWorldMatrix(true,true);
     for(const b of this.bindings){b.mesh.skeleton.boneInverses=b.inverses.map(m=>m.clone());b.mesh.bind(b.mesh.skeleton,b.bind);}
@@ -185,7 +210,7 @@ export class StudioRig {
     const results:{jointId:string;name:string;endpointId:string;angle:number|null;min:number;max:number;status:'within'|'outside'|'unmeasurable'}[]=[];
     const evaluated=new Set<string>();
     const scale=new Map(this.originalNodes.map(item=>[item.node,item.scale]));
-    const local=(point:ControlPoint)=>{const v=pose.values[point.id];if(!v)throw Error('Pose enthält nicht alle Gelenkspuren.');return new T.Matrix4().compose(new T.Vector3().fromArray(v.position),new T.Quaternion().fromArray(v.rotation),scale.get(this.bones[point.bone!])!);};
+    const local=(point:ControlPoint)=>{const v=pose.values[point.id];if(!v)throw Error('Pose enthält nicht alle Gelenkspuren.');return new T.Matrix4().compose(new T.Vector3().fromArray(v.position),new T.Quaternion().fromArray(v.rotation),scale.get(this.bones[point.bone!])??new T.Vector3(1,1,1));};
     const points=new Map(this.data.points.filter(p=>p.kind==='bone').map(p=>[this.bones[p.bone!],p]));
     const index={byBone:points,edges:new Set(this.data.links.map(edgeKey))};
     for(const endpoint of this.data.points){

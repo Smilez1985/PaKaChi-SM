@@ -2,7 +2,7 @@
 
 **SM steht für StateMaschine.** PaKaChi ist die **Panda-KI-Chimera**, das übergeordnete Projekt. PaKaChi-SM vereint Avatar-Player, Model Zoo und das fest integrierte **PaKaChi-Avatar-Studio**.
 
-**Softwarestand: 0.46.0 · Entwicklungsstand, keine fertige Bild-zu-3D-Lösung.**
+**Softwarestand: 0.47.0 · Entwicklungsstand, keine fertige Bild-zu-3D-Lösung.**
 
 Der bestehende PaKaChi mit Tierform, humanoider Arbeitsform und allen 72 Transformationsbildern ist erhalten und beim Start ausgewählt. Mika und Nori sind separate technische 3D-Testavatare. Ein 3D-Modell des Original-PaKaChi und die Qualitätsabnahme echter KI-Ergebnisse stehen noch aus.
 
@@ -53,7 +53,7 @@ Seit 0.14.0 besteht zusätzlich der interne [Auftragskern](docs/AUFTRAE.md): fes
 
 ## Was aktuell funktioniert
 
-| Bereich | Stand 0.46.0 |
+| Bereich | Stand 0.47.0 |
 | --- | --- |
 | Player | Avatar-Auswahl, tatsächliche Bewegungen anzeigen, abspielen, pausieren, Tempo und Abspielposition ändern. |
 | Modelle | Mika/Nori mit Skeletten und Clips; eigene eigenständige GLB-Dateien laden oder hineinziehen, bis 50 MiB, lokal für die Sitzung. |
@@ -199,3 +199,5 @@ Seit **0.43.0** ist ein [GitHub-Actions-Prüflauf](.github/workflows/verify.yml)
 Seit **0.45.0** aktualisiert sich die lokale Avatar-Liste auch in anderen geöffneten Tabs nach Speichern oder Löschen. Beim erneuten Fensterfokus wird sie ebenfalls nachgeladen. Der aktuell geladene Avatar wird dadurch nicht ausgetauscht. Alle neun Chromium-Browserfälle einschließlich F5-Persistenz und mehrerer Tabs sind bestanden ([CI-Nachweis](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/39902736987)).
 
 Seit **0.46.0** ergänzt ein Browserfall die Prüfung des Move-Dateiaustauschs: Download, Dateiauswahl, konfliktfreier Import, wiederholte Posen, Wiedergabe, Undo/Redo und Ablehnung einer unpassenden Modellbindung. 237 Tests, Build und alle zehn Chromium-Fälle bestanden ([CI-Nachweis](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/39913313594)).
+
+Seit **0.47.0** lassen sich im Modus „Gelenke bearbeiten“ echte Zwischengelenke einfügen: Endpunkt einer vorhandenen Knochenstrecke auswählen → „Knochen dazwischen einfügen“. Das Studio ergänzt den Knochen in der Mitte, verbindet beide Teilstrecken und verteilt vorhandene Hautgewichte um. Danach lässt sich das Gelenk verschieben und posieren. Die Änderung wird mit dem Projekt gespeichert und ist als ein Schritt rückgängig machbar. Freies Erzeugen eines ganzen Skeletts und beliebiges Löschen von Quellknochen bleiben offen. Projekte mit Zwischengelenken benötigen mindestens Version 0.47.0.

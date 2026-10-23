@@ -13,6 +13,7 @@ export function zooPackage(input,id){
  const p=parseProject(input),a=p.avatar,d=p.studio;
  // Explicit allowlists exclude unrelated fields accepted by older project readers.
  const project={format:p.format,version:p.version,model:p.model,avatar:{id,name:a.name,description:a.description||'Eigenes Studio-Projekt',moves:a.moves.map(({id,name,clip,loop})=>({id,name,clip,loop})),...(a.defaultMove?{defaultMove:a.defaultMove}:{}),...(a.states?{states:a.states}:{})},studio:{
+  ...(d.boneInsertions?{boneInsertions:d.boneInsertions.map(({child,ratio})=>({child,ratio}))}:{}),
   points:d.points.map(({id,name,kind,bone,mesh,rest,size,radius,bendLimit})=>({id,name,kind,...(bone===undefined?{}:{bone}),...(mesh===undefined?{}:{mesh}),rest,size,radius,...(bendLimit===undefined?{}:{bendLimit:{min:bendLimit.min,max:bendLimit.max}})})),links:d.links,boneRest:d.boneRest.map(transform),
   poses:d.poses.map(({id,name,seconds,values:map,review})=>({id,name,seconds,values:values(map),...(review?{review}:{} )})),moves:d.moves.map(({id,name,loop,poses})=>({id,name,loop,poses})),...(d.draft?{draft:values(d.draft)}:{}),
  }};
