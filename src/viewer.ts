@@ -67,6 +67,7 @@ export class Viewer {
   private readonly holder = new THREE.Group();
   private model: THREE.Object3D | null = null;
   private skeleton: THREE.SkeletonHelper | null = null;
+  private skeletonSignature = '';
   private frame = 0;
   private readonly clock = new AnimationClock(performance.now());
   private readonly visibilityChanged = () => this.clock.reset(performance.now());
@@ -117,6 +118,7 @@ export class Viewer {
       const elapsed = this.clock.tick(now);
       const delta = document.hidden ? 0 : elapsed;
       this.onFrame(delta);
+      if(this.skeleton?.visible)this.refreshSkeleton();
       this.controls.update();
       this.renderer.render(this.scene, this.camera);
     };
@@ -144,7 +146,13 @@ export class Viewer {
     const controls=this.controls;
     return new StudioView(rig,this.camera,this.renderer.domElement,{get enabled(){return controls.enabled;},set enabled(value:boolean){controls.enabled=value;},get target(){return controls._gizmos.position;}},this.scene); }
 
-  showSkeleton(visible: boolean): void { if (this.skeleton) this.skeleton.visible = visible; }
+  private refreshSkeleton(){
+    if(!this.model||!this.skeleton)return;
+    const nodes:string[]=[];this.model.traverse(n=>{if(n instanceof THREE.Bone)nodes.push(n.uuid+':'+n.parent?.uuid);});const signature=nodes.join('|');
+    if(signature===this.skeletonSignature)return;this.skeletonSignature=signature;
+    const visible=this.skeleton.visible;this.scene.remove(this.skeleton);this.skeleton.dispose();this.skeleton=new THREE.SkeletonHelper(this.model);this.skeleton.visible=visible;this.scene.add(this.skeleton);
+  }
+  showSkeleton(visible: boolean): void { if (this.skeleton){this.skeleton.visible = visible;if(visible)this.refreshSkeleton();} }
   resetCamera(): void {
     this.camera.up.set(0,1,0);
     this.camera.position.set(3.2, 2.1, 5.5);

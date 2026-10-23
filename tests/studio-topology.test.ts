@@ -60,3 +60,40 @@ test('successive insertions survive catalog export and recover the original weig
  const weights=mesh.geometry.getAttribute('skinWeight');for(let i=0;i<weights.count;i++)assert.ok(Math.abs([0,1,2,3].reduce((s,k)=>s+weights.getComponent(i,k),0)-1)<1e-6);
  rig.restoreSource();assert.deepEqual(Array.from(mesh.geometry.getAttribute('skinIndex').array),sourceIndices);assert.deepEqual(Array.from(mesh.geometry.getAttribute('skinWeight').array),sourceWeights);
 });
+test('deleting an inserted bone removes it from hierarchy and skin palette and persists in catalog',async()=>{
+ // @ts-expect-error CLI module has no declaration file.
+ const {zooPackage}=await import('../scripts/export-zoo.mjs');
+ const {rig,mesh,hip,foot}=fixture(),before=[0,1,2].map(i=>vertex(mesh,i));const joint=rig.insertJoint(rig.data.points[1]);rig.deleteBone(joint);
+ assert.equal(foot.parent,hip);assert.equal(rig.bones[joint.bone!].parent,null);assert.ok(!mesh.skeleton.bones.includes(rig.bones[joint.bone!]));assert.equal(mesh.skeleton.bones.length,2);
+ before.forEach((v,i)=>assert.ok(vertex(mesh,i).distanceTo(v)<1e-6));assert.ok(!detectJoints(rig).some(p=>p.bone===joint.bone));
+ const packed=JSON.parse(zooPackage(project(rig),'deleted').project);assert.deepEqual(packed.studio.boneDeletions,[joint.bone]);parseProject(packed);
+ const other=fixture();other.rig.data=packed.studio;other.rig.reset();assert.equal(other.foot.parent,other.hip);assert.equal(other.mesh.skeleton.bones.length,2);
+ const snapshot=structuredClone(rig.data);assert.throws(()=>rig.insertJoint(rig.data.points[1]),/rückgängig/);assert.deepEqual(rig.data,snapshot);
+});
+test('leaf deletion transfers and merges weights; root and scaled bone rejection do not mutate',()=>{
+ const {rig,mesh,hip,foot}=fixture(),snapshot=structuredClone(rig.data);assert.throws(()=>rig.deleteBone(rig.data.points[0]),/Wurzel/);assert.deepEqual(rig.data,snapshot);
+ foot.scale.setScalar(2);assert.throws(()=>rig.deleteBone(rig.data.points[1]),/skalierte/);assert.deepEqual(rig.data,snapshot);foot.scale.setScalar(1);
+ rig.deleteBone(rig.data.points[1]);assert.equal(foot.parent,null);assert.deepEqual(mesh.skeleton.bones,[hip]);
+ const weights=mesh.geometry.getAttribute('skinWeight'),indices=mesh.geometry.getAttribute('skinIndex');for(let i=0;i<weights.count;i++){assert.equal(indices.getX(i),0);assert.equal(weights.getX(i),1);}
+ parseProject(project(rig));rig.restoreSource();assert.equal(foot.parent,hip);assert.equal(mesh.skeleton.bones.length,2);
+});
+test('Mika source knee deletion preserves child pose transforms, survives reload and undo/redo',async()=>{
+ const {readFileSync}=await import('node:fs');const {parseModel,disposeModel}=await import('../src/viewer.ts');
+ const bytes=readFileSync(new URL('../public/model-zoo/mika/model.gltf',import.meta.url)),{scene}=await parseModel(Uint8Array.from(bytes).buffer),rig=new StudioRig(scene);
+ const knee=rig.data.points.find(p=>p.name==='LeftKnee')!,foot=rig.data.points.find(p=>p.name==='LeftFoot')!,bone=rig.bones[knee.bone!],parent=bone.parent;
+ const rest=rig.capture();rig.setPoint(knee,rig.position(knee),new T.Quaternion().setFromAxisAngle(new T.Vector3(1,0,0),.5),false,'rotate');const posed=rig.capture(),position=rig.position(foot),rotation=rig.rotation(foot);
+ rig.data.poses=[{id:'a',name:'A',seconds:1,values:rest},{id:'b',name:'B',seconds:1,values:posed}];rig.data.moves=[{id:'m',name:'M',loop:false,poses:['a','b']}];
+ const w=new Window();Object.assign(globalThis,{document:w.document,Option:function(text='',value=''){const o=w.document.createElement('option');o.textContent=text;o.value=value;return o;}});
+ const host=document.createElement('div'),view={setEnabled(){},setFigureEnabled(){},setAction(){},setRotation(){},select(){},refresh(){},dispose(){},onSelect:(_id:string)=>{}};
+ const editor=new StudioEditor(rig,view as unknown as StudioView,host,{...project(rig),model:bytes.toString('base64')},{suspend(){},resume(){},changed(){},feedback(){}});editor.enter();const click=(id:string)=>host.querySelector<HTMLButtonElement>('#'+id)!.click();click('mode-rig');view.onSelect(knee.id);click('bone-delete');
+ assert.equal(bone.parent,null);assert.equal(rig.bones[foot.bone!].parent,parent);assert.ok(rig.data.poses.every(p=>p.review?.includes('bone-rest')));rig.apply(rig.data.poses[1].values);assert.ok(rig.position(foot).distanceTo(position)<1e-5);assert.ok(rig.rotation(foot).angleTo(rotation)<1e-5);
+ const saved=parseProject(editor.exportProject()),loaded=await parseModel(Uint8Array.from(bytes).buffer),again=new StudioRig(loaded.scene,saved.studio);assert.equal(again.bones[knee.bone!].parent,null);again.apply(saved.studio.poses[1].values);assert.ok(again.position(foot).distanceTo(position)<1e-5);
+ click('studio-undo');assert.equal(bone.parent,parent);assert.ok(rig.data.points.some(p=>p.id===knee.id));click('studio-redo');assert.equal(bone.parent,null);assert.ok(!rig.data.points.some(p=>p.id===knee.id));
+ editor.dispose();again.dispose();disposeModel(scene);disposeModel(loaded.scene);w.happyDOM.abort();
+});
+test('deletion rejects incomplete skin palettes atomically and validates persisted deletion IDs',()=>{
+ const f=fixture();f.mesh.bind(new T.Skeleton([f.foot]));f.mesh.geometry.setAttribute('skinIndex',new T.Uint16BufferAttribute(new Array(12).fill(0),4));const rig=new StudioRig(f.root),before=structuredClone(rig.data),weights=Array.from(f.mesh.geometry.getAttribute('skinWeight').array);
+ assert.throws(()=>rig.deleteBone(rig.data.points[1]),/Elternknochen/);assert.deepEqual(rig.data,before);assert.equal(f.foot.parent,f.hip);assert.deepEqual(f.mesh.skeleton.bones,[f.foot]);assert.deepEqual(Array.from(f.mesh.geometry.getAttribute('skinWeight').array),weights);
+ for(const deletion of [[1,1],[-1],[999]]){const bad=project(rig);bad.studio={...structuredClone(before),boneDeletions:deletion};assert.throws(()=>parseProject(bad));}
+ const bad=project(rig);bad.studio={...structuredClone(before),boneDeletions:[1]};assert.throws(()=>parseProject(bad),'deleted bones cannot keep active controls');
+});

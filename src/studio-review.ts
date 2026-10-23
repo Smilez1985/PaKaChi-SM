@@ -14,7 +14,7 @@ const rest=(data:StudioData,p:ControlPoint):Transform=>p.kind==='bone'?data.bone
 const active=(pose:Pose,data:StudioData,p:ControlPoint)=>!sameTransform(pose.values[p.id],rest(data,p));
 /** Detect changes to the interpretation of stored poses, without rewriting their motion. */
 export function flagAffectedPoses(before:StudioData,after:StudioData):void {
-  const bonesChanged=before.boneRest.length!==after.boneRest.length||before.boneRest.some((v,i)=>!sameTransform(v,after.boneRest[i]));
+  const bonesChanged=JSON.stringify(before.boneDeletions??[])!==JSON.stringify(after.boneDeletions??[])||before.boneRest.length!==after.boneRest.length||before.boneRest.some((v,i)=>!sameTransform(v,after.boneRest[i]));
   const current=new Map(after.points.map(p=>[p.id,p]));
   for(const pose of after.poses){const previous=before.poses.find(p=>p.id===pose.id);if(!previous)continue;
     const reasons=new Set<ReviewReason>(pose.review??[]);

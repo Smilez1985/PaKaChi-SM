@@ -4,7 +4,7 @@ Teil der [Blaupause](README.md) · [Roadmap](ROADMAP.md) · [Changelog](CHANGELO
 
 ## Status und Begriffe
 
-Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.47.0: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau, automatische Anatomieerkennung und die Qualitätsabnahme der angeschlossenen lokalen KI-Generierung bleiben offen.
+Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.48.0: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau, automatische Anatomieerkennung und die Qualitätsabnahme der angeschlossenen lokalen KI-Generierung bleiben offen.
 
 - **PaKaChi:** Panda-KI-Chimera, das übergeordnete Projekt.
 - **PaKaChi-SM:** StateMaschine mit Avatar-Player und integriertem Studio.
@@ -490,3 +490,13 @@ Für betroffene SkinnedMeshes wird der neue Knochen in die Skinning-Palette aufg
 Die Hierarchie und Gewichte werden aus Quellmodell und Unterteilungen reproduziert. Originalclips verwenden wieder das Quellskelett und die ursprünglichen Gewichte; eigene Studio-Moves stellen die Bearbeitungshierarchie wieder her. Undo/Redo umfasst Daten, Hierarchie und Gewichte. Projektdateien, lokale Sammlung und Katalogexport erhalten die Unterteilungen. Move-Kompatibilität berücksichtigt die Hierarchieänderungen. Projektformat bleibt 1; Projekte mit Unterteilungen benötigen Software ab 0.47.0.
 
 Grenzen: vorhandene Knochenstrecke erforderlich, höchstens 64 Unterteilungen und 256 Knochen/Kontrollpunkte. Kein vollständiges Auto-Rigging, kein beliebiges Löschen oder Umhängen von Quellknochen, kein eigenständiger GLB-Export. „Kontrollpunkt löschen“ entfernt weiterhin nur den Griff. Der neue Browserfall bestätigt Einfügen, Undo/Redo und Projekt-Download/-Import. 242 Tests, Build und alle elf Chromium-Fälle bestanden ([CI-Nachweis](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/39957177749)).
+
+## Knochen entfernen (0.48.0)
+
+Die optionale geordnete Liste `boneDeletions` referenziert stabile Knochenindizes nach den Einfügungen. Entfernte Knochen behalten ihren Indexplatz in den Rekonstruktionsdaten, sind jedoch aus der aktiven Modellhierarchie und den Skinning-Paletten entfernt. Das eingebettete Quellmodell bleibt unverändert. Beim Wiederherstellen des Quellmodells für Originalclips werden ursprüngliche Hierarchie und Gewichte wiederhergestellt.
+
+Direkte Kindknochen wechseln zum überlebenden Elternknochen. Grundstellung, gespeicherte Posen, Entwurf und aktuelle Pose werden durch Komposition der lokalen Positionen und Quaternionen umgerechnet. Die Gewichte des entfernten Knochens werden mit den Gewichten seines Elternknochens zusammengeführt und normalisiert; Palette und Vertex-Indizes werden konsistent verkleinert. Vorhandene Posen werden markiert: Die Welttransformationen verbleibender Kindgelenke bleiben erhalten, die Hautverformung einer entfernten Gelenkspur kann sich dennoch ändern und verlangt Kontrolle.
+
+Die Änderung ist ein Undo-/Redo-Schritt. Fehler rollen Daten und Laufzeitstruktur zurück. Projektdateien, lokale Sammlung und Katalogexport erhalten die Löschliste; Move-Kompatibilität berücksichtigt sie. Die Skelettanzeige baut ihre Linien bei Hierarchieänderungen neu auf.
+
+Geschützt sind Wurzelknochen, Knochen mit eigener Skalierung ungleich 1, Nicht-Knochen-Anbauten und fehlende Elternknochen in einer betroffenen Skinning-Palette. Eltern- und Kindgriffe müssen vorhanden sein. Weitere Einfügungen nach Löschungen sind vorerst gesperrt; Löschungen zuerst per Undo zurücknehmen. Beliebig gemischte Umbaufolgen, Umhängen und gezielte Gewichts-Malwerkzeuge bleiben offen. Neue Bedienung zunächst über die Studio-Oberfläche; kein neuer MCP-Befehl. Projektformat bleibt 1, Projekte mit Löschlisten benötigen Software ab 0.48.0.

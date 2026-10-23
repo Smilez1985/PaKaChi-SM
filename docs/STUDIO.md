@@ -262,3 +262,9 @@ Das Löschen einer gespeicherten Kopie entfernt ihre Ablage und Listenauswahl. E
 5. Das vollständige Projekt speichern. Es benötigt zum erneuten Laden mindestens Version 0.47.0. Undo/Redo nimmt den gesamten Einfügeschritt zurück beziehungsweise stellt ihn wieder her.
 
 Die Gewichtsverteilung ist geometrisch angenähert; die Oberfläche besonders an Gelenken kontrollieren. Der Knopf benötigt ein vorhandenes Skelett und erzeugt kein vollständiges Rig aus einer ungeriggten Figur. „Kontrollpunkt löschen“ entfernt weiterhin nur den Griff, nicht den Knochen. Die ursprünglichen Modellbytes bleiben erhalten.
+
+## Einen echten Knochen löschen (0.48.0)
+
+Unter „Gelenke bearbeiten“ den Knochen auswählen und „Knochen wirklich löschen“ anklicken. Der Knopf „Kontrollpunkt löschen“ entfernt weiterhin nur den Bearbeitungsgriff. Beim echten Löschen bleiben Kinder verbunden: Sie wechseln zum Elternknochen, der auch die Hautgewichte übernimmt. Vorhandene Posen werden umgerechnet und zur Kontrolle markiert. Oberfläche und Moves danach prüfen; besonders eine zuvor stark gebeugte gelöschte Gelenkspur kann anders aussehen.
+
+Undo/Redo stellt den gesamten Eingriff einschließlich Hierarchie und Gewichten wieder her. Die Projektdatei speichert die Löschungen; zum Laden ist mindestens 0.48.0 erforderlich. Wurzelknochen, selbst skalierte Knochen und Knochen mit Anbauteilen können derzeit nicht gelöscht werden. Falls Griffe fehlen, zuerst vorhandene Gelenke erkennen. Nach Löschungen ist weiteres Einfügen bis zum Rückgängigmachen der Löschungen gesperrt; weitere Löschungen bleiben möglich.

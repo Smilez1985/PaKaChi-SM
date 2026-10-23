@@ -13,6 +13,7 @@ export interface ControlPoint {
 export interface Pose { id: string; name: string; seconds: number; values: Record<string, Transform>; review?: ReviewReason[] }
 export interface StudioMove { id: string; name: string; loop: boolean; poses: string[] }
 export interface StudioData {
+  boneDeletions?: number[];
   boneInsertions?: {child:number;ratio:number}[];
   points: ControlPoint[]; links: [string, string][]; boneRest: Transform[]; poses: Pose[]; moves: StudioMove[]; draft?: Record<string,Transform>;
 }
@@ -45,11 +46,12 @@ export function parseProject(input: unknown): StudioProject {
     const count=d.boneRest.length-d.boneInsertions.length;require(count>0);
     d.boneInsertions.forEach((e,i)=>require(obj(e)&&Object.keys(e).every(k=>k==='child'||k==='ratio')&&Number.isInteger(e.child)&&(e.child as number)>=0&&(e.child as number)<count+i&&typeof e.ratio==='number'&&Number.isFinite(e.ratio)&&e.ratio>=.1&&e.ratio<=.9,'Ungültiges Zwischengelenk.'));
   }
+  if(d.boneDeletions!==undefined)require(Array.isArray(d.boneDeletions)&&d.boneDeletions.length<=256&&new Set(d.boneDeletions).size===d.boneDeletions.length&&d.boneDeletions.every(i=>Number.isInteger(i)&&i>=0&&i<(d.boneRest as unknown[]).length),'Ungültige Knochenlöschungen.');
   const ids=new Set<string>(), bones=new Set<number>();
   for(const p of d.points) {
     require(obj(p) && id(p.id) && !ids.has(p.id) && name(p.name) && ['bone','surface'].includes(p.kind as string) && vector(p.rest,3) && finite(p.size) && p.size>=.003 && p.size<=.15 && finite(p.radius) && p.radius>=.005 && p.radius<=2);
     require(p.bendLimit===undefined || p.kind==='bone'&&validBendLimit(p.bendLimit),'Ungültige IK-Beugegrenze.');
-    if(p.kind==='bone') {require(Number.isInteger(p.bone) && (p.bone as number)>=0 && (p.bone as number)<d.boneRest.length && !bones.has(p.bone as number));bones.add(p.bone as number);}
+    if(p.kind==='bone') {require(Number.isInteger(p.bone) && (p.bone as number)>=0 && (p.bone as number)<d.boneRest.length && !bones.has(p.bone as number)&&!(d.boneDeletions as number[]|undefined)?.includes(p.bone as number));bones.add(p.bone as number);}
     else require(p.mesh===undefined || Number.isInteger(p.mesh) && (p.mesh as number)>=0 && (p.mesh as number)<2048);
     ids.add(p.id);
   }

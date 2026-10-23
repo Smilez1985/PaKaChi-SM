@@ -5,7 +5,7 @@ import type { ControlPoint } from './studio-data.ts';
 export function detectJoints(rig:StudioRig):ControlPoint[] {
   const existing=new Set(rig.data.points.filter(p=>p.kind==='bone').map(p=>p.bone));
   const candidates:ControlPoint[]=[...rig.initial.points,...rig.bones.slice(rig.initial.boneRest.length).map((bone,i)=>({id:'bone-'+(rig.initial.boneRest.length+i),name:bone.name.slice(0,100)||'Zwischengelenk',kind:'bone' as const,bone:rig.initial.boneRest.length+i,rest:bone.getWorldPosition(new Vector3()).toArray(),size:.025,radius:.18}))];
-  return candidates.filter(p=>!existing.has(p.bone)).map(p=>{const copy=structuredClone(p);if(rig.data.points.some(q=>q.id===copy.id))copy.id=`p-${crypto.randomUUID()}`;return copy;});
+  return candidates.filter(p=>!existing.has(p.bone)&&!rig.data.boneDeletions?.includes(p.bone!)).map(p=>{const copy=structuredClone(p);if(rig.data.points.some(q=>q.id===copy.id))copy.id=`p-${crypto.randomUUID()}`;return copy;});
 }
 /** Only proven parent/child bone edges. Independent hand-made groups remain independent. */
 export function detectConnections(rig:StudioRig):[string,string][] {

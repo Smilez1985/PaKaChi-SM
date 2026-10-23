@@ -1,6 +1,6 @@
 # Prüfstand und Abnahme
 
-**Softwarestand: 0.47.0 · Dokumentationsabgleich: 23.10.2026.**
+**Softwarestand: 0.48.0 · Dokumentationsabgleich: 23.10.2026.**
 
 ## Nachgewiesen
 
@@ -135,3 +135,5 @@ Der neue Workflow [verify.yml](../.github/workflows/verify.yml) installiert Chro
 **0.46.0:** 237 Tests, Build und alle zehn Chromium-Fälle bestanden ([CI-Nachweis](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/39913313594)). Der zusätzliche Fall bestätigt Move-Download, Dateiauswahl, konfliktfreien Import, Wiedergabe, Undo/Redo und Ablehnung einer unpassenden Modellbindung. [Prüfbericht](PRUEFUNG-0.46.0.md).
 
 **0.47.0:** 242 Tests und Build bestanden. Fünf neue Tests prüfen echte Knochen, Hautgewichte, Grundformerhalt, Beugung, Posen, Undo/Redo, Projekt-/Katalogpersistenz, mehrere Unterteilungen sowie Mika und Nori. 242 Tests, Build und alle elf Chromium-Fälle bestanden ([CI-Nachweis](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/39957177749)). Der neue Fall bestätigt Einfügen, Undo/Redo und Projekt-Download/-Import. [Prüfbericht](PRUEFUNG-0.47.0.md).
+
+**0.48.0:** 246 Tests und Build bestanden. Vier zusätzliche Tests prüfen echte Knochenentfernung, Gewichtsübernahme, Posenumrechnung, Undo/Redo, Rekonstruktion und Fehler-Rollback. Ein weiterer Browserfall für das ursprüngliche Mika-Knie ist vorbereitet; neuer CI-Nachweis steht aus. [Prüfbericht](PRUEFUNG-0.48.0.md).

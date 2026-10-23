@@ -58,6 +58,7 @@ export class StudioRig {
     this.reset();
   }
   insertJoint(point:ControlPoint,ratio=.5){
+    if(this.data.boneDeletions?.length)throw Error('Vor weiterem Einfügen die Knochenlöschung rückgängig machen.');
     if(point.kind!=='bone'||!Number.isFinite(ratio)||ratio<.1||ratio>.9||this.data.points.length>=256||this.data.boneRest.length>=256||(this.data.boneInsertions?.length??0)>=64)throw Error('Zwischengelenk kann hier nicht eingefügt werden.');
     const child=this.bones[point.bone!],parent=child.parent;
     if(!(parent instanceof T.Bone)||this.data.boneRest[point.bone!].position.every(v=>Math.abs(v)<1e-8))throw Error('Einen Endpunkt mit vorhandener Knochenstrecke auswählen.');
@@ -76,11 +77,29 @@ export class StudioRig {
       this.reset();added.rest=this.position(added).toArray();this.apply(values);return added;
     }catch(error){this.data=before;this.reset();this.apply(originalValues);throw error;}
   }
+  deleteBone(point:ControlPoint){
+    if(point.kind!=='bone'||this.data.boneDeletions?.includes(point.bone!))throw Error('Einen vorhandenen Knochen auswählen.');
+    const bone=this.bones[point.bone!],parent=bone.parent;
+    if(!(parent instanceof T.Bone)||bone.children.some(n=>!(n instanceof T.Bone))||bone.scale.distanceTo(new T.Vector3(1,1,1))>1e-8)throw Error('Wurzelknochen, skalierte Knochen und Knochen mit Anbauteilen können nicht gelöscht werden.');
+    const parentPoint=this.data.points.find(p=>p.kind==='bone'&&this.bones[p.bone!]===parent);
+    const children=bone.children.map(child=>this.data.points.find(p=>p.kind==='bone'&&this.bones[p.bone!]===child));
+    if(!parentPoint||children.some(p=>!p))throw Error('Zuerst die vorhandenen Gelenke erkennen.');
+    const before=structuredClone(this.data),values=this.capture(),original=structuredClone(values);
+    const combine=(a:Transform,b:Transform):Transform=>({position:new T.Vector3().fromArray(b.position).applyQuaternion(new T.Quaternion().fromArray(a.rotation)).add(new T.Vector3().fromArray(a.position)).toArray(),rotation:new T.Quaternion().fromArray(a.rotation).multiply(new T.Quaternion().fromArray(b.rotation)).normalize().toArray()});
+    try{
+      for(const child of children)this.data.boneRest[child!.bone!]=combine(before.boneRest[point.bone!],before.boneRest[child!.bone!]);
+      const convert=(v:Record<string,Transform>)=>{for(const child of children)v[child!.id]=combine(v[point.id]??before.boneRest[point.bone!],v[child!.id]??before.boneRest[child!.bone!]);delete v[point.id];};
+      this.data.poses.forEach(p=>convert(p.values));if(this.data.draft)convert(this.data.draft);convert(values);
+      this.data.boneDeletions=[...(this.data.boneDeletions??[]),point.bone!];this.data.points=this.data.points.filter(p=>p.id!==point.id);this.data.links=this.data.links.filter(l=>!l.includes(point.id));
+      for(const child of children)if(!this.data.links.some(l=>l.includes(parentPoint.id)&&l.includes(child!.id)))this.data.links.push([parentPoint.id,child!.id]);
+      this.reset();this.apply(values);return parentPoint.id;
+    }catch(error){this.data=before;this.reset();this.apply(original);throw error;}
+  }
   dispose(){this.topology.restore();}
   reset() {
     this.figureOffset.set(0,0,0);this.figureRotation.identity();this.figureScale=1;this.figureMatrix.identity();this.root.matrixAutoUpdate=this.rootAutoUpdate;this.root.matrix.copy(this.rootMatrix);
     for(const item of this.originalNodes){write(item.node,item.value);item.node.scale.copy(item.scale);}
-    const bones=this.topology.build(this.data.boneInsertions??[],this.data.boneRest);this.bones.splice(0,this.bones.length,...bones);
+    const bones=this.topology.build(this.data.boneInsertions??[],this.data.boneRest,this.data.boneDeletions??[]);this.bones.splice(0,this.bones.length,...bones);
     this.bones.forEach((b,i)=>write(b,this.data.boneRest[i]));
     this.root.updateWorldMatrix(true,true);
     this.rebind();

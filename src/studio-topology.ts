@@ -18,7 +18,7 @@ export class StudioTopology {
   for(const s of this.skins){s.mesh.skeleton=s.skeleton;s.mesh.geometry.setAttribute('skinIndex',s.indices.clone());s.mesh.geometry.setAttribute('skinWeight',s.weights.clone());}
   this.generated.forEach(s=>s.dispose());this.generated=[];
  }
- build(edits:BoneInsertion[],rest:{position:[number,number,number];rotation:[number,number,number,number]}[]):T.Bone[]{
+ build(edits:BoneInsertion[],rest:{position:[number,number,number];rotation:[number,number,number,number]}[],deletions:number[]=[]):T.Bone[]{
   this.restore();const bones=[...this.source],splits:{parent:T.Bone;child:T.Bone;added:T.Bone;ratio:number}[]=[];
   for(const edit of edits){
    const child=bones[edit.child],parent=child?.parent;
@@ -45,6 +45,25 @@ export class StudioTopology {
     }
     indices.needsUpdate=true;weights.needsUpdate=true;
    }
+  }
+  for(const index of deletions){
+   const bone=bones[index],parent=bone?.parent;
+   if(!(parent instanceof T.Bone)||bone.children.some(n=>!(n instanceof T.Bone))||bone.scale.distanceTo(new T.Vector3(1,1,1))>1e-8)throw Error('Dieser Knochen kann nicht sicher entfernt werden.');
+   for(const s of this.skins){
+    const old=s.mesh.skeleton,removed=old.bones.indexOf(bone);if(removed<0)continue;
+    const parentIndex=old.bones.indexOf(parent);if(parentIndex<0)throw Error('Elternknochen fehlt in der Skinning-Palette.');
+    const kept=old.bones.filter(b=>b!==bone),next=new T.Skeleton(kept,old.boneInverses.filter((_,i)=>i!==removed).map(m=>m.clone()));this.generated.push(next);s.mesh.skeleton=next;
+    const indices=s.mesh.geometry.getAttribute('skinIndex'),weights=s.mesh.geometry.getAttribute('skinWeight');
+    for(let v=0;v<indices.count;v++){
+     const merged=new Map<number,number>();
+     for(let k=0;k<4;k++){let i=indices.getComponent(v,k);const w=weights.getComponent(v,k);if(!w)continue;if(i===removed)i=parentIndex;const n=i>removed?i-1:i;merged.set(n,(merged.get(n)??0)+w);}
+     const entries=[...merged],sum=entries.reduce((s,[,w])=>s+w,0);
+     for(let k=0;k<4;k++){indices.setComponent(v,k,entries[k]?.[0]??0);weights.setComponent(v,k,(entries[k]?.[1]??0)/(sum||1));}
+    }
+    indices.needsUpdate=true;weights.needsUpdate=true;
+   }
+   // Persisted child transforms already use the surviving parent's coordinates.
+   for(const child of [...bone.children])parent.add(child);bone.removeFromParent();
   }
   return bones;
  }

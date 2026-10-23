@@ -12,6 +12,28 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.48.0] - 2026-10-23
+
+Zeitstempel: 2026-10-23T20:23:34+02:00 (Europe/Berlin)
+
+### Added
+
+- Echtes Knochenlöschen mit Übernahme von Kindgelenken und Hautgewichten durch den Elternknochen, Posenumrechnung und einem Undo-/Redo-Schritt.
+- Persistente Löschlisten in Projektdateien und Katalogexport sowie Berücksichtigung bei Move-Kompatibilität.
+- Vier Tests für Hierarchie, Gewichte, Posen, Persistenz und Fehler-Rollback sowie ein weiterer Chromium-Fall.
+
+### Fixed
+
+- Skelettanzeige rekonstruiert Verbindungslinien nach Hierarchieänderungen.
+- Automatische Erkennung stellt tatsächlich gelöschte Knochen nicht als Griffe wieder her.
+
+### Changed
+
+- README, Design, Roadmap, Studio-Anleitung und Prüfstand nachgezogen.
+- Projekte mit Knochenlöschungen benötigen Software ab 0.48.0. Weitere Einfügungen nach Löschungen sind vorerst gesperrt; Wurzelknochen, eigene Knochenskalierung und Anbauteile werden geschützt.
+
+**Prüfung:** 246 Tests und Build bestanden; neuer Browsernachweis steht aus. Manuelle Haut-/Bewegungsqualität bleibt offen.
+
 ## [0.47.0] - 2026-10-23
 
 Zeitstempel: 2026-10-23T14:50:26+02:00 (Europe/Berlin)
@@ -992,3 +1014,5 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 [0.46.0]: PRUEFUNG-0.46.0.md
 
 [0.47.0]: PRUEFUNG-0.47.0.md
+
+[0.48.0]: PRUEFUNG-0.48.0.md
