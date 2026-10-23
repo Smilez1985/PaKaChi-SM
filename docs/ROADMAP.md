@@ -31,9 +31,11 @@ Diese Reihenfolge ist ein Umsetzungsvorschlag, kein Terminversprechen. Lokale un
 - [x] Vollständige 3D-Projektkopien in einer lokalen Browsersammlung speichern, auswählen, laden und bestätigt löschen (0.26.0; separate Auswahl neben dem mitgelieferten Katalog).
 - [x] Lokale Sammlungslisten nach bestätigten Speicher-/Löschvorgängen zwischen Tabs aktualisieren; beim Fensterfokus nachladen, wartende Meldungen bündeln (0.45.0).
 - [x] Zwei Browserfälle für F5-Persistenz einschließlich Posen/Moves und mehrere Tabs mit bestätigtem Löschen vorbereiten (0.45.0).
-- [ ] Neue IndexedDB-Browserfälle erfolgreich ausführen; tatsächliche Speichergrenzen und Quotenfehler weiterhin gesondert prüfen.
+- [x] IndexedDB-Browserfälle erfolgreich ausführen: F5 erhält Posen, Moves und gespeicherte Identität; zwei Tabs übernehmen bestätigte Listenänderungen (0.45.0, [Nachweis](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/39902736987)).
+- [ ] Tatsächliche Speichergrenzen und Quotenfehler prüfen.
 - [x] Lokal gespeicherte Avatare in gemeinsame Auswahl, Zähler und `list_avatars` aufnehmen; gespeicherte ID beim Laden und in der Steuerung erhalten (0.28.0).
-- [ ] Gemeinsame Auswahl inklusive gespeicherter IDs mit echtem Browser/MCP-Host abnehmen.
+- [x] Gemeinsame Auswahl inklusive gespeicherter IDs im echten Browser über die integrierte Steuerung prüfen (0.45.0).
+- [ ] Gespeicherte Auswahl zusätzlich mit externem MCP-Host abnehmen.
 - [x] Bearbeitete Projekte als statisches Katalogprojektpaket exportieren und im Player laden (0.29.0; CLI erstellt neuen Ordner, kein automatisches Deployment).
 - [x] Kataloge mit Konflikt-, Quellen- und Größenprüfung in einem neuen Ordner zusammenführen; Quellen unverändert lassen und SHA-256-Bericht erzeugen (0.30.0).
 - [ ] Veröffentlichungsablauf ergänzen und zusammengeführte Exportpakete im gerenderten Player abnehmen.

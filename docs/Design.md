@@ -24,7 +24,7 @@ Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich gen
 | Generierung | Lokaler TripoSR-Dienst, Bildauswahl, getrennte Vorschau, Vorprüfungs-Fallbacks, expliziter weiterer Auftrag | Echte GPU-/Qualitätsabnahme, Cloud-Generatoren, Korrekturprompts und Rigging |
 | Übernahme | Revisionsschutz, ein Modellwechsel-Rücksprung, vorbereitete 3D-Installation mit Rückabwicklung | Gerenderte Abnahme, Originalplayer-Neustart und GPU-Kontextverlust |
 
-Prüfnachweis für Software 0.45.0: **237 Tests und Build bestanden**. Das belegt keine gerenderte Browser-, Anbieter- oder GPU-Abnahme. Projektformat bleibt Version 1. Freie Punkte/Posen aus 0.22.0/0.23.0 benötigen wegen der korrigierten Normalisierungsreihenfolge eine visuelle Kontrolle; keine automatische Migration. [Prüfbericht](PRUEFUNG-0.45.0.md).
+Prüfnachweis für Software 0.45.0: **237 Tests und Build bestanden**. Separate Chromium-Nachweise stehen im Prüfbericht; echte Anbieter-/GPU-Inferenz und manuelle Mausabnahme bleiben offen. Projektformat bleibt Version 1. Freie Punkte/Posen aus 0.22.0/0.23.0 benötigen wegen der korrigierten Normalisierungsreihenfolge eine visuelle Kontrolle; keine automatische Migration. [Prüfbericht](PRUEFUNG-0.45.0.md).
 
 ## Bestehender PaKaChi-Avatar
 
@@ -457,7 +457,7 @@ Der Workflow `.github/workflows/verify.yml` führt auf Ubuntu 24.04 mit Node 24 
 
 Die Tests verwenden lokale Testdaten und simulierte Anbieterantworten, keine Kontoschlüssel oder reale Inferenz. Workflow-Rechte sind auf Lesen der Repository-Inhalte begrenzt. HTML-Bericht, Fehler-Screenshots, Traces und explizite Testbilder werden als `browser-evidence` für 14 Tage bereitgestellt. In CI werden versehentlich exklusiv markierte Tests abgewiesen; ein Vite-Server wird für den Lauf frisch gestartet.
 
-Das neue Szenario prüft einen echten Studio-/Assistentenablauf bis zur Übernahme und zum Undo. Die bloße Definition und Auflistung dieser Tests ist kein Browsernachweis. Der lokale Chromium-Prozess bricht weiterhin vor dem Seitenstart mit einer Socket-Berechtigungssperre ab; ein erfolgreicher Runner-Lauf und visuelle Prüfung bleiben erforderlich.
+Das neue Szenario prüft einen echten Studio-/Assistentenablauf bis zur Übernahme und zum Undo. Die bloße Definition und Auflistung dieser Tests ist kein Browsernachweis. Der lokale Chromium-Prozess bricht weiterhin vor dem Seitenstart mit einer Socket-Berechtigungssperre ab; der erfolgreiche Runner-Lauf ist seit 0.44.0 nachgewiesen, die manuelle visuelle Prüfung bleibt erforderlich.
 
 
 ## Browserbefunde und Animationszeit (0.44.0)
@@ -475,4 +475,4 @@ Nach einem erfolgreich abgeschlossenen IndexedDB-Speicher- oder Löschvorgang se
 
 Meldungen während einer laufenden Operation werden zu einer ausstehenden Aktualisierung zusammengefasst. Die ausgewählte gespeicherte ID bleibt erhalten, sofern sie weiter existiert. Zusätzlich wird bei Fensterfokus aktualisiert; bei fehlendem BroadcastChannel bleiben Fokus und manueller Aktualisierungsknopf verfügbar. Fehler beim Benachrichtigen machen einen bereits abgeschlossenen Speichervorgang nicht rückgängig. Beim Abbau werden Kanal und Ereignisbehandlung geschlossen.
 
-Die neuen Browserfälle prüfen echte IndexedDB-Persistenz nach Reload einschließlich Posen, Move-Verweisen und gespeicherter Identität sowie zwei Tabs mit Löschbestätigung. Die bestehenden Grenzen von 50 Einträgen/80 MiB je Projekt bleiben erhalten; reale Browserquoten sind damit nicht abgenommen.
+Die neuen Browserfälle bestätigen echte IndexedDB-Persistenz nach Reload einschließlich Posen, Move-Verweisen und gespeicherter Identität sowie zwei Tabs mit Löschbestätigung. Alle neun Chromium-Fälle bestehen im [CI-Lauf](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/39902736987). Die bestehenden Grenzen von 50 Einträgen/80 MiB je Projekt bleiben erhalten; reale Browserquoten sind damit nicht abgenommen.

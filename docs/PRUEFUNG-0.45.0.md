@@ -2,7 +2,8 @@
 
 - `npm test`: 237 Tests bestanden, keine Fehler oder übersprungenen Tests.
 - `npm run build`: TypeScript/Vite erfolgreich; bekannte Bundle-Warnung.
-- Playwright erkennt neun Browserfälle in vier Dateien; die beiden neuen Fälle benötigen den CI-Lauf.
+- Alle neun Chromium-Browserfälle bestanden auf dem GitHub-Runner (1,5 Minuten; [CI-Lauf](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/39902736987)).
+- Geprüfter Commit: `b4fe7204aa35d7d0af7c8b29dfcbe5e17727cdc8`; Job `120247737733` erfolgreich abgeschlossen.
 - Originaldateien-Erhaltungsprüfung einschließlich 72 Transformationsbildern besteht.
 
 ## Neue Prüfungen
@@ -11,4 +12,4 @@ Zwei DOM-Tests prüfen Nachrichten erst nach erfolgreichem Speichern, ausschlie�
 
 Ein Browserfall speichert ein importiertes GLB mit zwei Posen, einem Move und Bearbeitungspose, lädt die Seite neu und öffnet die Kopie über ihre stabile gespeicherte ID. Ein weiterer öffnet zwei Tabs, prüft automatische Aktualisierung nach Speichern, abgebrochenes und bestätigtes Löschen sowie den Erhalt des bereits geladenen Avatars im zweiten Tab.
 
-Diese Browserfälle sind vor dem tatsächlichen CI-Ergebnis nur vorbereitet. Der vorherige Stand 0.44.0 bestand alle sieben damaligen Chromium-Fälle. Reale Speicherquoten, sehr große Projekte und manuelle Maus-/Darstellungsabnahme bleiben offen.
+Der tatsächliche CI-Lauf bestätigt beide neuen Browserfälle und alle sieben bisherigen Fälle. Er verwendet Chromium mit Software-WebGL und lokale Testdaten; keine echte Anbieterinferenz. Reale Speicherquoten, sehr große Projekte und manuelle Maus-/Darstellungsabnahme bleiben offen.

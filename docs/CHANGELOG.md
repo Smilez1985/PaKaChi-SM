@@ -26,7 +26,7 @@ Zeitstempel: 2026-10-23T06:51:03+02:00 (Europe/Berlin)
 - Laufende Vorgänge bündeln weitere Aktualisierungsanforderungen; geladener Avatar und Bearbeitungsstand bleiben erhalten.
 - README, Design, Roadmap, Studio-Anleitung und Prüfstand aktualisiert.
 
-**Prüfung:** 237 Tests und Build bestanden; neun Browserfälle vorbereitet, neuer CI-Nachweis steht aus. Reale Browserquoten bleiben offen.
+**Prüfung:** 237 Tests, Build und alle neun Chromium-Browserfälle bestanden ([CI-Nachweis](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/39902736987)). Reale Browserquoten bleiben offen.
 
 
 ## [0.44.0] - 2026-10-22

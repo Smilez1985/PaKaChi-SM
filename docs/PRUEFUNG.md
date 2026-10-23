@@ -7,7 +7,7 @@
 | Prüfung | Letzter Nachweis | Umfang und Grenze |
 | --- | --- | --- |
 | `npm test` | 0.45.0: 237 Tests bestanden | Player, Router, Studio-Daten, reale Three.js-Geometrie, DOM/Ereignisse mit happy-dom, Node-MCP und Erhaltungsprüfung. Kein gerenderter Browser. |
-| `npm run test:e2e` | 0.44.0: 7 Chromium-Fälle bestanden | GitHub-Runner mit Software-WebGL; simulierte Anbieter, keine manuelle Maus-/KI-Qualitätsabnahme. |
+| `npm run test:e2e` | 0.45.0: 9 Chromium-Fälle bestanden | GitHub-Runner mit Software-WebGL; simulierte Anbieter, keine manuelle Maus-/KI-Qualitätsabnahme. |
 | `npm run test:legacy` | 0.9.0: beide Programme bestanden | Originalplayer-Steuerung, MQTT-Verhalten und Lebenszyklus. |
 | `npm run build` | 0.45.0: bestanden | TypeScript und Produktionsbuild; Vite meldet weiterhin das große gemeinsame JS-Bundle (rund 1,33 MB / 369 kB gzip). |
 | `npm run test:python` mit `PAKACHI_PYTHON` | 0.10.0: Integration bestanden | Echter Python-MCP-Prozess, eingebetteter aMQTT-Broker, produktiver MQTT-Client, Router und Studio-Editor. Acht Tools, Studio-Änderungen einschließlich gültiger/ungültiger Skalierung, fehlende Freigabe und Revisionskonflikte geprüft. |
@@ -17,7 +17,7 @@ Vier neue Tests in 0.11.0 prüfen Hand-/Fußziele, feste Knochenabstände, den g
 
 ## Noch nicht abgenommen
 
-- Gerenderte WebGL-Ansicht und tatsächliches Mausgefühl: Chromium konnte in der bisherigen Ausführungsumgebung nicht starten. Die DOM-/Geometrietests ersetzen diese Prüfung nicht.
+- Manuelle Prüfung der WebGL-Darstellung und des tatsächlichen Mausgefühls. Automatisierte Chromium-Fälle laufen auf GitHub mit Software-WebGL; lokal bleibt der Browserstart blockiert.
 - Vollständiger Ablauf in einem konkreten externen KI-/MCP-Host sowie Anbindung eines externen NanoMQ-Brokers.
 - Gesamter Bedienablauf mit Nutzern ohne 3D-Vorkenntnisse und die Verträglichkeit unterschiedlich aufgebauter Importmodelle.
 - Lokale KI-Generierung ist an die Oberfläche angeschlossen, besitzt aber noch keine echte GPU-/Qualitätsabnahme. Vollständiger Knochenumbau und Optimierung bleiben Entwicklungsziele.
@@ -130,4 +130,4 @@ Der neue Workflow [verify.yml](../.github/workflows/verify.yml) installiert Chro
 0.44.0 korrigiert die fehlenden Original-Metadaten und die bei niedriger Bildrate künstlich verlangsamte Animationszeit. 235 Node-Tests und Build bestehen. Der [Folgelauf](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/39826526209) für Commit `5474cb169515da8a2bb70d66176396f64770c09f` besteht **alle sieben Browserfälle** (1,8 Minuten). Das bestätigt die automatisierten Abläufe, ersetzt aber keine vollständige manuelle Maus-/UI-Abnahme. [Prüfbericht](PRUEFUNG-0.44.0.md).
 
 
-**0.45.0:** 237 Tests und Build bestanden. Zwei zusätzliche Chromium-Fälle für echte IndexedDB-Persistenz nach F5 und mehrere Tabs vorbereitet; nun neun Browserfälle aufgelistet. Neuer CI-Nachweis steht aus. [Prüfbericht](PRUEFUNG-0.45.0.md).
+**0.45.0:** 237 Tests, Build und alle neun Chromium-Fälle bestanden ([CI-Nachweis](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/39902736987)). Die beiden neuen Fälle bestätigen echte IndexedDB-Persistenz nach F5 und Listenänderungen zwischen zwei Tabs. [Prüfbericht](PRUEFUNG-0.45.0.md).

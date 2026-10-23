@@ -112,4 +112,4 @@ Die folgenden Einträge beschreiben den jeweiligen Meilenstein; der aktuelle Sta
 **Browsernachweis 0.44.0:** [Alle sieben Chromium-E2E-Fälle bestanden](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/39826526209), einschließlich Sequenzvorschau, Übernahme/Undo und Modellwechsel-Rücksprung.
 
 
-**0.45.0:** Automatische Aktualisierung der lokalen Avatar-Sammlung zwischen Tabs; Browserfälle für F5 und mehrere Tabs ergänzt. [Prüfbericht](PRUEFUNG-0.45.0.md).
+**0.45.0:** Automatische Aktualisierung der lokalen Avatar-Sammlung zwischen Tabs; Alle neun Chromium-Fälle einschließlich F5-Persistenz und mehrerer Tabs bestanden. [Prüfbericht](PRUEFUNG-0.45.0.md).
