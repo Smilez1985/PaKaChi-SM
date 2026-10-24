@@ -27,7 +27,7 @@ Zeitstempel: 2026-10-25T00:31:31+02:00 (Europe/Berlin)
 - Betroffene Posen/Moves nach Umhängen zur Prüfung markieren. Zwischenbewegungen können sich trotz erhaltener Einzelposen ändern.
 - README, Design, Roadmap, Bedienanleitung und Prüfbericht nachgezogen.
 
-**Prüfung:** 256 Node-Tests und Build bestanden; Python-Syntax geprüft. 16 Chromium-Fälle vorbereitet, neuer CI-Nachweis steht aus. Wurzeln, Kreise, fremde Skelettbäume, skalierte Knochenketten und direkte Anbauteile sind ausgeschlossen.
+**Prüfung:** 256 Node-Tests und Build bestanden; Python-Syntax geprüft. Alle 16 Chromium-Fälle bestanden ([CI-Nachweis](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/40138951275)). Wurzeln, Kreise, fremde Skelettbäume, skalierte Knochenketten und direkte Anbauteile sind ausgeschlossen.
 
 ## [0.52.0] - 2026-10-24
 
