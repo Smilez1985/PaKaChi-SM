@@ -24,7 +24,7 @@ Zeitstempel: 2026-10-24T18:47:49+02:00 (Europe/Berlin)
 
 - README und Blaupause mit Prüfumfang und Grenzen aktualisiert.
 
-**Prüfung:** Build bestanden; 14 Browserfälle aufgelistet. Neuer CI-Nachweis steht aus; Anbieterantworten simuliert.
+**Prüfung:** 249 Tests, Build und alle 14 Chromium-Fälle bestanden ([CI-Nachweis](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/40113222944)); Anbieterantworten simuliert.
 
 ## [0.50.0] - 2026-10-24
 
