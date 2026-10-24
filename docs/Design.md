@@ -4,7 +4,7 @@ Teil der [Blaupause](README.md) · [Roadmap](ROADMAP.md) · [Changelog](CHANGELO
 
 ## Status und Begriffe
 
-Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.49.0: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau, automatische Anatomieerkennung und die Qualitätsabnahme der angeschlossenen lokalen KI-Generierung bleiben offen.
+Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.50.0: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau, automatische Anatomieerkennung und die Qualitätsabnahme der angeschlossenen lokalen KI-Generierung bleiben offen.
 
 - **PaKaChi:** Panda-KI-Chimera, das übergeordnete Projekt.
 - **PaKaChi-SM:** StateMaschine mit Avatar-Player und integriertem Studio.
@@ -508,3 +508,10 @@ Ein Einfügeeintrag kann `afterDeletions` enthalten: die Anzahl vorausgegangener
 Die Laufzeithierarchie wird nun in der gespeicherten Reihenfolge aufgebaut. Die dazugehörigen Skinning-Palettenänderungen und Gewichtsübertragungen erfolgen ebenfalls in dieser Reihenfolge. Die abschließenden Grundstellungen liefern die Geometrie für die weiterhin angenäherte Gewichtsverteilung. Die ursprünglichen Modellbytes bleiben unverändert. Katalogexport und Move-Bindung erhalten beziehungsweise berücksichtigen die Marker. Undo/Redo setzt jeden Eingriff mit seinem Datenstand zurück.
 
 Die Einfügesperre nach Löschungen entfällt. Projektformat bleibt 1; gemischte Abläufe benötigen Software ab 0.49.0. Schutz vor Wurzellöschung, eigener Knochenskalierung und Anbauteilen bleibt bestehen. Gezielte Gewichtsbearbeitung, freies Umhängen und neue MCP-Topologieaktionen bleiben offen. Lokale Tests prüfen wiederholte Mischfolgen und identische Gewichte nach Rekonstruktion; die zwölf Chromium-Fälle bestehen im [CI-Lauf](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/40096800795), die manuelle Hautabnahme bleibt offen.
+
+
+## Knochenbearbeitung durch Agenten (0.50.0)
+
+Seit **0.50.0** unterstützen `edit_studio` und der integrierte Assistent zwei weitere Aktionen: `insert_bone` mit der ID des Kindknochens fügt ein echtes Zwischengelenk mittig ein; `delete_bone` entfernt den angegebenen Knochen und überträgt Kinder und Gewichte an seinen Elternknochen. `delete_point` entfernt weiterhin nur den Griff. Zuerst `get_studio` mit `section: points` lesen, dann im Rig-Modus mit aktueller Sitzung/Revision und erteilter Bearbeitungsfreigabe arbeiten. Der integrierte Assistent legt Änderungen weiterhin zur ausdrücklichen Übernahme vor. Jeder Eingriff ist über Undo/Redo rückgängig machbar; vorhandene Posen danach prüfen. Die Schutzregeln für Wurzeln, skalierte Knochen und Anbauteile bleiben bestehen.
+
+249 Tests und Build bestanden; Node-MCP-Transport mit beiden Aktionen geprüft. Python-Modell und Werkzeugbeschreibung erweitert, Syntax geprüft. Keine neue reale Python-MCP-/Anbieterabnahme; neuer CI-Nachweis steht aus.

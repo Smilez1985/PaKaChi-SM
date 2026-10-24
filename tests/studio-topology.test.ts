@@ -116,3 +116,15 @@ test('mixed Studio operations undo and redo both hierarchy steps independently',
  view.onSelect(rig.data.points.find(p=>p.name==='Foot')!.id);assert.equal(host.querySelector<HTMLButtonElement>('#bone-insert')!.disabled,false);click('bone-insert');assert.equal(mesh.skeleton.bones.length,3);const newIndex=rig.data.boneRest.length-1;assert.equal(foot.parent,rig.bones[newIndex]);
  click('studio-undo');assert.equal(foot.parent,hip);assert.equal(mesh.skeleton.bones.length,2);click('studio-undo');assert.equal(foot.parent,rig.bones[initial.bone!]);click('studio-redo');assert.equal(foot.parent,hip);click('studio-redo');assert.equal(foot.parent,rig.bones[newIndex]);parseProject(editor.exportProject());editor.dispose();w.happyDOM.abort();
 });
+test('agent topology actions require permission, rig mode and fresh revision, and undo completely',()=>{
+ const w=new Window();Object.assign(globalThis,{document:w.document,Option:function(text='',value=''){const o=w.document.createElement('option');o.textContent=text;o.value=value;return o;}});
+ const {rig,foot,hip}=fixture(),host=document.createElement('div'),view={setEnabled(){},setFigureEnabled(){},setAction(){},setRotation(){},select(){},refresh(){},dispose(){}};
+ const editor=new StudioEditor(rig,view as unknown as StudioView,host,project(rig),{suspend(){},resume(){},changed(){},feedback(){}});editor.enter();
+ const command=(action:string,id?:string)=>({session:editor.session,expectedRevision:editor.inspect().revision,action,...(id?{id}:{})});const endpoint=rig.data.points[1].id;
+ assert.throws(()=>editor.execute(command('insert_bone',endpoint)),/freigegeben/);
+ const grant=host.querySelector<HTMLInputElement>('#studio-agent-edit')!;grant.checked=true;grant.dispatchEvent(new w.Event('change') as unknown as Event);
+ assert.throws(()=>editor.execute(command('insert_bone',endpoint)),/Modus/);editor.execute({...command('set_mode'),mode:'rig'});
+ const stale=command('insert_bone',endpoint),added=editor.execute(stale).id!;assert.equal(foot.parent,rig.bones[2]);assert.throws(()=>editor.execute(stale),/Stand/);
+ editor.execute(command('delete_bone',added));assert.equal(foot.parent,hip);editor.execute(command('undo'));assert.equal(foot.parent,rig.bones[2]);editor.execute(command('undo'));assert.equal(foot.parent,hip);
+ assert.throws(()=>editor.execute(command('insert_bone')));assert.throws(()=>editor.execute(command('delete_bone','$figure')));editor.dispose();w.happyDOM.abort();
+});

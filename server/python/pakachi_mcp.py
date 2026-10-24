@@ -30,7 +30,7 @@ class StudioCommand(BaseModel):
     model_config = ConfigDict(extra='forbid', strict=True)
     session: str = Field(max_length=100)
     expectedRevision: int = Field(ge=0)
-    action: Literal['set_mode', 'add_point', 'update_point', 'delete_point', 'connect_points', 'disconnect_points', 'save_pose', 'apply_pose', 'replace_pose', 'create_move', 'update_move', 'update_moves', 'undo', 'redo']
+    action: Literal['set_mode', 'add_point', 'update_point', 'delete_point','insert_bone','delete_bone', 'connect_points', 'disconnect_points', 'save_pose', 'apply_pose', 'replace_pose', 'create_move', 'update_move', 'update_moves', 'undo', 'redo']
     mode: Literal['pose', 'rig'] | None = None
     id: str | None = Field(default=None, max_length=100)
     target: str | None = Field(default=None, max_length=100)
@@ -213,7 +213,10 @@ def build_server(uri=None, embedded=True, tcp_port=1883, ws_port=8083):
         set_mode: mode=pose/rig. add_point: position, optional name/mesh/size/radius.
         bendLimit: nur Knochen im Rig-Modus, {min,max} Grad 0–175, min<=max; null entfernt. Nur Zweiglied-IK-Ziehen.
         update_point: id und name/position/rotation/scale/size/radius (scale nur $figure, 0.1–5); $figure ist die ganze Figur.
-        delete_point: id. connect_points/disconnect_points: id,target.
+        insert_bone: id des Kindknochens, echtes Zwischengelenk in der Mitte (Rig-Modus).
+        delete_bone: id, echten Knochen entfernen; Kinder/Gewichte zum Elternknochen (Rig-Modus).
+        Zuerst points lesen; Posen nach Topologieänderungen prüfen, Undo möglich. Wurzeln, skalierte Knochen und Anbauteile geschützt.
+        delete_point: id, entfernt nur den Griff. connect_points/disconnect_points: id,target.
         save_pose: optional name,seconds. apply_pose/replace_pose: id.
         create_move: id,name,poses,optional loop.
         update_moves: updates=[{id,poses}], 1–8 verschiedene Moves, insgesamt maximal 200 Posenverweise; atomar, ein Undo-Schritt.

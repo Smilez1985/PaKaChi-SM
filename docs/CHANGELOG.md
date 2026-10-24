@@ -12,6 +12,21 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.50.0] - 2026-10-24
+
+Zeitstempel: 2026-10-24T18:36:37+02:00 (Europe/Berlin)
+
+### Added
+
+- `insert_bone` und `delete_bone` für Studio-Werkzeuge, Node-/Python-MCP und integrierten Assistenten.
+- Editor-Test für Freigabe, Modus, Revision und Undo; MCP-Prozesstest um beide Aktionen erweitert.
+
+### Changed
+
+- Werkzeugbeschreibungen unterscheiden echte Knochenentfernung vom Löschen eines Griffs; README und Blaupause nachgezogen.
+
+**Prüfung:** 249 Tests und Build bestanden; Node-MCP-Transport geprüft, Python-Syntax gültig. Neue Browser-/externe Anbieterabnahme steht aus.
+
 ## [0.49.0] - 2026-10-24
 
 Zeitstempel: 2026-10-23T21:49:50+02:00 (Europe/Berlin)
@@ -1034,3 +1049,5 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 [0.48.0]: PRUEFUNG-0.48.0.md
 
 [0.49.0]: PRUEFUNG-0.49.0.md
+
+[0.50.0]: PRUEFUNG-0.50.0.md

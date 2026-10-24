@@ -274,3 +274,10 @@ Undo/Redo stellt den gesamten Eingriff einschließlich Hierarchie und Gewichten 
 Die frühere Sperre entfällt: Nach „Knochen wirklich löschen“ einen verbleibenden Endpunkt auswählen und „Knochen dazwischen einfügen“ anklicken. So lässt sich beispielsweise ein Knie entfernen und zwischen Hüfte und Fuß ein neues Gelenk einsetzen. Anschließend die Gelenkposition und Hautverformung kontrollieren.
 
 Jedes Löschen und Einfügen hat einen eigenen Undo-/Redo-Schritt. Beim Speichern und Laden bleibt die Reihenfolge erhalten; für solche gemischten Abläufe ist mindestens 0.49.0 erforderlich. Die Schutzregeln für Wurzeln, skalierte Knochen und Anbauteile gelten weiterhin.
+
+
+## Knochenbearbeitung durch Agenten (0.50.0)
+
+Seit **0.50.0** unterstützen `edit_studio` und der integrierte Assistent zwei weitere Aktionen: `insert_bone` mit der ID des Kindknochens fügt ein echtes Zwischengelenk mittig ein; `delete_bone` entfernt den angegebenen Knochen und überträgt Kinder und Gewichte an seinen Elternknochen. `delete_point` entfernt weiterhin nur den Griff. Zuerst `get_studio` mit `section: points` lesen, dann im Rig-Modus mit aktueller Sitzung/Revision und erteilter Bearbeitungsfreigabe arbeiten. Der integrierte Assistent legt Änderungen weiterhin zur ausdrücklichen Übernahme vor. Jeder Eingriff ist über Undo/Redo rückgängig machbar; vorhandene Posen danach prüfen. Die Schutzregeln für Wurzeln, skalierte Knochen und Anbauteile bleiben bestehen.
+
+249 Tests und Build bestanden; Node-MCP-Transport mit beiden Aktionen geprüft. Python-Modell und Werkzeugbeschreibung erweitert, Syntax geprüft. Keine neue reale Python-MCP-/Anbieterabnahme; neuer CI-Nachweis steht aus.

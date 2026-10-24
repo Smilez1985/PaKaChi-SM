@@ -1,6 +1,6 @@
 # Roadmap – was kommt
 
-**Softwarestand: 0.49.0 · Abgleich: 24.10.2026.** Teil der [Blaupause](README.md).
+**Softwarestand: 0.50.0 · Abgleich: 24.10.2026.** Teil der [Blaupause](README.md).
 
 Ein Häkchen bedeutet implementiert; es ersetzt keine visuelle oder externe Live-Abnahme. Die Nachweise und Prüfgrenzen stehen im [Prüfstand](PRUEFUNG.md). Die Versionshistorie gehört ins [Changelog](CHANGELOG.md).
 
@@ -225,3 +225,13 @@ Details: [Modellauswahl](LOKALE-MODELLE.md). Die aktuelle Ollama-Kuration ist ei
 - [x] Passwortwechsel mit Prüfung des bisherigen Passworts und Erhalt des gespeicherten Schlüsselbestands (0.20.0).
 - [x] Ausdrückliche Sitzungssperre mit Löschen der Sitzungsschlüssel/Schlüsselentwürfe und Verwerfen laufender Ergebnisse (0.20.0).
 - [ ] Optional Betriebssystem-Schlüsselbund für spätere Desktop-Verpackung prüfen.
+
+- [x] Zwischengelenk einfügen und echten Knochen löschen über MCP und integrierten Assistenten anbieten; Freigabe, Revision, Rig-Modus und Undo/Redo (0.50.0).
+- [ ] Neue Topologieaktionen mit echtem externem MCP-Host und Anbieter abnehmen.
+
+
+## Knochenbearbeitung durch Agenten (0.50.0)
+
+Seit **0.50.0** unterstützen `edit_studio` und der integrierte Assistent zwei weitere Aktionen: `insert_bone` mit der ID des Kindknochens fügt ein echtes Zwischengelenk mittig ein; `delete_bone` entfernt den angegebenen Knochen und überträgt Kinder und Gewichte an seinen Elternknochen. `delete_point` entfernt weiterhin nur den Griff. Zuerst `get_studio` mit `section: points` lesen, dann im Rig-Modus mit aktueller Sitzung/Revision und erteilter Bearbeitungsfreigabe arbeiten. Der integrierte Assistent legt Änderungen weiterhin zur ausdrücklichen Übernahme vor. Jeder Eingriff ist über Undo/Redo rückgängig machbar; vorhandene Posen danach prüfen. Die Schutzregeln für Wurzeln, skalierte Knochen und Anbauteile bleiben bestehen.
+
+249 Tests und Build bestanden; Node-MCP-Transport mit beiden Aktionen geprüft. Python-Modell und Werkzeugbeschreibung erweitert, Syntax geprüft. Keine neue reale Python-MCP-/Anbieterabnahme; neuer CI-Nachweis steht aus.
