@@ -12,6 +12,20 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.51.0] - 2026-10-24
+
+Zeitstempel: 2026-10-24T18:47:49+02:00 (Europe/Berlin)
+
+### Added
+
+- Zwei Browserfälle für Einfügen/Löschen echter Knochen über bestätigte Assistentenvorschläge mit Undo.
+
+### Changed
+
+- README und Blaupause mit Prüfumfang und Grenzen aktualisiert.
+
+**Prüfung:** Build bestanden; 14 Browserfälle aufgelistet. Neuer CI-Nachweis steht aus; Anbieterantworten simuliert.
+
 ## [0.50.0] - 2026-10-24
 
 Zeitstempel: 2026-10-24T18:36:37+02:00 (Europe/Berlin)
@@ -1051,3 +1065,5 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 [0.49.0]: PRUEFUNG-0.49.0.md
 
 [0.50.0]: PRUEFUNG-0.50.0.md
+
+[0.51.0]: PRUEFUNG-0.51.0.md
