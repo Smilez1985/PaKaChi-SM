@@ -11,8 +11,8 @@ export function validMoveSequenceUpdates(value:unknown):value is MoveSequenceUpd
  }
  return count<=200;
 }
-export interface StudioCommand {session:string;expectedRevision:number;action:StudioAction;mode?:'pose'|'rig';id?:string;target?:string;name?:string;position?:[number,number,number];rotation?:[number,number,number,number];scale?:number;bendLimit?:{min:number;max:number}|null;size?:number;radius?:number;mesh?:number;seconds?:number;loop?:boolean;poses?:string[];updates?:MoveSequenceUpdate[]}
-const fields:Record<StudioAction,string[]>={set_mode:['mode'],add_point:['name','position','mesh','size','radius'],update_point:['id','name','position','rotation','scale','size','radius','bendLimit'],delete_point:['id'],insert_bone:['id'],delete_bone:['id'],connect_points:['id','target'],disconnect_points:['id','target'],save_pose:['name','seconds'],apply_pose:['id'],replace_pose:['id'],create_move:['id','name','poses','loop'],update_move:['id','poses'],update_moves:['updates'],undo:[],redo:[]};
+export interface StudioCommand {session:string;expectedRevision:number;action:StudioAction;mode?:'pose'|'rig';id?:string;target?:string;name?:string;position?:[number,number,number];rotation?:[number,number,number,number];scale?:number;ratio?:number;bendLimit?:{min:number;max:number}|null;size?:number;radius?:number;mesh?:number;seconds?:number;loop?:boolean;poses?:string[];updates?:MoveSequenceUpdate[]}
+const fields:Record<StudioAction,string[]>={set_mode:['mode'],add_point:['name','position','mesh','size','radius'],update_point:['id','name','position','rotation','scale','size','radius','bendLimit'],delete_point:['id'],insert_bone:['id','ratio'],delete_bone:['id'],connect_points:['id','target'],disconnect_points:['id','target'],save_pose:['name','seconds'],apply_pose:['id'],replace_pose:['id'],create_move:['id','name','poses','loop'],update_move:['id','poses'],update_moves:['updates'],undo:[],redo:[]};
 export function parseStudioCommand(value:unknown):StudioCommand {
  const fail=()=>{throw new Error('Ungültiger Studio-Befehl.');};
  if(!value||typeof value!=='object'||Array.isArray(value))return fail();const v=value as Record<string,unknown>;
@@ -23,7 +23,7 @@ export function parseStudioCommand(value:unknown):StudioCommand {
  if(v.mode!==undefined&&!['pose','rig'].includes(v.mode as string))return fail();
  for(const [key,count,max] of [['position',3,100],['rotation',4,1]] as const)if(v[key]!==undefined&&(!Array.isArray(v[key])||v[key].length!==count||!(v[key] as unknown[]).every(x=>typeof x==='number'&&Number.isFinite(x)&&Math.abs(x)<=max)))return fail();
  if(v.rotation!==undefined&&Math.abs((v.rotation as number[]).reduce((s,n)=>s+n*n,0)-1)>.001)return fail();
- for(const [key,min,max] of [['size',.003,.15],['radius',.005,.6],['seconds',.1,30]] as const)if(v[key]!==undefined&&(typeof v[key]!=='number'||!Number.isFinite(v[key])||v[key]<min||v[key]>max))return fail();
+ for(const [key,min,max] of [['ratio',.1,.9],['size',.003,.15],['radius',.005,.6],['seconds',.1,30]] as const)if(v[key]!==undefined&&(typeof v[key]!=='number'||!Number.isFinite(v[key])||v[key]<min||v[key]>max))return fail();
  if(v.bendLimit!==undefined&&v.bendLimit!==null&&!validBendLimit(v.bendLimit))return fail();
  if(v.scale!==undefined&&!validFigureScale(v.scale))return fail();
  if(v.mesh!==undefined&&(!Number.isInteger(v.mesh)||(v.mesh as number)<0))return fail();

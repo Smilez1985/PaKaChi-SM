@@ -38,6 +38,7 @@ class StudioCommand(BaseModel):
     position: list[float] | None = Field(default=None, min_length=3, max_length=3)
     rotation: list[float] | None = Field(default=None, min_length=4, max_length=4)
     bendLimit: BendLimit | None = None
+    ratio: float | None = Field(default=None, ge=.1, le=.9)
     scale: float | None = Field(default=None, ge=.1, le=5)
     size: float | None = Field(default=None, ge=.003, le=.15)
     radius: float | None = Field(default=None, ge=.005, le=.6)
@@ -213,7 +214,7 @@ def build_server(uri=None, embedded=True, tcp_port=1883, ws_port=8083):
         set_mode: mode=pose/rig. add_point: position, optional name/mesh/size/radius.
         bendLimit: nur Knochen im Rig-Modus, {min,max} Grad 0–175, min<=max; null entfernt. Nur Zweiglied-IK-Ziehen.
         update_point: id und name/position/rotation/scale/size/radius (scale nur $figure, 0.1–5); $figure ist die ganze Figur.
-        insert_bone: id des Kindknochens, echtes Zwischengelenk in der Mitte (Rig-Modus).
+        insert_bone: id des Kindknochens, optional ratio 0.1–0.9 (Standard 0.5), vom Elternknochen zum Kind gemessen (Rig-Modus).
         delete_bone: id, echten Knochen entfernen; Kinder/Gewichte zum Elternknochen (Rig-Modus).
         Zuerst points lesen; Posen nach Topologieänderungen prüfen, Undo möglich. Wurzeln, skalierte Knochen und Anbauteile geschützt.
         delete_point: id, entfernt nur den Griff. connect_points/disconnect_points: id,target.

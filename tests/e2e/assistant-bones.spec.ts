@@ -10,7 +10,7 @@ for(const action of ['insert_bone','delete_bone'] as const){
   await page.route('http://127.0.0.1:11434/**',async route=>{
    const headers={'Access-Control-Allow-Origin':'http://127.0.0.1:5173'};
    if(route.request().method()==='OPTIONS'){await route.fulfill({status:204,headers:{...headers,'Access-Control-Allow-Methods':'POST','Access-Control-Allow-Headers':'content-type'}});return;}
-   const reading=requests++===0,args=reading?{section:'points'}:{command:{session:before.session,expectedRevision:before.revision,action,id:target.id}};
+   const reading=requests++===0,args=reading?{section:'points'}:{command:{session:before.session,expectedRevision:before.revision,action,id:target.id,...(action==='insert_bone'?{ratio:.3}:{})}};
    await route.fulfill({headers,contentType:'application/json',body:JSON.stringify({done:true,message:{role:'assistant',content:'',tool_calls:[{function:{name:reading?'get_studio':'edit_studio',arguments:args}}]}})});
   });
   await page.locator('.assistant-panel > summary').click();await page.locator('#assistant-prompt').fill(action==='insert_bone'?'Füge vor dem linken Fuß ein Gelenk ein.':'Entferne den linken Knieknochen.');await page.locator('#assistant-send').click();await expect(page.locator('#assistant-apply')).toBeVisible();

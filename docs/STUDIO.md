@@ -256,7 +256,7 @@ Das Löschen einer gespeicherten Kopie entfernt ihre Ablage und Listenauswahl. E
 ## Echten Knochen dazwischen einfügen (0.47.0)
 
 1. „Gelenke bearbeiten“ öffnen und den Endpunkt einer vorhandenen Knochenstrecke auswählen, beispielsweise den Fuß einer Hüfte-Fuß-Strecke.
-2. „Knochen dazwischen einfügen“ anklicken. In der Mitte entsteht ein echtes Zwischengelenk mit zwei verbundenen Teilstrecken und angepassten Hautgewichten.
+2. „Position auf der Knochenstrecke“ mit der Maus auf 10–90 % einstellen. Gemessen wird vom Elternknochen zum ausgewählten Kindknochen; 50 % ist die Mitte. Der Regler bereitet den nächsten Eingriff vor. Erst „Knochen dazwischen einfügen“ erzeugt dort das echte Zwischengelenk mit zwei verbundenen Teilstrecken und angepassten Hautgewichten.
 3. Das neue Gelenk benennen und bei Bedarf in der Grundpose verschieben. Unter „Figur bewegen“ die Bewegung prüfen.
 4. Vorhandene Posen sind als prüfbedürftig markiert. Änderungen ansehen und gegebenenfalls Posen korrigieren.
 5. Das vollständige Projekt speichern. Es benötigt zum erneuten Laden mindestens Version 0.47.0. Undo/Redo nimmt den gesamten Einfügeschritt zurück beziehungsweise stellt ihn wieder her.
@@ -278,6 +278,6 @@ Jedes Löschen und Einfügen hat einen eigenen Undo-/Redo-Schritt. Beim Speicher
 
 ## Knochenbearbeitung durch Agenten (0.50.0)
 
-Seit **0.50.0** unterstützen `edit_studio` und der integrierte Assistent zwei weitere Aktionen: `insert_bone` mit der ID des Kindknochens fügt ein echtes Zwischengelenk mittig ein; `delete_bone` entfernt den angegebenen Knochen und überträgt Kinder und Gewichte an seinen Elternknochen. `delete_point` entfernt weiterhin nur den Griff. Zuerst `get_studio` mit `section: points` lesen, dann im Rig-Modus mit aktueller Sitzung/Revision und erteilter Bearbeitungsfreigabe arbeiten. Der integrierte Assistent legt Änderungen weiterhin zur ausdrücklichen Übernahme vor. Jeder Eingriff ist über Undo/Redo rückgängig machbar; vorhandene Posen danach prüfen. Die Schutzregeln für Wurzeln, skalierte Knochen und Anbauteile bleiben bestehen.
+Seit **0.50.0** unterstützen `edit_studio` und der integrierte Assistent zwei weitere Aktionen: `insert_bone` mit der ID des Kindknochens fügt ein echtes Zwischengelenk ein (seit 0.52.0 optional `ratio: 0.1…0.9`, Standard `0.5`, vom Elternknochen zum Kind gemessen); `delete_bone` entfernt den angegebenen Knochen und überträgt Kinder und Gewichte an seinen Elternknochen. `delete_point` entfernt weiterhin nur den Griff. Zuerst `get_studio` mit `section: points` lesen, dann im Rig-Modus mit aktueller Sitzung/Revision und erteilter Bearbeitungsfreigabe arbeiten. Der integrierte Assistent legt Änderungen weiterhin zur ausdrücklichen Übernahme vor. Jeder Eingriff ist über Undo/Redo rückgängig machbar; vorhandene Posen danach prüfen. Die Schutzregeln für Wurzeln, skalierte Knochen und Anbauteile bleiben bestehen.
 
 249 Tests und Build bestanden; Node-MCP-Transport mit beiden Aktionen geprüft. Python-Modell und Werkzeugbeschreibung erweitert, Syntax geprüft. Keine neue reale Python-MCP-/Anbieterabnahme; neuer CI-Nachweis steht aus.

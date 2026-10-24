@@ -12,6 +12,22 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.52.0] - 2026-10-24
+
+Zeitstempel: 2026-10-24T23:29:23+02:00 (Europe/Berlin)
+
+### Added
+
+- Mausregler für die Position neuer Zwischengelenke zwischen 10 und 90 % der vorhandenen Knochenstrecke.
+- Optionaler `ratio`-Parameter für Assistent, Node-MCP und Python-MCP; ohne Angabe bleibt die Mitte der Standard.
+
+### Changed
+
+- Prüfungen für außermittige Position, Grenzwerte, Posen, Hautgewichte, Wiederladen und Undo; vorhandene Browserfälle verwenden jetzt 30 %.
+- README, Design, Roadmap und Studio-Anleitung nachgezogen.
+
+**Prüfung:** 251 Node-Tests und Build bestanden, Python-Syntax gültig. Neuer Chromium-Nachweis steht aus; keine reale Anbieter-/Python-Host- oder manuelle Hautabnahme.
+
 ## [0.51.0] - 2026-10-24
 
 Zeitstempel: 2026-10-24T18:47:49+02:00 (Europe/Berlin)
@@ -1067,3 +1083,5 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 [0.50.0]: PRUEFUNG-0.50.0.md
 
 [0.51.0]: PRUEFUNG-0.51.0.md
+
+[0.52.0]: PRUEFUNG-0.52.0.md

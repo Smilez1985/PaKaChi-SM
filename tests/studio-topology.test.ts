@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import * as T from 'three';
 import {Window} from 'happy-dom';
 import {detectJoints} from '../src/studio-detection.ts';
+import {parseStudioCommand} from '../src/studio-command.ts';
 import {StudioRig} from '../src/studio-rig.ts';
 import {StudioEditor} from '../src/studio-editor.ts';
 import type {StudioView} from '../src/studio-view.ts';
@@ -35,7 +36,7 @@ test('Studio insertion is one undo/redo step including skeleton, weights, poses 
  const w=new Window();Object.assign(globalThis,{document:w.document,Option:function(text='',value=''){const o=w.document.createElement('option');o.textContent=text;o.value=value;return o;}});
  const {rig,mesh,foot,hip}=fixture(),host=document.createElement('div');const view={setEnabled(){},setFigureEnabled(){},setAction(){},setRotation(){},select(){},refresh(){},dispose(){},onSelect:(_id:string)=>{}};
  const editor=new StudioEditor(rig,view as unknown as StudioView,host,project(rig),{suspend(){},resume(){},changed(){},feedback(){}});editor.enter();
- const click=(id:string)=>host.querySelector<HTMLButtonElement>('#'+id)!.click();click('pose-add');click('mode-rig');view.onSelect(rig.data.points[1].id);click('bone-insert');
+ const click=(id:string)=>host.querySelector<HTMLButtonElement>('#'+id)!.click();click('pose-add');click('mode-rig');view.onSelect(rig.data.points[1].id);const ratio=host.querySelector<HTMLInputElement>('#bone-ratio')!;ratio.value='30';ratio.dispatchEvent(new w.Event('input') as unknown as Event);click('bone-insert');assert.equal(rig.data.boneInsertions![0].ratio,.3);assert.ok(Math.abs(rig.bones[2].position.y-.6)<1e-8);
  assert.equal(rig.data.points.length,3);assert.ok(rig.data.poses[0].review?.includes('bone-rest'));assert.equal(editor.exportProject().studio.boneInsertions?.length,1);
  click('studio-undo');assert.equal(rig.data.points.length,2);assert.equal(foot.parent,hip);assert.equal(mesh.skeleton.bones.length,2);assert.equal(rig.data.poses[0].review,undefined);
  click('studio-redo');assert.equal(rig.data.points.length,3);assert.equal(foot.parent,rig.bones[2]);assert.equal(mesh.skeleton.bones.length,3);parseProject(editor.exportProject());editor.dispose();w.happyDOM.abort();
@@ -124,7 +125,28 @@ test('agent topology actions require permission, rig mode and fresh revision, an
  assert.throws(()=>editor.execute(command('insert_bone',endpoint)),/freigegeben/);
  const grant=host.querySelector<HTMLInputElement>('#studio-agent-edit')!;grant.checked=true;grant.dispatchEvent(new w.Event('change') as unknown as Event);
  assert.throws(()=>editor.execute(command('insert_bone',endpoint)),/Modus/);editor.execute({...command('set_mode'),mode:'rig'});
- const stale=command('insert_bone',endpoint),added=editor.execute(stale).id!;assert.equal(foot.parent,rig.bones[2]);assert.throws(()=>editor.execute(stale),/Stand/);
+ const stale={...command('insert_bone',endpoint),ratio:.3},added=editor.execute(stale).id!;assert.equal(rig.data.boneInsertions![0].ratio,.3);assert.ok(Math.abs(rig.bones[2].position.y-.6)<1e-8);assert.equal(foot.parent,rig.bones[2]);assert.throws(()=>editor.execute(stale),/Stand/);
  editor.execute(command('delete_bone',added));assert.equal(foot.parent,hip);editor.execute(command('undo'));assert.equal(foot.parent,rig.bones[2]);editor.execute(command('undo'));assert.equal(foot.parent,hip);
  assert.throws(()=>editor.execute(command('insert_bone')));assert.throws(()=>editor.execute(command('delete_bone','$figure')));editor.dispose();w.happyDOM.abort();
+});
+
+test('off-center insertion preserves geometry and posed endpoints at both range boundaries and reloads weights',()=>{
+ for(const ratio of [.1,.3,.9]){
+  const {rig,mesh}=fixture(),point=rig.data.points[1],before=[0,1,2].map(i=>vertex(mesh,i));
+  rig.bones[0].quaternion.setFromAxisAngle(new T.Vector3(0,0,1),.4);rig.root.updateMatrixWorld(true);
+  const posed=rig.position(point);rig.data.poses=[{id:'pose',name:'Pose',seconds:1,values:rig.capture()}];
+  const joint=rig.insertJoint(point,ratio);assert.ok(rig.position(point).distanceTo(posed)<1e-6);
+  assert.ok(Math.abs(rig.data.boneRest[joint.bone!].position[1]-2*ratio)<1e-8);
+  rig.reset();before.forEach((v,i)=>assert.ok(vertex(mesh,i).distanceTo(v)<1e-6));
+  const other=fixture();other.rig.data=parseProject(project(rig)).studio;other.rig.reset();
+  assert.deepEqual(Array.from(other.mesh.geometry.getAttribute('skinWeight').array),Array.from(mesh.geometry.getAttribute('skinWeight').array));
+  other.rig.apply(other.rig.data.poses[0].values);assert.ok(other.rig.position(other.rig.data.points[1]).distanceTo(posed)<1e-6);
+ }
+});
+test('insertion ratio accepts only finite numbers in range and only on insert_bone',()=>{
+ const command={session:'test',expectedRevision:0,action:'insert_bone',id:'bone-1'};
+ for(const ratio of [.1,.3,.9])assert.equal(parseStudioCommand({...command,ratio}).ratio,ratio);
+ assert.equal(parseStudioCommand(command).ratio,undefined);
+ for(const ratio of [0,.099,.901,1,NaN,Infinity,'0.3',null])assert.throws(()=>parseStudioCommand({...command,ratio}));
+ assert.throws(()=>parseStudioCommand({...command,action:'delete_bone',ratio:.3}));
 });
