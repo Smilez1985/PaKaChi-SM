@@ -58,7 +58,6 @@ export class StudioRig {
     this.reset();
   }
   insertJoint(point:ControlPoint,ratio=.5){
-    if(this.data.boneDeletions?.length)throw Error('Vor weiterem Einfügen die Knochenlöschung rückgängig machen.');
     if(point.kind!=='bone'||!Number.isFinite(ratio)||ratio<.1||ratio>.9||this.data.points.length>=256||this.data.boneRest.length>=256||(this.data.boneInsertions?.length??0)>=64)throw Error('Zwischengelenk kann hier nicht eingefügt werden.');
     const child=this.bones[point.bone!],parent=child.parent;
     if(!(parent instanceof T.Bone)||this.data.boneRest[point.bone!].position.every(v=>Math.abs(v)<1e-8))throw Error('Einen Endpunkt mit vorhandener Knochenstrecke auswählen.');
@@ -67,7 +66,7 @@ export class StudioRig {
     const before=structuredClone(this.data),values=this.capture(),originalValues=structuredClone(values);
     try{
       const offset=new T.Vector3().fromArray(this.data.boneRest[point.bone!].position).multiplyScalar(ratio),index=this.data.boneRest.length,id='joint-'+crypto.randomUUID();
-      this.data.boneInsertions=[...(this.data.boneInsertions??[]),{child:point.bone!,ratio}];
+      this.data.boneInsertions=[...(this.data.boneInsertions??[]),{child:point.bone!,ratio,...(this.data.boneDeletions?.length?{afterDeletions:this.data.boneDeletions.length}:{})}];
       this.data.boneRest[point.bone!].position=new T.Vector3().fromArray(this.data.boneRest[point.bone!].position).sub(offset).toArray();
       const rest:Transform={position:offset.toArray(),rotation:[0,0,0,1]};this.data.boneRest.push(rest);
       const convert=(v:Record<string,Transform>)=>{if(v[point.id])v[point.id].position=new T.Vector3().fromArray(v[point.id].position).sub(offset).toArray();v[id]=structuredClone(rest);};

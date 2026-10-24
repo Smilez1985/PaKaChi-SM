@@ -1,5 +1,5 @@
 import * as T from 'three';
-export interface BoneInsertion {child:number;ratio:number}
+export interface BoneInsertion {child:number;ratio:number;afterDeletions?:number}
 /** Reversible topology overlay. Source skeletons and vertex weights remain recoverable. */
 export class StudioTopology {
  private parents:{bone:T.Bone;parent:T.Object3D;position:T.Vector3}[];
@@ -19,16 +19,37 @@ export class StudioTopology {
   this.generated.forEach(s=>s.dispose());this.generated=[];
  }
  build(edits:BoneInsertion[],rest:{position:[number,number,number];rotation:[number,number,number,number]}[],deletions:number[]=[]):T.Bone[]{
-  this.restore();const bones=[...this.source],splits:{parent:T.Bone;child:T.Bone;added:T.Bone;ratio:number}[]=[];
+  this.restore();const bones=[...this.source],weights:(()=>void)[]=[];
+  const remove=(index:number)=>{
+   const bone=bones[index],parent=bone?.parent;
+   if(!(parent instanceof T.Bone)||bone.children.some(n=>!(n instanceof T.Bone))||bone.scale.distanceTo(new T.Vector3(1,1,1))>1e-8)throw Error('Dieser Knochen kann nicht sicher entfernt werden.');
+   weights.push(()=>{
+   for(const s of this.skins){
+    const old=s.mesh.skeleton,removed=old.bones.indexOf(bone);if(removed<0)continue;
+    const parentIndex=old.bones.indexOf(parent);if(parentIndex<0)throw Error('Elternknochen fehlt in der Skinning-Palette.');
+    const kept=old.bones.filter(b=>b!==bone),next=new T.Skeleton(kept,old.boneInverses.filter((_,i)=>i!==removed).map(m=>m.clone()));this.generated.push(next);s.mesh.skeleton=next;
+    const indices=s.mesh.geometry.getAttribute('skinIndex'),weights=s.mesh.geometry.getAttribute('skinWeight');
+    for(let v=0;v<indices.count;v++){
+     const merged=new Map<number,number>();
+     for(let k=0;k<4;k++){let i=indices.getComponent(v,k);const w=weights.getComponent(v,k);if(!w)continue;if(i===removed)i=parentIndex;const n=i>removed?i-1:i;merged.set(n,(merged.get(n)??0)+w);}
+     const entries=[...merged],sum=entries.reduce((s,[,w])=>s+w,0);
+     for(let k=0;k<4;k++){indices.setComponent(v,k,entries[k]?.[0]??0);weights.setComponent(v,k,(entries[k]?.[1]??0)/(sum||1));}
+    }
+    indices.needsUpdate=true;weights.needsUpdate=true;
+   }
+   });
+   for(const child of [...bone.children])parent.add(child);bone.removeFromParent();
+  };
+  let removed=0;
   for(const edit of edits){
+   const stage=edit.afterDeletions??0;
+   if(!Number.isInteger(stage)||stage<removed||stage>deletions.length)throw Error('Ungültige Reihenfolge der Knochenänderungen.');
+   while(removed<stage)remove(deletions[removed++]);
    const child=bones[edit.child],parent=child?.parent;
-   if(!(parent instanceof T.Bone)||child.position.lengthSq()<1e-12)throw Error('Zwischengelenk benötigt eine vorhandene Knochenstrecke.');
-   const added=new T.Bone();added.name='StudioJoint'+bones.length;added.position.copy(child.position).multiplyScalar(edit.ratio);parent.add(added);added.add(child);child.position.multiplyScalar(1-edit.ratio);this.added.push(added);bones.push(added);
-   splits.push({parent,child,added,ratio:edit.ratio});
-  }
-  if(rest.length!==bones.length)throw Error('Knochenhierarchie passt nicht zur Grundstellung.');
-  bones.forEach((bone,i)=>{bone.position.fromArray(rest[i].position);bone.quaternion.fromArray(rest[i].rotation);});
-  for(const {parent,child,added,ratio} of splits){
+   if(!(parent instanceof T.Bone))throw Error('Zwischengelenk benötigt eine vorhandene Knochenstrecke.');
+   const added=new T.Bone();added.name='StudioJoint'+bones.length;parent.add(added);added.add(child);this.added.push(added);bones.push(added);
+   const ratio=edit.ratio;
+   weights.push(()=>{
    for(const s of this.skins){
     const skeleton=s.mesh.skeleton,pi=skeleton.bones.indexOf(parent),ci=skeleton.bones.indexOf(child);if(pi<0||ci<0)continue;
     const next=new T.Skeleton([...skeleton.bones,added], [...skeleton.boneInverses.map(m=>m.clone()),new T.Matrix4()]);this.generated.push(next);s.mesh.skeleton=next;
@@ -45,26 +66,12 @@ export class StudioTopology {
     }
     indices.needsUpdate=true;weights.needsUpdate=true;
    }
+   });
   }
-  for(const index of deletions){
-   const bone=bones[index],parent=bone?.parent;
-   if(!(parent instanceof T.Bone)||bone.children.some(n=>!(n instanceof T.Bone))||bone.scale.distanceTo(new T.Vector3(1,1,1))>1e-8)throw Error('Dieser Knochen kann nicht sicher entfernt werden.');
-   for(const s of this.skins){
-    const old=s.mesh.skeleton,removed=old.bones.indexOf(bone);if(removed<0)continue;
-    const parentIndex=old.bones.indexOf(parent);if(parentIndex<0)throw Error('Elternknochen fehlt in der Skinning-Palette.');
-    const kept=old.bones.filter(b=>b!==bone),next=new T.Skeleton(kept,old.boneInverses.filter((_,i)=>i!==removed).map(m=>m.clone()));this.generated.push(next);s.mesh.skeleton=next;
-    const indices=s.mesh.geometry.getAttribute('skinIndex'),weights=s.mesh.geometry.getAttribute('skinWeight');
-    for(let v=0;v<indices.count;v++){
-     const merged=new Map<number,number>();
-     for(let k=0;k<4;k++){let i=indices.getComponent(v,k);const w=weights.getComponent(v,k);if(!w)continue;if(i===removed)i=parentIndex;const n=i>removed?i-1:i;merged.set(n,(merged.get(n)??0)+w);}
-     const entries=[...merged],sum=entries.reduce((s,[,w])=>s+w,0);
-     for(let k=0;k<4;k++){indices.setComponent(v,k,entries[k]?.[0]??0);weights.setComponent(v,k,(entries[k]?.[1]??0)/(sum||1));}
-    }
-    indices.needsUpdate=true;weights.needsUpdate=true;
-   }
-   // Persisted child transforms already use the surviving parent's coordinates.
-   for(const child of [...bone.children])parent.add(child);bone.removeFromParent();
-  }
+  while(removed<deletions.length)remove(deletions[removed++]);
+  if(rest.length!==bones.length)throw Error('Knochenhierarchie passt nicht zur Grundstellung.');
+  bones.forEach((bone,i)=>{bone.position.fromArray(rest[i].position);bone.quaternion.fromArray(rest[i].rotation);});
+  for(const apply of weights)apply();
   return bones;
  }
 }

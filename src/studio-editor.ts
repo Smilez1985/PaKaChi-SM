@@ -105,7 +105,6 @@ export class StudioEditor {
     <p class="subtle">${this.edit?'Punkte setzen und verbinden. Bestehende Skelettpunkte verschieben ihren Drehpunkt.':'Ziehen bewegt verbundene Gelenkketten. Unter Drehen lässt sich die Ausrichtung direkt mit der Maus ändern.'}</p>
     <div class="studio-actions"><button id="studio-undo" ${this.history.canUndo?'':'disabled'}>↶ Zurück</button><button id="studio-redo" ${this.history.canRedo?'':'disabled'}>↷ Wiederholen</button></div>
     <div class="studio-detection" ${this.edit?'':'hidden'}><button id="detect-joints">Joints automatisch erkennen</button><button id="detect-links">Joint-Verbindungen automatisch erkennen</button><p class="subtle">Erkennung verwendet vorhandene Skelettdaten. Für Modelle ohne Skelett ist KI-Rigging noch nicht verfügbar.</p></div>
-    <p ${this.edit&&this.data.boneDeletions?.length?'':'hidden'}>Weitere Knochen erst nach Rücknahme der Löschungen einfügen. Gelöschte Knochen sind über Undo wiederherstellbar.</p>
     <button id="figure-select" ${this.edit?'hidden':''}>Gesamte Figur bewegen</button>
     <label for="studio-points">Gelenk / Gesichtspunkt</label><select id="studio-points"><option value="">Punkt auswählen …</option></select>
     <div class="studio-actions" ${this.edit?'':'hidden'}><button id="bone-insert">Knochen dazwischen einfügen</button><button id="point-add">＋ Punkt setzen</button><button id="point-connect" ${this.point?'':'disabled'}>Verbinden / lösen</button></div>
@@ -135,7 +134,7 @@ export class StudioEditor {
     on('figure-select',()=>{this.selected=FIGURE_TRACK;this.view.setAction('select');this.render();});
     on('mode-pose',()=>{this.revision++;this.edit=false;this.view.setAction('select');this.rig.reset();this.render();});
     on('mode-rig',()=>{this.revision++;this.edit=true;if(this.selected===FIGURE_TRACK)this.selected=null;this.view.setAction('select');this.rig.reset();this.render();});
-    q<HTMLButtonElement>('bone-insert').disabled=!this.edit||this.point?.kind!=='bone'||this.playing||!!this.data.boneDeletions?.length;
+    q<HTMLButtonElement>('bone-insert').disabled=!this.edit||this.point?.kind!=='bone'||this.playing;
     on('bone-delete',()=>{if(!this.edit||this.point?.kind!=='bone'||this.interactionActive)return;try{this.mutate(()=>{this.selected=this.rig.deleteBone(this.point!);});this.hooks.feedback('Knochen entfernt. Kinder und Hautgewichte dem Elternknochen zugeordnet; Posen prüfen.');}catch(error){this.hooks.feedback((error as Error).message);}});
     on('bone-insert',()=>{if(!this.edit||!this.point||this.interactionActive)return;try{this.mutate(()=>{this.selected=this.rig.insertJoint(this.point!).id;});this.hooks.feedback('Zwischengelenk eingefügt. Hautgewichte angepasst; vorhandene Posen prüfen.');}catch(error){this.hooks.feedback((error as Error).message);}});
     on('studio-undo',()=>{const s=this.history.undo(this.snapshot());if(s)this.restore(s);});on('studio-redo',()=>{const s=this.history.redo(this.snapshot());if(s)this.restore(s);});

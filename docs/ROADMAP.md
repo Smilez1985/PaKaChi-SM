@@ -1,6 +1,6 @@
 # Roadmap – was kommt
 
-**Softwarestand: 0.48.0 · Abgleich: 23.10.2026.** Teil der [Blaupause](README.md).
+**Softwarestand: 0.49.0 · Abgleich: 23.10.2026.** Teil der [Blaupause](README.md).
 
 Ein Häkchen bedeutet implementiert; es ersetzt keine visuelle oder externe Live-Abnahme. Die Nachweise und Prüfgrenzen stehen im [Prüfstand](PRUEFUNG.md). Die Versionshistorie gehört ins [Changelog](CHANGELOG.md).
 
@@ -89,7 +89,9 @@ Diese Reihenfolge ist ein Umsetzungsvorschlag, kein Terminversprechen. Lokale un
 - [ ] Gewichtsqualität der eingefügten Gelenke manuell prüfen.
 - [x] Nicht skalierte Knochen mit Knochen-Eltern entfernen, Kindposen umrechnen und Gewichte zusammenführen; Projektpersistenz, Undo/Redo und Schutzfälle (0.48.0).
 - [ ] Knochenlöschen im Browser erfolgreich abnehmen und Hautverformung manuell prüfen.
-- [ ] Frei hinzufügen/umhängen, beliebig gemischte Einfüge-/Löschfolgen, skalierte Knochen und Anbauteile unterstützen; Hautgewichte gezielt bearbeiten und neue Topologieaktionen über MCP anbieten.
+- [x] Gemischte Einfüge-/Löschfolgen mit gespeicherter Reihenfolge, Rekonstruktion der Gewichte und einzelnen Undo-/Redo-Schritten ermöglichen (0.49.0).
+- [ ] Gemischten Ablauf im echten Browser abnehmen; Hautqualität manuell prüfen.
+- [ ] Frei hinzufügen/umhängen, skalierte Knochen und Anbauteile unterstützen; Hautgewichte gezielt bearbeiten und neue Topologieaktionen über MCP anbieten.
 - [x] Vorhandenes Gesamtskelett automatisch verbinden; beim Posieren Ein-/Zweiglied-Ketten mit erhaltenen Knochenlängen lösen (0.11.0).
 - [x] Manuell einstellbare Beugegrenzen am mittleren Knochen einer Zweiglied-IK-Kette berücksichtigen; Grenzen speichern, über MCP bearbeiten und betroffene Posen markieren (0.33.0).
 - [ ] Anatomische Gelenkketten aus ungeriggter Oberfläche erzeugen; allgemeine Dreh-/Twistgrenzen, fixierte Füße und gekoppelte Ganzkörper-IK ergänzen.

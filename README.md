@@ -2,7 +2,7 @@
 
 **SM steht für StateMaschine.** PaKaChi ist die **Panda-KI-Chimera**, das übergeordnete Projekt. PaKaChi-SM vereint Avatar-Player, Model Zoo und das fest integrierte **PaKaChi-Avatar-Studio**.
 
-**Softwarestand: 0.48.0 · Entwicklungsstand, keine fertige Bild-zu-3D-Lösung.**
+**Softwarestand: 0.49.0 · Entwicklungsstand, keine fertige Bild-zu-3D-Lösung.**
 
 Der bestehende PaKaChi mit Tierform, humanoider Arbeitsform und allen 72 Transformationsbildern ist erhalten und beim Start ausgewählt. Mika und Nori sind separate technische 3D-Testavatare. Ein 3D-Modell des Original-PaKaChi und die Qualitätsabnahme echter KI-Ergebnisse stehen noch aus.
 
@@ -53,7 +53,7 @@ Seit 0.14.0 besteht zusätzlich der interne [Auftragskern](docs/AUFTRAE.md): fes
 
 ## Was aktuell funktioniert
 
-| Bereich | Stand 0.48.0 |
+| Bereich | Stand 0.49.0 |
 | --- | --- |
 | Player | Avatar-Auswahl, tatsächliche Bewegungen anzeigen, abspielen, pausieren, Tempo und Abspielposition ändern. |
 | Modelle | Mika/Nori mit Skeletten und Clips; eigene eigenständige GLB-Dateien laden oder hineinziehen, bis 50 MiB, lokal für die Sitzung. |
@@ -204,4 +204,6 @@ Seit **0.47.0** lassen sich im Modus „Gelenke bearbeiten“ echte Zwischengele
 
 242 Tests, Build und alle elf Chromium-Fälle bestanden ([CI-Nachweis](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/39957177749)).
 
-Seit **0.48.0** entfernt „Gelenke bearbeiten → Knochen wirklich löschen“ den ausgewählten Knochen aus Hierarchie und Skinning-Palette. Kindgelenke und Hautgewichte gehen an seinen Elternknochen; gespeicherte Kindposen werden umgerechnet und alle Posen zur Prüfung markiert. Undo/Redo und Projektdateien erhalten die vollständige Änderung. Wurzelknochen, Knochen mit eigener Skalierung oder angehängten Nicht-Knochen-Objekten werden abgewiesen. Nach Löschungen ist weiteres Einfügen bis zur Rücknahme der Löschungen gesperrt. Projekte mit Knochenlöschungen benötigen Version 0.48.0 oder neuer.
+Seit **0.48.0** entfernt „Gelenke bearbeiten → Knochen wirklich löschen“ den ausgewählten Knochen aus Hierarchie und Skinning-Palette. Kindgelenke und Hautgewichte gehen an seinen Elternknochen; gespeicherte Kindposen werden umgerechnet und alle Posen zur Prüfung markiert. Undo/Redo und Projektdateien erhalten die vollständige Änderung. Wurzelknochen, Knochen mit eigener Skalierung oder angehängten Nicht-Knochen-Objekten werden abgewiesen. Diese Version sperrte weiteres Einfügen nach Löschungen; die Sperre entfällt mit 0.49.0. Projekte mit Knochenlöschungen benötigen Version 0.48.0 oder neuer.
+
+Seit **0.49.0** können Knochen abwechselnd gelöscht und wieder eingefügt werden, ohne vorherige Löschungen rückgängig zu machen. Die Projektdatei und der Katalogexport erhalten die Reihenfolge; Undo/Redo behandelt weiterhin jeden Eingriff einzeln. Gemischte Abläufe benötigen mindestens 0.49.0. 248 Tests und Build bestanden; der neue Browsernachweis steht aus.

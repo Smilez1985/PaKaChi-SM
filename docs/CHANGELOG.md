@@ -12,6 +12,22 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.49.0] - 2026-10-24
+
+Zeitstempel: 2026-10-23T21:49:50+02:00 (Europe/Berlin)
+
+### Added
+
+- Gespeicherte Reihenfolge für gemischte Knochen-Einfügungen und -Löschungen; Katalogexport erhält die Reihenfolgemarker.
+- Zwei Tests für wiederholte Mischfolgen, Gewichtsrekonstruktion, Markerprüfung und unabhängiges Undo/Redo. Browserfall um Ersatzgelenk und erneutes Laden erweitert.
+
+### Changed
+
+- Einfügen nach Knochenlöschungen ist wieder möglich; Hierarchie und Skinning-Änderungen werden in ihrer tatsächlichen Reihenfolge aufgebaut.
+- README und Blaupause nachgezogen. Gemischte Abläufe benötigen Software ab 0.49.0.
+
+**Prüfung:** 248 Tests und Build bestanden; neuer Browsernachweis steht aus. Manuelle Hautqualität bleibt offen.
+
 ## [0.48.0] - 2026-10-23
 
 Zeitstempel: 2026-10-23T20:23:34+02:00 (Europe/Berlin)
@@ -1016,3 +1032,5 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 [0.47.0]: PRUEFUNG-0.47.0.md
 
 [0.48.0]: PRUEFUNG-0.48.0.md
+
+[0.49.0]: PRUEFUNG-0.49.0.md

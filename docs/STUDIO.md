@@ -267,4 +267,10 @@ Die Gewichtsverteilung ist geometrisch angenähert; die Oberfläche besonders an
 
 Unter „Gelenke bearbeiten“ den Knochen auswählen und „Knochen wirklich löschen“ anklicken. Der Knopf „Kontrollpunkt löschen“ entfernt weiterhin nur den Bearbeitungsgriff. Beim echten Löschen bleiben Kinder verbunden: Sie wechseln zum Elternknochen, der auch die Hautgewichte übernimmt. Vorhandene Posen werden umgerechnet und zur Kontrolle markiert. Oberfläche und Moves danach prüfen; besonders eine zuvor stark gebeugte gelöschte Gelenkspur kann anders aussehen.
 
-Undo/Redo stellt den gesamten Eingriff einschließlich Hierarchie und Gewichten wieder her. Die Projektdatei speichert die Löschungen; zum Laden ist mindestens 0.48.0 erforderlich. Wurzelknochen, selbst skalierte Knochen und Knochen mit Anbauteilen können derzeit nicht gelöscht werden. Falls Griffe fehlen, zuerst vorhandene Gelenke erkennen. Nach Löschungen ist weiteres Einfügen bis zum Rückgängigmachen der Löschungen gesperrt; weitere Löschungen bleiben möglich.
+Undo/Redo stellt den gesamten Eingriff einschließlich Hierarchie und Gewichten wieder her. Die Projektdatei speichert die Löschungen; zum Laden ist mindestens 0.48.0 erforderlich. Wurzelknochen, selbst skalierte Knochen und Knochen mit Anbauteilen können derzeit nicht gelöscht werden. Falls Griffe fehlen, zuerst vorhandene Gelenke erkennen. In 0.48.0 war weiteres Einfügen nach Löschungen gesperrt; seit 0.49.0 entfällt diese Einschränkung.
+
+## Nach dem Löschen wieder einfügen (0.49.0)
+
+Die frühere Sperre entfällt: Nach „Knochen wirklich löschen“ einen verbleibenden Endpunkt auswählen und „Knochen dazwischen einfügen“ anklicken. So lässt sich beispielsweise ein Knie entfernen und zwischen Hüfte und Fuß ein neues Gelenk einsetzen. Anschließend die Gelenkposition und Hautverformung kontrollieren.
+
+Jedes Löschen und Einfügen hat einen eigenen Undo-/Redo-Schritt. Beim Speichern und Laden bleibt die Reihenfolge erhalten; für solche gemischten Abläufe ist mindestens 0.49.0 erforderlich. Die Schutzregeln für Wurzeln, skalierte Knochen und Anbauteile gelten weiterhin.

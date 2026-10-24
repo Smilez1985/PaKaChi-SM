@@ -68,7 +68,7 @@ test('deleting an inserted bone removes it from hierarchy and skin palette and p
  before.forEach((v,i)=>assert.ok(vertex(mesh,i).distanceTo(v)<1e-6));assert.ok(!detectJoints(rig).some(p=>p.bone===joint.bone));
  const packed=JSON.parse(zooPackage(project(rig),'deleted').project);assert.deepEqual(packed.studio.boneDeletions,[joint.bone]);parseProject(packed);
  const other=fixture();other.rig.data=packed.studio;other.rig.reset();assert.equal(other.foot.parent,other.hip);assert.equal(other.mesh.skeleton.bones.length,2);
- const snapshot=structuredClone(rig.data);assert.throws(()=>rig.insertJoint(rig.data.points[1]),/rückgängig/);assert.deepEqual(rig.data,snapshot);
+ const replacement=rig.insertJoint(rig.data.points[1]);assert.equal(rig.data.boneInsertions?.at(-1)?.afterDeletions,1);assert.equal(foot.parent,rig.bones[replacement.bone!]);
 });
 test('leaf deletion transfers and merges weights; root and scaled bone rejection do not mutate',()=>{
  const {rig,mesh,hip,foot}=fixture(),snapshot=structuredClone(rig.data);assert.throws(()=>rig.deleteBone(rig.data.points[0]),/Wurzel/);assert.deepEqual(rig.data,snapshot);
@@ -96,4 +96,23 @@ test('deletion rejects incomplete skin palettes atomically and validates persist
  assert.throws(()=>rig.deleteBone(rig.data.points[1]),/Elternknochen/);assert.deepEqual(rig.data,before);assert.equal(f.foot.parent,f.hip);assert.deepEqual(f.mesh.skeleton.bones,[f.foot]);assert.deepEqual(Array.from(f.mesh.geometry.getAttribute('skinWeight').array),weights);
  for(const deletion of [[1,1],[-1],[999]]){const bad=project(rig);bad.studio={...structuredClone(before),boneDeletions:deletion};assert.throws(()=>parseProject(bad));}
  const bad=project(rig);bad.studio={...structuredClone(before),boneDeletions:[1]};assert.throws(()=>parseProject(bad),'deleted bones cannot keep active controls');
+});
+test('mixed insert-delete-insert sequences reconstruct hierarchy and weights after reload',async()=>{
+ // @ts-expect-error CLI module has no declaration file.
+ const {zooPackage}=await import('../scripts/export-zoo.mjs');
+ const {rig,mesh,foot}=fixture(),before=[0,1,2].map(i=>vertex(mesh,i)),endpoint=rig.data.points[1];
+ for(let i=0;i<3;i++){const added=rig.insertJoint(endpoint);rig.deleteBone(added);}
+ const final=rig.insertJoint(endpoint);assert.equal(rig.data.boneInsertions?.at(-1)?.afterDeletions,3);assert.equal(foot.parent,rig.bones[final.bone!]);assert.equal(mesh.skeleton.bones.length,3);before.forEach((v,i)=>assert.ok(vertex(mesh,i).distanceTo(v)<1e-6));
+ const packed=JSON.parse(zooPackage(project(rig),'mixed').project);parseProject(packed);assert.equal(packed.studio.boneInsertions.at(-1).afterDeletions,3);
+ const other=fixture();other.rig.data=packed.studio;other.rig.reset();assert.equal(other.foot.parent,other.rig.bones[final.bone!]);assert.deepEqual(Array.from(other.mesh.geometry.getAttribute('skinIndex').array),Array.from(mesh.geometry.getAttribute('skinIndex').array));assert.deepEqual(Array.from(other.mesh.geometry.getAttribute('skinWeight').array),Array.from(mesh.geometry.getAttribute('skinWeight').array));
+ const middleBefore=vertex(other.mesh,1);other.rig.setPoint(other.rig.data.points.find(p=>p.id===final.id)!,other.rig.position(final),new T.Quaternion().setFromAxisAngle(new T.Vector3(0,0,1),.5),false,'rotate');assert.ok(vertex(other.mesh,1).distanceTo(middleBefore)>.05);
+ for(const stage of [-1,4,1.5]){const bad=structuredClone(packed);bad.studio.boneInsertions.at(-1).afterDeletions=stage;assert.throws(()=>parseProject(bad));}
+ const unordered=structuredClone(packed);unordered.studio.boneInsertions[1].afterDeletions=2;unordered.studio.boneInsertions[2].afterDeletions=1;assert.throws(()=>parseProject(unordered));
+});
+test('mixed Studio operations undo and redo both hierarchy steps independently',()=>{
+ const w=new Window();Object.assign(globalThis,{document:w.document,Option:function(text='',value=''){const o=w.document.createElement('option');o.textContent=text;o.value=value;return o;}});
+ const {rig,mesh,foot,hip}=fixture(),initial=rig.insertJoint(rig.data.points[1]),host=document.createElement('div');const view={setEnabled(){},setFigureEnabled(){},setAction(){},setRotation(){},select(){},refresh(){},dispose(){},onSelect:(_id:string)=>{}};
+ const editor=new StudioEditor(rig,view as unknown as StudioView,host,project(rig),{suspend(){},resume(){},changed(){},feedback(){}});editor.enter();const click=(id:string)=>host.querySelector<HTMLButtonElement>('#'+id)!.click();click('mode-rig');view.onSelect(initial.id);click('bone-delete');assert.equal(foot.parent,hip);
+ view.onSelect(rig.data.points.find(p=>p.name==='Foot')!.id);assert.equal(host.querySelector<HTMLButtonElement>('#bone-insert')!.disabled,false);click('bone-insert');assert.equal(mesh.skeleton.bones.length,3);const newIndex=rig.data.boneRest.length-1;assert.equal(foot.parent,rig.bones[newIndex]);
+ click('studio-undo');assert.equal(foot.parent,hip);assert.equal(mesh.skeleton.bones.length,2);click('studio-undo');assert.equal(foot.parent,rig.bones[initial.bone!]);click('studio-redo');assert.equal(foot.parent,hip);click('studio-redo');assert.equal(foot.parent,rig.bones[newIndex]);parseProject(editor.exportProject());editor.dispose();w.happyDOM.abort();
 });
