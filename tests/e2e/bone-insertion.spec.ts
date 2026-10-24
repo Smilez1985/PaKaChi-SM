@@ -23,3 +23,14 @@ test('actual source bone deletion survives undo, redo and project reload',async(
  const mixedDownload=page.waitForEvent('download');await page.locator('#studio-save').click();const mixedPath=await (await mixedDownload).path();const mixed=JSON.parse(await readFile(mixedPath!,'utf8'));expect(mixed.studio.boneInsertions.at(-1).afterDeletions).toBe(1);await page.locator('#project-file').setInputFiles(mixedPath!);await expect(page.locator('#message')).toContainText('Mika bereit');await page.locator('#studio-tab').click();expect((await points()).items.some((p:any)=>p.name==='Zwischengelenk')).toBe(true);
  await page.screenshot({path:'test-results/deleted-bone.png',fullPage:true});expect(errors).toEqual([]);
 });
+
+test('reparenting a source bone preserves position and survives undo, redo and project reload',async({page})=>{
+ const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');await page.locator('#avatar-select').selectOption('mika');await expect(page.locator('#message')).toContainText('Mika bereit');await page.locator('#studio-tab').click();
+ const points=()=>page.evaluate(()=>window.PaKaChiSM.call('get_studio',{section:'points'}) as any),original=(await points()).items,foot=original.find((p:any)=>p.name==='LeftFoot'),hip=original.find((p:any)=>p.name==='LeftHip');
+ await page.locator('#mode-rig').click();await page.locator('#studio-points').selectOption(foot.id);await page.locator('#bone-parent').selectOption(hip.id);await page.locator('#bone-reparent').click();await expect(page.locator('#message')).toContainText('Knochen umgehängt');
+ let moved=(await points()).items.find((p:any)=>p.id===foot.id);expect(moved.parentId).toBe(hip.id);moved.position.forEach((v:number,i:number)=>expect(v).toBeCloseTo(foot.position[i],6));
+ await page.locator('#studio-undo').click();expect((await points()).items.find((p:any)=>p.id===foot.id).parentId).toBe(foot.parentId);await page.locator('#studio-redo').click();expect((await points()).items.find((p:any)=>p.id===foot.id).parentId).toBe(hip.id);
+ const downloading=page.waitForEvent('download');await page.locator('#studio-save').click();const path=await (await downloading).path(),saved=JSON.parse(await readFile(path!,'utf8'));expect(saved.studio.boneReparents).toEqual([{bone:foot.bone,parent:hip.bone,after:0}]);
+ await page.locator('#project-file').setInputFiles(path!);await expect(page.locator('#message')).toContainText('Mika bereit');await page.locator('#studio-tab').click();moved=(await points()).items.find((p:any)=>p.id===foot.id);expect(moved.parentId).toBe(hip.id);moved.position.forEach((v:number,i:number)=>expect(v).toBeCloseTo(foot.position[i],6));
+ await page.screenshot({path:'test-results/reparented-bone.png',fullPage:true});expect(errors).toEqual([]);
+});

@@ -12,6 +12,23 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.53.0] - 2026-10-25
+
+Zeitstempel: 2026-10-25T00:31:31+02:00 (Europe/Berlin)
+
+### Added
+
+- Echte Knochen im Studio umhängen: neuer Elternknochen, Erhalt der Grundstellung und gespeicherter Einzelposen, Undo/Redo.
+- `reparent_bone` für Assistent und beide MCP-Server; tatsächliche Elternknochen in `get_studio`.
+- Geordnete Persistenz für gemischtes Einfügen/Löschen/Umhängen einschließlich Katalogexport und Move-Bindung.
+
+### Changed
+
+- Betroffene Posen/Moves nach Umhängen zur Prüfung markieren. Zwischenbewegungen können sich trotz erhaltener Einzelposen ändern.
+- README, Design, Roadmap, Bedienanleitung und Prüfbericht nachgezogen.
+
+**Prüfung:** 256 Node-Tests und Build bestanden; Python-Syntax geprüft. 16 Chromium-Fälle vorbereitet, neuer CI-Nachweis steht aus. Wurzeln, Kreise, fremde Skelettbäume, skalierte Knochenketten und direkte Anbauteile sind ausgeschlossen.
+
 ## [0.52.0] - 2026-10-24
 
 Zeitstempel: 2026-10-24T23:29:23+02:00 (Europe/Berlin)
@@ -1085,3 +1102,5 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 [0.51.0]: PRUEFUNG-0.51.0.md
 
 [0.52.0]: PRUEFUNG-0.52.0.md
+
+[0.53.0]: PRUEFUNG-0.53.0.md

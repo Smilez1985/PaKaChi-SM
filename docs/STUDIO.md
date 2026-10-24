@@ -281,3 +281,17 @@ Jedes Löschen und Einfügen hat einen eigenen Undo-/Redo-Schritt. Beim Speicher
 Seit **0.50.0** unterstützen `edit_studio` und der integrierte Assistent zwei weitere Aktionen: `insert_bone` mit der ID des Kindknochens fügt ein echtes Zwischengelenk ein (seit 0.52.0 optional `ratio: 0.1…0.9`, Standard `0.5`, vom Elternknochen zum Kind gemessen); `delete_bone` entfernt den angegebenen Knochen und überträgt Kinder und Gewichte an seinen Elternknochen. `delete_point` entfernt weiterhin nur den Griff. Zuerst `get_studio` mit `section: points` lesen, dann im Rig-Modus mit aktueller Sitzung/Revision und erteilter Bearbeitungsfreigabe arbeiten. Der integrierte Assistent legt Änderungen weiterhin zur ausdrücklichen Übernahme vor. Jeder Eingriff ist über Undo/Redo rückgängig machbar; vorhandene Posen danach prüfen. Die Schutzregeln für Wurzeln, skalierte Knochen und Anbauteile bleiben bestehen.
 
 249 Tests und Build bestanden; Node-MCP-Transport mit beiden Aktionen geprüft. Python-Modell und Werkzeugbeschreibung erweitert, Syntax geprüft. Keine neue reale Python-MCP-/Anbieterabnahme; neuer CI-Nachweis steht aus.
+
+
+## Knochen umhängen (0.53.0)
+
+1. „Gelenke bearbeiten“ öffnen und den umzuhängenden Knochen auswählen.
+2. Unter „Neuer Elternknochen“ den gewünschten Knochen auswählen.
+3. „Knochen umhängen“ anwählen. Die echte Skelettverbindung ändert sich, ohne den Knochen in der Grundstellung zu versetzen. Kinder bleiben am umgehängten Knochen.
+4. Gespeicherte Posen und vor allem die Übergänge der Moves prüfen. Einzelposen werden umgerechnet; Zwischenbewegungen können sich durch die neue Hierarchie ändern.
+
+Undo/Redo und Speichern/Laden erhalten die Änderung. Umhängen kann mit Einfügen und Löschen gemischt werden. Hautgewichte werden keinem anderen Knochen zugewiesen. Wurzeln, Selbst-/Nachfahrenverbindungen, andere Skelettbäume, skalierte Knochenketten und direkte Anbauteile werden abgewiesen.
+
+Für Assistent/MCP: `reparent_bone` benötigt `id` des umzuhängenden Knochens und `target` des neuen Elternknochens, aktuellen `session`/`expectedRevision`, Rig-Modus und erteilte Bearbeitungsfreigabe. Der Assistent braucht zusätzlich die ausdrückliche Übernahme. `get_studio` mit `section: points` liefert nun `parentBone` (Knochenindex oder null) und `parentId` (Griff-ID oder null, wenn kein Griff vorhanden ist).
+
+Projektformat 1 enthält optional `boneReparents: [{bone, parent, after}]`; `after` zählt vorausgehende Einfüge-/Löschoperationen. Umgehängte Projekte benötigen mindestens Software 0.53.0; ältere Leser kennen diese Hierarchieänderung nicht. Originalclips verwenden weiterhin die unveränderte Quellhierarchie.

@@ -13,6 +13,7 @@ export interface ControlPoint {
 export interface Pose { id: string; name: string; seconds: number; values: Record<string, Transform>; review?: ReviewReason[] }
 export interface StudioMove { id: string; name: string; loop: boolean; poses: string[] }
 export interface StudioData {
+  boneReparents?: {bone:number;parent:number;after:number}[];
   boneDeletions?: number[];
   boneInsertions?: {child:number;ratio:number;afterDeletions?:number}[];
   points: ControlPoint[]; links: [string, string][]; boneRest: Transform[]; poses: Pose[]; moves: StudioMove[]; draft?: Record<string,Transform>;
@@ -49,6 +50,11 @@ export function parseProject(input: unknown): StudioProject {
   if(d.boneDeletions!==undefined)require(Array.isArray(d.boneDeletions)&&d.boneDeletions.length<=256&&new Set(d.boneDeletions).size===d.boneDeletions.length&&d.boneDeletions.every(i=>Number.isInteger(i)&&i>=0&&i<(d.boneRest as unknown[]).length),'Ungültige Knochenlöschungen.');
   let stage=0;
   for(const e of (d.boneInsertions??[]) as {afterDeletions?:number}[]){const next=e.afterDeletions??0;require(Number.isInteger(next)&&next>=stage&&next<=((d.boneDeletions as number[]|undefined)?.length??0),'Ungültige Reihenfolge der Knochenänderungen.');stage=next;}
+  if(d.boneReparents!==undefined){
+    require(Array.isArray(d.boneReparents)&&d.boneReparents.length<=256,'Ungültige Knochenzuordnungen.');
+    let previous=0;const total=((d.boneInsertions as unknown[]|undefined)?.length??0)+((d.boneDeletions as unknown[]|undefined)?.length??0);
+    for(const e of d.boneReparents){require(obj(e)&&Object.keys(e).every(k=>['bone','parent','after'].includes(k))&&Number.isInteger(e.bone)&&Number.isInteger(e.parent)&&(e.bone as number)>=0&&(e.parent as number)>=0&&(e.bone as number)<d.boneRest.length&&(e.parent as number)<d.boneRest.length&&e.bone!==e.parent&&Number.isInteger(e.after)&&(e.after as number)>=previous&&(e.after as number)<=total,'Ungültige Knochenzuordnung.');previous=e.after as number;}
+  }
   const ids=new Set<string>(), bones=new Set<number>();
   for(const p of d.points) {
     require(obj(p) && id(p.id) && !ids.has(p.id) && name(p.name) && ['bone','surface'].includes(p.kind as string) && vector(p.rest,3) && finite(p.size) && p.size>=.003 && p.size<=.15 && finite(p.radius) && p.radius>=.005 && p.radius<=2);

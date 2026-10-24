@@ -1,4 +1,4 @@
-import {StudioTopology} from './studio-topology.ts';
+import {StudioTopology,validateReparent} from './studio-topology.ts';
 import {solveLimb} from './studio-ik.ts';
 import {detectConnections,edgeKey} from './studio-detection.ts';
 import * as T from 'three';
@@ -76,6 +76,27 @@ export class StudioRig {
       this.reset();added.rest=this.position(added).toArray();this.apply(values);return added;
     }catch(error){this.data=before;this.reset();this.apply(originalValues);throw error;}
   }
+  reparentBone(point:ControlPoint,target:ControlPoint){
+    if(point.kind!=='bone'||target.kind!=='bone'||!this.data.points.includes(point)||!this.data.points.includes(target)||(this.data.boneReparents?.length??0)>=256)throw Error('Zwei vorhandene Knochen auswählen (höchstens 256 Umhängungen).');
+    const bone=this.bones[point.bone!],parent=this.bones[target.bone!];validateReparent(bone,parent);
+    const oldParent=this.data.points.find(p=>p.kind==='bone'&&this.bones[p.bone!]===bone.parent);
+    if(!oldParent)throw Error('Zuerst die vorhandenen Gelenke erkennen.');
+    const before=structuredClone(this.data),values=this.capture(),original=structuredClone(values);
+    const world=(node:T.Bone,v:Record<string,Transform>):T.Matrix4=>{
+      const chain:T.Bone[]=[];for(let n:T.Object3D|null=node;n instanceof T.Bone;n=n.parent)chain.unshift(n);
+      const matrix=new T.Matrix4();for(const n of chain){const i=this.bones.indexOf(n),p=this.data.points.find(p=>p.kind==='bone'&&p.bone===i),t=p&&v[p.id]||before.boneRest[i];matrix.multiply(new T.Matrix4().compose(new T.Vector3().fromArray(t.position),new T.Quaternion().fromArray(t.rotation),new T.Vector3(1,1,1)));}return matrix;
+    };
+    const convert=(v:Record<string,Transform>):Transform=>{const matrix=world(parent,v).invert().multiply(world(bone,v)),position=new T.Vector3(),rotation=new T.Quaternion(),scale=new T.Vector3();matrix.decompose(position,rotation,scale);return {position:position.toArray(),rotation:rotation.normalize().toArray()};};
+    try{
+      const rest=convert({}),poses=this.data.poses.map(p=>convert(p.values)),draft=this.data.draft?convert(this.data.draft):undefined,current=convert(values);
+      this.data.boneRest[point.bone!]=rest;this.data.poses.forEach((p,i)=>p.values[point.id]=poses[i]);if(this.data.draft&&draft)this.data.draft[point.id]=draft;values[point.id]=current;
+      this.data.boneReparents=[...(this.data.boneReparents??[]),{bone:point.bone!,parent:target.bone!,after:(this.data.boneInsertions?.length??0)+(this.data.boneDeletions?.length??0)}];
+      this.data.links=this.data.links.filter(l=>!(l.includes(point.id)&&l.includes(oldParent.id)));
+      if(!this.data.links.some(l=>l.includes(point.id)&&l.includes(target.id)))this.data.links.push([target.id,point.id]);
+      if(this.data.links.length>2048)throw Error('Zu viele Gelenkverbindungen.');
+      this.reset();this.apply(values);
+    }catch(error){this.data=before;this.reset();this.apply(original);throw error;}
+  }
   deleteBone(point:ControlPoint){
     if(point.kind!=='bone'||this.data.boneDeletions?.includes(point.bone!))throw Error('Einen vorhandenen Knochen auswählen.');
     const bone=this.bones[point.bone!],parent=bone.parent;
@@ -98,7 +119,7 @@ export class StudioRig {
   reset() {
     this.figureOffset.set(0,0,0);this.figureRotation.identity();this.figureScale=1;this.figureMatrix.identity();this.root.matrixAutoUpdate=this.rootAutoUpdate;this.root.matrix.copy(this.rootMatrix);
     for(const item of this.originalNodes){write(item.node,item.value);item.node.scale.copy(item.scale);}
-    const bones=this.topology.build(this.data.boneInsertions??[],this.data.boneRest,this.data.boneDeletions??[]);this.bones.splice(0,this.bones.length,...bones);
+    const bones=this.topology.build(this.data.boneInsertions??[],this.data.boneRest,this.data.boneDeletions??[],this.data.boneReparents??[]);this.bones.splice(0,this.bones.length,...bones);
     this.bones.forEach((b,i)=>write(b,this.data.boneRest[i]));
     this.root.updateWorldMatrix(true,true);
     this.rebind();
