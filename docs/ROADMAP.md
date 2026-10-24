@@ -93,7 +93,7 @@ Diese Reihenfolge ist ein Umsetzungsvorschlag, kein Terminversprechen. Lokale un
 - [x] Gemischte Einfüge-/Löschfolgen mit gespeicherter Reihenfolge, Rekonstruktion der Gewichte und einzelnen Undo-/Redo-Schritten ermöglichen (0.49.0).
 - [x] Löschen, Ersatzgelenk einfügen und erneutes Laden im echten Browser prüfen (0.49.0; [Nachweis](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/40096800795)).
 - [ ] Hautqualität nach gemischten Umbaufolgen manuell prüfen.
-- [ ] Frei hinzufügen/umhängen, skalierte Knochen und Anbauteile unterstützen; Hautgewichte gezielt bearbeiten ; Einfügen/Löschen sind bereits über MCP verfügbar (0.50.0).
+- [ ] Frei hinzufügen/umhängen, skalierte Knochen und Anbauteile unterstützen; Hautgewichte gezielt bearbeiten; Einfügen/Löschen sind bereits über MCP verfügbar (0.50.0).
 - [x] Vorhandenes Gesamtskelett automatisch verbinden; beim Posieren Ein-/Zweiglied-Ketten mit erhaltenen Knochenlängen lösen (0.11.0).
 - [x] Manuell einstellbare Beugegrenzen am mittleren Knochen einer Zweiglied-IK-Kette berücksichtigen; Grenzen speichern, über MCP bearbeiten und betroffene Posen markieren (0.33.0).
 - [ ] Anatomische Gelenkketten aus ungeriggter Oberfläche erzeugen; allgemeine Dreh-/Twistgrenzen, fixierte Füße und gekoppelte Ganzkörper-IK ergänzen.
@@ -243,6 +243,6 @@ Seit **0.50.0** unterstützen `edit_studio` und der integrierte Assistent zwei w
 - [x] Neue Assistenten-Knochenfälle erfolgreich im Chromium-Lauf ausführen (0.51.0; Zustimmung und Undo für beide Aktionen bestätigt).
 
 
-**0.52.0:** Zwischengelenke lassen sich über einen Mausregler bei 10–90 % der vorhandenen Knochenstrecke einfügen (vom Elternknochen zum ausgewählten Kind; Standard 50 %). Assistent und beide MCP-Server unterstützen dafür optional `ratio`. Vorhandene Posen, Gewichtsverteilung, Projektpersistenz und Undo/Redo bleiben berücksichtigt. 251 Node-Tests und Build bestanden; erweiterte Chromium-Fälle warten auf den CI-Nachweis. Keine neue manuelle Hautqualitäts- oder reale Anbieterabnahme.
+**0.52.0:** Zwischengelenke lassen sich über einen Mausregler bei 10–90 % der vorhandenen Knochenstrecke einfügen (vom Elternknochen zum ausgewählten Kind; Standard 50 %). Assistent und beide MCP-Server unterstützen dafür optional `ratio`. Vorhandene Posen, Gewichtsverteilung, Projektpersistenz und Undo/Redo bleiben berücksichtigt. 251 Node-Tests, Build und alle 14 Chromium-Fälle bestanden ([CI-Nachweis](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/40134452209)). Keine neue manuelle Hautqualitäts- oder reale Anbieterabnahme.
 
 - [x] Position neuer Zwischengelenke per Mausregler und optionalem Agentenparameter wählen (0.52.0).

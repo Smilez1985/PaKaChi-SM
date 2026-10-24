@@ -26,7 +26,7 @@ Zeitstempel: 2026-10-24T23:29:23+02:00 (Europe/Berlin)
 - Prüfungen für außermittige Position, Grenzwerte, Posen, Hautgewichte, Wiederladen und Undo; vorhandene Browserfälle verwenden jetzt 30 %.
 - README, Design, Roadmap und Studio-Anleitung nachgezogen.
 
-**Prüfung:** 251 Node-Tests und Build bestanden, Python-Syntax gültig. Neuer Chromium-Nachweis steht aus; keine reale Anbieter-/Python-Host- oder manuelle Hautabnahme.
+**Prüfung:** 251 Node-Tests und Build bestanden, Python-Syntax gültig. Alle 14 Chromium-Fälle bestanden ([CI-Nachweis](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/40134452209)); keine reale Anbieter-/Python-Host- oder manuelle Hautabnahme.
 
 ## [0.51.0] - 2026-10-24
 
