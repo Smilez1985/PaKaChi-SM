@@ -24,7 +24,7 @@ Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich gen
 | Generierung | Lokaler TripoSR-Dienst, Bildauswahl, getrennte Vorschau, Vorprüfungs-Fallbacks, expliziter weiterer Auftrag | Echte GPU-/Qualitätsabnahme, Cloud-Generatoren, Korrekturprompts und Rigging |
 | Übernahme | Revisionsschutz, ein Modellwechsel-Rücksprung, vorbereitete 3D-Installation mit Rückabwicklung | Gerenderte Abnahme, Originalplayer-Neustart und GPU-Kontextverlust |
 
-Prüfnachweis für Software 0.47.0: **242 Tests, Build und elf Chromium-Fälle bestanden**. Separate Chromium-Nachweise stehen im Prüfbericht; echte Anbieter-/GPU-Inferenz und manuelle Mausabnahme bleiben offen. Projektformat bleibt Version 1. Freie Punkte/Posen aus 0.22.0/0.23.0 benötigen wegen der korrigierten Normalisierungsreihenfolge eine visuelle Kontrolle; keine automatische Migration. [Prüfbericht](PRUEFUNG-0.47.0.md).
+Prüfnachweis für Software 0.49.0: **248 Tests, Build und zwölf Chromium-Fälle bestanden**. Separate Chromium-Nachweise stehen im Prüfbericht; echte Anbieter-/GPU-Inferenz und manuelle Mausabnahme bleiben offen. Projektformat bleibt Version 1. Freie Punkte/Posen aus 0.22.0/0.23.0 benötigen wegen der korrigierten Normalisierungsreihenfolge eine visuelle Kontrolle; keine automatische Migration. [Prüfbericht](PRUEFUNG-0.49.0.md).
 
 ## Bestehender PaKaChi-Avatar
 
@@ -507,4 +507,4 @@ Ein Einfügeeintrag kann `afterDeletions` enthalten: die Anzahl vorausgegangener
 
 Die Laufzeithierarchie wird nun in der gespeicherten Reihenfolge aufgebaut. Die dazugehörigen Skinning-Palettenänderungen und Gewichtsübertragungen erfolgen ebenfalls in dieser Reihenfolge. Die abschließenden Grundstellungen liefern die Geometrie für die weiterhin angenäherte Gewichtsverteilung. Die ursprünglichen Modellbytes bleiben unverändert. Katalogexport und Move-Bindung erhalten beziehungsweise berücksichtigen die Marker. Undo/Redo setzt jeden Eingriff mit seinem Datenstand zurück.
 
-Die Einfügesperre nach Löschungen entfällt. Projektformat bleibt 1; gemischte Abläufe benötigen Software ab 0.49.0. Schutz vor Wurzellöschung, eigener Knochenskalierung und Anbauteilen bleibt bestehen. Gezielte Gewichtsbearbeitung, freies Umhängen und neue MCP-Topologieaktionen bleiben offen. Lokale Tests prüfen wiederholte Mischfolgen und identische Gewichte nach Rekonstruktion; reale Browser- und manuelle Hautabnahme stehen noch aus.
+Die Einfügesperre nach Löschungen entfällt. Projektformat bleibt 1; gemischte Abläufe benötigen Software ab 0.49.0. Schutz vor Wurzellöschung, eigener Knochenskalierung und Anbauteilen bleibt bestehen. Gezielte Gewichtsbearbeitung, freies Umhängen und neue MCP-Topologieaktionen bleiben offen. Lokale Tests prüfen wiederholte Mischfolgen und identische Gewichte nach Rekonstruktion; die zwölf Chromium-Fälle bestehen im [CI-Lauf](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/40096800795), die manuelle Hautabnahme bleibt offen.

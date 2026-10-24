@@ -131,7 +131,7 @@ npx playwright install chromium
 npm run test:e2e
 ```
 
-Für 0.47.0 sind 242 Tests, Build und alle elf Chromium-Browserfälle bestanden. Die unveränderten Original-Testprogramme wurden zuletzt in 0.9.0 geprüft. Die manuelle WebGL-/Mausabnahme bleibt offen; automatisierte Browserprüfungen laufen auf GitHub. Die reale Python-MCP-/MQTT-Integration mit Studio-Editor wurde zuletzt in 0.10.0 erfolgreich geprüft. Details und frühere Nachweise stehen im [Prüfstand](docs/PRUEFUNG.md).
+Für 0.49.0 sind 248 Tests, Build und alle zwölf Chromium-Browserfälle bestanden. Die unveränderten Original-Testprogramme wurden zuletzt in 0.9.0 geprüft. Die manuelle WebGL-/Mausabnahme bleibt offen; automatisierte Browserprüfungen laufen auf GitHub. Die reale Python-MCP-/MQTT-Integration mit Studio-Editor wurde zuletzt in 0.10.0 erfolgreich geprüft. Details und frühere Nachweise stehen im [Prüfstand](docs/PRUEFUNG.md).
 
 ## Lizenz
 
@@ -190,7 +190,7 @@ Seit **0.41.0** zeigt der Assistent vorgeschlagene Posenfolgen zusätzlich als *
 Seit **0.42.0** lassen sich KI-Sequenzvorschläge vor der Übernahme am Studio-Modell abspielen: **Vorher abspielen**, **Nachher abspielen** und **Vorschau beenden**. Die Vorschau verändert keine gespeicherten Moves; Stoppen und Übernehmen stellen zuerst die vorherige Bearbeitungspose wieder her. Die visuelle Browserabnahme bleibt offen.
 
 
-Seit **0.43.0** ist ein [GitHub-Actions-Prüflauf](.github/workflows/verify.yml) für Tests, Build und Chromium vorbereitet. Sieben Browserfälle umfassen Originalplayer, 3D/Studio, Generierung mit simuliertem Dienst und die KI-Sequenzvorschau. Berichte und Fehler-Traces werden als `browser-evidence` aufbewahrt. Lokal: `npx playwright install --with-deps chromium`, dann `npm run test:e2e`. **Die Browserabnahme ist weiterhin offen:** In der bisherigen Umgebung blockiert `socket() failed: Operation not permitted` den Chromium-Start.
+Seit **0.43.0** ist ein [GitHub-Actions-Prüflauf](.github/workflows/verify.yml) für Tests, Build und Chromium vorbereitet. Sieben Browserfälle umfassen Originalplayer, 3D/Studio, Generierung mit simuliertem Dienst und die KI-Sequenzvorschau. Berichte und Fehler-Traces werden als `browser-evidence` aufbewahrt. Lokal: `npx playwright install --with-deps chromium`, dann `npm run test:e2e`. **Historischer Stand 0.43.0; automatisierte Chromium-Prüfungen bestehen inzwischen auf GitHub.** In der bisherigen Umgebung blockiert `socket() failed: Operation not permitted` den Chromium-Start.
 
 
 **Browserbefund 0.44.0:** Der erste echte GitHub-Chromium-Lauf besteht Original-Transformation und KI-Sequenzvorschau, meldet aber fünf weitere Fehler. Korrigiert sind die veraltete Beschriftung beim Originalwechsel und die verlangsamte Animation bei niedriger Bildrate. Der [Folgelauf](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/39826526209) besteht **alle sieben Chromium-E2E-Fälle**, zusätzlich zu 235 Tests und Build. Die manuelle Maus-/UI-Abnahme bleibt offen. [Prüfbericht](docs/PRUEFUNG-0.44.0.md).
@@ -206,4 +206,4 @@ Seit **0.47.0** lassen sich im Modus „Gelenke bearbeiten“ echte Zwischengele
 
 Seit **0.48.0** entfernt „Gelenke bearbeiten → Knochen wirklich löschen“ den ausgewählten Knochen aus Hierarchie und Skinning-Palette. Kindgelenke und Hautgewichte gehen an seinen Elternknochen; gespeicherte Kindposen werden umgerechnet und alle Posen zur Prüfung markiert. Undo/Redo und Projektdateien erhalten die vollständige Änderung. Wurzelknochen, Knochen mit eigener Skalierung oder angehängten Nicht-Knochen-Objekten werden abgewiesen. Diese Version sperrte weiteres Einfügen nach Löschungen; die Sperre entfällt mit 0.49.0. Projekte mit Knochenlöschungen benötigen Version 0.48.0 oder neuer.
 
-Seit **0.49.0** können Knochen abwechselnd gelöscht und wieder eingefügt werden, ohne vorherige Löschungen rückgängig zu machen. Die Projektdatei und der Katalogexport erhalten die Reihenfolge; Undo/Redo behandelt weiterhin jeden Eingriff einzeln. Gemischte Abläufe benötigen mindestens 0.49.0. 248 Tests und Build bestanden; der neue Browsernachweis steht aus.
+Seit **0.49.0** können Knochen abwechselnd gelöscht und wieder eingefügt werden, ohne vorherige Löschungen rückgängig zu machen. Die Projektdatei und der Katalogexport erhalten die Reihenfolge; Undo/Redo behandelt weiterhin jeden Eingriff einzeln. Gemischte Abläufe benötigen mindestens 0.49.0. 248 Tests, Build und alle zwölf Chromium-Fälle bestanden ([CI-Nachweis](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/40096800795)).

@@ -1,6 +1,6 @@
 # Blaupause – PaKaChi-SM
 
-**Softwarestand: 0.49.0 · Dokumentation abgeglichen am 23.10.2026.**
+**Softwarestand: 0.49.0 · Dokumentation abgeglichen am 24.10.2026.**
 
 Die Blaupause besteht aus drei Dokumenten. Das Designdokument beschreibt das Produktziel, die Roadmap die Umsetzung und das Changelog die bereits erfolgten Änderungen.
 
@@ -121,3 +121,5 @@ Die folgenden Einträge beschreiben den jeweiligen Meilenstein; der aktuelle Sta
 **0.48.0:** Echtes Knochenlöschen mit Übernahme von Kindgelenken und Hautgewichten, Posenumrechnung und Undo/Redo. [Prüfbericht](PRUEFUNG-0.48.0.md).
 
 **0.49.0:** Gemischte Einfüge-/Löschfolgen mit gespeicherter Reihenfolge und Undo/Redo. [Prüfbericht](PRUEFUNG-0.49.0.md).
+
+248 Tests, Build und alle zwölf Chromium-Fälle bestanden ([CI-Nachweis](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/40096800795)). Manuelle Haut-/Mausabnahme bleibt offen.

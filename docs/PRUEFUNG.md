@@ -1,17 +1,17 @@
 # Prüfstand und Abnahme
 
-**Softwarestand: 0.49.0 · Dokumentationsabgleich: 23.10.2026.**
+**Softwarestand: 0.49.0 · Dokumentationsabgleich: 24.10.2026.**
 
 ## Nachgewiesen
 
 | Prüfung | Letzter Nachweis | Umfang und Grenze |
 | --- | --- | --- |
-| `npm test` | 0.47.0: 242 Tests bestanden | Player, Router, Studio-Daten, reale Three.js-Geometrie, DOM/Ereignisse mit happy-dom, Node-MCP und Erhaltungsprüfung. Kein gerenderter Browser. |
-| `npm run test:e2e` | 0.47.0: 11 Chromium-Fälle bestanden | GitHub-Runner mit Software-WebGL; simulierte Anbieter, keine manuelle Maus-/KI-Qualitätsabnahme. |
+| `npm test` | 0.49.0: 248 Tests bestanden | Player, Router, Studio-Daten, reale Three.js-Geometrie, DOM/Ereignisse mit happy-dom, Node-MCP und Erhaltungsprüfung. Kein gerenderter Browser. |
+| `npm run test:e2e` | 0.49.0: 12 Chromium-Fälle bestanden | GitHub-Runner mit Software-WebGL; simulierte Anbieter, keine manuelle Maus-/KI-Qualitätsabnahme. |
 | `npm run test:legacy` | 0.9.0: beide Programme bestanden | Originalplayer-Steuerung, MQTT-Verhalten und Lebenszyklus. |
-| `npm run build` | 0.47.0: bestanden | TypeScript und Produktionsbuild; Vite meldet weiterhin das große gemeinsame JS-Bundle (rund 1,33 MB / 369 kB gzip). |
+| `npm run build` | 0.49.0: bestanden | TypeScript und Produktionsbuild; Vite meldet weiterhin das große gemeinsame JS-Bundle (rund 1,33 MB / 369 kB gzip). |
 | `npm run test:python` mit `PAKACHI_PYTHON` | 0.10.0: Integration bestanden | Echter Python-MCP-Prozess, eingebetteter aMQTT-Broker, produktiver MQTT-Client, Router und Studio-Editor. Acht Tools, Studio-Änderungen einschließlich gültiger/ungültiger Skalierung, fehlende Freigabe und Revisionskonflikte geprüft. |
-| Originaldateien | 0.47.0: bytegenau erhalten | 83 wiederhergestellte Dateien einschließlich exakt 72 Transformationsbildern. |
+| Originaldateien | 0.49.0: bytegenau erhalten | 83 wiederhergestellte Dateien einschließlich exakt 72 Transformationsbildern. |
 
 Vier neue Tests in 0.11.0 prüfen Hand-/Fußziele, feste Knochenabstände, den ganzen erkannten Körper, Hals/Kopf und Rumpf, tatsächliche Hautverformung, gespeicherte Posen sowie direktes Ziehen/Drehen mit Undo. Nutzertest von 0.10.0 meldete auseinanderziehbare Knochen und Probleme mit der Ausrichtung; die visuelle Nachprüfung der Korrektur 0.11.0 steht aus.
 
@@ -138,4 +138,4 @@ Der neue Workflow [verify.yml](../.github/workflows/verify.yml) installiert Chro
 
 **0.48.0:** 246 Tests und Build bestanden. Vier zusätzliche Tests prüfen echte Knochenentfernung, Gewichtsübernahme, Posenumrechnung, Undo/Redo, Rekonstruktion und Fehler-Rollback. Ein weiterer Browserfall für das ursprüngliche Mika-Knie ist vorbereitet; neuer CI-Nachweis steht aus. [Prüfbericht](PRUEFUNG-0.48.0.md).
 
-**0.49.0:** 248 Tests und Build bestanden. Zwei neue Tests prüfen wiederholte Mischfolgen, Rekonstruktion identischer Gewichte, Markerprüfung und einzelne Undo-/Redo-Schritte. Der bestehende Browserfall für Knochenlöschen wurde um anschließendes Einfügen und erneuten Dateiaustausch erweitert; neuer Browsernachweis steht aus. [Prüfbericht](PRUEFUNG-0.49.0.md).
+**0.49.0:** 248 Tests und Build bestanden. Zwei neue Tests prüfen wiederholte Mischfolgen, Rekonstruktion identischer Gewichte, Markerprüfung und einzelne Undo-/Redo-Schritte. 248 Tests, Build und alle zwölf Chromium-Fälle bestanden ([CI-Nachweis](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/40096800795)). Der erweiterte Browserfall bestätigt Löschen, anschließendes Einfügen und erneuten Dateiaustausch. [Prüfbericht](PRUEFUNG-0.49.0.md).

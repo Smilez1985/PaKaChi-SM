@@ -26,7 +26,7 @@ Zeitstempel: 2026-10-23T21:49:50+02:00 (Europe/Berlin)
 - Einfügen nach Knochenlöschungen ist wieder möglich; Hierarchie und Skinning-Änderungen werden in ihrer tatsächlichen Reihenfolge aufgebaut.
 - README und Blaupause nachgezogen. Gemischte Abläufe benötigen Software ab 0.49.0.
 
-**Prüfung:** 248 Tests und Build bestanden; neuer Browsernachweis steht aus. Manuelle Hautqualität bleibt offen.
+**Prüfung:** 248 Tests, Build und alle zwölf Chromium-Fälle bestanden ([CI-Nachweis](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/40096800795)). Manuelle Hautqualität bleibt offen.
 
 ## [0.48.0] - 2026-10-23
 
