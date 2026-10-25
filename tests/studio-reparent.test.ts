@@ -84,3 +84,15 @@ test('rigid nested attachments retain world transforms in rest, poses, reload an
  rig.reset();const old=f.ornament.getWorldPosition(new T.Vector3());f.right.rotation.z=.7;rig.root.updateMatrixWorld(true);assert.ok(f.ornament.getWorldPosition(new T.Vector3()).distanceTo(old)>.1);assert.equal(f.accessory.parent,f.foot);
  rig.restoreSource();close(matrices(),rest);assert.equal(f.foot.parent,f.left);rig.reset();assert.equal(f.foot.parent,f.right);assert.throws(()=>rig.deleteBone(f.point('Foot')),/Anbauteile/);
 });
+
+test('imported rigid glTF attachment is a plain mesh and survives reparenting and reconstruction',async()=>{
+ const {readFileSync}=await import('node:fs');const {parseModel,disposeModel}=await import('../src/viewer.ts');
+ const model=JSON.parse(readFileSync(new URL('../public/model-zoo/mika/model.gltf',import.meta.url),'utf8'));
+ const mesh=structuredClone(model.meshes[0]);for(const p of mesh.primitives){delete p.attributes.JOINTS_0;delete p.attributes.WEIGHTS_0;}const meshIndex=model.meshes.length;model.meshes.push(mesh);
+ const nodeIndex=model.nodes.length;model.nodes.push({name:'RigidAccessory',mesh:meshIndex,translation:[.08,.05,0],scale:[.1,.1,.1]});const foot=model.nodes.find((n:{name:string})=>n.name==='LeftFoot');foot.children=[...(foot.children??[]),nodeIndex];
+ const bytes=new TextEncoder().encode(JSON.stringify(model)).buffer,{scene}=await parseModel(bytes),rig=new StudioRig(scene),accessory=scene.getObjectByName('RigidAccessory')!;
+ let rigidMeshes=0;accessory.traverse(node=>{assert.ok(!(node instanceof T.SkinnedMesh));if(node instanceof T.Mesh)rigidMeshes++;});assert.ok(rigidMeshes>0);const before=accessory.matrixWorld.clone();
+ rig.reparentBone(rig.data.points.find(p=>p.name==='LeftFoot')!,rig.data.points.find(p=>p.name==='LeftHip')!);accessory.matrixWorld.elements.forEach((v,i)=>assert.ok(Math.abs(v-before.elements[i])<1e-6));
+ const loaded=await parseModel(bytes),again=new StudioRig(loaded.scene,parseProject(project(rig)).studio);loaded.scene.getObjectByName('RigidAccessory')!.matrixWorld.elements.forEach((v,i)=>assert.ok(Math.abs(v-before.elements[i])<1e-6));
+ rig.dispose();again.dispose();disposeModel(scene);disposeModel(loaded.scene);
+});
