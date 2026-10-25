@@ -39,3 +39,13 @@ test('reparenting a source bone with a rigid attachment survives undo, redo and 
  await page.locator('#project-file').setInputFiles(path!);await expect(page.locator('#message')).toContainText('Mika bereit');await page.locator('#studio-tab').click();moved=(await points()).items.find((p:any)=>p.id===foot.id);expect(moved.parentId).toBe(hip.id);moved.position.forEach((v:number,i:number)=>expect(v).toBeCloseTo(foot.position[i],6));
  await page.screenshot({path:'test-results/reparented-bone.png',fullPage:true});expect(errors).toEqual([]);
 });
+
+test('skin weight transfer can be undone and restored through a project file',async({page})=>{
+ const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');await page.locator('#avatar-select').selectOption('mika');await expect(page.locator('#message')).toContainText('Mika bereit');await page.locator('#studio-tab').click();
+ const points=await page.evaluate(()=>window.PaKaChiSM.call('get_studio',{section:'points'}) as any),source=points.items.find((p:any)=>p.name==='LeftKnee'),target=points.items.find((p:any)=>p.name==='LeftFoot');
+ await page.locator('#pose-name').fill('Before weights');await page.locator('#pose-add').click();await page.locator('#mode-rig').click();await page.locator('#studio-points').selectOption(source.id);await page.locator('#weight-target').selectOption(target.id);await page.locator('#weight-amount').fill('30');await page.locator('#weight-transfer').click();await expect(page.locator('#message')).toContainText('Oberflächen-Einfluss übertragen');
+ const download=async()=>{const pending=page.waitForEvent('download');await page.locator('#studio-save').click();const path=await(await pending).path();return {path:path!,data:JSON.parse(await readFile(path!,'utf8'))};};
+ const saved=await download();expect(saved.data.studio.weightTransfers).toEqual([{from:source.bone,to:target.bone,amount:.3,after:0}]);expect(saved.data.studio.poses[0].review).toContain('skin-weights');
+ await page.locator('#studio-undo').click();expect((await download()).data.studio.weightTransfers).toBeUndefined();await page.locator('#studio-redo').click();expect((await download()).data.studio.weightTransfers).toEqual(saved.data.studio.weightTransfers);
+ await page.locator('#project-file').setInputFiles(saved.path);await expect(page.locator('#message')).toContainText('Mika bereit');await page.locator('#studio-tab').click();expect((await download()).data.studio.weightTransfers).toEqual(saved.data.studio.weightTransfers);expect(errors).toEqual([]);
+});

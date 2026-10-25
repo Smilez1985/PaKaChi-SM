@@ -1,5 +1,6 @@
 import * as T from 'three';
 export interface BoneInsertion {child:number;ratio:number;afterDeletions?:number}
+export interface WeightTransfer {from:number;to:number;amount:number;after:number}
 export interface BoneReparent {bone:number;parent:number;after:number}
 /** Only same-tree, unscaled bone chains can be represented by the pose format. */
 export function validateReparent(bone:T.Bone|undefined,parent:T.Bone|undefined){
@@ -30,10 +31,29 @@ export class StudioTopology {
   for(const s of this.skins){s.mesh.skeleton=s.skeleton;s.mesh.geometry.setAttribute('skinIndex',s.indices.clone());s.mesh.geometry.setAttribute('skinWeight',s.weights.clone());}
   this.generated.forEach(s=>s.dispose());this.generated=[];
  }
- build(edits:BoneInsertion[],rest:{position:[number,number,number];rotation:[number,number,number,number]}[],deletions:number[]=[],reparents:BoneReparent[]=[]):T.Bone[]{
+ build(edits:BoneInsertion[],rest:{position:[number,number,number];rotation:[number,number,number,number]}[],deletions:number[]=[],reparents:BoneReparent[]=[],transfers:WeightTransfer[]=[]):T.Bone[]{
   this.restore();const bones=[...this.source],weights:(()=>void)[]=[];
-  let changes=0,reparented=0;
-  const applyReparents=()=>{while(reparented<reparents.length&&reparents[reparented].after===changes){const edit=reparents[reparented++],bone=bones[edit.bone],parent=bones[edit.parent];validateReparent(bone,parent);parent.add(bone);}};
+  let changes=0,reparented=0,transferred=0;
+  const queueTransfers=()=>{while(transferred<transfers.length&&transfers[transferred].after===changes){const edit=transfers[transferred++],from=bones[edit.from],to=bones[edit.to];
+   if(!from||!to||from===to||!from.parent||!to.parent||!Number.isFinite(edit.amount)||edit.amount<=0||edit.amount>1)throw Error('Ungültige Hautgewichtsübertragung.');
+   weights.push(()=>{let affected=0;
+    for(const s of this.skins){const skeleton=s.mesh.skeleton,source=skeleton.bones.indexOf(from),target=skeleton.bones.indexOf(to);if(source<0)continue;
+     const indices=s.mesh.geometry.getAttribute('skinIndex'),values=s.mesh.geometry.getAttribute('skinWeight');
+     for(let v=0;v<indices.count;v++){
+      const merged=new Map<number,number>();for(let k=0;k<4;k++){const i=indices.getComponent(v,k),w=values.getComponent(v,k);if(w>0)merged.set(i,(merged.get(i)??0)+w);}
+      const original=merged.get(source)??0;if(original<=0)continue;
+      if(target<0)throw Error('Zielknochen fehlt in einer betroffenen Skinning-Palette.');
+      affected++;merged.set(source,original*(1-edit.amount));merged.set(target,(merged.get(target)??0)+original*edit.amount);
+      const strongest=[...merged].filter(([,w])=>w>0).sort((a,b)=>b[1]-a[1]||a[0]-b[0]).slice(0,4),sum=strongest.reduce((total,[,w])=>total+w,0);
+      for(let k=0;k<4;k++){indices.setComponent(v,k,strongest[k]?.[0]??0);values.setComponent(v,k,(strongest[k]?.[1]??0)/sum);}
+     }
+     indices.needsUpdate=true;values.needsUpdate=true;
+    }
+    if(!affected)throw Error('Der Quellknochen hat keinen übertragbaren Oberflächen-Einfluss.');
+   });
+  }};
+
+  const applyReparents=()=>{queueTransfers();while(reparented<reparents.length&&reparents[reparented].after===changes){const edit=reparents[reparented++],bone=bones[edit.bone],parent=bones[edit.parent];validateReparent(bone,parent);parent.add(bone);}};
   const remove=(index:number)=>{
    applyReparents();
    const bone=bones[index],parent=bone?.parent;
@@ -85,7 +105,7 @@ export class StudioTopology {
    });
   }
   while(removed<deletions.length)remove(deletions[removed++]);
-  applyReparents();if(reparented!==reparents.length)throw Error('Ungültige Reihenfolge der Knochenzuordnungen.');
+  applyReparents();if(transferred!==transfers.length)throw Error('Ungültige Reihenfolge der Hautgewichte.');if(reparented!==reparents.length)throw Error('Ungültige Reihenfolge der Knochenzuordnungen.');
   if(rest.length!==bones.length)throw Error('Knochenhierarchie passt nicht zur Grundstellung.');
   bones.forEach((bone,i)=>{bone.position.fromArray(rest[i].position);bone.quaternion.fromArray(rest[i].rotation);});
   for(const apply of weights)apply();

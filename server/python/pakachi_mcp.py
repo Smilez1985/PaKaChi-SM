@@ -30,7 +30,7 @@ class StudioCommand(BaseModel):
     model_config = ConfigDict(extra='forbid', strict=True)
     session: str = Field(max_length=100)
     expectedRevision: int = Field(ge=0)
-    action: Literal['set_mode', 'add_point', 'update_point', 'delete_point','insert_bone','delete_bone','reparent_bone', 'connect_points', 'disconnect_points', 'save_pose', 'apply_pose', 'replace_pose', 'create_move', 'update_move', 'update_moves', 'undo', 'redo']
+    action: Literal['set_mode', 'add_point', 'update_point', 'delete_point','insert_bone','delete_bone','reparent_bone','transfer_weights', 'connect_points', 'disconnect_points', 'save_pose', 'apply_pose', 'replace_pose', 'create_move', 'update_move', 'update_moves', 'undo', 'redo']
     mode: Literal['pose', 'rig'] | None = None
     id: str | None = Field(default=None, max_length=100)
     target: str | None = Field(default=None, max_length=100)
@@ -38,6 +38,7 @@ class StudioCommand(BaseModel):
     position: list[float] | None = Field(default=None, min_length=3, max_length=3)
     rotation: list[float] | None = Field(default=None, min_length=4, max_length=4)
     bendLimit: BendLimit | None = None
+    amount: float | None = Field(default=None, gt=0, le=1)
     ratio: float | None = Field(default=None, ge=.1, le=.9)
     scale: float | None = Field(default=None, ge=.1, le=5)
     size: float | None = Field(default=None, ge=.003, le=.15)
@@ -214,6 +215,9 @@ def build_server(uri=None, embedded=True, tcp_port=1883, ws_port=8083):
         set_mode: mode=pose/rig. add_point: position, optional name/mesh/size/radius.
         bendLimit: nur Knochen im Rig-Modus, {min,max} Grad 0–175, min<=max; null entfernt. Nur Zweiglied-IK-Ziehen.
         update_point: id und name/position/rotation/scale/size/radius (scale nur $figure, 0.1–5); $figure ist die ganze Figur.
+        transfer_weights: id (Quelle), target (Ziel), amount (Anteil über 0 bis 1), nur Rig-Modus.
+        Quellgewichte an allen betroffenen Vertices übertragen, vier stärkste Einflüsse normalisiert behalten.
+        Grundpose bleibt erhalten; Posen/Bewegungen prüfen. Undo möglich.
         reparent_bone: id,target (neuer Elternknochen), nur Rig-Modus und gleicher Skelettbaum.
         Erhält Einzelposen; Bewegungsübergänge prüfen. Keine Kreise, Wurzeln oder skalierten Ketten. Starre Anbauteile bleiben befestigt; keine Anbauteile mit eigenem Skelett.
         insert_bone: id des Kindknochens, optional ratio 0.1–0.9 (Standard 0.5), vom Elternknochen zum Kind gemessen (Rig-Modus).

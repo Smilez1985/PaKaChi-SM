@@ -76,6 +76,14 @@ export class StudioRig {
       this.reset();added.rest=this.position(added).toArray();this.apply(values);return added;
     }catch(error){this.data=before;this.reset();this.apply(originalValues);throw error;}
   }
+  transferWeights(point:ControlPoint,target:ControlPoint,amount:number){
+    if(point.kind!=='bone'||target.kind!=='bone'||point===target||!this.data.points.includes(point)||!this.data.points.includes(target)||!Number.isFinite(amount)||amount<=0||amount>1||(this.data.weightTransfers?.length??0)>=128)throw Error('Zwei verschiedene Knochen und einen Anteil über 0 bis 100 % wählen (höchstens 128 Übertragungen).');
+    const before=structuredClone(this.data),values=this.capture();
+    try{
+      this.data.weightTransfers=[...(this.data.weightTransfers??[]),{from:point.bone!,to:target.bone!,amount,after:(this.data.boneInsertions?.length??0)+(this.data.boneDeletions?.length??0)}];
+      this.reset();this.apply(values);
+    }catch(error){this.data=before;this.reset();this.apply(values);throw error;}
+  }
   reparentBone(point:ControlPoint,target:ControlPoint){
     if(point.kind!=='bone'||target.kind!=='bone'||!this.data.points.includes(point)||!this.data.points.includes(target)||(this.data.boneReparents?.length??0)>=256)throw Error('Zwei vorhandene Knochen auswählen (höchstens 256 Umhängungen).');
     const bone=this.bones[point.bone!],parent=this.bones[target.bone!];validateReparent(bone,parent);
@@ -119,7 +127,7 @@ export class StudioRig {
   reset() {
     this.figureOffset.set(0,0,0);this.figureRotation.identity();this.figureScale=1;this.figureMatrix.identity();this.root.matrixAutoUpdate=this.rootAutoUpdate;this.root.matrix.copy(this.rootMatrix);
     for(const item of this.originalNodes){write(item.node,item.value);item.node.scale.copy(item.scale);}
-    const bones=this.topology.build(this.data.boneInsertions??[],this.data.boneRest,this.data.boneDeletions??[],this.data.boneReparents??[]);this.bones.splice(0,this.bones.length,...bones);
+    const bones=this.topology.build(this.data.boneInsertions??[],this.data.boneRest,this.data.boneDeletions??[],this.data.boneReparents??[],this.data.weightTransfers??[]);this.bones.splice(0,this.bones.length,...bones);
     this.bones.forEach((b,i)=>write(b,this.data.boneRest[i]));
     this.root.updateWorldMatrix(true,true);
     this.rebind();

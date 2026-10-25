@@ -1,7 +1,8 @@
 import type {ControlPoint,Pose,StudioData,StudioMove,Transform} from './studio-data.ts';
-export const REVIEW_REASONS=['bone-rest','surface-rest','surface-radius','point-removed','bend-limit'] as const;
+export const REVIEW_REASONS=['skin-weights','bone-rest','surface-rest','surface-radius','point-removed','bend-limit'] as const;
 export type ReviewReason=typeof REVIEW_REASONS[number];
 export const reviewLabels:Record<ReviewReason,string>={
+  'skin-weights':'Oberflächen-Einfluss der Knochen geändert. Bewegung prüfen.',
   'bend-limit':'IK-Beugegrenze geändert. Gespeicherte Bewegung prüfen.',
   'bone-rest':'Skelett-Grundstellung oder Drehpunkt geändert.',
   'surface-rest':'Grundposition eines Oberflächenpunkts geändert.',
@@ -20,6 +21,7 @@ export function flagAffectedPoses(before:StudioData,after:StudioData):void {
     const reasons=new Set<ReviewReason>(pose.review??[]);
     // Skin weights and descendant joints can affect any stored pose; conservatively flag all.
     if(bonesChanged)reasons.add('bone-rest');
+    if(JSON.stringify(before.weightTransfers??[])!==JSON.stringify(after.weightTransfers??[]))reasons.add('skin-weights');
     for(const point of before.points){const next=current.get(point.id);
       if(!next){if(active(previous,before,point))reasons.add('point-removed');continue;}
       if(JSON.stringify(point.bendLimit)!==JSON.stringify(next.bendLimit))reasons.add('bend-limit');

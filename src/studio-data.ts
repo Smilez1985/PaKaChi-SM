@@ -13,6 +13,7 @@ export interface ControlPoint {
 export interface Pose { id: string; name: string; seconds: number; values: Record<string, Transform>; review?: ReviewReason[] }
 export interface StudioMove { id: string; name: string; loop: boolean; poses: string[] }
 export interface StudioData {
+  weightTransfers?: {from:number;to:number;amount:number;after:number}[];
   boneReparents?: {bone:number;parent:number;after:number}[];
   boneDeletions?: number[];
   boneInsertions?: {child:number;ratio:number;afterDeletions?:number}[];
@@ -50,6 +51,11 @@ export function parseProject(input: unknown): StudioProject {
   if(d.boneDeletions!==undefined)require(Array.isArray(d.boneDeletions)&&d.boneDeletions.length<=256&&new Set(d.boneDeletions).size===d.boneDeletions.length&&d.boneDeletions.every(i=>Number.isInteger(i)&&i>=0&&i<(d.boneRest as unknown[]).length),'Ungültige Knochenlöschungen.');
   let stage=0;
   for(const e of (d.boneInsertions??[]) as {afterDeletions?:number}[]){const next=e.afterDeletions??0;require(Number.isInteger(next)&&next>=stage&&next<=((d.boneDeletions as number[]|undefined)?.length??0),'Ungültige Reihenfolge der Knochenänderungen.');stage=next;}
+  if(d.weightTransfers!==undefined){
+    require(Array.isArray(d.weightTransfers)&&d.weightTransfers.length<=128,'Zu viele Hautgewichtsübertragungen.');let previous=0;
+    const total=((d.boneInsertions as unknown[]|undefined)?.length??0)+((d.boneDeletions as unknown[]|undefined)?.length??0);
+    for(const e of d.weightTransfers){require(obj(e)&&Object.keys(e).every(k=>['from','to','amount','after'].includes(k))&&Number.isInteger(e.from)&&Number.isInteger(e.to)&&(e.from as number)>=0&&(e.to as number)>=0&&(e.from as number)<d.boneRest.length&&(e.to as number)<d.boneRest.length&&e.from!==e.to&&typeof e.amount==='number'&&Number.isFinite(e.amount)&&e.amount>0&&e.amount<=1&&Number.isInteger(e.after)&&(e.after as number)>=previous&&(e.after as number)<=total,'Ungültige Hautgewichtsübertragung.');previous=e.after as number;}
+  }
   if(d.boneReparents!==undefined){
     require(Array.isArray(d.boneReparents)&&d.boneReparents.length<=256,'Ungültige Knochenzuordnungen.');
     let previous=0;const total=((d.boneInsertions as unknown[]|undefined)?.length??0)+((d.boneDeletions as unknown[]|undefined)?.length??0);

@@ -298,3 +298,17 @@ Projektformat 1 enthält optional `boneReparents: [{bone, parent, after}]`; `aft
 
 
 Umhängen mit starren Anbauteilen benötigt Software 0.54.0. Die Projektstruktur bleibt unverändert; ältere Versionen weisen diese Umhängung beim Laden ab. Die Bewegung zwischen gespeicherten Posen muss weiterhin geprüft werden.
+
+
+## Oberflächen-Einfluss übertragen (0.55.0)
+
+1. „Gelenke bearbeiten“ öffnen und den Quellknochen auswählen.
+2. Unter „Oberflächen-Einfluss übertragen auf“ den Zielknochen auswählen.
+3. Den Anteil mit dem Mausregler einstellen und „Einfluss übertragen“ anklicken. 30 % bedeutet: 30 % des vorhandenen Quellgewichts pro betroffenem Oberflächenpunkt übertragen.
+4. Posen und Moves prüfen: Die Grundpose bleibt erhalten, die Haut folgt bei Bewegung nun stärker dem Zielknochen. Undo/Redo stellt die Gewichte wieder her.
+
+Alle vom Quellknochen beeinflussten Vertices werden bearbeitet. Es gibt noch keinen räumlichen Malpinsel. Bei mehr als vier resultierenden Einflüssen bleiben die vier stärksten und werden normalisiert; dadurch kann der effektive Anteil abweichen. Starre Anbauteile sind keine gewichtete Haut und bleiben unverändert. Bis zu 128 Übertragungen werden in ihrer Reihenfolge gespeichert, auch zwischen Knochen-Einfüge-/Löschoperationen.
+
+Assistent/MCP: `transfer_weights` mit `id` der Quelle, `target` des Ziels und `amount` größer 0 bis einschließlich 1. Rig-Modus, Bearbeitungsfreigabe und aktuelle Sitzung/Revision sind erforderlich; der integrierte Assistent braucht die ausdrückliche Übernahme. Fehlende Zielknochen in betroffenen Skinning-Paletten und Quellen ohne Gewicht werden abgewiesen.
+
+Projektformat 1 erhält optional `weightTransfers: [{from,to,amount,after}]`. Der Prüfgrund `skin-weights` markiert betroffene Posen. Solche Projekte benötigen mindestens Software 0.55.0. Originalclips verwenden weiterhin ursprüngliche Gewichte. Move-Dateien bleiben an die bearbeitete Rig-Struktur gebunden.

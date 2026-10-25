@@ -12,6 +12,23 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.55.0] - 2026-10-25
+
+Zeitstempel: 2026-10-25T18:43:03+01:00 (Europe/Berlin)
+
+### Added
+
+- Anteiliges Übertragen von Hautgewichten zwischen vorhandenen Knochen mit Mausregler, Undo/Redo und Projekt-/Katalogpersistenz.
+- Aktion `transfer_weights` für Assistent und beide MCP-Server.
+- Prüfgrund `skin-weights` für Posen und Moves; Reihenfolge bei gemischten Topologieänderungen erhalten.
+
+### Changed
+
+- Move-Bindung berücksichtigt Gewichtsbearbeitungen; ursprüngliche Quellgewichte bleiben wiederherstellbar.
+- README, Design, Roadmap, Bedienanleitung und Prüfbericht nachgezogen.
+
+**Prüfung:** Lokal 263 Tests im Gesamtlauf und ergänzter Mika-Test bestanden; Build und Python-Syntax geprüft. 17 Chromium-Fälle vorbereitet, neuer CI-Nachweis steht aus. Kein räumlicher Malpinsel oder manuelle Hautqualitätsabnahme.
+
 ## [0.54.0] - 2026-10-25
 
 Zeitstempel: 2026-10-25T11:13:22+01:00 (Europe/Berlin)
@@ -1121,3 +1138,5 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 [0.53.0]: PRUEFUNG-0.53.0.md
 
 [0.54.0]: PRUEFUNG-0.54.0.md
+
+[0.55.0]: PRUEFUNG-0.55.0.md
