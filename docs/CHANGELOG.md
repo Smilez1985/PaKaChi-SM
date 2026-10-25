@@ -27,7 +27,7 @@ Zeitstempel: 2026-10-25T18:43:03+01:00 (Europe/Berlin)
 - Move-Bindung berücksichtigt Gewichtsbearbeitungen; ursprüngliche Quellgewichte bleiben wiederherstellbar.
 - README, Design, Roadmap, Bedienanleitung und Prüfbericht nachgezogen.
 
-**Prüfung:** Lokal 263 Tests im Gesamtlauf und ergänzter Mika-Test bestanden; Build und Python-Syntax geprüft. 17 Chromium-Fälle vorbereitet, neuer CI-Nachweis steht aus. Kein räumlicher Malpinsel oder manuelle Hautqualitätsabnahme.
+**Prüfung:** 264 Node-Tests, Build und alle 17 Chromium-Fälle bestanden ([CI-Nachweis](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/40217823978)); Python-Syntax geprüft. Kein räumlicher Malpinsel oder manuelle Hautqualitätsabnahme.
 
 ## [0.54.0] - 2026-10-25
 

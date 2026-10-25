@@ -131,7 +131,7 @@ npx playwright install chromium
 npm run test:e2e
 ```
 
-Für 0.54.0 sind 258 Tests, Build und alle 16 Chromium-Browserfälle bestanden. Die unveränderten Original-Testprogramme wurden zuletzt in 0.9.0 geprüft. Die manuelle WebGL-/Mausabnahme bleibt offen; automatisierte Browserprüfungen laufen auf GitHub. Die reale Python-MCP-/MQTT-Integration mit Studio-Editor wurde zuletzt in 0.10.0 erfolgreich geprüft. Details und frühere Nachweise stehen im [Prüfstand](docs/PRUEFUNG.md).
+Für 0.55.0 sind 264 Tests, Build und alle 17 Chromium-Browserfälle bestanden. Die unveränderten Original-Testprogramme wurden zuletzt in 0.9.0 geprüft. Die manuelle WebGL-/Mausabnahme bleibt offen; automatisierte Browserprüfungen laufen auf GitHub. Die reale Python-MCP-/MQTT-Integration mit Studio-Editor wurde zuletzt in 0.10.0 erfolgreich geprüft. Details und frühere Nachweise stehen im [Prüfstand](docs/PRUEFUNG.md).
 
 ## Lizenz
 
@@ -230,6 +230,6 @@ Nur innerhalb desselben Skelettbaums; Wurzeln, Kreise, skalierte Knochenketten u
 **0.54.0:** Knochen mit starren Anbauteilen können umgehängt werden. Auch verschachtelte starre Objektgruppen mit eigener Drehung und Skalierung bleiben am Knochen befestigt; Grundstellung und gespeicherte Einzelposen behalten ihre Welttransformationen. Anbauteile mit eigenen Knochen oder SkinnedMesh bleiben ausgeschlossen. Löschen eines Knochens mit Anbauteilen ist weiterhin gesperrt. 258 Node-Tests, Build und alle 16 Chromium-Fälle bestanden ([CI-Nachweis](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/40184399914)).
 
 
-**0.55.0:** Oberflächen-Einfluss eines Knochens lässt sich anteilig auf einen anderen übertragen. Mengenregler, Undo/Redo, Projekt-/Katalogpersistenz, gemischte Knochenänderungen und `transfer_weights` für Assistent/MCP sind vorhanden. Die Grundgeometrie bleibt erhalten; Posen werden mit `skin-weights` zur Prüfung markiert. Lokal bestanden 263 Tests im Gesamtlauf plus der anschließend ergänzte Mika-Test; Build bestanden. 17 Chromium-Fälle vorbereitet, neuer CI-Nachweis steht aus.
+**0.55.0:** Oberflächen-Einfluss eines Knochens lässt sich anteilig auf einen anderen übertragen. Mengenregler, Undo/Redo, Projekt-/Katalogpersistenz, gemischte Knochenänderungen und `transfer_weights` für Assistent/MCP sind vorhanden. Die Grundgeometrie bleibt erhalten; Posen werden mit `skin-weights` zur Prüfung markiert. 264 Node-Tests, Build und alle 17 Chromium-Fälle bestanden ([CI-Nachweis](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/40217823978)).
 
 Die Übertragung betrifft alle Vertices mit Quellgewicht, ohne räumlichen Malpinsel. Bei mehr als vier Einflüssen bleiben die vier stärksten, anschließend auf Summe 1 normalisiert; dadurch kann der effektive Anteil vom Reglerwert abweichen. Fehlende Zielpaletten, leere Quellen und ungültige Werte werden ohne bleibende Änderung abgewiesen. Manuelle Haut-/Bewegungsqualität und reale Anbieterabnahme bleiben offen.

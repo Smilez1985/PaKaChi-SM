@@ -24,7 +24,7 @@ Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich gen
 | Generierung | Lokaler TripoSR-Dienst, Bildauswahl, getrennte Vorschau, Vorprüfungs-Fallbacks, expliziter weiterer Auftrag | Echte GPU-/Qualitätsabnahme, Cloud-Generatoren, Korrekturprompts und Rigging |
 | Übernahme | Revisionsschutz, ein Modellwechsel-Rücksprung, vorbereitete 3D-Installation mit Rückabwicklung | Gerenderte Abnahme, Originalplayer-Neustart und GPU-Kontextverlust |
 
-Prüfnachweis für Software 0.54.0: **258 Tests, Build und 16 Chromium-Fälle bestanden**. Separate Chromium-Nachweise stehen im Prüfbericht; echte Anbieter-/GPU-Inferenz und manuelle Mausabnahme bleiben offen. Projektformat bleibt Version 1. Freie Punkte/Posen aus 0.22.0/0.23.0 benötigen wegen der korrigierten Normalisierungsreihenfolge eine visuelle Kontrolle; keine automatische Migration. [Prüfbericht](PRUEFUNG-0.54.0.md).
+Prüfnachweis für Software 0.55.0: **264 Tests, Build und 17 Chromium-Fälle bestanden**. Separate Chromium-Nachweise stehen im Prüfbericht; echte Anbieter-/GPU-Inferenz und manuelle Mausabnahme bleiben offen. Projektformat bleibt Version 1. Freie Punkte/Posen aus 0.22.0/0.23.0 benötigen wegen der korrigierten Normalisierungsreihenfolge eine visuelle Kontrolle; keine automatische Migration. [Prüfbericht](PRUEFUNG-0.55.0.md).
 
 ## Bestehender PaKaChi-Avatar
 
@@ -531,6 +531,6 @@ Nur innerhalb desselben Skelettbaums; Wurzeln, Kreise, skalierte Knochenketten u
 **0.54.0:** Knochen mit starren Anbauteilen können umgehängt werden. Auch verschachtelte starre Objektgruppen mit eigener Drehung und Skalierung bleiben am Knochen befestigt; Grundstellung und gespeicherte Einzelposen behalten ihre Welttransformationen. Anbauteile mit eigenen Knochen oder SkinnedMesh bleiben ausgeschlossen. Löschen eines Knochens mit Anbauteilen ist weiterhin gesperrt. 258 Node-Tests, Build und alle 16 Chromium-Fälle bestanden ([CI-Nachweis](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/40184399914)).
 
 
-**0.55.0:** Oberflächen-Einfluss eines Knochens lässt sich anteilig auf einen anderen übertragen. Mengenregler, Undo/Redo, Projekt-/Katalogpersistenz, gemischte Knochenänderungen und `transfer_weights` für Assistent/MCP sind vorhanden. Die Grundgeometrie bleibt erhalten; Posen werden mit `skin-weights` zur Prüfung markiert. Lokal bestanden 263 Tests im Gesamtlauf plus der anschließend ergänzte Mika-Test; Build bestanden. 17 Chromium-Fälle vorbereitet, neuer CI-Nachweis steht aus.
+**0.55.0:** Oberflächen-Einfluss eines Knochens lässt sich anteilig auf einen anderen übertragen. Mengenregler, Undo/Redo, Projekt-/Katalogpersistenz, gemischte Knochenänderungen und `transfer_weights` für Assistent/MCP sind vorhanden. Die Grundgeometrie bleibt erhalten; Posen werden mit `skin-weights` zur Prüfung markiert. 264 Node-Tests, Build und alle 17 Chromium-Fälle bestanden ([CI-Nachweis](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/40217823978)).
 
 Die Übertragung betrifft alle Vertices mit Quellgewicht, ohne räumlichen Malpinsel. Bei mehr als vier Einflüssen bleiben die vier stärksten, anschließend auf Summe 1 normalisiert; dadurch kann der effektive Anteil vom Reglerwert abweichen. Fehlende Zielpaletten, leere Quellen und ungültige Werte werden ohne bleibende Änderung abgewiesen. Manuelle Haut-/Bewegungsqualität und reale Anbieterabnahme bleiben offen.
