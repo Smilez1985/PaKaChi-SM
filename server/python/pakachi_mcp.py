@@ -215,7 +215,7 @@ def build_server(uri=None, embedded=True, tcp_port=1883, ws_port=8083):
         bendLimit: nur Knochen im Rig-Modus, {min,max} Grad 0–175, min<=max; null entfernt. Nur Zweiglied-IK-Ziehen.
         update_point: id und name/position/rotation/scale/size/radius (scale nur $figure, 0.1–5); $figure ist die ganze Figur.
         reparent_bone: id,target (neuer Elternknochen), nur Rig-Modus und gleicher Skelettbaum.
-        Erhält Einzelposen; Bewegungsübergänge prüfen. Keine Kreise, Wurzeln, skalierten Ketten oder Anbauteile.
+        Erhält Einzelposen; Bewegungsübergänge prüfen. Keine Kreise, Wurzeln oder skalierten Ketten. Starre Anbauteile bleiben befestigt; keine Anbauteile mit eigenem Skelett.
         insert_bone: id des Kindknochens, optional ratio 0.1–0.9 (Standard 0.5), vom Elternknochen zum Kind gemessen (Rig-Modus).
         delete_bone: id, echten Knochen entfernen; Kinder/Gewichte zum Elternknochen (Rig-Modus).
         Zuerst points lesen; Posen nach Topologieänderungen prüfen, Undo möglich. Wurzeln, skalierte Knochen und Anbauteile geschützt.

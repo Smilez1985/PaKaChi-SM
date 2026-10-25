@@ -8,7 +8,9 @@ export function validateReparent(bone:T.Bone|undefined,parent:T.Bone|undefined){
  const a=chain(bone),b=chain(parent);
  if(b.includes(bone))throw Error('Ein Knochen kann nicht unter sich selbst oder einem Nachfahren hängen.');
  if(a.at(-1)!==b.at(-1))throw Error('Umhängen ist nur innerhalb desselben Skelettbaums möglich.');
- if([...a,...b].some(n=>n.scale.distanceTo(new T.Vector3(1,1,1))>1e-8)||bone.children.some(n=>!(n instanceof T.Bone)))throw Error('Skalierte Knochenketten und Knochen mit Anbauteilen können nicht umgehängt werden.');
+ if([...a,...b].some(n=>n.scale.distanceTo(new T.Vector3(1,1,1))>1e-8))throw Error('Skalierte Knochenketten können nicht umgehängt werden.');
+ // Rigid attachment subtrees follow the bone unchanged. Nested rigs need separate conversion.
+ for(const child of bone.children)if(!(child instanceof T.Bone))child.traverse(node=>{if(node instanceof T.Bone||node instanceof T.SkinnedMesh)throw Error('Anbauteile mit eigenem Skelett können nicht umgehängt werden.');});
 }
 /** Reversible topology overlay. Source skeletons and vertex weights remain recoverable. */
 export class StudioTopology {

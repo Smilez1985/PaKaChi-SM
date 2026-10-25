@@ -24,7 +24,11 @@ test('actual source bone deletion survives undo, redo and project reload',async(
  await page.screenshot({path:'test-results/deleted-bone.png',fullPage:true});expect(errors).toEqual([]);
 });
 
-test('reparenting a source bone preserves position and survives undo, redo and project reload',async({page})=>{
+test('reparenting a source bone with a rigid attachment survives undo, redo and project reload',async({page})=>{
+ const model=JSON.parse(await readFile(new URL('../../public/model-zoo/mika/model.gltf',import.meta.url),'utf8'));
+ const footNode=model.nodes.find((n:any)=>n.name==='LeftFoot');const accessory=model.nodes.length;
+ model.nodes.push({name:'RigidAccessory',mesh:0,translation:[.08,.05,0],scale:[.1,.1,.1]});footNode.children=[...(footNode.children??[]),accessory];
+ await page.route('**/model-zoo/mika/model.gltf',route=>route.fulfill({json:model}));
  const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');await page.locator('#avatar-select').selectOption('mika');await expect(page.locator('#message')).toContainText('Mika bereit');await page.locator('#studio-tab').click();
  const points=()=>page.evaluate(()=>window.PaKaChiSM.call('get_studio',{section:'points'}) as any),original=(await points()).items,foot=original.find((p:any)=>p.name==='LeftFoot'),hip=original.find((p:any)=>p.name==='LeftHip');
  await page.locator('#mode-rig').click();await page.locator('#studio-points').selectOption(foot.id);await page.locator('#bone-parent').selectOption(hip.id);await page.locator('#bone-reparent').click();await expect(page.locator('#message')).toContainText('Knochen umgehängt');

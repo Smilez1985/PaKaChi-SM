@@ -12,6 +12,21 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.54.0] - 2026-10-25
+
+Zeitstempel: 2026-10-25T11:13:22+01:00 (Europe/Berlin)
+
+### Added
+
+- Umhängen von Knochen mit starren Anbauteilen und verschachtelten Objektgruppen; Erhalt von Grundstellung, Posen und Befestigung.
+
+### Changed
+
+- Schutzprüfung unterscheidet starre Anbauteile von eingebetteten Knochen/SkinnedMesh; letztere bleiben ausgeschlossen. Knochenlöschen mit Anbauteilen bleibt gesperrt.
+- Assistent-/MCP-Beschreibungen, Bedienanleitung, README und Blaupause angepasst.
+
+**Prüfung:** 257 Node-Tests und Build bestanden; Python-Syntax geprüft. Browserfall um starres Anbauteil ergänzt, neuer CI-Nachweis steht aus. Keine manuelle Bewegungsqualität oder neue reale KI-/Python-Host-Abnahme.
+
 ## [0.53.0] - 2026-10-25
 
 Zeitstempel: 2026-10-25T00:31:31+02:00 (Europe/Berlin)
@@ -1104,3 +1119,5 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 [0.52.0]: PRUEFUNG-0.52.0.md
 
 [0.53.0]: PRUEFUNG-0.53.0.md
+
+[0.54.0]: PRUEFUNG-0.54.0.md

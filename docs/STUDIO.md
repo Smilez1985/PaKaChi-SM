@@ -290,8 +290,11 @@ Seit **0.50.0** unterstützen `edit_studio` und der integrierte Assistent zwei w
 3. „Knochen umhängen“ anwählen. Die echte Skelettverbindung ändert sich, ohne den Knochen in der Grundstellung zu versetzen. Kinder bleiben am umgehängten Knochen.
 4. Gespeicherte Posen und vor allem die Übergänge der Moves prüfen. Einzelposen werden umgerechnet; Zwischenbewegungen können sich durch die neue Hierarchie ändern.
 
-Undo/Redo und Speichern/Laden erhalten die Änderung. Umhängen kann mit Einfügen und Löschen gemischt werden. Hautgewichte werden keinem anderen Knochen zugewiesen. Wurzeln, Selbst-/Nachfahrenverbindungen, andere Skelettbäume, skalierte Knochenketten und direkte Anbauteile werden abgewiesen.
+Undo/Redo und Speichern/Laden erhalten die Änderung. Umhängen kann mit Einfügen und Löschen gemischt werden. Hautgewichte werden keinem anderen Knochen zugewiesen. Wurzeln, Selbst-/Nachfahrenverbindungen, andere Skelettbäume, skalierte Knochenketten und Anbauteile mit eigenem Skelett werden abgewiesen. Seit 0.54.0 bleiben starre Anbauteile beim Umhängen am Knochen befestigt, auch wenn sie selbst verschachtelt, gedreht oder skaliert sind. Das Löschen eines Knochens mit Anbauteilen bleibt gesperrt.
 
 Für Assistent/MCP: `reparent_bone` benötigt `id` des umzuhängenden Knochens und `target` des neuen Elternknochens, aktuellen `session`/`expectedRevision`, Rig-Modus und erteilte Bearbeitungsfreigabe. Der Assistent braucht zusätzlich die ausdrückliche Übernahme. `get_studio` mit `section: points` liefert nun `parentBone` (Knochenindex oder null) und `parentId` (Griff-ID oder null, wenn kein Griff vorhanden ist).
 
 Projektformat 1 enthält optional `boneReparents: [{bone, parent, after}]`; `after` zählt vorausgehende Einfüge-/Löschoperationen. Umgehängte Projekte benötigen mindestens Software 0.53.0; ältere Leser kennen diese Hierarchieänderung nicht. Originalclips verwenden weiterhin die unveränderte Quellhierarchie.
+
+
+Umhängen mit starren Anbauteilen benötigt Software 0.54.0. Die Projektstruktur bleibt unverändert; ältere Versionen weisen diese Umhängung beim Laden ab. Die Bewegung zwischen gespeicherten Posen muss weiterhin geprüft werden.

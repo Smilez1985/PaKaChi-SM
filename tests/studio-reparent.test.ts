@@ -8,14 +8,15 @@ import type {StudioView} from '../src/studio-view.ts';
 import {parseProject} from '../src/studio-data.ts';
 import {parseStudioCommand} from '../src/studio-command.ts';
 import {exportMoveFile,importMoveFile} from '../src/move-file.ts';
-function fixture(){
+function fixture(attachment=false){
  const root=new T.Group(),hip=new T.Bone(),left=new T.Bone(),foot=new T.Bone(),right=new T.Bone();hip.name='Hip';left.name='Left';foot.name='Foot';right.name='Right';
  hip.add(left,right);left.add(foot);left.position.set(-1,1,0);foot.position.set(0,1,0);right.position.set(1,1,0);root.add(hip);root.scale.setScalar(.7);
+ const accessory=new T.Group(),ornament=new T.Mesh(new T.BoxGeometry(.2,.2,.2),new T.MeshBasicMaterial());accessory.name='Accessory';accessory.position.set(.2,.3,.1);accessory.rotation.set(.1,.2,.3);accessory.scale.set(1,2,.5);accessory.add(ornament);ornament.position.x=.1;if(attachment)foot.add(accessory);
  const geometry=new T.BufferGeometry();geometry.setAttribute('position',new T.Float32BufferAttribute([-1,1,0,-1,2,0,1,1,0],3));geometry.setAttribute('skinIndex',new T.Uint16BufferAttribute([1,0,0,0,2,0,0,0,3,0,0,0],4));geometry.setAttribute('skinWeight',new T.Float32BufferAttribute([1,0,0,0,1,0,0,0,1,0,0,0],4));
  const mesh=new T.SkinnedMesh(geometry,new T.MeshBasicMaterial());root.add(mesh);root.updateMatrixWorld(true);mesh.bind(new T.Skeleton([hip,left,foot,right]));const rig=new StudioRig(root);
  const point=(name:string)=>rig.data.points.find(p=>p.name===name)!;
  const vertices=()=>[0,1,2].map(i=>mesh.getVertexPosition(i,new T.Vector3()).applyMatrix4(mesh.matrixWorld));
- return {root,hip,left,foot,right,mesh,rig,point,vertices};
+ return {root,hip,left,foot,right,mesh,rig,point,vertices,accessory,ornament};
 }
 const project=(rig:StudioRig)=>({format:'pakachi-studio' as const,version:1 as const,model:'AAAA',avatar:{id:'x',name:'X',description:'',moves:[]},studio:rig.data});
 const near=(a:T.Vector3[],b:T.Vector3[])=>a.forEach((v,i)=>assert.ok(v.distanceTo(b[i])<1e-6,`${i}: ${v.distanceTo(b[i])}`));
@@ -44,7 +45,8 @@ test('invalid reparent operations leave data, hierarchy and skin unchanged',()=>
  const f=fixture(),{rig}=f,before=structuredClone(rig.data),rest=f.vertices();
  for(const [bone,parent] of [['Hip','Right'],['Left','Left'],['Left','Foot'],['Foot','Left']]){assert.throws(()=>rig.reparentBone(f.point(bone),f.point(parent)));assert.deepEqual(rig.data,before);near(f.vertices(),rest);}
  f.right.scale.setScalar(2);assert.throws(()=>rig.reparentBone(f.point('Foot'),f.point('Right')),/Skalierte/);f.right.scale.setScalar(1);
- f.foot.add(new T.Object3D());assert.throws(()=>rig.reparentBone(f.point('Foot'),f.point('Right')),/Anbauteile/);f.foot.clear();
+ const nested=new T.Group();nested.add(new T.Bone());f.foot.add(nested);assert.throws(()=>rig.reparentBone(f.point('Foot'),f.point('Right')),/eigenem Skelett/);f.foot.clear();
+ const skinned=new T.SkinnedMesh();f.foot.add(skinned);assert.throws(()=>rig.reparentBone(f.point('Foot'),f.point('Right')),/eigenem Skelett/);f.foot.clear();
  f.hip.remove(f.right);f.root.add(f.right);assert.throws(()=>rig.reparentBone(f.point('Foot'),f.point('Right')),/Skelettbaum/);f.hip.add(f.right);rig.reset();assert.deepEqual(rig.data,before);near(f.vertices(),rest);
  for(const entry of [{bone:1,parent:1,after:0},{bone:2,parent:3,after:1},{bone:999,parent:3,after:0},{bone:2,parent:3,after:-1}]){const bad=project(rig);bad.studio={...structuredClone(before),boneReparents:[entry]};assert.throws(()=>parseProject(bad));}
  const cycle=structuredClone(before);cycle.boneReparents=[{bone:1,parent:2,after:0}];const other=fixture();other.rig.data=cycle;assert.throws(()=>other.rig.reset(),/Nachfahren/);
@@ -52,7 +54,7 @@ test('invalid reparent operations leave data, hierarchy and skin unchanged',()=>
 });
 test('UI and guarded agent reparent are independent undo steps with pose review',()=>{
  const w=new Window();Object.assign(globalThis,{document:w.document,Option:function(text='',value=''){const o=w.document.createElement('option');o.textContent=text;o.value=value;return o;}});
- const f=fixture(),{rig}=f,host=document.createElement('div'),view={setEnabled(){},setFigureEnabled(){},setAction(){},setRotation(){},select(){},refresh(){},dispose(){},onSelect:(_id:string)=>{}};
+ const f=fixture(true),{rig}=f,host=document.createElement('div'),view={setEnabled(){},setFigureEnabled(){},setAction(){},setRotation(){},select(){},refresh(){},dispose(){},onSelect:(_id:string)=>{}};
  const editor=new StudioEditor(rig,view as unknown as StudioView,host,project(rig),{suspend(){},resume(){},changed(){},feedback(){}});editor.enter();
  const click=(id:string)=>host.querySelector<HTMLButtonElement>('#'+id)!.click(),command=(id:string,target:string)=>({session:editor.session,expectedRevision:editor.inspect().revision,action:'reparent_bone',id,target});
  const foot=f.point('Foot').id,right=f.point('Right').id;assert.throws(()=>editor.execute(command(foot,right)),/freigegeben/);
@@ -70,4 +72,15 @@ test('Mika and Nori source bones retain all skinned vertices after reparent and 
   const loaded=await parseModel(Uint8Array.from(bytes).buffer),again=new StudioRig(loaded.scene,parseProject(project(rig)).studio);near(vertices(again),before);assert.equal(again.bones[foot.bone!].parent,again.bones[hip.bone!]);
   rig.dispose();again.dispose();disposeModel(scene);disposeModel(loaded.scene);
  }
+});
+
+test('rigid nested attachments retain world transforms in rest, poses, reload and source restoration',()=>{
+ const f=fixture(true),{rig}=f;
+ const matrices=()=>[f.accessory,f.ornament].map(n=>n.matrixWorld.clone());
+ const close=(actual:T.Matrix4[],expected:T.Matrix4[])=>actual.forEach((m,i)=>m.elements.forEach((v,k)=>assert.ok(Math.abs(v-expected[i].elements[k])<1e-6)));
+ const rest=matrices();f.left.rotation.z=.5;f.right.rotation.y=.3;rig.root.updateMatrixWorld(true);const posed=matrices();rig.data.poses=[{id:'a',name:'A',seconds:1,values:rig.capture()}];
+ rig.reparentBone(f.point('Foot'),f.point('Right'));assert.equal(f.accessory.parent,f.foot);close(matrices(),posed);rig.reset();close(matrices(),rest);rig.apply(rig.data.poses[0].values);close(matrices(),posed);
+ const other=fixture(true);other.rig.data=parseProject(project(rig)).studio;other.rig.reset();close([other.accessory.matrixWorld,other.ornament.matrixWorld],rest);other.rig.apply(other.rig.data.poses[0].values);close([other.accessory.matrixWorld,other.ornament.matrixWorld],posed);
+ rig.reset();const old=f.ornament.getWorldPosition(new T.Vector3());f.right.rotation.z=.7;rig.root.updateMatrixWorld(true);assert.ok(f.ornament.getWorldPosition(new T.Vector3()).distanceTo(old)>.1);assert.equal(f.accessory.parent,f.foot);
+ rig.restoreSource();close(matrices(),rest);assert.equal(f.foot.parent,f.left);rig.reset();assert.equal(f.foot.parent,f.right);assert.throws(()=>rig.deleteBone(f.point('Foot')),/Anbauteile/);
 });

@@ -1,6 +1,6 @@
 # Roadmap – was kommt
 
-**Softwarestand: 0.53.0 · Abgleich: 25.10.2026.** Teil der [Blaupause](README.md).
+**Softwarestand: 0.54.0 · Abgleich: 25.10.2026.** Teil der [Blaupause](README.md).
 
 Ein Häkchen bedeutet implementiert; es ersetzt keine visuelle oder externe Live-Abnahme. Die Nachweise und Prüfgrenzen stehen im [Prüfstand](PRUEFUNG.md). Die Versionshistorie gehört ins [Changelog](CHANGELOG.md).
 
@@ -94,7 +94,8 @@ Diese Reihenfolge ist ein Umsetzungsvorschlag, kein Terminversprechen. Lokale un
 - [x] Löschen, Ersatzgelenk einfügen und erneutes Laden im echten Browser prüfen (0.49.0; [Nachweis](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/40096800795)).
 - [ ] Hautqualität nach gemischten Umbaufolgen manuell prüfen.
 - [x] Vorhandene Knochen innerhalb desselben Skelettbaums umhängen; Einzelposen erhalten, Undo/Redo, Persistenz und MCP (0.53.0).
-- [ ] Frei hinzufügen, skalierte Knochen und Anbauteile unterstützen; Hautgewichte gezielt bearbeiten.
+- [x] Umhängen mit starren Anbauteilen einschließlich verschachtelter Objektgruppen ermöglichen (0.54.0).
+- [ ] Frei hinzufügen, skalierte Knochenketten und Anbauteile mit eigenem Skelett unterstützen; Löschen mit Anbauteilen und gezielte Hautgewichtsbearbeitung ergänzen.
 - [ ] Haut- und Bewegungsqualität nach Umhängen manuell prüfen.
 - [x] Vorhandenes Gesamtskelett automatisch verbinden; beim Posieren Ein-/Zweiglied-Ketten mit erhaltenen Knochenlängen lösen (0.11.0).
 - [x] Manuell einstellbare Beugegrenzen am mittleren Knochen einer Zweiglied-IK-Kette berücksichtigen; Grenzen speichern, über MCP bearbeiten und betroffene Posen markieren (0.33.0).
@@ -255,3 +256,6 @@ Seit **0.50.0** unterstützen `edit_studio` und der integrierte Assistent zwei w
 Nur innerhalb desselben Skelettbaums; Wurzeln, Kreise, skalierte Knochenketten und Knochen mit direkten Nicht-Knochen-Anbauteilen werden abgewiesen. Gespeicherte Einzelposen bleiben erhalten, interpolierte Bewegungswege können sich ändern und werden zur Prüfung markiert. Keine automatische anatomische Bewertung oder neue reale Anbieter-/Python-Host-Abnahme.
 
 - [x] Umhängen im Chromium-Browser über Oberfläche/Dateiaustausch und Assistent/Zustimmung/Undo prüfen (0.53.0).
+
+
+**0.54.0:** Knochen mit starren Anbauteilen können umgehängt werden. Auch verschachtelte starre Objektgruppen mit eigener Drehung und Skalierung bleiben am Knochen befestigt; Grundstellung und gespeicherte Einzelposen behalten ihre Welttransformationen. Anbauteile mit eigenen Knochen oder SkinnedMesh bleiben ausgeschlossen. Löschen eines Knochens mit Anbauteilen ist weiterhin gesperrt. 257 Node-Tests und Build bestanden; erweiterter Chromium-Nachweis steht aus.
