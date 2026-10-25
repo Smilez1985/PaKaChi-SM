@@ -25,7 +25,7 @@ Zeitstempel: 2026-10-25T11:13:22+01:00 (Europe/Berlin)
 - Schutzprüfung unterscheidet starre Anbauteile von eingebetteten Knochen/SkinnedMesh; letztere bleiben ausgeschlossen. Knochenlöschen mit Anbauteilen bleibt gesperrt.
 - Assistent-/MCP-Beschreibungen, Bedienanleitung, README und Blaupause angepasst.
 
-**Prüfung:** 257 Node-Tests und Build bestanden; Python-Syntax geprüft. Browserfall um starres Anbauteil ergänzt, neuer CI-Nachweis steht aus. Keine manuelle Bewegungsqualität oder neue reale KI-/Python-Host-Abnahme.
+**Prüfung:** 258 Node-Tests und Build bestanden; Python-Syntax geprüft. Alle 16 Chromium-Fälle bestanden ([CI-Nachweis](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/40184399914)). Keine manuelle Bewegungsqualität oder neue reale KI-/Python-Host-Abnahme.
 
 ## [0.53.0] - 2026-10-25
 
