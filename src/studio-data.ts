@@ -12,8 +12,13 @@ export interface ControlPoint {
 }
 export interface Pose { id: string; name: string; seconds: number; values: Record<string, Transform>; review?: ReviewReason[] }
 export interface StudioMove { id: string; name: string; loop: boolean; poses: string[] }
+export interface WeightRegion {center:Vec3;radius:number}
+export function validWeightRegion(value:unknown):value is WeightRegion {
+ if(!value||typeof value!=='object'||Array.isArray(value))return false;const r=value as Record<string,unknown>;
+ return Object.keys(r).every(k=>k==='center'||k==='radius')&&Array.isArray(r.center)&&r.center.length===3&&r.center.every(v=>typeof v==='number'&&Number.isFinite(v)&&Math.abs(v)<=100)&&typeof r.radius==='number'&&Number.isFinite(r.radius)&&r.radius>=.005&&r.radius<=2;
+}
 export interface StudioData {
-  weightTransfers?: {from:number;to:number;amount:number;after:number}[];
+  weightTransfers?: {from:number;to:number;amount:number;after:number;region?:WeightRegion}[];
   boneReparents?: {bone:number;parent:number;after:number}[];
   boneDeletions?: number[];
   boneInsertions?: {child:number;ratio:number;afterDeletions?:number}[];
@@ -54,7 +59,7 @@ export function parseProject(input: unknown): StudioProject {
   if(d.weightTransfers!==undefined){
     require(Array.isArray(d.weightTransfers)&&d.weightTransfers.length<=128,'Zu viele Hautgewichtsübertragungen.');let previous=0;
     const total=((d.boneInsertions as unknown[]|undefined)?.length??0)+((d.boneDeletions as unknown[]|undefined)?.length??0);
-    for(const e of d.weightTransfers){require(obj(e)&&Object.keys(e).every(k=>['from','to','amount','after'].includes(k))&&Number.isInteger(e.from)&&Number.isInteger(e.to)&&(e.from as number)>=0&&(e.to as number)>=0&&(e.from as number)<d.boneRest.length&&(e.to as number)<d.boneRest.length&&e.from!==e.to&&typeof e.amount==='number'&&Number.isFinite(e.amount)&&e.amount>0&&e.amount<=1&&Number.isInteger(e.after)&&(e.after as number)>=previous&&(e.after as number)<=total,'Ungültige Hautgewichtsübertragung.');previous=e.after as number;}
+    for(const e of d.weightTransfers){require(obj(e)&&Object.keys(e).every(k=>['from','to','amount','after','region'].includes(k))&&Number.isInteger(e.from)&&Number.isInteger(e.to)&&(e.from as number)>=0&&(e.to as number)>=0&&(e.from as number)<d.boneRest.length&&(e.to as number)<d.boneRest.length&&e.from!==e.to&&(e.region===undefined||validWeightRegion(e.region))&&typeof e.amount==='number'&&Number.isFinite(e.amount)&&e.amount>0&&e.amount<=1&&Number.isInteger(e.after)&&(e.after as number)>=previous&&(e.after as number)<=total,'Ungültige Hautgewichtsübertragung.');previous=e.after as number;}
   }
   if(d.boneReparents!==undefined){
     require(Array.isArray(d.boneReparents)&&d.boneReparents.length<=256,'Ungültige Knochenzuordnungen.');

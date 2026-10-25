@@ -307,8 +307,19 @@ Umhängen mit starren Anbauteilen benötigt Software 0.54.0. Die Projektstruktur
 3. Den Anteil mit dem Mausregler einstellen und „Einfluss übertragen“ anklicken. 30 % bedeutet: 30 % des vorhandenen Quellgewichts pro betroffenem Oberflächenpunkt übertragen.
 4. Posen und Moves prüfen: Die Grundpose bleibt erhalten, die Haut folgt bei Bewegung nun stärker dem Zielknochen. Undo/Redo stellt die Gewichte wieder her.
 
-Alle vom Quellknochen beeinflussten Vertices werden bearbeitet. Es gibt noch keinen räumlichen Malpinsel. Bei mehr als vier resultierenden Einflüssen bleiben die vier stärksten und werden normalisiert; dadurch kann der effektive Anteil abweichen. Starre Anbauteile sind keine gewichtete Haut und bleiben unverändert. Bis zu 128 Übertragungen werden in ihrer Reihenfolge gespeichert, auch zwischen Knochen-Einfüge-/Löschoperationen.
+Ohne Bereichsbegrenzung werden alle vom Quellknochen beeinflussten Vertices bearbeitet. Seit 0.56.0 kann die Übertragung auf einen kugelförmigen Umkreis begrenzt werden; kontinuierliches Malen bleibt offen. Bei mehr als vier resultierenden Einflüssen bleiben die vier stärksten und werden normalisiert; dadurch kann der effektive Anteil abweichen. Starre Anbauteile sind keine gewichtete Haut und bleiben unverändert. Bis zu 128 Übertragungen werden in ihrer Reihenfolge gespeichert, auch zwischen Knochen-Einfüge-/Löschoperationen.
 
 Assistent/MCP: `transfer_weights` mit `id` der Quelle, `target` des Ziels und `amount` größer 0 bis einschließlich 1. Rig-Modus, Bearbeitungsfreigabe und aktuelle Sitzung/Revision sind erforderlich; der integrierte Assistent braucht die ausdrückliche Übernahme. Fehlende Zielknochen in betroffenen Skinning-Paletten und Quellen ohne Gewicht werden abgewiesen.
 
 Projektformat 1 erhält optional `weightTransfers: [{from,to,amount,after}]`. Der Prüfgrund `skin-weights` markiert betroffene Posen. Solche Projekte benötigen mindestens Software 0.55.0. Originalclips verwenden weiterhin ursprüngliche Gewichte. Move-Dateien bleiben an die bearbeitete Rig-Struktur gebunden.
+
+
+## Hautgewichte im Umkreis bearbeiten (0.56.0)
+
+Bei der Gewichtsübertragung „Nur im Umkreis des Quellgelenks“ aktivieren und den Radius einstellen (0,005 bis 2 in normalisierten Modelleinheiten). Mittelpunkt ist die gespeicherte Grundposition des ausgewählten Gelenks. Im Mittelpunkt wirkt der volle eingestellte Anteil; zum Rand nimmt die Stärke weich auf null ab. Außerhalb der Kugel werden keine Gewichte geändert. Deaktivieren der Option stellt die globale Übertragung wieder her.
+
+Die Auswahl wird an den ursprünglichen Vertexpositionen in der Grundpose berechnet. Figurbewegung, Skalierung und bereits veränderte Hautgewichte verschieben diesen gespeicherten Bereich nicht. Eine leere Auswahl führt zu einer Fehlermeldung und keiner Änderung. Undo/Redo, Projektdateien und Katalogexport erhalten den Bereich.
+
+Assistent/MCP: optional `region: {center: [x,y,z], radius: r}` bei `transfer_weights`. Der Mittelpunkt darf frei in normalisierten Weltkoordinaten der ursprünglichen Grundpose angegeben werden (jede Koordinate −100 bis 100); Radius 0,005 bis 2. Ohne `region` bleibt der bisherige globale Ablauf erhalten. Projekte mit Bereichen benötigen Software 0.56.0.
+
+Eine sichtbare Kugelvorschau und kontinuierliches Pinseln sind noch nicht implementiert. Die Vier-Einfluss-Grenze und Normalisierung gelten weiterhin.

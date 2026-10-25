@@ -2,8 +2,8 @@ import {StudioTopology,validateReparent} from './studio-topology.ts';
 import {solveLimb} from './studio-ik.ts';
 import {detectConnections,edgeKey} from './studio-detection.ts';
 import * as T from 'three';
-import { emptyStudio, FIGURE_TRACK, neutralFigure, validFigureScale } from './studio-data.ts';
-import type { ControlPoint, StudioData, Transform, Vec3, Pose, StudioMove } from './studio-data.ts';
+import { emptyStudio, FIGURE_TRACK, neutralFigure, validFigureScale, validWeightRegion } from './studio-data.ts';
+import type { ControlPoint, StudioData, Transform, Vec3, Pose, StudioMove, WeightRegion } from './studio-data.ts';
 const read = (o:T.Object3D):Transform => ({position:o.position.toArray(),rotation:o.quaternion.toArray()});
 const write = (o:T.Object3D,v:Transform) => {o.position.fromArray(v.position);o.quaternion.fromArray(v.rotation);};
 interface Surface { mesh:T.Mesh; base:Float32Array; world:T.Vector3[]; inverse:T.Matrix3; worldInverse:T.Matrix4 }
@@ -76,11 +76,12 @@ export class StudioRig {
       this.reset();added.rest=this.position(added).toArray();this.apply(values);return added;
     }catch(error){this.data=before;this.reset();this.apply(originalValues);throw error;}
   }
-  transferWeights(point:ControlPoint,target:ControlPoint,amount:number){
+  transferWeights(point:ControlPoint,target:ControlPoint,amount:number,region?:WeightRegion){
     if(point.kind!=='bone'||target.kind!=='bone'||point===target||!this.data.points.includes(point)||!this.data.points.includes(target)||!Number.isFinite(amount)||amount<=0||amount>1||(this.data.weightTransfers?.length??0)>=128)throw Error('Zwei verschiedene Knochen und einen Anteil über 0 bis 100 % wählen (höchstens 128 Übertragungen).');
+    if(region!==undefined&&!validWeightRegion(region))throw Error('Ungültiger Bereich für Hautgewichte.');
     const before=structuredClone(this.data),values=this.capture();
     try{
-      this.data.weightTransfers=[...(this.data.weightTransfers??[]),{from:point.bone!,to:target.bone!,amount,after:(this.data.boneInsertions?.length??0)+(this.data.boneDeletions?.length??0)}];
+      this.data.weightTransfers=[...(this.data.weightTransfers??[]),{from:point.bone!,to:target.bone!,amount,...(region?{region:structuredClone(region)}:{}),after:(this.data.boneInsertions?.length??0)+(this.data.boneDeletions?.length??0)}];
       this.reset();this.apply(values);
     }catch(error){this.data=before;this.reset();this.apply(values);throw error;}
   }

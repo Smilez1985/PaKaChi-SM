@@ -1,6 +1,6 @@
 # Roadmap – was kommt
 
-**Softwarestand: 0.55.0 · Abgleich: 25.10.2026.** Teil der [Blaupause](README.md).
+**Softwarestand: 0.56.0 · Abgleich: 25.10.2026.** Teil der [Blaupause](README.md).
 
 Ein Häkchen bedeutet implementiert; es ersetzt keine visuelle oder externe Live-Abnahme. Die Nachweise und Prüfgrenzen stehen im [Prüfstand](PRUEFUNG.md). Die Versionshistorie gehört ins [Changelog](CHANGELOG.md).
 
@@ -16,7 +16,7 @@ Ein Häkchen bedeutet implementiert; es ersetzt keine visuelle oder externe Live
 ## Nächste Arbeitspakete
 
 1. **Korrekturen 0.11.0/0.11.1 visuell nachprüfen:** Drehung um die Figurenmitte auch nach Zoom/Pan sowie vollständige Körperverbindungen, Hand-/Fußziele, Rumpfbewegung und direktes Drehen. Nutzertest 0.10.0 meldete auseinanderziehbare Knochen und unbrauchbare Ausrichtung; diese Fehler sind technisch korrigiert, die erneute Nutzerabnahme steht aus. Anschließend Mausnavigation, kleine Gesichtspunkte, Gesamtverschiebung, Speichern/Laden und Agentensteuerung in einer lauffähigen Browserumgebung prüfen.
-2. **Gelenkbearbeitung vervollständigen:** Zwischengelenke in vorhandenen Knochenstrecken samt Gewichtsverteilung und Undo/Redo sind seit 0.47.0 vorhanden. Löschen und gemischte Umbaufolgen sind seit 0.48.0/0.49.0 vorhanden, Assistent/MCP seit 0.50.0. Umhängen vorhandener Knochen ist seit 0.53.0 vorhanden. Anteiliges Übertragen von Hautgewichten ist seit 0.55.0 vorhanden. Als Nächstes freies Hinzufügen von Knochen sowie räumlich begrenzte Hautgewichtsbearbeitung ergänzen; bestehende Moves und Gewichtsqualität prüfen. Ein fehlendes Knie lässt sich nun in eine vorhandene Strecke einfügen und beugen, jedoch noch kein vollständiges Rig aus einer ungeriggten Oberfläche erzeugen.
+2. **Gelenkbearbeitung vervollständigen:** Zwischengelenke in vorhandenen Knochenstrecken samt Gewichtsverteilung und Undo/Redo sind seit 0.47.0 vorhanden. Löschen und gemischte Umbaufolgen sind seit 0.48.0/0.49.0 vorhanden, Assistent/MCP seit 0.50.0. Umhängen vorhandener Knochen ist seit 0.53.0 vorhanden. Anteiliges Übertragen von Hautgewichten ist seit 0.55.0 vorhanden. Räumlich begrenzte Übertragung ist seit 0.56.0 vorhanden. Als Nächstes freies Hinzufügen von Knochen sowie Bereichsvorschau und kontinuierlichen Gewichtspinsel ergänzen; bestehende Moves und Gewichtsqualität prüfen. Ein fehlendes Knie lässt sich nun in eine vorhandene Strecke einfügen und beugen, jedoch noch kein vollständiges Rig aus einer ungeriggten Oberfläche erzeugen.
 3. **Studio-Harness anbinden:** auf den Profilen und der Rollen-/Fähigkeitsprüfung aus 0.13.0 aufbauen; Modellauflistung ist seit 0.15.0 vorhanden. Assistenten-Inferenz für Ollama/OpenAI-kompatible APIs ist seit 0.16.0 vorhanden. Als Nächstes reale Modell-/Werkzeugqualität prüfen sowie weitere Fachadapter und offiziell unterstützte OAuth-Verfahren ergänzen. Anthropic und der optionale verschlüsselte Schlüsseltresor sind bereits angebunden. Details und Abnahme in Abschnitt 7.
 4. **Aufträge und KI-Verfahren integrieren:** den seit 0.22.0 sichtbaren lokalen Generierungsablauf live prüfen, den Modellwechsel-Rücksprung und die abgesicherte 3D-Übernahme aus 0.24.0 visuell prüfen, weitere Generator-/Rigging-Adapter ergänzen, echte Inferenz und Qualität prüfen, die Generator-Fallbacks aus 0.25.0 live prüfen und anschließend gezielte Skelettkorrekturen mit Vorschau integrieren. Vorhandene Skelettdaten auszulesen ist bereits möglich, aber keine KI-Anatomieerkennung.
 
@@ -95,7 +95,7 @@ Diese Reihenfolge ist ein Umsetzungsvorschlag, kein Terminversprechen. Lokale un
 - [ ] Hautqualität nach gemischten Umbaufolgen manuell prüfen.
 - [x] Vorhandene Knochen innerhalb desselben Skelettbaums umhängen; Einzelposen erhalten, Undo/Redo, Persistenz und MCP (0.53.0).
 - [x] Umhängen mit starren Anbauteilen einschließlich verschachtelter Objektgruppen ermöglichen (0.54.0).
-- [ ] Frei hinzufügen, skalierte Knochenketten und Anbauteile mit eigenem Skelett unterstützen; Löschen mit Anbauteilen und räumlich begrenzte Hautgewichtsbearbeitung ergänzen.
+- [ ] Frei hinzufügen, skalierte Knochenketten und Anbauteile mit eigenem Skelett unterstützen; Löschen mit Anbauteilen und kontinuierlichen Gewichtspinsel ergänzen.
 - [ ] Haut- und Bewegungsqualität nach Umhängen manuell prüfen.
 - [x] Vorhandenes Gesamtskelett automatisch verbinden; beim Posieren Ein-/Zweiglied-Ketten mit erhaltenen Knochenlängen lösen (0.11.0).
 - [x] Manuell einstellbare Beugegrenzen am mittleren Knochen einer Zweiglied-IK-Kette berücksichtigen; Grenzen speichern, über MCP bearbeiten und betroffene Posen markieren (0.33.0).
@@ -269,3 +269,11 @@ Die Übertragung betrifft alle Vertices mit Quellgewicht, ohne räumlichen Malpi
 - [ ] Räumlichen Gewichtspinsel/Vertex-Auswahl und visuelle Einflussanzeige ergänzen; Hautqualität manuell prüfen.
 
 - [x] Hautgewichtsübertragung im Chromium-Browser mit Mengenregler, Undo/Redo und Projektdateiaustausch prüfen (0.55.0).
+
+
+**0.56.0:** Hautgewichtsübertragungen können auf einen kugelförmigen Bereich um das Quellgelenk begrenzt werden. Radius per Mausregler; Stärke nimmt zum Rand weich auf null ab. Außerhalb bleiben Gewichte unverändert. Assistent/MCP unterstützen optional `region: {center, radius}`; Projekt-/Katalogexport erhalten den Bereich. 266 Node-Tests und Build bestanden; erweiterter Chromium-Nachweis steht aus.
+
+Der Bereich bezieht sich auf normalisierte Weltkoordinaten der ursprünglichen Grundpose, unabhängig von der aktuellen Figurpose. Die Oberfläche nutzt den gespeicherten Gelenkpunkt als Mittelpunkt; API-Aufrufe können einen eigenen Mittelpunkt setzen. Noch kein kontinuierlicher Malpinsel oder sichtbare Bereichsvorschau. Höchstens vier normalisierte Einflüsse pro Vertex; manuelle Hautqualität und echte Anbieterabnahme bleiben offen.
+
+- [x] Hautgewichtsübertragung räumlich auf eine Kugel mit weichem Randabfall begrenzen, speichern und über MCP verfügbar machen (0.56.0).
+- [ ] Sichtbare Bereichsvorschau und kontinuierliches Malen auf der Oberfläche ergänzen.

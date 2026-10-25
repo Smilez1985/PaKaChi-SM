@@ -54,6 +54,22 @@ test('Mika weight transfer uses real palettes and retains all rest vertices afte
  if(typeof globalThis.ProgressEvent==='undefined')Object.defineProperty(globalThis,'ProgressEvent',{value:class extends Event{constructor(type:string,init:Record<string,unknown>={}){super(type);Object.assign(this,init);}}});
  const bytes=Uint8Array.from(readFileSync(new URL('../public/model-zoo/mika/model.gltf',import.meta.url))).buffer,{scene}=await parseModel(bytes),rig=new StudioRig(scene);
  const meshes=rig.surfaces.filter(s=>s.mesh instanceof T.SkinnedMesh).map(s=>s.mesh as T.SkinnedMesh),vertices=()=>meshes.flatMap(m=>Array.from({length:m.geometry.getAttribute('position').count},(_,i)=>m.getVertexPosition(i,new T.Vector3()).applyMatrix4(m.matrixWorld))),before=vertices();
- rig.transferWeights(rig.data.points.find(p=>p.name==='LeftKnee')!,rig.data.points.find(p=>p.name==='LeftFoot')!,.3);vertices().forEach((v,i)=>assert.ok(v.distanceTo(before[i])<1e-5));
+ rig.transferWeights(rig.data.points.find(p=>p.name==='LeftKnee')!,rig.data.points.find(p=>p.name==='LeftFoot')!,.3,{center:[...rig.data.points.find(p=>p.name==='LeftKnee')!.rest],radius:.5});vertices().forEach((v,i)=>assert.ok(v.distanceTo(before[i])<1e-5));
  const loaded=await parseModel(bytes),again=new StudioRig(loaded.scene,parseProject(project(rig)).studio);assert.deepEqual(again.surfaces.filter(s=>s.mesh instanceof T.SkinnedMesh).map(s=>arrays(s.mesh as T.SkinnedMesh)),meshes.map(arrays));rig.dispose();again.dispose();disposeModel(scene);disposeModel(loaded.scene);
+});
+test('regional weight transfer uses original world-space sphere with smooth falloff and excludes outside vertices',async()=>{
+ // @ts-expect-error CLI module has no declarations.
+ const {zooPackage}=await import('../scripts/export-zoo.mjs');
+ const make=()=>{const root=new T.Group(),a=new T.Bone(),b=new T.Bone();a.add(b);root.add(a);b.position.y=1;root.position.x=3;root.scale.setScalar(2);const g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute([0,0,0,.5,0,0,2,0,0],3));g.setAttribute('skinIndex',new T.Uint16BufferAttribute(new Array(12).fill(0),4));g.setAttribute('skinWeight',new T.Float32BufferAttribute([1,0,0,0,1,0,0,0,1,0,0,0],4));const mesh=new T.SkinnedMesh(g,new T.MeshBasicMaterial());root.add(mesh);root.updateMatrixWorld(true);mesh.bind(new T.Skeleton([a,b]));return {rig:new StudioRig(root),mesh,a,b};};
+ const {rig,mesh,b}=make(),region={center:[3,0,0] as [number,number,number],radius:2};
+ rig.setFigureTransform(new T.Vector3(10,0,0),new T.Quaternion(),1.5);rig.transferWeights(rig.data.points[0],rig.data.points[1],.6,region);
+ assert.ok(Math.abs(weight(mesh,0,b)-.6)<1e-6);assert.ok(Math.abs(weight(mesh,1,b)-.3)<1e-6);assert.equal(weight(mesh,2,b),0);assert.equal(rig.capture().$figure.scale,1.5);
+ const original=arrays(mesh),packed=JSON.parse(zooPackage(project(rig),'regional').project);assert.deepEqual(packed.studio.weightTransfers[0].region,region);region.center[0]=99;rig.reset();assert.deepEqual(arrays(mesh),original);
+ const other=make();other.rig.data=parseProject(packed).studio;other.rig.reset();assert.deepEqual(arrays(other.mesh),original);
+});
+test('regional transfers reject empty selections and malformed spheres without mutation',()=>{
+ const f=fixture(),{rig}=f,before=structuredClone(rig.data),skin=arrays(f.mesh),command={session:'test',expectedRevision:0,action:'transfer_weights',id:'bone-1',target:'bone-2',amount:.5};
+ for(const region of [{center:[0,0],radius:1},{center:[0,NaN,0],radius:1},{center:[0,0,0],radius:0},{center:[0,0,0],radius:3},{center:[0,0,0],radius:1,extra:true},null])assert.throws(()=>parseStudioCommand({...command,region}));
+ assert.throws(()=>rig.transferWeights(f.point(f.arm),f.point(f.hand),.5,{center:[99,99,99],radius:.1}),/keinen/);assert.deepEqual(rig.data,before);assert.deepEqual(arrays(f.mesh),skin);
+ const bad={...project(rig),studio:{...rig.data,weightTransfers:[{from:1,to:2,amount:.5,after:0,region:{center:[0,0,0],radius:-1}}]}};assert.throws(()=>parseProject(bad));
 });

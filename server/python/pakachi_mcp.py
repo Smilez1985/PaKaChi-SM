@@ -26,6 +26,11 @@ class MoveSequenceUpdate(BaseModel):
     id: str = Field(min_length=1, max_length=100)
     poses: list[str] = Field(min_length=2, max_length=100)
 
+class WeightRegion(BaseModel):
+    model_config = ConfigDict(extra='forbid', strict=True)
+    center: list[float] = Field(min_length=3, max_length=3)
+    radius: float = Field(ge=.005, le=2)
+
 class StudioCommand(BaseModel):
     model_config = ConfigDict(extra='forbid', strict=True)
     session: str = Field(max_length=100)
@@ -38,6 +43,7 @@ class StudioCommand(BaseModel):
     position: list[float] | None = Field(default=None, min_length=3, max_length=3)
     rotation: list[float] | None = Field(default=None, min_length=4, max_length=4)
     bendLimit: BendLimit | None = None
+    region: WeightRegion | None = None
     amount: float | None = Field(default=None, gt=0, le=1)
     ratio: float | None = Field(default=None, ge=.1, le=.9)
     scale: float | None = Field(default=None, ge=.1, le=5)
@@ -217,6 +223,7 @@ def build_server(uri=None, embedded=True, tcp_port=1883, ws_port=8083):
         update_point: id und name/position/rotation/scale/size/radius (scale nur $figure, 0.1–5); $figure ist die ganze Figur.
         transfer_weights: id (Quelle), target (Ziel), amount (Anteil über 0 bis 1), nur Rig-Modus.
         Quellgewichte an allen betroffenen Vertices übertragen, vier stärkste Einflüsse normalisiert behalten.
+        Optional region={center:[x,y,z],radius:0.005..2}: normalisierte Weltkoordinaten der ursprünglichen Grundpose, Kugel mit weichem Randabfall. Ohne region global.
         Grundpose bleibt erhalten; Posen/Bewegungen prüfen. Undo möglich.
         reparent_bone: id,target (neuer Elternknochen), nur Rig-Modus und gleicher Skelettbaum.
         Erhält Einzelposen; Bewegungsübergänge prüfen. Keine Kreise, Wurzeln oder skalierten Ketten. Starre Anbauteile bleiben befestigt; keine Anbauteile mit eigenem Skelett.

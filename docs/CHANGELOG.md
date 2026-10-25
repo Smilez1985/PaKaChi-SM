@@ -12,6 +12,22 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.56.0] - 2026-10-25
+
+Zeitstempel: 2026-10-25T19:09:43+01:00 (Europe/Berlin)
+
+### Added
+
+- Optionale räumliche Begrenzung der Hautgewichtsübertragung auf eine Kugel mit einstellbarem Radius und weichem Randabfall.
+- `region` für Assistent und beide MCP-Server, inklusive Projektpersistenz und Katalogexport.
+
+### Changed
+
+- Bereichsauswahl verwendet ursprüngliche Vertexpositionen in normalisierten Weltkoordinaten; laufende Posen verändern die Auswahl nicht.
+- README, Design, Roadmap, Anleitung und Prüfbericht nachgezogen.
+
+**Prüfung:** 266 Node-Tests und Build bestanden, Python-Syntax geprüft. Erweiterter Chromium-Nachweis steht aus. Bereichsvorschau, kontinuierlicher Malpinsel und manuelle Hautabnahme bleiben offen.
+
 ## [0.55.0] - 2026-10-25
 
 Zeitstempel: 2026-10-25T18:43:03+01:00 (Europe/Berlin)
@@ -1140,3 +1156,5 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 [0.54.0]: PRUEFUNG-0.54.0.md
 
 [0.55.0]: PRUEFUNG-0.55.0.md
+
+[0.56.0]: PRUEFUNG-0.56.0.md

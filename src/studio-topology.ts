@@ -1,6 +1,8 @@
 import * as T from 'three';
+import {validWeightRegion} from './studio-data.ts';
+import type {WeightRegion} from './studio-data.ts';
 export interface BoneInsertion {child:number;ratio:number;afterDeletions?:number}
-export interface WeightTransfer {from:number;to:number;amount:number;after:number}
+export interface WeightTransfer {from:number;to:number;amount:number;after:number;region?:WeightRegion}
 export interface BoneReparent {bone:number;parent:number;after:number}
 /** Only same-tree, unscaled bone chains can be represented by the pose format. */
 export function validateReparent(bone:T.Bone|undefined,parent:T.Bone|undefined){
@@ -16,14 +18,14 @@ export function validateReparent(bone:T.Bone|undefined,parent:T.Bone|undefined){
 /** Reversible topology overlay. Source skeletons and vertex weights remain recoverable. */
 export class StudioTopology {
  private parents:{bone:T.Bone;parent:T.Object3D;position:T.Vector3}[];
- private skins:{mesh:T.SkinnedMesh;skeleton:T.Skeleton;indices:T.BufferAttribute;weights:T.BufferAttribute}[]=[];
+ private skins:{mesh:T.SkinnedMesh;skeleton:T.Skeleton;indices:T.BufferAttribute;weights:T.BufferAttribute;positions:T.BufferAttribute;world:T.Matrix4}[]=[];
  private added:T.Bone[]=[];
  private generated:T.Skeleton[]=[];
  private source:T.Bone[];
  constructor(source:T.Bone[],root:T.Object3D){
   this.source=source;
   this.parents=source.map(bone=>({bone,parent:bone.parent!,position:bone.position.clone()}));
-  root.traverse(n=>{if(n instanceof T.SkinnedMesh)this.skins.push({mesh:n,skeleton:n.skeleton,indices:n.geometry.getAttribute('skinIndex').clone() as T.BufferAttribute,weights:n.geometry.getAttribute('skinWeight').clone() as T.BufferAttribute});});
+  root.traverse(n=>{if(n instanceof T.SkinnedMesh)this.skins.push({mesh:n,skeleton:n.skeleton,indices:n.geometry.getAttribute('skinIndex').clone() as T.BufferAttribute,weights:n.geometry.getAttribute('skinWeight').clone() as T.BufferAttribute,positions:n.geometry.getAttribute('position').clone() as T.BufferAttribute,world:n.matrixWorld.clone()});});
  }
  restore(){
   for(const {bone,parent,position} of this.parents){if(bone.parent!==parent)parent.add(bone);bone.position.copy(position);}
@@ -35,15 +37,17 @@ export class StudioTopology {
   this.restore();const bones=[...this.source],weights:(()=>void)[]=[];
   let changes=0,reparented=0,transferred=0;
   const queueTransfers=()=>{while(transferred<transfers.length&&transfers[transferred].after===changes){const edit=transfers[transferred++],from=bones[edit.from],to=bones[edit.to];
-   if(!from||!to||from===to||!from.parent||!to.parent||!Number.isFinite(edit.amount)||edit.amount<=0||edit.amount>1)throw Error('Ungültige Hautgewichtsübertragung.');
+   if(!from||!to||from===to||!from.parent||!to.parent||!Number.isFinite(edit.amount)||edit.amount<=0||edit.amount>1||(edit.region!==undefined&&!validWeightRegion(edit.region)))throw Error('Ungültige Hautgewichtsübertragung.');
    weights.push(()=>{let affected=0;
     for(const s of this.skins){const skeleton=s.mesh.skeleton,source=skeleton.bones.indexOf(from),target=skeleton.bones.indexOf(to);if(source<0)continue;
      const indices=s.mesh.geometry.getAttribute('skinIndex'),values=s.mesh.geometry.getAttribute('skinWeight');
      for(let v=0;v<indices.count;v++){
       const merged=new Map<number,number>();for(let k=0;k<4;k++){const i=indices.getComponent(v,k),w=values.getComponent(v,k);if(w>0)merged.set(i,(merged.get(i)??0)+w);}
       const original=merged.get(source)??0;if(original<=0)continue;
+      let amount=edit.amount;
+      if(edit.region){const distance=new T.Vector3().fromBufferAttribute(s.positions,v).applyMatrix4(s.world).distanceTo(new T.Vector3().fromArray(edit.region.center));const u=T.MathUtils.clamp(1-distance/edit.region.radius,0,1);amount*=u*u*(3-2*u);if(amount<=0)continue;}
       if(target<0)throw Error('Zielknochen fehlt in einer betroffenen Skinning-Palette.');
-      affected++;merged.set(source,original*(1-edit.amount));merged.set(target,(merged.get(target)??0)+original*edit.amount);
+      affected++;merged.set(source,original*(1-amount));merged.set(target,(merged.get(target)??0)+original*amount);
       const strongest=[...merged].filter(([,w])=>w>0).sort((a,b)=>b[1]-a[1]||a[0]-b[0]).slice(0,4),sum=strongest.reduce((total,[,w])=>total+w,0);
       for(let k=0;k<4;k++){indices.setComponent(v,k,strongest[k]?.[0]??0);values.setComponent(v,k,(strongest[k]?.[1]??0)/sum);}
      }
