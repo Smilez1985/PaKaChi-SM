@@ -322,4 +322,11 @@ Die Auswahl wird an den ursprünglichen Vertexpositionen in der Grundpose berech
 
 Assistent/MCP: optional `region: {center: [x,y,z], radius: r}` bei `transfer_weights`. Der Mittelpunkt darf frei in normalisierten Weltkoordinaten der ursprünglichen Grundpose angegeben werden (jede Koordinate −100 bis 100); Radius 0,005 bis 2. Ohne `region` bleibt der bisherige globale Ablauf erhalten. Projekte mit Bereichen benötigen Software 0.56.0.
 
-Eine sichtbare Kugelvorschau und kontinuierliches Pinseln sind noch nicht implementiert. Die Vier-Einfluss-Grenze und Normalisierung gelten weiterhin.
+Seit 0.57.0 zeigen grüne Außenringe die Bereichsgrenze und orange Innenringe die halbe Übertragungsstärke. Kontinuierliches Pinseln ist noch nicht implementiert. Die Vier-Einfluss-Grenze und Normalisierung gelten weiterhin.
+
+
+## Bereichsvorschau (0.57.0)
+
+Sobald „Nur im Umkreis des Quellgelenks“ aktiv ist und ein Knochen im Modus „Gelenke bearbeiten“ ausgewählt ist, erscheint die Vorschau. Drei grüne Außenringe zeigen die Kugelgrenze; drei orange, gestrichelte Innenringe liegen beim halben Radius, wo der weiche Randabfall die Stärke halbiert. Eine schwach transparente Kugelfläche unterstützt die räumliche Orientierung. Die Bedienhinweise sind auf Deutsch und Englisch vorhanden.
+
+Auswahlwechsel, Radiusregler, Gelenkverschiebung und Undo/Redo aktualisieren die Anzeige. Im Modus „Figur bewegen“, bei Wiedergabe und nach Verlassen des Studios ist sie ausgeblendet. Die Vorschau wird nicht im Modell oder Projekt gespeichert und fängt keine Auswahlklicks ab. Sie zeigt den räumlichen Bereich, keine farbige Vertex-Gewichtsanalyse.

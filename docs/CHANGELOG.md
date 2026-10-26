@@ -12,6 +12,22 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.57.0] - 2026-10-26
+
+Zeitstempel: 2026-10-26T02:13:51+01:00 (Europe/Berlin)
+
+### Added
+
+- Sichtbare räumliche Vorschau für Hautgewichtsübertragung mit Radiusgrenze, halber Stärke und transparenter Kugelfläche.
+- Aktualisierung bei Gelenkauswahl, Radius, Gelenkverschiebung und Undo/Redo; automatische Ausblendung außerhalb der Bearbeitung.
+
+### Changed
+
+- Deutsche und englische Hinweise für Gewichtsübertragung und Vorschau ergänzt.
+- README, Design, Roadmap, Bedienanleitung und Prüfbericht nachgezogen.
+
+**Prüfung:** 268 Node-Tests und Build bestanden. Neuer Chromium-Nachweis steht aus. Keine farbige Vertex-Gewichtsanalyse, kontinuierlicher Gewichtspinsel oder neue manuelle Hautabnahme.
+
 ## [0.56.0] - 2026-10-25
 
 Zeitstempel: 2026-10-25T19:09:43+01:00 (Europe/Berlin)
@@ -1158,3 +1174,5 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 [0.55.0]: PRUEFUNG-0.55.0.md
 
 [0.56.0]: PRUEFUNG-0.56.0.md
+
+[0.57.0]: PRUEFUNG-0.57.0.md

@@ -5,6 +5,14 @@ export function readOptions(storage?:Pick<Storage,'getItem'>):Options {
 }
 export const options=readOptions();
 const translations:Record<string,string>={
+  "Oberflächen-Einfluss übertragen auf":"Transfer skin influence to",
+  "Anteil":"Amount",
+  "Nur im Umkreis des Quellgelenks":"Only within the source joint radius",
+  "Radius":"Radius",
+  "Einfluss übertragen":"Transfer influence",
+  "Zielknochen auswählen …":"Select target bone …",
+  "Oberflächen-Einfluss übertragen. Posen und Bewegungen prüfen.":"Skin influence transferred. Review poses and motions.",
+  "Überträgt Einfluss des gewählten Knochens. Im Umkreis nimmt die Stärke zum Rand weich ab; außerhalb bleibt die Hautzuordnung unverändert. Grüne Außenringe zeigen die Grenze, orange Innenringe die halbe Stärke. Die Vorschau zeigt den räumlichen Bereich, nicht die tatsächlich gewichteten Vertices. Bezug ist die ursprüngliche Grundpose. Ohne Umkreis gilt die Übertragung überall. Grundpose bleibt erhalten; Posen und Bewegungen prüfen. Pro Oberflächenpunkt bleiben höchstens vier Einflüsse.":"Transfers influence from the selected bone. Within the region, strength fades smoothly towards the edge; skin weights outside stay unchanged. Green outer rings show the boundary; orange inner rings show half strength. This is a spatial guide, not a display of vertices with skin weights. Coordinates refer to the original rest pose. Without a region, the transfer is global. Rest geometry stays unchanged; review poses and motions. Each vertex retains at most four influences.",
   'Ungültiges Bewegungspaket. Maximal 8 Bewegungen und insgesamt 200 Posenverweise.':'Invalid motion batch. At most 8 motions and 200 pose references in total.',
   'Gemeinsame Move-Sammlung':'Shared move collection','Sammlung laden':'Load collection','Aus Sammlung importieren':'Import from collection',
   'Die Sammlung gehört zur Anwendung. Import nur bei passendem Modell und Rig.':'The collection belongs to this application. Import requires a matching model and rig.',

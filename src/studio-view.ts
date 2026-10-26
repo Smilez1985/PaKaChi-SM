@@ -1,3 +1,5 @@
+import {StudioWeightPreview} from './studio-weight-preview.ts';
+import type {WeightRegion} from './studio-data.ts';
 import {FIGURE_TRACK} from './studio-data.ts';
 import * as T from 'three';
 import { TransformControls } from 'three/addons/controls/TransformControls.js';
@@ -6,6 +8,8 @@ import type { StudioRig } from './studio-rig.ts';
 
 export class StudioView {
   readonly group=new T.Group();
+  private readonly weightPreview=new StudioWeightPreview();
+  setWeightRegion(region:WeightRegion|null){this.weightPreview.setRegion(region);}
   private readonly handles=new T.Group();
   private readonly lines=new T.Group();
   private readonly proxy=new T.Object3D();
@@ -31,7 +35,7 @@ export class StudioView {
   private orbit:NavigationControls;
   constructor(rig:StudioRig,camera:T.PerspectiveCamera,canvas:HTMLCanvasElement,orbit:NavigationControls,scene:T.Scene) {
     this.rig=rig;this.camera=camera;this.canvas=canvas;this.orbit=orbit;
-    this.group.add(this.handles,this.lines,this.proxy);scene.add(this.group);
+    this.group.add(this.handles,this.lines,this.proxy,this.weightPreview.group);scene.add(this.group);
     this.gizmo=new TransformControls(camera,canvas);this.gizmo.setSpace('world');this.gizmo.setSize(.75);this.group.add(this.gizmo.getHelper());
     this.gizmo.addEventListener('mouseDown',()=>{this.dragging=true;orbit.enabled=false;this.onStart();});
     this.gizmo.addEventListener('objectChange',()=>{if(this.dragging)this.onMove(this.proxy.position.clone(),this.proxy.quaternion.clone(),this.rotation?'rotate':'translate');});
@@ -88,5 +92,5 @@ export class StudioView {
     if(this.enabled && point && this.action==='select') {if(!this.dragging){this.proxy.position.copy(this.rig.position(point));this.proxy.quaternion.copy(this.rig.rotation(point));}this.gizmo.setMode(this.rotation && (point.kind==='bone'||point.id===FIGURE_TRACK)?'rotate':'translate');this.gizmo.attach(this.proxy);}else this.gizmo.detach();
   }
   private clearGroup(group:T.Group){for(const child of [...group.children]){group.remove(child);if(child instanceof T.Mesh||child instanceof T.Line){child.geometry.dispose();(child.material as T.Material).dispose();}}}
-  dispose(){this.canvas.removeEventListener('pointermove',this.move,true);this.canvas.removeEventListener('pointercancel',this.cancel,true);this.canvas.removeEventListener('lostpointercapture',this.cancel,true);this.canvas.removeEventListener('pointerdown',this.down,true);this.canvas.removeEventListener('pointerup',this.up,true);this.canvas.style.cursor='';this.orbit.enabled=true;this.gizmo.dispose();this.clearGroup(this.handles);this.clearGroup(this.lines);this.group.removeFromParent();}
+  dispose(){this.canvas.removeEventListener('pointermove',this.move,true);this.canvas.removeEventListener('pointercancel',this.cancel,true);this.canvas.removeEventListener('lostpointercapture',this.cancel,true);this.canvas.removeEventListener('pointerdown',this.down,true);this.canvas.removeEventListener('pointerup',this.up,true);this.canvas.style.cursor='';this.orbit.enabled=true;this.gizmo.dispose();this.weightPreview.dispose();this.clearGroup(this.handles);this.clearGroup(this.lines);this.group.removeFromParent();}
 }
