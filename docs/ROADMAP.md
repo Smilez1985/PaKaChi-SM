@@ -95,7 +95,8 @@ Diese Reihenfolge ist ein Umsetzungsvorschlag, kein Terminversprechen. Lokale un
 - [ ] Hautqualität nach gemischten Umbaufolgen manuell prüfen.
 - [x] Vorhandene Knochen innerhalb desselben Skelettbaums umhängen; Einzelposen erhalten, Undo/Redo, Persistenz und MCP (0.53.0).
 - [x] Umhängen mit starren Anbauteilen einschließlich verschachtelter Objektgruppen ermöglichen (0.54.0).
-- [ ] Frei hinzufügen, skalierte Knochenketten und Anbauteile mit eigenem Skelett unterstützen; Löschen mit Anbauteilen und kontinuierlichen Gewichtspinsel ergänzen.
+- [x] Freie Kindknochen hinzufügen (0.58.0) und erste kontinuierliche Gewichtspinsel-Stufe ergänzen (0.59.0).
+- [ ] Skalierte Knochenketten und Anbauteile mit eigenem Skelett unterstützen; Löschen mit Anbauteilen ergänzen.
 - [ ] Haut- und Bewegungsqualität nach Umhängen manuell prüfen.
 - [x] Vorhandenes Gesamtskelett automatisch verbinden; beim Posieren Ein-/Zweiglied-Ketten mit erhaltenen Knochenlängen lösen (0.11.0).
 - [x] Manuell einstellbare Beugegrenzen am mittleren Knochen einer Zweiglied-IK-Kette berücksichtigen; Grenzen speichern, über MCP bearbeiten und betroffene Posen markieren (0.33.0).
@@ -266,7 +267,8 @@ Nur innerhalb desselben Skelettbaums; Wurzeln, Kreise, skalierte Knochenketten u
 Die Übertragung betrifft alle Vertices mit Quellgewicht, ohne räumlichen Malpinsel. Bei mehr als vier Einflüssen bleiben die vier stärksten, anschließend auf Summe 1 normalisiert; dadurch kann der effektive Anteil vom Reglerwert abweichen. Fehlende Zielpaletten, leere Quellen und ungültige Werte werden ohne bleibende Änderung abgewiesen. Manuelle Haut-/Bewegungsqualität und reale Anbieterabnahme bleiben offen.
 
 - [x] Hautgewichte zwischen vorhandenen Knochen anteilig übertragen, normalisieren, speichern und rückgängig machen (0.55.0).
-- [ ] Räumlichen Gewichtspinsel/Vertex-Auswahl und visuelle Einflussanzeige ergänzen; Hautqualität manuell prüfen.
+- [x] Räumlichen Gewichtspinsel ergänzen (0.59.0).
+- [ ] Vertex-Auswahl und farbige Einflussanzeige ergänzen; Hautqualität manuell prüfen.
 
 - [x] Hautgewichtsübertragung im Chromium-Browser mit Mengenregler, Undo/Redo und Projektdateiaustausch prüfen (0.55.0).
 
@@ -277,7 +279,8 @@ Der Bereich bezieht sich auf normalisierte Weltkoordinaten der ursprünglichen G
 
 - [x] Hautgewichtsübertragung räumlich auf eine Kugel mit weichem Randabfall begrenzen, speichern und über MCP verfügbar machen (0.56.0).
 - [x] Sichtbare Bereichsvorschau mit Radiusgrenze und halber Stärke ergänzen (0.57.0).
-- [ ] Kontinuierliches Malen auf der Oberfläche und farbige Anzeige tatsächlicher Hautgewichte ergänzen.
+- [x] Kontinuierliches Malen auf der Oberfläche ergänzen (erste begrenzte Stufe, 0.59.0).
+- [ ] Farbige Anzeige tatsächlicher Hautgewichte ergänzen.
 
 - [x] Räumlich begrenzte Übertragung im Chromium-Browser mit Checkbox, Radiusregler, Undo/Redo und Wiederladen prüfen (0.56.0).
 
@@ -301,7 +304,7 @@ Benötigt einen vorhandenen Elternknochen; kein neues Skelett auf einer ungerigg
 
 **0.59.0:** Hautgewichte lassen sich mit gedrückter linker Maustaste zwischen zwei ausgewählten Knochen übertragen. Der Pinsel verwendet Radius und Anteil, zeigt den räumlichen Einfluss am aktuellen Treffer und setzt Aufträge mit festem räumlichem Abstand. Ein kompletter Strich ist ein Undo-Schritt; Abbruch und Überschreitung des Übertragungslimits nehmen den ganzen Strich zurück. Währenddessen sind Editor-Eingaben und Agentenänderungen gesperrt.
 
-275 Node-Tests und Build bestanden. Neuer Chromium-Nachweis steht aus.
+275 Node-Tests, Build und alle 19 Chromium-Fälle bestanden ([CI-Nachweis](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/40280964660)).
 
 Erste Pinselstufe: kugelförmiger Einfluss, auch durch dünne Oberflächen hindurch; keine Beschränkung auf sichtbare Vertices, keine Gewichtsfärbung. Überlappende Aufträge verstärken den Effekt. Höchstens 128 gespeicherte Übertragungen pro Projekt einschließlich Einzelaufträgen; lange Striche können das Limit erreichen. Große Sprünge und fehlende Oberflächentreffer unterbrechen die Verbindung zwischen Aufträgen. Manuelle Hautqualitäts- und Performance-Abnahme bleibt offen.
 
