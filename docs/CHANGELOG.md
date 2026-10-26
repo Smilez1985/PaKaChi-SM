@@ -26,7 +26,7 @@ Zeitstempel: 2026-10-25T19:09:43+01:00 (Europe/Berlin)
 - Bereichsauswahl verwendet ursprüngliche Vertexpositionen in normalisierten Weltkoordinaten; laufende Posen verändern die Auswahl nicht.
 - README, Design, Roadmap, Anleitung und Prüfbericht nachgezogen.
 
-**Prüfung:** 266 Node-Tests und Build bestanden, Python-Syntax geprüft. Erweiterter Chromium-Nachweis steht aus. Bereichsvorschau, kontinuierlicher Malpinsel und manuelle Hautabnahme bleiben offen.
+**Prüfung:** 266 Node-Tests und Build bestanden, Python-Syntax geprüft. Alle 17 Chromium-Fälle bestanden ([CI-Nachweis](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/40219939990)). Bereichsvorschau, kontinuierlicher Malpinsel und manuelle Hautabnahme bleiben offen.
 
 ## [0.55.0] - 2026-10-25
 

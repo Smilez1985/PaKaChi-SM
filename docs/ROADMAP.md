@@ -1,6 +1,6 @@
 # Roadmap – was kommt
 
-**Softwarestand: 0.56.0 · Abgleich: 25.10.2026.** Teil der [Blaupause](README.md).
+**Softwarestand: 0.56.0 · Abgleich: 26.10.2026.** Teil der [Blaupause](README.md).
 
 Ein Häkchen bedeutet implementiert; es ersetzt keine visuelle oder externe Live-Abnahme. Die Nachweise und Prüfgrenzen stehen im [Prüfstand](PRUEFUNG.md). Die Versionshistorie gehört ins [Changelog](CHANGELOG.md).
 
@@ -271,9 +271,11 @@ Die Übertragung betrifft alle Vertices mit Quellgewicht, ohne räumlichen Malpi
 - [x] Hautgewichtsübertragung im Chromium-Browser mit Mengenregler, Undo/Redo und Projektdateiaustausch prüfen (0.55.0).
 
 
-**0.56.0:** Hautgewichtsübertragungen können auf einen kugelförmigen Bereich um das Quellgelenk begrenzt werden. Radius per Mausregler; Stärke nimmt zum Rand weich auf null ab. Außerhalb bleiben Gewichte unverändert. Assistent/MCP unterstützen optional `region: {center, radius}`; Projekt-/Katalogexport erhalten den Bereich. 266 Node-Tests und Build bestanden; erweiterter Chromium-Nachweis steht aus.
+**0.56.0:** Hautgewichtsübertragungen können auf einen kugelförmigen Bereich um das Quellgelenk begrenzt werden. Radius per Mausregler; Stärke nimmt zum Rand weich auf null ab. Außerhalb bleiben Gewichte unverändert. Assistent/MCP unterstützen optional `region: {center, radius}`; Projekt-/Katalogexport erhalten den Bereich. 266 Node-Tests, Build und alle 17 Chromium-Fälle bestanden ([CI-Nachweis](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/40219939990)).
 
 Der Bereich bezieht sich auf normalisierte Weltkoordinaten der ursprünglichen Grundpose, unabhängig von der aktuellen Figurpose. Die Oberfläche nutzt den gespeicherten Gelenkpunkt als Mittelpunkt; API-Aufrufe können einen eigenen Mittelpunkt setzen. Noch kein kontinuierlicher Malpinsel oder sichtbare Bereichsvorschau. Höchstens vier normalisierte Einflüsse pro Vertex; manuelle Hautqualität und echte Anbieterabnahme bleiben offen.
 
 - [x] Hautgewichtsübertragung räumlich auf eine Kugel mit weichem Randabfall begrenzen, speichern und über MCP verfügbar machen (0.56.0).
 - [ ] Sichtbare Bereichsvorschau und kontinuierliches Malen auf der Oberfläche ergänzen.
+
+- [x] Räumlich begrenzte Übertragung im Chromium-Browser mit Checkbox, Radiusregler, Undo/Redo und Wiederladen prüfen (0.56.0).
