@@ -338,3 +338,11 @@ Im Modus **Gelenke bearbeiten** einen vorhandenen Elternknochen auswählen, **�
 Für Agenten: `add_bone` verwendet `id` des Elternknochens und `position: [x,y,z]` in normalisierten Weltkoordinaten der Grundpose. Nur im Rig-Modus, mit Bearbeitungsfreigabe, aktueller Sitzung und Revision; der Assistent legt den Vorschlag zur Übernahme vor.
 
 Benötigt einen vorhandenen Elternknochen; kein neues Skelett auf einer ungeriggten Oberfläche. Neue Knochen wirken erst nach Gewichtsübertragung auf die Haut. Skalierte Knochenketten sind ausgeschlossen. Kontinuierlicher Gewichtspinsel, Gewichtsfärbung und manuelle Hautabnahme bleiben offen. Projekte mit freien Knochen benötigen mindestens 0.58.0; ältere Leser lehnen diese Einträge ab.
+
+## Mit dem Gewichtspinsel malen (0.59.0)
+
+In **Gelenke bearbeiten** den Quellknochen auswählen und unter **Oberflächen-Einfluss übertragen auf** den Zielknochen wählen. **Anteil** und **Radius** einstellen (für den Radiusregler gegebenenfalls **Nur im Umkreis des Quellgelenks** aktivieren). **Mit Pinsel übertragen** anklicken und mit gedrückter linker Maustaste über die Haut ziehen. Der Pinsel gilt immer lokal am Maustreffer, unabhängig von der Umkreis-Checkbox. Beim Aktivieren wird die Grundpose angezeigt. Nach dem Loslassen endet der Strich und die normale Auswahl ist wieder aktiv; zum nächsten Strich den Pinsel erneut aktivieren. Die mittlere Maustaste bleibt zwischen Strichen zur Ansichtsdrehung verfügbar.
+
+Der räumliche Abstand zwischen Aufträgen beträgt ein Viertel des Radius. Leere Quellbereiche ändern nichts. Jeder wirksame Strich erhöht die Revision einmal und lässt sich mit einem Undo vollständig zurücknehmen. Ein Verlust der Mausaufnahme oder Pointer-Abbruch nimmt den laufenden Strich zurück. Gespeichert werden die vorhandenen räumlichen Gewichtsübertragungen, daher ist kein neues Projektformat nötig.
+
+Erste Pinselstufe: kugelförmiger Einfluss, auch durch dünne Oberflächen hindurch; keine Beschränkung auf sichtbare Vertices, keine Gewichtsfärbung. Überlappende Aufträge verstärken den Effekt. Höchstens 128 gespeicherte Übertragungen pro Projekt einschließlich Einzelaufträgen; lange Striche können das Limit erreichen. Große Sprünge und fehlende Oberflächentreffer unterbrechen die Verbindung zwischen Aufträgen. Manuelle Hautqualitäts- und Performance-Abnahme bleibt offen.

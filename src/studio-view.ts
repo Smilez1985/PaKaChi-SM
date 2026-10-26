@@ -1,3 +1,4 @@
+import {StudioWeightPointer} from './studio-weight-pointer.ts';
 import {StudioWeightPreview} from './studio-weight-preview.ts';
 import type {WeightRegion} from './studio-data.ts';
 import {FIGURE_TRACK} from './studio-data.ts';
@@ -17,7 +18,7 @@ export class StudioView {
   private readonly ray=new T.Raycaster();
   private enabled=false;
   private selected:string|null=null;
-  private action:'select'|'add'|'connect'='select';
+  private action:'select'|'add'|'connect'|'brush'='select';
   private rotation=false;
   private figureEnabled=false;
   setFigureEnabled(value:boolean){this.figureEnabled=value;}
@@ -29,6 +30,10 @@ export class StudioView {
   onStart:()=>void=()=>{};
   onMove:(position:T.Vector3,rotation:T.Quaternion,intent?:'translate'|'rotate')=>void=()=>{};
   onEnd:()=>void=()=>{};
+  onBrushStart:()=>boolean=()=>false;
+  onBrushSample:(p:T.Vector3|null)=>void=()=>{};
+  onBrushEnd:(cancel:boolean)=>void=()=>{};
+  private brush:StudioWeightPointer;
   private rig:StudioRig;
   private camera:T.PerspectiveCamera;
   private canvas:HTMLCanvasElement;
@@ -41,10 +46,11 @@ export class StudioView {
     this.gizmo.addEventListener('objectChange',()=>{if(this.dragging)this.onMove(this.proxy.position.clone(),this.proxy.quaternion.clone(),this.rotation?'rotate':'translate');});
     this.gizmo.addEventListener('mouseUp',()=>{this.dragging=false;orbit.enabled=true;this.onEnd();this.refresh();});
     canvas.addEventListener('pointermove',this.move,true);canvas.addEventListener('pointercancel',this.cancel,true);canvas.addEventListener('lostpointercapture',this.cancel,true);canvas.addEventListener('pointerdown',this.down,true);canvas.addEventListener('pointerup',this.up,true);
+    this.brush=new StudioWeightPointer(canvas,(x,y)=>{this.aim(x,y);return this.ray.intersectObjects(this.rig.surfaces.map(s=>s.mesh),false)[0]?.point??null;},()=>this.onBrushStart(),p=>this.onBrushSample(p),cancel=>this.onBrushEnd(cancel),orbit);
     this.setEnabled(false);
   }
-  setEnabled(value:boolean) {this.enabled=value;this.canvas.style.cursor=value&&this.action==='add'?'crosshair':'';this.group.visible=value;this.gizmo.enabled=value;this.orbit.enabled=true;if(!value){this.gizmo.detach();this.dragging=false;}else this.refresh();}
-  setAction(value:'select'|'add'|'connect'){this.action=value;if(value!=='select')this.gizmo.detach();else this.refresh();this.canvas.style.cursor=value==='add'?'crosshair':'';}
+  setEnabled(value:boolean) {if(!value)this.brush.finish();this.brush.enabled=value&&this.action==='brush';this.enabled=value;this.canvas.style.cursor=value&&this.action==='add'?'crosshair':'';this.group.visible=value;this.gizmo.enabled=value;this.orbit.enabled=true;if(!value){this.gizmo.detach();this.dragging=false;}else this.refresh();}
+  setAction(value:'select'|'add'|'connect'|'brush'){if(value!=='brush')this.brush.finish();this.brush.enabled=this.enabled&&value==='brush';this.action=value;if(value!=='select')this.gizmo.detach();else this.refresh();this.canvas.style.cursor=(value==='add'||value==='brush')?'crosshair':'';}
   setRotation(value:boolean){this.rotation=value;this.gizmo.setMode(value?'rotate':'translate');}
   select(id:string|null){this.selected=id;this.refresh();}
   private start:{x:number;y:number}|null=null;
@@ -71,6 +77,7 @@ export class StudioView {
   private cancel=(event:PointerEvent)=>{if(this.direct?.pointer!==event.pointerId)return;const d=this.direct;this.direct=null;this.start=null;this.orbit.enabled=true;if(this.canvas.hasPointerCapture(event.pointerId))this.canvas.releasePointerCapture(event.pointerId);if(d.moved)this.onEnd();};
   private up=(event:PointerEvent)=>{
     if(this.direct?.pointer===event.pointerId){event.preventDefault();event.stopImmediatePropagation();this.cancel(event);return;}
+    if(this.action==='brush')return;
     const start=this.start;this.start=null;if(!start||!this.enabled||event.button!==0||Math.hypot(event.clientX-start.x,event.clientY-start.y)>4||this.dragging||this.gizmo.axis)return;
     const rect=this.canvas.getBoundingClientRect();this.ray.setFromCamera(new T.Vector2((event.clientX-rect.left)/rect.width*2-1,-(event.clientY-rect.top)/rect.height*2+1),this.camera);
     // Minimum 10 px pick radius keeps tiny face points usable without enlarging their display.
@@ -92,5 +99,5 @@ export class StudioView {
     if(this.enabled && point && this.action==='select') {if(!this.dragging){this.proxy.position.copy(this.rig.position(point));this.proxy.quaternion.copy(this.rig.rotation(point));}this.gizmo.setMode(this.rotation && (point.kind==='bone'||point.id===FIGURE_TRACK)?'rotate':'translate');this.gizmo.attach(this.proxy);}else this.gizmo.detach();
   }
   private clearGroup(group:T.Group){for(const child of [...group.children]){group.remove(child);if(child instanceof T.Mesh||child instanceof T.Line){child.geometry.dispose();(child.material as T.Material).dispose();}}}
-  dispose(){this.canvas.removeEventListener('pointermove',this.move,true);this.canvas.removeEventListener('pointercancel',this.cancel,true);this.canvas.removeEventListener('lostpointercapture',this.cancel,true);this.canvas.removeEventListener('pointerdown',this.down,true);this.canvas.removeEventListener('pointerup',this.up,true);this.canvas.style.cursor='';this.orbit.enabled=true;this.gizmo.dispose();this.weightPreview.dispose();this.clearGroup(this.handles);this.clearGroup(this.lines);this.group.removeFromParent();}
+  dispose(){this.brush.dispose();this.canvas.removeEventListener('pointermove',this.move,true);this.canvas.removeEventListener('pointercancel',this.cancel,true);this.canvas.removeEventListener('lostpointercapture',this.cancel,true);this.canvas.removeEventListener('pointerdown',this.down,true);this.canvas.removeEventListener('pointerup',this.up,true);this.canvas.style.cursor='';this.orbit.enabled=true;this.gizmo.dispose();this.weightPreview.dispose();this.clearGroup(this.handles);this.clearGroup(this.lines);this.group.removeFromParent();}
 }

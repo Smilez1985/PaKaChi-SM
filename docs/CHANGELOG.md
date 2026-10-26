@@ -12,6 +12,22 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.59.0] - 2026-10-26
+
+Zeitstempel: 2026-10-26T07:37:18+01:00 (Europe/Berlin)
+
+### Added
+
+- Gewichtspinsel mit linker Maustaste, räumlicher Vorschau und festem Abstand zwischen Aufträgen.
+- Gemeinsames Undo pro Strich, vollständiger Rollback bei Abbruch oder Budgetüberschreitung und Sperre paralleler Agentenänderungen.
+- Prüfungen für Abtastung, leere Bereiche, Abbruch, Navigation und Undo/Redo; Browserfall mit Projekt-Wiederladen.
+
+### Changed
+
+- README, Design, Roadmap, Studio-Anleitung und deutsche/englische Pinselhinweise ergänzt.
+
+**Prüfung:** 275 Node-Tests und Build bestanden. Neuer Chromium-Nachweis steht aus. Erste Pinselstufe: kugelförmiger Einfluss, auch durch dünne Oberflächen hindurch; keine Beschränkung auf sichtbare Vertices, keine Gewichtsfärbung. Überlappende Aufträge verstärken den Effekt. Höchstens 128 gespeicherte Übertragungen pro Projekt einschließlich Einzelaufträgen; lange Striche können das Limit erreichen. Große Sprünge und fehlende Oberflächentreffer unterbrechen die Verbindung zwischen Aufträgen. Manuelle Hautqualitäts- und Performance-Abnahme bleibt offen.
+
 ## [0.58.0] - 2026-10-26
 
 Zeitstempel: 2026-10-26T07:00:49+01:00 (Europe/Berlin)
@@ -1195,3 +1211,5 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 [0.57.0]: PRUEFUNG-0.57.0.md
 
 [0.58.0]: PRUEFUNG-0.58.0.md
+
+[0.59.0]: PRUEFUNG-0.59.0.md

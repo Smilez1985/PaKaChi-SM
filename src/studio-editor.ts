@@ -1,3 +1,4 @@
+import {StudioWeightStroke} from './studio-weight-stroke.ts';
 import {checkMoveBends} from './move-limit-check.ts';
 import {loadMoveLibrary,loadLibraryMove} from './move-library.ts';
 import type {LibraryMove} from './move-library.ts';
@@ -29,6 +30,7 @@ export class StudioEditor {
   private rotate=false;
   private insertionRatio=.5;
   private addingBoneParent:string|null=null;
+  private weightStroke:StudioWeightStroke|null=null;
   private weightAmount=.5;
   private weightLocal=false;
   private weightRadius=.2;
@@ -38,7 +40,7 @@ export class StudioEditor {
   private timeline:{move:Move;time:number;preview:boolean;sequence?:StudioMove}|null=null;
   private gesture:Snapshot|null=null;
   private gesturePosition:T.Vector3|null=null;
-  get interactionActive(){return this.playing||!!this.gesture;}
+  get interactionActive(){return this.playing||!!this.gesture||!!this.weightStroke;}
   readonly session=crypto.randomUUID();
   private revision=0;
   private agentEditing=false;
@@ -69,6 +71,13 @@ export class StudioEditor {
       this.view.refresh();this.refreshWeightPreview();this.refreshNumbers();
     };
     view.onEnd=()=>{if(this.gesture){flagAffectedPoses(this.gesture.data,this.data);this.history.push(this.gesture);this.gesture=null;this.mark();this.render();}};
+    view.onBrushStart=()=>{
+      const source=this.point,target=this.data.points.find(p=>p.id===this.host.querySelector<HTMLSelectElement>('#weight-target')?.value);
+      if(!this.active||!this.edit||this.interactionActive||source?.kind!=='bone'||target?.kind!=='bone')return false;
+      this.weightStroke=new StudioWeightStroke(rig,source,target,this.weightAmount,this.weightRadius);this.host.querySelectorAll<HTMLButtonElement|HTMLInputElement|HTMLSelectElement>('button,input,select').forEach(e=>e.disabled=true);return true;
+    };
+    view.onBrushSample=position=>{if(!this.weightStroke)return;try{this.weightStroke.sample(position);this.view.setWeightRegion?.(position?{center:position.toArray(),radius:this.weightRadius}:null);}catch(error){this.weightStroke=null;this.view.setAction('select');this.render();this.hooks.feedback((error as Error).message+' Pinselstrich zurückgenommen.');}};
+    view.onBrushEnd=cancel=>{const stroke=this.weightStroke;this.weightStroke=null;if(!stroke)return;if(cancel)stroke.cancel();else if(stroke.finish()){flagAffectedPoses(stroke.before.data,this.data);this.history.push(stroke.before);this.mark();}this.view.setAction('select');this.render();this.hooks.feedback(cancel?'Pinselstrich abgebrochen.':'Pinselstrich abgeschlossen. Posen und Bewegungen prüfen.');};
     this.render();
   }
   get point(){if(this.selected===FIGURE_TRACK&&!this.edit)return this.rig.figure;return this.rig.data.points.find(p=>p.id===this.selected);}
@@ -83,7 +92,7 @@ export class StudioEditor {
   private mark(){this.moveCheck?.abort();this.revision++;this.dirty=true;this.hooks.changed();}
   private mutate(fn:()=>void){const before=this.snapshot();fn();flagAffectedPoses(before.data,this.data);this.history.push(before);this.mark();this.render();}
   enter(){this.revision++;this.hooks.suspend();this.stopMove();this.active=true;this.rig.reset();if(this.data.draft)this.rig.apply(this.data.draft);this.view.setEnabled(true);this.render();}
-  leave(){this.moveCheck?.abort();this.libraryRequest?.abort();this.agentEditing=false;this.revision++;if(this.active&&this.proposalOrigin)this.data.draft=structuredClone(this.proposalOrigin);else if(this.active&&!this.playing)this.data.draft=this.rig.capture();this.active=false;this.stopMove();this.view.setEnabled(false);this.rig.restoreSource();this.hooks.resume();}
+  leave(){this.view.setAction('select');this.moveCheck?.abort();this.libraryRequest?.abort();this.agentEditing=false;this.revision++;if(this.active&&this.proposalOrigin)this.data.draft=structuredClone(this.proposalOrigin);else if(this.active&&!this.playing)this.data.draft=this.rig.capture();this.active=false;this.stopMove();this.view.setEnabled(false);this.rig.restoreSource();this.hooks.resume();}
   stopMove(){if(this.proposalOrigin){this.rig.apply(this.proposalOrigin);this.proposalOrigin=null;this.view.refresh();}if(this.inspectionOrigin){this.rig.apply(this.inspectionOrigin);this.inspectionOrigin=null;this.view.refresh();}this.timeline=null;this.paused=false;this.view.setEnabled(this.active);}
   stopPreview(){this.stopMove();this.render();}
   play(id:string,preview=false):boolean {
@@ -121,7 +130,7 @@ export class StudioEditor {
     <label for="studio-points">Gelenk / Gesichtspunkt</label><select id="studio-points"><option value="">Punkt auswählen …</option></select>
     <div class="studio-actions" ${this.edit?'':'hidden'}><label>Position auf der Knochenstrecke <output id="bone-ratio-value">${Math.round(this.insertionRatio*100)} %</output><input id="bone-ratio" type="range" min="10" max="90" step="1" value="${Math.round(this.insertionRatio*100)}" aria-label="Position des Zwischengelenks"><span class="subtle">Vom Elternknochen zum ausgewählten Kindknochen; 50 % = Mitte.</span></label><button id="bone-add">＋ Knochen setzen</button><button id="bone-insert">Knochen dazwischen einfügen</button><button id="point-add">＋ Punkt setzen</button><button id="point-connect" ${this.point?'':'disabled'}>Verbinden / lösen</button></div>
     <div ${this.edit&&this.point?.kind==='bone'?'':'hidden'}><label for="bone-parent">Neuer Elternknochen</label><select id="bone-parent"></select><button id="bone-reparent">Knochen umhängen</button><p class="subtle">Ändert die echte Skelettverbindung. Einzelposen bleiben erhalten; Bewegungsübergänge danach prüfen.</p></div>
-    <div ${this.edit&&this.point?.kind==='bone'?'':'hidden'}><label for="weight-target">Oberflächen-Einfluss übertragen auf</label><select id="weight-target"></select><label>Anteil <output id="weight-amount-value">${Math.round(this.weightAmount*100)} %</output><input id="weight-amount" type="range" min="1" max="100" step="1" value="${Math.round(this.weightAmount*100)}"></label><label class="check"><input id="weight-local" type="checkbox" ${this.weightLocal?'checked':''}> Nur im Umkreis des Quellgelenks</label><label>Radius <output id="weight-radius-value">${this.weightRadius.toFixed(3)}</output><input id="weight-radius" type="range" min="0.005" max="2" step="0.005" value="${this.weightRadius}" ${this.weightLocal?'':'disabled'}></label><button id="weight-transfer">Einfluss übertragen</button><p class="subtle">Überträgt Einfluss des gewählten Knochens. Im Umkreis nimmt die Stärke zum Rand weich ab; außerhalb bleibt die Hautzuordnung unverändert. Grüne Außenringe zeigen die Grenze, orange Innenringe die halbe Stärke. Die Vorschau zeigt den räumlichen Bereich, nicht die tatsächlich gewichteten Vertices. Bezug ist die ursprüngliche Grundpose. Ohne Umkreis gilt die Übertragung überall. Grundpose bleibt erhalten; Posen und Bewegungen prüfen. Pro Oberflächenpunkt bleiben höchstens vier Einflüsse.</p></div>
+    <div ${this.edit&&this.point?.kind==='bone'?'':'hidden'}><label for="weight-target">Oberflächen-Einfluss übertragen auf</label><select id="weight-target"></select><label>Anteil <output id="weight-amount-value">${Math.round(this.weightAmount*100)} %</output><input id="weight-amount" type="range" min="1" max="100" step="1" value="${Math.round(this.weightAmount*100)}"></label><label class="check"><input id="weight-local" type="checkbox" ${this.weightLocal?'checked':''}> Nur im Umkreis des Quellgelenks</label><label>Radius <output id="weight-radius-value">${this.weightRadius.toFixed(3)}</output><input id="weight-radius" type="range" min="0.005" max="2" step="0.005" value="${this.weightRadius}" ${this.weightLocal?'':'disabled'}></label><button id="weight-transfer">Einfluss übertragen</button><button id="weight-brush">Mit Pinsel übertragen</button><p class="subtle">Quelle und Ziel wählen, dann mit gedrückter linker Maustaste über die Haut ziehen. Ein Strich = ein Undo-Schritt. Radius gilt auch ohne Umkreis-Checkbox. Überlappende Aufträge verstärken den Einfluss. Höchstens 128 gespeicherte Übertragungen; bei Überschreitung wird der ganze Strich zurückgenommen.</p><p class="subtle">Überträgt Einfluss des gewählten Knochens. Im Umkreis nimmt die Stärke zum Rand weich ab; außerhalb bleibt die Hautzuordnung unverändert. Grüne Außenringe zeigen die Grenze, orange Innenringe die halbe Stärke. Die Vorschau zeigt den räumlichen Bereich, nicht die tatsächlich gewichteten Vertices. Bezug ist die ursprüngliche Grundpose. Ohne Umkreis gilt die Übertragung überall. Grundpose bleibt erhalten; Posen und Bewegungen prüfen. Pro Oberflächenpunkt bleiben höchstens vier Einflüsse.</p></div>
     <div id="point-fields" ${this.point?'':'hidden'}><label>Name<input id="point-name" maxlength="100"></label><label>Punktgröße<input id="point-size" type="range" min="0.003" max="0.15" step="0.001"></label>
     <div id="bend-fields" hidden><label class="check"><input id="bend-enabled" type="checkbox"> IK-Beugegrenze</label><label>Minimale Beugung <output id="bend-min-value"></output><input id="bend-min" type="range" min="0" max="175" step="1"></label><label>Maximale Beugung <output id="bend-max-value"></output><input id="bend-max" type="range" min="0" max="175" step="1"></label><p class="subtle">0° ist gestreckt. Gilt beim Ziehen des Endpunkts einer Zweiglied-Kette. Direkte Drehung und gespeicherte Moves bleiben unverändert.</p></div><label id="radius-label">Einflussbereich<input id="point-radius" type="range" min="0.005" max="0.6" step="0.005"></label>
     <div class="point-xyz">${['x','y','z'].map(a=>`<label>${a.toUpperCase()}<input id="point-${a}" type="number" step="0.005" min="-100" max="100"></label>`).join('')}</div>
@@ -158,6 +167,8 @@ export class StudioEditor {
     input('weight-amount').oninput=()=>{this.weightAmount=Number(input('weight-amount').value)/100;q('weight-amount-value').textContent=Math.round(this.weightAmount*100)+' %';};
     input('weight-local').onchange=()=>{this.weightLocal=input('weight-local').checked;input('weight-radius').disabled=!this.weightLocal;this.refreshWeightPreview();};
     input('weight-radius').oninput=()=>{this.weightRadius=Number(input('weight-radius').value);q('weight-radius-value').textContent=this.weightRadius.toFixed(3);this.refreshWeightPreview();};
+    q<HTMLButtonElement>('weight-brush').disabled=!this.edit||this.point?.kind!=='bone'||this.interactionActive;
+    on('weight-brush',()=>{if(!this.edit||this.point?.kind!=='bone'||this.interactionActive)return;if(!this.data.points.some(p=>p.id===weightTarget.value&&p.kind==='bone'))throw Error('Zielknochen auswählen.');this.rig.reset();this.view.refresh();this.addingBoneParent=null;this.view.setAction('brush');this.hooks.feedback('Mit linker Maustaste über die Haut malen. Ein Strich wird gemeinsam rückgängig gemacht.');});
     q<HTMLButtonElement>('weight-transfer').disabled=!this.edit||this.point?.kind!=='bone'||this.interactionActive;
     on('weight-transfer',()=>{if(!this.edit||!this.point||this.interactionActive)return;const target=this.data.points.find(p=>p.id===weightTarget.value);if(!target)throw Error('Zielknochen auswählen.');this.mutate(()=>this.rig.transferWeights(this.point!,target,this.weightAmount,this.weightLocal?{center:[...this.point!.rest],radius:this.weightRadius}:undefined));this.hooks.feedback('Oberflächen-Einfluss übertragen. Posen und Bewegungen prüfen.');});
     on('bone-delete',()=>{if(!this.edit||this.point?.kind!=='bone'||this.interactionActive)return;try{this.mutate(()=>{this.selected=this.rig.deleteBone(this.point!);});this.hooks.feedback('Knochen entfernt. Kinder und Hautgewichte dem Elternknochen zugeordnet; Posen prüfen.');}catch(error){this.hooks.feedback((error as Error).message);}});
@@ -263,7 +274,7 @@ export class StudioEditor {
   inspect(args:Record<string,unknown>={}) {
     const section=args.section??'info',offset=args.offset??0,limit=args.limit??32;
     if(Object.keys(args).some(k=>!['section','offset','limit'].includes(k))||!['info','points','poses','moves'].includes(section as string)||!Number.isInteger(offset)||(offset as number)<0||!Number.isInteger(limit)||(limit as number)<1||(limit as number)>32)throw new Error('Ungültige Studio-Abfrage.');
-    const info={session:this.session,revision:this.revision,dirty:this.dirty,open:this.active,editable:this.active&&this.agentEditing&&!this.playing&&!this.gesture,mode:this.edit?'rig':'pose',figure:{id:FIGURE_TRACK,scale:this.rig.scale,position:this.rig.position(this.rig.figure).toArray(),rotation:this.rig.rotation(this.rig.figure).toArray()},counts:{points:this.data.points.length,poses:this.data.poses.length,moves:this.data.moves.length,surfaces:this.rig.surfaces.length},undo:this.history.canUndo,redo:this.history.canRedo};
+    const info={session:this.session,revision:this.revision,dirty:this.dirty,open:this.active,editable:this.active&&this.agentEditing&&!this.interactionActive,mode:this.edit?'rig':'pose',figure:{id:FIGURE_TRACK,scale:this.rig.scale,position:this.rig.position(this.rig.figure).toArray(),rotation:this.rig.rotation(this.rig.figure).toArray()},counts:{points:this.data.points.length,poses:this.data.poses.length,moves:this.data.moves.length,surfaces:this.rig.surfaces.length},undo:this.history.canUndo,redo:this.history.canRedo};
     if(section==='info')return info;
     const items=section==='points'?this.data.points.map(p=>({...p,...(p.kind==='bone'?{parentBone:this.rig.bones.indexOf(this.rig.bones[p.bone!].parent as T.Bone)<0?null:this.rig.bones.indexOf(this.rig.bones[p.bone!].parent as T.Bone),parentId:this.data.points.find(q=>q.kind==='bone'&&this.rig.bones[q.bone!]===this.rig.bones[p.bone!].parent)?.id??null}:{}),position:this.rig.position(p).toArray(),rotation:this.rig.rotation(p).toArray(),ikChain:this.rig.poseChain(p).map(b=>this.data.points.find(p=>p.kind==='bone'&&this.rig.bones[p.bone!]===b)!.id),connections:this.data.links.filter(l=>l.includes(p.id)).map(l=>l[0]===p.id?l[1]:l[0])})):section==='poses'?this.data.poses.map(p=>({id:p.id,name:p.name,seconds:p.seconds,review:p.review??[]})):this.data.moves.map(m=>({id:m.id,name:m.name,loop:m.loop,poseCount:m.poses.length,poses:[...m.poses],...moveReview(this.data,m)}));
     // Bound pages by count and UTF-8 size so both MCP bridges stay below their payload limit.
@@ -273,7 +284,7 @@ export class StudioEditor {
   execute(raw:unknown) {
     const c=parseStudioCommand(raw);
     if(!this.active||!this.agentEditing)throw new Error('Studio-Bearbeitung durch KI ist nicht freigegeben.');
-    if(this.playing||this.gesture)throw new Error('Studio ist beschäftigt. Nach Vorschau oder Ziehgeste erneut abfragen.');
+    if(this.interactionActive)throw new Error('Studio ist beschäftigt. Nach Vorschau oder Ziehgeste erneut abfragen.');
     if(c.session!==this.session||c.expectedRevision!==this.revision)throw new Error('Studio-Stand hat sich geändert. get_studio erneut abfragen.');
     const point=c.id===FIGURE_TRACK?this.rig.figure:this.data.points.find(p=>p.id===c.id),pose=this.data.poses.find(p=>p.id===c.id);
     const require=(ok:unknown,message='Studio-Aktion passt nicht zum aktuellen Modus oder Ziel.'):void=>{if(!ok)throw new Error(message);};
