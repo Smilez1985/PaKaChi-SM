@@ -360,3 +360,9 @@ Nur geriggte Oberflächen mit Skinning-Gewichten. Farben werden zwischen Vertice
 Pinsel und Einzelübertragungen teilen sich jetzt **1024 Aufträge pro Projekt**. Ein Strich bleibt ein gemeinsamer Undo-Schritt. Wird das Limit innerhalb eines Strichs überschritten, wird weiterhin der ganze Strich zurückgenommen. Neue Aufträge berechnen nur die nächste Gewichtsänderung; sie spielen den bisherigen Verlauf nicht erneut ab. Export und Wiederladen erhalten die Aufträge in ihrer Reihenfolge.
 
 Projekte mit mehr als 128 Gewichtsaufträgen benötigen mindestens 0.61.0. Das Projektformat bleibt Version 1; ältere Leser lehnen das größere Budget ab. Laden und Undo/Redo rekonstruieren weiterhin den gespeicherten Verlauf. Die manuelle Performance-Abnahme großer Modelle bleibt offen; keine pauschale Echtzeit-Zusage. Sichtbare Oberflächen begrenzen den kugelförmigen Pinsel weiterhin nicht.
+
+## Gewichtsverläufe messen (0.62.0)
+
+`npm run benchmark:weights` misst dreimal den Rig-Wiederaufbau des mitgelieferten Mika-Modells mit 256 räumlichen Gewichtsaufträgen und gibt Einzelzeiten sowie Median als JSON aus. Der Test verändert keine Projektdateien. Dateiimport, Oberfläche und Rendering sind nicht Teil dieser Messung. Der Chromium-Test protokolliert dagegen die Zeit bis zur Bereitschaftsmeldung nach dem Dateiimport.
+
+Das Budget bleibt bei 1024 Aufträgen. Lokale Messung mit 256 Aufträgen: 1626/1471/1551 ms für den reinen Rig-Reset (Median 1551 ms); vorherige Vergleichsmessung 6375/5903/5718 ms. Dies ist kein vollständiger Browserimport und keine allgemeine Echtzeit-Zusage. Vorberechnete Weltpositionen benötigen 24 Byte pro Vertex statt zuvor 12 Byte für die Positionskopie. Beschränkung des Pinsels auf sichtbare Oberflächen und manuelle Prüfung großer Modelle bleiben offen.

@@ -12,6 +12,22 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.62.0] - 2026-10-26
+
+Zeitstempel: 2026-10-26T22:48:12+01:00 (Europe/Berlin)
+
+### Changed
+
+- Gewichtsberechnung durch vorberechnete Weltpositionen, wiederverwendete Zahlenfelder, frühes Überspringen und direkte Pufferkopien beschleunigt.
+- README, Design, Roadmap und Bedienanleitung mit getrennten Rig-Reset- und Importmessungen aktualisiert.
+
+### Added
+
+- Deterministischer Vergleich gegen die bisherige Map-Berechnung, einschließlich Duplikaten, Gleichständen, räumlichem Abfall und Interleaved-Attributen.
+- `npm run benchmark:weights` für reproduzierbare lokale Messungen mit Mika und 256 Aufträgen.
+
+**Prüfung:** 279 Node-Tests und Build bestanden. Neuer Chromium-Nachweis steht aus. Das Budget bleibt bei 1024 Aufträgen. Lokale Messung mit 256 Aufträgen: 1626/1471/1551 ms für den reinen Rig-Reset (Median 1551 ms); vorherige Vergleichsmessung 6375/5903/5718 ms. Dies ist kein vollständiger Browserimport und keine allgemeine Echtzeit-Zusage. Vorberechnete Weltpositionen benötigen 24 Byte pro Vertex statt zuvor 12 Byte für die Positionskopie. Beschränkung des Pinsels auf sichtbare Oberflächen und manuelle Prüfung großer Modelle bleiben offen.
+
 ## [0.61.0] - 2026-10-26
 
 Zeitstempel: 2026-10-26T13:25:33+01:00 (Europe/Berlin)
@@ -1254,3 +1270,5 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 [0.60.0]: PRUEFUNG-0.60.0.md
 
 [0.61.0]: PRUEFUNG-0.61.0.md
+
+[0.62.0]: PRUEFUNG-0.62.0.md

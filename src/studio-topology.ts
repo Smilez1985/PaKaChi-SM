@@ -18,14 +18,18 @@ export function validateReparent(bone:T.Bone|undefined,parent:T.Bone|undefined){
 /** Reversible topology overlay. Source skeletons and vertex weights remain recoverable. */
 export class StudioTopology {
  private parents:{bone:T.Bone;parent:T.Object3D;position:T.Vector3}[];
- private skins:{mesh:T.SkinnedMesh;skeleton:T.Skeleton;indices:T.BufferAttribute;weights:T.BufferAttribute;positions:T.BufferAttribute;world:T.Matrix4}[]=[];
+ private skins:{mesh:T.SkinnedMesh;skeleton:T.Skeleton;indices:T.BufferAttribute;weights:T.BufferAttribute;worldPositions:Float64Array}[]=[];
  private added:T.Bone[]=[];
  private generated:T.Skeleton[]=[];
  private source:T.Bone[];
  constructor(source:T.Bone[],root:T.Object3D){
   this.source=source;
   this.parents=source.map(bone=>({bone,parent:bone.parent!,position:bone.position.clone()}));
-  root.traverse(n=>{if(n instanceof T.SkinnedMesh)this.skins.push({mesh:n,skeleton:n.skeleton,indices:n.geometry.getAttribute('skinIndex').clone() as T.BufferAttribute,weights:n.geometry.getAttribute('skinWeight').clone() as T.BufferAttribute,positions:n.geometry.getAttribute('position').clone() as T.BufferAttribute,world:n.matrixWorld.clone()});});
+  root.traverse(n=>{if(n instanceof T.SkinnedMesh){
+   const positions=n.geometry.getAttribute('position'),worldPositions=new Float64Array(positions.count*3),point=new T.Vector3();
+   for(let v=0;v<positions.count;v++)point.fromBufferAttribute(positions,v).applyMatrix4(n.matrixWorld).toArray(worldPositions,v*3);
+   this.skins.push({mesh:n,skeleton:n.skeleton,indices:n.geometry.getAttribute('skinIndex').clone() as T.BufferAttribute,weights:n.geometry.getAttribute('skinWeight').clone() as T.BufferAttribute,worldPositions});
+  }});
  }
  restore(){
   for(const {bone,parent,position} of this.parents){if(bone.parent!==parent)parent.add(bone);bone.position.copy(position);}
@@ -38,17 +42,30 @@ export class StudioTopology {
   let affected=0;const commits:(()=>void)[]=[];
     for(const s of this.skins){const skeleton=s.mesh.skeleton,source=skeleton.bones.indexOf(from),target=skeleton.bones.indexOf(to);if(source<0)continue;
      const originalIndices=s.mesh.geometry.getAttribute('skinIndex'),originalWeights=s.mesh.geometry.getAttribute('skinWeight'),indices=originalIndices.clone(),values=originalWeights.clone();
+     const ids=new Int32Array(5),merged=new Float64Array(5);let changed=false;
      for(let v=0;v<indices.count;v++){
-      const merged=new Map<number,number>();for(let k=0;k<4;k++){const i=indices.getComponent(v,k),w=values.getComponent(v,k);if(w>0)merged.set(i,(merged.get(i)??0)+w);}
-      const original=merged.get(source)??0;if(original<=0)continue;
+      let original=0;for(let k=0;k<4;k++)if(indices.getComponent(v,k)===source&&values.getComponent(v,k)>0)original+=values.getComponent(v,k);
+      if(original<=0)continue;
       let amount=edit.amount;
-      if(edit.region){const distance=new T.Vector3().fromBufferAttribute(s.positions,v).applyMatrix4(s.world).distanceTo(new T.Vector3().fromArray(edit.region.center));const u=T.MathUtils.clamp(1-distance/edit.region.radius,0,1);amount*=u*u*(3-2*u);if(amount<=0)continue;}
+      if(edit.region){const offset=v*3,dx=s.worldPositions[offset]-edit.region.center[0],dy=s.worldPositions[offset+1]-edit.region.center[1],dz=s.worldPositions[offset+2]-edit.region.center[2];const u=T.MathUtils.clamp(1-Math.sqrt(dx*dx+dy*dy+dz*dz)/edit.region.radius,0,1);amount*=u*u*(3-2*u);if(amount<=0)continue;}
       if(target<0)throw Error('Zielknochen fehlt in einer betroffenen Skinning-Palette.');
-      affected++;merged.set(source,original*(1-amount));merged.set(target,(merged.get(target)??0)+original*amount);
-      const strongest=[...merged].filter(([,w])=>w>0).sort((a,b)=>b[1]-a[1]||a[0]-b[0]).slice(0,4),sum=strongest.reduce((total,[,w])=>total+w,0);
-      for(let k=0;k<4;k++){indices.setComponent(v,k,strongest[k]?.[0]??0);values.setComponent(v,k,(strongest[k]?.[1]??0)/sum);}
+      affected++;changed=true;let count=0;
+      for(let k=0;k<4;k++){const id=indices.getComponent(v,k),w=values.getComponent(v,k);if(w<=0)continue;let slot=0;while(slot<count&&ids[slot]!==id)slot++;if(slot===count){ids[count]=id;merged[count++]=0;}merged[slot]+=w;}
+      let targetSlot=-1;
+      for(let k=0;k<count;k++){if(ids[k]===source)merged[k]=original*(1-amount);if(ids[k]===target)targetSlot=k;}
+      if(targetSlot<0){targetSlot=count++;ids[targetSlot]=target;merged[targetSlot]=0;}merged[targetSlot]+=original*amount;
+      // Stable numeric ordering matches the reference: weight descending, palette index ascending.
+      for(let k=1;k<count;k++){const id=ids[k],w=merged[k];let j=k;while(j>0&&(merged[j-1]<w||merged[j-1]===w&&ids[j-1]>id)){ids[j]=ids[j-1];merged[j]=merged[j-1];j--;}ids[j]=id;merged[j]=w;}
+      let sum=0;for(let k=0;k<Math.min(count,4);k++)if(merged[k]>0)sum+=merged[k];
+      for(let k=0;k<4;k++){const present=k<count&&merged[k]>0;indices.setComponent(v,k,present?ids[k]:0);values.setComponent(v,k,present?merged[k]/sum:0);}
      }
-     commits.push(()=>{for(let v=0;v<indices.count;v++)for(let k=0;k<4;k++){originalIndices.setComponent(v,k,indices.getComponent(v,k));originalWeights.setComponent(v,k,values.getComponent(v,k));}originalIndices.needsUpdate=true;originalWeights.needsUpdate=true;});
+     if(changed)commits.push(()=>{
+      if(originalIndices instanceof T.BufferAttribute&&indices instanceof T.BufferAttribute)originalIndices.array.set(indices.array);
+      else for(let v=0;v<indices.count;v++)for(let k=0;k<4;k++)originalIndices.setComponent(v,k,indices.getComponent(v,k));
+      if(originalWeights instanceof T.BufferAttribute&&values instanceof T.BufferAttribute)originalWeights.array.set(values.array);
+      else for(let v=0;v<values.count;v++)for(let k=0;k<4;k++)originalWeights.setComponent(v,k,values.getComponent(v,k));
+      originalIndices.needsUpdate=true;originalWeights.needsUpdate=true;
+     });
     }
     if(!affected)throw Error('Der Quellknochen hat keinen übertragbaren Oberflächen-Einfluss.');
   for(const commit of commits)commit();

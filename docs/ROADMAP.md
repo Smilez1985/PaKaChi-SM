@@ -1,6 +1,6 @@
 # Roadmap – was kommt
 
-**Softwarestand: 0.61.0 · Abgleich: 26.10.2026.** Teil der [Blaupause](README.md).
+**Softwarestand: 0.62.0 · Abgleich: 26.10.2026.** Teil der [Blaupause](README.md).
 
 Ein Häkchen bedeutet implementiert; es ersetzt keine visuelle oder externe Live-Abnahme. Die Nachweise und Prüfgrenzen stehen im [Prüfstand](PRUEFUNG.md). Die Versionshistorie gehört ins [Changelog](CHANGELOG.md).
 
@@ -330,3 +330,14 @@ Nur geriggte Oberflächen mit Skinning-Gewichten. Farben werden zwischen Vertice
 Projekte mit mehr als 128 Gewichtsaufträgen benötigen mindestens 0.61.0. Das Projektformat bleibt Version 1; ältere Leser lehnen das größere Budget ab. Laden und Undo/Redo rekonstruieren weiterhin den gespeicherten Verlauf. Die manuelle Performance-Abnahme großer Modelle bleibt offen; keine pauschale Echtzeit-Zusage. Sichtbare Oberflächen begrenzen den kugelförmigen Pinsel weiterhin nicht.
 
 - [ ] Rekonstruktion langer Gewichtsverläufe beim Import beschleunigen: 256 Aufträge benötigten im CI-Ladetest 19,181 Sekunden.
+
+## Gewichtsverläufe schneller berechnen
+
+**0.62.0:** Die Berechnung langer Gewichtsverläufe verwendet vorberechnete Weltpositionen, wiederverwendete kleine Zahlenfelder und direkte Pufferkopien. Vertices ohne Quellgewicht oder außerhalb des Bereichs werden früh übersprungen. Der Gewichtsvergleich bestätigt dieselben Ergebnisse einschließlich Zusammenführen doppelter Indizes, Sortierung, Normalisierung und Vier-Einfluss-Grenze.
+
+279 Node-Tests und Build bestanden. Neuer Chromium-Nachweis steht aus.
+
+Das Budget bleibt bei 1024 Aufträgen. Lokale Messung mit 256 Aufträgen: 1626/1471/1551 ms für den reinen Rig-Reset (Median 1551 ms); vorherige Vergleichsmessung 6375/5903/5718 ms. Dies ist kein vollständiger Browserimport und keine allgemeine Echtzeit-Zusage. Vorberechnete Weltpositionen benötigen 24 Byte pro Vertex statt zuvor 12 Byte für die Positionskopie. Beschränkung des Pinsels auf sichtbare Oberflächen und manuelle Prüfung großer Modelle bleiben offen.
+
+- [x] Gewichtsberechnung ohne neue Map-/Vektorobjekte pro Vertex und Auftrag beschleunigen (0.62.0).
+- [ ] Vollständige Importzeiten großer Projekte weiter messen und optimieren; manuelle Performance-Abnahme bleibt offen.
