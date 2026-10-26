@@ -2,7 +2,7 @@ import {StudioTopology,validateReparent} from './studio-topology.ts';
 import {solveLimb} from './studio-ik.ts';
 import {detectConnections,edgeKey} from './studio-detection.ts';
 import * as T from 'three';
-import { emptyStudio, FIGURE_TRACK, neutralFigure, validFigureScale, validWeightRegion } from './studio-data.ts';
+import { MAX_WEIGHT_TRANSFERS, emptyStudio, FIGURE_TRACK, neutralFigure, validFigureScale, validWeightRegion } from './studio-data.ts';
 import type { ControlPoint, StudioData, Transform, Vec3, Pose, StudioMove, WeightRegion } from './studio-data.ts';
 const read = (o:T.Object3D):Transform => ({position:o.position.toArray(),rotation:o.quaternion.toArray()});
 const write = (o:T.Object3D,v:Transform) => {o.position.fromArray(v.position);o.quaternion.fromArray(v.rotation);};
@@ -94,14 +94,13 @@ export class StudioRig {
     }catch(error){this.data=before;this.reset();this.apply(original);throw error;}
   }
   transferWeights(point:ControlPoint,target:ControlPoint,amount:number,region?:WeightRegion){
-    if(point.kind!=='bone'||target.kind!=='bone'||point===target||!this.data.points.includes(point)||!this.data.points.includes(target)||!Number.isFinite(amount)||amount<=0||amount>1||(this.data.weightTransfers?.length??0)>=128)throw Error('Zwei verschiedene Knochen und einen Anteil über 0 bis 100 % wählen (höchstens 128 Übertragungen).');
+    if(point.kind!=='bone'||target.kind!=='bone'||point===target||!this.data.points.includes(point)||!this.data.points.includes(target)||!Number.isFinite(amount)||amount<=0||amount>1||(this.data.weightTransfers?.length??0)>=MAX_WEIGHT_TRANSFERS)throw Error('Zwei verschiedene Knochen und einen Anteil über 0 bis 100 % wählen (höchstens 1024 Übertragungen).');
     if(region!==undefined&&!validWeightRegion(region))throw Error('Ungültiger Bereich für Hautgewichte.');
-    const before=structuredClone(this.data),values=this.capture();
-    try{
-      this.data.weightTransfers=[...(this.data.weightTransfers??[]),{from:point.bone!,to:target.bone!,amount,...(region?{region:structuredClone(region)}:{}),after:(this.data.boneInsertions?.length??0)+(this.data.boneDeletions?.length??0)}];
-      this.reset();this.apply(values);
-    }catch(error){this.data=before;this.reset();this.apply(values);throw error;}
+    const edit={from:point.bone!,to:target.bone!,amount,...(region?{region:structuredClone(region)}:{}),after:(this.data.boneInsertions?.length??0)+(this.data.boneDeletions?.length??0)};
+    this.topology.transfer(edit,this.bones[point.bone!],this.bones[target.bone!]);
+    (this.data.weightTransfers??=[]).push(edit);
   }
+
   reparentBone(point:ControlPoint,target:ControlPoint){
     if(point.kind!=='bone'||target.kind!=='bone'||!this.data.points.includes(point)||!this.data.points.includes(target)||(this.data.boneReparents?.length??0)>=256)throw Error('Zwei vorhandene Knochen auswählen (höchstens 256 Umhängungen).');
     const bone=this.bones[point.bone!],parent=this.bones[target.bone!];validateReparent(bone,parent);

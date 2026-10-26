@@ -73,3 +73,14 @@ test('regional transfers reject empty selections and malformed spheres without m
  assert.throws(()=>rig.transferWeights(f.point(f.arm),f.point(f.hand),.5,{center:[99,99,99],radius:.1}),/keinen/);assert.deepEqual(rig.data,before);assert.deepEqual(arrays(f.mesh),skin);
  const bad={...project(rig),studio:{...rig.data,weightTransfers:[{from:1,to:2,amount:.5,after:0,region:{center:[0,0,0],radius:-1}}]}};assert.throws(()=>parseProject(bad));
 });
+
+test('expanded weight budget applies incrementally without resetting pose and exactly matches replay',async()=>{
+ const f=fixture(),{rig,mesh}=f;f.hand.rotation.z=.4;rig.root.updateMatrixWorld(true);const values=rig.capture(),skeleton=mesh.skeleton,indices=mesh.geometry.getAttribute('skinIndex'),weights=mesh.geometry.getAttribute('skinWeight');
+ const reset=rig.reset.bind(rig);let resets=0;rig.reset=()=>{resets++;reset();};
+ for(let i=0;i<1024;i++)rig.transferWeights(f.point(f.arm),f.point(f.hand),.001);
+ assert.equal(resets,0);assert.deepEqual(rig.capture(),values);assert.equal(mesh.skeleton,skeleton);assert.equal(mesh.geometry.getAttribute('skinIndex'),indices);assert.equal(mesh.geometry.getAttribute('skinWeight'),weights);
+ const expected=arrays(mesh),snapshot=structuredClone(rig.data);assert.throws(()=>rig.transferWeights(f.point(f.arm),f.point(f.hand),.001),/1024/);assert.deepEqual(rig.data,snapshot);assert.deepEqual(arrays(mesh),expected);
+ // @ts-expect-error JavaScript CLI module
+ const {zooPackage}=await import('../scripts/export-zoo.mjs');const packed=JSON.parse(zooPackage(project(rig),'long-weights').project);assert.equal(packed.studio.weightTransfers.length,1024);parseProject(packed);const other=fixture();other.rig.data=packed.studio;other.rig.reset();assert.deepEqual(arrays(other.mesh),expected);
+ const bad=structuredClone(packed);bad.studio.weightTransfers.push(bad.studio.weightTransfers[0]);assert.throws(()=>parseProject(bad),/Zu viele/);
+});

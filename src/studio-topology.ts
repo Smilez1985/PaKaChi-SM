@@ -33,14 +33,11 @@ export class StudioTopology {
   for(const s of this.skins){s.mesh.skeleton=s.skeleton;s.mesh.geometry.setAttribute('skinIndex',s.indices.clone());s.mesh.geometry.setAttribute('skinWeight',s.weights.clone());}
   this.generated.forEach(s=>s.dispose());this.generated=[];
  }
- build(edits:BoneInsertion[],rest:{position:[number,number,number];rotation:[number,number,number,number]}[],deletions:number[]=[],reparents:BoneReparent[]=[],transfers:WeightTransfer[]=[]):T.Bone[]{
-  this.restore();const bones=[...this.source],weights:(()=>void)[]=[];
-  let changes=0,reparented=0,transferred=0;
-  const queueTransfers=()=>{while(transferred<transfers.length&&transfers[transferred].after===changes){const edit=transfers[transferred++],from=bones[edit.from],to=bones[edit.to];
-   if(!from||!to||from===to||!from.parent||!to.parent||!Number.isFinite(edit.amount)||edit.amount<=0||edit.amount>1||(edit.region!==undefined&&!validWeightRegion(edit.region)))throw Error('Ungültige Hautgewichtsübertragung.');
-   weights.push(()=>{let affected=0;
+ /** Stage all affected palettes before committing: failure never leaves partial weights. */
+ transfer(edit:WeightTransfer,from:T.Bone,to:T.Bone){
+  let affected=0;const commits:(()=>void)[]=[];
     for(const s of this.skins){const skeleton=s.mesh.skeleton,source=skeleton.bones.indexOf(from),target=skeleton.bones.indexOf(to);if(source<0)continue;
-     const indices=s.mesh.geometry.getAttribute('skinIndex'),values=s.mesh.geometry.getAttribute('skinWeight');
+     const originalIndices=s.mesh.geometry.getAttribute('skinIndex'),originalWeights=s.mesh.geometry.getAttribute('skinWeight'),indices=originalIndices.clone(),values=originalWeights.clone();
      for(let v=0;v<indices.count;v++){
       const merged=new Map<number,number>();for(let k=0;k<4;k++){const i=indices.getComponent(v,k),w=values.getComponent(v,k);if(w>0)merged.set(i,(merged.get(i)??0)+w);}
       const original=merged.get(source)??0;if(original<=0)continue;
@@ -51,10 +48,17 @@ export class StudioTopology {
       const strongest=[...merged].filter(([,w])=>w>0).sort((a,b)=>b[1]-a[1]||a[0]-b[0]).slice(0,4),sum=strongest.reduce((total,[,w])=>total+w,0);
       for(let k=0;k<4;k++){indices.setComponent(v,k,strongest[k]?.[0]??0);values.setComponent(v,k,(strongest[k]?.[1]??0)/sum);}
      }
-     indices.needsUpdate=true;values.needsUpdate=true;
+     commits.push(()=>{for(let v=0;v<indices.count;v++)for(let k=0;k<4;k++){originalIndices.setComponent(v,k,indices.getComponent(v,k));originalWeights.setComponent(v,k,values.getComponent(v,k));}originalIndices.needsUpdate=true;originalWeights.needsUpdate=true;});
     }
     if(!affected)throw Error('Der Quellknochen hat keinen übertragbaren Oberflächen-Einfluss.');
-   });
+  for(const commit of commits)commit();
+ }
+ build(edits:BoneInsertion[],rest:{position:[number,number,number];rotation:[number,number,number,number]}[],deletions:number[]=[],reparents:BoneReparent[]=[],transfers:WeightTransfer[]=[]):T.Bone[]{
+  this.restore();const bones=[...this.source],weights:(()=>void)[]=[];
+  let changes=0,reparented=0,transferred=0;
+  const queueTransfers=()=>{while(transferred<transfers.length&&transfers[transferred].after===changes){const edit=transfers[transferred++],from=bones[edit.from],to=bones[edit.to];
+   if(!from||!to||from===to||!from.parent||!to.parent||!Number.isFinite(edit.amount)||edit.amount<=0||edit.amount>1||(edit.region!==undefined&&!validWeightRegion(edit.region)))throw Error('Ungültige Hautgewichtsübertragung.');
+   weights.push(()=>this.transfer(edit,from,to));
   }};
 
   const applyReparents=()=>{queueTransfers();while(reparented<reparents.length&&reparents[reparented].after===changes){const edit=reparents[reparented++],bone=bones[edit.bone],parent=bones[edit.parent];validateReparent(bone,parent);parent.add(bone);}};

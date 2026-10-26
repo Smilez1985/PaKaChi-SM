@@ -354,3 +354,9 @@ Im Modus **Gelenke bearbeiten** einen Knochen auswählen und **Hautgewichte farb
 Die Diagnoseansicht ersetzt vorübergehend die Materialien geriggter Oberflächen durch unbeleuchtete Gewichtsfarben. Ausschalten, Wechsel in **Figur bewegen** oder Verlassen des Studios stellt ursprüngliche Materialien und Vertex-Farben wieder her. Nicht geriggte Teile behalten ihre normale Darstellung. Die Auswahl ist eine lokale Ansichtseinstellung und wird nicht in die Projektdatei geschrieben.
 
 Nur geriggte Oberflächen mit Skinning-Gewichten. Farben werden zwischen Vertices über Dreiecke interpoliert; die Anzeige ist keine Anatomie- oder Qualitätsbewertung. Der bestehende Pinsel bleibt kugelförmig und auf 128 gespeicherte Übertragungen begrenzt. Beschränkung auf sichtbare Vertices, größere Pinselbudgets und manuelle Hautqualitäts-/Performance-Abnahme bleiben offen.
+
+## Pinselbudget und längere Verläufe (0.61.0)
+
+Pinsel und Einzelübertragungen teilen sich jetzt **1024 Aufträge pro Projekt**. Ein Strich bleibt ein gemeinsamer Undo-Schritt. Wird das Limit innerhalb eines Strichs überschritten, wird weiterhin der ganze Strich zurückgenommen. Neue Aufträge berechnen nur die nächste Gewichtsänderung; sie spielen den bisherigen Verlauf nicht erneut ab. Export und Wiederladen erhalten die Aufträge in ihrer Reihenfolge.
+
+Projekte mit mehr als 128 Gewichtsaufträgen benötigen mindestens 0.61.0. Das Projektformat bleibt Version 1; ältere Leser lehnen das größere Budget ab. Laden und Undo/Redo rekonstruieren weiterhin den gespeicherten Verlauf. Die manuelle Performance-Abnahme großer Modelle bleibt offen; keine pauschale Echtzeit-Zusage. Sichtbare Oberflächen begrenzen den kugelförmigen Pinsel weiterhin nicht.

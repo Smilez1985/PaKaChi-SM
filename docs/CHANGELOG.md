@@ -12,6 +12,23 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.61.0] - 2026-10-26
+
+Zeitstempel: 2026-10-26T13:25:33+01:00 (Europe/Berlin)
+
+### Changed
+
+- Gemeinsames Budget für Pinsel- und Einzelübertragungen von 128 auf 1024 Aufträge erhöht.
+- Neue Gewichtsaufträge werden direkt und atomar auf aktuellen Skinning-Attributen angewendet, ohne den Verlauf oder die Knochenhierarchie pro Auftrag neu aufzubauen.
+- README, Design, Roadmap, Bedienanleitung und deutsche/englische Budgethinweise aktualisiert.
+
+### Added
+
+- Prüfung von 1024 direkten Übertragungen, identischer Wiederherstellung, erhaltenen Posen/Paletten/Attributen, Budgetgrenze und Katalogexport.
+- Browserprüfung eines gespeicherten Mika-Projekts mit 256 Gewichtsaufträgen.
+
+**Prüfung:** 278 Node-Tests und Build bestanden. Neuer Chromium-Nachweis steht aus. Projekte mit mehr als 128 Gewichtsaufträgen benötigen mindestens 0.61.0. Das Projektformat bleibt Version 1; ältere Leser lehnen das größere Budget ab. Laden und Undo/Redo rekonstruieren weiterhin den gespeicherten Verlauf. Die manuelle Performance-Abnahme großer Modelle bleibt offen; keine pauschale Echtzeit-Zusage. Sichtbare Oberflächen begrenzen den kugelförmigen Pinsel weiterhin nicht.
+
 ## [0.60.0] - 2026-10-26
 
 Zeitstempel: 2026-10-26T08:02:39+01:00 (Europe/Berlin)
@@ -1231,3 +1248,5 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 [0.59.0]: PRUEFUNG-0.59.0.md
 
 [0.60.0]: PRUEFUNG-0.60.0.md
+
+[0.61.0]: PRUEFUNG-0.61.0.md

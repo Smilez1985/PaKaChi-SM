@@ -12,6 +12,7 @@ export interface ControlPoint {
 }
 export interface Pose { id: string; name: string; seconds: number; values: Record<string, Transform>; review?: ReviewReason[] }
 export interface StudioMove { id: string; name: string; loop: boolean; poses: string[] }
+export const MAX_WEIGHT_TRANSFERS=1024;
 export interface WeightRegion {center:Vec3;radius:number}
 export function validWeightRegion(value:unknown):value is WeightRegion {
  if(!value||typeof value!=='object'||Array.isArray(value))return false;const r=value as Record<string,unknown>;
@@ -62,7 +63,7 @@ export function parseProject(input: unknown): StudioProject {
   let stage=0;
   for(const e of (d.boneInsertions??[]) as {afterDeletions?:number}[]){const next=e.afterDeletions??0;require(Number.isInteger(next)&&next>=stage&&next<=((d.boneDeletions as number[]|undefined)?.length??0),'Ungültige Reihenfolge der Knochenänderungen.');stage=next;}
   if(d.weightTransfers!==undefined){
-    require(Array.isArray(d.weightTransfers)&&d.weightTransfers.length<=128,'Zu viele Hautgewichtsübertragungen.');let previous=0;
+    require(Array.isArray(d.weightTransfers)&&d.weightTransfers.length<=MAX_WEIGHT_TRANSFERS,'Zu viele Hautgewichtsübertragungen.');let previous=0;
     const total=((d.boneInsertions as unknown[]|undefined)?.length??0)+((d.boneDeletions as unknown[]|undefined)?.length??0);
     for(const e of d.weightTransfers){require(obj(e)&&Object.keys(e).every(k=>['from','to','amount','after','region'].includes(k))&&Number.isInteger(e.from)&&Number.isInteger(e.to)&&(e.from as number)>=0&&(e.to as number)>=0&&(e.from as number)<d.boneRest.length&&(e.to as number)<d.boneRest.length&&e.from!==e.to&&(e.region===undefined||validWeightRegion(e.region))&&typeof e.amount==='number'&&Number.isFinite(e.amount)&&e.amount>0&&e.amount<=1&&Number.isInteger(e.after)&&(e.after as number)>=previous&&(e.after as number)<=total,'Ungültige Hautgewichtsübertragung.');previous=e.after as number;}
   }
