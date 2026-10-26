@@ -26,7 +26,7 @@ Zeitstempel: 2026-10-26T08:02:39+01:00 (Europe/Berlin)
 - Temporäre Ansicht stellt ursprüngliche Materialien beim Ausschalten, Moduswechsel und Verlassen wieder her; keine Projektänderung.
 - README, Design, Roadmap, Bedienanleitung und deutsche/englische Hinweise nachgezogen.
 
-**Prüfung:** 277 Node-Tests und Build bestanden. Neuer Chromium-Nachweis steht aus. Nur geriggte Oberflächen mit Skinning-Gewichten. Farben werden zwischen Vertices über Dreiecke interpoliert; die Anzeige ist keine Anatomie- oder Qualitätsbewertung. Der bestehende Pinsel bleibt kugelförmig und auf 128 gespeicherte Übertragungen begrenzt. Beschränkung auf sichtbare Vertices, größere Pinselbudgets und manuelle Hautqualitäts-/Performance-Abnahme bleiben offen.
+**Prüfung:** 277 Node-Tests, Build und alle 20 Chromium-Fälle bestanden ([CI-Nachweis](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/40313636231)). Nur geriggte Oberflächen mit Skinning-Gewichten. Farben werden zwischen Vertices über Dreiecke interpoliert; die Anzeige ist keine Anatomie- oder Qualitätsbewertung. Der bestehende Pinsel bleibt kugelförmig und auf 128 gespeicherte Übertragungen begrenzt. Beschränkung auf sichtbare Vertices, größere Pinselbudgets und manuelle Hautqualitäts-/Performance-Abnahme bleiben offen.
 
 ## [0.59.0] - 2026-10-26
 
