@@ -333,7 +333,7 @@ Auswahlwechsel, Radiusregler, Gelenkverschiebung und Undo/Redo aktualisieren die
 
 ## Freie Knochen setzen (0.58.0)
 
-Im Modus **Gelenke bearbeiten** einen vorhandenen Elternknochen auswählen, **＋ Knochen setzen** anklicken und die neue Position auf der Figur anklicken. Neben der Figur liegt die Position auf der aktuellen Ansichtsebene; anschließend lässt sie sich verschieben. Der neue Kindknochen ist mit dem Elternknochen verbunden, kann weitere Kinder erhalten und besitzt zunächst keinen Haut-Einfluss. Zum Zuweisen den Quellknochen auswählen und mit **Hautgewichte übertragen** Einfluss an den neuen Knochen abgeben. Undo/Redo umfasst jeweils die vollständige Änderung. Vorhandene Posen werden zur Prüfung markiert.
+Im Modus **Gelenke bearbeiten** einen vorhandenen Elternknochen auswählen, **＋ Knochen setzen** anklicken und die neue Position auf der Figur anklicken. Neben der Figur liegt die Position auf der aktuellen Ansichtsebene; anschließend lässt sie sich verschieben. Der neue Kindknochen ist mit dem Elternknochen verbunden, kann weitere Kinder erhalten und besitzt zunächst keinen Haut-Einfluss. Zum Zuweisen den Quellknochen auswählen und mit **Einfluss übertragen** Einfluss an den neuen Knochen abgeben. Undo/Redo umfasst jeweils die vollständige Änderung. Vorhandene Posen werden zur Prüfung markiert.
 
 Für Agenten: `add_bone` verwendet `id` des Elternknochens und `position: [x,y,z]` in normalisierten Weltkoordinaten der Grundpose. Nur im Rig-Modus, mit Bearbeitungsfreigabe, aktueller Sitzung und Revision; der Assistent legt den Vorschlag zur Übernahme vor.
 
