@@ -131,7 +131,7 @@ npx playwright install chromium
 npm run test:e2e
 ```
 
-Für 0.60.0 sind 277 Tests, Build und alle 20 Chromium-Browserfälle bestanden. Die unveränderten Original-Testprogramme wurden zuletzt in 0.9.0 geprüft. Die manuelle WebGL-/Mausabnahme bleibt offen; automatisierte Browserprüfungen laufen auf GitHub. Die reale Python-MCP-/MQTT-Integration mit Studio-Editor wurde zuletzt in 0.10.0 erfolgreich geprüft. Details und frühere Nachweise stehen im [Prüfstand](docs/PRUEFUNG.md).
+Für 0.61.0 sind 278 Tests, Build und alle 20 Chromium-Browserfälle bestanden. Die unveränderten Original-Testprogramme wurden zuletzt in 0.9.0 geprüft. Die manuelle WebGL-/Mausabnahme bleibt offen; automatisierte Browserprüfungen laufen auf GitHub. Die reale Python-MCP-/MQTT-Integration mit Studio-Editor wurde zuletzt in 0.10.0 erfolgreich geprüft. Details und frühere Nachweise stehen im [Prüfstand](docs/PRUEFUNG.md).
 
 ## Lizenz
 
@@ -272,6 +272,6 @@ Nur geriggte Oberflächen mit Skinning-Gewichten. Farben werden zwischen Vertice
 
 **0.61.0:** Das gemeinsame Budget für Pinsel- und Einzelübertragungen steigt von 128 auf 1024 Aufträge pro Projekt. Neue Übertragungen werden auf den aktuellen Gewichten berechnet, ohne den bisherigen Verlauf und das Skelett bei jedem Auftrag erneut aufzubauen. Alle betroffenen Oberflächen werden vor der Übernahme geprüft; Fehler hinterlassen keine teilweise geänderten Gewichte. Posen, Skinning-Paletten und bestehende Attribute bleiben während der Übertragung erhalten.
 
-278 Node-Tests und Build bestanden. Neuer Chromium-Nachweis steht aus.
+278 Node-Tests, Build und alle 20 Chromium-Fälle bestanden ([CI-Nachweis](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/40362549729)). Der Import mit 256 Aufträgen dauerte auf diesem CI-Runner 19,181 Sekunden; weitere Ladezeitoptimierung bleibt offen.
 
 Projekte mit mehr als 128 Gewichtsaufträgen benötigen mindestens 0.61.0. Das Projektformat bleibt Version 1; ältere Leser lehnen das größere Budget ab. Laden und Undo/Redo rekonstruieren weiterhin den gespeicherten Verlauf. Die manuelle Performance-Abnahme großer Modelle bleibt offen; keine pauschale Echtzeit-Zusage. Sichtbare Oberflächen begrenzen den kugelförmigen Pinsel weiterhin nicht.

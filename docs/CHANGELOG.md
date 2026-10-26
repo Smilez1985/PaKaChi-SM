@@ -31,7 +31,7 @@ Zeitstempel: 2026-10-26T13:25:33+01:00 (Europe/Berlin)
 - Prüfung von 1024 direkten Übertragungen, identischer Wiederherstellung, erhaltenen Posen/Paletten/Attributen, Budgetgrenze und Katalogexport.
 - Browserprüfung eines gespeicherten Mika-Projekts mit 256 Gewichtsaufträgen.
 
-**Prüfung:** 278 Node-Tests und Build bestanden. Neuer Chromium-Nachweis steht aus. Projekte mit mehr als 128 Gewichtsaufträgen benötigen mindestens 0.61.0. Das Projektformat bleibt Version 1; ältere Leser lehnen das größere Budget ab. Laden und Undo/Redo rekonstruieren weiterhin den gespeicherten Verlauf. Die manuelle Performance-Abnahme großer Modelle bleibt offen; keine pauschale Echtzeit-Zusage. Sichtbare Oberflächen begrenzen den kugelförmigen Pinsel weiterhin nicht.
+**Prüfung:** 278 Node-Tests, Build und alle 20 Chromium-Fälle bestanden ([CI-Nachweis](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/40362549729)). Der Import mit 256 Aufträgen dauerte auf diesem CI-Runner 19,181 Sekunden; weitere Ladezeitoptimierung bleibt offen. Projekte mit mehr als 128 Gewichtsaufträgen benötigen mindestens 0.61.0. Das Projektformat bleibt Version 1; ältere Leser lehnen das größere Budget ab. Laden und Undo/Redo rekonstruieren weiterhin den gespeicherten Verlauf. Die manuelle Performance-Abnahme großer Modelle bleibt offen; keine pauschale Echtzeit-Zusage. Sichtbare Oberflächen begrenzen den kugelförmigen Pinsel weiterhin nicht.
 
 ## [0.60.0] - 2026-10-26
 
