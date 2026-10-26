@@ -76,6 +76,23 @@ export class StudioRig {
       this.reset();added.rest=this.position(added).toArray();this.apply(values);return added;
     }catch(error){this.data=before;this.reset();this.apply(originalValues);throw error;}
   }
+  addBone(parentPoint:ControlPoint,position:T.Vector3){
+    if(parentPoint.kind!=='bone'||!this.data.points.includes(parentPoint)||!position.toArray().every(v=>Number.isFinite(v)&&Math.abs(v)<=100)||this.data.points.length>=256||this.data.boneRest.length>=256||(this.data.boneInsertions?.length??0)>=64||this.data.links.length>=2048)throw Error('Elternknochen und gültige Position wählen; höchstens 64 neue Knochen und 256 Gelenke.');
+    const parent=this.bones[parentPoint.bone!];
+    for(let n:T.Object3D|null=parent;n instanceof T.Bone;n=n.parent)if(n.scale.distanceTo(new T.Vector3(1,1,1))>1e-8)throw Error('Skalierte Knochenketten werden nicht unterstützt.');
+    const before=structuredClone(this.data),values=this.capture(),original=structuredClone(values);
+    try{
+      this.reset();const restParent=this.bones[parentPoint.bone!];restParent.updateWorldMatrix(true,false);const local=restParent.worldToLocal(position.clone());
+      if(local.length()<1e-5)throw Error('Neuen Knochen mit Abstand zum Elternknochen setzen.');
+      const rest:Transform={position:local.toArray(),rotation:[0,0,0,1]},index=this.data.boneRest.length,id='joint-'+crypto.randomUUID();
+      this.data.boneInsertions=[...(this.data.boneInsertions??[]),{parent:parentPoint.bone!,...(this.data.boneDeletions?.length?{afterDeletions:this.data.boneDeletions.length}:{})}];
+      this.data.boneRest.push(rest);
+      const added:ControlPoint={id,name:'Neuer Knochen',kind:'bone',bone:index,rest:position.toArray(),size:.025,radius:.18};
+      this.data.points.push(added);this.data.links.push([parentPoint.id,id]);
+      for(const pose of this.data.poses)pose.values[id]=structuredClone(rest);if(this.data.draft)this.data.draft[id]=structuredClone(rest);values[id]=structuredClone(rest);
+      this.reset();this.apply(values);return added;
+    }catch(error){this.data=before;this.reset();this.apply(original);throw error;}
+  }
   transferWeights(point:ControlPoint,target:ControlPoint,amount:number,region?:WeightRegion){
     if(point.kind!=='bone'||target.kind!=='bone'||point===target||!this.data.points.includes(point)||!this.data.points.includes(target)||!Number.isFinite(amount)||amount<=0||amount>1||(this.data.weightTransfers?.length??0)>=128)throw Error('Zwei verschiedene Knochen und einen Anteil über 0 bis 100 % wählen (höchstens 128 Übertragungen).');
     if(region!==undefined&&!validWeightRegion(region))throw Error('Ungültiger Bereich für Hautgewichte.');

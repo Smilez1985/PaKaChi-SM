@@ -1,7 +1,7 @@
 import * as T from 'three';
 import {validWeightRegion} from './studio-data.ts';
 import type {WeightRegion} from './studio-data.ts';
-export interface BoneInsertion {child:number;ratio:number;afterDeletions?:number}
+import type {BoneInsertion} from './studio-data.ts';
 export interface WeightTransfer {from:number;to:number;amount:number;after:number;region?:WeightRegion}
 export interface BoneReparent {bone:number;parent:number;after:number}
 /** Only same-tree, unscaled bone chains can be represented by the pose format. */
@@ -85,6 +85,15 @@ export class StudioTopology {
    if(!Number.isInteger(stage)||stage<removed||stage>deletions.length)throw Error('Ungültige Reihenfolge der Knochenänderungen.');
    while(removed<stage)remove(deletions[removed++]);
    applyReparents();
+   if(edit.parent!==undefined){
+    const parent=bones[edit.parent];
+    if(!parent?.parent)throw Error('Elternknochen fehlt.');
+    const added=new T.Bone();added.name='StudioJoint'+bones.length;parent.add(added);this.added.push(added);bones.push(added);changes++;
+    weights.push(()=>{for(const s of this.skins){const old=s.mesh.skeleton;if(!old.bones.includes(parent))continue;
+     const next=new T.Skeleton([...old.bones,added],[...old.boneInverses.map(m=>m.clone()),new T.Matrix4()]);this.generated.push(next);s.mesh.skeleton=next;
+    }});
+    continue;
+   }
    const child=bones[edit.child],parent=child?.parent;
    if(!(parent instanceof T.Bone))throw Error('Zwischengelenk benötigt eine vorhandene Knochenstrecke.');
    const added=new T.Bone();added.name='StudioJoint'+bones.length;parent.add(added);added.add(child);this.added.push(added);bones.push(added);changes++;

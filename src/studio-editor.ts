@@ -28,6 +28,7 @@ export class StudioEditor {
   private groupMove=false;
   private rotate=false;
   private insertionRatio=.5;
+  private addingBoneParent:string|null=null;
   private weightAmount=.5;
   private weightLocal=false;
   private weightRadius=.2;
@@ -51,7 +52,13 @@ export class StudioEditor {
   constructor(rig:StudioRig,view:StudioView,host:HTMLElement,project:Omit<StudioProject,'studio'>,hooks:Hooks) {
     this.rig=rig;this.view=view;this.host=host;this.project=project;this.hooks=hooks;this.initial=structuredClone(rig.initial);
     view.onSelect=id=>{this.selected=id;this.render();};
-    view.onAdd=(position,mesh)=>this.addPoint(position,mesh);
+    view.onAdd=(position,mesh)=>{
+      const parent=this.data.points.find(p=>p.id===this.addingBoneParent);
+      if(!this.addingBoneParent){this.addPoint(position,mesh);return;}
+      if(!this.active||!this.edit||this.interactionActive)return;
+      try{if(!parent)throw Error('Elternknochen erneut auswählen.');this.mutate(()=>{this.selected=this.rig.addBone(parent,position).id;});this.hooks.feedback('Knochen hinzugefügt. Hautgewichte bei Bedarf gezielt übertragen.');}catch(error){this.hooks.feedback((error as Error).message);}
+      this.addingBoneParent=null;this.view.setAction('select');
+    };
     view.onConnect=id=>this.connect(id);
     view.onStart=()=>{this.gesture=this.snapshot();this.gesturePosition=this.point ? rig.position(this.point):null;this.gesturePositions=new Map(rig.data.points.map(p=>[p.id,rig.position(p)]));};
     view.onMove=(position,rotation,intent)=>{
@@ -93,12 +100,12 @@ export class StudioEditor {
   setSpeed(value:number){this.speed=T.MathUtils.clamp(value,.25,2);}
   private addPoint(position:T.Vector3,mesh?:number){if(!this.edit||this.playing)return;if(this.data.points.length>=256){this.hooks.feedback('Höchstens 256 Kontrollpunkte pro Projekt.');return;}
     this.mutate(()=>{const p:ControlPoint={id:uid(),name:`Punkt ${this.data.points.length+1}`,kind:'surface',rest:position.toArray(),size:.015,radius:.12,...(mesh!==undefined?{mesh}:{})};this.data.points.push(p);for(const pose of this.data.poses)pose.values[p.id]={position:[...p.rest],rotation:[0,0,0,1]};if(this.data.draft)this.data.draft[p.id]={position:[...p.rest],rotation:[0,0,0,1]};this.selected=p.id;this.rig.reset();});
-    this.view.setAction('select');this.hooks.feedback('Punkt gesetzt. Größe und Einflussbereich sind getrennt einstellbar.');
+    this.addingBoneParent=null;this.view.setAction('select');this.hooks.feedback('Punkt gesetzt. Größe und Einflussbereich sind getrennt einstellbar.');
   }
   private connect(id:string){if(!this.edit||!this.selected||id===this.selected)return;
     const a=this.data.points.find(p=>p.id===this.selected),b=this.data.points.find(p=>p.id===id);if(!a||!b)return;
     if(!this.data.links.some(l=>l.includes(a.id)&&l.includes(b.id))){try{this.rig.validateConnection(a,b);}catch(e){this.hooks.feedback((e as Error).message);return;}}
-    this.mutate(()=>{const index=this.data.links.findIndex(([a,b])=>(a===id&&b===this.selected)||(b===id&&a===this.selected));if(index>=0)this.data.links.splice(index,1);else if(this.data.links.length<2048)this.data.links.push([this.selected!,id]);});this.view.setAction('select');
+    this.mutate(()=>{const index=this.data.links.findIndex(([a,b])=>(a===id&&b===this.selected)||(b===id&&a===this.selected));if(index>=0)this.data.links.splice(index,1);else if(this.data.links.length<2048)this.data.links.push([this.selected!,id]);});this.addingBoneParent=null;this.view.setAction('select');
   }
   private refreshNumbers(){const label=this.host.querySelector('#figure-scale-value');if(label)label.textContent=`${Math.round(this.rig.scale*100)} %`;const p=this.point;if(!p)return;const pos=this.rig.position(p);['x','y','z'].forEach((axis,i)=>{const input=this.host.querySelector<HTMLInputElement>(`#point-${axis}`);if(input)input.value=pos.toArray()[i].toFixed(3);});}
   private render(){
@@ -112,7 +119,7 @@ export class StudioEditor {
     <div class="studio-detection" ${this.edit?'':'hidden'}><button id="detect-joints">Joints automatisch erkennen</button><button id="detect-links">Joint-Verbindungen automatisch erkennen</button><p class="subtle">Erkennung verwendet vorhandene Skelettdaten. Für Modelle ohne Skelett ist KI-Rigging noch nicht verfügbar.</p></div>
     <button id="figure-select" ${this.edit?'hidden':''}>Gesamte Figur bewegen</button>
     <label for="studio-points">Gelenk / Gesichtspunkt</label><select id="studio-points"><option value="">Punkt auswählen …</option></select>
-    <div class="studio-actions" ${this.edit?'':'hidden'}><label>Position auf der Knochenstrecke <output id="bone-ratio-value">${Math.round(this.insertionRatio*100)} %</output><input id="bone-ratio" type="range" min="10" max="90" step="1" value="${Math.round(this.insertionRatio*100)}" aria-label="Position des Zwischengelenks"><span class="subtle">Vom Elternknochen zum ausgewählten Kindknochen; 50 % = Mitte.</span></label><button id="bone-insert">Knochen dazwischen einfügen</button><button id="point-add">＋ Punkt setzen</button><button id="point-connect" ${this.point?'':'disabled'}>Verbinden / lösen</button></div>
+    <div class="studio-actions" ${this.edit?'':'hidden'}><label>Position auf der Knochenstrecke <output id="bone-ratio-value">${Math.round(this.insertionRatio*100)} %</output><input id="bone-ratio" type="range" min="10" max="90" step="1" value="${Math.round(this.insertionRatio*100)}" aria-label="Position des Zwischengelenks"><span class="subtle">Vom Elternknochen zum ausgewählten Kindknochen; 50 % = Mitte.</span></label><button id="bone-add">＋ Knochen setzen</button><button id="bone-insert">Knochen dazwischen einfügen</button><button id="point-add">＋ Punkt setzen</button><button id="point-connect" ${this.point?'':'disabled'}>Verbinden / lösen</button></div>
     <div ${this.edit&&this.point?.kind==='bone'?'':'hidden'}><label for="bone-parent">Neuer Elternknochen</label><select id="bone-parent"></select><button id="bone-reparent">Knochen umhängen</button><p class="subtle">Ändert die echte Skelettverbindung. Einzelposen bleiben erhalten; Bewegungsübergänge danach prüfen.</p></div>
     <div ${this.edit&&this.point?.kind==='bone'?'':'hidden'}><label for="weight-target">Oberflächen-Einfluss übertragen auf</label><select id="weight-target"></select><label>Anteil <output id="weight-amount-value">${Math.round(this.weightAmount*100)} %</output><input id="weight-amount" type="range" min="1" max="100" step="1" value="${Math.round(this.weightAmount*100)}"></label><label class="check"><input id="weight-local" type="checkbox" ${this.weightLocal?'checked':''}> Nur im Umkreis des Quellgelenks</label><label>Radius <output id="weight-radius-value">${this.weightRadius.toFixed(3)}</output><input id="weight-radius" type="range" min="0.005" max="2" step="0.005" value="${this.weightRadius}" ${this.weightLocal?'':'disabled'}></label><button id="weight-transfer">Einfluss übertragen</button><p class="subtle">Überträgt Einfluss des gewählten Knochens. Im Umkreis nimmt die Stärke zum Rand weich ab; außerhalb bleibt die Hautzuordnung unverändert. Grüne Außenringe zeigen die Grenze, orange Innenringe die halbe Stärke. Die Vorschau zeigt den räumlichen Bereich, nicht die tatsächlich gewichteten Vertices. Bezug ist die ursprüngliche Grundpose. Ohne Umkreis gilt die Übertragung überall. Grundpose bleibt erhalten; Posen und Bewegungen prüfen. Pro Oberflächenpunkt bleiben höchstens vier Einflüsse.</p></div>
     <div id="point-fields" ${this.point?'':'hidden'}><label>Name<input id="point-name" maxlength="100"></label><label>Punktgröße<input id="point-size" type="range" min="0.003" max="0.15" step="0.001"></label>
@@ -136,11 +143,13 @@ export class StudioEditor {
     const input=(id:string)=>q<HTMLInputElement>(id);
     const on=(id:string,fn:()=>void)=>{q<HTMLButtonElement>(id).onclick=()=>{try{fn();}catch(e){this.hooks.feedback(e instanceof Error?e.message:String(e));}};};
     const points=q<HTMLSelectElement>('studio-points');if(!this.edit){const option=new Option('Gesamte Figur',FIGURE_TRACK);option.dataset.figureLabel='';points.add(option);}for(const p of this.data.points)points.add(new Option(`${p.kind==='bone'?'◇':'●'} ${p.name}`,p.id));points.value=selected??'';
-    points.onchange=()=>{this.selected=points.value||null;this.view.setAction('select');this.render();};
+    points.onchange=()=>{this.selected=points.value||null;this.addingBoneParent=null;this.view.setAction('select');this.render();};
     input('studio-agent-edit').onchange=()=>{this.agentEditing=input('studio-agent-edit').checked;this.revision++;};
-    on('figure-select',()=>{this.selected=FIGURE_TRACK;this.view.setAction('select');this.render();});
-    on('mode-pose',()=>{this.revision++;this.edit=false;this.view.setAction('select');this.rig.reset();this.render();});
-    on('mode-rig',()=>{this.revision++;this.edit=true;if(this.selected===FIGURE_TRACK)this.selected=null;this.view.setAction('select');this.rig.reset();this.render();});
+    on('figure-select',()=>{this.selected=FIGURE_TRACK;this.addingBoneParent=null;this.view.setAction('select');this.render();});
+    on('mode-pose',()=>{this.revision++;this.edit=false;this.addingBoneParent=null;this.view.setAction('select');this.rig.reset();this.render();});
+    on('mode-rig',()=>{this.revision++;this.edit=true;if(this.selected===FIGURE_TRACK)this.selected=null;this.addingBoneParent=null;this.view.setAction('select');this.rig.reset();this.render();});
+    q<HTMLButtonElement>('bone-add').disabled=!this.edit||this.point?.kind!=='bone'||this.interactionActive;
+    on('bone-add',()=>{if(!this.edit||this.point?.kind!=='bone'||this.interactionActive)return;this.addingBoneParent=this.point.id;this.view.setAction('add');this.hooks.feedback('Position für den neuen Kindknochen anklicken. Hautgewichte bleiben zunächst unverändert.');});
     q<HTMLButtonElement>('bone-insert').disabled=!this.edit||this.point?.kind!=='bone'||this.playing;
     const parentSelect=q<HTMLSelectElement>('bone-parent');parentSelect.add(new Option('Elternknochen auswählen …',''));for(const p of this.data.points.filter(p=>p.kind==='bone'&&p.id!==this.point?.id))parentSelect.add(new Option(p.name,p.id));
     q<HTMLButtonElement>('bone-reparent').disabled=!this.edit||this.point?.kind!=='bone'||this.interactionActive;
@@ -170,7 +179,7 @@ export class StudioEditor {
       this.mutate(()=>this.data.links.push(...edges));this.hooks.feedback('Erkannte Verbindungen ergänzt.');});
     const links=q('studio-links');if(!this.data.links.length)links.textContent='Keine Verbindungen.';
     for(const edge of this.data.links){const row=document.createElement('div');row.className='connection-row';const name=document.createElement('span');name.dataset.userText='';name.textContent=edge.map(id=>this.data.points.find(p=>p.id===id)?.name??id).join(' ↔ ');const remove=document.createElement('button');remove.textContent='Verbindung entfernen';remove.onclick=()=>this.mutate(()=>{this.data.links=this.data.links.filter(e=>edgeKey(e)!==edgeKey(edge));});const kind=document.createElement('span');kind.textContent=this.rig.isBoneConnection(this.data.points.find(p=>p.id===edge[0])!,this.data.points.find(p=>p.id===edge[1])!)?'Gelenkkette':'Punktgruppe';row.append(name,kind,remove);links.append(row);}
-    on('point-add',()=>{this.view.setAction('add');this.hooks.feedback('In die Figur klicken. Neben der Figur wird der Punkt auf der Ansichtsebene gesetzt.');});
+    on('point-add',()=>{this.addingBoneParent=null;this.view.setAction('add');this.hooks.feedback('In die Figur klicken. Neben der Figur wird der Punkt auf der Ansichtsebene gesetzt.');});
     on('point-connect',()=>{this.view.setAction('connect');this.hooks.feedback('Zweiten Punkt anklicken. Eine vorhandene Verbindung wird gelöst.');});
     if(this.point){const p=this.point;const whole=p.id===FIGURE_TRACK;input('point-name').disabled=whole;input('point-size').disabled=whole;input('point-radius').disabled=whole;input('point-name').value=p.name;input('point-size').value=String(p.size);input('point-radius').value=String(p.radius);q('radius-label').hidden=p.kind==='bone'||whole;q('rotation-label').hidden=(!whole&&p.kind!=='bone')||this.edit;q('group-label').hidden=p.kind!=='surface'||this.edit||whole;
       q('figure-scale-label').hidden=!whole||this.edit;
@@ -270,7 +279,7 @@ export class StudioEditor {
     const require=(ok:unknown,message='Studio-Aktion passt nicht zum aktuellen Modus oder Ziel.'):void=>{if(!ok)throw new Error(message);};
     let resultId:string|undefined;
     switch(c.action){
-      case 'set_mode':require(c.mode);this.revision++;this.edit=c.mode==='rig';this.selected=null;this.view.setAction('select');this.rig.reset();this.render();break;
+      case 'set_mode':require(c.mode);this.revision++;this.edit=c.mode==='rig';this.selected=null;this.addingBoneParent=null;this.view.setAction('select');this.rig.reset();this.render();break;
       case 'add_point':{
         require(this.edit&&c.position&&this.data.points.length<256);require(c.mesh===undefined||c.mesh<this.rig.surfaces.length);
         this.mutate(()=>{const p:ControlPoint={id:uid(),name:c.name?.trim()||`Punkt ${this.data.points.length+1}`,kind:'surface',rest:[...c.position!],size:c.size??.015,radius:c.radius??.12,...(c.mesh!==undefined?{mesh:c.mesh}:{})};this.data.points.push(p);for(const pose of this.data.poses)pose.values[p.id]={position:[...p.rest],rotation:[0,0,0,1]};if(this.data.draft)this.data.draft[p.id]={position:[...p.rest],rotation:[0,0,0,1]};this.selected=p.id;resultId=p.id;this.rig.reset();});break;
@@ -279,6 +288,7 @@ export class StudioEditor {
         require(point);const p=point!;require(p.id!==FIGURE_TRACK||!this.edit);require(c.rotation===undefined||!this.edit&&(p.kind==='bone'||p.id===FIGURE_TRACK));require(p.id!==FIGURE_TRACK||(c.size===undefined&&c.radius===undefined&&c.name===undefined));require(c.radius===undefined||p.kind==='surface');require(c.scale===undefined||p.id===FIGURE_TRACK&&!this.edit);require(c.bendLimit===undefined||this.edit&&p.kind==='bone');require(['name','position','rotation','scale','size','radius','bendLimit'].some(k=>k in c));
         this.mutate(()=>{if(c.bendLimit!==undefined){if(c.bendLimit===null)delete p.bendLimit;else p.bendLimit=structuredClone(c.bendLimit);}if(c.name!==undefined)p.name=c.name.trim();if(c.size!==undefined)p.size=c.size;if(c.radius!==undefined)p.radius=c.radius;if(c.position||c.rotation)this.rig.setPoint(p,c.position?new T.Vector3().fromArray(c.position):this.rig.position(p),c.rotation?new T.Quaternion().fromArray(c.rotation):this.rig.rotation(p),this.edit,c.position?(c.rotation?'both':'translate'):'rotate');else this.rig.apply(this.rig.capture());if(c.scale!==undefined)this.rig.setFigureScale(c.scale);this.selected=p.id;});break;
       }
+      case 'add_bone':require(this.edit&&point?.kind==='bone');this.mutate(()=>{const added=this.rig.addBone(point!,new T.Vector3().fromArray(c.position!));this.selected=added.id;resultId=added.id;});break;
       case 'insert_bone':require(this.edit&&point?.kind==='bone');this.mutate(()=>{const added=this.rig.insertJoint(point!,c.ratio??.5);this.selected=added.id;resultId=added.id;});break;
       case 'transfer_weights':{const target=this.data.points.find(p=>p.id===c.target);require(this.edit&&point?.kind==='bone'&&target?.kind==='bone');this.mutate(()=>{this.rig.transferWeights(point!,target!,c.amount!,c.region);this.selected=point!.id;});break;}
       case 'reparent_bone':{const target=this.data.points.find(p=>p.id===c.target);require(this.edit&&point?.kind==='bone'&&target?.kind==='bone');this.mutate(()=>{this.rig.reparentBone(point!,target!);this.selected=point!.id;});break;}

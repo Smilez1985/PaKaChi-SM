@@ -1,6 +1,6 @@
 # Roadmap – was kommt
 
-**Softwarestand: 0.57.0 · Abgleich: 26.10.2026.** Teil der [Blaupause](README.md).
+**Softwarestand: 0.58.0 · Abgleich: 26.10.2026.** Teil der [Blaupause](README.md).
 
 Ein Häkchen bedeutet implementiert; es ersetzt keine visuelle oder externe Live-Abnahme. Die Nachweise und Prüfgrenzen stehen im [Prüfstand](PRUEFUNG.md). Die Versionshistorie gehört ins [Changelog](CHANGELOG.md).
 
@@ -16,7 +16,7 @@ Ein Häkchen bedeutet implementiert; es ersetzt keine visuelle oder externe Live
 ## Nächste Arbeitspakete
 
 1. **Korrekturen 0.11.0/0.11.1 visuell nachprüfen:** Drehung um die Figurenmitte auch nach Zoom/Pan sowie vollständige Körperverbindungen, Hand-/Fußziele, Rumpfbewegung und direktes Drehen. Nutzertest 0.10.0 meldete auseinanderziehbare Knochen und unbrauchbare Ausrichtung; diese Fehler sind technisch korrigiert, die erneute Nutzerabnahme steht aus. Anschließend Mausnavigation, kleine Gesichtspunkte, Gesamtverschiebung, Speichern/Laden und Agentensteuerung in einer lauffähigen Browserumgebung prüfen.
-2. **Gelenkbearbeitung vervollständigen:** Zwischengelenke in vorhandenen Knochenstrecken samt Gewichtsverteilung und Undo/Redo sind seit 0.47.0 vorhanden. Löschen und gemischte Umbaufolgen sind seit 0.48.0/0.49.0 vorhanden, Assistent/MCP seit 0.50.0. Umhängen vorhandener Knochen ist seit 0.53.0 vorhanden. Anteiliges Übertragen von Hautgewichten ist seit 0.55.0 vorhanden. Räumlich begrenzte Übertragung ist seit 0.56.0 vorhanden. Die Bereichsvorschau ist seit 0.57.0 vorhanden. Als Nächstes freies Hinzufügen von Knochen und kontinuierlichen Gewichtspinsel ergänzen; bestehende Moves und Gewichtsqualität prüfen. Ein fehlendes Knie lässt sich nun in eine vorhandene Strecke einfügen und beugen, jedoch noch kein vollständiges Rig aus einer ungeriggten Oberfläche erzeugen.
+2. **Gelenkbearbeitung vervollständigen:** Zwischengelenke in vorhandenen Knochenstrecken samt Gewichtsverteilung und Undo/Redo sind seit 0.47.0 vorhanden. Löschen und gemischte Umbaufolgen sind seit 0.48.0/0.49.0 vorhanden, Assistent/MCP seit 0.50.0. Umhängen vorhandener Knochen ist seit 0.53.0 vorhanden. Anteiliges Übertragen von Hautgewichten ist seit 0.55.0 vorhanden. Räumlich begrenzte Übertragung ist seit 0.56.0 vorhanden. Die Bereichsvorschau ist seit 0.57.0 vorhanden. Freie Knochenabzweigungen sind seit 0.58.0 vorhanden. Als Nächstes kontinuierlichen Gewichtspinsel ergänzen; bestehende Moves und Gewichtsqualität prüfen. Ein fehlendes Knie lässt sich nun in eine vorhandene Strecke einfügen und beugen, jedoch noch kein vollständiges Rig aus einer ungeriggten Oberfläche erzeugen.
 3. **Studio-Harness anbinden:** auf den Profilen und der Rollen-/Fähigkeitsprüfung aus 0.13.0 aufbauen; Modellauflistung ist seit 0.15.0 vorhanden. Assistenten-Inferenz für Ollama/OpenAI-kompatible APIs ist seit 0.16.0 vorhanden. Als Nächstes reale Modell-/Werkzeugqualität prüfen sowie weitere Fachadapter und offiziell unterstützte OAuth-Verfahren ergänzen. Anthropic und der optionale verschlüsselte Schlüsseltresor sind bereits angebunden. Details und Abnahme in Abschnitt 7.
 4. **Aufträge und KI-Verfahren integrieren:** den seit 0.22.0 sichtbaren lokalen Generierungsablauf live prüfen, den Modellwechsel-Rücksprung und die abgesicherte 3D-Übernahme aus 0.24.0 visuell prüfen, weitere Generator-/Rigging-Adapter ergänzen, echte Inferenz und Qualität prüfen, die Generator-Fallbacks aus 0.25.0 live prüfen und anschließend gezielte Skelettkorrekturen mit Vorschau integrieren. Vorhandene Skelettdaten auszulesen ist bereits möglich, aber keine KI-Anatomieerkennung.
 
@@ -285,3 +285,14 @@ Der Bereich bezieht sich auf normalisierte Weltkoordinaten der ursprünglichen G
 **0.57.0:** Die räumlich begrenzte Gewichtsübertragung zeigt eine Vorschau im Studio: grüne Außenringe markieren den Radius, orange Innenringe die halbe Stärke. Sie folgt Auswahl, Radius und bearbeitetem Gelenkpunkt und wird im Posenmodus sowie außerhalb des Studios ausgeblendet. Die Vorschau verändert weder Projekt noch Undo-Verlauf. 268 Node-Tests, Build und alle 17 Chromium-Fälle bestanden ([CI-Nachweis](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/40253220224)).
 
 Die Ringe zeigen den räumlichen Bereich in der ursprünglichen Grundpose, nicht die tatsächlich gewichteten Vertices. Kontinuierlicher Gewichtspinsel und farbige Darstellung der Hautgewichte bleiben offen. Keine neue manuelle Hautqualitäts- oder reale Anbieterabnahme.
+
+## Freie Knochenabzweigungen
+
+**0.58.0:** Neue Knochen lassen sich als freie Abzweigung an einem ausgewählten Elternknochen platzieren. Verbindung und Skinning-Palette entstehen automatisch; bestehende Hautgewichte bleiben unverändert. Einfluss lässt sich danach gezielt übertragen. Undo/Redo, gespeicherte Posen, Projekt-/Katalogexport und `add_bone` über Assistent/MCP sind berücksichtigt.
+
+271 Node-Tests und Build bestanden; Python-Syntax geprüft. Der neue Chromium-Nachweis steht aus.
+
+Benötigt einen vorhandenen Elternknochen; kein neues Skelett auf einer ungeriggten Oberfläche. Neue Knochen wirken erst nach Gewichtsübertragung auf die Haut. Skalierte Knochenketten sind ausgeschlossen. Kontinuierlicher Gewichtspinsel, Gewichtsfärbung und manuelle Hautabnahme bleiben offen. Projekte mit freien Knochen benötigen mindestens 0.58.0; ältere Leser lehnen diese Einträge ab.
+
+- [x] Freie Kindknochen in einem vorhandenen Skelett setzen, speichern und per MCP bearbeiten (0.58.0).
+- [ ] Erstes Skelett auf einer ungeriggten Oberfläche erstellen und binden.

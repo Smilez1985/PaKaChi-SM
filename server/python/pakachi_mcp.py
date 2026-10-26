@@ -35,7 +35,7 @@ class StudioCommand(BaseModel):
     model_config = ConfigDict(extra='forbid', strict=True)
     session: str = Field(max_length=100)
     expectedRevision: int = Field(ge=0)
-    action: Literal['set_mode', 'add_point', 'update_point', 'delete_point','insert_bone','delete_bone','reparent_bone','transfer_weights', 'connect_points', 'disconnect_points', 'save_pose', 'apply_pose', 'replace_pose', 'create_move', 'update_move', 'update_moves', 'undo', 'redo']
+    action: Literal['set_mode', 'add_point', 'update_point', 'delete_point','add_bone','insert_bone','delete_bone','reparent_bone','transfer_weights', 'connect_points', 'disconnect_points', 'save_pose', 'apply_pose', 'replace_pose', 'create_move', 'update_move', 'update_moves', 'undo', 'redo']
     mode: Literal['pose', 'rig'] | None = None
     id: str | None = Field(default=None, max_length=100)
     target: str | None = Field(default=None, max_length=100)
@@ -227,7 +227,7 @@ def build_server(uri=None, embedded=True, tcp_port=1883, ws_port=8083):
         Grundpose bleibt erhalten; Posen/Bewegungen prüfen. Undo möglich.
         reparent_bone: id,target (neuer Elternknochen), nur Rig-Modus und gleicher Skelettbaum.
         Erhält Einzelposen; Bewegungsübergänge prüfen. Keine Kreise, Wurzeln oder skalierten Ketten. Starre Anbauteile bleiben befestigt; keine Anbauteile mit eigenem Skelett.
-        insert_bone: id des Kindknochens, optional ratio 0.1–0.9 (Standard 0.5), vom Elternknochen zum Kind gemessen (Rig-Modus).
+        add_bone: id des Elternknochens, position=[x,y,z] in normalisierten Weltkoordinaten der Grundpose; neuer Kindknochen ohne Hautgewichte, nur Rig-Modus. Danach transfer_weights verwenden. insert_bone: id des Kindknochens, optional ratio 0.1–0.9 (Standard 0.5), vom Elternknochen zum Kind gemessen (Rig-Modus).
         delete_bone: id, echten Knochen entfernen; Kinder/Gewichte zum Elternknochen (Rig-Modus).
         Zuerst points lesen; Posen nach Topologieänderungen prüfen, Undo möglich. Wurzeln, skalierte Knochen und Anbauteile geschützt.
         delete_point: id, entfernt nur den Griff. connect_points/disconnect_points: id,target.

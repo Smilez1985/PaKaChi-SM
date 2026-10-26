@@ -1,5 +1,5 @@
 import {validFigureScale,validBendLimit,validWeightRegion} from './studio-data.ts';
-export const STUDIO_ACTIONS=['set_mode','add_point','update_point','delete_point','insert_bone','delete_bone','reparent_bone','transfer_weights','connect_points','disconnect_points','save_pose','apply_pose','replace_pose','create_move','update_move','update_moves','undo','redo'] as const;
+export const STUDIO_ACTIONS=['set_mode','add_point','update_point','delete_point','add_bone','insert_bone','delete_bone','reparent_bone','transfer_weights','connect_points','disconnect_points','save_pose','apply_pose','replace_pose','create_move','update_move','update_moves','undo','redo'] as const;
 export type StudioAction=typeof STUDIO_ACTIONS[number];
 export interface MoveSequenceUpdate {id:string;poses:string[]}
 export function validMoveSequenceUpdates(value:unknown):value is MoveSequenceUpdate[]{
@@ -12,7 +12,7 @@ export function validMoveSequenceUpdates(value:unknown):value is MoveSequenceUpd
  return count<=200;
 }
 export interface StudioCommand {session:string;expectedRevision:number;action:StudioAction;mode?:'pose'|'rig';id?:string;target?:string;name?:string;position?:[number,number,number];rotation?:[number,number,number,number];scale?:number;ratio?:number;amount?:number;region?:import('./studio-data.ts').WeightRegion;bendLimit?:{min:number;max:number}|null;size?:number;radius?:number;mesh?:number;seconds?:number;loop?:boolean;poses?:string[];updates?:MoveSequenceUpdate[]}
-const fields:Record<StudioAction,string[]>={set_mode:['mode'],add_point:['name','position','mesh','size','radius'],update_point:['id','name','position','rotation','scale','size','radius','bendLimit'],delete_point:['id'],insert_bone:['id','ratio'],delete_bone:['id'],reparent_bone:['id','target'],transfer_weights:['id','target','amount','region'],connect_points:['id','target'],disconnect_points:['id','target'],save_pose:['name','seconds'],apply_pose:['id'],replace_pose:['id'],create_move:['id','name','poses','loop'],update_move:['id','poses'],update_moves:['updates'],undo:[],redo:[]};
+const fields:Record<StudioAction,string[]>={set_mode:['mode'],add_point:['name','position','mesh','size','radius'],update_point:['id','name','position','rotation','scale','size','radius','bendLimit'],delete_point:['id'],add_bone:['id','position'],insert_bone:['id','ratio'],delete_bone:['id'],reparent_bone:['id','target'],transfer_weights:['id','target','amount','region'],connect_points:['id','target'],disconnect_points:['id','target'],save_pose:['name','seconds'],apply_pose:['id'],replace_pose:['id'],create_move:['id','name','poses','loop'],update_move:['id','poses'],update_moves:['updates'],undo:[],redo:[]};
 export function parseStudioCommand(value:unknown):StudioCommand {
  const fail=()=>{throw new Error('Ungültiger Studio-Befehl.');};
  if(!value||typeof value!=='object'||Array.isArray(value))return fail();const v=value as Record<string,unknown>;
@@ -29,9 +29,10 @@ export function parseStudioCommand(value:unknown):StudioCommand {
  if(v.mesh!==undefined&&(!Number.isInteger(v.mesh)||(v.mesh as number)<0))return fail();
  if(v.loop!==undefined&&typeof v.loop!=='boolean')return fail();
  if(v.poses!==undefined&&(!Array.isArray(v.poses)||v.poses.length<2||v.poses.length>100||v.poses.some(x=>typeof x!=='string'||!x||x.length>100)))return fail();
- if(['insert_bone','delete_bone','reparent_bone','transfer_weights'].includes(v.action as string)&&(typeof v.id!=='string'||v.id==='$figure'))return fail();
+ if(['add_bone','insert_bone','delete_bone','reparent_bone','transfer_weights'].includes(v.action as string)&&(typeof v.id!=='string'||v.id==='$figure'))return fail();
  if(['reparent_bone','transfer_weights'].includes(v.action as string)&&(typeof v.target!=='string'||v.target==='$figure'||v.target===v.id))return fail();
  if(v.region!==undefined&&!validWeightRegion(v.region))return fail();
+ if(v.action==='add_bone'&&v.position===undefined)return fail();
  if(v.action==='transfer_weights'&&(typeof v.amount!=='number'||!Number.isFinite(v.amount)||v.amount<=0||v.amount>1))return fail();
  if(v.action==='update_moves'&&!validMoveSequenceUpdates(v.updates))return fail();
  return structuredClone(v) as unknown as StudioCommand;

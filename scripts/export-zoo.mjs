@@ -16,7 +16,7 @@ export function zooPackage(input,id){
   ...(d.weightTransfers?{weightTransfers:d.weightTransfers.map(({from,to,amount,after,region})=>({from,to,amount,after,...(region?{region:{center:[...region.center],radius:region.radius}}:{})}))}:{}),
   ...(d.boneReparents?{boneReparents:d.boneReparents.map(({bone,parent,after})=>({bone,parent,after}))}:{}),
   ...(d.boneDeletions?{boneDeletions:[...d.boneDeletions]}:{}),
-  ...(d.boneInsertions?{boneInsertions:d.boneInsertions.map(({child,ratio,afterDeletions})=>({child,ratio,...(afterDeletions===undefined?{}:{afterDeletions})}))}:{}),
+  ...(d.boneInsertions?{boneInsertions:d.boneInsertions.map(({child,ratio,parent,afterDeletions})=>({...((parent===undefined)?{child,ratio}:{parent}),...(afterDeletions===undefined?{}:{afterDeletions})}))}:{}),
   points:d.points.map(({id,name,kind,bone,mesh,rest,size,radius,bendLimit})=>({id,name,kind,...(bone===undefined?{}:{bone}),...(mesh===undefined?{}:{mesh}),rest,size,radius,...(bendLimit===undefined?{}:{bendLimit:{min:bendLimit.min,max:bendLimit.max}})})),links:d.links,boneRest:d.boneRest.map(transform),
   poses:d.poses.map(({id,name,seconds,values:map,review})=>({id,name,seconds,values:values(map),...(review?{review}:{} )})),moves:d.moves.map(({id,name,loop,poses})=>({id,name,loop,poses})),...(d.draft?{draft:values(d.draft)}:{}),
  }};

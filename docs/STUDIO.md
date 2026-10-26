@@ -330,3 +330,11 @@ Seit 0.57.0 zeigen grüne Außenringe die Bereichsgrenze und orange Innenringe d
 Sobald „Nur im Umkreis des Quellgelenks“ aktiv ist und ein Knochen im Modus „Gelenke bearbeiten“ ausgewählt ist, erscheint die Vorschau. Drei grüne Außenringe zeigen die Kugelgrenze; drei orange, gestrichelte Innenringe liegen beim halben Radius, wo der weiche Randabfall die Stärke halbiert. Eine schwach transparente Kugelfläche unterstützt die räumliche Orientierung. Die Bedienhinweise sind auf Deutsch und Englisch vorhanden.
 
 Auswahlwechsel, Radiusregler, Gelenkverschiebung und Undo/Redo aktualisieren die Anzeige. Im Modus „Figur bewegen“, bei Wiedergabe und nach Verlassen des Studios ist sie ausgeblendet. Die Vorschau wird nicht im Modell oder Projekt gespeichert und fängt keine Auswahlklicks ab. Sie zeigt den räumlichen Bereich, keine farbige Vertex-Gewichtsanalyse.
+
+## Freie Knochen setzen (0.58.0)
+
+Im Modus **Gelenke bearbeiten** einen vorhandenen Elternknochen auswählen, **＋ Knochen setzen** anklicken und die neue Position auf der Figur anklicken. Neben der Figur liegt die Position auf der aktuellen Ansichtsebene; anschließend lässt sie sich verschieben. Der neue Kindknochen ist mit dem Elternknochen verbunden, kann weitere Kinder erhalten und besitzt zunächst keinen Haut-Einfluss. Zum Zuweisen den Quellknochen auswählen und mit **Hautgewichte übertragen** Einfluss an den neuen Knochen abgeben. Undo/Redo umfasst jeweils die vollständige Änderung. Vorhandene Posen werden zur Prüfung markiert.
+
+Für Agenten: `add_bone` verwendet `id` des Elternknochens und `position: [x,y,z]` in normalisierten Weltkoordinaten der Grundpose. Nur im Rig-Modus, mit Bearbeitungsfreigabe, aktueller Sitzung und Revision; der Assistent legt den Vorschlag zur Übernahme vor.
+
+Benötigt einen vorhandenen Elternknochen; kein neues Skelett auf einer ungeriggten Oberfläche. Neue Knochen wirken erst nach Gewichtsübertragung auf die Haut. Skalierte Knochenketten sind ausgeschlossen. Kontinuierlicher Gewichtspinsel, Gewichtsfärbung und manuelle Hautabnahme bleiben offen. Projekte mit freien Knochen benötigen mindestens 0.58.0; ältere Leser lehnen diese Einträge ab.

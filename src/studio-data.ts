@@ -17,11 +17,12 @@ export function validWeightRegion(value:unknown):value is WeightRegion {
  if(!value||typeof value!=='object'||Array.isArray(value))return false;const r=value as Record<string,unknown>;
  return Object.keys(r).every(k=>k==='center'||k==='radius')&&Array.isArray(r.center)&&r.center.length===3&&r.center.every(v=>typeof v==='number'&&Number.isFinite(v)&&Math.abs(v)<=100)&&typeof r.radius==='number'&&Number.isFinite(r.radius)&&r.radius>=.005&&r.radius<=2;
 }
+export type BoneInsertion = ({child:number;ratio:number;parent?:never}|{parent:number;child?:never;ratio?:never}) & {afterDeletions?:number};
 export interface StudioData {
   weightTransfers?: {from:number;to:number;amount:number;after:number;region?:WeightRegion}[];
   boneReparents?: {bone:number;parent:number;after:number}[];
   boneDeletions?: number[];
-  boneInsertions?: {child:number;ratio:number;afterDeletions?:number}[];
+  boneInsertions?: BoneInsertion[];
   points: ControlPoint[]; links: [string, string][]; boneRest: Transform[]; poses: Pose[]; moves: StudioMove[]; draft?: Record<string,Transform>;
 }
 export interface StudioProject {
@@ -51,7 +52,11 @@ export function parseProject(input: unknown): StudioProject {
   if(d.boneInsertions!==undefined){
     require(Array.isArray(d.boneInsertions)&&d.boneInsertions.length<=64&&d.boneRest.length<=256,'Ungültige Knochenänderungen.');
     const count=d.boneRest.length-d.boneInsertions.length;require(count>0);
-    d.boneInsertions.forEach((e,i)=>require(obj(e)&&Object.keys(e).every(k=>k==='child'||k==='ratio'||k==='afterDeletions')&&Number.isInteger(e.child)&&(e.child as number)>=0&&(e.child as number)<count+i&&typeof e.ratio==='number'&&Number.isFinite(e.ratio)&&e.ratio>=.1&&e.ratio<=.9,'Ungültiges Zwischengelenk.'));
+    d.boneInsertions.forEach((e,i)=>{
+      require(obj(e),'Ungültiger neuer Knochen.');
+      const branch=e.parent!==undefined,index=branch?e.parent:e.child;
+      require(Object.keys(e).every(k=>(branch?['parent','afterDeletions']:['child','ratio','afterDeletions']).includes(k))&&Number.isInteger(index)&&(index as number)>=0&&(index as number)<count+i&&(branch||typeof e.ratio==='number'&&Number.isFinite(e.ratio)&&e.ratio>=.1&&e.ratio<=.9),'Ungültiger neuer Knochen.');
+    });
   }
   if(d.boneDeletions!==undefined)require(Array.isArray(d.boneDeletions)&&d.boneDeletions.length<=256&&new Set(d.boneDeletions).size===d.boneDeletions.length&&d.boneDeletions.every(i=>Number.isInteger(i)&&i>=0&&i<(d.boneRest as unknown[]).length),'Ungültige Knochenlöschungen.');
   let stage=0;

@@ -49,3 +49,13 @@ test('skin weight transfer can be undone and restored through a project file',as
  await page.locator('#studio-undo').click();expect((await download()).data.studio.weightTransfers).toBeUndefined();await page.locator('#studio-redo').click();expect((await download()).data.studio.weightTransfers).toEqual(saved.data.studio.weightTransfers);
  await page.locator('#project-file').setInputFiles(saved.path);await expect(page.locator('#message')).toContainText('Mika bereit');await page.locator('#studio-tab').click();expect((await download()).data.studio.weightTransfers).toEqual(saved.data.studio.weightTransfers);expect(errors).toEqual([]);
 });
+
+test('free child bone can be placed with the mouse, undone and reloaded',async({page})=>{
+ const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');await page.locator('#avatar-select').selectOption('mika');await expect(page.locator('#message')).toContainText('Mika bereit');await page.locator('#studio-tab').click();
+ const points=()=>page.evaluate(()=>window.PaKaChiSM.call('get_studio',{section:'points'}) as any);const before=await points(),parent=before.items.find((p:any)=>p.name==='LeftFoot');expect(parent).toBeTruthy();
+ await page.locator('#mode-rig').click();await page.locator('#studio-points').selectOption(parent.id);await page.locator('#bone-add').click();const canvas=page.locator('canvas').first(),box=(await canvas.boundingBox())!;await page.mouse.click(box.x+box.width*.72,box.y+box.height*.55);await expect(page.locator('#message')).toContainText('Knochen hinzugefügt');
+ const added=(await points()).items.find((p:any)=>p.name==='Neuer Knochen');expect(added.parentId).toBe(parent.id);
+ await page.locator('#studio-undo').click();expect((await points()).items).toHaveLength(before.items.length);await page.locator('#studio-redo').click();expect((await points()).items).toHaveLength(before.items.length+1);
+ const pending=page.waitForEvent('download');await page.locator('#studio-save').click();const path=(await(await pending).path())!,saved=JSON.parse(await readFile(path,'utf8'));expect(saved.studio.boneInsertions).toEqual([{parent:parent.bone}]);
+ await page.locator('#project-file').setInputFiles(path);await expect(page.locator('#message')).toContainText('Mika bereit');await page.locator('#studio-tab').click();expect((await points()).items.find((p:any)=>p.id===added.id).parentId).toBe(parent.id);expect(errors).toEqual([]);
+});

@@ -12,6 +12,23 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.58.0] - 2026-10-26
+
+Zeitstempel: 2026-10-26T07:00:49+01:00 (Europe/Berlin)
+
+### Added
+
+- Freie Kindknochen per Mausklick an vorhandenen Knochen setzen, mit Verbindung, Skinning-Palette und Undo/Redo.
+- `add_bone` für Assistent sowie Node-/Python-MCP mit Freigabe- und Revisionsprüfung.
+- Prüfungen für Gewichterhalt, gezielte Gewichtszuteilung, gemischte Umbaufolgen und Projekt-/Katalogexport.
+
+### Changed
+
+- Projektleser und Katalogexport erhalten freie Knochenabzweigungen. Diese Dateien benötigen mindestens 0.58.0.
+- README, Design, Roadmap und Studio-Anleitung aktualisiert.
+
+**Prüfung:** 271 Node-Tests und Build bestanden; Python-Syntax geprüft. Der neue Chromium-Nachweis steht aus. Benötigt einen vorhandenen Elternknochen; kein neues Skelett auf einer ungeriggten Oberfläche. Neue Knochen wirken erst nach Gewichtsübertragung auf die Haut. Skalierte Knochenketten sind ausgeschlossen. Kontinuierlicher Gewichtspinsel, Gewichtsfärbung und manuelle Hautabnahme bleiben offen. Projekte mit freien Knochen benötigen mindestens 0.58.0; ältere Leser lehnen diese Einträge ab.
+
 ## [0.57.0] - 2026-10-26
 
 Zeitstempel: 2026-10-26T02:13:51+01:00 (Europe/Berlin)
@@ -1176,3 +1193,5 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 [0.56.0]: PRUEFUNG-0.56.0.md
 
 [0.57.0]: PRUEFUNG-0.57.0.md
+
+[0.58.0]: PRUEFUNG-0.58.0.md
