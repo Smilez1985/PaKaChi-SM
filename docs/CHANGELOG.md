@@ -26,7 +26,7 @@ Zeitstempel: 2026-10-26T02:13:51+01:00 (Europe/Berlin)
 - Deutsche und englische Hinweise für Gewichtsübertragung und Vorschau ergänzt.
 - README, Design, Roadmap, Bedienanleitung und Prüfbericht nachgezogen.
 
-**Prüfung:** 268 Node-Tests und Build bestanden. Neuer Chromium-Nachweis steht aus. Keine farbige Vertex-Gewichtsanalyse, kontinuierlicher Gewichtspinsel oder neue manuelle Hautabnahme.
+**Prüfung:** 268 Node-Tests, Build und alle 17 Chromium-Fälle bestanden ([CI-Nachweis](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/40253220224)). Keine farbige Vertex-Gewichtsanalyse, kontinuierlicher Gewichtspinsel oder neue manuelle Hautabnahme.
 
 ## [0.56.0] - 2026-10-25
 
