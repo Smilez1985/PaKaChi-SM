@@ -22,6 +22,10 @@ Zeitstempel: 2026-10-26T13:25:33+01:00 (Europe/Berlin)
 - Neue Gewichtsaufträge werden direkt und atomar auf aktuellen Skinning-Attributen angewendet, ohne den Verlauf oder die Knochenhierarchie pro Auftrag neu aufzubauen.
 - README, Design, Roadmap, Bedienanleitung und deutsche/englische Budgethinweise aktualisiert.
 
+### Fixed
+
+- Dem Browser-Ladetest für 256 Gewichtsaufträge eine eigene begrenzte Wartefrist und Ladezeitmessung gegeben, nachdem der erste CI-Lauf an der bisherigen 5-Sekunden-Frist abbrach.
+
 ### Added
 
 - Prüfung von 1024 direkten Übertragungen, identischer Wiederherstellung, erhaltenen Posen/Paletten/Attributen, Budgetgrenze und Katalogexport.
