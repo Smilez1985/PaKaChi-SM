@@ -1,3 +1,4 @@
+import {StudioWeightColors} from './studio-weight-colors.ts';
 import {StudioWeightPointer} from './studio-weight-pointer.ts';
 import {StudioWeightPreview} from './studio-weight-preview.ts';
 import type {WeightRegion} from './studio-data.ts';
@@ -9,6 +10,8 @@ import type { StudioRig } from './studio-rig.ts';
 
 export class StudioView {
   readonly group=new T.Group();
+  private readonly weightColors=new StudioWeightColors();
+  setWeightBone(index:number|null){this.weightColors.show(this.rig.surfaces.map(s=>s.mesh),this.enabled&&index!==null?this.rig.bones[index]??null:null);}
   private readonly weightPreview=new StudioWeightPreview();
   setWeightRegion(region:WeightRegion|null){this.weightPreview.setRegion(region);}
   private readonly handles=new T.Group();
@@ -49,7 +52,7 @@ export class StudioView {
     this.brush=new StudioWeightPointer(canvas,(x,y)=>{this.aim(x,y);return this.ray.intersectObjects(this.rig.surfaces.map(s=>s.mesh),false)[0]?.point??null;},()=>this.onBrushStart(),p=>this.onBrushSample(p),cancel=>this.onBrushEnd(cancel),orbit);
     this.setEnabled(false);
   }
-  setEnabled(value:boolean) {if(!value)this.brush.finish();this.brush.enabled=value&&this.action==='brush';this.enabled=value;this.canvas.style.cursor=value&&this.action==='add'?'crosshair':'';this.group.visible=value;this.gizmo.enabled=value;this.orbit.enabled=true;if(!value){this.gizmo.detach();this.dragging=false;}else this.refresh();}
+  setEnabled(value:boolean) {if(!value){this.brush.finish();this.weightColors.clear();}this.brush.enabled=value&&this.action==='brush';this.enabled=value;this.canvas.style.cursor=value&&this.action==='add'?'crosshair':'';this.group.visible=value;this.gizmo.enabled=value;this.orbit.enabled=true;if(!value){this.gizmo.detach();this.dragging=false;}else this.refresh();}
   setAction(value:'select'|'add'|'connect'|'brush'){if(value!=='brush')this.brush.finish();this.brush.enabled=this.enabled&&value==='brush';this.action=value;if(value!=='select')this.gizmo.detach();else this.refresh();this.canvas.style.cursor=(value==='add'||value==='brush')?'crosshair':'';}
   setRotation(value:boolean){this.rotation=value;this.gizmo.setMode(value?'rotate':'translate');}
   select(id:string|null){this.selected=id;this.refresh();}
@@ -99,5 +102,5 @@ export class StudioView {
     if(this.enabled && point && this.action==='select') {if(!this.dragging){this.proxy.position.copy(this.rig.position(point));this.proxy.quaternion.copy(this.rig.rotation(point));}this.gizmo.setMode(this.rotation && (point.kind==='bone'||point.id===FIGURE_TRACK)?'rotate':'translate');this.gizmo.attach(this.proxy);}else this.gizmo.detach();
   }
   private clearGroup(group:T.Group){for(const child of [...group.children]){group.remove(child);if(child instanceof T.Mesh||child instanceof T.Line){child.geometry.dispose();(child.material as T.Material).dispose();}}}
-  dispose(){this.brush.dispose();this.canvas.removeEventListener('pointermove',this.move,true);this.canvas.removeEventListener('pointercancel',this.cancel,true);this.canvas.removeEventListener('lostpointercapture',this.cancel,true);this.canvas.removeEventListener('pointerdown',this.down,true);this.canvas.removeEventListener('pointerup',this.up,true);this.canvas.style.cursor='';this.orbit.enabled=true;this.gizmo.dispose();this.weightPreview.dispose();this.clearGroup(this.handles);this.clearGroup(this.lines);this.group.removeFromParent();}
+  dispose(){this.brush.dispose();this.weightColors.dispose();this.canvas.removeEventListener('pointermove',this.move,true);this.canvas.removeEventListener('pointercancel',this.cancel,true);this.canvas.removeEventListener('lostpointercapture',this.cancel,true);this.canvas.removeEventListener('pointerdown',this.down,true);this.canvas.removeEventListener('pointerup',this.up,true);this.canvas.style.cursor='';this.orbit.enabled=true;this.gizmo.dispose();this.weightPreview.dispose();this.clearGroup(this.handles);this.clearGroup(this.lines);this.group.removeFromParent();}
 }

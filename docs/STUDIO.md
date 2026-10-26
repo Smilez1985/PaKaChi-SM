@@ -346,3 +346,11 @@ In **Gelenke bearbeiten** den Quellknochen auswählen und unter **Oberflächen-E
 Der räumliche Abstand zwischen Aufträgen beträgt ein Viertel des Radius. Leere Quellbereiche ändern nichts. Jeder wirksame Strich erhöht die Revision einmal und lässt sich mit einem Undo vollständig zurücknehmen. Ein Verlust der Mausaufnahme oder Pointer-Abbruch nimmt den laufenden Strich zurück. Gespeichert werden die vorhandenen räumlichen Gewichtsübertragungen, daher ist kein neues Projektformat nötig.
 
 Erste Pinselstufe: kugelförmiger Einfluss, auch durch dünne Oberflächen hindurch; keine Beschränkung auf sichtbare Vertices, keine Gewichtsfärbung. Überlappende Aufträge verstärken den Effekt. Höchstens 128 gespeicherte Übertragungen pro Projekt einschließlich Einzelaufträgen; lange Striche können das Limit erreichen. Große Sprünge und fehlende Oberflächentreffer unterbrechen die Verbindung zwischen Aufträgen. Manuelle Hautqualitäts- und Performance-Abnahme bleibt offen.
+
+## Hautgewichte farbig anzeigen (0.60.0)
+
+Im Modus **Gelenke bearbeiten** einen Knochen auswählen und **Hautgewichte farbig anzeigen** aktivieren. Blau steht für keinen Einfluss, Grün für 50 % und Rot für vollständigen Einfluss des ausgewählten Knochens. Dazwischen liegen interpolierte Farben. Auch nach einer Gewichtsübertragung, beim Malen und nach Undo/Redo zeigt die Ansicht den aktuellen Stand. Zum Prüfen des Zielknochens diesen auswählen.
+
+Die Diagnoseansicht ersetzt vorübergehend die Materialien geriggter Oberflächen durch unbeleuchtete Gewichtsfarben. Ausschalten, Wechsel in **Figur bewegen** oder Verlassen des Studios stellt ursprüngliche Materialien und Vertex-Farben wieder her. Nicht geriggte Teile behalten ihre normale Darstellung. Die Auswahl ist eine lokale Ansichtseinstellung und wird nicht in die Projektdatei geschrieben.
+
+Nur geriggte Oberflächen mit Skinning-Gewichten. Farben werden zwischen Vertices über Dreiecke interpoliert; die Anzeige ist keine Anatomie- oder Qualitätsbewertung. Der bestehende Pinsel bleibt kugelförmig und auf 128 gespeicherte Übertragungen begrenzt. Beschränkung auf sichtbare Vertices, größere Pinselbudgets und manuelle Hautqualitäts-/Performance-Abnahme bleiben offen.

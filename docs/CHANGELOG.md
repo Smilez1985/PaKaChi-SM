@@ -12,6 +12,22 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.60.0] - 2026-10-26
+
+Zeitstempel: 2026-10-26T08:02:39+01:00 (Europe/Berlin)
+
+### Added
+
+- Farbige Diagnoseansicht tatsächlicher Hautgewichte für den ausgewählten Knochen, mit Legende und Aktualisierung nach Gewichtsänderungen.
+- Prüfungen für Gewichtswerte, Auswahl/Pinsel/Undo, Material- und Vertex-Farberhaltung sowie einen gerenderten Browservergleich.
+
+### Changed
+
+- Temporäre Ansicht stellt ursprüngliche Materialien beim Ausschalten, Moduswechsel und Verlassen wieder her; keine Projektänderung.
+- README, Design, Roadmap, Bedienanleitung und deutsche/englische Hinweise nachgezogen.
+
+**Prüfung:** 277 Node-Tests und Build bestanden. Neuer Chromium-Nachweis steht aus. Nur geriggte Oberflächen mit Skinning-Gewichten. Farben werden zwischen Vertices über Dreiecke interpoliert; die Anzeige ist keine Anatomie- oder Qualitätsbewertung. Der bestehende Pinsel bleibt kugelförmig und auf 128 gespeicherte Übertragungen begrenzt. Beschränkung auf sichtbare Vertices, größere Pinselbudgets und manuelle Hautqualitäts-/Performance-Abnahme bleiben offen.
+
 ## [0.59.0] - 2026-10-26
 
 Zeitstempel: 2026-10-26T07:37:18+01:00 (Europe/Berlin)
@@ -1213,3 +1229,5 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 [0.58.0]: PRUEFUNG-0.58.0.md
 
 [0.59.0]: PRUEFUNG-0.59.0.md
+
+[0.60.0]: PRUEFUNG-0.60.0.md

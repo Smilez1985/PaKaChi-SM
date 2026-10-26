@@ -1,6 +1,6 @@
 # Roadmap – was kommt
 
-**Softwarestand: 0.59.0 · Abgleich: 26.10.2026.** Teil der [Blaupause](README.md).
+**Softwarestand: 0.60.0 · Abgleich: 26.10.2026.** Teil der [Blaupause](README.md).
 
 Ein Häkchen bedeutet implementiert; es ersetzt keine visuelle oder externe Live-Abnahme. Die Nachweise und Prüfgrenzen stehen im [Prüfstand](PRUEFUNG.md). Die Versionshistorie gehört ins [Changelog](CHANGELOG.md).
 
@@ -16,7 +16,7 @@ Ein Häkchen bedeutet implementiert; es ersetzt keine visuelle oder externe Live
 ## Nächste Arbeitspakete
 
 1. **Korrekturen 0.11.0/0.11.1 visuell nachprüfen:** Drehung um die Figurenmitte auch nach Zoom/Pan sowie vollständige Körperverbindungen, Hand-/Fußziele, Rumpfbewegung und direktes Drehen. Nutzertest 0.10.0 meldete auseinanderziehbare Knochen und unbrauchbare Ausrichtung; diese Fehler sind technisch korrigiert, die erneute Nutzerabnahme steht aus. Anschließend Mausnavigation, kleine Gesichtspunkte, Gesamtverschiebung, Speichern/Laden und Agentensteuerung in einer lauffähigen Browserumgebung prüfen.
-2. **Gelenkbearbeitung vervollständigen:** Zwischengelenke in vorhandenen Knochenstrecken samt Gewichtsverteilung und Undo/Redo sind seit 0.47.0 vorhanden. Löschen und gemischte Umbaufolgen sind seit 0.48.0/0.49.0 vorhanden, Assistent/MCP seit 0.50.0. Umhängen vorhandener Knochen ist seit 0.53.0 vorhanden. Anteiliges Übertragen von Hautgewichten ist seit 0.55.0 vorhanden. Räumlich begrenzte Übertragung ist seit 0.56.0 vorhanden. Die Bereichsvorschau ist seit 0.57.0 vorhanden. Freie Knochenabzweigungen sind seit 0.58.0 vorhanden. Ein erster kontinuierlicher Gewichtspinsel ist seit 0.59.0 vorhanden. Als Nächstes Gewichtsfärbung, größere Pinselbudgets und Beschränkung auf sichtbare Oberflächen ergänzen; bestehende Moves und Gewichtsqualität prüfen. Ein fehlendes Knie lässt sich nun in eine vorhandene Strecke einfügen und beugen, jedoch noch kein vollständiges Rig aus einer ungeriggten Oberfläche erzeugen.
+2. **Gelenkbearbeitung vervollständigen:** Zwischengelenke in vorhandenen Knochenstrecken samt Gewichtsverteilung und Undo/Redo sind seit 0.47.0 vorhanden. Löschen und gemischte Umbaufolgen sind seit 0.48.0/0.49.0 vorhanden, Assistent/MCP seit 0.50.0. Umhängen vorhandener Knochen ist seit 0.53.0 vorhanden. Anteiliges Übertragen von Hautgewichten ist seit 0.55.0 vorhanden. Räumlich begrenzte Übertragung ist seit 0.56.0 vorhanden. Die Bereichsvorschau ist seit 0.57.0 vorhanden. Freie Knochenabzweigungen sind seit 0.58.0 vorhanden. Ein erster kontinuierlicher Gewichtspinsel ist seit 0.59.0 vorhanden. Gewichtsfärbung ist seit 0.60.0 vorhanden. Als Nächstes größere Pinselbudgets und Beschränkung auf sichtbare Oberflächen ergänzen; bestehende Moves und Gewichtsqualität prüfen. Ein fehlendes Knie lässt sich nun in eine vorhandene Strecke einfügen und beugen, jedoch noch kein vollständiges Rig aus einer ungeriggten Oberfläche erzeugen.
 3. **Studio-Harness anbinden:** auf den Profilen und der Rollen-/Fähigkeitsprüfung aus 0.13.0 aufbauen; Modellauflistung ist seit 0.15.0 vorhanden. Assistenten-Inferenz für Ollama/OpenAI-kompatible APIs ist seit 0.16.0 vorhanden. Als Nächstes reale Modell-/Werkzeugqualität prüfen sowie weitere Fachadapter und offiziell unterstützte OAuth-Verfahren ergänzen. Anthropic und der optionale verschlüsselte Schlüsseltresor sind bereits angebunden. Details und Abnahme in Abschnitt 7.
 4. **Aufträge und KI-Verfahren integrieren:** den seit 0.22.0 sichtbaren lokalen Generierungsablauf live prüfen, den Modellwechsel-Rücksprung und die abgesicherte 3D-Übernahme aus 0.24.0 visuell prüfen, weitere Generator-/Rigging-Adapter ergänzen, echte Inferenz und Qualität prüfen, die Generator-Fallbacks aus 0.25.0 live prüfen und anschließend gezielte Skelettkorrekturen mit Vorschau integrieren. Vorhandene Skelettdaten auszulesen ist bereits möglich, aber keine KI-Anatomieerkennung.
 
@@ -268,7 +268,8 @@ Die Übertragung betrifft alle Vertices mit Quellgewicht, ohne räumlichen Malpi
 
 - [x] Hautgewichte zwischen vorhandenen Knochen anteilig übertragen, normalisieren, speichern und rückgängig machen (0.55.0).
 - [x] Räumlichen Gewichtspinsel ergänzen (0.59.0).
-- [ ] Vertex-Auswahl und farbige Einflussanzeige ergänzen; Hautqualität manuell prüfen.
+- [x] Farbige Einflussanzeige ergänzen (0.60.0).
+- [ ] Vertex-Auswahl ergänzen; Hautqualität manuell prüfen.
 
 - [x] Hautgewichtsübertragung im Chromium-Browser mit Mengenregler, Undo/Redo und Projektdateiaustausch prüfen (0.55.0).
 
@@ -280,7 +281,7 @@ Der Bereich bezieht sich auf normalisierte Weltkoordinaten der ursprünglichen G
 - [x] Hautgewichtsübertragung räumlich auf eine Kugel mit weichem Randabfall begrenzen, speichern und über MCP verfügbar machen (0.56.0).
 - [x] Sichtbare Bereichsvorschau mit Radiusgrenze und halber Stärke ergänzen (0.57.0).
 - [x] Kontinuierliches Malen auf der Oberfläche ergänzen (erste begrenzte Stufe, 0.59.0).
-- [ ] Farbige Anzeige tatsächlicher Hautgewichte ergänzen.
+- [x] Farbige Anzeige tatsächlicher Hautgewichte ergänzen (0.60.0).
 
 - [x] Räumlich begrenzte Übertragung im Chromium-Browser mit Checkbox, Radiusregler, Undo/Redo und Wiederladen prüfen (0.56.0).
 
@@ -309,4 +310,12 @@ Benötigt einen vorhandenen Elternknochen; kein neues Skelett auf einer ungerigg
 Erste Pinselstufe: kugelförmiger Einfluss, auch durch dünne Oberflächen hindurch; keine Beschränkung auf sichtbare Vertices, keine Gewichtsfärbung. Überlappende Aufträge verstärken den Effekt. Höchstens 128 gespeicherte Übertragungen pro Projekt einschließlich Einzelaufträgen; lange Striche können das Limit erreichen. Große Sprünge und fehlende Oberflächentreffer unterbrechen die Verbindung zwischen Aufträgen. Manuelle Hautqualitäts- und Performance-Abnahme bleibt offen.
 
 - [x] Hautgewichte per Mausstrich mit festem Auftragsabstand und gemeinsamem Undo übertragen (0.59.0).
-- [ ] Gewichtsfärbung, größere Pinselbudgets und Beschränkung auf sichtbare Vertices ergänzen; große Modelle manuell prüfen.
+- [ ] Größere Pinselbudgets und Beschränkung auf sichtbare Vertices ergänzen; große Modelle manuell prüfen.
+
+## Farbige Hautgewichte
+
+**0.60.0:** Die tatsächlichen Hautgewichte des ausgewählten Knochens können farbig angezeigt werden: Blau = 0 %, Grün = 50 %, Rot = 100 %, mit Zwischenfarben. Die Anzeige folgt Auswahl, Gewichtsübertragung, Pinsel und Undo/Redo. Ausschalten, Posenmodus und Verlassen des Studios stellen ursprüngliche Materialien und Vertex-Farben wieder her. Die Ansicht verändert weder Projekt, Revision noch Undo-Verlauf.
+
+277 Node-Tests und Build bestanden. Neuer Chromium-Nachweis steht aus.
+
+Nur geriggte Oberflächen mit Skinning-Gewichten. Farben werden zwischen Vertices über Dreiecke interpoliert; die Anzeige ist keine Anatomie- oder Qualitätsbewertung. Der bestehende Pinsel bleibt kugelförmig und auf 128 gespeicherte Übertragungen begrenzt. Beschränkung auf sichtbare Vertices, größere Pinselbudgets und manuelle Hautqualitäts-/Performance-Abnahme bleiben offen.

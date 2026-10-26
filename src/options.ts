@@ -90,6 +90,8 @@ const translations:Record<string,string>={
   'Knochen wirklich löschen':'Delete actual bone',
   'Knochen entfernt. Kinder und Hautgewichte dem Elternknochen zugeordnet; Posen prüfen.':'Bone removed. Children and skin weights transferred to the parent; review poses.',
   'Knochen dazwischen einfügen':'Insert intermediate bone',
+  'Hautgewichte farbig anzeigen':'Show skin weight colors',
+  'Ausgewählter Knochen: Blau = 0 %, Grün = 50 %, Rot = 100 %. Dazwischen interpolierte Farben. Nur geriggte Oberflächen; ursprüngliche Materialien erscheinen nach dem Ausschalten wieder.':'Selected bone: blue = 0%, green = 50%, red = 100%. Colors interpolate between these values. Skinned surfaces only; disabling restores the original materials.',
   'Mit Pinsel übertragen':'Transfer with brush',
   'Mit linker Maustaste über die Haut malen. Ein Strich wird gemeinsam rückgängig gemacht.':'Paint on the skin with the left mouse button. Undo restores the entire stroke.',
   'Pinselstrich abgeschlossen. Posen und Bewegungen prüfen.':'Brush stroke completed. Review poses and moves.',

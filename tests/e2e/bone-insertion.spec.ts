@@ -69,3 +69,10 @@ test('weight brush paints with a captured mouse stroke and restores the complete
  await page.locator('#studio-undo').click();expect((await download()).data.studio.weightTransfers).toBeUndefined();await page.locator('#studio-redo').click();expect((await download()).data.studio.weightTransfers).toEqual(saved.data.studio.weightTransfers);
  await page.locator('#project-file').setInputFiles(saved.path);await expect(page.locator('#message')).toContainText('Mika bereit');await page.locator('#studio-tab').click();expect((await download()).data.studio.weightTransfers).toEqual(saved.data.studio.weightTransfers);expect(errors).toEqual([]);
 });
+
+test('skin weight colors visibly change the viewport without changing project revision',async({page})=>{
+ const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');await page.locator('#avatar-select').selectOption('mika');await expect(page.locator('#message')).toContainText('Mika bereit');await page.locator('#studio-tab').click();await page.locator('#mode-rig').click();
+ const info=()=>page.evaluate(()=>window.PaKaChiSM.call('get_studio') as any),points=await page.evaluate(()=>window.PaKaChiSM.call('get_studio',{section:'points'}) as any);await page.locator('#studio-points').selectOption(points.items.find((p:any)=>p.name==='Root').id);
+ const before=await info(),canvas=page.locator('canvas').first(),original=await canvas.screenshot();await page.locator('#weight-colors').check();const colored=await canvas.screenshot({path:'test-results/skin-weight-colors.png'});expect(colored.equals(original)).toBe(false);expect((await info()).revision).toBe(before.revision);expect((await info()).dirty).toBe(before.dirty);
+ await page.locator('#weight-colors').uncheck();const restored=await canvas.screenshot();expect(restored.equals(colored)).toBe(false);expect((await info()).revision).toBe(before.revision);expect(errors).toEqual([]);
+});
