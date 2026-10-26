@@ -131,7 +131,7 @@ npx playwright install chromium
 npm run test:e2e
 ```
 
-Für 0.61.0 sind 278 Tests, Build und alle 20 Chromium-Browserfälle bestanden. Die unveränderten Original-Testprogramme wurden zuletzt in 0.9.0 geprüft. Die manuelle WebGL-/Mausabnahme bleibt offen; automatisierte Browserprüfungen laufen auf GitHub. Die reale Python-MCP-/MQTT-Integration mit Studio-Editor wurde zuletzt in 0.10.0 erfolgreich geprüft. Details und frühere Nachweise stehen im [Prüfstand](docs/PRUEFUNG.md).
+Für 0.62.0 sind 279 Tests, Build und alle 20 Chromium-Browserfälle bestanden. Die unveränderten Original-Testprogramme wurden zuletzt in 0.9.0 geprüft. Die manuelle WebGL-/Mausabnahme bleibt offen; automatisierte Browserprüfungen laufen auf GitHub. Die reale Python-MCP-/MQTT-Integration mit Studio-Editor wurde zuletzt in 0.10.0 erfolgreich geprüft. Details und frühere Nachweise stehen im [Prüfstand](docs/PRUEFUNG.md).
 
 ## Lizenz
 
@@ -280,6 +280,6 @@ Projekte mit mehr als 128 Gewichtsaufträgen benötigen mindestens 0.61.0. Das P
 
 **0.62.0:** Die Berechnung langer Gewichtsverläufe verwendet vorberechnete Weltpositionen, wiederverwendete kleine Zahlenfelder und direkte Pufferkopien. Vertices ohne Quellgewicht oder außerhalb des Bereichs werden früh übersprungen. Der Gewichtsvergleich bestätigt dieselben Ergebnisse einschließlich Zusammenführen doppelter Indizes, Sortierung, Normalisierung und Vier-Einfluss-Grenze.
 
-279 Node-Tests und Build bestanden. Neuer Chromium-Nachweis steht aus.
+279 Node-Tests, Build und alle 20 Chromium-Fälle bestanden ([CI-Nachweis](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/40407457621)). Der Browserimport mit 256 Aufträgen dauerte in diesem Lauf 6822 ms (vorheriger 0.61.0-Lauf: 19181 ms). Einzelmessungen auf CI-Runnern, keine allgemeine Laufzeitgarantie.
 
 Das Budget bleibt bei 1024 Aufträgen. Lokale Messung mit 256 Aufträgen: 1626/1471/1551 ms für den reinen Rig-Reset (Median 1551 ms); vorherige Vergleichsmessung 6375/5903/5718 ms. Dies ist kein vollständiger Browserimport und keine allgemeine Echtzeit-Zusage. Vorberechnete Weltpositionen benötigen 24 Byte pro Vertex statt zuvor 12 Byte für die Positionskopie. Beschränkung des Pinsels auf sichtbare Oberflächen und manuelle Prüfung großer Modelle bleiben offen.
