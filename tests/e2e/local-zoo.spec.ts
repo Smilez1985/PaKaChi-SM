@@ -16,6 +16,10 @@ test('two tabs share committed list changes without replacing a loaded avatar',a
  await page.locator('#file-input').setInputFiles({name:'shared.glb',mimeType:'model/gltf-binary',buffer:glb()});await expect(page.locator('#message')).toContainText('bereit');await page.locator('#zoo-name').fill('Shared triangle');await page.locator('#zoo-save').click();await expect(page.locator('.local-zoo [role=status]')).toContainText('Neue Kopie gespeichert');const id=await page.locator('#zoo-list').inputValue();
  await expect(second.locator('#zoo-list option')).toHaveCount(1);await second.locator('#avatar-select').selectOption(id);await expect(second.locator('#message')).toContainText('Shared triangle bereit');const before=await second.evaluate(()=>window.PaKaChiSM.call('get_studio') as any);
  page.once('dialog',d=>d.dismiss());await page.locator('#zoo-remove').click();await expect(second.locator('#zoo-list option')).toHaveCount(1);
- page.once('dialog',d=>d.accept());await page.locator('#zoo-remove').click();await expect(second.locator('#zoo-list option')).toHaveCount(0);await expect(second.locator('#avatar-name')).toHaveText('Shared triangle');expect(await second.evaluate(()=>window.PaKaChiSM.call('get_studio'))).toEqual(before);
+ page.once('dialog',d=>d.accept());await page.locator('#zoo-remove').click();await expect(second.locator('#zoo-list option')).toHaveCount(0);await expect(second.locator('#avatar-name')).toHaveText('Shared triangle');const after=await second.evaluate(()=>window.PaKaChiSM.call('get_studio') as any);
+ // The list can resize the viewport: projection is transient, not avatar state.
+ const {view:beforeView,...beforeState}=before,{view:afterView,...afterState}=after;
+ expect(afterState).toEqual(beforeState);expect(afterView.eye).toEqual(beforeView.eye);
+ expect(afterView.projection).toHaveLength(16);expect(afterView.projection.every(Number.isFinite)).toBe(true);
  await second.close();
 });
