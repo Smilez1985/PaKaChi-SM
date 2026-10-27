@@ -6,7 +6,7 @@ import logging
 import os
 import re
 import time
-from typing import Literal
+from typing import Literal, Annotated
 from urllib.parse import quote
 from uuid import uuid4
 from amqtt.broker import Broker
@@ -26,10 +26,16 @@ class MoveSequenceUpdate(BaseModel):
     id: str = Field(min_length=1, max_length=100)
     poses: list[str] = Field(min_length=2, max_length=100)
 
+class WeightView(BaseModel):
+    model_config = ConfigDict(extra='forbid', strict=True)
+    eye: list[Annotated[float, Field(ge=-1000, le=1000)]] = Field(min_length=3, max_length=3)
+    projection: list[Annotated[float, Field(ge=-1e6, le=1e6)]] = Field(min_length=16, max_length=16)
+
 class WeightRegion(BaseModel):
     model_config = ConfigDict(extra='forbid', strict=True)
     center: list[float] = Field(min_length=3, max_length=3)
     radius: float = Field(ge=.005, le=2)
+    view: WeightView | None = None
 
 class StudioCommand(BaseModel):
     model_config = ConfigDict(extra='forbid', strict=True)
@@ -223,7 +229,7 @@ def build_server(uri=None, embedded=True, tcp_port=1883, ws_port=8083):
         update_point: id und name/position/rotation/scale/size/radius (scale nur $figure, 0.1–5); $figure ist die ganze Figur.
         transfer_weights: id (Quelle), target (Ziel), amount (Anteil über 0 bis 1), nur Rig-Modus.
         Quellgewichte an allen betroffenen Vertices übertragen, vier stärkste Einflüsse normalisiert behalten.
-        Optional region={center:[x,y,z],radius:0.005..2}: normalisierte Weltkoordinaten der ursprünglichen Grundpose, Kugel mit weichem Randabfall. Ohne region global.
+        Optional region={center:[x,y,z],radius:0.005..2}: normalisierte Weltkoordinaten der ursprünglichen Grundpose, Kugel mit weichem Randabfall. Ohne region global. Optional region.view aus get_studio.view beschränkt auf geometrisch sichtbare Vertices der ursprünglichen Grundpose (eye und projection); transparente Flächen gelten als undurchsichtig.
         Grundpose bleibt erhalten; Posen/Bewegungen prüfen. Undo möglich.
         reparent_bone: id,target (neuer Elternknochen), nur Rig-Modus und gleicher Skelettbaum.
         Erhält Einzelposen; Bewegungsübergänge prüfen. Keine Kreise, Wurzeln oder skalierten Ketten. Starre Anbauteile bleiben befestigt; keine Anbauteile mit eigenem Skelett.

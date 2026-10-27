@@ -1,6 +1,6 @@
 # Roadmap – was kommt
 
-**Softwarestand: 0.62.0 · Abgleich: 26.10.2026.** Teil der [Blaupause](README.md).
+**Softwarestand: 0.63.0 · Abgleich: 26.10.2026.** Teil der [Blaupause](README.md).
 
 Ein Häkchen bedeutet implementiert; es ersetzt keine visuelle oder externe Live-Abnahme. Die Nachweise und Prüfgrenzen stehen im [Prüfstand](PRUEFUNG.md). Die Versionshistorie gehört ins [Changelog](CHANGELOG.md).
 
@@ -16,7 +16,7 @@ Ein Häkchen bedeutet implementiert; es ersetzt keine visuelle oder externe Live
 ## Nächste Arbeitspakete
 
 1. **Korrekturen 0.11.0/0.11.1 visuell nachprüfen:** Drehung um die Figurenmitte auch nach Zoom/Pan sowie vollständige Körperverbindungen, Hand-/Fußziele, Rumpfbewegung und direktes Drehen. Nutzertest 0.10.0 meldete auseinanderziehbare Knochen und unbrauchbare Ausrichtung; diese Fehler sind technisch korrigiert, die erneute Nutzerabnahme steht aus. Anschließend Mausnavigation, kleine Gesichtspunkte, Gesamtverschiebung, Speichern/Laden und Agentensteuerung in einer lauffähigen Browserumgebung prüfen.
-2. **Gelenkbearbeitung vervollständigen:** Zwischengelenke in vorhandenen Knochenstrecken samt Gewichtsverteilung und Undo/Redo sind seit 0.47.0 vorhanden. Löschen und gemischte Umbaufolgen sind seit 0.48.0/0.49.0 vorhanden, Assistent/MCP seit 0.50.0. Umhängen vorhandener Knochen ist seit 0.53.0 vorhanden. Anteiliges Übertragen von Hautgewichten ist seit 0.55.0 vorhanden. Räumlich begrenzte Übertragung ist seit 0.56.0 vorhanden. Die Bereichsvorschau ist seit 0.57.0 vorhanden. Freie Knochenabzweigungen sind seit 0.58.0 vorhanden. Ein erster kontinuierlicher Gewichtspinsel ist seit 0.59.0 vorhanden. Gewichtsfärbung ist seit 0.60.0 vorhanden. Das Pinselbudget beträgt seit 0.61.0 1024 Aufträge. Als Nächstes Beschränkung auf sichtbare Oberflächen ergänzen; bestehende Moves und Gewichtsqualität prüfen. Ein fehlendes Knie lässt sich nun in eine vorhandene Strecke einfügen und beugen, jedoch noch kein vollständiges Rig aus einer ungeriggten Oberfläche erzeugen.
+2. **Gelenkbearbeitung vervollständigen:** Zwischengelenke in vorhandenen Knochenstrecken samt Gewichtsverteilung und Undo/Redo sind seit 0.47.0 vorhanden. Löschen und gemischte Umbaufolgen sind seit 0.48.0/0.49.0 vorhanden, Assistent/MCP seit 0.50.0. Umhängen vorhandener Knochen ist seit 0.53.0 vorhanden. Anteiliges Übertragen von Hautgewichten ist seit 0.55.0 vorhanden. Räumlich begrenzte Übertragung ist seit 0.56.0 vorhanden. Die Bereichsvorschau ist seit 0.57.0 vorhanden. Freie Knochenabzweigungen sind seit 0.58.0 vorhanden. Ein erster kontinuierlicher Gewichtspinsel ist seit 0.59.0 vorhanden. Gewichtsfärbung ist seit 0.60.0 vorhanden. Das Pinselbudget beträgt seit 0.61.0 1024 Aufträge. Geometrische Sichtprüfung ist seit 0.63.0 optional vorhanden. Als Nächstes Material-/Transparenzfälle und große Modelle prüfen; bestehende Moves und Gewichtsqualität prüfen. Ein fehlendes Knie lässt sich nun in eine vorhandene Strecke einfügen und beugen, jedoch noch kein vollständiges Rig aus einer ungeriggten Oberfläche erzeugen.
 3. **Studio-Harness anbinden:** auf den Profilen und der Rollen-/Fähigkeitsprüfung aus 0.13.0 aufbauen; Modellauflistung ist seit 0.15.0 vorhanden. Assistenten-Inferenz für Ollama/OpenAI-kompatible APIs ist seit 0.16.0 vorhanden. Als Nächstes reale Modell-/Werkzeugqualität prüfen sowie weitere Fachadapter und offiziell unterstützte OAuth-Verfahren ergänzen. Anthropic und der optionale verschlüsselte Schlüsseltresor sind bereits angebunden. Details und Abnahme in Abschnitt 7.
 4. **Aufträge und KI-Verfahren integrieren:** den seit 0.22.0 sichtbaren lokalen Generierungsablauf live prüfen, den Modellwechsel-Rücksprung und die abgesicherte 3D-Übernahme aus 0.24.0 visuell prüfen, weitere Generator-/Rigging-Adapter ergänzen, echte Inferenz und Qualität prüfen, die Generator-Fallbacks aus 0.25.0 live prüfen und anschließend gezielte Skelettkorrekturen mit Vorschau integrieren. Vorhandene Skelettdaten auszulesen ist bereits möglich, aber keine KI-Anatomieerkennung.
 
@@ -311,7 +311,8 @@ Erste Pinselstufe: kugelförmiger Einfluss, auch durch dünne Oberflächen hindu
 
 - [x] Hautgewichte per Mausstrich mit festem Auftragsabstand und gemeinsamem Undo übertragen (0.59.0).
 - [x] Pinselbudget auf 1024 Aufträge erhöhen und fortlaufende Übertragung ohne vollständigen Wiederaufbau ermöglichen (0.61.0).
-- [ ] Beschränkung auf sichtbare Vertices ergänzen; große Modelle und Ladezeiten manuell prüfen.
+- [x] Optionale geometrische Sichtprüfung mit gespeicherter Kamera ergänzen (0.63.0).
+- [ ] Transparenz/Alpha-Ausschnitte und Materialgruppen berücksichtigen; große Modelle und Ladezeiten manuell prüfen.
 
 ## Farbige Hautgewichte
 
@@ -341,3 +342,11 @@ Das Budget bleibt bei 1024 Aufträgen. Lokale Messung mit 256 Aufträgen: 1626/1
 
 - [x] Gewichtsberechnung ohne neue Map-/Vektorobjekte pro Vertex und Auftrag beschleunigen (0.62.0).
 - [ ] Vollständige Importzeiten großer Projekte weiter messen und optimieren; manuelle Performance-Abnahme bleibt offen.
+
+## Pinsel mit Sichtprüfung
+
+**0.63.0:** Die optionale Checkbox „Pinsel nur auf sichtbare Oberfläche“ begrenzt Gewichtsaufträge auf geometrisch sichtbare Vertices im Blickfeld. Eine räumliche Suchstruktur prüft Verdeckung durch andere Dreiecke. Die Kamera wird pro Strich festgehalten und mit den Aufträgen gespeichert; Projekt-/Katalogexport und Undo/Redo reproduzieren die Auswahl. Assistent/MCP können `region.view` aus `get_studio.view` übernehmen.
+
+281 Node-Tests und Build bestanden; Python-Syntax geprüft. Neuer Chromium-Nachweis steht aus.
+
+Sichtprüfung bezieht sich auf die ursprüngliche Grundpose. Dreiecke gelten beidseitig als undurchsichtige Hindernisse; Transparenz, Alpha-Ausschnitte und Materialgruppen-Sichtbarkeit werden nicht ausgewertet. Die erste Sichtprüfung baut eine Suchstruktur auf und benötigt zusätzlichen Speicher; große Modelle sind noch nicht manuell abgenommen. Ohne Checkbox gilt weiterhin der kugelförmige Pinsel. Projekte mit `region.view` benötigen mindestens 0.63.0.

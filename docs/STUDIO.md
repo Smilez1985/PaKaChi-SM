@@ -366,3 +366,11 @@ Projekte mit mehr als 128 Gewichtsaufträgen benötigen mindestens 0.61.0. Das P
 `npm run benchmark:weights` misst dreimal den Rig-Wiederaufbau des mitgelieferten Mika-Modells mit 256 räumlichen Gewichtsaufträgen und gibt Einzelzeiten sowie Median als JSON aus. Der Test verändert keine Projektdateien. Dateiimport, Oberfläche und Rendering sind nicht Teil dieser Messung. Der Chromium-Test protokolliert dagegen die Zeit bis zur Bereitschaftsmeldung nach dem Dateiimport.
 
 Das Budget bleibt bei 1024 Aufträgen. Lokale Messung mit 256 Aufträgen: 1626/1471/1551 ms für den reinen Rig-Reset (Median 1551 ms); vorherige Vergleichsmessung 6375/5903/5718 ms. Dies ist kein vollständiger Browserimport und keine allgemeine Echtzeit-Zusage. Vorberechnete Weltpositionen benötigen 24 Byte pro Vertex statt zuvor 12 Byte für die Positionskopie. Beschränkung des Pinsels auf sichtbare Oberflächen und manuelle Prüfung großer Modelle bleiben offen.
+
+## Nur sichtbare Oberflächen bemalen (0.63.0)
+
+Vor **Mit Pinsel übertragen** die Checkbox **Pinsel nur auf sichtbare Oberfläche** aktivieren. Die Ansicht beim Beginn des Strichs bestimmt, welche Vertices im Blickfeld und nicht durch andere Dreiecke verdeckt sind. Der räumliche Radius und sein weicher Abfall gelten zusätzlich. Nach einer Drehung und einem neuen Strich wird die neue Kamera verwendet. Der alte Strich behält seine gespeicherte Ansicht auch beim späteren Laden oder Undo/Redo.
+
+Für Agenten liefert `get_studio.view` die Kameraposition `eye` und die 16 Werte der kombinierten Projektions-/Ansichtsmatrix `projection`. Sie können unverändert in `transfer_weights.region.view` übernommen werden. Fehlt `view`, bleibt die Übertragung ohne Sichtfilter.
+
+Sichtprüfung bezieht sich auf die ursprüngliche Grundpose. Dreiecke gelten beidseitig als undurchsichtige Hindernisse; Transparenz, Alpha-Ausschnitte und Materialgruppen-Sichtbarkeit werden nicht ausgewertet. Die erste Sichtprüfung baut eine Suchstruktur auf und benötigt zusätzlichen Speicher; große Modelle sind noch nicht manuell abgenommen. Ohne Checkbox gilt weiterhin der kugelförmige Pinsel. Projekte mit `region.view` benötigen mindestens 0.63.0.

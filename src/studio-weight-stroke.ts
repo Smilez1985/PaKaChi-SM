@@ -1,3 +1,4 @@
+import type {WeightView} from './studio-weight-visibility.ts';
 import * as T from 'three';
 import type {ControlPoint,StudioData,Transform,WeightRegion} from './studio-data.ts';
 import type {StudioRig} from './studio-rig.ts';
@@ -8,14 +9,16 @@ export class StudioWeightStroke {
  private distance=0;
  private closed=false;
  changed=false;
+ private view?:WeightView;
  private rig:StudioRig;private source:ControlPoint;private target:ControlPoint;private amount:number;private radius:number;
- constructor(rig:StudioRig,source:ControlPoint,target:ControlPoint,amount:number,radius:number){
+ constructor(rig:StudioRig,source:ControlPoint,target:ControlPoint,amount:number,radius:number,view?:WeightView){
+  this.view=view?structuredClone(view):undefined;
   this.rig=rig;this.source=source;this.target=target;this.amount=amount;this.radius=radius;
   if(source.kind!=='bone'||target.kind!=='bone'||source===target||!rig.data.points.includes(source)||!rig.data.points.includes(target)||!Number.isFinite(amount)||amount<=0||amount>1||!Number.isFinite(radius)||radius<.005||radius>2)throw Error('Zwei Knochen, Stärke und gültigen Pinselradius wählen.');
   this.before={data:structuredClone(rig.data),values:rig.capture()};
  }
  private dab(center:T.Vector3){
-  const region:WeightRegion={center:center.toArray(),radius:this.radius};
+  const region:WeightRegion={center:center.toArray(),radius:this.radius,...(this.view?{view:this.view}:{})};
   try{this.rig.transferWeights(this.source,this.target,this.amount,region);this.changed=true;}
   catch(error){
    // A region with no source influence is a normal gap, not a failed gesture.

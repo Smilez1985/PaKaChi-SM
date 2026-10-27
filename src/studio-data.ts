@@ -1,3 +1,4 @@
+import type {WeightView} from './studio-weight-visibility.ts';
 import {REVIEW_REASONS} from './studio-review.ts';
 import type {ReviewReason} from './studio-review.ts';
 export type Vec3 = [number, number, number];
@@ -13,10 +14,11 @@ export interface ControlPoint {
 export interface Pose { id: string; name: string; seconds: number; values: Record<string, Transform>; review?: ReviewReason[] }
 export interface StudioMove { id: string; name: string; loop: boolean; poses: string[] }
 export const MAX_WEIGHT_TRANSFERS=1024;
-export interface WeightRegion {center:Vec3;radius:number}
+export interface WeightRegion {center:Vec3;radius:number;view?:WeightView}
+export function validWeightView(v:unknown):v is WeightView {if(!v||typeof v!=='object'||Array.isArray(v))return false;const x=v as Record<string,unknown>;return Object.keys(x).every(k=>k==='eye'||k==='projection')&&Array.isArray(x.eye)&&x.eye.length===3&&x.eye.every(n=>typeof n==='number'&&Number.isFinite(n)&&Math.abs(n)<=1000)&&Array.isArray(x.projection)&&x.projection.length===16&&x.projection.every(n=>typeof n==='number'&&Number.isFinite(n)&&Math.abs(n)<=1e6);}
 export function validWeightRegion(value:unknown):value is WeightRegion {
  if(!value||typeof value!=='object'||Array.isArray(value))return false;const r=value as Record<string,unknown>;
- return Object.keys(r).every(k=>k==='center'||k==='radius')&&Array.isArray(r.center)&&r.center.length===3&&r.center.every(v=>typeof v==='number'&&Number.isFinite(v)&&Math.abs(v)<=100)&&typeof r.radius==='number'&&Number.isFinite(r.radius)&&r.radius>=.005&&r.radius<=2;
+ return Object.keys(r).every(k=>k==='center'||k==='radius'||k==='view')&&(r.view===undefined||validWeightView(r.view))&&Array.isArray(r.center)&&r.center.length===3&&r.center.every(v=>typeof v==='number'&&Number.isFinite(v)&&Math.abs(v)<=100)&&typeof r.radius==='number'&&Number.isFinite(r.radius)&&r.radius>=.005&&r.radius<=2;
 }
 export type BoneInsertion = ({child:number;ratio:number;parent?:never}|{parent:number;child?:never;ratio?:never}) & {afterDeletions?:number};
 export interface StudioData {

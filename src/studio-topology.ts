@@ -1,3 +1,4 @@
+import {StudioWeightVisibility} from './studio-weight-visibility.ts';
 import * as T from 'three';
 import {validWeightRegion} from './studio-data.ts';
 import type {WeightRegion} from './studio-data.ts';
@@ -22,8 +23,11 @@ export class StudioTopology {
  private added:T.Bone[]=[];
  private generated:T.Skeleton[]=[];
  private source:T.Bone[];
+ private visibility:StudioWeightVisibility;
+ private viewKey='';
+ private visibilityCache=new Map<T.SkinnedMesh,Int8Array>();
  constructor(source:T.Bone[],root:T.Object3D){
-  this.source=source;
+  this.source=source;const surfaces:T.Mesh[]=[];root.traverse(n=>{if(n instanceof T.Mesh)surfaces.push(n);});this.visibility=new StudioWeightVisibility(surfaces);
   this.parents=source.map(bone=>({bone,parent:bone.parent!,position:bone.position.clone()}));
   root.traverse(n=>{if(n instanceof T.SkinnedMesh){
    const positions=n.geometry.getAttribute('position'),worldPositions=new Float64Array(positions.count*3),point=new T.Vector3();
@@ -39,6 +43,7 @@ export class StudioTopology {
  }
  /** Stage all affected palettes before committing: failure never leaves partial weights. */
  transfer(edit:WeightTransfer,from:T.Bone,to:T.Bone){
+  const view=edit.region?.view,matrix=view?new T.Matrix4().fromArray(view.projection):null;const key=view?JSON.stringify(view):'';if(key!==this.viewKey){this.viewKey=key;this.visibilityCache.clear();}
   let affected=0;const commits:(()=>void)[]=[];
     for(const s of this.skins){const skeleton=s.mesh.skeleton,source=skeleton.bones.indexOf(from),target=skeleton.bones.indexOf(to);if(source<0)continue;
      const originalIndices=s.mesh.geometry.getAttribute('skinIndex'),originalWeights=s.mesh.geometry.getAttribute('skinWeight'),indices=originalIndices.clone(),values=originalWeights.clone();
@@ -48,6 +53,7 @@ export class StudioTopology {
       if(original<=0)continue;
       let amount=edit.amount;
       if(edit.region){const offset=v*3,dx=s.worldPositions[offset]-edit.region.center[0],dy=s.worldPositions[offset+1]-edit.region.center[1],dz=s.worldPositions[offset+2]-edit.region.center[2];const u=T.MathUtils.clamp(1-Math.sqrt(dx*dx+dy*dy+dz*dz)/edit.region.radius,0,1);amount*=u*u*(3-2*u);if(amount<=0)continue;}
+      if(view){let cache=this.visibilityCache.get(s.mesh);if(!cache){cache=new Int8Array(indices.count);this.visibilityCache.set(s.mesh,cache);}if(cache[v]===0)cache[v]=this.visibility.visible(new T.Vector3().fromArray(s.worldPositions,v*3),view,matrix!)?1:-1;if(cache[v]<0)continue;}
       if(target<0)throw Error('Zielknochen fehlt in einer betroffenen Skinning-Palette.');
       affected++;changed=true;let count=0;
       for(let k=0;k<4;k++){const id=indices.getComponent(v,k),w=values.getComponent(v,k);if(w<=0)continue;let slot=0;while(slot<count&&ids[slot]!==id)slot++;if(slot===count){ids[count]=id;merged[count++]=0;}merged[slot]+=w;}

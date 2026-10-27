@@ -12,6 +12,22 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.63.0] - 2026-10-27
+
+Zeitstempel: 2026-10-27T06:48:29+01:00 (Europe/Berlin)
+
+### Added
+
+- Optionale Sichtprüfung für den Gewichtspinsel mit geometrischer Verdeckungsprüfung und Blickfeldbegrenzung.
+- Gespeicherte Kamera pro Pinselstrich; `region.view` über Projekt-/Katalogexport und beide MCP-Schemas erhalten, Kamera über `get_studio.view` verfügbar.
+- Tests für verdeckte Vertices, eingefrorene Ansicht, umgedrehte Kamera, Wiederladen und ungültige Sichtdaten.
+
+### Changed
+
+- README, Design, Roadmap, Studio-Anleitung und Sprachtexte nachgezogen.
+
+**Prüfung:** 281 Node-Tests und Build bestanden; Python-Syntax geprüft. Neuer Chromium-Nachweis steht aus. Sichtprüfung bezieht sich auf die ursprüngliche Grundpose. Dreiecke gelten beidseitig als undurchsichtige Hindernisse; Transparenz, Alpha-Ausschnitte und Materialgruppen-Sichtbarkeit werden nicht ausgewertet. Die erste Sichtprüfung baut eine Suchstruktur auf und benötigt zusätzlichen Speicher; große Modelle sind noch nicht manuell abgenommen. Ohne Checkbox gilt weiterhin der kugelförmige Pinsel. Projekte mit `region.view` benötigen mindestens 0.63.0.
+
 ## [0.62.0] - 2026-10-26
 
 Zeitstempel: 2026-10-26T22:48:12+01:00 (Europe/Berlin)
@@ -1272,3 +1288,5 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 [0.61.0]: PRUEFUNG-0.61.0.md
 
 [0.62.0]: PRUEFUNG-0.62.0.md
+
+[0.63.0]: PRUEFUNG-0.63.0.md
