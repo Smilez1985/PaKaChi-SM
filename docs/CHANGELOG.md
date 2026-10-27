@@ -12,6 +12,20 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.64.0] - 2026-10-27
+
+Zeitstempel: 2026-10-27T17:35:17+01:00 (Europe/Berlin)
+
+### Added
+
+- Sichtprüfung berücksichtigt ausgeblendete Materialgruppen und transparente Materialien mit Opazität 0.
+- Gespeicherte Materialregel über Projekt, Katalog, Assistent und MCP; alte Aufträge bleiben geometrisch.
+- Regressionstest für Gruppen, Transparenz, Material-Snapshot und alte Verläufe.
+
+**Prüfung:** Lokale Tests und Build sowie der neue Chromium-Lauf werden noch abschließend geprüft.
+
+Teiltransparente Materialien und Alpha-Texturen gelten weiterhin als undurchsichtige Hindernisse; Dreiecke bleiben beidseitig. Große Modelle und Materialdarstellung sind noch nicht manuell abgenommen. Dateien mit dem neuen Feld benötigen mindestens 0.64.0.
+
 ## [0.63.0] - 2026-10-27
 
 Zeitstempel: 2026-10-27T06:48:29+01:00 (Europe/Berlin)
@@ -1294,3 +1308,5 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 [0.62.0]: PRUEFUNG-0.62.0.md
 
 [0.63.0]: PRUEFUNG-0.63.0.md
+
+[0.64.0]: PRUEFUNG-0.64.0.md

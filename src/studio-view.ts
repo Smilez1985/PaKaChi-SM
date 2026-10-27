@@ -33,7 +33,7 @@ export class StudioView {
   onStart:()=>void=()=>{};
   onMove:(position:T.Vector3,rotation:T.Quaternion,intent?:'translate'|'rotate')=>void=()=>{};
   onEnd:()=>void=()=>{};
-  weightView(){this.camera.updateMatrixWorld(true);return {eye:this.camera.getWorldPosition(new T.Vector3()).toArray(),projection:new T.Matrix4().multiplyMatrices(this.camera.projectionMatrix,this.camera.matrixWorldInverse).toArray()};}
+  weightView(){this.camera.updateMatrixWorld(true);return {materials:true as const,eye:this.camera.getWorldPosition(new T.Vector3()).toArray(),projection:new T.Matrix4().multiplyMatrices(this.camera.projectionMatrix,this.camera.matrixWorldInverse).toArray()};}
   onBrushStart:()=>boolean=()=>false;
   onBrushSample:(p:T.Vector3|null)=>void=()=>{};
   onBrushEnd:(cancel:boolean)=>void=()=>{};

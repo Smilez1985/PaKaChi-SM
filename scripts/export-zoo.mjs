@@ -13,7 +13,7 @@ export function zooPackage(input,id){
  const p=parseProject(input),a=p.avatar,d=p.studio;
  // Explicit allowlists exclude unrelated fields accepted by older project readers.
  const project={format:p.format,version:p.version,model:p.model,avatar:{id,name:a.name,description:a.description||'Eigenes Studio-Projekt',moves:a.moves.map(({id,name,clip,loop})=>({id,name,clip,loop})),...(a.defaultMove?{defaultMove:a.defaultMove}:{}),...(a.states?{states:a.states}:{})},studio:{
-  ...(d.weightTransfers?{weightTransfers:d.weightTransfers.map(({from,to,amount,after,region})=>({from,to,amount,after,...(region?{region:{center:[...region.center],radius:region.radius,...(region.view?{view:{eye:[...region.view.eye],projection:[...region.view.projection]}}:{})}}:{})}))}:{}),
+  ...(d.weightTransfers?{weightTransfers:d.weightTransfers.map(({from,to,amount,after,region})=>({from,to,amount,after,...(region?{region:{center:[...region.center],radius:region.radius,...(region.view?{view:{...(region.view.materials?{materials:true}:{}),eye:[...region.view.eye],projection:[...region.view.projection]}}:{})}}:{})}))}:{}),
   ...(d.boneReparents?{boneReparents:d.boneReparents.map(({bone,parent,after})=>({bone,parent,after}))}:{}),
   ...(d.boneDeletions?{boneDeletions:[...d.boneDeletions]}:{}),
   ...(d.boneInsertions?{boneInsertions:d.boneInsertions.map(({child,ratio,parent,afterDeletions})=>({...((parent===undefined)?{child,ratio}:{parent}),...(afterDeletions===undefined?{}:{afterDeletions})}))}:{}),
