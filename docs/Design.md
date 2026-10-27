@@ -24,7 +24,7 @@ Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich gen
 | Generierung | Lokaler TripoSR-Dienst, Bildauswahl, getrennte Vorschau, Vorprüfungs-Fallbacks, expliziter weiterer Auftrag | Echte GPU-/Qualitätsabnahme, Cloud-Generatoren, Korrekturprompts und Rigging |
 | Übernahme | Revisionsschutz, ein Modellwechsel-Rücksprung, vorbereitete 3D-Installation mit Rückabwicklung | Gerenderte Abnahme, Originalplayer-Neustart und GPU-Kontextverlust |
 
-Prüfnachweis für Software 0.62.0: **279 Tests, Build und 20 Chromium-Fälle bestanden**. Separate Chromium-Nachweise stehen im Prüfbericht; echte Anbieter-/GPU-Inferenz und manuelle Mausabnahme bleiben offen. Projektformat bleibt Version 1. Freie Punkte/Posen aus 0.22.0/0.23.0 benötigen wegen der korrigierten Normalisierungsreihenfolge eine visuelle Kontrolle; keine automatische Migration. [Prüfbericht](PRUEFUNG-0.62.0.md).
+Prüfnachweis für Software 0.63.0: **281 Tests, Build und 20 Chromium-Fälle bestanden**. Separate Chromium-Nachweise stehen im Prüfbericht; echte Anbieter-/GPU-Inferenz und manuelle Mausabnahme bleiben offen. Projektformat bleibt Version 1. Freie Punkte/Posen aus 0.22.0/0.23.0 benötigen wegen der korrigierten Normalisierungsreihenfolge eine visuelle Kontrolle; keine automatische Migration. [Prüfbericht](PRUEFUNG-0.63.0.md).
 
 ## Bestehender PaKaChi-Avatar
 
@@ -589,6 +589,6 @@ Das Budget bleibt bei 1024 Aufträgen. Lokale Messung mit 256 Aufträgen: 1626/1
 
 **0.63.0:** Die optionale Checkbox „Pinsel nur auf sichtbare Oberfläche“ begrenzt Gewichtsaufträge auf geometrisch sichtbare Vertices im Blickfeld. Eine räumliche Suchstruktur prüft Verdeckung durch andere Dreiecke. Die Kamera wird pro Strich festgehalten und mit den Aufträgen gespeichert; Projekt-/Katalogexport und Undo/Redo reproduzieren die Auswahl. Assistent/MCP können `region.view` aus `get_studio.view` übernehmen.
 
-281 Node-Tests und Build bestanden; Python-Syntax geprüft. Neuer Chromium-Nachweis steht aus.
+281 Node-Tests, Build und alle 20 Chromium-Fälle bestanden ([CI-Nachweis](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/40529588502)); Python-Syntax lokal geprüft. Der Browserimport mit 256 sichtgefilterten Aufträgen dauerte in diesem Lauf 8909 ms; Einzelmessung, keine allgemeine Laufzeitgarantie.
 
 Sichtprüfung bezieht sich auf die ursprüngliche Grundpose. Dreiecke gelten beidseitig als undurchsichtige Hindernisse; Transparenz, Alpha-Ausschnitte und Materialgruppen-Sichtbarkeit werden nicht ausgewertet. Die erste Sichtprüfung baut eine Suchstruktur auf und benötigt zusätzlichen Speicher; große Modelle sind noch nicht manuell abgenommen. Ohne Checkbox gilt weiterhin der kugelförmige Pinsel. Projekte mit `region.view` benötigen mindestens 0.63.0.

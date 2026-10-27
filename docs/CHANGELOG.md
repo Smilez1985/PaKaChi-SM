@@ -26,7 +26,11 @@ Zeitstempel: 2026-10-27T06:48:29+01:00 (Europe/Berlin)
 
 - README, Design, Roadmap, Studio-Anleitung und Sprachtexte nachgezogen.
 
-**Prüfung:** 281 Node-Tests und Build bestanden; Python-Syntax geprüft. Neuer Chromium-Nachweis steht aus. Sichtprüfung bezieht sich auf die ursprüngliche Grundpose. Dreiecke gelten beidseitig als undurchsichtige Hindernisse; Transparenz, Alpha-Ausschnitte und Materialgruppen-Sichtbarkeit werden nicht ausgewertet. Die erste Sichtprüfung baut eine Suchstruktur auf und benötigt zusätzlichen Speicher; große Modelle sind noch nicht manuell abgenommen. Ohne Checkbox gilt weiterhin der kugelförmige Pinsel. Projekte mit `region.view` benötigen mindestens 0.63.0.
+### Fixed
+
+- Zwei-Tab-Browsertest trennt die größenabhängige Kameraprojektion vom weiterhin vollständig verglichenen Studiozustand; Kameraposition bleibt geprüft.
+
+**Prüfung:** 281 Node-Tests, Build und alle 20 Chromium-Fälle bestanden ([CI-Nachweis](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/40529588502)); Python-Syntax lokal geprüft. Der Browserimport mit 256 sichtgefilterten Aufträgen dauerte in diesem Lauf 8909 ms; Einzelmessung, keine allgemeine Laufzeitgarantie. Sichtprüfung bezieht sich auf die ursprüngliche Grundpose. Dreiecke gelten beidseitig als undurchsichtige Hindernisse; Transparenz, Alpha-Ausschnitte und Materialgruppen-Sichtbarkeit werden nicht ausgewertet. Die erste Sichtprüfung baut eine Suchstruktur auf und benötigt zusätzlichen Speicher; große Modelle sind noch nicht manuell abgenommen. Ohne Checkbox gilt weiterhin der kugelförmige Pinsel. Projekte mit `region.view` benötigen mindestens 0.63.0.
 
 ## [0.62.0] - 2026-10-26
 
