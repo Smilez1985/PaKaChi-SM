@@ -22,7 +22,7 @@ Zeitstempel: 2026-10-27T17:35:17+01:00 (Europe/Berlin)
 - Gespeicherte Materialregel über Projekt, Katalog, Assistent und MCP; alte Aufträge bleiben geometrisch.
 - Regressionstest für Gruppen, Transparenz, Material-Snapshot und alte Verläufe.
 
-**Prüfung:** Lokale Tests und Build sowie der neue Chromium-Lauf werden noch abschließend geprüft.
+**Prüfung:** 282 Node-Tests, Produktionsbuild und alle 20 Chromium-Fälle bestanden ([CI-Nachweis](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/40542963343)); Python-Syntax lokal geprüft. Der Browserimport von 256 Aufträgen dauerte in diesem Lauf 6254 ms; Einzelmessung, keine allgemeine Laufzeitgarantie.
 
 Teiltransparente Materialien und Alpha-Texturen gelten weiterhin als undurchsichtige Hindernisse; Dreiecke bleiben beidseitig. Große Modelle und Materialdarstellung sind noch nicht manuell abgenommen. Dateien mit dem neuen Feld benötigen mindestens 0.64.0.
 
