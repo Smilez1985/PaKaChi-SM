@@ -1,6 +1,6 @@
 # Roadmap – was kommt
 
-**Softwarestand: 0.64.0 · Abgleich: 27.10.2026.** Teil der [Blaupause](README.md).
+**Softwarestand: 0.65.0 · Abgleich: 27.10.2026.** Teil der [Blaupause](README.md).
 
 Ein Häkchen bedeutet implementiert; es ersetzt keine visuelle oder externe Live-Abnahme. Die Nachweise und Prüfgrenzen stehen im [Prüfstand](PRUEFUNG.md). Die Versionshistorie gehört ins [Changelog](CHANGELOG.md).
 
@@ -16,7 +16,7 @@ Ein Häkchen bedeutet implementiert; es ersetzt keine visuelle oder externe Live
 ## Nächste Arbeitspakete
 
 1. **Korrekturen 0.11.0/0.11.1 visuell nachprüfen:** Drehung um die Figurenmitte auch nach Zoom/Pan sowie vollständige Körperverbindungen, Hand-/Fußziele, Rumpfbewegung und direktes Drehen. Nutzertest 0.10.0 meldete auseinanderziehbare Knochen und unbrauchbare Ausrichtung; diese Fehler sind technisch korrigiert, die erneute Nutzerabnahme steht aus. Anschließend Mausnavigation, kleine Gesichtspunkte, Gesamtverschiebung, Speichern/Laden und Agentensteuerung in einer lauffähigen Browserumgebung prüfen.
-2. **Gelenkbearbeitung vervollständigen:** Zwischengelenke in vorhandenen Knochenstrecken samt Gewichtsverteilung und Undo/Redo sind seit 0.47.0 vorhanden. Löschen und gemischte Umbaufolgen sind seit 0.48.0/0.49.0 vorhanden, Assistent/MCP seit 0.50.0. Umhängen vorhandener Knochen ist seit 0.53.0 vorhanden. Anteiliges Übertragen von Hautgewichten ist seit 0.55.0 vorhanden. Räumlich begrenzte Übertragung ist seit 0.56.0 vorhanden. Die Bereichsvorschau ist seit 0.57.0 vorhanden. Freie Knochenabzweigungen sind seit 0.58.0 vorhanden. Ein erster kontinuierlicher Gewichtspinsel ist seit 0.59.0 vorhanden. Gewichtsfärbung ist seit 0.60.0 vorhanden. Das Pinselbudget beträgt seit 0.61.0 1024 Aufträge. Geometrische Sichtprüfung ist seit 0.63.0 optional vorhanden. Ausgeblendete Materialgruppen und Opazität 0 sind seit 0.64.0 berücksichtigt. Als Nächstes Alpha-Texturen, Teiltransparenz und große Modelle prüfen; bestehende Moves und Gewichtsqualität prüfen. Ein fehlendes Knie lässt sich nun in eine vorhandene Strecke einfügen und beugen, jedoch noch kein vollständiges Rig aus einer ungeriggten Oberfläche erzeugen.
+2. **Gelenkbearbeitung vervollständigen:** Zwischengelenke in vorhandenen Knochenstrecken samt Gewichtsverteilung und Undo/Redo sind seit 0.47.0 vorhanden. Löschen und gemischte Umbaufolgen sind seit 0.48.0/0.49.0 vorhanden, Assistent/MCP seit 0.50.0. Umhängen vorhandener Knochen ist seit 0.53.0 vorhanden. Anteiliges Übertragen von Hautgewichten ist seit 0.55.0 vorhanden. Räumlich begrenzte Übertragung ist seit 0.56.0 vorhanden. Die Bereichsvorschau ist seit 0.57.0 vorhanden. Freie Knochenabzweigungen sind seit 0.58.0 vorhanden. Ein erster kontinuierlicher Gewichtspinsel ist seit 0.59.0 vorhanden. Gewichtsfärbung ist seit 0.60.0 vorhanden. Das Pinselbudget beträgt seit 0.61.0 1024 Aufträge. Geometrische Sichtprüfung ist seit 0.63.0 optional vorhanden. Ausgeblendete Materialgruppen und Opazität 0 sind seit 0.64.0 berücksichtigt. Alpha-Ausschnitte auf Texturbasisebene sind seit 0.65.0 berücksichtigt. Als Nächstes gerenderte Alpha-Kanten, Teiltransparenz und große Modelle prüfen; bestehende Moves und Gewichtsqualität prüfen. Ein fehlendes Knie lässt sich nun in eine vorhandene Strecke einfügen und beugen, jedoch noch kein vollständiges Rig aus einer ungeriggten Oberfläche erzeugen.
 3. **Studio-Harness anbinden:** auf den Profilen und der Rollen-/Fähigkeitsprüfung aus 0.13.0 aufbauen; Modellauflistung ist seit 0.15.0 vorhanden. Assistenten-Inferenz für Ollama/OpenAI-kompatible APIs ist seit 0.16.0 vorhanden. Als Nächstes reale Modell-/Werkzeugqualität prüfen sowie weitere Fachadapter und offiziell unterstützte OAuth-Verfahren ergänzen. Anthropic und der optionale verschlüsselte Schlüsseltresor sind bereits angebunden. Details und Abnahme in Abschnitt 7.
 4. **Aufträge und KI-Verfahren integrieren:** den seit 0.22.0 sichtbaren lokalen Generierungsablauf live prüfen, den Modellwechsel-Rücksprung und die abgesicherte 3D-Übernahme aus 0.24.0 visuell prüfen, weitere Generator-/Rigging-Adapter ergänzen, echte Inferenz und Qualität prüfen, die Generator-Fallbacks aus 0.25.0 live prüfen und anschließend gezielte Skelettkorrekturen mit Vorschau integrieren. Vorhandene Skelettdaten auszulesen ist bereits möglich, aber keine KI-Anatomieerkennung.
 
@@ -312,7 +312,8 @@ Erste Pinselstufe: kugelförmiger Einfluss, auch durch dünne Oberflächen hindu
 - [x] Hautgewichte per Mausstrich mit festem Auftragsabstand und gemeinsamem Undo übertragen (0.59.0).
 - [x] Pinselbudget auf 1024 Aufträge erhöhen und fortlaufende Übertragung ohne vollständigen Wiederaufbau ermöglichen (0.61.0).
 - [x] Optionale geometrische Sichtprüfung mit gespeicherter Kamera ergänzen (0.63.0).
-- [ ] Transparenz/Alpha-Ausschnitte und Materialgruppen berücksichtigen; große Modelle und Ladezeiten manuell prüfen.
+- [x] Materialgruppen/Opazität 0 (0.64.0) und deterministische Alpha-Ausschnitte auf Texturbasisebene (0.65.0) berücksichtigen.
+- [ ] Gerenderte Alpha-Kanten/Mipmaps, Teiltransparenz sowie große Modelle und Ladezeiten manuell prüfen.
 
 ## Farbige Hautgewichte
 
@@ -359,3 +360,12 @@ Sichtprüfung bezieht sich auf die ursprüngliche Grundpose. Dreiecke gelten bei
 282 Node-Tests, Produktionsbuild und alle 20 Chromium-Fälle bestanden ([CI-Nachweis](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/40542963343)); Python-Syntax lokal geprüft. Der Browserimport von 256 Aufträgen dauerte in diesem Lauf 6254 ms; Einzelmessung, keine allgemeine Laufzeitgarantie.
 
 Teiltransparente Materialien und Alpha-Texturen gelten weiterhin als undurchsichtige Hindernisse; Dreiecke bleiben beidseitig. Große Modelle und Materialdarstellung sind noch nicht manuell abgenommen. Dateien mit dem neuen Feld benötigen mindestens 0.64.0.
+
+
+## Alpha-Ausschnitte im Gewichtspinsel
+
+**0.65.0:** Neue sichtgefilterte Pinselstriche berücksichtigen Alpha-Ausschnitte über `alphaTest`, Bildalpha und den Grünkanal einer `alphaMap`. Die Prüfung interpoliert UVs am Strahltreffer und berücksichtigt Texturtransformation, UV-Kanal, Wiederholung, Spiegelung, Flip und Nearest-/Linear-Vergrößerungsfilter. Pixel und Materialdaten werden beim Laden festgehalten. `region.view.alpha: true` zusammen mit `materials: true` speichert die neue Regel; ältere Aufträge behalten ihre bisherige Sichtprüfung.
+
+285 Node-Tests und Produktionsbuild bestanden; Python-Syntax geprüft. Neuer Chromium-Nachweis steht aus.
+
+Die Alpha-Prüfung verwendet deterministisch die Basisebene der Textur, keine Mipmaps oder anisotrope Filterung. Dadurch sind Abweichungen zur gerenderten Kante bei Verkleinerung möglich. Unterstützt sind lesbare RGBA-8-Bit-Bilder bis 16.777.216 Pixel pro Textur. Nicht lesbare/komprimierte Texturen, fehlende UVs, Shader-Materialien und Alpha-to-Coverage bleiben verdeckend. Teiltransparenz wird nicht simuliert; Dreiecke bleiben beidseitig. GPU-/Materialqualität und große Modelle sind nicht manuell abgenommen. Neue Alpha-Aufträge benötigen mindestens 0.65.0; kein automatischer Umbau alter Verläufe.

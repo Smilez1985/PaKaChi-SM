@@ -12,6 +12,20 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.65.0] - 2026-10-27
+
+Zeitstempel: 2026-10-27T17:55:08+01:00 (Europe/Berlin)
+
+### Added
+
+- Deterministische Alpha-Ausschnitte für den sichtbaren Gewichtspinsel mit UV-Interpolation, Material-Grenzwert und unveränderlicher Pixelkopie.
+- Gespeicherte Alpha-Regel in Projekten, Katalogen sowie Assistent-/MCP-Schemas; alte Aufträge bleiben unverändert.
+- Drei Node-Regressionstests und Browserfall für tatsächlich dekodiertes PNG.
+
+**Prüfung:** 285 Node-Tests und Produktionsbuild bestanden; Python-Syntax geprüft. Neuer Chromium-Nachweis steht aus.
+
+Die Alpha-Prüfung verwendet deterministisch die Basisebene der Textur, keine Mipmaps oder anisotrope Filterung. Dadurch sind Abweichungen zur gerenderten Kante bei Verkleinerung möglich. Unterstützt sind lesbare RGBA-8-Bit-Bilder bis 16.777.216 Pixel pro Textur. Nicht lesbare/komprimierte Texturen, fehlende UVs, Shader-Materialien und Alpha-to-Coverage bleiben verdeckend. Teiltransparenz wird nicht simuliert; Dreiecke bleiben beidseitig. GPU-/Materialqualität und große Modelle sind nicht manuell abgenommen. Neue Alpha-Aufträge benötigen mindestens 0.65.0; kein automatischer Umbau alter Verläufe.
+
 ## [0.64.0] - 2026-10-27
 
 Zeitstempel: 2026-10-27T17:35:17+01:00 (Europe/Berlin)
@@ -1310,3 +1324,5 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 [0.63.0]: PRUEFUNG-0.63.0.md
 
 [0.64.0]: PRUEFUNG-0.64.0.md
+
+[0.65.0]: PRUEFUNG-0.65.0.md

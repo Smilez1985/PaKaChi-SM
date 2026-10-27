@@ -27,6 +27,7 @@ class MoveSequenceUpdate(BaseModel):
     poses: list[str] = Field(min_length=2, max_length=100)
 
 class WeightView(BaseModel):
+    alpha: Literal[True] | None = None
     materials: Literal[True] | None = None
     model_config = ConfigDict(extra='forbid', strict=True)
     eye: list[Annotated[float, Field(ge=-1000, le=1000)]] = Field(min_length=3, max_length=3)
@@ -230,7 +231,7 @@ def build_server(uri=None, embedded=True, tcp_port=1883, ws_port=8083):
         update_point: id und name/position/rotation/scale/size/radius (scale nur $figure, 0.1–5); $figure ist die ganze Figur.
         transfer_weights: id (Quelle), target (Ziel), amount (Anteil über 0 bis 1), nur Rig-Modus.
         Quellgewichte an allen betroffenen Vertices übertragen, vier stärkste Einflüsse normalisiert behalten.
-        Optional region={center:[x,y,z],radius:0.005..2}: normalisierte Weltkoordinaten der ursprünglichen Grundpose, Kugel mit weichem Randabfall. Ohne region global. Optional region.view aus get_studio.view beschränkt auf geometrisch sichtbare Vertices der ursprünglichen Grundpose (eye und projection); materials:true überspringt unsichtbare Materialien und transparente Materialien mit Opazität 0; Teiltransparenz und Alpha-Texturen bleiben undurchsichtig.
+        Optional region={center:[x,y,z],radius:0.005..2}: normalisierte Weltkoordinaten der ursprünglichen Grundpose, Kugel mit weichem Randabfall. Ohne region global. Optional region.view aus get_studio.view beschränkt auf geometrisch sichtbare Vertices der ursprünglichen Grundpose (eye und projection); materials:true überspringt unsichtbare Materialien und transparente Materialien mit Opazität 0; alpha:true wertet zusätzlich RGBA-Bildalpha und alphaMap-Grün auf Basisebene gegen alphaTest aus. Nicht unterstützte Texturen, Shader und Teiltransparenz bleiben undurchsichtig; keine Mipmap-Simulation.
         Grundpose bleibt erhalten; Posen/Bewegungen prüfen. Undo möglich.
         reparent_bone: id,target (neuer Elternknochen), nur Rig-Modus und gleicher Skelettbaum.
         Erhält Einzelposen; Bewegungsübergänge prüfen. Keine Kreise, Wurzeln oder skalierten Ketten. Starre Anbauteile bleiben befestigt; keine Anbauteile mit eigenem Skelett.

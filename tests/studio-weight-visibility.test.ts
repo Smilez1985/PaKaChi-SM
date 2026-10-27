@@ -8,11 +8,11 @@ function fixture(){const root=new T.Group(),a=new T.Bone(),b=new T.Bone();root.a
 function view(z=3){const camera=new T.PerspectiveCamera(60,1,.1,10);camera.position.z=z;camera.lookAt(0,0,0);camera.updateMatrixWorld(true);return {eye:camera.position.toArray(),projection:new T.Matrix4().multiplyMatrices(camera.projectionMatrix,camera.matrixWorldInverse).toArray()};}
 function target(mesh:T.SkinnedMesh,v:number){const i=mesh.geometry.getAttribute('skinIndex'),w=mesh.geometry.getAttribute('skinWeight');let result=0;for(let k=0;k<4;k++)if(i.getComponent(v,k)===1)result+=w.getComponent(v,k);return result;}
 test('visible brush excludes occluded vertices, freezes the view and survives project/catalog replay',async()=>{
- const {rig,mesh}=fixture(),snapshot={...view(),materials:true as const},stroke=new StudioWeightStroke(rig,rig.data.points[0],rig.data.points[1],.5,2,snapshot);snapshot.eye[2]=-3;stroke.sample(new T.Vector3(0,0,.5));stroke.finish();
+ const {rig,mesh}=fixture(),snapshot={...view(),materials:true as const,alpha:true as const},stroke=new StudioWeightStroke(rig,rig.data.points[0],rig.data.points[1],.5,2,snapshot);snapshot.eye[2]=-3;stroke.sample(new T.Vector3(0,0,.5));stroke.finish();
  for(let i=0;i<3;i++)assert.ok(target(mesh,i)>0);for(let i=3;i<6;i++)assert.equal(target(mesh,i),0);
  const project={format:'pakachi-studio' as const,version:1 as const,model:'AAAA',avatar:{id:'x',name:'X',description:'',moves:[]},studio:rig.data};parseProject(project);
  // @ts-expect-error JavaScript CLI module
- const {zooPackage}=await import('../scripts/export-zoo.mjs');const saved=JSON.parse(zooPackage(project,'visible').project);assert.deepEqual(saved.studio.weightTransfers[0].region.view,{...view(),materials:true});const loaded=fixture();loaded.rig.data=saved.studio;loaded.rig.reset();for(let i=0;i<6;i++)assert.equal(target(loaded.mesh,i),target(mesh,i));
+ const {zooPackage}=await import('../scripts/export-zoo.mjs');const saved=JSON.parse(zooPackage(project,'visible').project);assert.deepEqual(saved.studio.weightTransfers[0].region.view,{...view(),materials:true,alpha:true});const loaded=fixture();loaded.rig.data=saved.studio;loaded.rig.reset();for(let i=0;i<6;i++)assert.equal(target(loaded.mesh,i),target(mesh,i));
  rig.transferWeights(rig.data.points[0],rig.data.points[1],.5,{center:[0,0,0],radius:2,view:view(-3)});for(let i=3;i<6;i++)assert.ok(target(mesh,i)>0);
  const through=fixture();through.rig.transferWeights(through.rig.data.points[0],through.rig.data.points[1],.5,{center:[0,0,.5],radius:2});for(let i=3;i<6;i++)assert.ok(target(through.mesh,i)>0);
 });
