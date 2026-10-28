@@ -25,7 +25,7 @@ Zeitstempel: 2026-10-28T00:52:17+01:00 (Europe/Berlin)
 
 - Nur benötigte UV-Kanäle kopieren; undurchsichtige Dreiecke benötigen keine eigenen UV-Vektoren. Sichtregeln und Projektformat bleiben unverändert.
 
-**Prüfung:** 286 Node-Tests und Produktionsbuild lokal bestanden. Neuer Chromium-Nachweis steht aus.
+**Prüfung:** 286 Node-Tests, Produktionsbuild und alle 21 Chromium-Fälle bestanden ([CI-Nachweis](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/40665412491)). Der Browserimport von 256 Aufträgen dauerte in diesem Lauf 4758 ms; Einzelmessung, keine allgemeine Laufzeitgarantie.
 
 Lokale Einzelmessung bei 80.000 Dreiecken: zurückbehaltener JavaScript-Heap einschließlich Testmodell von 166,10 auf 64,85 MiB (undurchsichtig) und 166,12 auf 100,20 MiB (Alpha). Die 1.000 Strahlproben lieferten jeweils dieselben Ergebnisse. Keine Messung des vollständigen Browserimports, Renderings oder Skinning; keine allgemeine Laufzeit-/Speicherzusage. Mipmaps, Teiltransparenz und manuelle Abnahme großer realer Modelle bleiben offen.
 
