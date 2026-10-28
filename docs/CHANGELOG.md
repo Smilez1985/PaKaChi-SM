@@ -12,6 +12,18 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.67.0] - 2026-10-28
+
+Zeitstempel: 2026-10-28T12:48:55+01:00 (Europe/Berlin)
+
+### Added
+
+- Browserprüfung echter Mausnavigation nach Zoom/Pan: Figurenmitte, Kameraradius, Inversion über Optionen, Loslassen und unveränderte Projektdaten.
+
+**Prüfung:** Produktionsbuild lokal bestanden. Neuer Chromium-Nachweis steht aus. Der bisherige bestätigte Stand umfasst 286 Node-Tests und 21 Browserfälle.
+
+Dies ergänzt den automatisierten Navigationsnachweis; tatsächliches Mausgefühl, komplexe Skelett-/Hautqualität und große reale Modelle bleiben manuell zu prüfen. Keine Änderung am Kameraalgorithmus.
+
 ## [0.66.0] - 2026-10-28
 
 Zeitstempel: 2026-10-28T00:52:17+01:00 (Europe/Berlin)
@@ -1345,3 +1357,5 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 [0.65.0]: PRUEFUNG-0.65.0.md
 
 [0.66.0]: PRUEFUNG-0.66.0.md
+
+[0.67.0]: PRUEFUNG-0.67.0.md
