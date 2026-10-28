@@ -240,6 +240,6 @@ Lokale Einzelmessung bei 80.000 Dreiecken: zurückbehaltener JavaScript-Heap ein
 
 **0.67.0:** Ein zusätzlicher Browserfall prüft echte Mausrad-, Rechts- und Mitteltastenereignisse im Studio. Nach außermittigem Zoom und Verschieben bleiben beim Drehen Abstand und Bildschirmposition der bekannten Figurenmitte konstant. Der Test wählt die normale und invertierte Drehrichtung über den Optionsdialog, prüft gegensinnige Kamerabewegung und funktionierenden Zoom nach Loslassen. Der übrige Studiozustand einschließlich Revision und Figur bleibt unverändert.
 
-Produktionsbuild lokal bestanden. Neuer Chromium-Nachweis steht aus. Der bisherige bestätigte Stand umfasst 286 Node-Tests und 21 Browserfälle.
+Der erste CI-Lauf besteht 286 Node-Tests, Build und die bisherigen 21 Browserfälle. Der neue Mausfall scheiterte an einer Testposition unterhalb des sichtbaren Browserfensters. Der korrigierte Test verwendet den sichtbaren Canvas-Ausschnitt und prüft das getroffene Element; Build lokal bestanden. Sein CI-Bestätigungslauf [40727289984](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/40727289984) endet auch nach Wiederholung vor dem ersten Arbeitsschritt ohne Testlogs. Auch lokal endet Chromium vor dem Teststart mit `socket() failed: Operation not permitted`. Die Bestätigung aller 22 Browserfälle steht aus.
 
 Dies ergänzt den automatisierten Navigationsnachweis; tatsächliches Mausgefühl, komplexe Skelett-/Hautqualität und große reale Modelle bleiben manuell zu prüfen. Keine Änderung am Kameraalgorithmus.

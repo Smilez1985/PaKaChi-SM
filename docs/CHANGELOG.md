@@ -20,7 +20,11 @@ Zeitstempel: 2026-10-28T12:48:55+01:00 (Europe/Berlin)
 
 - Browserprüfung echter Mausnavigation nach Zoom/Pan: Figurenmitte, Kameraradius, Inversion über Optionen, Loslassen und unveränderte Projektdaten.
 
-**Prüfung:** Produktionsbuild lokal bestanden. Neuer Chromium-Nachweis steht aus. Der bisherige bestätigte Stand umfasst 286 Node-Tests und 21 Browserfälle.
+### Fixed
+
+- Testmaus auf den tatsächlich sichtbaren Canvas-Ausschnitt begrenzt und Elementtreffer geprüft; zuvor lag sie bei hohem Canvas außerhalb des Browserfensters.
+
+**Prüfung:** Der erste CI-Lauf besteht 286 Node-Tests, Build und die bisherigen 21 Browserfälle. Der neue Mausfall scheiterte an einer Testposition unterhalb des sichtbaren Browserfensters. Der korrigierte Test verwendet den sichtbaren Canvas-Ausschnitt und prüft das getroffene Element; Build lokal bestanden. Sein CI-Bestätigungslauf [40727289984](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/40727289984) endet auch nach Wiederholung vor dem ersten Arbeitsschritt ohne Testlogs. Auch lokal endet Chromium vor dem Teststart mit `socket() failed: Operation not permitted`. Die Bestätigung aller 22 Browserfälle steht aus.
 
 Dies ergänzt den automatisierten Navigationsnachweis; tatsächliches Mausgefühl, komplexe Skelett-/Hautqualität und große reale Modelle bleiben manuell zu prüfen. Keine Änderung am Kameraalgorithmus.
 
