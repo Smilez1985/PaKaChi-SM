@@ -12,6 +12,23 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.66.0] - 2026-10-28
+
+Zeitstempel: 2026-10-28T00:52:17+01:00 (Europe/Berlin)
+
+### Added
+
+- Reproduzierbarer CPU-/Speicherbenchmark für geometrische und Alpha-Sichtprüfung bis 80.000 Dreiecke; isolierter Prozess je Fall und JSON-Ausgabe.
+- Regressionstest für unterschiedliche UV-Kanäle von Bildalpha und Alpha-Map sowie unveränderliche UV-Kopien.
+
+### Changed
+
+- Nur benötigte UV-Kanäle kopieren; undurchsichtige Dreiecke benötigen keine eigenen UV-Vektoren. Sichtregeln und Projektformat bleiben unverändert.
+
+**Prüfung:** 286 Node-Tests und Produktionsbuild lokal bestanden. Neuer Chromium-Nachweis steht aus.
+
+Lokale Einzelmessung bei 80.000 Dreiecken: zurückbehaltener JavaScript-Heap einschließlich Testmodell von 166,10 auf 64,85 MiB (undurchsichtig) und 166,12 auf 100,20 MiB (Alpha). Die 1.000 Strahlproben lieferten jeweils dieselben Ergebnisse. Keine Messung des vollständigen Browserimports, Renderings oder Skinning; keine allgemeine Laufzeit-/Speicherzusage. Mipmaps, Teiltransparenz und manuelle Abnahme großer realer Modelle bleiben offen.
+
 ## [0.65.0] - 2026-10-27
 
 Zeitstempel: 2026-10-27T17:55:08+01:00 (Europe/Berlin)
@@ -1326,3 +1343,5 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 [0.64.0]: PRUEFUNG-0.64.0.md
 
 [0.65.0]: PRUEFUNG-0.65.0.md
+
+[0.66.0]: PRUEFUNG-0.66.0.md

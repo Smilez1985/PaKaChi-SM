@@ -39,3 +39,17 @@ test('unreadable images and missing UVs do not infer alpha holes',()=>{
  const map=new T.Texture({width:1,height:1} as any),material=new T.MeshBasicMaterial({map,alphaTest:.5});assert.equal(captureWeightAlpha(material,new Map()),null);
  material.map=texture();assert.equal(weightAlphaDiscard(captureWeightAlpha(material,new Map()),new Map(),bary),false);
 });
+
+test('visibility preserves independently selected UV channels after source edits',()=>{
+ const geometry=new T.PlaneGeometry(2,2),map=texture(),alphaMap=texture();map.channel=2;alphaMap.channel=1;
+ geometry.setAttribute('uv2',geometry.getAttribute('uv').clone());geometry.setAttribute('uv1',geometry.getAttribute('uv').clone());
+ for(let i=0;i<geometry.getAttribute('uv').count;i++){geometry.getAttribute('uv').setXY(i,1,.5);geometry.getAttribute('uv1').setXY(i,.75,.5);}
+ alphaMap.image.data![1]=0;
+ const mesh=new T.Mesh(geometry,new T.MeshBasicMaterial({map,alphaMap,alphaTest:.5}));mesh.position.z=.5;mesh.updateMatrixWorld(true);
+ const tree=new StudioWeightVisibility([mesh]),camera=new T.PerspectiveCamera(60,1,.1,10);camera.position.z=3;camera.lookAt(0,0,0);camera.updateMatrixWorld(true);
+ const matrix=new T.Matrix4().multiplyMatrices(camera.projectionMatrix,camera.matrixWorldInverse),view={eye:camera.position.toArray(),projection:matrix.toArray(),materials:true as const,alpha:true as const};
+ for(let i=0;i<geometry.getAttribute('uv').count;i++){geometry.getAttribute('uv2').setXY(i,.75,.5);geometry.getAttribute('uv1').setXY(i,.25,.5);}
+ assert.equal(tree.visible(new T.Vector3(-.5,0,0),view,matrix),true);
+ assert.equal(tree.visible(new T.Vector3(.5,0,0),view,matrix),false);
+ assert.equal(tree.visible(new T.Vector3(-.5,0,0),{...view,alpha:undefined},matrix),false);
+});

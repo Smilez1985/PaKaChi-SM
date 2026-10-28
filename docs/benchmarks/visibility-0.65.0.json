@@ -1,0 +1,73 @@
+{
+  "node": "v24.22.1",
+  "gcAvailable": true,
+  "scope": "Each case in a fresh process. Synthetic planes with four UV channels; CPU snapshot, first query including BVH build, then 1000 rays. Memory deltas include the source fixture. No rendering, file loading, skinning or manual quality acceptance.",
+  "results": [
+    {
+      "triangles": 5000,
+      "material": "opaque",
+      "captureMs": 0.5,
+      "firstQueryMs": 40.5,
+      "queries": 1000,
+      "queriesMs": 4.6,
+      "visible": 0,
+      "retainedHeapMiB": 10.85,
+      "retainedArrayBuffersMiB": 0.17
+    },
+    {
+      "triangles": 5000,
+      "material": "alpha-cutout-uv2",
+      "captureMs": 0.7,
+      "firstQueryMs": 39.8,
+      "queries": 1000,
+      "queriesMs": 6.9,
+      "visible": 502,
+      "retainedHeapMiB": 10.55,
+      "retainedArrayBuffersMiB": 0.17
+    },
+    {
+      "triangles": 20000,
+      "material": "opaque",
+      "captureMs": 0.6,
+      "firstQueryMs": 186.9,
+      "queries": 1000,
+      "queriesMs": 8.8,
+      "visible": 0,
+      "retainedHeapMiB": 41.86,
+      "retainedArrayBuffersMiB": 1.2
+    },
+    {
+      "triangles": 20000,
+      "material": "alpha-cutout-uv2",
+      "captureMs": 0.7,
+      "firstQueryMs": 155.8,
+      "queries": 1000,
+      "queriesMs": 10.4,
+      "visible": 502,
+      "retainedHeapMiB": 41.67,
+      "retainedArrayBuffersMiB": 0.66
+    },
+    {
+      "triangles": 80000,
+      "material": "opaque",
+      "captureMs": 1.8,
+      "firstQueryMs": 518.6,
+      "queries": 1000,
+      "queriesMs": 14.6,
+      "visible": 0,
+      "retainedHeapMiB": 166.1,
+      "retainedArrayBuffersMiB": 2.62
+    },
+    {
+      "triangles": 80000,
+      "material": "alpha-cutout-uv2",
+      "captureMs": 1.9,
+      "firstQueryMs": 564.1,
+      "queries": 1000,
+      "queriesMs": 18.2,
+      "visible": 502,
+      "retainedHeapMiB": 166.12,
+      "retainedArrayBuffersMiB": 2.62
+    }
+  ]
+}
