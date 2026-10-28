@@ -8,8 +8,13 @@ test('middle mouse orbits the figure center after zoom and pan, with reversible 
   await page.goto('/');await page.locator('#options-open').click();await page.locator('#option-invert').setChecked(inverted);await page.locator('#options-close').click();await page.locator('#file-input').setInputFiles({name:'orbit.glb',mimeType:'model/gltf-binary',buffer:glb()});
   await expect(page.locator('#message')).toContainText('bereit');await page.locator('#studio-tab').click();
   const info=()=>page.evaluate(()=>window.PaKaChiSM.call('get_studio') as any);
-  const initial=await info();const box=(await page.locator('canvas').first().boundingBox())!;
-  const x=box.x+box.width*.58,y=box.y+box.height*.44;
+  const canvas=page.locator('canvas').first();await canvas.scrollIntoViewIfNeeded();
+  const initial=await info();const box=(await canvas.boundingBox())!,viewport=page.viewportSize()!;
+  // The Studio canvas can be taller than the browser window. Target its visible intersection.
+  const left=Math.max(0,box.x),top=Math.max(0,box.y),right=Math.min(viewport.width,box.x+box.width),bottom=Math.min(viewport.height,box.y+box.height);
+  expect(right-left).toBeGreaterThan(100);expect(bottom-top).toBeGreaterThan(100);
+  const x=left+(right-left)*.58,y=top+(bottom-top)*.44;
+  expect(await canvas.evaluate((element,p)=>document.elementFromPoint(p.x,p.y)===element,{x,y})).toBe(true);
   await page.mouse.move(x,y);await page.mouse.wheel(0,-180);
   await expect.poll(async()=>JSON.stringify((await info()).view.eye)).not.toBe(JSON.stringify(initial.view.eye));
   const zoomed=await info();await page.mouse.down({button:'right'});await page.mouse.move(x+45,y+25,{steps:5});await page.mouse.up({button:'right'});
