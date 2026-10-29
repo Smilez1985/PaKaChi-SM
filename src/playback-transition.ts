@@ -57,3 +57,11 @@ export class PlaybackTransition {
  }
  cancel(){this.beforeFrame();this.source=null;this.elapsed=0;}
 }
+
+/** Keep a display fade advancing after natural completion or without a base clip. */
+export function playbackTransitionDelta(transport:{current:unknown;paused:boolean;speed:number;finished?:boolean}|null|undefined,delta:number):number {
+ if(!Number.isFinite(delta)||delta<=0)return 0;
+ if(transport?.current&&transport.paused&&!transport.finished)return 0;
+ const speed=transport?.speed??1;
+ return Number.isFinite(speed)&&speed>0?delta*speed:0;
+}

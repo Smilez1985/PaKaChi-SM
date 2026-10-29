@@ -2,7 +2,7 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import * as T from 'three';
 import {Window} from 'happy-dom';
-import {PlaybackTransition} from '../src/playback-transition.ts';
+import {PlaybackTransition,playbackTransitionDelta} from '../src/playback-transition.ts';
 import {Playback} from '../src/playback.ts';
 import {StudioRig} from '../src/studio-rig.ts';
 import {StudioEditor} from '../src/studio-editor.ts';
@@ -31,7 +31,7 @@ test('original and studio playback blend both ways without changing project data
  const view={setEnabled(){},setFigureEnabled(){},setAction(){},setRotation(){},select(){},refresh(){},dispose(){}} as unknown as StudioView;
  const editor=new StudioEditor(rig,view,window.document.createElement('div') as unknown as HTMLElement,{format:'pakachi-studio',version:1,model:'AAAA',avatar:{id:'test',name:'Test',description:'',moves:[]}},{suspend:()=>playback.suspend(),resume:()=>{playback.setBaseMove('idle');},changed(){},feedback(){}});
  t.after(()=>{editor.dispose();playback.dispose();window.happyDOM.abort();});
- const frame=(delta:number)=>{editor.playbackTransition.beforeFrame();if(editor.playing)editor.update(delta);else playback.update(delta);editor.playbackTransition.afterFrame((editor.playing?editor.paused:playback.paused)?0:delta);};
+ const frame=(delta:number)=>{editor.playbackTransition.beforeFrame();if(editor.playing)editor.update(delta);else playback.update(delta);editor.playbackTransition.afterFrame(playbackTransitionDelta(editor.playing?editor:playback,delta));};
  const data=structuredClone(editor.data);rig.restoreSource();playback.play('idle');playback.update(.1);near(bone.position.y,2);near(root.position.x,3);
  root.updateMatrixWorld(true);const originalVertex=skin.localToWorld(skin.getVertexPosition(0,new T.Vector3()));
  assert.equal(editor.play('own'),true);assert.ok(skin.localToWorld(skin.getVertexPosition(0,new T.Vector3())).distanceTo(originalVertex)<1e-6);near(bone.position.y,2);near(root.position.x,3);frame(.09);assert.ok(bone.position.y>2&&bone.position.y<4.5);near(root.position.x,1.5);
@@ -42,4 +42,25 @@ test('original and studio playback blend both ways without changing project data
  editor.play('own');editor.enter();assert.equal(editor.playbackTransition.active,false);
  editor.leave();editor.data.points.push({id:'surface',name:'Surface',kind:'surface',rest:[0,0,0],size:.01,radius:.1});editor.beginPlaybackTransition();assert.equal(editor.playbackTransition.active,false);editor.data.points.pop();
  editor.data.boneRest[0].position[0]+=1;editor.beginPlaybackTransition();assert.equal(editor.playbackTransition.active,false);
+});
+
+test('short one-shot completes its display fade while manual pause freezes and replay clears completion',()=>{
+ const root=new T.Group();root.name='Model';root.position.x=10;
+ const clip=new T.AnimationClip('short',.05,[new T.NumberKeyframeTrack('Model.position[x]',[0,.05],[0,2])]);
+ const player=new Playback(root,[clip],[{id:'short',name:'Short',clip:'short',loop:false}]);
+ const fade=new PlaybackTransition(root);fade.begin();player.play('short');fade.afterFrame(0);near(root.position.x,10);
+ const frame=(delta:number)=>{fade.beforeFrame();player.update(delta);fade.afterFrame(playbackTransitionDelta(player,delta));};
+ player.togglePause();frame(.1);near(root.position.x,10);assert.equal(player.finished,false);player.togglePause();
+ frame(.06);assert.equal(player.finished,true);assert.equal(player.paused,true);assert.equal(fade.active,true);assert.ok(root.position.x>2);
+ frame(.12);near(root.position.x,2);assert.equal(fade.active,false);assert.equal(player.finished,true);
+ player.togglePause();assert.equal(player.finished,false);assert.equal(player.paused,false);frame(.06);assert.equal(player.finished,true);
+ player.seek(.5);assert.equal(player.finished,false);assert.equal(playbackTransitionDelta(player,.1),0);player.dispose();
+});
+test('missing base clip, speed and invalid frame times have explicit transition timing',()=>{
+ const root=new T.Group(),fade=new PlaybackTransition(root);root.position.x=4;fade.begin();root.position.x=0;
+ const idle={current:null,paused:true,speed:2};fade.afterFrame(playbackTransitionDelta(idle,.045));near(root.position.x,2);
+ fade.beforeFrame();fade.afterFrame(playbackTransitionDelta(idle,.045));near(root.position.x,0);assert.equal(fade.active,false);
+ for(const delta of [NaN,Infinity,-1,0])assert.equal(playbackTransitionDelta(idle,delta),0);
+ assert.equal(playbackTransitionDelta({current:{},paused:true,speed:2},.1),0);
+ assert.equal(playbackTransitionDelta({current:{},paused:false,speed:NaN},.1),0);
 });

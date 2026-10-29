@@ -1,3 +1,4 @@
+import {playbackTransitionDelta} from './playback-transition.ts';
 import {loadCatalogProject} from './catalog-project.ts';
 import type {ZooEntry} from './local-zoo.ts';
 import {mountLocalZoo} from './local-zoo-panel.ts';
@@ -365,7 +366,7 @@ async function boot(): Promise<void> {
   if (viewer) viewer.onFrame = delta => {
     editor?.playbackTransition.beforeFrame();
     if(editor?.playing)editor.update(delta);else if(!studio)playback?.update(delta);
-    const activeTransport=transport();editor?.playbackTransition.afterFrame(studio||(activeTransport?.current&&activeTransport.paused)?0:delta*(activeTransport?.speed??1));
+    const activeTransport=transport();editor?.playbackTransition.afterFrame(studio?0:playbackTransitionDelta(activeTransport,delta));
     if(editor?.playing)syncPlayback();
     const duration = transport()?.duration ?? 0;
     const progress = transport()?.progress ?? 0;

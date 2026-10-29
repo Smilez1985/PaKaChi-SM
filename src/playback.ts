@@ -90,6 +90,9 @@ export class Playback {
     }
   }
 
+  /** Natural one-shot completion is a held final pose, not a user pause. */
+  get finished(): boolean { return !!this.action && !this.current?.loop && this.action.paused && this.progress >= 1; }
+
   get duration(): number { return this.action?.getClip().duration ?? 0; }
   get progress(): number { return this.duration ? (this.action?.time ?? 0) / this.duration : 0; }
 

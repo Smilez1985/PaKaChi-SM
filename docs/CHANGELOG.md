@@ -12,6 +12,17 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.69.1] - 2026-10-29
+
+Zeitstempel: 2026-10-29T21:45:22+01:00 (Europe/Berlin)
+
+### Fixed
+
+- Überblendungen erreichen auch dann die vollständige Zielpose, wenn ein einmaliger Originalclip kürzer als der Übergang ist. Natürliches Clip-Ende wird von manueller Pause unterschieden; manuelle Pause hält die Überblendung weiterhin an.
+- Gemeinsame Berechnung der Übergangszeit berücksichtigt fehlenden Grundclip, Tempo und ungültige Framezeiten. Wiederholen oder Springen auf der Zeitleiste hebt den erkannten Abschlusszustand korrekt auf.
+
+Entwicklungsstand auf dem Arbeitsbranch, keine neue gerenderte Browserabnahme. [Prüfbericht](PRUEFUNG-0.69.1.md).
+
 ## [0.69.0] - 2026-10-29
 
 Zeitstempel: 2026-10-29T21:13:59+01:00 (Europe/Berlin)
@@ -1401,3 +1412,5 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 [0.68.0]: PRUEFUNG-0.68.0.md
 
 [0.69.0]: PRUEFUNG-0.69.0.md
+
+[0.69.1]: PRUEFUNG-0.69.1.md
