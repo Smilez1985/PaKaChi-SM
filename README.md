@@ -2,7 +2,7 @@
 
 **SM steht für StateMaschine.** PaKaChi ist die **Panda-KI-Chimera**, das übergeordnete Projekt. PaKaChi-SM vereint Avatar-Player, Model Zoo und das fest integrierte **PaKaChi-Avatar-Studio**.
 
-**Softwarestand: 0.67.0 · Entwicklungsstand, keine fertige Bild-zu-3D-Lösung.**
+**Softwarestand: 0.68.0 · Entwicklungsstand, keine fertige Bild-zu-3D-Lösung.**
 
 Der bestehende PaKaChi mit Tierform, humanoider Arbeitsform und allen 72 Transformationsbildern ist erhalten und beim Start ausgewählt. Mika und Nori sind separate technische 3D-Testavatare. Ein 3D-Modell des Original-PaKaChi und die Qualitätsabnahme echter KI-Ergebnisse stehen noch aus.
 
@@ -20,6 +20,8 @@ Die angezeigte Adresse öffnen, normalerweise `http://127.0.0.1:5173`. Unter Win
 Der archivierte Originalplayer lässt sich auch separat ohne Node öffnen: `public/legacy/pakachi/index.html`.
 
 Seit **0.11.1** dreht die mittlere Maustaste um die Mitte der ganzen Figur, auch nach Zoom zum Mauszeiger und Verschieben des Bildausschnitts.
+
+**0.68.0 auf dem Arbeitsbranch:** Model-Zoo-Speicherfehler sind abgesichert; die [Roadmap](docs/ROADMAP.md) enthält offene Arbeit statt erledigter Versionshistorie. `npm run benchmark:import` misst CPU-Importphasen ([Anleitung](docs/IMPORT-BENCHMARK.md)). Noch keine Übernahme nach `main` oder neue Browserabnahme.
 
 ## Lokal prüfen
 
@@ -59,7 +61,7 @@ Seit 0.14.0 besteht zusätzlich der interne [Auftragskern](docs/AUFTRAE.md): fes
 
 ## Was aktuell funktioniert
 
-| Bereich | Stand 0.67.0 |
+| Bereich | Stand 0.68.0 |
 | --- | --- |
 | Player | Avatar-Auswahl, tatsächliche Bewegungen anzeigen, abspielen, pausieren, Tempo und Abspielposition ändern. |
 | Modelle | Mika/Nori mit Skeletten und Clips; eigene eigenständige GLB-Dateien laden oder hineinziehen, bis 50 MiB, lokal für die Sitzung. |
@@ -334,6 +336,6 @@ Produktionsbuild lokal bestanden. Neuer Chromium-Nachweis steht aus. Der bisheri
 
 Dies ergänzt den automatisierten Navigationsnachweis; tatsächliches Mausgefühl, komplexe Skelett-/Hautqualität und große reale Modelle bleiben manuell zu prüfen. Keine Änderung am Kameraalgorithmus.
 
-## Model-Zoo-Speicherfehler (Unreleased)
+## Model-Zoo-Speicherfehler (0.68.0)
 
 Konkrete Hinweise unterscheiden volles Browserkontingent, 50 Kopien und Projekte über 80 MiB. Vorhandene Kopien werden nicht automatisch gelöscht. Scheitert nach bestätigtem Speichern oder Löschen nur die Listenabfrage, bleibt der Erfolg sichtbar. Veraltete Auswahlen können bis zu einer erfolgreichen Aktualisierung weder geladen noch gelöscht werden; „Liste aktualisieren“ bleibt nutzbar. Das aktive Projekt bleibt erhalten.

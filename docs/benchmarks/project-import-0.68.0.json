@@ -1,0 +1,83 @@
+{
+  "version": 1,
+  "measuredAt": "2026-10-29T18:37:38.682Z",
+  "node": "v24.22.1",
+  "platform": "linux",
+  "arch": "x64",
+  "cpu": "AMD EPYC 9V74 80-Core Processor",
+  "runs": 3,
+  "fixture": "mika",
+  "scope": "CPU import stages in fresh processes; startup, fixture creation, checksum calculation, disposal, UI, WebGL, image decoding and browser storage excluded. OS file cache may be warm. Heap delta is not peak or retained memory. No pass/fail performance threshold.",
+  "medianTotalMs": 1922.96,
+  "samples": [
+    {
+      "projectSha256": "f206c004e7f6b1d8372a159d3d0c86fff3ffbe8036636a03b7da4fe9af96ae41",
+      "modelBytes": 709372,
+      "projectBytes": 979550,
+      "transfers": 256,
+      "meshes": 25,
+      "vertices": 196875,
+      "triangles": 13000,
+      "bones": 15,
+      "skinSha256": "78f41dab6587d51a8498355ecd3673dcbbac12477f0736aa2b00f6cb91d87447",
+      "stages": {
+        "readMs": 1.38,
+        "jsonMs": 1.21,
+        "validateMs": 5.21,
+        "decodeMs": 50.54,
+        "modelParseMs": 36.91,
+        "normalizeMs": 69.28,
+        "rigBuildReplayMs": 1758.21
+      },
+      "totalMs": 1922.96,
+      "heapDeltaMiB": 30.65,
+      "rssMiB": 240.29
+    },
+    {
+      "projectSha256": "f206c004e7f6b1d8372a159d3d0c86fff3ffbe8036636a03b7da4fe9af96ae41",
+      "modelBytes": 709372,
+      "projectBytes": 979550,
+      "transfers": 256,
+      "meshes": 25,
+      "vertices": 196875,
+      "triangles": 13000,
+      "bones": 15,
+      "skinSha256": "78f41dab6587d51a8498355ecd3673dcbbac12477f0736aa2b00f6cb91d87447",
+      "stages": {
+        "readMs": 1.36,
+        "jsonMs": 1.11,
+        "validateMs": 4.42,
+        "decodeMs": 48.93,
+        "modelParseMs": 34.64,
+        "normalizeMs": 70.47,
+        "rigBuildReplayMs": 1779.44
+      },
+      "totalMs": 1940.57,
+      "heapDeltaMiB": 35.77,
+      "rssMiB": 189.74
+    },
+    {
+      "projectSha256": "f206c004e7f6b1d8372a159d3d0c86fff3ffbe8036636a03b7da4fe9af96ae41",
+      "modelBytes": 709372,
+      "projectBytes": 979550,
+      "transfers": 256,
+      "meshes": 25,
+      "vertices": 196875,
+      "triangles": 13000,
+      "bones": 15,
+      "skinSha256": "78f41dab6587d51a8498355ecd3673dcbbac12477f0736aa2b00f6cb91d87447",
+      "stages": {
+        "readMs": 1.35,
+        "jsonMs": 1.04,
+        "validateMs": 4.89,
+        "decodeMs": 50.71,
+        "modelParseMs": 35.07,
+        "normalizeMs": 65.63,
+        "rigBuildReplayMs": 1743.1
+      },
+      "totalMs": 1901.99,
+      "heapDeltaMiB": 28.14,
+      "rssMiB": 189.51
+    }
+  ]
+}

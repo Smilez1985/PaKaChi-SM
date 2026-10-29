@@ -16,7 +16,7 @@
     "vite": "8.3.4"
   },
   "name": "pakachi-sm",
-  "version": "0.67.0",
+  "version": "0.68.0",
   "private": true,
   "type": "module",
   "description": "PaKaChi StateMaschine \u2013 lokaler Avatar-Player und integriertes Studio",
@@ -45,6 +45,7 @@
     "export:moves": "node scripts/export-moves.mjs",
     "merge:moves": "node scripts/merge-moves.mjs",
     "verify": "npm test && npm run build",
-    "verify:full": "npm run verify && npm run test:e2e"
+    "verify:full": "npm run verify && npm run test:e2e",
+    "benchmark:import": "node scripts/benchmark-project-import.mjs"
   }
 }

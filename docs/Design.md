@@ -4,7 +4,7 @@ Teil der [Blaupause](README.md) · [Roadmap](ROADMAP.md) · [Changelog](CHANGELO
 
 ## Status und Begriffe
 
-Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.63.0: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau, automatische Anatomieerkennung und die Qualitätsabnahme der angeschlossenen lokalen KI-Generierung bleiben offen.
+Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.68.0: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau, automatische Anatomieerkennung und die Qualitätsabnahme der angeschlossenen lokalen KI-Generierung bleiben offen.
 
 - **PaKaChi:** Panda-KI-Chimera, das übergeordnete Projekt.
 - **PaKaChi-SM:** StateMaschine mit Avatar-Player und integriertem Studio.
@@ -17,14 +17,14 @@ Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich gen
 | Bereich | Implementiert | Noch offen |
 | --- | --- | --- |
 | Original-PaKaChi | Beide Formen und 72 Transformationsbilder erhalten | Designgetreue 3D-Formen und kompatibler Formwechsel |
-| Studio | Zwei Modi, Mausnavigation, Punkte/Verbindungen, bestehende Skelettketten, Posen/Moves | Quellknochenumbau, Anatomieerkennung, Ganzkörper-IK und visuelle Abnahme |
+| Studio | Zwei Modi, Mausnavigation, Punkte/Verbindungen, bestehende Skelettketten, Posen/Moves | Skalierte Knochenketten, neue Rigs ohne vorhandenes Skelett, Ganzkörper-IK und visuelle Abnahme |
 | Anbieter | Mehrere Profile gleichzeitig, drei unabhängige Rollen und Fallback-Routen, editierbare Vorgabeadressen | Weitere Fachadapter, OAuth und reale Kontoabnahme |
 | Schlüssel | Optionale verschlüsselte Persistenz, Entsperren nach F5, Passwortwechsel, Sitzungssperre | Betriebssystem-Schlüsselbund und unabhängiges Sicherheitsaudit |
 | Assistent | Ollama, LM Studio, OpenAI-kompatible API und Anthropic; einzeln bestätigte Studio-Vorschläge | Bildkontext und mehrschrittige Änderungsvorschau |
 | Generierung | Lokaler TripoSR-Dienst, Bildauswahl, getrennte Vorschau, Vorprüfungs-Fallbacks, expliziter weiterer Auftrag | Echte GPU-/Qualitätsabnahme, Cloud-Generatoren, Korrekturprompts und Rigging |
 | Übernahme | Revisionsschutz, ein Modellwechsel-Rücksprung, vorbereitete 3D-Installation mit Rückabwicklung | Gerenderte Abnahme, Originalplayer-Neustart und GPU-Kontextverlust |
 
-Prüfnachweis für Software 0.66.0: **286 Tests, Build und 21 Chromium-Fälle bestanden**. Separate Chromium-Nachweise stehen im Prüfbericht; echte Anbieter-/GPU-Inferenz und manuelle Mausabnahme bleiben offen. Projektformat bleibt Version 1. Freie Punkte/Posen aus 0.22.0/0.23.0 benötigen wegen der korrigierten Normalisierungsreihenfolge eine visuelle Kontrolle; keine automatische Migration. [Prüfbericht](PRUEFUNG-0.66.0.md).
+Lokaler Prüfnachweis für 0.68.0: **291 Node-Tests und Build bestanden** ([Bericht](PRUEFUNG-0.68.0.md)). Letzter vollständiger Browser-Prüfnachweis für Software 0.66.0: **286 Tests, Build und 21 Chromium-Fälle bestanden**. Separate Chromium-Nachweise stehen im Prüfbericht; echte Anbieter-/GPU-Inferenz und manuelle Mausabnahme bleiben offen. Projektformat bleibt Version 1. Freie Punkte/Posen aus 0.22.0/0.23.0 benötigen wegen der korrigierten Normalisierungsreihenfolge eine visuelle Kontrolle; keine automatische Migration. [Prüfbericht](PRUEFUNG-0.66.0.md).
 
 ## Bestehender PaKaChi-Avatar
 
@@ -629,12 +629,16 @@ Produktionsbuild lokal bestanden. Neuer Chromium-Nachweis steht aus. Der bisheri
 
 Dies ergänzt den automatisierten Navigationsnachweis; tatsächliches Mausgefühl, komplexe Skelett-/Hautqualität und große reale Modelle bleiben manuell zu prüfen. Keine Änderung am Kameraalgorithmus.
 
-## Lokale Prüfbarkeit (Unreleased)
+## Lokale Prüfbarkeit (0.68.0)
 
 Node-Tests und Produktionsbuild sind gemeinsam über `npm run verify` ausführbar. `npm run verify:full` ergänzt die bestehenden Chromium-Fälle. Beide Abläufe stoppen bei Fehlern und benötigen kein GitHub-Actions-Kontingent; Browser und Systembibliotheken werden separat eingerichtet. Ein erfolgreicher Lauf ohne Browserprüfung gilt nicht als vollständige Abnahme. Die Produkt- und Projektformate ändern sich dadurch nicht.
 
-## Model-Zoo-Speicherfehler (Unreleased)
+## Model-Zoo-Speicherfehler (0.68.0)
 
 Konkrete Hinweise unterscheiden volles Browserkontingent, 50 Kopien und Projekte über 80 MiB. Vorhandene Kopien werden nicht automatisch gelöscht. Scheitert nach bestätigtem Speichern oder Löschen nur die Listenabfrage, bleibt der Erfolg sichtbar. Veraltete Auswahlen können bis zu einer erfolgreichen Aktualisierung weder geladen noch gelöscht werden; „Liste aktualisieren“ bleibt nutzbar. Das aktive Projekt bleibt erhalten.
 
 Automatische Listenaktualisierungen erhalten die Meldung zum letzten Bedienvorgang. Eine getrennte Statusmeldung zeigt einen Listenfehler und wird nach erfolgreicher Aktualisierung entfernt. So bleibt eine bestätigte Speicherung auch bei wartenden Tab-Ereignissen erkennbar.
+
+## Messbarkeit des Projektimports (0.68.0)
+
+Der CPU-Importbenchmark trennt Dateilesen, Projektprüfung, Modelldekodierung, Normalisierung und Rig-Aufbau. Er nutzt produktive Loader und Rig-Rekonstruktion, während die Viewer-Normalisierung ohne Renderer nachgebildet wird. Eigene Quelldateien bleiben unverändert. Bildtexturen werden abgewiesen, statt eine unvollständige Browserdekodierung als erfolgreich zu messen. CPU-Zeiten ersetzen keine vollständigen Browserladezeiten oder Hautqualitätsabnahme. [Messvertrag und Aufruf](IMPORT-BENCHMARK.md).

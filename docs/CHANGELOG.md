@@ -12,7 +12,15 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.68.0] - 2026-10-29
+
+Zeitstempel: 2026-10-29T19:35:45+01:00 (Europe/Berlin)
+
+Entwicklungsmeilenstein auf `work/local-verification-model-zoo`; noch nicht in `main`. Chromium-Abnahme steht aus.
+
 ### Added
+
+- `npm run benchmark:import` misst Projektdatei, Validierung, Modelldekodierung, Normalisierung und Rig-Aufbau inklusive Gewichtsverlauf getrennt. Wiederholungen in eigenen Prozessen, eigene Projektdateien ohne Änderung, Prüfsummen und JSON-Bericht; Bildtexturen werden ausdrücklich abgewiesen.
 
 - Lokale Sammelbefehle `npm run verify` (Node-Tests und Build) und `npm run verify:full` (zusätzlich Chromium-E2E), jeweils mit Abbruch beim ersten fehlgeschlagenen Schritt. Browserinstallation bleibt ein ausdrücklicher Vorbereitungsschritt.
 
@@ -24,6 +32,8 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 - Bestätigtes Speichern/Löschen bleibt bei nachfolgendem Listenfehler als erfolgreich sichtbar. Veraltete Auswahlen bleiben bis zur erfolgreichen Aktualisierung für Laden/Löschen gesperrt, auch über die gemeinsame Avatar-Auswahl.
 
 ### Changed
+
+- Roadmap auf offene Aufgaben und Abnahmen reduziert; erledigte Versionshistorie im Changelog und in den Prüfberichten belassen.
 
 - Direkte Pushes nach `main`, die ausschließlich README, Markdown-Dokumentation oder Benchmark-Messdaten ändern, lösen künftig keinen vollständigen Prüflauf aus. Pull Requests und manuelle Ausführung bleiben unverändert; Prüfsummen in `docs/references` sind nicht ausgenommen.
 
@@ -1256,7 +1266,7 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 
 - Bestehendes Bedienkonzept ausdrücklich als Designdokument eingeordnet und mit Roadmap und Changelog verknüpft.
 
-[Unreleased]: https://github.com/Smilez1985/PaKaChi-SM/commits/main
+[Unreleased]: https://github.com/Smilez1985/PaKaChi-SM/commits/work/local-verification-model-zoo
 [0.20.0]: ./PRUEFUNG-0.20.0.md
 [0.19.0]: ./PRUEFUNG-0.19.0.md
 [0.18.0]: ./PRUEFUNG-0.18.0.md
@@ -1374,3 +1384,5 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 [0.66.0]: PRUEFUNG-0.66.0.md
 
 [0.67.0]: PRUEFUNG-0.67.0.md
+
+[0.68.0]: PRUEFUNG-0.68.0.md
