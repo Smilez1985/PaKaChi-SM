@@ -37,6 +37,7 @@ Diese Reihenfolge ist ein Umsetzungsvorschlag, kein Terminversprechen. Lokale un
 - [x] Zwei Browserfälle für F5-Persistenz einschließlich Posen/Moves und mehrere Tabs mit bestätigtem Löschen vorbereiten (0.45.0).
 - [x] IndexedDB-Browserfälle erfolgreich ausführen: F5 erhält Posen, Moves und gespeicherte Identität; zwei Tabs übernehmen bestätigte Listenänderungen (0.45.0, [Nachweis](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/39902736987)).
 - [x] Speicherfehler, bestätigte Schreibvorgänge mit nachfolgendem Listenfehler und Sperre veralteter Auswahlen behandeln (Unreleased; simulierte Fehler geprüft).
+- [x] Bedienergebnis bei automatischen Tab-/Fokus-Aktualisierungen erhalten; Listenwarnung nach Wiederherstellung entfernen (Unreleased).
 - [ ] Tatsächliche Speichergrenzen und Quotenfehler in realen Browsern prüfen.
 - [x] Lokal gespeicherte Avatare in gemeinsame Auswahl, Zähler und `list_avatars` aufnehmen; gespeicherte ID beim Laden und in der Steuerung erhalten (0.28.0).
 - [x] Gemeinsame Auswahl inklusive gespeicherter IDs im echten Browser über die integrierte Steuerung prüfen (0.45.0).

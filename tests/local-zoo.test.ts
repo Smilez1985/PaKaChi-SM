@@ -109,3 +109,16 @@ test('manual refresh failure blocks stale identities and successful refresh rest
  const f=fixture(t);await f.save();const id=f.list.value,list=f.store.list.bind(f.store);f.store.list=async()=>{throw Error('read-failed');};f.button('refresh').click();await f.settle();assert.equal(f.panel.load(id),false);assert.equal(f.button('remove').disabled,true);
  f.store.list=list;f.button('refresh').click();await f.settle();assert.equal(f.panel.load(id),true);await f.settle();assert.equal(f.loads,1);
 });
+
+test('queued and focus refreshes preserve save outcome while updating a separate list warning',async t=>{
+ let listener:((event:{data:unknown})=>void)|null=null;
+ class Channel {set onmessage(fn:(event:{data:unknown})=>void){listener=fn;}postMessage(){}close(){}}
+ const f=fixture(t,new MemoryZoo(),w=>Object.assign(w,{BroadcastChannel:Channel}));await f.settle();
+ const list=f.store.list.bind(f.store),add=f.store.add.bind(f.store);let release!:()=>void;
+ f.store.add=async(name,p)=>{await new Promise<void>(r=>{release=r;});return add(name,p);};
+ f.name.value='Copy';f.name.dispatchEvent(new f.w.Event('input') as unknown as Event);f.button('save').click();await until(()=>!!release);
+ f.store.list=async()=>{throw Error('offline');};listener!({data:'changed'});release();await f.settle();
+ const statuses=f.host.querySelectorAll('[role="status"]');assert.match(statuses[0].textContent!,/Kopie gespeichert/);assert.match(statuses[1].textContent!,/Liste konnte nicht/);assert.equal(f.store.values.size,1);assert.equal(f.button('load').disabled,true);
+ f.store.list=list;f.w.dispatchEvent(new f.w.Event('focus'));await f.settle();assert.match(statuses[0].textContent!,/Kopie gespeichert/);assert.equal(statuses[1].textContent,'');assert.equal(f.button('load').disabled,false);assert.equal(f.store.values.size,1);
+ f.w.dispatchEvent(new f.w.Event('focus'));await f.settle();assert.match(statuses[0].textContent!,/Kopie gespeichert/);assert.equal(f.loads,0);
+});

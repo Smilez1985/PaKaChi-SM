@@ -290,3 +290,7 @@ Dies ergänzt den automatisierten Navigationsnachweis; tatsächliches Mausgefüh
 ## Nachtrag 29.10.2026 – Unreleased
 
 `npm run verify`: **289 Node-Tests und Produktionsbuild bestanden**. Simulierte Quoten-/Transaktionsfehler, Eintragslimit, Erhalt vorhandener Kopien, bestätigtes Speichern/Löschen trotz Listenfehler und Sperre/Wiederfreigabe veralteter Auswahlen geprüft. Reale Browserkontingente und Chromium-Abnahme bleiben offen. Bekannte Bundle-Größenwarnung besteht fort. Das Paket wird auf `work/local-verification-model-zoo` gesichert; keine Änderung an main und kein Pull Request.
+
+### Automatische Listenaktualisierung – 29.10.2026
+
+290 Node-Tests und Produktionsbuild über `npm run verify` bestanden. Neuer Regressionstest: während des Speicherns eintreffende Tab-Meldung, fehlgeschlagene Listenabfragen, erhaltene Erfolgsmeldung, gesperrte veraltete Auswahl und erfolgreiche Wiederherstellung beim Fensterfokus. Die getrennte Listenwarnung verschwindet danach; es entsteht keine doppelte Kopie. DOM-/Speichersimulation, keine neue gerenderte Browserabnahme.

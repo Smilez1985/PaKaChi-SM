@@ -18,6 +18,8 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ### Fixed
 
+- Automatische Model-Zoo-Aktualisierungen durch andere Tabs oder Fensterfokus erhalten das Ergebnis des letzten Bedienvorgangs. Listenfehler erscheinen getrennt und verschwinden nach erfolgreicher Aktualisierung.
+
 - Model Zoo unterscheidet Browserkontingent, das 50-Kopien-Limit und Projekte über 80 MiB mit konkreten Hinweisen.
 - Bestätigtes Speichern/Löschen bleibt bei nachfolgendem Listenfehler als erfolgreich sichtbar. Veraltete Auswahlen bleiben bis zur erfolgreichen Aktualisierung für Laden/Löschen gesperrt, auch über die gemeinsame Avatar-Auswahl.
 

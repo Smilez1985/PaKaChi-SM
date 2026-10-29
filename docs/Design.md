@@ -636,3 +636,5 @@ Node-Tests und Produktionsbuild sind gemeinsam über `npm run verify` ausführba
 ## Model-Zoo-Speicherfehler (Unreleased)
 
 Konkrete Hinweise unterscheiden volles Browserkontingent, 50 Kopien und Projekte über 80 MiB. Vorhandene Kopien werden nicht automatisch gelöscht. Scheitert nach bestätigtem Speichern oder Löschen nur die Listenabfrage, bleibt der Erfolg sichtbar. Veraltete Auswahlen können bis zu einer erfolgreichen Aktualisierung weder geladen noch gelöscht werden; „Liste aktualisieren“ bleibt nutzbar. Das aktive Projekt bleibt erhalten.
+
+Automatische Listenaktualisierungen erhalten die Meldung zum letzten Bedienvorgang. Eine getrennte Statusmeldung zeigt einen Listenfehler und wird nach erfolgreicher Aktualisierung entfernt. So bleibt eine bestätigte Speicherung auch bei wartenden Tab-Ereignissen erkennbar.

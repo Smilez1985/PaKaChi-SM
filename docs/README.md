@@ -252,3 +252,5 @@ Das Actions-Kontingent ist laut Repository-Inhaber aufgebraucht. Die Browserbest
 Lokale Prüfung unter `Unreleased`: `npm run verify` bündelt Node-Tests und Build; `npm run verify:full` ergänzt Chromium. Am 28.10.2026 bestanden lokal 286 Tests und der Build über den neuen Sammelbefehl. Browserbestätigung bleibt offen; Änderungen sind noch nicht veröffentlicht. Details im [Prüfstand](PRUEFUNG.md).
 
 Nachtrag 29.10.2026 (Unreleased): Model-Zoo-Speicherfehler und veraltete Auswahl abgesichert; 289 Tests und Build lokal bestanden. Sicherungsbranch `work/local-verification-model-zoo`, noch nicht in main. Browserabnahme offen.
+
+Ergänzung 29.10.2026: Automatische Tab-/Fokus-Aktualisierungen erhalten Bedienergebnisse und räumen behobene Listenwarnungen auf. 290 Node-Tests und Build lokal bestanden; Änderungen auf dem bestehenden Arbeitsbranch, Browsernachweis weiterhin offen.
