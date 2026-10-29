@@ -4,7 +4,7 @@ Teil der [Blaupause](README.md) · [Roadmap](ROADMAP.md) · [Changelog](CHANGELO
 
 ## Status und Begriffe
 
-Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.68.0: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau, automatische Anatomieerkennung und die Qualitätsabnahme der angeschlossenen lokalen KI-Generierung bleiben offen.
+Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.69.0: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau, automatische Anatomieerkennung und die Qualitätsabnahme der angeschlossenen lokalen KI-Generierung bleiben offen.
 
 - **PaKaChi:** Panda-KI-Chimera, das übergeordnete Projekt.
 - **PaKaChi-SM:** StateMaschine mit Avatar-Player und integriertem Studio.
@@ -642,3 +642,11 @@ Automatische Listenaktualisierungen erhalten die Meldung zum letzten Bedienvorga
 ## Messbarkeit des Projektimports (0.68.0)
 
 Der CPU-Importbenchmark trennt Dateilesen, Projektprüfung, Modelldekodierung, Normalisierung und Rig-Aufbau. Er nutzt produktive Loader und Rig-Rekonstruktion, während die Viewer-Normalisierung ohne Renderer nachgebildet wird. Eigene Quelldateien bleiben unverändert. Bildtexturen werden abgewiesen, statt eine unvollständige Browserdekodierung als erfolgreich zu messen. CPU-Zeiten ersetzen keine vollständigen Browserladezeiten oder Hautqualitätsabnahme. [Messvertrag und Aufruf](IMPORT-BENCHMARK.md).
+
+## Übergänge zwischen Wiedergabearten (0.69.0)
+
+Der Player friert beim Wechsel zur anderen Wiedergabeart die sichtbare Ausgangspose ein und überblendet sie über 0,18 Animationssekunden in die fortlaufend berechnete Zielpose. Position und Skalierung werden linear, Rotationen per Quaternion-Slerp interpoliert; vorhandene Morph-Gewichte ebenfalls linear. Vor jedem Animationsschritt wird der unveränderte Zielzustand wiederhergestellt. So fließt die Zwischenpose nicht in die nächste Animationsberechnung zurück und verändert keine gespeicherten Posen.
+
+Pause hält auch den Übergang an; Tempo skaliert seine Dauer. Wiederholter Wechsel übernimmt die sichtbare Zwischenpose als neue Ausgangspose. Zeitleistensprünge, Studioeintritt und Freigabe des Modells entfernen den Übergang. Studio-Vorschauen und Posenbearbeitung verwenden keine solche Überblendung.
+
+Erste Stufe: unveränderte Knochen-Grundstellung ohne Knochenumbau, Gewichtsaufträge oder freie Oberflächenpunkte. Geänderte Hierarchien und Matrizen mit Scherung werden nicht überblendet. Solche Fälle behalten den bisherigen direkten Wechsel; es werden keine inkompatiblen Hautbindungen oder Geometrien interpoliert. Renderer-, große-Modell- und visuelle Hautabnahme bleiben offen.

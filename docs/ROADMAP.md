@@ -1,6 +1,6 @@
 # Roadmap – offene Aufgaben
 
-**Entwicklungsstand: 0.68.0 · Abgleich: 29.10.2026.** Teil der [Blaupause](README.md).
+**Entwicklungsstand: 0.69.0 · Abgleich: 29.10.2026.** Teil der [Blaupause](README.md).
 
 Diese Roadmap enthält offene Umsetzung und ausstehende Abnahme. Erledigte Änderungen stehen nach Version im [Changelog](CHANGELOG.md); Nachweise und Grenzen im [Prüfstand](PRUEFUNG.md). Eine implementierte Funktion ist nicht automatisch manuell oder mit realen Anbietern abgenommen.
 
@@ -31,7 +31,7 @@ Der Arbeitsstand liegt auf `work/local-verification-model-zoo`; `main` bleibt bi
 ## 3. Posen und Bewegungen
 
 - [ ] Sequenzbearbeitung im gerenderten Studio und mit externem KI-/MCP-Host abnehmen.
-- [ ] Überblendung zwischen Originalclips und Studio-Moves ergänzen; bisher nur Originalclips untereinander.
+- [ ] Überblendung Originalclip ↔ Studio-Move im gerenderten Player abnehmen; Unterstützung für bearbeitete Grundskelette, freie Oberflächenpunkte und geänderte Hautgewichte ergänzen. Erste Stufe seit [0.69.0](CHANGELOG.md#0690---2026-10-29) implementiert.
 
 ## 4. Gelenke korrigieren
 

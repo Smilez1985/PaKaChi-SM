@@ -12,6 +12,19 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.69.0] - 2026-10-29
+
+Zeitstempel: 2026-10-29T21:13:59+01:00 (Europe/Berlin)
+
+Entwicklungsmeilenstein auf `work/local-verification-model-zoo`; Browserabnahme steht aus.
+
+### Added
+
+- Kurze Überblendung beim Wechsel zwischen Originalclips und Studio-Moves im Player sowie bei der automatischen Rückkehr zur Grundbewegung. Die sichtbare Ausgangspose wird über 0,18 Animationssekunden in die weiterlaufende Zielpose überführt; Position, Rotation, Größe und vorhandene Morph-Gewichte werden berücksichtigt.
+- Pause hält die Überblendung an, Tempo skaliert sie. Erneuter Wechsel startet an der sichtbaren Zwischenpose. Springen auf der Zeitleiste oder Öffnen des Studios beendet die temporäre Überblendung; Projekt, Undo-Verlauf und gespeicherte Posen bleiben unverändert.
+
+Nur unveränderte Grundskelette ohne freie Oberflächenpunkte, Knochenumbau oder Gewichtsaufträge. Geänderte Hierarchien und Schertransformationen werden nicht interpoliert; dort bleibt der direkte Wechsel erhalten. Originalclip-Überblendungen untereinander bleiben bestehen. [Prüfbericht](PRUEFUNG-0.69.0.md).
+
 ## [0.68.0] - 2026-10-29
 
 Zeitstempel: 2026-10-29T19:35:45+01:00 (Europe/Berlin)
@@ -1386,3 +1399,5 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 [0.67.0]: PRUEFUNG-0.67.0.md
 
 [0.68.0]: PRUEFUNG-0.68.0.md
+
+[0.69.0]: PRUEFUNG-0.69.0.md

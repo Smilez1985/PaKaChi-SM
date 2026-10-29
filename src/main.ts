@@ -130,8 +130,8 @@ function refreshCapabilities(): void {
   if (!loaded || !machine.capability) return;
   const capability = machine.capability;
   capability.moves = [...availableMoves(loaded, loaded.moves.map(m=>m.clip)), ...(editor?.data.moves ?? []).map(m=>({id:m.id,name:m.name,loop:m.loop,clip:m.id,...moveReview(editor!.data,m)}))];
-  machine.bind({capability,setState:state=>{editor?.stopMove();editor?.rig.restoreSource();playback!.setBaseMove(loaded!.states![state]);},
-    playMove:id=>{if(editor?.play(id))return;editor?.stopMove();editor?.rig.restoreSource();playback!.play(id);}},machine.state);
+  machine.bind({capability,setState:state=>{if(editor&&(editor.playing||editor.playbackTransition.active))editor.beginPlaybackTransition();editor?.stopMove();editor?.rig.restoreSource();playback!.setBaseMove(loaded!.states![state]);editor?.playbackTransition.afterFrame(0);},
+    playMove:id=>{if(editor?.play(id))return;if(editor&&(editor.playing||editor.playbackTransition.active))editor.beginPlaybackTransition();editor?.stopMove();editor?.rig.restoreSource();playback!.play(id);editor?.playbackTransition.afterFrame(0);}},machine.state);
   renderMoves(capability.moves.map(m=>({...m,clip:m.id})));
   syncPlayback();
 }
@@ -363,7 +363,9 @@ async function boot(): Promise<void> {
   try { viewer = new Viewer(el('viewport')); }
   catch { message('3D ist ohne WebGL2 nicht verfügbar. Der Originalplayer kann verwendet werden.', true); }
   if (viewer) viewer.onFrame = delta => {
+    editor?.playbackTransition.beforeFrame();
     if(editor?.playing)editor.update(delta);else if(!studio)playback?.update(delta);
+    const activeTransport=transport();editor?.playbackTransition.afterFrame(studio||(activeTransport?.current&&activeTransport.paused)?0:delta*(activeTransport?.speed??1));
     if(editor?.playing)syncPlayback();
     const duration = transport()?.duration ?? 0;
     const progress = transport()?.progress ?? 0;
@@ -380,7 +382,7 @@ async function boot(): Promise<void> {
   el('skeleton').onchange = () => viewer?.showSkeleton(el<HTMLInputElement>('skeleton').checked);
   el('pause').onclick = () => {transport()?.togglePause();syncPlayback();};
   el('speed').onchange = () => {const value=Number(el<HTMLSelectElement>('speed').value);playback?.setSpeed(value);editor?.setSpeed(value);};
-  el('timeline').oninput = () => transport()?.seek(Number(el<HTMLInputElement>('timeline').value) / 1000);
+  el('timeline').oninput = () => {editor?.playbackTransition.cancel();transport()?.seek(Number(el<HTMLInputElement>('timeline').value) / 1000);};
   el('avatar-select').onchange=()=>selectAvatar(el<HTMLSelectElement>('avatar-select').value);
   el('project-open').onclick = () => el<HTMLInputElement>('project-file').click();
   el('project-file').onchange = async () => {

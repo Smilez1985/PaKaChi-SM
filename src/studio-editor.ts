@@ -1,3 +1,4 @@
+import {PlaybackTransition} from './playback-transition.ts';
 import {StudioWeightStroke} from './studio-weight-stroke.ts';
 import {checkMoveBends} from './move-limit-check.ts';
 import {loadMoveLibrary,loadLibraryMove} from './move-library.ts';
@@ -17,6 +18,7 @@ interface Hooks { suspend:()=>void; resume:()=>void; changed:()=>void; feedback:
 const uid=()=>`p-${crypto.randomUUID()}`;
 export class StudioEditor {
   readonly rig:StudioRig;
+  readonly playbackTransition:PlaybackTransition;
   private readonly view:StudioView;
   private readonly host:HTMLElement;
   private readonly hooks:Hooks;
@@ -54,7 +56,7 @@ export class StudioEditor {
   paused=false;
   speed=1;
   constructor(rig:StudioRig,view:StudioView,host:HTMLElement,project:Omit<StudioProject,'studio'>,hooks:Hooks) {
-    this.rig=rig;this.view=view;this.host=host;this.project=project;this.hooks=hooks;this.initial=structuredClone(rig.initial);
+    this.rig=rig;this.playbackTransition=new PlaybackTransition(rig.root);this.view=view;this.host=host;this.project=project;this.hooks=hooks;this.initial=structuredClone(rig.initial);
     view.onSelect=id=>{this.selected=id;this.render();};
     view.onAdd=(position,mesh)=>{
       const parent=this.data.points.find(p=>p.id===this.addingBoneParent);
@@ -94,21 +96,27 @@ export class StudioEditor {
   private restore(s:Snapshot){this.rig.data=structuredClone(s.data);this.rig.reset();this.rig.apply(s.values);this.mark();this.render();}
   private mark(){this.moveCheck?.abort();this.revision++;this.dirty=true;this.hooks.changed();}
   private mutate(fn:()=>void){const before=this.snapshot();fn();flagAffectedPoses(before.data,this.data);this.history.push(before);this.mark();this.render();}
-  enter(){this.revision++;this.hooks.suspend();this.stopMove();this.active=true;this.rig.reset();if(this.data.draft)this.rig.apply(this.data.draft);this.view.setEnabled(true);this.render();}
-  leave(){this.view.setAction('select');this.moveCheck?.abort();this.libraryRequest?.abort();this.agentEditing=false;this.revision++;if(this.active&&this.proposalOrigin)this.data.draft=structuredClone(this.proposalOrigin);else if(this.active&&!this.playing)this.data.draft=this.rig.capture();this.active=false;this.stopMove();this.view.setEnabled(false);this.rig.restoreSource();this.hooks.resume();}
+  beginPlaybackTransition(){
+    const d=this.data;
+    if(this.active||d.points.some(p=>p.kind==='surface')||d.boneInsertions?.length||d.boneDeletions?.length||d.boneReparents?.length||d.weightTransfers?.length||JSON.stringify(d.boneRest)!==JSON.stringify(this.initial.boneRest)){this.playbackTransition.cancel();return;}
+    this.playbackTransition.begin();
+  }
+  enter(){this.playbackTransition.cancel();this.revision++;this.hooks.suspend();this.stopMove();this.active=true;this.rig.reset();if(this.data.draft)this.rig.apply(this.data.draft);this.view.setEnabled(true);this.render();}
+  leave(){this.playbackTransition.cancel();this.view.setAction('select');this.moveCheck?.abort();this.libraryRequest?.abort();this.agentEditing=false;this.revision++;if(this.active&&this.proposalOrigin)this.data.draft=structuredClone(this.proposalOrigin);else if(this.active&&!this.playing)this.data.draft=this.rig.capture();this.active=false;this.stopMove();this.view.setEnabled(false);this.rig.restoreSource();this.hooks.resume();}
   stopMove(){if(this.proposalOrigin){this.rig.apply(this.proposalOrigin);this.proposalOrigin=null;this.view.refresh();}if(this.inspectionOrigin){this.rig.apply(this.inspectionOrigin);this.inspectionOrigin=null;this.view.refresh();}this.timeline=null;this.paused=false;this.view.setEnabled(this.active);}
   stopPreview(){this.stopMove();this.render();}
   play(id:string,preview=false):boolean {
     const move=this.data.moves.find(m=>m.id===id);if(!move)return false;
+    if(!preview)this.beginPlaybackTransition();else this.playbackTransition.cancel();
     this.stopMove();this.hooks.suspend();this.rig.reset();this.timeline={move:{id:move.id,name:move.name,loop:move.loop,clip:move.id},time:0,preview};this.paused=false;
-    this.rig.apply(this.rig.sample(move,0));this.view.setEnabled(false);this.render();return true;
+    this.rig.apply(this.rig.sample(move,0));this.playbackTransition.afterFrame(0);this.view.setEnabled(false);this.render();return true;
   }
   update(delta:number){if(!this.timeline||this.paused)return;const t=this.timeline,move=t.sequence??this.data.moves.find(m=>m.id===t.move.id)!;t.time+=delta*this.speed;const duration=this.rig.duration(move);
-    if(t.time>=duration){if(move.loop)t.time%=duration;else {t.time=duration;this.rig.apply(this.rig.sample(move,duration));if(t.preview){this.paused=true;this.stopPreview();}else{this.stopMove();this.rig.restoreSource();this.hooks.resume();}return;}}
+    if(t.time>=duration){if(move.loop)t.time%=duration;else {t.time=duration;this.rig.apply(this.rig.sample(move,duration));if(t.preview){this.paused=true;this.stopPreview();}else{this.beginPlaybackTransition();this.stopMove();this.rig.restoreSource();this.hooks.resume();this.playbackTransition.afterFrame(0);}return;}}
     this.rig.apply(this.rig.sample(move,t.time));
   }
   togglePause(){this.paused=!this.paused;}
-  seek(ratio:number){if(!this.timeline)return;const move=this.timeline.sequence??this.data.moves.find(m=>m.id===this.timeline!.move.id)!;this.timeline.time=T.MathUtils.clamp(ratio,0,.999999)*this.duration;this.rig.apply(this.rig.sample(move,this.timeline.time));}
+  seek(ratio:number){if(!this.timeline||!Number.isFinite(ratio))return;this.playbackTransition.cancel();const move=this.timeline.sequence??this.data.moves.find(m=>m.id===this.timeline!.move.id)!;this.timeline.time=T.MathUtils.clamp(ratio,0,.999999)*this.duration;this.rig.apply(this.rig.sample(move,this.timeline.time));}
   setSpeed(value:number){this.speed=T.MathUtils.clamp(value,.25,2);}
   private addPoint(position:T.Vector3,mesh?:number){if(!this.edit||this.playing)return;if(this.data.points.length>=256){this.hooks.feedback('Höchstens 256 Kontrollpunkte pro Projekt.');return;}
     this.mutate(()=>{const p:ControlPoint={id:uid(),name:`Punkt ${this.data.points.length+1}`,kind:'surface',rest:position.toArray(),size:.015,radius:.12,...(mesh!==undefined?{mesh}:{})};this.data.points.push(p);for(const pose of this.data.poses)pose.values[p.id]={position:[...p.rest],rotation:[0,0,0,1]};if(this.data.draft)this.data.draft[p.id]={position:[...p.rest],rotation:[0,0,0,1]};this.selected=p.id;this.rig.reset();});
@@ -410,7 +418,7 @@ export class StudioEditor {
     const value=this.exportProject();
     const url=URL.createObjectURL(new Blob([JSON.stringify(value)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download=`${this.project.avatar.id}.pakachi.json`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);this.dirty=false;this.render();this.hooks.feedback('Studio-Projekt mit Modell, Kontrollpunkten, Posen und Bewegungen heruntergeladen.');
   }
-  dispose(){if(this.proposalOrigin)this.stopMove();this.moveCheck?.abort();this.libraryRequest?.abort();this.disposed=true;this.view.dispose();this.rig.dispose();this.host.replaceChildren();}
+  dispose(){this.playbackTransition.cancel();if(this.proposalOrigin)this.stopMove();this.moveCheck?.abort();this.libraryRequest?.abort();this.disposed=true;this.view.dispose();this.rig.dispose();this.host.replaceChildren();}
 }
 export function encodeModel(buffer:ArrayBuffer):string {let s='';const bytes=new Uint8Array(buffer);for(let i=0;i<bytes.length;i+=16384)s+=String.fromCharCode(...bytes.subarray(i,i+16384));return btoa(s);}
 export function decodeModel(base64:string):ArrayBuffer {return Uint8Array.from(atob(base64),c=>c.charCodeAt(0)).buffer;}
