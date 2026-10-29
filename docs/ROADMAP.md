@@ -13,7 +13,11 @@ Ein Häkchen bedeutet implementiert; es ersetzt keine visuelle oder externe Live
 - [x] Korrigierten Stand 0.44.0 erneut auf GitHub ausführen: alle sieben Chromium-E2E-Fälle bestanden ([Nachweis](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/39826526209)).
 - [ ] Screenshots und tatsächliches Mausgefühl manuell auswerten; gerenderte Automatisierung ersetzt diese Gesamtabnahme nicht. Lokales Chromium bleibt beim Socket-Aufbau blockiert.
 
+- [x] Lokale Sammelbefehle für Node-Tests/Build und zusätzlich Chromium bereitstellen (`Unreleased`); Ausführung ohne Actions-Kontingent ermöglichen.
+
 ## Nächste Arbeitspakete
+
+**CI vor dem nächsten bestätigten Meilenstein:** Actions-Kontingent aktuell aufgebraucht (Bestätigung des Repository-Inhabers am 28.10.2026). Dokumentationsfilter für direkte Pushes ist unter `Unreleased` vorbereitet. Sobald Kapazität verfügbar ist, den korrigierten Mausnavigationstest und den gesamten Workflow bestätigen; bis dahin keine erfolgreiche 0.67.0-Browserabnahme behaupten.
 
 1. **Korrekturen 0.11.0/0.11.1 visuell nachprüfen:** Drehung um die Figurenmitte auch nach Zoom/Pan sowie vollständige Körperverbindungen, Hand-/Fußziele, Rumpfbewegung und direktes Drehen. Nutzertest 0.10.0 meldete auseinanderziehbare Knochen und unbrauchbare Ausrichtung; diese Fehler sind technisch korrigiert, die erneute Nutzerabnahme steht aus. Ein gezielter Browserfall für Mitteltasten-Drehung nach Zoom/Pan samt Inversion ist in 0.67.0 ergänzt; der abschließende CI-Nachweis steht noch aus. Anschließend Mausnavigation, kleine Gesichtspunkte, Gesamtverschiebung, Speichern/Laden und Agentensteuerung in einer lauffähigen Browserumgebung prüfen.
 2. **Gelenkbearbeitung vervollständigen:** Zwischengelenke in vorhandenen Knochenstrecken samt Gewichtsverteilung und Undo/Redo sind seit 0.47.0 vorhanden. Löschen und gemischte Umbaufolgen sind seit 0.48.0/0.49.0 vorhanden, Assistent/MCP seit 0.50.0. Umhängen vorhandener Knochen ist seit 0.53.0 vorhanden. Anteiliges Übertragen von Hautgewichten ist seit 0.55.0 vorhanden. Räumlich begrenzte Übertragung ist seit 0.56.0 vorhanden. Die Bereichsvorschau ist seit 0.57.0 vorhanden. Freie Knochenabzweigungen sind seit 0.58.0 vorhanden. Ein erster kontinuierlicher Gewichtspinsel ist seit 0.59.0 vorhanden. Gewichtsfärbung ist seit 0.60.0 vorhanden. Das Pinselbudget beträgt seit 0.61.0 1024 Aufträge. Geometrische Sichtprüfung ist seit 0.63.0 optional vorhanden. Ausgeblendete Materialgruppen und Opazität 0 sind seit 0.64.0 berücksichtigt. Alpha-Ausschnitte auf Texturbasisebene sind seit 0.65.0 berücksichtigt. Synthetische Größenmessungen und reduzierte UV-Kopien sind seit 0.66.0 vorhanden. Als Nächstes gerenderte Alpha-Kanten, Teiltransparenz und große reale Modelle prüfen; bestehende Moves und Gewichtsqualität prüfen. Ein fehlendes Knie lässt sich nun in eine vorhandene Strecke einfügen und beugen, jedoch noch kein vollständiges Rig aus einer ungeriggten Oberfläche erzeugen.
@@ -32,7 +36,8 @@ Diese Reihenfolge ist ein Umsetzungsvorschlag, kein Terminversprechen. Lokale un
 - [x] Lokale Sammlungslisten nach bestätigten Speicher-/Löschvorgängen zwischen Tabs aktualisieren; beim Fensterfokus nachladen, wartende Meldungen bündeln (0.45.0).
 - [x] Zwei Browserfälle für F5-Persistenz einschließlich Posen/Moves und mehrere Tabs mit bestätigtem Löschen vorbereiten (0.45.0).
 - [x] IndexedDB-Browserfälle erfolgreich ausführen: F5 erhält Posen, Moves und gespeicherte Identität; zwei Tabs übernehmen bestätigte Listenänderungen (0.45.0, [Nachweis](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/39902736987)).
-- [ ] Tatsächliche Speichergrenzen und Quotenfehler prüfen.
+- [x] Speicherfehler, bestätigte Schreibvorgänge mit nachfolgendem Listenfehler und Sperre veralteter Auswahlen behandeln (Unreleased; simulierte Fehler geprüft).
+- [ ] Tatsächliche Speichergrenzen und Quotenfehler in realen Browsern prüfen.
 - [x] Lokal gespeicherte Avatare in gemeinsame Auswahl, Zähler und `list_avatars` aufnehmen; gespeicherte ID beim Laden und in der Steuerung erhalten (0.28.0).
 - [x] Gemeinsame Auswahl inklusive gespeicherter IDs im echten Browser über die integrierte Steuerung prüfen (0.45.0).
 - [ ] Gespeicherte Auswahl zusätzlich mit externem MCP-Host abnehmen.
@@ -384,6 +389,6 @@ Lokale Einzelmessung bei 80.000 Dreiecken: zurückbehaltener JavaScript-Heap ein
 
 **0.67.0:** Ein zusätzlicher Browserfall prüft echte Mausrad-, Rechts- und Mitteltastenereignisse im Studio. Nach außermittigem Zoom und Verschieben bleiben beim Drehen Abstand und Bildschirmposition der bekannten Figurenmitte konstant. Der Test wählt die normale und invertierte Drehrichtung über den Optionsdialog, prüft gegensinnige Kamerabewegung und funktionierenden Zoom nach Loslassen. Der übrige Studiozustand einschließlich Revision und Figur bleibt unverändert.
 
-Der erste CI-Lauf besteht 286 Node-Tests, Build und die bisherigen 21 Browserfälle. Der neue Mausfall scheiterte an einer Testposition unterhalb des sichtbaren Browserfensters. Der korrigierte Test verwendet den sichtbaren Canvas-Ausschnitt und prüft das getroffene Element; Build lokal bestanden. Sein CI-Bestätigungslauf [40727289984](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/40727289984) endet auch nach Wiederholung vor dem ersten Arbeitsschritt ohne Testlogs. Auch lokal endet Chromium vor dem Teststart mit `socket() failed: Operation not permitted`. Die Bestätigung aller 22 Browserfälle steht aus.
+Produktionsbuild lokal bestanden. Neuer Chromium-Nachweis steht aus. Der bisherige bestätigte Stand umfasst 286 Node-Tests und 21 Browserfälle.
 
 Dies ergänzt den automatisierten Navigationsnachweis; tatsächliches Mausgefühl, komplexe Skelett-/Hautqualität und große reale Modelle bleiben manuell zu prüfen. Keine Änderung am Kameraalgorithmus.

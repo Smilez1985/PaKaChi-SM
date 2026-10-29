@@ -12,6 +12,19 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+### Added
+
+- Lokale Sammelbefehle `npm run verify` (Node-Tests und Build) und `npm run verify:full` (zusätzlich Chromium-E2E), jeweils mit Abbruch beim ersten fehlgeschlagenen Schritt. Browserinstallation bleibt ein ausdrücklicher Vorbereitungsschritt.
+
+### Fixed
+
+- Model Zoo unterscheidet Browserkontingent, das 50-Kopien-Limit und Projekte über 80 MiB mit konkreten Hinweisen.
+- Bestätigtes Speichern/Löschen bleibt bei nachfolgendem Listenfehler als erfolgreich sichtbar. Veraltete Auswahlen bleiben bis zur erfolgreichen Aktualisierung für Laden/Löschen gesperrt, auch über die gemeinsame Avatar-Auswahl.
+
+### Changed
+
+- Direkte Pushes nach `main`, die ausschließlich README, Markdown-Dokumentation oder Benchmark-Messdaten ändern, lösen künftig keinen vollständigen Prüflauf aus. Pull Requests und manuelle Ausführung bleiben unverändert; Prüfsummen in `docs/references` sind nicht ausgenommen.
+
 ## [0.67.0] - 2026-10-28
 
 Zeitstempel: 2026-10-28T12:48:55+01:00 (Europe/Berlin)
@@ -20,11 +33,7 @@ Zeitstempel: 2026-10-28T12:48:55+01:00 (Europe/Berlin)
 
 - Browserprüfung echter Mausnavigation nach Zoom/Pan: Figurenmitte, Kameraradius, Inversion über Optionen, Loslassen und unveränderte Projektdaten.
 
-### Fixed
-
-- Testmaus auf den tatsächlich sichtbaren Canvas-Ausschnitt begrenzt und Elementtreffer geprüft; zuvor lag sie bei hohem Canvas außerhalb des Browserfensters.
-
-**Prüfung:** Der erste CI-Lauf besteht 286 Node-Tests, Build und die bisherigen 21 Browserfälle. Der neue Mausfall scheiterte an einer Testposition unterhalb des sichtbaren Browserfensters. Der korrigierte Test verwendet den sichtbaren Canvas-Ausschnitt und prüft das getroffene Element; Build lokal bestanden. Sein CI-Bestätigungslauf [40727289984](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/40727289984) endet auch nach Wiederholung vor dem ersten Arbeitsschritt ohne Testlogs. Auch lokal endet Chromium vor dem Teststart mit `socket() failed: Operation not permitted`. Die Bestätigung aller 22 Browserfälle steht aus.
+**Prüfung:** Produktionsbuild lokal bestanden. Neuer Chromium-Nachweis steht aus. Der bisherige bestätigte Stand umfasst 286 Node-Tests und 21 Browserfälle.
 
 Dies ergänzt den automatisierten Navigationsnachweis; tatsächliches Mausgefühl, komplexe Skelett-/Hautqualität und große reale Modelle bleiben manuell zu prüfen. Keine Änderung am Kameraalgorithmus.
 

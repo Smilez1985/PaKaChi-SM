@@ -43,6 +43,8 @@
     "export:zoo": "node scripts/export-zoo.mjs",
     "merge:zoo": "node scripts/merge-zoo.mjs",
     "export:moves": "node scripts/export-moves.mjs",
-    "merge:moves": "node scripts/merge-moves.mjs"
+    "merge:moves": "node scripts/merge-moves.mjs",
+    "verify": "npm test && npm run build",
+    "verify:full": "npm run verify && npm run test:e2e"
   }
 }

@@ -38,21 +38,21 @@ export class IndexedDBZoo implements LocalZoo {
    request.onsuccess=()=>{if(closed){request.result.close();return;}request.result.onversionchange=()=>request.result.close();resolve(request.result);};
   });
  }
- private async transaction<T>(mode:IDBTransactionMode,work:(tx:IDBTransaction,done:(value:T)=>void)=>void):Promise<T>{
+ private async transaction<T>(mode:IDBTransactionMode,work:(tx:IDBTransaction,done:(value:T)=>void,fail:(error:Error)=>void)=>void):Promise<T>{
   const db=await this.open();
   try{return await new Promise<T>((resolve,reject)=>{
-   const tx=db.transaction(['entries','projects'],mode);let result:T;
-   tx.oncomplete=()=>resolve(result);tx.onabort=()=>reject(new Error('storage-transaction-failed'));
+   const tx=db.transaction(['entries','projects'],mode);let result:T;let failure:Error|undefined;
+   tx.oncomplete=()=>resolve(result);tx.onabort=()=>reject(failure??new Error(tx.error?.name==='QuotaExceededError'?'storage-quota-exceeded':'storage-transaction-failed'));
    tx.onerror=()=>{/* The transaction abort rejects; request success alone never commits. */};
-   try{work(tx,value=>{result=value;});}catch(error){tx.abort();reject(error);}
+   try{work(tx,value=>{result=value;},error=>{failure=error;tx.abort();});}catch(error){tx.abort();reject(error);}
   });}finally{db.close();}
  }
  async list(){const value=await this.transaction<unknown>('readonly',(tx,done)=>{const request=tx.objectStore('entries').getAll();request.onsuccess=()=>done(request.result);});return parseZooEntries(value).sort((a,b)=>b.createdAt.localeCompare(a.createdAt));}
  async add(name:string,project:StudioProject){
   const snapshot=zooSnapshot(name,project);
-  return this.transaction<ZooEntry>('readwrite',(tx,done)=>{
+  return this.transaction<ZooEntry>('readwrite',(tx,done,fail)=>{
    const entries=tx.objectStore('entries'),count=entries.count();
-   count.onsuccess=()=>{if(count.result>=50){tx.abort();return;}entries.add(snapshot.entry);tx.objectStore('projects').add(snapshot.project,snapshot.entry.id);done(snapshot.entry);};
+   count.onsuccess=()=>{if(count.result>=50){fail(new Error('storage-entry-limit'));return;}entries.add(snapshot.entry);tx.objectStore('projects').add(snapshot.project,snapshot.entry.id);done(snapshot.entry);};
   });
  }
  async read(id:string){

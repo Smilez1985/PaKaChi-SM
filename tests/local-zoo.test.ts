@@ -52,15 +52,15 @@ test('deleting requires confirmation, removes only saved copy and keeps active p
 });
 
 test('IndexedDB save waits for transaction commit and rejects aborted or full transactions',async()=>{
- for(const mode of ['commit','abort','full']){
+ for(const mode of ['commit','abort','full','quota']){
   let tx:IDBTransaction|undefined,closed=0,writes=0;
   const factory={open(){const request={} as IDBOpenDBRequest;const database={close(){closed++;},transaction(){
    const transaction={objectStore(){return {count(){const count={result:mode==='full'?50:0} as IDBRequest<number>;queueMicrotask(()=>count.onsuccess?.(new Event('success')));return count;},add(){writes++;}};},abort(){queueMicrotask(()=>transaction.onabort?.(new Event('abort')));}} as unknown as IDBTransaction;
    tx=transaction;return transaction;
   }} as unknown as IDBDatabase;Object.defineProperty(request,'result',{value:database});queueMicrotask(()=>request.onsuccess?.(new Event('success')));return request;}} as unknown as IDBFactory;
   const store=new IndexedDBZoo(factory);let settled=false;const promise=store.add('Copy',project());const outcome=promise.then(value=>{settled=true;return value;},error=>{settled=true;return error as Error;});
-  await until(()=>!!tx);if(mode!=='full'){assert.equal(settled,false);assert.equal(writes,2);if(mode==='commit')tx!.oncomplete?.call(tx!,new Event('complete'));else tx!.onabort?.call(tx!,new Event('abort'));}
-  const result=await outcome;if(mode==='commit')assert.ok(!(result instanceof Error));else assert.ok(result instanceof Error);assert.equal(closed,1);if(mode==='full')assert.equal(writes,0);
+  await until(()=>!!tx);if(mode!=='full'){assert.equal(settled,false);assert.equal(writes,2);if(mode==='commit')tx!.oncomplete?.call(tx!,new Event('complete'));else {if(mode==='quota')Object.defineProperty(tx!,'error',{value:new DOMException('Full','QuotaExceededError')});tx!.onabort?.call(tx!,new Event('abort'));}}
+  const result=await outcome;if(mode==='commit')assert.ok(!(result instanceof Error));else assert.ok(result instanceof Error);assert.equal(closed,1);if(mode==='full'){assert.equal(writes,0);assert.equal((result as Error).message,'storage-entry-limit');}if(mode==='quota')assert.equal((result as Error).message,'storage-quota-exceeded');
  }
 });
 
@@ -88,4 +88,24 @@ test('cross-tab notices refresh only metadata, queue behind writes and contain n
 test('focus refresh does not load models and failed writes do not notify other tabs',async t=>{
  const sent:unknown[]=[];class Channel {postMessage(value:unknown){sent.push(value);}close(){}}
  const f=fixture(t,new MemoryZoo(),w=>Object.assign(w,{BroadcastChannel:Channel}));await f.settle();f.store.fail=true;await f.save();assert.deepEqual(sent,[]);f.store.fail=false;await f.store.add('External',project());f.w.dispatchEvent(new f.w.Event('focus'));await f.settle();assert.equal(f.list.options.length,1);assert.equal(f.loads,0);
+});
+
+test('specific storage failures preserve copies and the active project',async t=>{
+ const f=fixture(t);await f.save();const before=structuredClone([...f.store.values]),notices=f.notifications.length;
+ for(const [code,message] of [['storage-quota-exceeded','Browserspeicher voll'],['storage-entry-limit','50 Kopien'],['project-too-large','80 MiB']]){
+  f.store.add=async()=>{throw Error(code);};await f.save();assert.match(f.host.textContent!,new RegExp(message));assert.deepEqual([...f.store.values],before);assert.equal(f.loads,0);assert.equal(f.notifications.length,notices);assert.equal(f.button('save').disabled,false);
+ }
+});
+test('committed changes survive failed listing; stale selections stay blocked until refresh',async t=>{
+ for(const operation of ['save','remove']){
+  const f=fixture(t);await f.save();const id=f.list.value,list=f.store.list.bind(f.store);f.store.list=async()=>{throw Error('read-failed');};
+  if(operation==='save')await f.save();else{Object.assign(f.w,{confirm:()=>true});f.button('remove').click();await f.settle();}
+  assert.match(f.host.textContent!,operation==='save'?/Kopie gespeichert.*Liste konnte nicht/:/Kopie gelöscht.*Liste konnte nicht/);
+  const size=operation==='save'?2:0;assert.equal(f.store.values.size,size);assert.equal(f.button('load').disabled,true);assert.equal(f.button('remove').disabled,true);assert.equal(f.panel.load(id),false);assert.equal(f.loads,0);
+  f.store.list=list;f.button('refresh').click();await f.settle();assert.equal(f.list.options.length,size);assert.equal(f.store.values.size,size);assert.equal(f.button('load').disabled,size===0);
+ }
+});
+test('manual refresh failure blocks stale identities and successful refresh restores loading',async t=>{
+ const f=fixture(t);await f.save();const id=f.list.value,list=f.store.list.bind(f.store);f.store.list=async()=>{throw Error('read-failed');};f.button('refresh').click();await f.settle();assert.equal(f.panel.load(id),false);assert.equal(f.button('remove').disabled,true);
+ f.store.list=list;f.button('refresh').click();await f.settle();assert.equal(f.panel.load(id),true);await f.settle();assert.equal(f.loads,1);
 });

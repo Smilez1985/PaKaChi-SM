@@ -2,6 +2,33 @@
 
 **Softwarestand: 0.67.0 · Dokumentationsabgleich: 28.10.2026.**
 
+## CI-Kontingent und Dokumentationsänderungen
+
+Stand 28.10.2026: Der Repository-Inhaber hat bestätigt, dass das GitHub-Actions-Kontingent aufgebraucht ist. Die Startabbrüche der Läufe 40727289984 und 40727830120 sind daher keine Ergebnisse ausgeführter Tests. Die Bestätigung des korrigierten Mausnavigationstests bleibt offen.
+
+Unter `Unreleased` ist eine Workflow-Anpassung vorbereitet: Direkte Pushes nach `main` überspringen den Workflow nur dann, wenn **alle** geänderten Dateien unter `README.md`, `docs/**/*.md` oder `docs/benchmarks/*.json` fallen. Gemischte Änderungen, Code, Tests, Abhängigkeiten, Workflow-Dateien und `docs/references/original-sha256.json` lösen weiterhin die vollständige Prüfung aus. Pull Requests bleiben ungefiltert, damit verpflichtende Checks nicht durch einen Pfadfilter auf „Pending“ verbleiben. `workflow_dispatch` bleibt verfügbar.
+
+Nach verfügbarer Actions-Kapazität muss der korrigierte Stand einmal vollständig mit 286 Node-Tests, Build und 22 Browserfällen bestätigt werden. Die Filterung ersetzt diesen Nachweis nicht. [GitHub-Dokumentation zu Pfadfiltern](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#onpushpull_requestpull_request_targetpathspaths-ignore).
+
+## Prüfung ohne Actions-Kontingent
+
+Nach `npm ci`:
+
+```sh
+npm run verify
+```
+
+Dies führt dieselben Node-Tests und denselben Build wie der Workflow aus. Für eine vollständige Prüfung auf einem Rechner, der Chromium starten kann:
+
+```sh
+npx playwright install chromium
+npm run verify:full
+```
+
+Unter Linux bei fehlenden Systembibliotheken stattdessen einmalig `npx playwright install --with-deps chromium` verwenden. Installation braucht Internet und gegebenenfalls Administratorrechte. Die Sammelbefehle installieren keine Browser oder Systempakete, ändern keine GitHub-Einstellungen und starten keine Actions. Jeder fehlgeschlagene Schritt beendet die Kette mit Fehlerstatus; ein fehlender oder blockierter Browser zählt nicht als bestandene Prüfung. `verify` allein ersetzt keinen E2E-Nachweis. Browserbericht: `playwright-report/index.html`, Fehlerartefakte: `test-results/`.
+
+Lokaler Nachweis am 28.10.2026 für den vorbereiteten Unreleased-Stand: `npm run verify` erfolgreich, **286 Node-Tests bestanden**, TypeScript und Produktionsbuild bestanden. Die bekannte Warnung zum großen JavaScript-Bundle bleibt bestehen. `verify:full` wurde hier wegen des bereits nachgewiesenen Chromium-Startblockers nicht ausgeführt; die 22 Browserfälle bleiben unbestätigt.
+
 ## Nachgewiesen
 
 | Prüfung | Letzter Nachweis | Umfang und Grenze |
@@ -256,6 +283,10 @@ Lokale Einzelmessung bei 80.000 Dreiecken: zurückbehaltener JavaScript-Heap ein
 
 **0.67.0:** Ein zusätzlicher Browserfall prüft echte Mausrad-, Rechts- und Mitteltastenereignisse im Studio. Nach außermittigem Zoom und Verschieben bleiben beim Drehen Abstand und Bildschirmposition der bekannten Figurenmitte konstant. Der Test wählt die normale und invertierte Drehrichtung über den Optionsdialog, prüft gegensinnige Kamerabewegung und funktionierenden Zoom nach Loslassen. Der übrige Studiozustand einschließlich Revision und Figur bleibt unverändert.
 
-Der erste CI-Lauf besteht 286 Node-Tests, Build und die bisherigen 21 Browserfälle. Der neue Mausfall scheiterte an einer Testposition unterhalb des sichtbaren Browserfensters. Der korrigierte Test verwendet den sichtbaren Canvas-Ausschnitt und prüft das getroffene Element; Build lokal bestanden. Sein CI-Bestätigungslauf [40727289984](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/40727289984) endet auch nach Wiederholung vor dem ersten Arbeitsschritt ohne Testlogs. Auch lokal endet Chromium vor dem Teststart mit `socket() failed: Operation not permitted`. Die Bestätigung aller 22 Browserfälle steht aus.
+Produktionsbuild lokal bestanden. Neuer Chromium-Nachweis steht aus. Der bisherige bestätigte Stand umfasst 286 Node-Tests und 21 Browserfälle.
 
 Dies ergänzt den automatisierten Navigationsnachweis; tatsächliches Mausgefühl, komplexe Skelett-/Hautqualität und große reale Modelle bleiben manuell zu prüfen. Keine Änderung am Kameraalgorithmus.
+
+## Nachtrag 29.10.2026 – Unreleased
+
+`npm run verify`: **289 Node-Tests und Produktionsbuild bestanden**. Simulierte Quoten-/Transaktionsfehler, Eintragslimit, Erhalt vorhandener Kopien, bestätigtes Speichern/Löschen trotz Listenfehler und Sperre/Wiederfreigabe veralteter Auswahlen geprüft. Reale Browserkontingente und Chromium-Abnahme bleiben offen. Bekannte Bundle-Größenwarnung besteht fort. Das Paket wird auf `work/local-verification-model-zoo` gesichert; keine Änderung an main und kein Pull Request.

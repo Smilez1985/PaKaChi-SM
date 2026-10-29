@@ -21,6 +21,12 @@ Der archivierte Originalplayer lässt sich auch separat ohne Node öffnen: `publ
 
 Seit **0.11.1** dreht die mittlere Maustaste um die Mitte der ganzen Figur, auch nach Zoom zum Mauszeiger und Verschieben des Bildausschnitts.
 
+## Lokal prüfen
+
+Nach `npm ci` führt `npm run verify` die Node-Tests und den Produktionsbuild aus. `npm run verify:full` führt anschließend zusätzlich alle Chromium-Browserfälle aus; bei einem Fehler stoppt die Kette mit einem Fehlerstatus. Beide Befehle funktionieren ohne GitHub Actions.
+
+Für die vollständige Prüfung einmalig `npx playwright install chromium` ausführen; unter Linux gegebenenfalls `npx playwright install --with-deps chromium` für Systembibliotheken verwenden. Die Installation benötigt Internet, Systembibliotheken können Administratorrechte benötigen. Der Prüfaufruf selbst installiert nichts. HTML-Bericht: `playwright-report/index.html`; Fehlerartefakte: `test-results/`. [Prüfstand und Grenzen](docs/PRUEFUNG.md).
+
 ## Korrektur der Körpersteuerung in 0.11.0
 
 Mika/Nori frisch auswählen: Hand ziehen beugt Schulter/Ellenbogen, Fuß ziehen Hüfte/Knie. Rumpf ziehen nimmt den ganzen Körper mit; Hals/Kopf bleiben verbunden. Unter **Griffe → Drehen** kann ein Gelenk direkt mit der Maus ausgerichtet werden. Die mitgelieferten Testmodelle besitzen jetzt Hand-, Knie-, Fuß- und Halsgelenke. Alte Projektdateien behalten ihr eingebettetes Modell; sie erhalten diese neuen Knochen nicht automatisch. [Bedienung und Grenzen](docs/STUDIO.md#verbundener-körper-statt-auseinanderziehen).
@@ -324,6 +330,10 @@ Lokale Einzelmessung bei 80.000 Dreiecken: zurückbehaltener JavaScript-Heap ein
 
 **0.67.0:** Ein zusätzlicher Browserfall prüft echte Mausrad-, Rechts- und Mitteltastenereignisse im Studio. Nach außermittigem Zoom und Verschieben bleiben beim Drehen Abstand und Bildschirmposition der bekannten Figurenmitte konstant. Der Test wählt die normale und invertierte Drehrichtung über den Optionsdialog, prüft gegensinnige Kamerabewegung und funktionierenden Zoom nach Loslassen. Der übrige Studiozustand einschließlich Revision und Figur bleibt unverändert.
 
-Der erste CI-Lauf besteht 286 Node-Tests, Build und die bisherigen 21 Browserfälle. Der neue Mausfall scheiterte an einer Testposition unterhalb des sichtbaren Browserfensters. Der korrigierte Test verwendet den sichtbaren Canvas-Ausschnitt und prüft das getroffene Element; Build lokal bestanden. Sein CI-Bestätigungslauf [40727289984](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/40727289984) endet auch nach Wiederholung vor dem ersten Arbeitsschritt ohne Testlogs. Auch lokal endet Chromium vor dem Teststart mit `socket() failed: Operation not permitted`. Die Bestätigung aller 22 Browserfälle steht aus.
+Produktionsbuild lokal bestanden. Neuer Chromium-Nachweis steht aus. Der bisherige bestätigte Stand umfasst 286 Node-Tests und 21 Browserfälle.
 
 Dies ergänzt den automatisierten Navigationsnachweis; tatsächliches Mausgefühl, komplexe Skelett-/Hautqualität und große reale Modelle bleiben manuell zu prüfen. Keine Änderung am Kameraalgorithmus.
+
+## Model-Zoo-Speicherfehler (Unreleased)
+
+Konkrete Hinweise unterscheiden volles Browserkontingent, 50 Kopien und Projekte über 80 MiB. Vorhandene Kopien werden nicht automatisch gelöscht. Scheitert nach bestätigtem Speichern oder Löschen nur die Listenabfrage, bleibt der Erfolg sichtbar. Veraltete Auswahlen können bis zu einer erfolgreichen Aktualisierung weder geladen noch gelöscht werden; „Liste aktualisieren“ bleibt nutzbar. Das aktive Projekt bleibt erhalten.
