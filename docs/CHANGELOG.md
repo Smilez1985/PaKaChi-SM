@@ -12,6 +12,18 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.71.1] - 2026-10-30
+
+Zeitstempel: 2026-10-30T19:06:33+01:00 (Europe/Berlin)
+
+### Added
+
+- Überblendungsbenchmark akzeptiert eigene eigenständige GLB-/glTF-Dateien mit `--model` und 1–10 Wiederholungen pro Fall mit `--runs`. `--help` beschreibt die Optionen.
+- Größenlimit von 50 MiB, ausdrückliche Ablehnung von Bildtexturen und Prüfung unveränderter Modelle über alle Messprozesse. Quelldateien bleiben unangetastet.
+- CLI-Regressionen für eigene Geometrie, Prüfsummen, unveränderte Quelldateien, ungültige Argumente und nicht unterstützte Eingaben.
+
+[Prüfbericht](PRUEFUNG-0.71.1.md). Große reale Modelle und Browserabnahme bleiben offen.
+
 ## [0.71.0] - 2026-10-30
 
 Zeitstempel: 2026-10-30T09:42:50+01:00 (Europe/Berlin)
@@ -1461,3 +1473,5 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 [0.70.0]: PRUEFUNG-0.70.0.md
 
 [0.71.0]: PRUEFUNG-0.71.0.md
+
+[0.71.1]: PRUEFUNG-0.71.1.md

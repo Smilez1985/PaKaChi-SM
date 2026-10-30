@@ -4,7 +4,7 @@ Teil der [Blaupause](README.md) · [Roadmap](ROADMAP.md) · [Changelog](CHANGELO
 
 ## Status und Begriffe
 
-Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.71.0: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau, automatische Anatomieerkennung und die Qualitätsabnahme der angeschlossenen lokalen KI-Generierung bleiben offen.
+Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.71.1: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau, automatische Anatomieerkennung und die Qualitätsabnahme der angeschlossenen lokalen KI-Generierung bleiben offen.
 
 - **PaKaChi:** Panda-KI-Chimera, das übergeordnete Projekt.
 - **PaKaChi-SM:** StateMaschine mit Avatar-Player und integriertem Studio.
@@ -668,3 +668,7 @@ Der zusätzliche Speicherbedarf hängt von der Vertexzahl der betroffenen Meshes
 Zielpuffer für Positionen und Normalen werden pro betroffenem Mesh innerhalb eines Übergangs wiederverwendet. Die eingefrorene Ausgangsgeometrie besitzt weiterhin unabhängige Kopien. Vor erneutem Befüllen wird der bisherige Zielzustand wiederhergestellt; Abschluss, Abbruch und inkompatible Zielgeometrie geben die Puffer frei. Nicht normalisierte zusammenhängende Float32-Attribute mit drei Komponenten verwenden direkte Pufferkopien; andere Layouts behalten den allgemeinen Attributzugriff.
 
 Der CPU-Benchmark trennt diese Darstellungskosten von Modellladen, Animator/IK, Benutzeroberfläche und WebGL. Die lokale Mika-Messung zeigt eine Laufzeitverbesserung bei identischen Positionen-/Normalen-Prüfsummen. Speicher-Momentaufnahmen sind keine Spitzenwerte; die beiden festgehaltenen Geometriezustände werden weiterhin benötigt. [Messvertrag](TRANSITION-BENCHMARK.md).
+
+### Eigene Modelle im CPU-Überblendungsbenchmark (0.71.1)
+
+`benchmark:transitions -- --model datei.glb --runs 3` misst eigene eigenständige Geometrie ohne Bildtexturen. Dateigröße ist auf 50 MiB begrenzt; Modellprüfsummen sichern identische Eingaben über alle getrennten Prozesse. Der Lauf importiert keine Studio-Bearbeitungen und ersetzt keine gerenderte Qualitätsabnahme.

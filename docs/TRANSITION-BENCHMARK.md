@@ -12,7 +12,15 @@ Für JSON ohne npm-Kopfzeilen:
 node scripts/benchmark-playback-transition.mjs > transition-messung.json
 ```
 
-Das Werkzeug lädt den mitgelieferten Mika und baut ein StudioRig auf. Jeweils keine, eine oder alle Oberflächen werden in eine kontrolliert veränderte Zielgeometrie überführt. Jeder Fall läuft dreimal in einem eigenen Node-Prozess mit expliziter Garbage Collection. Zwölf Schritte mit jeweils 16 ms Animationszeit schließen den 180-ms-Übergang ab. Quelldateien bleiben unverändert. Jeder Kindprozess hat höchstens zwei Minuten Laufzeit.
+Seit 0.71.1 lassen sich eigene Modelle und 1–10 Wiederholungen pro Fall angeben:
+
+```sh
+npm run benchmark:transitions -- --model /pfad/figur.glb --runs 3
+```
+
+Unterstützt werden eigenständige GLB-/glTF-Dateien bis 50 MiB ohne Bildtexturen. Externe Ressourcen werden vom Modellloader blockiert. Bildtexturen benötigen Browser-Decodierung und werden vor dem Laden ausdrücklich abgewiesen. Die Quelldatei wird nur gelesen; ihr SHA-256 muss vor, während und nach den Wiederholungen übereinstimmen. `--help` zeigt die Optionen. Ein eigenes Modell wird unverändert als Quelle geladen; gespeicherte Studio-Projekte, Bearbeitungsverläufe oder Moves werden dabei nicht importiert. Die Zielverformung bleibt synthetisch.
+
+Das Werkzeug lädt standardmäßig den mitgelieferten Mika und baut ein StudioRig auf. Jeweils keine, eine oder alle Oberflächen werden in eine kontrolliert veränderte Zielgeometrie überführt. Jeder Fall läuft dreimal in einem eigenen Node-Prozess mit expliziter Garbage Collection. Zwölf Schritte mit jeweils 16 ms Animationszeit schließen den 180-ms-Übergang ab. Quelldateien bleiben unverändert. Jeder Kindprozess hat höchstens zwei Minuten Laufzeit.
 
 Gemessen werden Startzeit und einzelne CPU-Schritte einschließlich Wiederherstellung, Kopie, Interpolation, Normalen- und Begrenzungsberechnung. Modell-/Rig-Laden, Vorbereitung der Testverformung, Prüfsummen, Garbage Collection, Animator/IK, UI und WebGL sind nicht in den Zeiten enthalten. 16 ms sind hier der Simulationsschritt, keine erreichte Framezeit. Es gibt keinen hardwareunabhängigen Bestehensgrenzwert.
 
