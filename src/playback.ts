@@ -74,6 +74,8 @@ export class Playback {
 
   seek(ratio: number): void {
     if (!this.action || !Number.isFinite(ratio)) return;
+    this.fading?.stop(); this.fading=null; this.fadeLeft=0;
+    this.action.stopFading().setEffectiveWeight(1);
     this.action.time = Math.max(0, Math.min(1, ratio)) * this.duration;
     this.action.paused = false;
     this.mixer.update(0);
@@ -84,7 +86,7 @@ export class Playback {
   }
 
   update(delta: number): void {
-    if (!this.paused && Number.isFinite(delta) && delta >= 0) {
+    if ((!this.paused || this.finished && this.fading!==null) && Number.isFinite(delta) && delta >= 0) {
       this.mixer.update(delta * this.speed);
       if (this.fading && (this.fadeLeft -= delta * this.speed) <= 0) { this.fading.stop(); this.fading = null; }
     }

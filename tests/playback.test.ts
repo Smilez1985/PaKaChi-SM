@@ -23,3 +23,24 @@ test('imported one-shot holds its final pose and can replay', () => {
   const p = player(false); p.play('wave'); p.update(1.1); assert.equal(p.paused, true); assert.equal(p.progress, 1);
   p.togglePause(); assert.equal(p.paused, false); assert.equal(p.progress, 0); p.dispose();
 });
+
+test('short original one-shot finishes crossfade after its final frame without advancing the held clip',()=>{
+ const root=new Group();root.name='Root';
+ const clips=[new AnimationClip('idle',1,[new NumberKeyframeTrack('Root.position[x]',[0,1],[10,10])]),new AnimationClip('short',.05,[new NumberKeyframeTrack('Root.position[x]',[0,.05],[0,2])])];
+ const p=new Playback(root,clips,[{id:'idle',name:'Idle',clip:'idle',loop:true},{id:'short',name:'Short',clip:'short',loop:false}]);
+ try{
+  p.play('idle');p.update(.1);p.play('short');p.update(.06);assert.equal(p.finished,true);assert.equal(p.paused,true);assert.ok(root.position.x>2);
+  p.update(.2);assert.ok(Math.abs(root.position.x-2)<1e-6);assert.equal(p.progress,1);p.update(1);assert.ok(Math.abs(root.position.x-2)<1e-6);
+  p.togglePause();assert.equal(p.finished,false);assert.equal(p.paused,false);assert.equal(p.progress,0);
+ }finally{p.dispose();}
+});
+test('manual pause freezes original crossfade and seeking removes previous clip influence',()=>{
+ const root=new Group();root.name='Root';
+ const clips=[new AnimationClip('idle',1,[new NumberKeyframeTrack('Root.position[x]',[0,1],[10,10])]),new AnimationClip('target',1,[new NumberKeyframeTrack('Root.position[x]',[0,1],[0,4])])];
+ const p=new Playback(root,clips,[{id:'idle',name:'Idle',clip:'idle',loop:true},{id:'target',name:'Target',clip:'target',loop:false}]);
+ try{
+  p.play('idle');p.update(.1);p.play('target');p.update(.04);p.togglePause();const paused=root.position.x;p.update(1);assert.equal(root.position.x,paused);
+  p.seek(.5);assert.ok(Math.abs(root.position.x-2)<1e-6);assert.equal(p.paused,true);p.update(1);assert.ok(Math.abs(root.position.x-2)<1e-6);
+  p.togglePause();p.update(.1);assert.ok(Math.abs(root.position.x-2.4)<1e-6);
+ }finally{p.dispose();}
+});

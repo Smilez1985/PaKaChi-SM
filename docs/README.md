@@ -1,6 +1,6 @@
 # Blaupause – PaKaChi-SM
 
-**Softwarestand: 0.69.1 · Dokumentation abgeglichen am 29.10.2026.**
+**Softwarestand: 0.69.2 · Dokumentation abgeglichen am 30.10.2026.**
 
 Die Blaupause besteht aus drei Dokumenten. Das Designdokument beschreibt das Produktziel, die Roadmap die Umsetzung und das Changelog die bereits erfolgten Änderungen.
 
@@ -9,6 +9,10 @@ Die Blaupause besteht aus drei Dokumenten. Das Designdokument beschreibt das Pro
 | [Designdokument](Design.md) | Begriffe, Bedienprinzip, Anforderungen und noch offene Produktziele. |
 | [Roadmap](ROADMAP.md) | Offene Aufgaben, Prioritäten und ausstehende Abnahmen. |
 | [Changelog](CHANGELOG.md) | Historie mit Version, Datum und ISO-8601-Zeitstempel. |
+
+## Korrektur 0.69.2
+
+Originalclip-Überblendungen erreichen auch bei kurzen Zielclips die Endpose; Zeitleistensprünge entfernen den Einfluss des vorherigen Clips. [Prüfbericht](PRUEFUNG-0.69.2.md).
 
 ## Korrektur 0.69.1
 

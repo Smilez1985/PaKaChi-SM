@@ -12,6 +12,17 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.69.2] - 2026-10-30
+
+Zeitstempel: 2026-10-30T07:18:04+01:00 (Europe/Berlin)
+
+### Fixed
+
+- Auch bei Überblendungen zwischen Originalclips wird die Mischung vollständig beendet, wenn ein kurzer einmaliger Zielclip bereits seine Endpose erreicht hat. Der beendete Clip bleibt dabei an seinem Ende; manuelle Pause während eines laufenden Clips bleibt wirksam.
+- Ein Sprung auf der Zeitleiste beendet die alte Clip-Überblendung und zeigt die gewählte Zielpose ohne Restgewicht des vorherigen Clips. Der manuelle Pausenstatus bleibt erhalten.
+
+Beide Fehler vor der Korrektur durch Regressionstests reproduziert. Entwicklungsstand auf dem Arbeitsbranch; gerenderte Abnahme bleibt offen. [Prüfbericht](PRUEFUNG-0.69.2.md).
+
 ## [0.69.1] - 2026-10-29
 
 Zeitstempel: 2026-10-29T21:45:22+01:00 (Europe/Berlin)
@@ -1414,3 +1425,5 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 [0.69.0]: PRUEFUNG-0.69.0.md
 
 [0.69.1]: PRUEFUNG-0.69.1.md
+
+[0.69.2]: PRUEFUNG-0.69.2.md

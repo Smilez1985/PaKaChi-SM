@@ -2,7 +2,7 @@
 
 **SM steht für StateMaschine.** PaKaChi ist die **Panda-KI-Chimera**, das übergeordnete Projekt. PaKaChi-SM vereint Avatar-Player, Model Zoo und das fest integrierte **PaKaChi-Avatar-Studio**.
 
-**Softwarestand: 0.69.1 · Entwicklungsstand, keine fertige Bild-zu-3D-Lösung.**
+**Softwarestand: 0.69.2 · Entwicklungsstand, keine fertige Bild-zu-3D-Lösung.**
 
 Der bestehende PaKaChi mit Tierform, humanoider Arbeitsform und allen 72 Transformationsbildern ist erhalten und beim Start ausgewählt. Mika und Nori sind separate technische 3D-Testavatare. Ein 3D-Modell des Original-PaKaChi und die Qualitätsabnahme echter KI-Ergebnisse stehen noch aus.
 
@@ -23,9 +23,9 @@ Seit **0.11.1** dreht die mittlere Maustaste um die Mitte der ganzen Figur, auch
 
 **0.68.0 auf dem Arbeitsbranch:** Model-Zoo-Speicherfehler sind abgesichert; die [Roadmap](docs/ROADMAP.md) enthält offene Arbeit statt erledigter Versionshistorie. `npm run benchmark:import` misst CPU-Importphasen ([Anleitung](docs/IMPORT-BENCHMARK.md)). Noch keine Übernahme nach `main` oder neue Browserabnahme.
 
-## Überblendung im Player (0.69.1)
+## Überblendung im Player (0.69.2)
 
-Originalclips und Studio-Moves gehen bei unverändertem Grundskelett über 0,18 Animationssekunden ineinander über, auch bei der Rückkehr zur Grundbewegung. Pause und Tempo gelten auch für den Übergang. Seit 0.69.1 läuft die Überblendung bei natürlich beendeten kurzen Clips bis zur vollständigen Endpose weiter; manuelle Pause bleibt davon getrennt. Freie Oberflächenpunkte, Knochen-/Gewichtsumbauten und Schertransformationen verwenden weiterhin den direkten Wechsel. Im Studio bleibt die Posenbearbeitung exakt, ohne Wiedergabeüberblendung. [Nachweis und Grenzen](docs/PRUEFUNG-0.69.1.md).
+Originalclips und Studio-Moves gehen bei unverändertem Grundskelett über 0,18 Animationssekunden ineinander über, auch bei der Rückkehr zur Grundbewegung. Pause und Tempo gelten auch für den Übergang. Seit 0.69.1 läuft die Überblendung bei natürlich beendeten kurzen Clips bis zur vollständigen Endpose weiter; manuelle Pause bleibt davon getrennt. Freie Oberflächenpunkte, Knochen-/Gewichtsumbauten und Schertransformationen verwenden weiterhin den direkten Wechsel. Seit 0.69.2 enden auch Übergänge zwischen kurzen Originalclips vollständig; Zeitleistensprünge zeigen die gewählte Pose ohne Restgewicht des vorherigen Clips. Im Studio bleibt die Posenbearbeitung exakt, ohne Wiedergabeüberblendung. [Nachweis und Grenzen](docs/PRUEFUNG-0.69.2.md).
 
 ## Lokal prüfen
 
@@ -65,7 +65,7 @@ Seit 0.14.0 besteht zusätzlich der interne [Auftragskern](docs/AUFTRAE.md): fes
 
 ## Was aktuell funktioniert
 
-| Bereich | Stand 0.69.1 |
+| Bereich | Stand 0.69.2 |
 | --- | --- |
 | Player | Avatar-Auswahl, tatsächliche Bewegungen anzeigen, abspielen, pausieren, Tempo und Abspielposition ändern. |
 | Modelle | Mika/Nori mit Skeletten und Clips; eigene eigenständige GLB-Dateien laden oder hineinziehen, bis 50 MiB, lokal für die Sitzung. |

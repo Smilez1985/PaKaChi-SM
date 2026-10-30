@@ -4,7 +4,7 @@ Teil der [Blaupause](README.md) · [Roadmap](ROADMAP.md) · [Changelog](CHANGELO
 
 ## Status und Begriffe
 
-Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.69.1: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau, automatische Anatomieerkennung und die Qualitätsabnahme der angeschlossenen lokalen KI-Generierung bleiben offen.
+Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.69.2: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau, automatische Anatomieerkennung und die Qualitätsabnahme der angeschlossenen lokalen KI-Generierung bleiben offen.
 
 - **PaKaChi:** Panda-KI-Chimera, das übergeordnete Projekt.
 - **PaKaChi-SM:** StateMaschine mit Avatar-Player und integriertem Studio.
@@ -652,3 +652,5 @@ Pause hält auch den Übergang an; Tempo skaliert seine Dauer. Wiederholter Wech
 Erste Stufe: unveränderte Knochen-Grundstellung ohne Knochenumbau, Gewichtsaufträge oder freie Oberflächenpunkte. Geänderte Hierarchien und Matrizen mit Scherung werden nicht überblendet. Solche Fälle behalten den bisherigen direkten Wechsel; es werden keine inkompatiblen Hautbindungen oder Geometrien interpoliert. Renderer-, große-Modell- und visuelle Hautabnahme bleiben offen.
 
 Seit 0.69.1 wird das natürliche Ende eines einmaligen Originalclips als gehaltene Zielpose behandelt. Eine noch laufende Überblendung erreicht diese Endpose vollständig. Nur eine manuelle Pause hält ihre Zeit an. Ohne aktiven Grundclip läuft der Übergang zur wiederhergestellten Ruhepose ebenfalls zu Ende; ungültige Zeitwerte werden nicht fortgeschrieben.
+
+Seit 0.69.2 läuft bei einem natürlich beendeten Originalclip eine noch aktive Mixer-Überblendung bis zum vollständigen Zielgewicht weiter. Die Clipzeit bleibt am Ende stehen. Springen auf der Zeitleiste entfernt den alten Mischpartner und dessen Fade-Gewicht, bevor die gewünschte Pose ausgewertet wird; ein manuell pausierter Transport bleibt pausiert.
