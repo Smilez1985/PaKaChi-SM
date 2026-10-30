@@ -12,6 +12,21 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.70.0] - 2026-10-30
+
+Zeitstempel: 2026-10-30T08:51:57+01:00 (Europe/Berlin)
+
+### Added
+
+- Player-Überblendung auch für freie Gesichts-/Oberflächenpunkte: Betroffene Mesh-Positionen werden vorübergehend interpoliert, Normalen und Begrenzungen für die sichtbare Zwischenform neu berechnet.
+- Vor jedem Animationsschritt werden Zielpositionen, Zielnormalen und Begrenzungen wiederhergestellt. Pause, wiederholter Wechsel, Abbruch und Rückkehr zum Originalclip erhalten den Zielzustand; gespeicherte Posen und Hautgewichte werden nicht verändert.
+
+### Changed
+
+- Freie Oberflächenpunkte verhindern die Überblendung nicht mehr. Zusätzliche Geometriekopien sind auf Meshes beschränkt, denen solche Punkte zugeordnet sind; Punkte ohne Mesh-Zuordnung betreffen alle Studio-Meshes.
+
+Bearbeitete Knochen-Grundstellung, Knochenumbau, Gewichtsaufträge, geänderte Geometrieidentität und Schertransformationen bleiben ausgeschlossen. Zusätzlicher CPU-/Speicherbedarf während des Übergangs; große Modelle und gerenderte Hautqualität sind noch nicht abgenommen. [Prüfbericht](PRUEFUNG-0.70.0.md).
+
 ## [0.69.2] - 2026-10-30
 
 Zeitstempel: 2026-10-30T07:18:04+01:00 (Europe/Berlin)
@@ -1427,3 +1442,5 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 [0.69.1]: PRUEFUNG-0.69.1.md
 
 [0.69.2]: PRUEFUNG-0.69.2.md
+
+[0.70.0]: PRUEFUNG-0.70.0.md

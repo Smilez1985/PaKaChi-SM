@@ -40,7 +40,7 @@ test('original and studio playback blend both ways without changing project data
  editor.beginPlaybackTransition();editor.stopMove();rig.restoreSource();playback.setBaseMove('idle');editor.playbackTransition.afterFrame(0);near(bone.position.y,from);frame(.09);near(bone.position.y,(from+2)/2);frame(.09);near(bone.position.y,2);near(root.position.x,3);
  editor.play('own');frame(.2);frame(.4);assert.equal(editor.playing,false);assert.equal(playback.current?.id,'idle');frame(.2);near(bone.position.y,2);assert.deepEqual(editor.data,data);assert.equal(editor.dirty,false);
  editor.play('own');editor.enter();assert.equal(editor.playbackTransition.active,false);
- editor.leave();editor.data.points.push({id:'surface',name:'Surface',kind:'surface',rest:[0,0,0],size:.01,radius:.1});editor.beginPlaybackTransition();assert.equal(editor.playbackTransition.active,false);editor.data.points.pop();
+ editor.leave();editor.data.points.push({id:'surface',name:'Surface',kind:'surface',rest:[0,0,0],size:.01,radius:.1});editor.beginPlaybackTransition();assert.equal(editor.playbackTransition.active,true);editor.playbackTransition.cancel();editor.data.points.pop();
  editor.data.boneRest[0].position[0]+=1;editor.beginPlaybackTransition();assert.equal(editor.playbackTransition.active,false);
 });
 
@@ -63,4 +63,31 @@ test('missing base clip, speed and invalid frame times have explicit transition 
  for(const delta of [NaN,Infinity,-1,0])assert.equal(playbackTransitionDelta(idle,delta),0);
  assert.equal(playbackTransitionDelta({current:{},paused:true,speed:2},.1),0);
  assert.equal(playbackTransitionDelta({current:{},paused:false,speed:NaN},.1),0);
+});
+
+test('surface fades restore target vertices, normals and bounds; changed geometry is not overwritten',()=>{
+ const root=new T.Group(),mesh=new T.Mesh(new T.PlaneGeometry(1,1),new T.MeshBasicMaterial());root.add(mesh);const fade=new PlaybackTransition(root),geometry=mesh.geometry,position=geometry.getAttribute('position');
+ const untouched=new T.Mesh(new T.PlaneGeometry(1,1),new T.MeshBasicMaterial());root.add(untouched);
+ const source=Array.from(position.array);fade.begin([mesh]);untouched.geometry.getAttribute('position').setZ(0,3);position.setZ(0,1);position.needsUpdate=true;geometry.computeVertexNormals();geometry.computeBoundingBox();geometry.computeBoundingSphere();
+ const target=Array.from(position.array),normals=Array.from(geometry.getAttribute('normal').array),box=geometry.boundingBox!.clone(),sphere=geometry.boundingSphere!.clone();
+ fade.afterFrame(.09);near(untouched.geometry.getAttribute('position').getZ(0),3);near(position.getZ(0),.5);near(geometry.boundingBox!.max.z,.5);fade.beforeFrame();assert.deepEqual(Array.from(position.array),target);assert.deepEqual(Array.from(geometry.getAttribute('normal').array),normals);assert.ok(geometry.boundingBox!.equals(box));assert.ok(geometry.boundingSphere!.equals(sphere));
+ fade.afterFrame(0);near(position.getZ(0),.5);fade.begin([mesh]);position.setZ(0,2);geometry.computeVertexNormals();fade.afterFrame(0);near(position.getZ(0),.5);fade.cancel();near(position.getZ(0),2);
+ fade.begin([mesh]);const replacement=new T.PlaneGeometry(2,2);mesh.geometry=replacement;fade.afterFrame(.05);assert.equal(fade.active,false);assert.equal(mesh.geometry,replacement);assert.deepEqual(Array.from(replacement.getAttribute('position').array),source.map(v=>v*2));
+ geometry.dispose();replacement.dispose();untouched.geometry.dispose();(untouched.material as T.Material).dispose();(mesh.material as T.Material).dispose();
+});
+
+test('free facial point movement blends into and out of a Studio move without changing saved poses',t=>{
+ const window=new Window();Object.assign(globalThis,{document:window.document,Option:function(text='',value=''){const option=window.document.createElement('option');option.text=text;option.value=value;return option;}});
+ const root=new T.Group();root.name='Face';const mesh=new T.Mesh(new T.PlaneGeometry(1,1),new T.MeshBasicMaterial());root.add(mesh);root.updateMatrixWorld(true);
+ const rig=new StudioRig(root);rig.data.points.push({id:'mouth',name:'Mouth',kind:'surface',mesh:0,rest:[0,0,0],radius:2,size:.01});
+ const values=rig.capture();values.mouth.position=[0,0,1];rig.data.poses=[{id:'a',name:'A',seconds:.5,values:structuredClone(values)},{id:'b',name:'B',seconds:.5,values:structuredClone(values)}];rig.data.moves=[{id:'smile',name:'Smile',loop:true,poses:['a','b']}];
+ const clip=new T.AnimationClip('idle',1,[new T.NumberKeyframeTrack('Face.position[x]',[0,1],[0,0])]),playback=new Playback(root,[clip],[{id:'idle',name:'Idle',clip:'idle',loop:true}],'idle');
+ const view={setEnabled(){},setFigureEnabled(){},setAction(){},setRotation(){},select(){},refresh(){},dispose(){}} as unknown as StudioView;
+ const editor=new StudioEditor(rig,view,window.document.createElement('div') as unknown as HTMLElement,{format:'pakachi-studio',version:1,model:'AAAA',avatar:{id:'face',name:'Face',description:'',moves:[]}},{suspend:()=>playback.suspend(),resume:()=>{playback.setBaseMove('idle');},changed(){},feedback(){}});
+ t.after(()=>{editor.dispose();playback.dispose();window.happyDOM.abort();});
+ const data=structuredClone(editor.data),position=mesh.geometry.getAttribute('position');rig.apply(values);const target=position.getZ(0);assert.ok(target>0);rig.restoreSource();playback.play('idle');
+ const frame=(delta:number)=>{editor.playbackTransition.beforeFrame();if(editor.playing)editor.update(delta);else playback.update(delta);editor.playbackTransition.afterFrame(playbackTransitionDelta(editor.playing?editor:playback,delta));};
+ editor.play('smile');assert.equal(editor.playbackTransition.active,true);near(position.getZ(0),0);frame(.09);near(position.getZ(0),target/2);editor.togglePause();frame(.1);near(position.getZ(0),target/2);editor.togglePause();frame(.09);near(position.getZ(0),target);
+ editor.beginPlaybackTransition();editor.stopMove();rig.restoreSource();playback.setBaseMove('idle');editor.playbackTransition.afterFrame(0);near(position.getZ(0),target);frame(.09);near(position.getZ(0),target/2);frame(.09);near(position.getZ(0),0);
+ assert.deepEqual(editor.data,data);assert.equal(editor.dirty,false);
 });

@@ -4,7 +4,7 @@ Teil der [Blaupause](README.md) · [Roadmap](ROADMAP.md) · [Changelog](CHANGELO
 
 ## Status und Begriffe
 
-Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.69.2: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau, automatische Anatomieerkennung und die Qualitätsabnahme der angeschlossenen lokalen KI-Generierung bleiben offen.
+Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.70.0: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau, automatische Anatomieerkennung und die Qualitätsabnahme der angeschlossenen lokalen KI-Generierung bleiben offen.
 
 - **PaKaChi:** Panda-KI-Chimera, das übergeordnete Projekt.
 - **PaKaChi-SM:** StateMaschine mit Avatar-Player und integriertem Studio.
@@ -654,3 +654,11 @@ Erste Stufe: unveränderte Knochen-Grundstellung ohne Knochenumbau, Gewichtsauft
 Seit 0.69.1 wird das natürliche Ende eines einmaligen Originalclips als gehaltene Zielpose behandelt. Eine noch laufende Überblendung erreicht diese Endpose vollständig. Nur eine manuelle Pause hält ihre Zeit an. Ohne aktiven Grundclip läuft der Übergang zur wiederhergestellten Ruhepose ebenfalls zu Ende; ungültige Zeitwerte werden nicht fortgeschrieben.
 
 Seit 0.69.2 läuft bei einem natürlich beendeten Originalclip eine noch aktive Mixer-Überblendung bis zum vollständigen Zielgewicht weiter. Die Clipzeit bleibt am Ende stehen. Springen auf der Zeitleiste entfernt den alten Mischpartner und dessen Fade-Gewicht, bevor die gewünschte Pose ausgewertet wird; ein manuell pausierter Transport bleibt pausiert.
+
+## Oberflächenpunkte in Wiedergabeübergängen (0.70.0)
+
+Freie Gesichtspunkte und andere Oberflächenpunkte sind für die Player-Überblendung zugelassen, solange Grundskelett und Gewichte unverändert sind. Die Übergangsschicht kopiert Positionen und Normalen nur für betroffene Meshes; ohne ausdrückliche Mesh-Zuordnung betrifft ein Punkt alle Studio-Oberflächen. Zwischenformen entstehen durch lineare Interpolation der lokalen Vertex-Positionen. Normalen, Bounding Box und Bounding Sphere werden für die Darstellung neu berechnet.
+
+Vor dem nächsten Animationsschritt werden die exakten Zielpositionen, Normalen und Begrenzungen wiederhergestellt. Die Zwischengeometrie fließt nicht in die nächste Posenberechnung zurück. Bei Abbruch wird ebenfalls die Zielgeometrie wiederhergestellt; bei erneutem Wechsel ist die sichtbare Zwischenform der neue Ausgangspunkt. Ausgetauschte Geometrie, Positions-/Normalenattribute oder Indexpuffer werden nicht überschrieben. Knochen-/Gewichtsumbauten und Schertransformationen bleiben ausgeschlossen.
+
+Der zusätzliche Speicherbedarf hängt von der Vertexzahl der betroffenen Meshes ab. Geometriekopien, Normalen- und Begrenzungsberechnung fallen nur während solcher Übergänge an. Keine pauschale Echtzeit- oder Speicherzusage für große Modelle; visuelle Hautabnahme bleibt offen.

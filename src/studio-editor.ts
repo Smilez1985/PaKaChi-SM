@@ -98,8 +98,9 @@ export class StudioEditor {
   private mutate(fn:()=>void){const before=this.snapshot();fn();flagAffectedPoses(before.data,this.data);this.history.push(before);this.mark();this.render();}
   beginPlaybackTransition(){
     const d=this.data;
-    if(this.active||d.points.some(p=>p.kind==='surface')||d.boneInsertions?.length||d.boneDeletions?.length||d.boneReparents?.length||d.weightTransfers?.length||JSON.stringify(d.boneRest)!==JSON.stringify(this.initial.boneRest)){this.playbackTransition.cancel();return;}
-    this.playbackTransition.begin();
+    if(this.active||d.boneInsertions?.length||d.boneDeletions?.length||d.boneReparents?.length||d.weightTransfers?.length||JSON.stringify(d.boneRest)!==JSON.stringify(this.initial.boneRest)){this.playbackTransition.cancel();return;}
+    const points=d.points.filter(p=>p.kind==='surface');
+    this.playbackTransition.begin(this.rig.surfaces.filter((_,i)=>points.some(p=>p.mesh===undefined||p.mesh===i)).map(s=>s.mesh));
   }
   enter(){this.playbackTransition.cancel();this.revision++;this.hooks.suspend();this.stopMove();this.active=true;this.rig.reset();if(this.data.draft)this.rig.apply(this.data.draft);this.view.setEnabled(true);this.render();}
   leave(){this.playbackTransition.cancel();this.view.setAction('select');this.moveCheck?.abort();this.libraryRequest?.abort();this.agentEditing=false;this.revision++;if(this.active&&this.proposalOrigin)this.data.draft=structuredClone(this.proposalOrigin);else if(this.active&&!this.playing)this.data.draft=this.rig.capture();this.active=false;this.stopMove();this.view.setEnabled(false);this.rig.restoreSource();this.hooks.resume();}
