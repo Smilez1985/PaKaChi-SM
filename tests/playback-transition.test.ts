@@ -91,3 +91,20 @@ test('free facial point movement blends into and out of a Studio move without ch
  editor.beginPlaybackTransition();editor.stopMove();rig.restoreSource();playback.setBaseMove('idle');editor.playbackTransition.afterFrame(0);near(position.getZ(0),target);frame(.09);near(position.getZ(0),target/2);frame(.09);near(position.getZ(0),0);
  assert.deepEqual(editor.data,data);assert.equal(editor.dirty,false);
 });
+
+test('reused target buffers follow changing poses and interleaved attributes match packed geometry',()=>{
+ const root=new T.Group(),packed=new T.Mesh(new T.PlaneGeometry(1,1),new T.MeshBasicMaterial()),interleaved=new T.Mesh(new T.PlaneGeometry(1,1),new T.MeshBasicMaterial());root.add(packed,interleaved);
+ const original=interleaved.geometry.getAttribute('position'),raw=new Float32Array(original.count*4);for(let i=0;i<original.count;i++){raw[i*4]=original.getX(i);raw[i*4+1]=original.getY(i);raw[i*4+2]=original.getZ(i);raw[i*4+3]=1234;}
+ interleaved.geometry.setAttribute('position',new T.InterleavedBufferAttribute(new T.InterleavedBuffer(raw,4),3,0));
+ const fade=new PlaybackTransition(root);fade.begin([packed,interleaved]);
+ for(let step=1;step<=6;step++){
+  fade.beforeFrame();
+  for(const mesh of [packed,interleaved]){const p=mesh.geometry.getAttribute('position');near(p.getZ(0),.3*(step-1));p.setZ(0,.3*step);p.needsUpdate=true;mesh.geometry.computeVertexNormals();mesh.geometry.computeBoundingBox();mesh.geometry.computeBoundingSphere();}
+  fade.afterFrame(.03);
+  const a=packed.geometry.getAttribute('position'),b=interleaved.geometry.getAttribute('position');near(a.getZ(0),.3*step*Math.min(1,step/6));
+  for(let i=0;i<a.count;i++){near(a.getX(i),b.getX(i));near(a.getY(i),b.getY(i));near(a.getZ(i),b.getZ(i));assert.equal(raw[i*4+3],1234);}
+  assert.deepEqual(Array.from(packed.geometry.getAttribute('normal').array),Array.from(interleaved.geometry.getAttribute('normal').array));
+ }
+ fade.cancel();near(packed.geometry.getAttribute('position').getZ(0),1.8);
+ for(const mesh of [packed,interleaved]){mesh.geometry.dispose();(mesh.material as T.Material).dispose();}
+});

@@ -1,6 +1,6 @@
 # Blaupause – PaKaChi-SM
 
-**Softwarestand: 0.70.0 · Dokumentation abgeglichen am 30.10.2026.**
+**Softwarestand: 0.71.0 · Dokumentation abgeglichen am 30.10.2026.**
 
 Die Blaupause besteht aus drei Dokumenten. Das Designdokument beschreibt das Produktziel, die Roadmap die Umsetzung und das Changelog die bereits erfolgten Änderungen.
 
@@ -9,6 +9,10 @@ Die Blaupause besteht aus drei Dokumenten. Das Designdokument beschreibt das Pro
 | [Designdokument](Design.md) | Begriffe, Bedienprinzip, Anforderungen und noch offene Produktziele. |
 | [Roadmap](ROADMAP.md) | Offene Aufgaben, Prioritäten und ausstehende Abnahmen. |
 | [Changelog](CHANGELOG.md) | Historie mit Version, Datum und ISO-8601-Zeitstempel. |
+
+## Meilenstein 0.71.0
+
+Oberflächenüberblendungen verwenden Zielpuffer wieder; ein eigener CPU-Benchmark dokumentiert die Kosten für unterschiedlich viele betroffene Meshes. Identische Geometrie-Prüfsummen und gemessene Laufzeitverbesserung, keine FPS-Garantie. [Prüfbericht](PRUEFUNG-0.71.0.md) · [Messvertrag](TRANSITION-BENCHMARK.md).
 
 ## Meilenstein 0.70.0
 

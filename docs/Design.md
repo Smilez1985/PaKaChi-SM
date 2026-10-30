@@ -4,7 +4,7 @@ Teil der [Blaupause](README.md) · [Roadmap](ROADMAP.md) · [Changelog](CHANGELO
 
 ## Status und Begriffe
 
-Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.70.0: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau, automatische Anatomieerkennung und die Qualitätsabnahme der angeschlossenen lokalen KI-Generierung bleiben offen.
+Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.71.0: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau, automatische Anatomieerkennung und die Qualitätsabnahme der angeschlossenen lokalen KI-Generierung bleiben offen.
 
 - **PaKaChi:** Panda-KI-Chimera, das übergeordnete Projekt.
 - **PaKaChi-SM:** StateMaschine mit Avatar-Player und integriertem Studio.
@@ -662,3 +662,9 @@ Freie Gesichtspunkte und andere Oberflächenpunkte sind für die Player-Überble
 Vor dem nächsten Animationsschritt werden die exakten Zielpositionen, Normalen und Begrenzungen wiederhergestellt. Die Zwischengeometrie fließt nicht in die nächste Posenberechnung zurück. Bei Abbruch wird ebenfalls die Zielgeometrie wiederhergestellt; bei erneutem Wechsel ist die sichtbare Zwischenform der neue Ausgangspunkt. Ausgetauschte Geometrie, Positions-/Normalenattribute oder Indexpuffer werden nicht überschrieben. Knochen-/Gewichtsumbauten und Schertransformationen bleiben ausgeschlossen.
 
 Der zusätzliche Speicherbedarf hängt von der Vertexzahl der betroffenen Meshes ab. Geometriekopien, Normalen- und Begrenzungsberechnung fallen nur während solcher Übergänge an. Keine pauschale Echtzeit- oder Speicherzusage für große Modelle; visuelle Hautabnahme bleibt offen.
+
+## Laufzeit der Oberflächenüberblendung (0.71.0)
+
+Zielpuffer für Positionen und Normalen werden pro betroffenem Mesh innerhalb eines Übergangs wiederverwendet. Die eingefrorene Ausgangsgeometrie besitzt weiterhin unabhängige Kopien. Vor erneutem Befüllen wird der bisherige Zielzustand wiederhergestellt; Abschluss, Abbruch und inkompatible Zielgeometrie geben die Puffer frei. Nicht normalisierte zusammenhängende Float32-Attribute mit drei Komponenten verwenden direkte Pufferkopien; andere Layouts behalten den allgemeinen Attributzugriff.
+
+Der CPU-Benchmark trennt diese Darstellungskosten von Modellladen, Animator/IK, Benutzeroberfläche und WebGL. Die lokale Mika-Messung zeigt eine Laufzeitverbesserung bei identischen Positionen-/Normalen-Prüfsummen. Speicher-Momentaufnahmen sind keine Spitzenwerte; die beiden festgehaltenen Geometriezustände werden weiterhin benötigt. [Messvertrag](TRANSITION-BENCHMARK.md).

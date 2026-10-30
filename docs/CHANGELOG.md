@@ -12,6 +12,21 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.71.0] - 2026-10-30
+
+Zeitstempel: 2026-10-30T09:42:50+01:00 (Europe/Berlin)
+
+### Added
+
+- `npm run benchmark:transitions`: reproduzierbare CPU-Messung der Player-Überblendung mit dem mitgelieferten Mika, ohne/einem/allen betroffenen Meshes, jeweils drei eigene Prozesse. JSON-Bericht mit Einzelzeiten, Speicher-Momentaufnahmen und Geometrie-Prüfsummen; kein Rendering- oder FPS-Nachweis.
+
+### Changed
+
+- Oberflächenüberblendungen verwenden Zielpuffer innerhalb eines Übergangs wieder und kopieren zusammenhängende Float32-Attribute direkt. Andere Attributlayouts behalten den allgemeinen Zugriff. Ausgangspose und Zielzustand bleiben getrennt; beim Abschluss oder Abbruch werden die wiederverwendeten Puffer freigegeben.
+- Lokale Messreihe für alle Mika-Meshes: Medianzeiten pro Prozess von 24,94–26,86 ms auf 13,10–16,93 ms reduziert. Positionen-/Normalen-Prüfsummen identisch; festgehaltener ArrayBuffer-Bedarf weiterhin rund 8,34 MiB. Keine allgemeine Laufzeitgarantie.
+
+[Prüfbericht](PRUEFUNG-0.71.0.md) · [Messvertrag](TRANSITION-BENCHMARK.md). Gerenderte Abnahme und große reale Importmodelle bleiben offen.
+
 ## [0.70.0] - 2026-10-30
 
 Zeitstempel: 2026-10-30T08:51:57+01:00 (Europe/Berlin)
@@ -1444,3 +1459,5 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 [0.69.2]: PRUEFUNG-0.69.2.md
 
 [0.70.0]: PRUEFUNG-0.70.0.md
+
+[0.71.0]: PRUEFUNG-0.71.0.md
