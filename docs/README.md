@@ -1,6 +1,6 @@
 # Blaupause – PaKaChi-SM
 
-**Softwarestand: 0.72.0 · Dokumentation abgeglichen am 31.10.2026.**
+**Softwarestand: 0.73.0 · Dokumentation abgeglichen am 31.10.2026.**
 
 Die Blaupause besteht aus drei Dokumenten. Das Designdokument beschreibt das Produktziel, die Roadmap die Umsetzung und das Changelog die bereits erfolgten Änderungen.
 
@@ -9,6 +9,10 @@ Die Blaupause besteht aus drei Dokumenten. Das Designdokument beschreibt das Pro
 | [Designdokument](Design.md) | Begriffe, Bedienprinzip, Anforderungen und noch offene Produktziele. |
 | [Roadmap](ROADMAP.md) | Offene Aufgaben, Prioritäten und ausstehende Abnahmen. |
 | [Changelog](CHANGELOG.md) | Historie mit Version, Datum und ISO-8601-Zeitstempel. |
+
+## Meilenstein 0.73.0
+
+Skalierte Endknochen ohne Kinder/Anbauteile löschen. [Prüfbericht](PRUEFUNG-0.73.0.md).
 
 ## Meilenstein 0.72.0
 
@@ -161,3 +165,5 @@ Die vollständige Versionshistorie steht im [Changelog](CHANGELOG.md); offene Au
 Seit **0.71.1** unterstützt `npm run benchmark:transitions -- --model datei.glb --runs 3` eigene eigenständige Modelle ohne Bildtexturen (bis 50 MiB). CPU-Messung; keine gerenderte Abnahme.
 
 Seit **0.72.0** lassen sich neue Knochenabzweigungen unter skalierten Quellknochen platzieren. Umhängen/Löschen skalierter Knochen und die gerenderte Qualitätsabnahme bleiben offen.
+
+Seit **0.73.0** können skalierte Endknochen ohne Kinder oder Anbauteile gelöscht werden. Ihre Hautgewichte gehen an den Elternknochen; die Grundgeometrie bleibt erhalten. Gespeicherte Posen verlieren die Spur des entfernten Knochens und müssen auf veränderte Bewegung geprüft werden. Skalierte Zwischenknochen sowie Knochen mit Anbauteilen bleiben gesperrt.

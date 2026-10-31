@@ -126,7 +126,7 @@ export class StudioRig {
   deleteBone(point:ControlPoint){
     if(point.kind!=='bone'||this.data.boneDeletions?.includes(point.bone!))throw Error('Einen vorhandenen Knochen auswählen.');
     const bone=this.bones[point.bone!],parent=bone.parent;
-    if(!(parent instanceof T.Bone)||bone.children.some(n=>!(n instanceof T.Bone))||bone.scale.distanceTo(new T.Vector3(1,1,1))>1e-8)throw Error('Wurzelknochen, skalierte Knochen und Knochen mit Anbauteilen können nicht gelöscht werden.');
+    if(!(parent instanceof T.Bone)||bone.children.some(n=>!(n instanceof T.Bone))||(bone.children.length>0&&bone.scale.distanceTo(new T.Vector3(1,1,1))>1e-8))throw Error('Wurzelknochen, skalierte Zwischenknochen und Knochen mit Anbauteilen können nicht gelöscht werden.');
     const parentPoint=this.data.points.find(p=>p.kind==='bone'&&this.bones[p.bone!]===parent);
     const children=bone.children.map(child=>this.data.points.find(p=>p.kind==='bone'&&this.bones[p.bone!]===child));
     if(!parentPoint||children.some(p=>!p))throw Error('Zuerst die vorhandenen Gelenke erkennen.');

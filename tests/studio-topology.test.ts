@@ -9,8 +9,8 @@ import {StudioEditor} from '../src/studio-editor.ts';
 import type {StudioView} from '../src/studio-view.ts';
 import {parseProject} from '../src/studio-data.ts';
 import {exportMoveFile,importMoveFile} from '../src/move-file.ts';
-function fixture(){
- const root=new T.Group(),hip=new T.Bone(),foot=new T.Bone();hip.name='Hip';foot.name='Foot';foot.position.y=2;hip.add(foot);root.add(hip);
+function fixture(scale=new T.Vector3(1,1,1)){
+ const root=new T.Group(),hip=new T.Bone(),foot=new T.Bone();hip.name='Hip';foot.name='Foot';foot.scale.copy(scale);foot.position.y=2;hip.add(foot);root.add(hip);
  const geometry=new T.BufferGeometry();geometry.setAttribute('position',new T.Float32BufferAttribute([.1,0,0,.1,1.5,0,.1,2,0],3));geometry.setAttribute('skinIndex',new T.Uint16BufferAttribute([0,0,0,0,0,0,0,0,1,0,0,0],4));geometry.setAttribute('skinWeight',new T.Float32BufferAttribute([1,0,0,0,1,0,0,0,1,0,0,0],4));
  const mesh=new T.SkinnedMesh(geometry,new T.MeshBasicMaterial());root.add(mesh);root.updateMatrixWorld(true);mesh.bind(new T.Skeleton([hip,foot]));const rig=new StudioRig(root);
  return {root,hip,foot,mesh,rig};
@@ -71,9 +71,9 @@ test('deleting an inserted bone removes it from hierarchy and skin palette and p
  const other=fixture();other.rig.data=packed.studio;other.rig.reset();assert.equal(other.foot.parent,other.hip);assert.equal(other.mesh.skeleton.bones.length,2);
  const replacement=rig.insertJoint(rig.data.points[1]);assert.equal(rig.data.boneInsertions?.at(-1)?.afterDeletions,1);assert.equal(foot.parent,rig.bones[replacement.bone!]);
 });
-test('leaf deletion transfers and merges weights; root and scaled bone rejection do not mutate',()=>{
+test('leaf deletion transfers and merges weights; root and scaled intermediate bone rejection do not mutate',()=>{
  const {rig,mesh,hip,foot}=fixture(),snapshot=structuredClone(rig.data);assert.throws(()=>rig.deleteBone(rig.data.points[0]),/Wurzel/);assert.deepEqual(rig.data,snapshot);
- foot.scale.setScalar(2);assert.throws(()=>rig.deleteBone(rig.data.points[1]),/skalierte/);assert.deepEqual(rig.data,snapshot);foot.scale.setScalar(1);
+ const tip=new T.Bone();foot.add(tip);foot.scale.setScalar(2);assert.throws(()=>rig.deleteBone(rig.data.points[1]),/skalierte/);assert.deepEqual(rig.data,snapshot);foot.scale.setScalar(1);tip.removeFromParent();
  rig.deleteBone(rig.data.points[1]);assert.equal(foot.parent,null);assert.deepEqual(mesh.skeleton.bones,[hip]);
  const weights=mesh.geometry.getAttribute('skinWeight'),indices=mesh.geometry.getAttribute('skinIndex');for(let i=0;i<weights.count;i++){assert.equal(indices.getX(i),0);assert.equal(weights.getX(i),1);}
  parseProject(project(rig));rig.restoreSource();assert.equal(foot.parent,hip);assert.equal(mesh.skeleton.bones.length,2);
@@ -149,4 +149,15 @@ test('insertion ratio accepts only finite numbers in range and only on insert_bo
  assert.equal(parseStudioCommand(command).ratio,undefined);
  for(const ratio of [0,.099,.901,1,NaN,Infinity,'0.3',null])assert.throws(()=>parseStudioCommand({...command,ratio}));
  assert.throws(()=>parseStudioCommand({...command,action:'delete_bone',ratio:.3}));
+});
+
+test('scaled leaf deletion preserves rest skin, reloads, and restores original scale and weights',()=>{
+ for(const scale of [new T.Vector3(2,2,2),new T.Vector3(2,.5,1.5),new T.Vector3(-2,.5,1.5)]){
+  const {rig,mesh,foot,hip}=fixture(scale),before=[0,1,2].map(i=>vertex(mesh,i)),original=structuredClone(rig.data),weights=Array.from(mesh.geometry.getAttribute('skinWeight').array);
+  rig.data.poses=[{id:'pose',name:'Pose',seconds:1,values:rig.capture()}];const id=rig.data.points[1].id;
+  rig.deleteBone(rig.data.points[1]);assert.equal(foot.parent,null);assert.deepEqual(mesh.skeleton.bones,[hip]);assert.equal(rig.data.poses[0].values[id],undefined);before.forEach((v,i)=>assert.ok(vertex(mesh,i).distanceTo(v)<1e-6));
+  const saved=parseProject(structuredClone(project(rig))),other=fixture(scale);other.rig.data=saved.studio;other.rig.reset();before.forEach((v,i)=>assert.ok(vertex(other.mesh,i).distanceTo(v)<1e-6));assert.equal(other.foot.parent,null);
+  rig.restoreSource();assert.equal(foot.parent,hip);assert.deepEqual(foot.scale.toArray(),scale.toArray());assert.deepEqual(Array.from(mesh.geometry.getAttribute('skinWeight').array),weights);before.forEach((v,i)=>assert.ok(vertex(mesh,i).distanceTo(v)<1e-6));
+  rig.data=original;rig.reset();assert.equal(rig.data.points.length,2);assert.equal(mesh.skeleton.bones.length,2);rig.dispose();other.rig.dispose();
+ }
 });

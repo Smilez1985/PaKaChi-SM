@@ -88,7 +88,7 @@ export class StudioTopology {
   const remove=(index:number)=>{
    applyReparents();
    const bone=bones[index],parent=bone?.parent;
-   if(!(parent instanceof T.Bone)||bone.children.some(n=>!(n instanceof T.Bone))||bone.scale.distanceTo(new T.Vector3(1,1,1))>1e-8)throw Error('Dieser Knochen kann nicht sicher entfernt werden.');
+   if(!(parent instanceof T.Bone)||bone.children.some(n=>!(n instanceof T.Bone))||(bone.children.length>0&&bone.scale.distanceTo(new T.Vector3(1,1,1))>1e-8))throw Error('Dieser Knochen kann nicht sicher entfernt werden.');
    weights.push(()=>{
    for(const s of this.skins){
     const old=s.mesh.skeleton,removed=old.bones.indexOf(bone);if(removed<0)continue;
