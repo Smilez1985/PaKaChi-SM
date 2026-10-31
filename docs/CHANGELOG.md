@@ -12,6 +12,17 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.74.0] - 2026-10-31
+
+Zeitstempel: 2026-10-31T02:45:35+01:00 (Europe/Berlin)
+
+### Added
+
+- Knochen innerhalb eines gemeinsam skalierten Teilbaums umhängen: Die Umrechnung erfolgt relativ zum nächsten gemeinsamen Vorfahren. Gleichmäßige, ungleichmäßige und negative gemeinsame Skalierung bleiben erhalten.
+- Regressionen für Hautgeometrie und starre Anbauteile in Grundpose, gespeicherter Pose, Entwurf, Projektrekonstruktion und Quellwiederherstellung; nicht invertierbare gemeinsame Skalierung wird ohne Datenänderung abgewiesen.
+
+[Prüfbericht](PRUEFUNG-0.74.0.md). Unterschiedlich skalierte Äste und gerenderte Qualitätsabnahme bleiben offen.
+
 ## [0.73.0] - 2026-10-31
 
 Zeitstempel: 2026-10-31T02:32:53+01:00 (Europe/Berlin)
@@ -1502,3 +1513,5 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 [0.72.0]: PRUEFUNG-0.72.0.md
 
 [0.73.0]: PRUEFUNG-0.73.0.md
+
+[0.74.0]: PRUEFUNG-0.74.0.md

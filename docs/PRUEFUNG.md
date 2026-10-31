@@ -1,6 +1,6 @@
 # Prüfstand und Abnahme
 
-**Softwarestand: 0.73.0 · Dokumentationsabgleich: 31.10.2026.**
+**Softwarestand: 0.74.0 · Dokumentationsabgleich: 31.10.2026.**
 
 ## CI-Kontingent und Dokumentationsänderungen
 
@@ -29,7 +29,7 @@ Unter Linux bei fehlenden Systembibliotheken stattdessen einmalig `npx playwrigh
 
 Lokaler Nachweis am 28.10.2026 für den vorbereiteten Unreleased-Stand: `npm run verify` erfolgreich, **286 Node-Tests bestanden**, TypeScript und Produktionsbuild bestanden. Die bekannte Warnung zum großen JavaScript-Bundle bleibt bestehen. `verify:full` wurde hier wegen des bereits nachgewiesenen Chromium-Startblockers nicht ausgeführt; die 22 Browserfälle bleiben unbestätigt.
 
-Aktueller lokaler Meilenstein: [0.73.0](PRUEFUNG-0.73.0.md). Browsernachweis weiterhin 0.66.0; der korrigierte zusätzliche Mausnavigationstest aus 0.67.0 bleibt offen.
+Aktueller lokaler Meilenstein: [0.74.0](PRUEFUNG-0.74.0.md). Browsernachweis weiterhin 0.66.0; der korrigierte zusätzliche Mausnavigationstest aus 0.67.0 bleibt offen.
 
 ## Nachgewiesen
 

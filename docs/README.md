@@ -1,6 +1,6 @@
 # Blaupause – PaKaChi-SM
 
-**Softwarestand: 0.73.0 · Dokumentation abgeglichen am 31.10.2026.**
+**Softwarestand: 0.74.0 · Dokumentation abgeglichen am 31.10.2026.**
 
 Die Blaupause besteht aus drei Dokumenten. Das Designdokument beschreibt das Produktziel, die Roadmap die Umsetzung und das Changelog die bereits erfolgten Änderungen.
 
@@ -9,6 +9,10 @@ Die Blaupause besteht aus drei Dokumenten. Das Designdokument beschreibt das Pro
 | [Designdokument](Design.md) | Begriffe, Bedienprinzip, Anforderungen und noch offene Produktziele. |
 | [Roadmap](ROADMAP.md) | Offene Aufgaben, Prioritäten und ausstehende Abnahmen. |
 | [Changelog](CHANGELOG.md) | Historie mit Version, Datum und ISO-8601-Zeitstempel. |
+
+## Meilenstein 0.74.0
+
+Umhängen unter gemeinsam skalierten Vorfahren. [Prüfbericht](PRUEFUNG-0.74.0.md).
 
 ## Meilenstein 0.73.0
 
@@ -167,3 +171,5 @@ Seit **0.71.1** unterstützt `npm run benchmark:transitions -- --model datei.glb
 Seit **0.72.0** lassen sich neue Knochenabzweigungen unter skalierten Quellknochen platzieren. Umhängen/Löschen skalierter Knochen und die gerenderte Qualitätsabnahme bleiben offen.
 
 Seit **0.73.0** können skalierte Endknochen ohne Kinder oder Anbauteile gelöscht werden. Ihre Hautgewichte gehen an den Elternknochen; die Grundgeometrie bleibt erhalten. Gespeicherte Posen verlieren die Spur des entfernten Knochens und müssen auf veränderte Bewegung geprüft werden. Skalierte Zwischenknochen sowie Knochen mit Anbauteilen bleiben gesperrt.
+
+Seit **0.74.0** ist Umhängen innerhalb eines gemeinsam skalierten Teilbaums möglich: Nur die beiden Äste unterhalb ihres nächsten gemeinsamen Vorfahren müssen unskaliert sein. Die gemeinsame Transformation entfällt bei der Umrechnung der Grundpose, gespeicherten Posen und des Entwurfs. Gemeinsame gleichmäßige, ungleichmäßige und negative Skalierungen sind unterstützt; nicht invertierbare gemeinsame Skalierungen werden abgewiesen. Unterschiedliche Skalierungen auf den betroffenen Ästen und Anbauteile mit eigenem Skelett bleiben ausgeschlossen.

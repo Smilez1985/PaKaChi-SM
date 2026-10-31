@@ -8,8 +8,8 @@ import type {StudioView} from '../src/studio-view.ts';
 import {parseProject} from '../src/studio-data.ts';
 import {parseStudioCommand} from '../src/studio-command.ts';
 import {exportMoveFile,importMoveFile} from '../src/move-file.ts';
-function fixture(attachment=false){
- const root=new T.Group(),hip=new T.Bone(),left=new T.Bone(),foot=new T.Bone(),right=new T.Bone();hip.name='Hip';left.name='Left';foot.name='Foot';right.name='Right';
+function fixture(attachment=false,scale=new T.Vector3(1,1,1)){
+ const root=new T.Group(),hip=new T.Bone(),left=new T.Bone(),foot=new T.Bone(),right=new T.Bone();hip.scale.copy(scale);hip.name='Hip';left.name='Left';foot.name='Foot';right.name='Right';
  hip.add(left,right);left.add(foot);left.position.set(-1,1,0);foot.position.set(0,1,0);right.position.set(1,1,0);root.add(hip);root.scale.setScalar(.7);
  const accessory=new T.Group(),ornament=new T.Mesh(new T.BoxGeometry(.2,.2,.2),new T.MeshBasicMaterial());accessory.name='Accessory';accessory.position.set(.2,.3,.1);accessory.rotation.set(.1,.2,.3);accessory.scale.set(1,2,.5);accessory.add(ornament);ornament.position.x=.1;if(attachment)foot.add(accessory);
  const geometry=new T.BufferGeometry();geometry.setAttribute('position',new T.Float32BufferAttribute([-1,1,0,-1,2,0,1,1,0],3));geometry.setAttribute('skinIndex',new T.Uint16BufferAttribute([1,0,0,0,2,0,0,0,3,0,0,0],4));geometry.setAttribute('skinWeight',new T.Float32BufferAttribute([1,0,0,0,1,0,0,0,1,0,0,0],4));
@@ -95,4 +95,20 @@ test('imported rigid glTF attachment is a plain mesh and survives reparenting an
  rig.reparentBone(rig.data.points.find(p=>p.name==='LeftFoot')!,rig.data.points.find(p=>p.name==='LeftHip')!);accessory.matrixWorld.elements.forEach((v,i)=>assert.ok(Math.abs(v-before.elements[i])<1e-6));
  const loaded=await parseModel(bytes),again=new StudioRig(loaded.scene,parseProject(project(rig)).studio);loaded.scene.getObjectByName('RigidAccessory')!.matrixWorld.elements.forEach((v,i)=>assert.ok(Math.abs(v-before.elements[i])<1e-6));
  rig.dispose();again.dispose();disposeModel(scene);disposeModel(loaded.scene);
+});
+
+test('shared scaled ancestors cancel during reparenting in rest, poses, draft and reload',()=>{
+ for(const scale of [new T.Vector3(2,2,2),new T.Vector3(2,.5,1.5),new T.Vector3(-2,.5,1.5)]){
+  const f=fixture(true,scale),{rig}=f,rest=f.vertices(),restAccessory=f.accessory.matrixWorld.clone();
+  f.hip.rotation.y=.3;f.left.rotation.z=.4;f.right.rotation.x=-.2;rig.root.updateMatrixWorld(true);
+  const posed=f.vertices(),accessory=f.accessory.matrixWorld.clone(),values=rig.capture();rig.data.poses=[{id:'scaled',name:'Scaled',seconds:1,values:structuredClone(values)}];rig.data.draft=structuredClone(values);
+  const close=(a:T.Matrix4,b:T.Matrix4)=>a.elements.forEach((v,i)=>assert.ok(Math.abs(v-b.elements[i])<1e-6));
+  rig.reparentBone(f.point('Left'),f.point('Right'));near(f.vertices(),posed);close(f.accessory.matrixWorld,accessory);rig.reset();near(f.vertices(),rest);close(f.accessory.matrixWorld,restAccessory);
+  rig.apply(rig.data.poses[0].values);near(f.vertices(),posed);close(f.accessory.matrixWorld,accessory);
+  const other=fixture(true,scale);other.rig.data=parseProject(structuredClone(project(rig))).studio;other.rig.reset();near(other.vertices(),rest);other.rig.apply(other.rig.data.draft!);near(other.vertices(),posed);close(other.accessory.matrixWorld,accessory);
+  rig.restoreSource();assert.equal(f.left.parent,f.hip);near(f.vertices(),rest);assert.deepEqual(f.hip.scale.toArray(),scale.toArray());rig.dispose();other.rig.dispose();
+ }
+});
+test('singular shared scaling rejects reparenting without changing data',()=>{
+ const f=fixture(false,new T.Vector3(0,1,1)),before=structuredClone(f.rig.data);assert.throws(()=>f.rig.reparentBone(f.point('Left'),f.point('Right')),/invertierbar/);assert.deepEqual(f.rig.data,before);assert.equal(f.left.parent,f.hip);f.rig.dispose();
 });

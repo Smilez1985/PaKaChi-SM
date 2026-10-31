@@ -5,16 +5,20 @@ import type {WeightRegion} from './studio-data.ts';
 import type {BoneInsertion} from './studio-data.ts';
 export interface WeightTransfer {from:number;to:number;amount:number;after:number;region?:WeightRegion}
 export interface BoneReparent {bone:number;parent:number;after:number}
-/** Only same-tree, unscaled bone chains can be represented by the pose format. */
+/** Relative branches must be unscaled; a shared ancestor transform cancels out. */
 export function validateReparent(bone:T.Bone|undefined,parent:T.Bone|undefined){
  if(!bone||!parent||!(bone.parent instanceof T.Bone)||bone.parent===parent)throw Error('Einen Knochen und einen anderen Elternknochen auswählen. Wurzeln können nicht umgehängt werden.');
  const chain=(start:T.Bone)=>{const result:T.Bone[]=[];let node:T.Object3D|null=start;while(node instanceof T.Bone){if(result.includes(node))throw Error('Kreis im Skelett.');result.push(node);node=node.parent;}return result;};
  const a=chain(bone),b=chain(parent);
  if(b.includes(bone))throw Error('Ein Knochen kann nicht unter sich selbst oder einem Nachfahren hängen.');
  if(a.at(-1)!==b.at(-1))throw Error('Umhängen ist nur innerhalb desselben Skelettbaums möglich.');
- if([...a,...b].some(n=>n.scale.distanceTo(new T.Vector3(1,1,1))>1e-8))throw Error('Skalierte Knochenketten können nicht umgehängt werden.');
+ const common=a.find(n=>b.includes(n))!;
+ const relative=[...a.slice(0,a.indexOf(common)),...b.slice(0,b.indexOf(common))];
+ if(relative.some(n=>n.scale.distanceTo(new T.Vector3(1,1,1))>1e-8))throw Error('Skalierte Knochenketten können nicht umgehängt werden.');
+ if(a.slice(a.indexOf(common)).some(n=>n.scale.toArray().some(v=>!Number.isFinite(v)||Math.abs(v)<1e-8)))throw Error('Gemeinsame Elternskalierung ist nicht invertierbar.');
  // Rigid attachment subtrees follow the bone unchanged. Nested rigs need separate conversion.
  for(const child of bone.children)if(!(child instanceof T.Bone))child.traverse(node=>{if(node instanceof T.Bone||node instanceof T.SkinnedMesh)throw Error('Anbauteile mit eigenem Skelett können nicht umgehängt werden.');});
+ return common;
 }
 /** Reversible topology overlay. Source skeletons and vertex weights remain recoverable. */
 export class StudioTopology {
