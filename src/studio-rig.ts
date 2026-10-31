@@ -78,11 +78,12 @@ export class StudioRig {
   }
   addBone(parentPoint:ControlPoint,position:T.Vector3){
     if(parentPoint.kind!=='bone'||!this.data.points.includes(parentPoint)||!position.toArray().every(v=>Number.isFinite(v)&&Math.abs(v)<=100)||this.data.points.length>=256||this.data.boneRest.length>=256||(this.data.boneInsertions?.length??0)>=64||this.data.links.length>=2048)throw Error('Elternknochen und gültige Position wählen; höchstens 64 neue Knochen und 256 Gelenke.');
-    const parent=this.bones[parentPoint.bone!];
-    for(let n:T.Object3D|null=parent;n instanceof T.Bone;n=n.parent)if(n.scale.distanceTo(new T.Vector3(1,1,1))>1e-8)throw Error('Skalierte Knochenketten werden nicht unterstützt.');
     const before=structuredClone(this.data),values=this.capture(),original=structuredClone(values);
     try{
-      this.reset();const restParent=this.bones[parentPoint.bone!];restParent.updateWorldMatrix(true,false);const local=restParent.worldToLocal(position.clone());
+      this.reset();const restParent=this.bones[parentPoint.bone!];restParent.updateWorldMatrix(true,false);
+      const determinant=restParent.matrixWorld.determinant();if(!Number.isFinite(determinant)||Math.abs(determinant)<1e-12)throw Error('Elterntransformation ist nicht invertierbar. Skalierung prüfen.');
+      const local=restParent.worldToLocal(position.clone());
+      if(!local.toArray().every(v=>Number.isFinite(v)&&Math.abs(v)<=100))throw Error('Lokale Knochenposition liegt außerhalb des unterstützten Bereichs.');
       if(local.length()<1e-5)throw Error('Neuen Knochen mit Abstand zum Elternknochen setzen.');
       const rest:Transform={position:local.toArray(),rotation:[0,0,0,1]},index=this.data.boneRest.length,id='joint-'+crypto.randomUUID();
       this.data.boneInsertions=[...(this.data.boneInsertions??[]),{parent:parentPoint.bone!,...(this.data.boneDeletions?.length?{afterDeletions:this.data.boneDeletions.length}:{})}];

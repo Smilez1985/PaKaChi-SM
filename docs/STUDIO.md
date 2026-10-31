@@ -337,7 +337,7 @@ Im Modus **Gelenke bearbeiten** einen vorhandenen Elternknochen auswählen, **�
 
 Für Agenten: `add_bone` verwendet `id` des Elternknochens und `position: [x,y,z]` in normalisierten Weltkoordinaten der Grundpose. Nur im Rig-Modus, mit Bearbeitungsfreigabe, aktueller Sitzung und Revision; der Assistent legt den Vorschlag zur Übernahme vor.
 
-Benötigt einen vorhandenen Elternknochen; kein neues Skelett auf einer ungeriggten Oberfläche. Neue Knochen wirken erst nach Gewichtsübertragung auf die Haut. Skalierte Knochenketten sind ausgeschlossen. Kontinuierlicher Gewichtspinsel, Gewichtsfärbung und manuelle Hautabnahme bleiben offen. Projekte mit freien Knochen benötigen mindestens 0.58.0; ältere Leser lehnen diese Einträge ab.
+Benötigt einen vorhandenen Elternknochen; kein neues Skelett auf einer ungeriggten Oberfläche. Neue Knochen wirken erst nach Gewichtsübertragung auf die Haut. Neue Abzweigungen unter skalierten Quellknochen werden seit 0.72.0 unterstützt; Umhängen und Löschen skalierter Knochen bleiben eingeschränkt. Kontinuierlicher Gewichtspinsel, Gewichtsfärbung und manuelle Hautabnahme bleiben offen. Projekte mit freien Knochen benötigen mindestens 0.58.0; ältere Leser lehnen diese Einträge ab.
 
 ## Mit dem Gewichtspinsel malen (0.59.0)
 
@@ -388,3 +388,7 @@ Teiltransparente Materialien und Alpha-Texturen gelten weiterhin als undurchsich
 **0.65.0:** Neue sichtgefilterte Pinselstriche berücksichtigen Alpha-Ausschnitte über `alphaTest`, Bildalpha und den Grünkanal einer `alphaMap`. Die Prüfung interpoliert UVs am Strahltreffer und berücksichtigt Texturtransformation, UV-Kanal, Wiederholung, Spiegelung, Flip und Nearest-/Linear-Vergrößerungsfilter. Pixel und Materialdaten werden beim Laden festgehalten. `region.view.alpha: true` zusammen mit `materials: true` speichert die neue Regel; ältere Aufträge behalten ihre bisherige Sichtprüfung.
 
 Die Alpha-Prüfung verwendet deterministisch die Basisebene der Textur, keine Mipmaps oder anisotrope Filterung. Dadurch sind Abweichungen zur gerenderten Kante bei Verkleinerung möglich. Unterstützt sind lesbare RGBA-8-Bit-Bilder bis 16.777.216 Pixel pro Textur. Nicht lesbare/komprimierte Texturen, fehlende UVs, Shader-Materialien und Alpha-to-Coverage bleiben verdeckend. Teiltransparenz wird nicht simuliert; Dreiecke bleiben beidseitig. GPU-/Materialqualität und große Modelle sind nicht manuell abgenommen. Neue Alpha-Aufträge benötigen mindestens 0.65.0; kein automatischer Umbau alter Verläufe.
+
+### Neue Abzweigungen unter skalierten Eltern
+
+Seit **0.72.0** können neue Knochen auch unter gleichmäßig, ungleichmäßig oder negativ skalierten Quellknochen platziert werden. Die Weltposition wird über die inverse Elternmatrix in die lokale Grundpose umgerechnet; die Skalierung der Quelle bleibt erhalten. Nicht invertierbare Elternmatrizen und lokale Koordinaten außerhalb ±100 werden ohne Änderung der Studio-Daten abgewiesen. Das gilt für neue Abzweigungen, nicht für das Umhängen oder Löschen skalierter Knochen. Anatomische IK-Qualität bleibt separat zu prüfen.

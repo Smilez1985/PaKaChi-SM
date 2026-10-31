@@ -7,8 +7,8 @@ import {StudioRig} from '../src/studio-rig.ts';
 import {StudioEditor} from '../src/studio-editor.ts';
 import type {StudioView} from '../src/studio-view.ts';
 import {parseProject} from '../src/studio-data.ts';
-function fixture(){
- const root=new T.Group(),hip=new T.Bone(),foot=new T.Bone();hip.name='Hip';foot.name='Foot';foot.position.y=2;hip.add(foot);root.add(hip);
+function fixture(scale=new T.Vector3(1,1,1)){
+ const root=new T.Group(),hip=new T.Bone(),foot=new T.Bone();hip.name='Hip';foot.name='Foot';hip.scale.copy(scale);hip.rotation.z=.2;foot.position.y=2;hip.add(foot);root.add(hip);
  const geometry=new T.BufferGeometry();geometry.setAttribute('position',new T.Float32BufferAttribute([.1,0,0,.1,1.5,0,.1,2,0],3));geometry.setAttribute('skinIndex',new T.Uint16BufferAttribute([0,0,0,0,0,0,0,0,1,0,0,0],4));geometry.setAttribute('skinWeight',new T.Float32BufferAttribute([1,0,0,0,1,0,0,0,1,0,0,0],4));
  const mesh=new T.SkinnedMesh(geometry,new T.MeshBasicMaterial());root.add(mesh);root.updateMatrixWorld(true);mesh.bind(new T.Skeleton([hip,foot]));const rig=new StudioRig(root);
  return {root,hip,foot,mesh,rig};
@@ -41,4 +41,20 @@ test('mouse placement and agent addition each undo completely; agent requires pe
  const command=()=>({session:editor.session,expectedRevision:editor.inspect().revision,action:'add_bone',id:rig.data.points[0].id,position:[-1,1,0]});assert.throws(()=>editor.execute(command()),/freigegeben/);
  const grant=host.querySelector<HTMLInputElement>('#studio-agent-edit')!;grant.checked=true;grant.dispatchEvent(new w.Event('change') as unknown as Event);const stale=command();const result=editor.execute(stale);assert.ok(result.id);assert.throws(()=>editor.execute(stale),/Stand/);click('studio-undo');assert.equal(mesh.skeleton.bones.length,3);
  assert.throws(()=>parseStudioCommand({...command(),position:undefined}));assert.throws(()=>parseStudioCommand({...command(),id:'$figure'}));editor.dispose();w.happyDOM.abort();
+});
+
+test('branches on scaled source chains preserve placement, skin, poses and reload',()=>{
+ for(const scale of [new T.Vector3(2,2,2),new T.Vector3(2,.5,1.5),new T.Vector3(-2,.5,1.5)]){
+  const f=fixture(scale),{rig,mesh}=f,before=[0,1,2].map(i=>vertex(mesh,i)),source=rig.data.points[1],target=new T.Vector3(1,2,.4);
+  const pose=rig.capture();pose[source.id].rotation=new T.Quaternion().setFromAxisAngle(new T.Vector3(0,1,0),.4).toArray();rig.data.poses=[{id:'scaled',name:'Scaled',seconds:1,values:pose}];
+  const added=rig.addBone(source,target);assert.ok(rig.position(added).distanceTo(target)<1e-6);before.forEach((v,i)=>assert.ok(vertex(mesh,i).distanceTo(v)<1e-6));
+  rig.apply(rig.data.poses[0].values);const posed=rig.position(added).clone();const saved=parseProject(structuredClone(project(rig)));
+  const loaded=fixture(scale);loaded.rig.data=saved.studio;loaded.rig.reset();loaded.rig.apply(saved.studio.poses[0].values);assert.ok(loaded.rig.position(saved.studio.points.find(p=>p.id===added.id)!).distanceTo(posed)<1e-6);
+  rig.reset();assert.ok(rig.position(added).distanceTo(target)<1e-6);rig.restoreSource();assert.equal(mesh.skeleton.bones.length,2);before.forEach((v,i)=>assert.ok(vertex(mesh,i).distanceTo(v)<1e-6));rig.dispose();loaded.rig.dispose();
+ }
+});
+test('singular and extreme scaled parent placement fails without changing studio data',()=>{
+ for(const scale of [new T.Vector3(0,1,1),new T.Vector3(.00001,1,1)]){
+  const {rig}=fixture(scale),data=structuredClone(rig.data),values=rig.capture();assert.throws(()=>rig.addBone(rig.data.points[1],new T.Vector3(2,3,1)),/invertierbar|Bereichs/);assert.deepEqual(rig.data,data);assert.deepEqual(rig.capture(),values);rig.dispose();
+ }
 });

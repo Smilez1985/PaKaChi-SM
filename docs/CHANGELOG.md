@@ -12,6 +12,18 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.72.0] - 2026-10-31
+
+Zeitstempel: 2026-10-31T01:51:23+01:00 (Europe/Berlin)
+
+### Added
+
+- Neue Knochenabzweigungen unter skalierten Quellknochen: gleichmäßige, ungleichmäßige und negative Skalierungen werden bei der Welt-/Lokalkoordinaten-Umrechnung berücksichtigt.
+- Regressionen für Platzierung, unveränderte Hautgeometrie, gespeicherte Posen, Rekonstruktion und Wiederherstellung der Quelle. Nicht invertierbare Elternmatrizen und extreme lokale Positionen werden atomar abgewiesen.
+
+[Prüfbericht](PRUEFUNG-0.72.0.md). Umhängen/Löschen skalierter Knochen und gerenderte Qualitätsabnahme bleiben offen.
+
+
 ## [0.71.1] - 2026-10-30
 
 Zeitstempel: 2026-10-30T19:06:33+01:00 (Europe/Berlin)
@@ -1475,3 +1487,5 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 [0.71.0]: PRUEFUNG-0.71.0.md
 
 [0.71.1]: PRUEFUNG-0.71.1.md
+
+[0.72.0]: PRUEFUNG-0.72.0.md

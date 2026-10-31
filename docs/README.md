@@ -1,6 +1,6 @@
 # Blaupause – PaKaChi-SM
 
-**Softwarestand: 0.71.1 · Dokumentation abgeglichen am 30.10.2026.**
+**Softwarestand: 0.72.0 · Dokumentation abgeglichen am 31.10.2026.**
 
 Die Blaupause besteht aus drei Dokumenten. Das Designdokument beschreibt das Produktziel, die Roadmap die Umsetzung und das Changelog die bereits erfolgten Änderungen.
 
@@ -9,6 +9,10 @@ Die Blaupause besteht aus drei Dokumenten. Das Designdokument beschreibt das Pro
 | [Designdokument](Design.md) | Begriffe, Bedienprinzip, Anforderungen und noch offene Produktziele. |
 | [Roadmap](ROADMAP.md) | Offene Aufgaben, Prioritäten und ausstehende Abnahmen. |
 | [Changelog](CHANGELOG.md) | Historie mit Version, Datum und ISO-8601-Zeitstempel. |
+
+## Meilenstein 0.72.0
+
+Neue Abzweigungen unter skalierten Eltern. [Prüfbericht](PRUEFUNG-0.72.0.md).
 
 ## Meilenstein 0.71.1
 
@@ -155,3 +159,5 @@ Die folgenden Einträge beschreiben den jeweiligen Meilenstein; der aktuelle Sta
 Die vollständige Versionshistorie steht im [Changelog](CHANGELOG.md); offene Aufgaben stehen ausschließlich in der [Roadmap](ROADMAP.md). Der letzte vollständige Chromium-Nachweis stammt aus 0.66.0, die lokale Prüfung von 0.68.0 umfasst 291 Node-Tests und den Build.
 
 Seit **0.71.1** unterstützt `npm run benchmark:transitions -- --model datei.glb --runs 3` eigene eigenständige Modelle ohne Bildtexturen (bis 50 MiB). CPU-Messung; keine gerenderte Abnahme.
+
+Seit **0.72.0** lassen sich neue Knochenabzweigungen unter skalierten Quellknochen platzieren. Umhängen/Löschen skalierter Knochen und die gerenderte Qualitätsabnahme bleiben offen.

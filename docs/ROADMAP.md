@@ -1,6 +1,6 @@
 # Roadmap – offene Aufgaben
 
-**Entwicklungsstand: 0.71.1 · Abgleich: 30.10.2026.** Teil der [Blaupause](README.md).
+**Entwicklungsstand: 0.72.0 · Abgleich: 31.10.2026.** Teil der [Blaupause](README.md).
 
 Diese Roadmap enthält offene Umsetzung und ausstehende Abnahme. Erledigte Änderungen stehen nach Version im [Changelog](CHANGELOG.md); Nachweise und Grenzen im [Prüfstand](PRUEFUNG.md). Eine implementierte Funktion ist nicht automatisch manuell oder mit realen Anbietern abgenommen.
 
@@ -38,7 +38,7 @@ Der Arbeitsstand liegt auf `work/local-verification-model-zoo`; `main` bleibt bi
 - [ ] Gewichtsqualität der eingefügten Gelenke manuell prüfen.
 - [ ] Hautverformung nach Knochenlöschen manuell prüfen.
 - [ ] Hautqualität nach gemischten Umbaufolgen manuell prüfen.
-- [ ] Skalierte Knochenketten und Anbauteile mit eigenem Skelett unterstützen; Löschen mit Anbauteilen ergänzen.
+- [ ] Weitere Umbauten skalierter Knochenketten und Anbauteile mit eigenem Skelett unterstützen; Löschen mit Anbauteilen ergänzen. Neue Abzweigungen unter skalierten Eltern sind seit 0.72.0 implementiert; gerenderte Haut-/IK-Abnahme bleibt offen.
 - [ ] Haut- und Bewegungsqualität nach Umhängen manuell prüfen.
 - [ ] Anatomische Gelenkketten aus ungeriggter Oberfläche erzeugen; allgemeine Dreh-/Twistgrenzen, fixierte Füße und gekoppelte Ganzkörper-IK ergänzen.
 - [ ] Beugegrenzen, Posen- und Bewegungsprüfung samt Prüfbildübernahme im gerenderten Studio abnehmen; lückenlose Bewegungsprüfung, direkte Drehgrenzen und Korrekturen ergänzen.

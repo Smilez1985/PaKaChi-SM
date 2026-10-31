@@ -4,7 +4,7 @@ Teil der [Blaupause](README.md) · [Roadmap](ROADMAP.md) · [Changelog](CHANGELO
 
 ## Status und Begriffe
 
-Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.71.1: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau, automatische Anatomieerkennung und die Qualitätsabnahme der angeschlossenen lokalen KI-Generierung bleiben offen.
+Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.72.0: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau, automatische Anatomieerkennung und die Qualitätsabnahme der angeschlossenen lokalen KI-Generierung bleiben offen.
 
 - **PaKaChi:** Panda-KI-Chimera, das übergeordnete Projekt.
 - **PaKaChi-SM:** StateMaschine mit Avatar-Player und integriertem Studio.
@@ -672,3 +672,7 @@ Der CPU-Benchmark trennt diese Darstellungskosten von Modellladen, Animator/IK, 
 ### Eigene Modelle im CPU-Überblendungsbenchmark (0.71.1)
 
 `benchmark:transitions -- --model datei.glb --runs 3` misst eigene eigenständige Geometrie ohne Bildtexturen. Dateigröße ist auf 50 MiB begrenzt; Modellprüfsummen sichern identische Eingaben über alle getrennten Prozesse. Der Lauf importiert keine Studio-Bearbeitungen und ersetzt keine gerenderte Qualitätsabnahme.
+
+### Skalierte Eltern für neue Knochen (0.72.0)
+
+Seit **0.72.0** können neue Knochen auch unter gleichmäßig, ungleichmäßig oder negativ skalierten Quellknochen platziert werden. Die Weltposition wird über die inverse Elternmatrix in die lokale Grundpose umgerechnet; die Skalierung der Quelle bleibt erhalten. Nicht invertierbare Elternmatrizen und lokale Koordinaten außerhalb ±100 werden ohne Änderung der Studio-Daten abgewiesen. Das gilt für neue Abzweigungen, nicht für das Umhängen oder Löschen skalierter Knochen. Anatomische IK-Qualität bleibt separat zu prüfen.
