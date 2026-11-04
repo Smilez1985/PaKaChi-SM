@@ -17,8 +17,9 @@ export function validateReparent(bone:T.Bone|undefined,parent:T.Bone|undefined){
   if(![x,y,z].every(Number.isFinite)||x<=1e-8||Math.abs(y-x)>1e-10*Math.max(1,x)||Math.abs(z-x)>1e-10*Math.max(1,x))return NaN;
   return product*x;
  },1);
+ if(bone.scale.toArray().some(v=>!Number.isFinite(v)||Math.abs(v)<1e-8))throw Error('Knochenskalierung ist nicht invertierbar.');
  const from=uniformProduct(a.slice(1,a.indexOf(common))),to=uniformProduct(b.slice(0,b.indexOf(common)));
- if(!Number.isFinite(from)||!Number.isFinite(to)||Math.min(from,to)<=1e-8||Math.abs(from-to)>1e-10*Math.max(from,to)||!bone.scale.toArray().every(Number.isFinite)||bone.scale.distanceTo(new T.Vector3(1,1,1))>1e-8)throw Error('Skalierte Knochenketten benötigen gleiche positive gleichmäßige Astskalierungen.');
+ if(!Number.isFinite(from)||!Number.isFinite(to)||Math.min(from,to)<=1e-8||Math.abs(from-to)>1e-10*Math.max(from,to))throw Error('Skalierte Knochenketten benötigen gleiche positive gleichmäßige Astskalierungen.');
  if(a.slice(a.indexOf(common)).some(n=>n.scale.toArray().some(v=>!Number.isFinite(v)||Math.abs(v)<1e-8)))throw Error('Gemeinsame Elternskalierung ist nicht invertierbar.');
  // Rigid attachment subtrees follow the bone unchanged. Nested rigs need separate conversion.
  for(const child of bone.children)if(!(child instanceof T.Bone))child.traverse(node=>{if(node instanceof T.Bone||node instanceof T.SkinnedMesh)throw Error('Anbauteile mit eigenem Skelett können nicht umgehängt werden.');});

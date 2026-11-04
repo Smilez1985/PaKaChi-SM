@@ -108,9 +108,11 @@ export class StudioRig {
     const oldParent=this.data.points.find(p=>p.kind==='bone'&&this.bones[p.bone!]===bone.parent);
     if(!oldParent)throw Error('Zuerst die vorhandenen Gelenke erkennen.');
     const before=structuredClone(this.data),values=this.capture(),original=structuredClone(values);
+    // Solve the moved bone frame without its own scale; source scale stays on the bone.
+    // This avoids reflection sign ambiguity when decomposing a negatively scaled matrix.
     const world=(node:T.Bone,v:Record<string,Transform>):T.Matrix4=>{
       const chain:T.Bone[]=[];for(let n:T.Object3D|null=node;n instanceof T.Bone&&n!==common;n=n.parent)chain.unshift(n);
-      const matrix=new T.Matrix4();for(const n of chain){const i=this.bones.indexOf(n),p=this.data.points.find(p=>p.kind==='bone'&&p.bone===i),t=p&&v[p.id]||before.boneRest[i];matrix.multiply(new T.Matrix4().compose(new T.Vector3().fromArray(t.position),new T.Quaternion().fromArray(t.rotation),n.scale));}return matrix;
+      const matrix=new T.Matrix4();for(const n of chain){const i=this.bones.indexOf(n),p=this.data.points.find(p=>p.kind==='bone'&&p.bone===i),t=p&&v[p.id]||before.boneRest[i];matrix.multiply(new T.Matrix4().compose(new T.Vector3().fromArray(t.position),new T.Quaternion().fromArray(t.rotation),n===bone?new T.Vector3(1,1,1):n.scale));}return matrix;
     };
     const convert=(v:Record<string,Transform>):Transform=>{const matrix=world(parent,v).invert().multiply(world(bone,v)),position=new T.Vector3(),rotation=new T.Quaternion(),scale=new T.Vector3();matrix.decompose(position,rotation,scale);return {position:position.toArray(),rotation:rotation.normalize().toArray()};};
     try{

@@ -1,6 +1,6 @@
 # Blaupause – PaKaChi-SM
 
-**Softwarestand: 0.75.0 · Dokumentation abgeglichen am 31.10.2026.**
+**Softwarestand: 0.76.0 · Dokumentation abgeglichen am 31.10.2026.**
 
 Die Blaupause besteht aus drei Dokumenten. Das Designdokument beschreibt das Produktziel, die Roadmap die Umsetzung und das Changelog die bereits erfolgten Änderungen.
 
@@ -9,6 +9,10 @@ Die Blaupause besteht aus drei Dokumenten. Das Designdokument beschreibt das Pro
 | [Designdokument](Design.md) | Begriffe, Bedienprinzip, Anforderungen und noch offene Produktziele. |
 | [Roadmap](ROADMAP.md) | Offene Aufgaben, Prioritäten und ausstehende Abnahmen. |
 | [Changelog](CHANGELOG.md) | Historie mit Version, Datum und ISO-8601-Zeitstempel. |
+
+## Meilenstein 0.76.0
+
+Eigene Skalierung beim Umhängen erhalten. [Prüfbericht](PRUEFUNG-0.76.0.md).
 
 ## Meilenstein 0.75.0
 
@@ -178,4 +182,6 @@ Seit **0.73.0** können skalierte Endknochen ohne Kinder oder Anbauteile gelösc
 
 Seit **0.74.0** ist Umhängen innerhalb eines gemeinsam skalierten Teilbaums möglich: Nur die beiden Äste unterhalb ihres nächsten gemeinsamen Vorfahren müssen unskaliert sein. Die gemeinsame Transformation entfällt bei der Umrechnung der Grundpose, gespeicherten Posen und des Entwurfs. Gemeinsame gleichmäßige, ungleichmäßige und negative Skalierungen sind unterstützt; nicht invertierbare gemeinsame Skalierungen werden abgewiesen. Unterschiedliche Skalierungen auf den betroffenen Ästen und Anbauteile mit eigenem Skelett bleiben ausgeschlossen.
 
-Seit **0.75.0** können Knochen zwischen Ästen mit gleicher kumulierter positiver gleichmäßiger Skalierung umgehängt werden, etwa zwischen 4 × 0,5 und 2. Die Umrechnung berücksichtigt die tatsächlichen Quellskalierungen unterhalb des gemeinsamen Vorfahren. Der verschobene Knochen selbst muss unskaliert bleiben. Ungleiche, nicht gleichmäßige oder negative Astskalierungen bleiben ausgeschlossen; die gemeinsame Vorfahrenskalierung darf wie seit 0.74.0 ungleichmäßig oder negativ sein. Vorhandene Posen und Hautqualität weiterhin visuell prüfen.
+Seit **0.75.0** können Knochen zwischen Ästen mit gleicher kumulierter positiver gleichmäßiger Skalierung umgehängt werden, etwa zwischen 4 × 0,5 und 2. Die Umrechnung berücksichtigt die tatsächlichen Quellskalierungen unterhalb des gemeinsamen Vorfahren. Bis 0.75.0 musste der verschobene Knochen selbst unskaliert bleiben; seit 0.76.0 bleibt seine eigene invertierbare Quellskalierung beim Umhängen erhalten. Ungleiche, nicht gleichmäßige oder negative Astskalierungen bleiben ausgeschlossen; die gemeinsame Vorfahrenskalierung darf wie seit 0.74.0 ungleichmäßig oder negativ sein. Vorhandene Posen und Hautqualität weiterhin visuell prüfen.
+
+Seit **0.76.0** darf der umgehängte Knochen selbst gleichmäßig, ungleichmäßig oder negativ skaliert sein. Seine Quellskalierung bleibt unverändert; die Positions-/Drehungsumrechnung erfolgt ohne diese eigene Skalierung, damit Spiegelungen nicht in eine falsche Drehung umgewandelt werden. Nicht invertierbare Knochenskalierungen werden abgewiesen. Die Elternäste müssen weiterhin dieselbe positive gleichmäßige Gesamtskalierung besitzen. Gerenderte Haut- und Bewegungsqualität bleiben separat zu prüfen.
