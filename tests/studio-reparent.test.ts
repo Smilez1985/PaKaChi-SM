@@ -8,9 +8,10 @@ import type {StudioView} from '../src/studio-view.ts';
 import {parseProject} from '../src/studio-data.ts';
 import {parseStudioCommand} from '../src/studio-command.ts';
 import {exportMoveFile,importMoveFile} from '../src/move-file.ts';
-function fixture(attachment=false,scale=new T.Vector3(1,1,1)){
+function fixture(attachment=false,scale=new T.Vector3(1,1,1),branchScale=1,nested=false){
  const root=new T.Group(),hip=new T.Bone(),left=new T.Bone(),foot=new T.Bone(),right=new T.Bone();hip.scale.copy(scale);hip.name='Hip';left.name='Left';foot.name='Foot';right.name='Right';
  hip.add(left,right);left.add(foot);left.position.set(-1,1,0);foot.position.set(0,1,0);right.position.set(1,1,0);root.add(hip);root.scale.setScalar(.7);
+ left.scale.setScalar(branchScale*(nested?2:1));right.scale.setScalar(branchScale);if(nested){const pivot=new T.Bone();pivot.name='Pivot';pivot.scale.setScalar(.5);hip.add(pivot);pivot.add(left);}
  const accessory=new T.Group(),ornament=new T.Mesh(new T.BoxGeometry(.2,.2,.2),new T.MeshBasicMaterial());accessory.name='Accessory';accessory.position.set(.2,.3,.1);accessory.rotation.set(.1,.2,.3);accessory.scale.set(1,2,.5);accessory.add(ornament);ornament.position.x=.1;if(attachment)foot.add(accessory);
  const geometry=new T.BufferGeometry();geometry.setAttribute('position',new T.Float32BufferAttribute([-1,1,0,-1,2,0,1,1,0],3));geometry.setAttribute('skinIndex',new T.Uint16BufferAttribute([1,0,0,0,2,0,0,0,3,0,0,0],4));geometry.setAttribute('skinWeight',new T.Float32BufferAttribute([1,0,0,0,1,0,0,0,1,0,0,0],4));
  const mesh=new T.SkinnedMesh(geometry,new T.MeshBasicMaterial());root.add(mesh);root.updateMatrixWorld(true);mesh.bind(new T.Skeleton([hip,left,foot,right]));const rig=new StudioRig(root);
@@ -111,4 +112,21 @@ test('shared scaled ancestors cancel during reparenting in rest, poses, draft an
 });
 test('singular shared scaling rejects reparenting without changing data',()=>{
  const f=fixture(false,new T.Vector3(0,1,1)),before=structuredClone(f.rig.data);assert.throws(()=>f.rig.reparentBone(f.point('Left'),f.point('Right')),/invertierbar/);assert.deepEqual(f.rig.data,before);assert.equal(f.left.parent,f.hip);f.rig.dispose();
+});
+
+test('equal cumulative uniform scales across distinct branches preserve poses, skin and attachments',()=>{
+ for(const nested of [false,true]){
+  const scale=new T.Vector3(2,.5,1.5),f=fixture(true,scale,2,nested),{rig}=f,rest=f.vertices(),restMatrix=f.accessory.matrixWorld.clone();
+  f.left.rotation.z=.4;f.right.rotation.y=-.3;rig.root.updateMatrixWorld(true);const posed=f.vertices(),posedMatrix=f.accessory.matrixWorld.clone(),values=rig.capture();rig.data.poses=[{id:'equal',name:'Equal',seconds:1,values:structuredClone(values)}];rig.data.draft=structuredClone(values);
+  const close=(a:T.Matrix4,b:T.Matrix4)=>a.elements.forEach((v,i)=>assert.ok(Math.abs(v-b.elements[i])<1e-6));
+  rig.reparentBone(f.point('Foot'),f.point('Right'));assert.equal(f.foot.parent,f.right);near(f.vertices(),posed);close(f.accessory.matrixWorld,posedMatrix);rig.reset();near(f.vertices(),rest);close(f.accessory.matrixWorld,restMatrix);
+  rig.apply(rig.data.poses[0].values);near(f.vertices(),posed);close(f.accessory.matrixWorld,posedMatrix);
+  const other=fixture(true,scale,2,nested);other.rig.data=parseProject(structuredClone(project(rig))).studio;other.rig.reset();near(other.vertices(),rest);other.rig.apply(other.rig.data.draft!);near(other.vertices(),posed);close(other.accessory.matrixWorld,posedMatrix);
+  rig.restoreSource();assert.equal(f.foot.parent,f.left);near(f.vertices(),rest);rig.dispose();other.rig.dispose();
+ }
+});
+test('unequal, nonuniform and negative branch scaling is rejected atomically',()=>{
+ for(const scale of [new T.Vector3(3,3,3),new T.Vector3(2,1,2),new T.Vector3(-2,-2,-2)]){
+  const f=fixture(false,new T.Vector3(1,1,1),2),before=structuredClone(f.rig.data);f.right.scale.copy(scale);assert.throws(()=>f.rig.reparentBone(f.point('Foot'),f.point('Right')),/Astskalierungen/);assert.deepEqual(f.rig.data,before);assert.equal(f.foot.parent,f.left);f.rig.dispose();
+ }
 });

@@ -12,6 +12,17 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.75.0] - 2026-11-04
+
+Zeitstempel: 2026-11-04T14:51:57+01:00 (Europe/Berlin)
+
+### Added
+
+- Umhängen zwischen Ästen mit gleicher kumulierter positiver gleichmäßiger Skalierung. Die Umrechnung von Grundpose, gespeicherten Posen und Entwurf berücksichtigt die tatsächlichen Quellskalierungen.
+- Regressionen für gleich skalierte sowie unterschiedlich aufgebaute Äste (4 × 0,5 gegenüber 2), Hautgeometrie, starre Anbauteile, Projektrekonstruktion und Quellwiederherstellung. Ungleiche, nicht gleichmäßige und negative Astskalierungen bleiben atomar abgewiesen.
+
+[Prüfbericht](PRUEFUNG-0.75.0.md). Gerenderte Haut-/Bewegungsabnahme bleibt offen.
+
 ## [0.74.0] - 2026-10-31
 
 Zeitstempel: 2026-10-31T02:45:35+01:00 (Europe/Berlin)
@@ -1515,3 +1526,5 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 [0.73.0]: PRUEFUNG-0.73.0.md
 
 [0.74.0]: PRUEFUNG-0.74.0.md
+
+[0.75.0]: PRUEFUNG-0.75.0.md
