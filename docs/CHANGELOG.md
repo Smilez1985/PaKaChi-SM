@@ -12,6 +12,20 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.76.1] - 2026-11-05
+
+Zeitstempel: 2026-11-05T09:17:35+01:00 (Europe/Berlin)
+
+### Fixed
+
+- Zwei fehlgeschlagene Chromium-Tests des lokalen Model Zoo: Der Selektor für die Speicherbestätigung traf nach der Trennung von Vorgangsstatus und Listenwarnung zwei Elemente. Beide Felder besitzen jetzt eindeutige IDs; die Tests prüfen gezielt den Vorgangsstatus. Keine Abschwächung der Speicher-, F5- oder Mehrtab-Prüfungen.
+
+### Changed
+
+- Actions-Abnahme nach wieder verfügbarem Kontingent aufgenommen. Der erste Lauf bestätigte 312 Node-Tests, Build und 20 Browserfälle einschließlich Mausnavigation. Korrigierter Stand und vollständige CI-Ergebnisse werden in PR #1 geprüft.
+
+[Prüfbericht](PRUEFUNG-0.76.1.md).
+
 ## [0.76.0] - 2026-11-04
 
 Zeitstempel: 2026-11-04T14:54:49+01:00 (Europe/Berlin)
@@ -1541,3 +1555,5 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 [0.75.0]: PRUEFUNG-0.75.0.md
 
 [0.76.0]: PRUEFUNG-0.76.0.md
+
+[0.76.1]: PRUEFUNG-0.76.1.md

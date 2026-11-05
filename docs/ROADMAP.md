@@ -1,12 +1,12 @@
 # Roadmap – offene Aufgaben
 
-**Entwicklungsstand: 0.76.0 · Abgleich: 04.11.2026.** Teil der [Blaupause](README.md).
+**Entwicklungsstand: 0.76.1 · Abgleich: 05.11.2026.** Teil der [Blaupause](README.md).
 
 Diese Roadmap enthält offene Umsetzung und ausstehende Abnahme. Erledigte Änderungen stehen nach Version im [Changelog](CHANGELOG.md); Nachweise und Grenzen im [Prüfstand](PRUEFUNG.md). Eine implementierte Funktion ist nicht automatisch manuell oder mit realen Anbietern abgenommen.
 
 ## Prioritäten
 
-1. **Browser- und Bedienabnahme:** Korrigierten Mausnavigationstest und vollständige Chromium-Suite bestätigen, anschließend Kamera, Körperketten, Hautverformung und Mausgefühl manuell prüfen. Actions-Kontingent laut Inhaber seit 28.10.2026 erschöpft; lokales Chromium startet hier nicht. Keine neuen Actions-Läufe bis zur verfügbaren Kapazität.
+1. **Browser- und Bedienabnahme:** Kamera, Körperketten, Hautverformung und Mausgefühl manuell prüfen. Actions ist seit 05.11.2026 wieder verfügbar. Der korrigierte Mausnavigationstest besteht im Lauf 41992106544; zwei mehrdeutige Model-Zoo-Testselektoren wurden in 0.76.1 korrigiert. Vollständigen Prüfstatus in [PR #1](https://github.com/Smilez1985/PaKaChi-SM/pull/1) beachten.
 2. **Ladezeiten nachvollziehbar messen:** Die CPU-Messung ist seit 0.68.0 vorhanden; als Nächstes große reale Projekte und vollständiges Browserladen messen. Erst aus diesen Ergebnissen weitere Optimierungen ableiten.
 3. **Gelenkbearbeitung vervollständigen:** Skalierte Knochenketten, Löschen mit Anbauteilen und neue Rigs auf ungeriggten Oberflächen; anschließend Ganzkörper-IK und Qualitätsabnahme.
 4. **KI-Verfahren und Anbieter:** Geometrie/Rigging-Fachadapter, echte Inferenzqualität und unabhängige Rollen/Fallbacks live prüfen; unterstützte OAuth-Verfahren ergänzen.

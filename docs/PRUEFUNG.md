@@ -1,14 +1,14 @@
 # Prüfstand und Abnahme
 
-**Softwarestand: 0.76.0 · Dokumentationsabgleich: 04.11.2026.**
+**Softwarestand: 0.76.1 · Dokumentationsabgleich: 05.11.2026.**
 
 ## CI-Kontingent und Dokumentationsänderungen
 
-Stand 28.10.2026: Der Repository-Inhaber hat bestätigt, dass das GitHub-Actions-Kontingent aufgebraucht ist. Die Startabbrüche der Läufe 40727289984 und 40727830120 sind daher keine Ergebnisse ausgeführter Tests. Die Bestätigung des korrigierten Mausnavigationstests bleibt offen.
+Actions ist laut Inhaber seit 05.11.2026 wieder verfügbar. [Lauf 41992106544](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/41992106544) prüfte 0.76.0: 312 Node-Tests und Build erfolgreich; 20 von 22 Browserfällen bestanden, einschließlich Mausnavigation. Beide Fehler betrafen denselben mehrdeutigen Statusselektor im Model-Zoo-Test. 0.76.1 vergibt eindeutige Status-IDs und korrigiert die Tests. Der vollständige Prüfstatus des korrigierten Stands ist in [PR #1](https://github.com/Smilez1985/PaKaChi-SM/pull/1) verknüpft. Die alten Kontingentabbrüche sind weiterhin keine Testergebnisse.
 
 Auf dem Arbeitsbranch ist mit 0.68.0 eine Workflow-Anpassung vorbereitet: Direkte Pushes nach `main` überspringen den Workflow nur dann, wenn **alle** geänderten Dateien unter `README.md`, `docs/**/*.md` oder `docs/benchmarks/*.json` fallen. Gemischte Änderungen, Code, Tests, Abhängigkeiten, Workflow-Dateien und `docs/references/original-sha256.json` lösen weiterhin die vollständige Prüfung aus. Pull Requests bleiben ungefiltert, damit verpflichtende Checks nicht durch einen Pfadfilter auf „Pending“ verbleiben. `workflow_dispatch` bleibt verfügbar.
 
-Nach verfügbarer Actions-Kapazität muss der korrigierte Stand einmal vollständig mit dem aktuellen Node-Testumfang, Build und 22 Browserfällen bestätigt werden. Die Filterung ersetzt diesen Nachweis nicht. [GitHub-Dokumentation zu Pfadfiltern](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#onpushpull_requestpull_request_targetpathspaths-ignore).
+Die Pfadfilterung ersetzt keinen Testnachweis. Pull Requests führen weiterhin die vollständige Suite aus.
 
 ## Prüfung ohne Actions-Kontingent
 
@@ -29,16 +29,16 @@ Unter Linux bei fehlenden Systembibliotheken stattdessen einmalig `npx playwrigh
 
 Lokaler Nachweis am 28.10.2026 für den vorbereiteten Unreleased-Stand: `npm run verify` erfolgreich, **286 Node-Tests bestanden**, TypeScript und Produktionsbuild bestanden. Die bekannte Warnung zum großen JavaScript-Bundle bleibt bestehen. `verify:full` wurde hier wegen des bereits nachgewiesenen Chromium-Startblockers nicht ausgeführt; die 22 Browserfälle bleiben unbestätigt.
 
-Aktueller lokaler Meilenstein: [0.76.0](PRUEFUNG-0.76.0.md). Browsernachweis weiterhin 0.66.0; der korrigierte zusätzliche Mausnavigationstest aus 0.67.0 bleibt offen.
+Aktueller lokaler Meilenstein: [0.76.1](PRUEFUNG-0.76.1.md). Mausnavigation ist seit dem CI-Lauf vom 05.11.2026 bestätigt; vollständiger aktueller PR-Status siehe oben.
 
 ## Nachgewiesen
 
 | Prüfung | Letzter Nachweis | Umfang und Grenze |
 | --- | --- | --- |
-| `npm test` | 0.70.0: 300 Tests bestanden | Player, Router, Studio-Daten, reale Three.js-Geometrie, DOM/Ereignisse mit happy-dom, Node-MCP und Erhaltungsprüfung. Kein gerenderter Browser. |
-| `npm run test:e2e` | 0.66.0: 21 Chromium-Fälle bestanden | GitHub-Runner mit Software-WebGL; simulierte Anbieter, keine manuelle Maus-/KI-Qualitätsabnahme. |
+| `npm test` | 0.76.0: 312 Tests in CI bestanden | Player, Router, Studio-Daten, reale Three.js-Geometrie, DOM/Ereignisse mit happy-dom, Node-MCP und Erhaltungsprüfung. Kein gerenderter Browser. |
+| `npm run test:e2e` | 0.76.0: 20/22 bestanden; zwei Zoo-Selektorfehler in 0.76.1 korrigiert | GitHub-Runner mit Software-WebGL; simulierte Anbieter, keine manuelle Maus-/KI-Qualitätsabnahme. |
 | `npm run test:legacy` | 0.9.0: beide Programme bestanden | Originalplayer-Steuerung, MQTT-Verhalten und Lebenszyklus. |
-| `npm run build` | 0.70.0: lokal bestanden | TypeScript und Produktionsbuild; Vite meldet weiterhin das große gemeinsame JS-Bundle (rund 1,37 MB / 380 kB gzip). |
+| `npm run build` | 0.76.0: in CI bestanden | TypeScript und Produktionsbuild; Vite meldet weiterhin das große gemeinsame JS-Bundle (rund 1,37 MB / 380 kB gzip). |
 | `npm run test:python` mit `PAKACHI_PYTHON` | 0.10.0: Integration bestanden | Echter Python-MCP-Prozess, eingebetteter aMQTT-Broker, produktiver MQTT-Client, Router und Studio-Editor. Acht Tools, Studio-Änderungen einschließlich gültiger/ungültiger Skalierung, fehlende Freigabe und Revisionskonflikte geprüft. |
 | Originaldateien | 0.49.0: bytegenau erhalten | 83 wiederhergestellte Dateien einschließlich exakt 72 Transformationsbildern. |
 

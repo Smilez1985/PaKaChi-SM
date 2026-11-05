@@ -15,7 +15,7 @@ export function mountLocalZoo(host:HTMLElement,bridge:Host,language:()=> 'de'|'e
  const heading=document.createElement('h2'),note=document.createElement('p'),nameLabel=document.createElement('label'),name=document.createElement('input'),save=document.createElement('button'),listLabel=document.createElement('label'),list=document.createElement('select'),load=document.createElement('button'),remove=document.createElement('button'),refresh=document.createElement('button'),status=document.createElement('p'),syncStatus=document.createElement('p');
  name.id='zoo-name';name.maxLength=100;nameLabel.htmlFor=name.id;list.id='zoo-list';listLabel.htmlFor=list.id;
  for(const [button,id] of [[save,'save'],[load,'load'],[remove,'remove'],[refresh,'refresh']] as const){button.type='button';button.id='zoo-'+id;}
- status.setAttribute('role','status');syncStatus.setAttribute('role','status');section.append(heading,note,nameLabel,name,save,listLabel,list,load,remove,refresh,status,syncStatus);host.append(section);
+ status.id='zoo-operation-status';syncStatus.id='zoo-sync-status';status.setAttribute('role','status');syncStatus.setAttribute('role','status');section.append(heading,note,nameLabel,name,save,listLabel,list,load,remove,refresh,status,syncStatus);host.append(section);
  let entries:ZooEntry[]=[],pending=false,disposed=false,generation=0,refreshQueued=false,stale=true;
  let channel:BroadcastChannel|null=null;try{if(typeof window.BroadcastChannel==='function')channel=new window.BroadcastChannel('pakachi-local-zoo-v1');}catch{/* Focus/manual refresh remains available when messaging is unavailable. */}
  const notify=()=>{try{channel?.postMessage('changed');}catch{/* A committed save must not become a reported failure. */}};
