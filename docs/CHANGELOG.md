@@ -12,6 +12,17 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.76.3] - 2026-11-07
+
+Zeitstempel: 2026-11-07T00:47:32+01:00 (Europe/Berlin)
+
+### Added
+
+- Gezielte Chromium-Prüfung der haftenden Studio-Vorschau beim Scrollen in normalen und niedrigen Desktopfenstern sowie nicht überdeckter Eingabefelder auf Mobilgeräten. Echte Mausradereignisse prüfen die Erreichbarkeit der Zeichenfläche; Projektdaten bleiben unverändert.
+- Screenshots des sichtbaren Bereichs statt Ganzseitenaufnahmen zur Bewertung der haftenden Vorschau.
+
+[Prüfbericht](PRUEFUNG-0.76.3.md). Das subjektive Mausgefühl und anatomische Bewegungsqualität bleiben getrennte manuelle Abnahmen.
+
 ## [0.76.2] - 2026-11-06
 
 Zeitstempel: 2026-11-06T19:13:55+01:00 (Europe/Berlin)
@@ -1574,3 +1585,5 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 [0.76.1]: PRUEFUNG-0.76.1.md
 
 [0.76.2]: PRUEFUNG-0.76.2.md
+
+[0.76.3]: PRUEFUNG-0.76.3.md

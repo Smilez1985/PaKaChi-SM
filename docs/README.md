@@ -1,6 +1,6 @@
 # Blaupause – PaKaChi-SM
 
-**Softwarestand: 0.76.2 · Dokumentation abgeglichen am 31.10.2026.**
+**Softwarestand: 0.76.3 · Dokumentation abgeglichen am 31.10.2026.**
 
 Die Blaupause besteht aus drei Dokumenten. Das Designdokument beschreibt das Produktziel, die Roadmap die Umsetzung und das Changelog die bereits erfolgten Änderungen.
 
@@ -189,3 +189,5 @@ Seit **0.76.0** darf der umgehängte Knochen selbst gleichmäßig, ungleichmäß
 **CI-Abnahme 0.76.1:** Actions wieder verfügbar. Zwei mehrdeutige Model-Zoo-Testselektoren korrigiert; Vorgangsstatus und Listenwarnung besitzen eindeutige IDs. Vollständiger Prüfstatus: [PR #1](https://github.com/Smilez1985/PaKaChi-SM/pull/1).
 
 **0.76.2:** Optionen auf dunkler Navigation mit heller Schrift und sichtbarem Tastaturfokus; die Versionsanzeige wird aus package.json übernommen. Automatisierter Kontrast-/Bediennachweis in der Chromium-Suite.
+
+**Scrollprüfung 0.76.3:** Die Browser-Suite prüft die haftende Studio-Vorschau in normalen/niedrigen Desktopfenstern und freie mobile Eingabefelder. Aufnahmen des sichtbaren Bereichs dienen der Artefaktbewertung; subjektives Mausgefühl bleibt offen.
