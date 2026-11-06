@@ -4,7 +4,7 @@ Teil der [Blaupause](README.md) · [Roadmap](ROADMAP.md) · [Changelog](CHANGELO
 
 ## Status und Begriffe
 
-Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.76.1: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau, automatische Anatomieerkennung und die Qualitätsabnahme der angeschlossenen lokalen KI-Generierung bleiben offen.
+Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.76.2: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau, automatische Anatomieerkennung und die Qualitätsabnahme der angeschlossenen lokalen KI-Generierung bleiben offen.
 
 - **PaKaChi:** Panda-KI-Chimera, das übergeordnete Projekt.
 - **PaKaChi-SM:** StateMaschine mit Avatar-Player und integriertem Studio.
@@ -686,3 +686,5 @@ Seit **0.75.0** können Knochen zwischen Ästen mit gleicher kumulierter positiv
 Seit **0.76.0** darf der umgehängte Knochen selbst gleichmäßig, ungleichmäßig oder negativ skaliert sein. Seine Quellskalierung bleibt unverändert; die Positions-/Drehungsumrechnung erfolgt ohne diese eigene Skalierung, damit Spiegelungen nicht in eine falsche Drehung umgewandelt werden. Nicht invertierbare Knochenskalierungen werden abgewiesen. Die Elternäste müssen weiterhin dieselbe positive gleichmäßige Gesamtskalierung besitzen. Gerenderte Haut- und Bewegungsqualität bleiben separat zu prüfen.
 
 **CI-Abnahme 0.76.1:** Actions wieder verfügbar. Zwei mehrdeutige Model-Zoo-Testselektoren korrigiert; Vorgangsstatus und Listenwarnung besitzen eindeutige IDs. Vollständiger Prüfstatus: [PR #1](https://github.com/Smilez1985/PaKaChi-SM/pull/1).
+
+**0.76.2:** Optionen auf dunkler Navigation mit heller Schrift und sichtbarem Tastaturfokus; die Versionsanzeige wird aus package.json übernommen. Automatisierter Kontrast-/Bediennachweis in der Chromium-Suite.

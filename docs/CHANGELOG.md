@@ -12,6 +12,21 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.76.2] - 2026-11-06
+
+Zeitstempel: 2026-11-06T19:13:55+01:00 (Europe/Berlin)
+
+### Fixed
+
+- Optionen-Schaltfläche auf dunkler Navigation: helle Textfarbe und lesbare Hover-/Fokuszustände statt dunkler Schrift auf dunklem Hintergrund.
+- Versionsanzeige der Oberfläche stammt aus package.json statt aus dem veralteten fest eingetragenen Stand 0.67.0.
+
+### Added
+
+- Chromium-Regression für Paketversion, mindestens 4,5:1 Textkontrast im Normal-/Hoverzustand, sichtbaren Tastaturfokus und Öffnen der Optionen per Enter.
+
+[Prüfbericht und Screenshotbefunde](PRUEFUNG-0.76.2.md).
+
 ## [0.76.1] - 2026-11-05
 
 Zeitstempel: 2026-11-05T09:17:35+01:00 (Europe/Berlin)
@@ -1557,3 +1572,5 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 [0.76.0]: PRUEFUNG-0.76.0.md
 
 [0.76.1]: PRUEFUNG-0.76.1.md
+
+[0.76.2]: PRUEFUNG-0.76.2.md
