@@ -5,6 +5,14 @@ export function readOptions(storage?:Pick<Storage,'getItem'>):Options {
 }
 export const options=readOptions();
 const translations:Record<string,string>={
+ 'Figur als GLB (mit Rig)':'Export figure as GLB (with rig)',
+ 'Standbild ohne Rig oder aktuelle Form mit Hautskelett. Beide ohne Animationen. Studio-Projekt zusätzlich speichern.':'Still without rig or current form with skin skeleton. Both without animations. Save the Studio project as well.',
+ 'GLB mit Hautskelett heruntergeladen. Studio-Posen und Animationen zusätzlich im Projekt speichern.':'GLB with skin skeleton downloaded. Save Studio poses and animations in the project as well.',
+ 'Die Figur enthält kein exportierbares Hautskelett.':'The figure has no exportable skin skeleton.',
+ 'Rig verweist auf Knochen außerhalb der Figur.':'The rig references bones outside the figure.',
+ 'Ausgeblendete Knochenhierarchie kann nicht als Rig exportiert werden.':'A hidden bone hierarchy cannot be exported as a rig.',
+ 'Rig-Export unterstützt keine Instanzen oder ausgeblendeten Materialgruppen.':'Rig export does not support instances or hidden material groups.',
+
  'Figur als GLB (Standbild)':'Export figure as GLB (still)',
  'Aktuell sichtbare Form ohne Rig oder Animationen. Studio-Projekt zusätzlich speichern.':'Current visible form without a rig or animations. Save the Studio project as well.',
  'GLB-Standbild heruntergeladen. Rig, Posen und Animationen bleiben im Studio-Projekt.':'GLB still downloaded. Rig, poses and animations remain in the Studio project.',

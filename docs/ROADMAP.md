@@ -1,6 +1,6 @@
 # Roadmap – offene Aufgaben
 
-**Entwicklungsstand: 0.77.0 · Abgleich: 07.11.2026.** Teil der [Blaupause](README.md).
+**Entwicklungsstand: 0.78.0 · Abgleich: 07.11.2026.** Teil der [Blaupause](README.md).
 
 Diese Roadmap enthält offene Umsetzung und ausstehende Abnahme. Erledigte Änderungen stehen nach Version im [Changelog](CHANGELOG.md); Nachweise und Grenzen im [Prüfstand](PRUEFUNG.md). Eine implementierte Funktion ist nicht automatisch manuell oder mit realen Anbietern abgenommen.
 
@@ -38,6 +38,7 @@ Der Arbeitsstand liegt auf `work/local-verification-model-zoo`; `main` bleibt bi
 - [ ] Gewichtsqualität der eingefügten Gelenke manuell prüfen.
 - [ ] Hautverformung nach Knochenlöschen manuell prüfen.
 - [ ] Hautqualität nach gemischten Umbaufolgen manuell prüfen.
+- [ ] Replay korrigieren, wenn nach eingefügtem Zwischengelenk Gewichte vom Elternknochen übertragen und danach genau dieser Elternknochen gelöscht wird. Der Rückbau kann die frühere Übertragung als wirkungslos ablehnen. In 0.78.0 beim Testaufbau reproduziert; Löschen vor der Übertragung ist separat erfolgreich geprüft.
 - [ ] Umhängen zwischen Ästen mit ungleicher Gesamtskalierung oder nicht gleichmäßiger Astskalierung, weitere Umbauten skalierter Knochenketten und Anbauteile mit eigenem Skelett unterstützen; Löschen mit Anbauteilen ergänzen. Neue Abzweigungen unter skalierten Eltern sind seit 0.72.0, das Löschen skalierter Endknochen ohne Kinder/Anbauteile seit 0.73.0 implementiert; Umhängen unter gemeinsam skalierten Vorfahren ist seit 0.74.0 und zwischen positiv gleichmäßig skalierten Ästen mit gleicher Gesamtskalierung seit 0.75.0 möglich; seit 0.76.0 bleibt auch die eigene invertierbare Skalierung des verschobenen Knochens erhalten; gerenderte Haut-/IK-Abnahme bleibt offen.
 - [ ] Haut- und Bewegungsqualität nach Umhängen manuell prüfen.
 - [ ] Anatomische Gelenkketten aus ungeriggter Oberfläche erzeugen; allgemeine Dreh-/Twistgrenzen, fixierte Füße und gekoppelte Ganzkörper-IK ergänzen.
@@ -56,7 +57,7 @@ Der Arbeitsstand liegt auf `work/local-verification-model-zoo`; `main` bleibt bi
 
 - [ ] Lokalisierung von Originalplayer, Modellbeschreibungen und technischen Meldungen vervollständigen.
 - [ ] Modellqualität und Dateigröße skalieren; Quelle neben optimierten Ableitungen bewahren.
-- [ ] Animationen nach Optimierungen prüfen; GLB-Export mit Rig und Animationen ergänzen. Eigenständiger statischer GLB-Export der sichtbaren Figur ist seit 0.77.0 implementiert.
+- [ ] Animationen nach Optimierungen prüfen; GLB-Export mit Animationen ergänzen. Statischer GLB-Export ist seit 0.77.0, GLB mit bearbeitetem Hautskelett ohne Clips seit 0.78.0 implementiert.
 - [ ] Gesamten Ablauf ohne Fachwissen erproben.
 
 ## 7. Studio-Harness und Anbieteranbindung

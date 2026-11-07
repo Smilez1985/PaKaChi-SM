@@ -1,4 +1,4 @@
-import {exportFigureGLB} from './figure-glb.ts';
+import {exportFigureGLB,exportRiggedFigureGLB} from './figure-glb.ts';
 import {PlaybackTransition} from './playback-transition.ts';
 import {StudioWeightStroke} from './studio-weight-stroke.ts';
 import {checkMoveBends} from './move-limit-check.ts';
@@ -135,7 +135,7 @@ export class StudioEditor {
     const remembered = Object.fromEntries(['pose-name','move-name','move-id','pose-list','studio-moves','library-moves','move-steps'].map(id=>[id,this.host.querySelector<HTMLInputElement>(`#${id}`)?.value ?? '']));
     const loop = this.host.querySelector<HTMLInputElement>('#move-loop')?.checked ?? false;
     const selected=this.selected;const poses=this.data.poses;
-    this.host.innerHTML=`<h2>Avatar-Studio</h2><label class="check"><input id="studio-agent-edit" type="checkbox" ${this.agentEditing?'checked':''}> KI darf dieses Studio bearbeiten</label><p class="subtle">Nur für diese Sitzung. Änderungen sind rückgängig machbar.</p><div class="studio-file-actions"><button id="studio-new">Neu</button><button id="studio-save">Speichern${this.dirty?' *':''}</button><button id="figure-glb" ${this.exportingFigure?'disabled':''}>Figur als GLB (Standbild)</button></div><p class="subtle">Aktuell sichtbare Form ohne Rig oder Animationen. Studio-Projekt zusätzlich speichern.</p>
+    this.host.innerHTML=`<h2>Avatar-Studio</h2><label class="check"><input id="studio-agent-edit" type="checkbox" ${this.agentEditing?'checked':''}> KI darf dieses Studio bearbeiten</label><p class="subtle">Nur für diese Sitzung. Änderungen sind rückgängig machbar.</p><div class="studio-file-actions"><button id="studio-new">Neu</button><button id="studio-save">Speichern${this.dirty?' *':''}</button><button id="figure-glb" ${this.exportingFigure?'disabled':''}>Figur als GLB (Standbild)</button><button id="figure-rig-glb" ${this.exportingFigure?'disabled':''}>Figur als GLB (mit Rig)</button></div><p class="subtle">Standbild ohne Rig oder aktuelle Form mit Hautskelett. Beide ohne Animationen. Studio-Projekt zusätzlich speichern.</p>
     <div class="studio-modes" role="group" aria-label="Bearbeitungsmodus"><button id="mode-pose" aria-pressed="${!this.edit}">Figur bewegen</button><button id="mode-rig" aria-pressed="${this.edit}">Gelenke bearbeiten</button></div>
     <p class="subtle">${this.edit?'Punkte setzen und verbinden. Bestehende Skelettpunkte verschieben ihren Drehpunkt.':'Ziehen bewegt verbundene Gelenkketten. Unter Drehen lässt sich die Ausrichtung direkt mit der Maus ändern.'}</p>
     <div class="studio-actions"><button id="studio-undo" ${this.history.canUndo?'':'disabled'}>↶ Zurück</button><button id="studio-redo" ${this.history.canRedo?'':'disabled'}>↷ Wiederholen</button></div>
@@ -194,6 +194,7 @@ export class StudioEditor {
     on('studio-undo',()=>{const s=this.history.undo(this.snapshot());if(s)this.restore(s);});on('studio-redo',()=>{const s=this.history.redo(this.snapshot());if(s)this.restore(s);});
     on('studio-new',()=>this.mutate(()=>{this.rig.data=structuredClone(this.initial);this.data.poses=[];this.data.moves=[];this.rig.reset();this.selected=null;}));
     on('studio-save',()=>this.save());
+    q<HTMLButtonElement>('figure-rig-glb').onclick=()=>{void this.exportFigure(true).catch(error=>{if(!this.disposed)this.hooks.feedback(error instanceof Error?error.message:'GLB-Export fehlgeschlagen.');});};
     q<HTMLButtonElement>('figure-glb').onclick=()=>{void this.exportFigure().catch(error=>{if(!this.disposed)this.hooks.feedback(error instanceof Error?error.message:'GLB-Export fehlgeschlagen.');});};
     on('detect-joints',()=>{
       if(!this.rig.bones.length){this.hooks.feedback('Das Modell enthält kein Skelett. KI-Erkennung für ungeriggte Modelle ist noch nicht verfügbar.');return;}
@@ -348,17 +349,17 @@ export class StudioEditor {
     const revision=this.revision;
     return this.withLibrary(async signal=>{const file=await loadLibraryMove(item,base,signal,fetcher);signal.throwIfAborted();await this.importMove(file,revision,signal);});
   }
-  async exportFigure(){
+  async exportFigure(withRig=false){
     if(this.disposed||!this.active||this.interactionActive||this.exportingFigure)throw Error('Studio ist beschäftigt oder geschlossen.');
     const revision=this.revision;this.exportingFigure=true;this.render();
     try{
       this.view.setWeightBone?.(null);
-      const exporting=exportFigureGLB(this.rig.surfaces.map(s=>s.mesh));
+      const exporting=withRig?exportRiggedFigureGLB(this.rig.root):exportFigureGLB(this.rig.surfaces.map(s=>s.mesh));
       this.refreshWeightColors();
       const bytes=await exporting;
       if(this.disposed||!this.active||this.revision!==revision||this.interactionActive)throw Error('Studio geändert; GLB-Export verworfen. Bitte erneut exportieren.');
-      const url=URL.createObjectURL(new Blob([bytes],{type:'model/gltf-binary'})),a=document.createElement('a');a.href=url;a.download=this.project.avatar.id+'-standbild.glb';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
-      this.hooks.feedback('GLB-Standbild heruntergeladen. Rig, Posen und Animationen bleiben im Studio-Projekt.');
+      const url=URL.createObjectURL(new Blob([bytes],{type:'model/gltf-binary'})),a=document.createElement('a');a.href=url;a.download=this.project.avatar.id+(withRig?'-rig.glb':'-standbild.glb');a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+      this.hooks.feedback(withRig?'GLB mit Hautskelett heruntergeladen. Studio-Posen und Animationen zusätzlich im Projekt speichern.':'GLB-Standbild heruntergeladen. Rig, Posen und Animationen bleiben im Studio-Projekt.');
     }finally{this.exportingFigure=false;if(!this.disposed){this.refreshWeightColors();this.render();}}
   }
   async exportMove(id:string){if(this.disposed||!this.active||this.interactionActive)throw Error('Studio ist beschäftigt oder geschlossen.');return exportMoveFile(this.exportProject(),id);}

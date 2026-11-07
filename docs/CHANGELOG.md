@@ -12,6 +12,18 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.78.0] - 2026-11-07
+
+Zeitstempel: 2026-11-07T02:12:55+01:00 (Europe/Berlin)
+
+### Added
+
+- GLB-Export mit bearbeitetem Hautskelett: aktuelle Hierarchie, Gewichte, Bindematrizen und Form bleiben beweglich. Keine Animationsclips oder Studio-Moves; Standbildexport bleibt separat verfügbar.
+- Unabhängige Kopien schützen Quelldaten. Nicht unterstützte Rig-/Sichtbarkeitsfälle werden ausdrücklich abgewiesen; bestehende Verwerfungsprüfung bei überholtem Export bleibt erhalten.
+- Tatsächliche GLB-Rundlauftests einschließlich Hautbewegung nach dem Laden, bearbeitetem Mika sowie Browser-Download und erneuter Gelenkbearbeitung.
+
+[Prüfbericht](PRUEFUNG-0.78.0.md). Animationsausgabe, Retargeting und das separat reproduzierte Topologie-Replay-Problem bleiben offen.
+
 ## [0.77.0] - 2026-11-07
 
 Zeitstempel: 2026-11-07T01:14:27+01:00 (Europe/Berlin)
@@ -1601,3 +1613,5 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 [0.76.3]: PRUEFUNG-0.76.3.md
 
 [0.77.0]: PRUEFUNG-0.77.0.md
+
+[0.78.0]: PRUEFUNG-0.78.0.md
