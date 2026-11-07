@@ -1,6 +1,6 @@
 # Blaupause – PaKaChi-SM
 
-**Softwarestand: 0.78.0 · Dokumentation abgeglichen am 31.10.2026.**
+**Softwarestand: 0.78.1 · Dokumentation abgeglichen am 31.10.2026.**
 
 Die Blaupause besteht aus drei Dokumenten. Das Designdokument beschreibt das Produktziel, die Roadmap die Umsetzung und das Changelog die bereits erfolgten Änderungen.
 
@@ -195,3 +195,5 @@ Seit **0.76.0** darf der umgehängte Knochen selbst gleichmäßig, ungleichmäß
 Seit **0.77.0** exportiert „Figur als GLB (Standbild)“ die aktuelle sichtbare Form als eigenständige GLB-Datei. Haut-/Morph-Verformung, freie Oberflächenpunkte und Welttransformation werden in statische Geometrie übernommen; Materialien und UVs bleiben erhalten. Die Datei enthält kein Rig, keine Studio-Punkte und keine Animationen. Für spätere Bearbeitung zusätzlich das Studio-Projekt speichern. Unsichtbare Zweige werden ausgelassen; Instanzen und teilweise ausgeblendete Materialgruppen werden ausdrücklich abgewiesen. Bei Studio-Änderung, Wiedergabestart oder Schließen vor Abschluss wird das Ergebnis verworfen. Der Export verändert weder Projekt noch Undo-Stand. Texturqualität und Dateigröße hängen vom Modell ab.
 
 Seit **0.78.0** bietet „Figur als GLB (mit Rig)“ zusätzlich eine eigenständige Datei mit aktuellem Hautskelett an. Knochenhierarchie, Hautgewichte, Bindematrizen, Material-/Geometriedaten und aktuelle Form werden unabhängig kopiert; Studio-Hilfen werden nicht übernommen. Die Quelle und der Undo-/Dirty-Stand bleiben erhalten. Die Datei enthält noch keine Animationsclips oder Studio-Moves. Für Studio-Punkte und weitere Bearbeitung das vollständige Projekt zusätzlich speichern. Modelle ohne sichtbares Hautskelett, externe Knochenverweise, ausgeblendete Knochenhierarchien, Instanzen und ausgeblendete Materialgruppen werden mit einer Meldung abgewiesen.
+
+**Korrektur 0.78.1:** Einfügen, Gewichtsübertragung vom Elternknochen und anschließendes Löschen dieses Knochens bleiben beim Replay erhalten. Frühere Elternbezüge dienen ausschließlich der korrekten Berechnung der Einfügeachse. Projektformat unverändert; Undo/Redo und erneutes Laden geprüft.

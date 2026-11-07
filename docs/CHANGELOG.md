@@ -12,6 +12,21 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.78.1] - 2026-11-07
+
+Zeitstempel: 2026-11-07T09:04:13+01:00 (Europe/Berlin)
+
+### Fixed
+
+- Topologie-Replay nach „Zwischengelenk einfügen → Gewichte vom Elternknochen übertragen → Elternknochen löschen“: Die Einfügeachse berücksichtigt den früheren Elternbezug gelöschter Knochen, statt deren lokale Position fälschlich als Weltposition zu verwenden. Hautgewichte bleiben beim Wiederaufbau erhalten.
+- Verschachtelte Löschungen, verschobene/skalierte Figuren, wiederholter Reset, Undo/Redo und Projektladen sind durch einen unabhängigen Gewichtsvergleich abgesichert. Der echte Mika-GLB-Rundlauftest verwendet jetzt die zuvor fehlerhafte Reihenfolge.
+
+### Added
+
+- Chromium-Regression für die Bearbeitungsfolge einschließlich Undo/Redo, Speichern und erneutem Laden.
+
+[Prüfbericht](PRUEFUNG-0.78.1.md). Keine Projektformatänderung.
+
 ## [0.78.0] - 2026-11-07
 
 Zeitstempel: 2026-11-07T02:12:55+01:00 (Europe/Berlin)
@@ -1615,3 +1630,5 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 [0.77.0]: PRUEFUNG-0.77.0.md
 
 [0.78.0]: PRUEFUNG-0.78.0.md
+
+[0.78.1]: PRUEFUNG-0.78.1.md

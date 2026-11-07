@@ -1,6 +1,6 @@
 # Prüfstand und Abnahme
 
-**Softwarestand: 0.78.0 · Dokumentationsabgleich: 07.11.2026.**
+**Softwarestand: 0.78.1 · Dokumentationsabgleich: 07.11.2026.**
 
 ## CI-Kontingent und Dokumentationsänderungen
 
@@ -29,16 +29,16 @@ Unter Linux bei fehlenden Systembibliotheken stattdessen einmalig `npx playwrigh
 
 Lokaler Nachweis am 28.10.2026 für den vorbereiteten Unreleased-Stand: `npm run verify` erfolgreich, **286 Node-Tests bestanden**, TypeScript und Produktionsbuild bestanden. Die bekannte Warnung zum großen JavaScript-Bundle bleibt bestehen. `verify:full` wurde hier wegen des bereits nachgewiesenen Chromium-Startblockers nicht ausgeführt; die 22 Browserfälle bleiben unbestätigt.
 
-Aktueller lokaler Meilenstein: [0.78.0](PRUEFUNG-0.78.0.md). Mausnavigation ist seit dem CI-Lauf vom 05.11.2026 bestätigt; vollständiger aktueller PR-Status siehe oben.
+Aktueller lokaler Meilenstein: [0.78.1](PRUEFUNG-0.78.1.md). Mausnavigation ist seit dem CI-Lauf vom 05.11.2026 bestätigt; vollständiger aktueller PR-Status siehe oben.
 
 ## Nachgewiesen
 
 | Prüfung | Letzter Nachweis | Umfang und Grenze |
 | --- | --- | --- |
-| `npm test` | 0.77.0: 314 Tests in CI bestanden | Player, Router, Studio-Daten, reale Three.js-Geometrie, DOM/Ereignisse mit happy-dom, Node-MCP und Erhaltungsprüfung. Kein gerenderter Browser. |
-| `npm run test:e2e` | 0.77.0: 25 Chromium-Fälle bestanden | GitHub-Runner mit Software-WebGL; simulierte Anbieter, keine manuelle Maus-/KI-Qualitätsabnahme. |
+| `npm test` | 0.78.0: 318 Tests in CI bestanden | Player, Router, Studio-Daten, reale Three.js-Geometrie, DOM/Ereignisse mit happy-dom, Node-MCP und Erhaltungsprüfung. Kein gerenderter Browser. |
+| `npm run test:e2e` | 0.78.0: 26 Chromium-Fälle bestanden | GitHub-Runner mit Software-WebGL; simulierte Anbieter, keine manuelle Maus-/KI-Qualitätsabnahme. |
 | `npm run test:legacy` | 0.9.0: beide Programme bestanden | Originalplayer-Steuerung, MQTT-Verhalten und Lebenszyklus. |
-| `npm run build` | 0.77.0: in CI bestanden | TypeScript und Produktionsbuild; Vite meldet weiterhin das große gemeinsame JS-Bundle (rund 1,37 MB / 380 kB gzip). |
+| `npm run build` | 0.78.0: in CI bestanden | TypeScript und Produktionsbuild; Vite meldet weiterhin das große gemeinsame JS-Bundle (rund 1,37 MB / 380 kB gzip). |
 | `npm run test:python` mit `PAKACHI_PYTHON` | 0.10.0: Integration bestanden | Echter Python-MCP-Prozess, eingebetteter aMQTT-Broker, produktiver MQTT-Client, Router und Studio-Editor. Acht Tools, Studio-Änderungen einschließlich gültiger/ungültiger Skalierung, fehlende Freigabe und Revisionskonflikte geprüft. |
 | Originaldateien | 0.49.0: bytegenau erhalten | 83 wiederhergestellte Dateien einschließlich exakt 72 Transformationsbildern. |
 

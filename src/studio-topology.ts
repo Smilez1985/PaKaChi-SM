@@ -86,7 +86,18 @@ export class StudioTopology {
   for(const commit of commits)commit();
  }
  build(edits:BoneInsertion[],rest:{position:[number,number,number];rotation:[number,number,number,number]}[],deletions:number[]=[],reparents:BoneReparent[]=[],transfers:WeightTransfer[]=[]):T.Bone[]{
-  this.restore();const bones=[...this.source],weights:(()=>void)[]=[];
+  this.restore();const bones=[...this.source],weights:(()=>void)[]=[],detachedParents=new Map<T.Bone,T.Object3D>();
+  // Weight operations run after the final rest transforms are installed. Deleted
+  // anchors still need their former ancestry to reconstruct the same rest axis.
+  const weightMatrices=new Map<T.Bone,T.Matrix4>();
+  const weightWorld=(bone:T.Bone):T.Matrix4=>{
+   const cached=weightMatrices.get(bone);if(cached)return cached;
+   const parent=bone.parent??detachedParents.get(bone);let matrix:T.Matrix4;
+   if(parent instanceof T.Bone)matrix=weightWorld(parent).clone();
+   else if(parent){parent.updateWorldMatrix(true,false);matrix=parent.matrixWorld.clone();}
+   else matrix=new T.Matrix4();
+   matrix.multiply(new T.Matrix4().compose(bone.position,bone.quaternion,bone.scale));weightMatrices.set(bone,matrix);return matrix;
+  };
   let changes=0,reparented=0,transferred=0;
   const queueTransfers=()=>{while(transferred<transfers.length&&transfers[transferred].after===changes){const edit=transfers[transferred++],from=bones[edit.from],to=bones[edit.to];
    if(!from||!to||from===to||!from.parent||!to.parent||!Number.isFinite(edit.amount)||edit.amount<=0||edit.amount>1||(edit.region!==undefined&&!validWeightRegion(edit.region)))throw Error('Ungültige Hautgewichtsübertragung.');
@@ -113,7 +124,7 @@ export class StudioTopology {
     indices.needsUpdate=true;weights.needsUpdate=true;
    }
    });
-   for(const child of [...bone.children])parent.add(child);bone.removeFromParent();changes++;
+   detachedParents.set(bone,parent);for(const child of [...bone.children])parent.add(child);bone.removeFromParent();changes++;
   };
   let removed=0;
   for(const edit of edits){
@@ -138,8 +149,8 @@ export class StudioTopology {
    for(const s of this.skins){
     const skeleton=s.mesh.skeleton,pi=skeleton.bones.indexOf(parent),ci=skeleton.bones.indexOf(child);if(pi<0||ci<0)continue;
     const next=new T.Skeleton([...skeleton.bones,added], [...skeleton.boneInverses.map(m=>m.clone()),new T.Matrix4()]);this.generated.push(next);s.mesh.skeleton=next;
-    parent.updateWorldMatrix(true,true);s.mesh.updateWorldMatrix(true,false);
-    const start=parent.getWorldPosition(new T.Vector3()),end=child.getWorldPosition(new T.Vector3()),axis=end.clone().sub(start),length=axis.lengthSq();
+    s.mesh.updateWorldMatrix(true,false);
+    const start=new T.Vector3().setFromMatrixPosition(weightWorld(parent)),end=new T.Vector3().setFromMatrixPosition(weightWorld(child)),axis=end.clone().sub(start),length=axis.lengthSq();
     const indices=s.mesh.geometry.getAttribute('skinIndex'),weights=s.mesh.geometry.getAttribute('skinWeight'),positions=s.mesh.geometry.getAttribute('position');
     for(let v=0;v<positions.count;v++){
      const point=new T.Vector3().fromBufferAttribute(positions,v).applyMatrix4(s.mesh.matrixWorld);
