@@ -1,6 +1,6 @@
 # Roadmap – offene Aufgaben
 
-**Entwicklungsstand: 0.76.3 · Abgleich: 07.11.2026.** Teil der [Blaupause](README.md).
+**Entwicklungsstand: 0.77.0 · Abgleich: 07.11.2026.** Teil der [Blaupause](README.md).
 
 Diese Roadmap enthält offene Umsetzung und ausstehende Abnahme. Erledigte Änderungen stehen nach Version im [Changelog](CHANGELOG.md); Nachweise und Grenzen im [Prüfstand](PRUEFUNG.md). Eine implementierte Funktion ist nicht automatisch manuell oder mit realen Anbietern abgenommen.
 
@@ -15,7 +15,7 @@ Der Arbeitsstand liegt auf `work/local-verification-model-zoo`; `main` bleibt bi
 
 ## Automatisierte Browserprüfung
 
-- [ ] Weitere Screenshots, haftende Studio-Vorschau beim Scrollen und tatsächliches Mausgefühl manuell auswerten; vier Artefaktbilder wurden in 0.76.2 stichprobenartig bewertet, Optionen-Kontrast und Versionsanzeige korrigiert; gerenderte Automatisierung ersetzt diese Gesamtabnahme nicht. Lokales Chromium bleibt beim Socket-Aufbau blockiert.
+- [ ] Weitere Screenshots und tatsächliches Mausgefühl manuell auswerten; haftende Vorschau und mobile Posenfelder wurden in 0.76.3 automatisiert und anhand dreier sichtbarer Bereichsaufnahmen geprüft; vier Artefaktbilder wurden in 0.76.2 stichprobenartig bewertet, Optionen-Kontrast und Versionsanzeige korrigiert; gerenderte Automatisierung ersetzt diese Gesamtabnahme nicht. Lokales Chromium bleibt beim Socket-Aufbau blockiert.
 
 ## 1. Player und Model Zoo
 
@@ -56,7 +56,7 @@ Der Arbeitsstand liegt auf `work/local-verification-model-zoo`; `main` bleibt bi
 
 - [ ] Lokalisierung von Originalplayer, Modellbeschreibungen und technischen Meldungen vervollständigen.
 - [ ] Modellqualität und Dateigröße skalieren; Quelle neben optimierten Ableitungen bewahren.
-- [ ] Animationen nach Optimierungen prüfen; eigenständigen GLB-Export ergänzen.
+- [ ] Animationen nach Optimierungen prüfen; GLB-Export mit Rig und Animationen ergänzen. Eigenständiger statischer GLB-Export der sichtbaren Figur ist seit 0.77.0 implementiert.
 - [ ] Gesamten Ablauf ohne Fachwissen erproben.
 
 ## 7. Studio-Harness und Anbieteranbindung

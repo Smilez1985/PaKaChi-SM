@@ -1,6 +1,6 @@
 # Blaupause – PaKaChi-SM
 
-**Softwarestand: 0.76.3 · Dokumentation abgeglichen am 31.10.2026.**
+**Softwarestand: 0.77.0 · Dokumentation abgeglichen am 31.10.2026.**
 
 Die Blaupause besteht aus drei Dokumenten. Das Designdokument beschreibt das Produktziel, die Roadmap die Umsetzung und das Changelog die bereits erfolgten Änderungen.
 
@@ -191,3 +191,5 @@ Seit **0.76.0** darf der umgehängte Knochen selbst gleichmäßig, ungleichmäß
 **0.76.2:** Optionen auf dunkler Navigation mit heller Schrift und sichtbarem Tastaturfokus; die Versionsanzeige wird aus package.json übernommen. Automatisierter Kontrast-/Bediennachweis in der Chromium-Suite.
 
 **Scrollprüfung 0.76.3:** Die Browser-Suite prüft die haftende Studio-Vorschau in normalen/niedrigen Desktopfenstern und freie mobile Eingabefelder. Aufnahmen des sichtbaren Bereichs dienen der Artefaktbewertung; subjektives Mausgefühl bleibt offen.
+
+Seit **0.77.0** exportiert „Figur als GLB (Standbild)“ die aktuelle sichtbare Form als eigenständige GLB-Datei. Haut-/Morph-Verformung, freie Oberflächenpunkte und Welttransformation werden in statische Geometrie übernommen; Materialien und UVs bleiben erhalten. Die Datei enthält kein Rig, keine Studio-Punkte und keine Animationen. Für spätere Bearbeitung zusätzlich das Studio-Projekt speichern. Unsichtbare Zweige werden ausgelassen; Instanzen und teilweise ausgeblendete Materialgruppen werden ausdrücklich abgewiesen. Bei Studio-Änderung, Wiedergabestart oder Schließen vor Abschluss wird das Ergebnis verworfen. Der Export verändert weder Projekt noch Undo-Stand. Texturqualität und Dateigröße hängen vom Modell ab.

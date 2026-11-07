@@ -12,6 +12,18 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.77.0] - 2026-11-07
+
+Zeitstempel: 2026-11-07T01:14:27+01:00 (Europe/Berlin)
+
+### Added
+
+- Eigenständiger GLB-Standbildexport im Studio: aktuelle Haut-/Morph-Verformung und Welttransformation werden in statische Geometrie übernommen, einschließlich korrigierter Dreiecksorientierung bei Spiegelungen. Materialien und UVs bleiben erhalten. Kein Rig-/Animations-Export; Studio-Projekt separat speichern.
+- Exporter wird bei Bedarf geladen. Projekt- und Quelldaten bleiben erhalten; während der Erstellung überholte Ergebnisse werden nicht heruntergeladen.
+- Geometrie-Regressionen und Browserprüfung für Download und erneuten Import der Datei. Instanzen und teilweise ausgeblendete Materialgruppen werden ausdrücklich abgewiesen.
+
+[Prüfbericht](PRUEFUNG-0.77.0.md). GLB-Export mit Rig/Animationen und Retargeting bleiben offen.
+
 ## [0.76.3] - 2026-11-07
 
 Zeitstempel: 2026-11-07T00:47:32+01:00 (Europe/Berlin)
@@ -1587,3 +1599,5 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 [0.76.2]: PRUEFUNG-0.76.2.md
 
 [0.76.3]: PRUEFUNG-0.76.3.md
+
+[0.77.0]: PRUEFUNG-0.77.0.md

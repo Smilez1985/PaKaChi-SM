@@ -5,6 +5,13 @@ export function readOptions(storage?:Pick<Storage,'getItem'>):Options {
 }
 export const options=readOptions();
 const translations:Record<string,string>={
+ 'Figur als GLB (Standbild)':'Export figure as GLB (still)',
+ 'Aktuell sichtbare Form ohne Rig oder Animationen. Studio-Projekt zusätzlich speichern.':'Current visible form without a rig or animations. Save the Studio project as well.',
+ 'GLB-Standbild heruntergeladen. Rig, Posen und Animationen bleiben im Studio-Projekt.':'GLB still downloaded. Rig, poses and animations remain in the Studio project.',
+ 'Studio geändert; GLB-Export verworfen. Bitte erneut exportieren.':'Studio changed; GLB export discarded. Please export again.',
+ 'GLB-Standbild unterstützt keine Instanzen oder teilweise ausgeblendeten Materialgruppen.':'GLB stills do not support instances or partially hidden material groups.',
+ 'Keine sichtbare Figur für den GLB-Export.':'No visible figure for GLB export.',
+
   "Oberflächen-Einfluss übertragen auf":"Transfer skin influence to",
   "Anteil":"Amount",
   "Nur im Umkreis des Quellgelenks":"Only within the source joint radius",
