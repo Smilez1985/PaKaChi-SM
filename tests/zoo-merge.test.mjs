@@ -14,10 +14,10 @@ const hash=b=>createHash('sha256').update(b).digest('hex');
 async function fixture(t){const root=await mkdtemp(join(tmpdir(),'pakachi-merge-'));t.after(()=>rm(root,{recursive:true,force:true}));return root;}
 async function pack(root,id){const p=zooPackage({format:'pakachi-studio',version:1,model:glb().toString('base64'),avatar:{id:'source',name:id,description:'Test',moves:[]},studio:emptyStudio()},id);const dir=join(root,id);await mkdir(join(dir,'model-zoo/projects'),{recursive:true});await writeFile(join(dir,p.path),p.project);await writeFile(join(dir,'model-zoo/catalog.json'),JSON.stringify(p.catalog));return {dir,...p};}
 test('merge preserves bundled avatars and project bytes, produces checksummed catalog without changing inputs',async t=>{
- const root=await fixture(t),incoming=await pack(root,'own'),base=resolve('public'),catalogBefore=await readFile(join(base,'model-zoo/catalog.json')),output=join(root,'result');const report=await mergeZoo({base,package:incoming.dir,output});assert.deepEqual(report.avatars.map(a=>a.id),['mika','nori','own']);
- assert.equal(parseCatalog(JSON.parse(await readFile(join(output,'model-zoo/catalog.json'),'utf8'))).length,3);assert.deepEqual(await readFile(join(base,'model-zoo/catalog.json')),catalogBefore);assert.equal(await readFile(join(incoming.dir,incoming.path),'utf8'),incoming.project);
+ const root=await fixture(t),incoming=await pack(root,'own'),base=resolve('public'),catalogBefore=await readFile(join(base,'model-zoo/catalog.json')),output=join(root,'result'),bundled=parseCatalog(JSON.parse(catalogBefore));const report=await mergeZoo({base,package:incoming.dir,output});assert.deepEqual(report.avatars.map(a=>a.id),[...bundled.map(a=>a.id),'own']);
+ assert.equal(parseCatalog(JSON.parse(await readFile(join(output,'model-zoo/catalog.json'),'utf8'))).length,bundled.length+1);assert.deepEqual(await readFile(join(base,'model-zoo/catalog.json')),catalogBefore);assert.equal(await readFile(join(incoming.dir,incoming.path),'utf8'),incoming.project);
  for(const item of report.files){const bytes=await readFile(join(output,item.path));assert.equal(hash(bytes),item.sha256);assert.equal(bytes.length,item.bytes);}
- for(const id of ['mika','nori'])assert.deepEqual(await readFile(join(output,`model-zoo/${id}/model.gltf`)),await readFile(join(base,`model-zoo/${id}/model.gltf`)));
+ for(const avatar of bundled)assert.deepEqual(await readFile(join(output,avatar.model)),await readFile(join(base,avatar.model)));
  assert.deepEqual((await readdir(output)).sort(),['README.txt','merge-report.json','model-zoo']);
 });
 test('duplicate IDs and normalized resource paths fail before creating output',async t=>{

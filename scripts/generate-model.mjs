@@ -7,6 +7,7 @@ import {pathToFileURL} from 'node:url';
 import {parseArgs} from 'node:util';
 import {parseModel,disposeModel} from '../src/viewer.ts';
 import {Box3,Vector3,Mesh} from 'three';
+import {orientTripoSRGlb} from './orient-triposr.mjs';
 const sha=bytes=>createHash('sha256').update(bytes).digest('hex');
 const MAX_BYTES=50*1024*1024;
 
@@ -71,7 +72,12 @@ export async function generate(options,{check=checkEnvironment,launch=processRun
  try{
   const p=await launch(python,args,{cwd:resolve(repo),timeout:timeout*1000,signal,onData:data=>{log=(log+data).slice(-2000000);}});
   signal?.throwIfAborted();if(p.code!==0)throw new Error(`Generator fehlgeschlagen (Exit ${p.code}); siehe generator.log.`);
-  const glb=join(job,'result','0','mesh.glb');report.model=await inspectGenerated(glb);report.model.file='result/0/mesh.glb';report.status='generated-unreviewed';
+  const glb=join(job,'result','0','mesh.glb'),native=await readFile(glb);
+  if(native.length>MAX_BYTES)throw new Error('GLB überschreitet 50 MiB.');
+  await writeFile(join(job,'result','0','mesh-native.glb'),native,{flag:'wx'});
+  await writeFile(glb,orientTripoSRGlb(native));
+  report.orientation={source:'Z-up / +X front',target:'Y-up / +Z front',nativeFile:'result/0/mesh-native.glb',nativeSha256:sha(native)};
+  report.model=await inspectGenerated(glb);report.model.file='result/0/mesh.glb';report.status='generated-unreviewed';
  }catch(error){report.status='failed';report.error=error.message;}
  finally{report.seconds=(performance.now()-start)/1000;report.finished=new Date().toISOString();await writeFile(join(job,'generator.log'),log);await save();}
  return {job,report};

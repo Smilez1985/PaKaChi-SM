@@ -1,6 +1,33 @@
-# Lokale Bild-zu-3D-Generierung – 0.22.0
+# Bild-zu-3D-Generierung
 
-**Experimenteller lokaler Generator mit Studio-Oberfläche seit 0.22.0.** Es wurde hier kein KI-Modell erzeugt. Vorprüfung und Ablauf sind getestet; für echte Inferenz fehlt in der Ausführungsumgebung die eingerichtete Python-/CUDA-Pipeline. Anatomisches Rigging, beide 3D-Formen und ihre Transformation bleiben offen.
+**Seit 0.83.0 erstmals mit echter PaKaChi-Inferenz belegt.** Beide Formen wurden mit TripoSR auf CPU rekonstruiert und stehen als statische 3D-Entwürfe im Model Zoo. Die Studio-Oberfläche existiert seit 0.22.0. GPU-Ausführung, designgetreue Charakterqualität, anatomisches Rigging und die 3D-Transformation bleiben offen.
+
+## Erste echte PaKaChi-Entwürfe
+
+Im Player unter **Avatar auswählen** die Einträge **PaKaChi · Humanoid · 3D-Entwurf** und **PaKaChi · Tierform · 3D-Entwurf** wählen. Beide lassen sich frei drehen und ins integrierte Studio übernehmen. Sie besitzen bewusst keine Moves und kein Skelett. Der beim Start ausgewählte Bildplayer bleibt erhalten.
+
+| Entwurf | Vorlage | Datei |
+| --- | --- | --- |
+| Humanoid | Korrigierter Fell-/Gelenk-Stilanker | [humanoid.glb](../public/model-zoo/pakachi-drafts/humanoid.glb) |
+| Tierform | Unveränderter Originalframe 001 | [animal.glb](../public/model-zoo/pakachi-drafts/animal.glb) |
+
+![Humanoider 3D-Entwurf aus vier Richtungen](references/pakachi-3d/pakachi-humanoid-views.png)
+
+![Tierischer 3D-Entwurf aus vier Richtungen](references/pakachi-3d/pakachi-animal-views.png)
+
+**Sichtbare Mängel:** Gesicht und Augen weichen ab, Finger/Pfoten sind unzureichend getrennt, Fell- und Materialwirkung gehen verloren, seitliches Körpervolumen und verdeckte Flächen sind unzuverlässig. Die Rückseite ist aus einem Einzelbild geschätzt. Mehr Abtastpunkte verfeinern das Mesh, beheben diese Rekonstruktionsfehler aber nicht grundsätzlich. Das sind Arbeitsentwürfe, keine Freigabe als fertiges Maskottchen.
+
+Vier echte CPU-Läufe (beide Formen, jeweils Auflösung 128 und 256), Eingabe-/Ausgabeprüfsummen, Parameter, Abhängigkeiten und Logs sind im [Messbericht](benchmarks/pakachi-generation-2026-11-07.json) dokumentiert; zusammenfassender [Prüfstand](PRUEFUNG.md#version-0830). Die 256er Ergebnisse werden ausgeliefert. Die Abbildungen wurden aus der vom produktiven GLTFLoader geladenen Geometrie mit Software-OpenGL gerendert; sie sind keine generierten 2D-Ansichten und keine vollständige Browser-/Materialabnahme.
+
+Für diese Läufe wurde TripoSR-Revision `107cefdc244c39106fa830359024f6a2f1c78871` mit [einem kleinen Patch](../scripts/patches/triposr-transparent-input.patch) verwendet. Er überspringt die Erzeugung einer Hintergrundentfernungs-Sitzung, wenn alle Eingaben schon transparente RGBA-Bilder sind. Die vorhandene TripoSR-Alphaverarbeitung bleibt aktiv. Ohne den Patch initialisiert das Backend unnötig den Hintergrundentferner samt zusätzlichem Gewichtsdownload. Der Patch wird **nicht automatisch** auf fremde Installationen angewendet.
+
+```sh
+# Im genannten TripoSR-Checkout, Pfad zum PaKaChi-Projekt anpassen:
+git apply --check /pfad/zu/PaKaChi-SM/scripts/patches/triposr-transparent-input.patch
+git apply /pfad/zu/PaKaChi-SM/scripts/patches/triposr-transparent-input.patch
+```
+
+Der Converter richtet TripoSR-Ausgaben seit 0.83.0 von Z-oben/+X-vorn nach glTF Y-oben/+Z-vorn aus. Die native Datei wird zusätzlich als `result/0/mesh-native.glb` erhalten. Ein neuer Wurzelknoten trägt die Rotation; Vertexfarben und Geometriebytes bleiben unverändert. Das fügt weder Skelett noch Animation hinzu. Allgemeine GLB-Importe werden nicht umorientiert.
 
 ## Auswahl des ersten Testkandidaten
 

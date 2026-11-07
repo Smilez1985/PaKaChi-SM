@@ -1,0 +1,409 @@
+{
+  "format": "pakachi-real-generation-evidence",
+  "version": 1,
+  "date": "2026-11-07",
+  "scope": "Real CPU inference; static, unrigged reconstruction drafts. Not approved character designs.",
+  "baseCommit": "8820d6d4b81db0fffeda15e9799a62853fde0192",
+  "backend": {
+    "repository": "https://github.com/VAST-AI-Research/TripoSR",
+    "commit": "107cefdc244c39106fa830359024f6a2f1c78871",
+    "patch": "scripts/patches/triposr-transparent-input.patch",
+    "patchSha256": "30972de33efe8c3631d789d52bad3d41d73f1898750e57b94d9f2927957d757c"
+  },
+  "observedWeights": {
+    "repository": "stabilityai/TripoSR",
+    "resolvedRevision": "5b521936b01fbe1890f6f9baed0254ab6351c04a",
+    "modelCkptSha256": "429e2c6b22a0923967459de24d67f05962b235f79cde6b032aa7ed2ffcd970ee",
+    "dinoConfigRevision": "f205d5d8e640a89a2b8ef0369670dfc37cc07fc2",
+    "note": "Official CLI uses the default revision; the observed downloaded file is hashed here. Generic adapter is not yet revision-pinned."
+  },
+  "runtime": {
+    "python": "3.12.14",
+    "device": "cpu",
+    "torch": "2.5.1+cpu",
+    "threads": 8,
+    "requirementsObserved": "antlr4-python3-runtime==4.9.3\nattrs==26.1.0\ncertifi==2026.10.23\ncharset-normalizer==3.5.2\ncmake==4.4.4\neinops==0.7.0\nfilelock==4.2.4\nflatbuffers==25.12.19\nfsspec==2026.9.0\nglcontext==2.5.0\nhuggingface-hub==0.17.3\nidna==3.20\nimageio==2.38.1\nimageio-ffmpeg==0.8.1\njinja2==3.1.6\njsonschema==4.26.0\njsonschema-specifications==2025.9.1\nlazy-loader==0.6\nllvmlite==0.50.0\nmarkupsafe==3.0.3\nmoderngl==5.10.0\nmpmath==1.3.0\nnetworkx==3.7\nninja==1.13.2\nnumba==0.68.1\nnumpy==1.26.4\nomegaconf==2.3.0\nonnxruntime==1.31.1\nopencv-python-headless==4.11.0.86\npackaging==26.3\npathspec==1.1.1\npillow==10.1.0\nplatformdirs==4.14.5\npooch==1.9.0\nprotobuf==7.36.2\npsutil==7.2.2\npybind11==3.1.0\npymatting==1.1.16\npyyaml==6.0.3\nreferencing==0.37.0\nregex==2026.11.7\nrembg==2.0.61\nrequests==2.34.2\nrpds-py==2026.9.1\nsafetensors==0.8.0\nscikit-build-core==1.1.2\nscikit-image==0.26.0\nscipy==1.17.1\nsetuptools==78.1.0\nsympy==1.13.1\ntifffile==2026.3.3\ntokenizers==0.14.1\ntorch==2.5.1+cpu\ntorchmcubes @ git+https://github.com/tatsy/torchmcubes.git@a9ac95aa329957ba646e7bb057f825f5dfa77f38\ntqdm==4.70.1\ntransformers==4.35.0\ntrimesh==4.0.5\ntyping-extensions==4.16.0\nurllib3==2.8.0\nwheel==0.48.0\nxatlas==0.0.9\n"
+  },
+  "notes": [
+    "Machine-specific paths in copied reports/logs are replaced with placeholders.",
+    "Each run duration excludes environment setup and preflight.",
+    "Initial stock-backend attempt was interrupted during background-remover initialization; it is not counted among the four completed runs.",
+    "Reference images were not edited.",
+    "128/256 are marching-cubes grid resolutions, not independently validated avatar quality presets.",
+    "Preview renders use geometry flattened by the production Three.js GLTFLoader/PLYExporter and software OpenGL llvmpipe; no browser/material quality approval.",
+    "GLB orientation adds a scene root, preserving mesh buffer bytes.",
+    "No rig, animation, transformation or visual design approval."
+  ],
+  "runs": [
+    {
+      "job": "2026-11-07T15-59-12-679Z-f13b886b",
+      "report": {
+        "format": "pakachi-generation-report",
+        "version": 1,
+        "backend": "TripoSR",
+        "weights": {
+          "source": "stabilityai/TripoSR",
+          "revision": "not-pinned"
+        },
+        "started": "2026-11-07T15:59:12.682Z",
+        "status": "generated-unreviewed",
+        "input": {
+          "name": "Pakachi-Endform-Stilanker.png",
+          "sha256": "687da2bee3e1cd9c82067977eeab870a493bbbd78d1329d2ddf6635747b9c44b"
+        },
+        "environment": {
+          "python": "<PYTHON>",
+          "device": "cpu",
+          "backend": "TripoSR",
+          "ready": true,
+          "blockers": [],
+          "backendSourceSha256": "2e83db0d8a1022b55e6e398844a19b3d5c3318d97e4def258bc9cc29395883a8",
+          "runtime": {
+            "missing": [],
+            "torch": "2.5.1+cpu",
+            "cuda": false
+          }
+        },
+        "command": {
+          "python": "<PYTHON>",
+          "args": [
+            "<TripoSR>/run.py",
+            "<JOBS>/2026-11-07T15-59-12-679Z-f13b886b/source.png",
+            "--device",
+            "cpu",
+            "--output-dir",
+            "<JOBS>/2026-11-07T15-59-12-679Z-f13b886b/result",
+            "--model-save-format",
+            "glb",
+            "--mc-resolution",
+            "128"
+          ]
+        },
+        "visualReview": "pending",
+        "rigReview": "pending",
+        "transformationReview": "pending",
+        "model": {
+          "bytes": 486008,
+          "sha256": "8a180d1fa528812d27fdfb810b7b177b57daa79a9843d9821a738b9fba7b4673",
+          "vertices": 12147,
+          "triangles": 24220,
+          "meshes": 1,
+          "bones": 0,
+          "clips": 0,
+          "bounds": {
+            "min": [
+              -0.21111470460891724,
+              -0.4812014400959015,
+              -0.4886026680469513
+            ],
+            "max": [
+              0.31936442852020264,
+              0.4552600383758545,
+              0.512751579284668
+            ]
+          },
+          "visualReview": "pending",
+          "rigReview": "pending",
+          "file": "result/0/mesh.glb"
+        },
+        "seconds": 66.971909593,
+        "finished": "2026-11-07T16:00:19.656Z"
+      },
+      "log": "2026-11-07 16:59:15,470 - INFO - Initializing model ...\n/workspace/scratch/8baeb9436482/triposr-venv/lib/python3.12/site-packages/transformers/utils/generic.py:441: FutureWarning: `torch.utils._pytree._register_pytree_node` is deprecated. Please use `torch.utils._pytree.register_pytree_node` instead.\n  _torch_pytree._register_pytree_node(\n/workspace/scratch/8baeb9436482/triposr-venv/lib/python3.12/site-packages/transformers/utils/generic.py:309: FutureWarning: `torch.utils._pytree._register_pytree_node` is deprecated. Please use `torch.utils._pytree.register_pytree_node` instead.\n  _torch_pytree._register_pytree_node(\n<TripoSR>/tsr/system.py:69: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.\n  ckpt = torch.load(weight_path, map_location=\"cpu\")\n2026-11-07 16:59:28,768 - INFO - Initializing model finished in 13297.77ms.\n2026-11-07 16:59:28,768 - INFO - Processing images ...\n2026-11-07 16:59:28,975 - INFO - Processing images finished in 207.46ms.\n2026-11-07 16:59:28,975 - INFO - Running image 1/1 ...\n2026-11-07 16:59:28,975 - INFO - Running model ...\n2026-11-07 17:00:08,440 - INFO - Running model finished in 39464.12ms.\n2026-11-07 17:00:08,440 - INFO - Extracting mesh ...\n2026-11-07 17:00:18,998 - INFO - Extracting mesh finished in 10558.23ms.\n2026-11-07 17:00:18,999 - INFO - Exporting mesh ...\n2026-11-07 17:00:19,002 - INFO - Exporting mesh finished in 3.17ms.\n"
+    },
+    {
+      "job": "2026-11-07T16-00-35-907Z-dd734b3a",
+      "report": {
+        "format": "pakachi-generation-report",
+        "version": 1,
+        "backend": "TripoSR",
+        "weights": {
+          "source": "stabilityai/TripoSR",
+          "revision": "not-pinned"
+        },
+        "started": "2026-11-07T16:00:35.915Z",
+        "status": "generated-unreviewed",
+        "input": {
+          "name": "001.png",
+          "sha256": "292f83e36f0f414b790360448e798f7148a1a78ebfaca9f69f0aee41fd74c6a8"
+        },
+        "environment": {
+          "python": "<PYTHON>",
+          "device": "cpu",
+          "backend": "TripoSR",
+          "ready": true,
+          "blockers": [],
+          "backendSourceSha256": "2e83db0d8a1022b55e6e398844a19b3d5c3318d97e4def258bc9cc29395883a8",
+          "runtime": {
+            "missing": [],
+            "torch": "2.5.1+cpu",
+            "cuda": false
+          }
+        },
+        "command": {
+          "python": "<PYTHON>",
+          "args": [
+            "<TripoSR>/run.py",
+            "<JOBS>/2026-11-07T16-00-35-907Z-dd734b3a/source.png",
+            "--device",
+            "cpu",
+            "--output-dir",
+            "<JOBS>/2026-11-07T16-00-35-907Z-dd734b3a/result",
+            "--model-save-format",
+            "glb",
+            "--mc-resolution",
+            "128"
+          ]
+        },
+        "visualReview": "pending",
+        "rigReview": "pending",
+        "transformationReview": "pending",
+        "model": {
+          "bytes": 765212,
+          "sha256": "2c80c558d6c5c51f86a546a2f274599ffea4924a47fe8896bd72713208bc8159",
+          "vertices": 19139,
+          "triangles": 38164,
+          "meshes": 1,
+          "bones": 0,
+          "clips": 0,
+          "bounds": {
+            "min": [
+              -0.31750017404556274,
+              -0.5227734446525574,
+              -0.44479426741600037
+            ],
+            "max": [
+              0.4150857925415039,
+              0.48567283153533936,
+              0.44491803646087646
+            ]
+          },
+          "visualReview": "pending",
+          "rigReview": "pending",
+          "file": "result/0/mesh.glb"
+        },
+        "seconds": 85.872858187,
+        "finished": "2026-11-07T16:02:01.790Z"
+      },
+      "log": "2026-11-07 17:00:38,378 - INFO - Initializing model ...\n/workspace/scratch/8baeb9436482/triposr-venv/lib/python3.12/site-packages/transformers/utils/generic.py:441: FutureWarning: `torch.utils._pytree._register_pytree_node` is deprecated. Please use `torch.utils._pytree.register_pytree_node` instead.\n  _torch_pytree._register_pytree_node(\n/workspace/scratch/8baeb9436482/triposr-venv/lib/python3.12/site-packages/transformers/utils/generic.py:309: FutureWarning: `torch.utils._pytree._register_pytree_node` is deprecated. Please use `torch.utils._pytree.register_pytree_node` instead.\n  _torch_pytree._register_pytree_node(\n<TripoSR>/tsr/system.py:69: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.\n  ckpt = torch.load(weight_path, map_location=\"cpu\")\n2026-11-07 17:00:51,350 - INFO - Initializing model finished in 12972.11ms.\n2026-11-07 17:00:51,350 - INFO - Processing images ...\n2026-11-07 17:00:51,503 - INFO - Processing images finished in 153.03ms.\n2026-11-07 17:00:51,503 - INFO - Running image 1/1 ...\n2026-11-07 17:00:51,503 - INFO - Running model ...\n2026-11-07 17:01:35,068 - INFO - Running model finished in 43565.15ms.\n2026-11-07 17:01:35,068 - INFO - Extracting mesh ...\n2026-11-07 17:02:01,072 - INFO - Extracting mesh finished in 26003.78ms.\n2026-11-07 17:02:01,073 - INFO - Exporting mesh ...\n2026-11-07 17:02:01,078 - INFO - Exporting mesh finished in 5.56ms.\n"
+    },
+    {
+      "job": "2026-11-07T16-02-26-333Z-2fa6fa68",
+      "report": {
+        "format": "pakachi-generation-report",
+        "version": 1,
+        "backend": "TripoSR",
+        "weights": {
+          "source": "stabilityai/TripoSR",
+          "revision": "not-pinned"
+        },
+        "started": "2026-11-07T16:02:26.337Z",
+        "status": "generated-unreviewed",
+        "input": {
+          "name": "Pakachi-Endform-Stilanker.png",
+          "sha256": "687da2bee3e1cd9c82067977eeab870a493bbbd78d1329d2ddf6635747b9c44b"
+        },
+        "environment": {
+          "python": "<PYTHON>",
+          "device": "cpu",
+          "backend": "TripoSR",
+          "ready": true,
+          "blockers": [],
+          "backendSourceSha256": "2e83db0d8a1022b55e6e398844a19b3d5c3318d97e4def258bc9cc29395883a8",
+          "runtime": {
+            "missing": [],
+            "torch": "2.5.1+cpu",
+            "cuda": false
+          }
+        },
+        "command": {
+          "python": "<PYTHON>",
+          "args": [
+            "<TripoSR>/run.py",
+            "<JOBS>/2026-11-07T16-02-26-333Z-2fa6fa68/source.png",
+            "--device",
+            "cpu",
+            "--output-dir",
+            "<JOBS>/2026-11-07T16-02-26-333Z-2fa6fa68/result",
+            "--model-save-format",
+            "glb",
+            "--mc-resolution",
+            "256"
+          ]
+        },
+        "visualReview": "pending",
+        "rigReview": "pending",
+        "transformationReview": "pending",
+        "model": {
+          "bytes": 2033712,
+          "sha256": "5e0540d1d4ed8a559d8cdd1f964f99103a8db749ada0d621e95bfdbc5372d0e4",
+          "vertices": 50870,
+          "triangles": 101564,
+          "meshes": 1,
+          "bones": 0,
+          "clips": 0,
+          "bounds": {
+            "min": [
+              -0.2104557752609253,
+              -0.48450469970703125,
+              -0.4871743619441986
+            ],
+            "max": [
+              0.3164921998977661,
+              0.45270800590515137,
+              0.5136983394622803
+            ]
+          },
+          "visualReview": "pending",
+          "rigReview": "pending",
+          "file": "result/0/mesh.glb"
+        },
+        "seconds": 186.075274377,
+        "finished": "2026-11-07T16:05:32.417Z"
+      },
+      "log": "2026-11-07 17:02:28,859 - INFO - Initializing model ...\n/workspace/scratch/8baeb9436482/triposr-venv/lib/python3.12/site-packages/transformers/utils/generic.py:441: FutureWarning: `torch.utils._pytree._register_pytree_node` is deprecated. Please use `torch.utils._pytree.register_pytree_node` instead.\n  _torch_pytree._register_pytree_node(\n/workspace/scratch/8baeb9436482/triposr-venv/lib/python3.12/site-packages/transformers/utils/generic.py:309: FutureWarning: `torch.utils._pytree._register_pytree_node` is deprecated. Please use `torch.utils._pytree.register_pytree_node` instead.\n  _torch_pytree._register_pytree_node(\n<TripoSR>/tsr/system.py:69: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.\n  ckpt = torch.load(weight_path, map_location=\"cpu\")\n2026-11-07 17:02:41,238 - INFO - Initializing model finished in 12378.33ms.\n2026-11-07 17:02:41,238 - INFO - Processing images ...\n2026-11-07 17:02:41,405 - INFO - Processing images finished in 167.68ms.\n2026-11-07 17:02:41,405 - INFO - Running image 1/1 ...\n2026-11-07 17:02:41,406 - INFO - Running model ...\n2026-11-07 17:03:24,248 - INFO - Running model finished in 42842.28ms.\n2026-11-07 17:03:24,248 - INFO - Extracting mesh ...\n2026-11-07 17:05:31,757 - INFO - Extracting mesh finished in 127508.82ms.\n2026-11-07 17:05:31,757 - INFO - Exporting mesh ...\n2026-11-07 17:05:31,768 - INFO - Exporting mesh finished in 11.36ms.\n"
+    },
+    {
+      "job": "2026-11-07T16-05-56-566Z-719f0046",
+      "report": {
+        "format": "pakachi-generation-report",
+        "version": 1,
+        "backend": "TripoSR",
+        "weights": {
+          "source": "stabilityai/TripoSR",
+          "revision": "not-pinned"
+        },
+        "started": "2026-11-07T16:05:56.577Z",
+        "status": "generated-unreviewed",
+        "input": {
+          "name": "001.png",
+          "sha256": "292f83e36f0f414b790360448e798f7148a1a78ebfaca9f69f0aee41fd74c6a8"
+        },
+        "environment": {
+          "python": "<PYTHON>",
+          "device": "cpu",
+          "backend": "TripoSR",
+          "ready": true,
+          "blockers": [],
+          "backendSourceSha256": "2e83db0d8a1022b55e6e398844a19b3d5c3318d97e4def258bc9cc29395883a8",
+          "runtime": {
+            "missing": [],
+            "torch": "2.5.1+cpu",
+            "cuda": false
+          }
+        },
+        "command": {
+          "python": "<PYTHON>",
+          "args": [
+            "<TripoSR>/run.py",
+            "<JOBS>/2026-11-07T16-05-56-566Z-719f0046/source.png",
+            "--device",
+            "cpu",
+            "--output-dir",
+            "<JOBS>/2026-11-07T16-05-56-566Z-719f0046/result",
+            "--model-save-format",
+            "glb",
+            "--mc-resolution",
+            "256"
+          ]
+        },
+        "visualReview": "pending",
+        "rigReview": "pending",
+        "transformationReview": "pending",
+        "orientation": {
+          "source": "Z-up / +X front",
+          "target": "Y-up / +Z front",
+          "nativeFile": "result/0/mesh-native.glb",
+          "nativeSha256": "9cc7550f0414218396cace66e0041dfa7f1f5f90d30926431e62eca404b467a7"
+        },
+        "model": {
+          "bytes": 3253384,
+          "sha256": "c87b55c51a9bf1872de421d1052f943de05e53119b3e8c6265d5d0016b8e6d42",
+          "vertices": 81388,
+          "triangles": 162500,
+          "meshes": 1,
+          "bones": 0,
+          "clips": 0,
+          "bounds": {
+            "min": [
+              -0.5251741409301758,
+              -0.44337424635887146,
+              -0.3205515146255493
+            ],
+            "max": [
+              0.4866863489151001,
+              0.4462648630142212,
+              0.41165852546691895
+            ]
+          },
+          "visualReview": "pending",
+          "rigReview": "pending",
+          "file": "result/0/mesh.glb"
+        },
+        "seconds": 173.563734017,
+        "finished": "2026-11-07T16:08:50.144Z"
+      },
+      "log": "2026-11-07 17:05:59,181 - INFO - Initializing model ...\n/workspace/scratch/8baeb9436482/triposr-venv/lib/python3.12/site-packages/transformers/utils/generic.py:441: FutureWarning: `torch.utils._pytree._register_pytree_node` is deprecated. Please use `torch.utils._pytree.register_pytree_node` instead.\n  _torch_pytree._register_pytree_node(\n/workspace/scratch/8baeb9436482/triposr-venv/lib/python3.12/site-packages/transformers/utils/generic.py:309: FutureWarning: `torch.utils._pytree._register_pytree_node` is deprecated. Please use `torch.utils._pytree.register_pytree_node` instead.\n  _torch_pytree._register_pytree_node(\n<TripoSR>/tsr/system.py:69: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.\n  ckpt = torch.load(weight_path, map_location=\"cpu\")\n2026-11-07 17:06:11,610 - INFO - Initializing model finished in 12428.67ms.\n2026-11-07 17:06:11,610 - INFO - Processing images ...\n2026-11-07 17:06:11,719 - INFO - Processing images finished in 108.29ms.\n2026-11-07 17:06:11,719 - INFO - Running image 1/1 ...\n2026-11-07 17:06:11,719 - INFO - Running model ...\n2026-11-07 17:07:05,789 - INFO - Running model finished in 54070.74ms.\n2026-11-07 17:07:05,790 - INFO - Extracting mesh ...\n2026-11-07 17:08:49,428 - INFO - Extracting mesh finished in 103638.13ms.\n2026-11-07 17:08:49,428 - INFO - Exporting mesh ...\n2026-11-07 17:08:49,443 - INFO - Exporting mesh finished in 15.48ms.\n"
+    }
+  ],
+  "artifacts": [
+    {
+      "form": "humanoid",
+      "file": "public/model-zoo/pakachi-drafts/humanoid.glb",
+      "run": 2,
+      "inspection": {
+        "bytes": 2033864,
+        "sha256": "debb9c4793368bff6989f41b2a40eba3e4ef6a6100aaf3858abe51117a174d14",
+        "vertices": 50870,
+        "triangles": 101564,
+        "meshes": 1,
+        "bones": 0,
+        "clips": 0,
+        "bounds": {
+          "min": [
+            -0.48450469970703125,
+            -0.4871743619441986,
+            -0.2104557752609253
+          ],
+          "max": [
+            0.45270800590515137,
+            0.5136983394622803,
+            0.3164921998977661
+          ]
+        },
+        "visualReview": "pending",
+        "rigReview": "pending"
+      },
+      "postprocessing": "Same orientation helper applied after the recorded generation completed."
+    },
+    {
+      "form": "animal",
+      "file": "public/model-zoo/pakachi-drafts/animal.glb",
+      "run": 3,
+      "inspection": {
+        "bytes": 3253384,
+        "sha256": "c87b55c51a9bf1872de421d1052f943de05e53119b3e8c6265d5d0016b8e6d42",
+        "vertices": 81388,
+        "triangles": 162500,
+        "meshes": 1,
+        "bones": 0,
+        "clips": 0,
+        "bounds": {
+          "min": [
+            -0.5251741409301758,
+            -0.44337424635887146,
+            -0.3205515146255493
+          ],
+          "max": [
+            0.4866863489151001,
+            0.4462648630142212,
+            0.41165852546691895
+          ]
+        },
+        "visualReview": "pending",
+        "rigReview": "pending"
+      },
+      "postprocessing": "Orientation applied by converter during the recorded run."
+    }
+  ]
+}

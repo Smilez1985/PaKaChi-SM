@@ -12,11 +12,28 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.83.0] - 2026-11-07
+
+Zeitstempel: 2026-11-07T17:13:02+01:00 (Europe/Berlin)
+
+### Added
+
+- Erste echte Bild-zu-3D-Rekonstruktionen des Original-PaKaChi: humanoide und tierische Form als getrennte, statische GLB-Entwürfe im Model Zoo. Aus den unveränderten Einzelvorlagen mit TripoSR auf CPU erzeugt; keine prozeduralen Ersatzpuppen.
+- Vier abgeschlossene Inferenzläufe (beide Formen, jeweils Auflösung 128 und 256), prüfbare Modell-/Eingabehashes, Abhängigkeiten, Parameter, Logs und echte 3D-Rundumansichten. Ausgeliefert werden die 256er Meshes mit 50.870 beziehungsweise 81.388 Vertices; ohne Skelett oder Clips.
+- Nachvollziehbarer Patch für die getestete TripoSR-Revision, der bei bereits transparenten RGBA-Vorlagen die unnötige Initialisierung des Hintergrundentferners vermeidet. Keine automatische Änderung fremder Installationen.
+
+### Fixed
+
+- TripoSR-Ausgaben stehen im Player aufrecht und schauen nach vorn: Ein Szenenwurzelknoten überführt Z-oben/+X-vorn nach glTF Y-oben/+Z-vorn. Native GLB bleibt im Generierungsordner erhalten; Meshbuffer bleiben unverändert. Die Ausrichtung wird nicht auf allgemeine GLB-Importe angewendet.
+
 ### Changed
 
+- Katalogprüfungen unterscheiden tatsächlich animierte Testavatare und ungeriggte Entwürfe; Sammlungsexport prüft den Byteerhalt aller mitgelieferten Modelle. Neuer Chromium-Fall lädt beide realen PaKaChi-Entwürfe ohne erfundene Bewegungsfähigkeiten.
 - Dokumentation neu geordnet (2026-11-07T15:22:04+01:00, Europe/Berlin): Versionschroniken aus beiden READMEs entfernt; die Historie wird ausschließlich hier gepflegt.
 - 91 einzelne Versions-Prüfberichte in `PRUEFUNG.md` mit einem Abschnitt je Version zusammengeführt. Datierte Zwischenprüfungen, bisherige Nachweise und Einschränkungen erhalten; alle Verweise auf die neuen Abschnittsanker umgestellt und die Einzeldateien entfernt.
 - Roadmap-Prioritäten auf den Original-PaKaChi und einen tatsächlichen Bild-zu-3D-Lauf ausgerichtet; allgemeine Gelenkerweiterungen dem konkreten Charakterablauf untergeordnet.
+
+[Prüfbericht](PRUEFUNG.md#version-0830). Gesicht/Augen, Hände/Pfoten, Fell-/Materialwirkung, Körpervolumen und verdeckte Flächen brauchen Korrektur. Charakterfreigabe, Rigging, Animationen, 3D-Transformation und GPU-Abnahme bleiben offen.
 
 ## [0.82.0] - 2026-11-07
 
@@ -1707,3 +1724,5 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 [0.81.0]: PRUEFUNG.md#version-0810
 
 [0.82.0]: PRUEFUNG.md#version-0820
+
+[0.83.0]: PRUEFUNG.md#version-0830

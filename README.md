@@ -2,9 +2,9 @@
 
 PaKaChi ist die **Panda-KI-Chimera**. PaKaChi-SM vereint den Avatar-Player, den Model Zoo und das fest integrierte **PaKaChi-Avatar-Studio**. SM steht für StateMaschine.
 
-**Softwarestand: 0.82.0 · Entwicklungsversion.**
+**Softwarestand: 0.83.0 · Entwicklungsversion.**
 
-Der Original-PaKaChi mit Tierform, humanoider Arbeitsform und 72 Transformationsbildern ist als Bildplayer erhalten und beim Start ausgewählt. **Sein designgetreues 3D-Modell fehlt noch.** Mika und Nori sind technische Testavatare. Die Bild-zu-3D-Anbindung ist vorbereitet; ein echter Generierungslauf und die Qualitätsabnahme für PaKaChi stehen aus.
+Der Original-PaKaChi mit Tierform, humanoider Arbeitsform und 72 Transformationsbildern ist als Bildplayer erhalten und beim Start ausgewählt. Im Model Zoo stehen zusätzlich **zwei echte Bild-zu-3D-Entwürfe des Original-PaKaChi** zur Auswahl: Humanoid und Tierform. Sie sind statisch und noch deutlich korrekturbedürftig; Skelett, Bewegungen und 3D-Transformation fehlen. Mika und Nori bleiben technische Testavatare. [Ergebnisse, Vorlagen und Grenzen](docs/KI-GENERIERUNG.md#erste-echte-pakachi-entwürfe).
 
 ## Starten
 
@@ -45,7 +45,7 @@ Projekte als Datei herunterladen, um sie unabhängig vom Browserbestand zu siche
 
 Ziel: **Bild hineinziehen → 3D-Avatar erzeugen → korrigieren → Bewegungen speichern → per Agent auslösen.** Der namensgebende PaKaChi und ein echter Bild-zu-3D-Lauf haben Vorrang; seine beiden Formen bleiben verbindliche Designvorlagen.
 
-Das Studio besitzt eine Bildauswahl, einen lokalen TripoSR-Aufruf und eine getrennte Ergebnisvorschau mit ausdrücklicher Übernahme. Eine eingerichtete KI-Laufzeit ist dafür erforderlich. Echte Inferenz, designgetreue Geometrie, anatomisches Rigging und die 3D-Transformation zwischen beiden Formen sind noch offen.
+Das Studio besitzt eine Bildauswahl, einen lokalen TripoSR-Aufruf und eine getrennte Ergebnisvorschau mit ausdrücklicher Übernahme. Eine eingerichtete KI-Laufzeit ist dafür erforderlich. Echte CPU-Inferenz für beide Originalformen ist belegt. Designgetreue Geometrie, GPU-Abnahme, anatomisches Rigging und die 3D-Transformation zwischen beiden Formen bleiben offen.
 
 - [Converter einrichten und beide Referenzen verwenden](docs/KI-GENERIERUNG.md)
 - [Originalbilder und korrigierter Stilanker](docs/references/README.md)

@@ -1,13 +1,13 @@
 # Roadmap – offene Aufgaben
 
-**Entwicklungsstand: 0.82.0 · Abgleich: 07.11.2026.** Teil der [Blaupause](README.md).
+**Entwicklungsstand: 0.83.0 · Abgleich: 07.11.2026.** Teil der [Blaupause](README.md).
 
 Diese Roadmap enthält offene Umsetzung und ausstehende Abnahme. Erledigte Änderungen stehen nach Version im [Changelog](CHANGELOG.md); Nachweise und Grenzen im [Prüfstand](PRUEFUNG.md). Eine implementierte Funktion ist nicht automatisch manuell oder mit realen Anbietern abgenommen.
 
 ## Prioritäten
 
-1. **Original-PaKaChi als 3D-Charakter:** Den ersten designgetreuen humanoiden Entwurf aus dem korrigierten Stilanker erzeugen und im Player aus allen Richtungen prüfen. Danach Tierform und gemeinsame Vorbereitung für Rigging und Transformation. Mika und Nori bleiben technische Testavatare.
-2. **Bild-zu-3D tatsächlich ausführen:** Eine geeignete GPU-Laufzeit mit dem vorhandenen Converter verbinden und einen echten Generierungslauf belegen. Aufruf-, Transport- und Testdaten-Nachweise ersetzen keine Inferenz oder Charakterqualität. [Ablauf und beide Referenzen](KI-GENERIERUNG.md).
+1. **Original-PaKaChi als 3D-Charakter:** Die erstmals wirklich rekonstruierten humanoiden und tierischen Entwürfe stehen seit 0.83.0 im Model Zoo. Als Nächstes Gesicht/Augen, Hände/Pfoten, Fellwirkung, Körpervolumen und verdeckte Flächen korrigieren und designgetreu abnehmen. Danach gemeinsame Vorbereitung für Rigging und Transformation. Mika und Nori bleiben technische Testavatare.
+2. **Bild-zu-3D tatsächlich ausführen:** Echte CPU-Inferenz für beide Formen auf zwei Rekonstruktionsstufen ist seit 0.83.0 belegt. GPU-Betrieb auf Zielhardware und ein qualitativer Vergleich mit einem geeigneten neueren Verfahren bleiben offen. Die vorhandenen Entwürfe ersetzen keine Charakterabnahme. [Ablauf und beide Referenzen](KI-GENERIERUNG.md).
 3. **Den Charakter beweglich machen:** Erst den akzeptierten PaKaChi-Entwurf riggen, Hautgewichte und Bewegungen prüfen und die beiden Formen auf einen abgestimmten Formwechsel vorbereiten. Weitere allgemeine Gelenkerweiterungen nur, wenn sie diesen Ablauf konkret blockieren.
 4. **Abnahme am tatsächlichen Ablauf:** Bedienung, Kamera, Haut und Speichern/Laden am Original-PaKaChi prüfen. Automatisierte Nachweise und offene Qualitätsabnahmen stehen gesammelt im [Prüfstand](PRUEFUNG.md).
 
@@ -48,7 +48,7 @@ Der Arbeitsstand liegt auf `work/local-verification-model-zoo`; `main` bleibt bi
 ## 5. Bild zu 3D und KI-Korrektur
 
 - [ ] Bestehenden PaKaChi anhand seiner erhaltenen Tierform und korrigierten humanoiden Stilreferenz in 3D nachbilden; beide Formen und die Transformation erhalten.
-- [ ] Geeignete Generierungs-/Rigging-Verfahren an echten Testfiguren bewerten. **Echte Inferenz und Qualitätsvergleich stehen weiterhin aus.** [Testlauf](KI-GENERIERUNG.md).
+- [ ] Geeignete Generierungs-/Rigging-Verfahren qualitativ vergleichen. Echte TripoSR-CPU-Inferenz beider Originalformen ist seit 0.83.0 belegt; GPU-Abnahme und der Vergleich mit einem weiteren Verfahren bleiben offen. [Testlauf](KI-GENERIERUNG.md).
 - [ ] Freien Korrekturprompt und „Skelett neu versuchen“ integrieren.
 - [ ] Diesen Ablauf im gerenderten Browser prüfen; Fehler beim separaten Neustart des Original-Bildplayers und GPU-Kontextverlust gesondert absichern.
 

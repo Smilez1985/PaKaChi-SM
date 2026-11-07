@@ -1,6 +1,6 @@
 # Prüfstand und Protokolle
 
-**Softwarestand: 0.82.0 · Dokumentationsabgleich: 2026-11-07T15:22:04+01:00 (Europe/Berlin).**
+**Softwarestand: 0.83.0 · Dokumentationsabgleich: 2026-11-07T17:13:43+01:00 (Europe/Berlin).**
 
 Alle Prüfnachweise stehen in dieser Datei: ein Abschnitt je Softwareversion sowie gesonderte Abschnitte für datierte Zwischenprüfungen. Die Ergebnisse und Grenzen gelten für den jeweils genannten Stand. Spätere Läufe stehen als Nachtrag im selben Abschnitt. Produktänderungen gehören in den [Changelog](CHANGELOG.md), offene Aufgaben in die [Roadmap](ROADMAP.md).
 
@@ -8,8 +8,8 @@ Alle Prüfnachweise stehen in dieser Datei: ein Abschnitt je Softwareversion sow
 
 | Prüfung | Bestätigter Stand | Umfang und Grenze |
 | --- | --- | --- |
-| Node-Tests | [0.82.0](#version-0820): 330 bestanden | Daten, Geometrie, DOM-/Transportabläufe und Erhaltungsprüfung; keine manuelle Qualitätsabnahme. |
-| TypeScript und Produktionsbuild | [0.82.0](#version-0820): bestanden | Bekannte Bundle-Größenwarnung; keine Aussage über Zielhardware-Leistung. |
+| Node-Tests | [0.83.0](#version-0830): 331 lokal bestanden | Daten, Geometrie, DOM-/Transportabläufe und Erhaltungsprüfung; keine manuelle Qualitätsabnahme. |
+| TypeScript und Produktionsbuild | [0.83.0](#version-0830): lokal bestanden | Bekannte Bundle-Größenwarnung; keine Aussage über Zielhardware-Leistung. |
 | Chromium-Browserfälle | [0.82.0](#version-0820): alle 32 bestanden | Software-WebGL, simulierte KI-Anbieter; keine reale KI-Inferenzabnahme. |
 | Produktionsbrowser-Importmessung | [0.82.0](#version-0820): drei Durchläufe bestanden | Mika mit 256 Gewichtsaufträgen; keine allgemeine Laufzeitgarantie. |
 | Legacy-Testprogramme | [0.9.0](#version-090): beide bestanden | Steuerung, MQTT-Verhalten und Lebenszyklus des Originalplayers. |
@@ -39,7 +39,7 @@ Der Workflow prüft Pull Requests vollständig. Direkte Pushes nach `main` sind 
 
 ## Noch nicht abgenommen
 
-- Designgetreuer 3D-Original-PaKaChi in beiden Formen und echte Bild-zu-3D-Inferenz auf geeigneter Hardware.
+- Designgetreuer 3D-Original-PaKaChi in beiden Formen und GPU-Inferenz auf Zielhardware. Erste echte CPU-Inferenz beider Formen ist seit 0.83.0 belegt.
 - Anatomische Haut-/Bewegungsqualität, tatsächliches Mausgefühl und der gesamte Ablauf mit Nutzern ohne 3D-Vorkenntnisse.
 - Echte lokale und Cloud-Anbieter sowie ein konkreter externer MCP-Host und NanoMQ-Broker.
 - Große reale Importmodelle, Zielhardware und reale Browserkontingente.
@@ -59,6 +59,29 @@ Diese Liste beschreibt ausstehende Abnahmen.
 ## Prüfungen nach Version
 
 Die jüngste Version steht zuerst. Für eine bestimmte Version die Dokumentgliederung oder die Browser-Suche verwenden.
+
+## Version 0.83.0
+
+Zeitstempel: 2026-11-07T17:13:02+01:00 (Europe/Berlin).
+
+**Erstmals echte Original-PaKaChi-Inferenz**, keine simulierte Generierung. Die unveränderten Referenzen wurden mit TripoSR auf CPU rekonstruiert. Beide 256er GLBs stehen als getrennte, ausdrücklich ungeriggte Entwürfe im Model Zoo. Sie sind noch nicht als fertiger Charakter freigegeben.
+
+| Form / Auflösung | Laufzeit ohne Einrichtung/Vorprüfung | Vertices | Dreiecke |
+| --- | --- | --- | --- |
+| Humanoid / 128 | 66,97 s | 12.147 | 24.220 |
+| Tierform / 128 | 85,87 s | 19.139 | 38.164 |
+| Humanoid / 256 | 186,08 s | 50.870 | 101.564 |
+| Tierform / 256 | 173,56 s | 81.388 | 162.500 |
+
+Alle vier Ergebnisse mit dem produktiven GLTFLoader geladen: jeweils ein Mesh, null Knochen und null Clips. Vollständige Messdaten, Logs und SHA-256-Werte: [Inferenzbericht](benchmarks/pakachi-generation-2026-11-07.json). TripoSR `107cefdc244c39106fa830359024f6a2f1c78871`, PyTorch `2.5.1+cpu`, Python `3.12.14`, acht CPU-Threads. Gewichte tatsächlich heruntergeladen und gehasht; der allgemeine Adapter nutzt weiterhin die Standardrevision. Keine GPU-Laufzeitmessung.
+
+Die getestete Backend-Revision wurde mit dem erhaltenen Transparenzpatch ergänzt. Ein anfänglicher Stock-Backend-Versuch wurde während der Hintergrundentferner-Initialisierung abgebrochen und zählt nicht als abgeschlossener Lauf. Der Patch wurde am genannten Stand auf Anwendbarkeit geprüft. Vorlagen selbst blieben bytegleich.
+
+TripoSR-Koordinaten werden über einen neuen GLB-Wurzelknoten ausgerichtet. Der Regressionstest prüft Weltachsen, unveränderte Binärdaten und Schutz gegen doppelte Rotation. Die native Ausgabe bleibt bei neuen Läufen als `mesh-native.glb` erhalten. Der humanoide 256er Lauf entstand vor dieser Adapteränderung und wurde anschließend mit genau demselben Helfer ausgerichtet; der tierische 256er Lauf enthält die Ausrichtung bereits im Auftragsbericht.
+
+**Lokale Softwareprüfung:** 331 Node-Tests und TypeScript/Produktionsbuild bestanden. Der Sammlungstest vergleicht nun alle vier Originalmodelle byteweise beim Zusammenführen. Neuer Chromium-Fall lädt beide tatsächlichen GLBs, prüft sichtbare WebGL-Ansicht und leere Bewegungsfähigkeiten und erzeugt Screenshots. Die komplette Branch-CI umfasst damit 33 Browserfälle plus Produktions-Importmessung; commitgebundene Ergebnisse stehen in [PR #1](https://github.com/Smilez1985/PaKaChi-SM/pull/1).
+
+**Sichtprüfung und Grenze:** Vier Richtungen und eine Umlaufansicht aus der vom Player-Lader geladenen, nach PLY abgeflachten Geometrie mit Software-OpenGL (llvmpipe) gerendert. Dafür wurde kein weiteres Bildmodell verwendet. Kopf, Ringelschweif und Grundformen sind erkennbar. Gesicht/Augen, Finger/Pfoten, Fell-/Materialwirkung, seitliche Körpermasse und verdeckte Flächen weichen sichtbar ab; höhere Meshauflösung behebt das nur begrenzt. Diese Bilder ersetzen keine vollständige Browser-/Materialabnahme. Kein anatomisches Rig, keine Hautgewichte, keine Animation und keine 3D-Transformation erzeugt. Nächster Charakter-Schritt ist die Korrektur dieser Entwürfe und ein qualitativer Verfahrensvergleich vor dem Rigging.
 
 ## Version 0.82.0
 

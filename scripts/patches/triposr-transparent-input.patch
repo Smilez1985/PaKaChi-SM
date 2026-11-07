@@ -1,0 +1,16 @@
+diff --git a/run.py b/run.py
+index 1150529..aa7c3b7 100644
+--- a/run.py
++++ b/run.py
+@@ -131,7 +131,10 @@ timer.end("Initializing model")
+ timer.start("Processing images")
+ images = []
+ 
+-if args.no_remove_bg:
++if args.no_remove_bg or all(
++    Image.open(path).mode == "RGBA" and Image.open(path).getextrema()[3][0] < 255
++    for path in args.image
++):
+     rembg_session = None
+ else:
+     rembg_session = rembg.new_session()

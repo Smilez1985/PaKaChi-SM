@@ -19,3 +19,5 @@ Die 72 Bilder enthalten Tier-zu-Humanoid-Verwandlung, kein Tablet und keine eige
 Weitere Etappen- und Korrekturpakete bleiben im bisherigen Bestand erhalten. Sie wurden nicht automatisch miteinander vermischt. Eine konsistente 3D-Umsetzung beider Formen steht noch aus.
 
 Die technischen Testmodelle Mika und Nori sind separate, prozedural erzeugte glTF-Dateien zur Prüfung von Player, Skelett und Animationswiedergabe. Sie ersetzen PaKaChi nicht.
+
+Seit 0.83.0 sind aus den beiden maßgeblichen Einzelvorlagen erstmals echte [3D-Arbeitsentwürfe](../KI-GENERIERUNG.md#erste-echte-pakachi-entwürfe) rekonstruiert. Sie sind im Model Zoo gesondert auswählbar, ohne Rig oder Bewegungen; die Charakterqualität ist noch nicht abgenommen.
