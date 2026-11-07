@@ -16,6 +16,17 @@ async function load(form:string){const bytes=await readFile(new URL(`../public/m
 function meshes(root:T.Object3D){const out:T.SkinnedMesh[]=[];root.traverse(n=>{if(n instanceof T.SkinnedMesh)out.push(n);});return out;}
 function vertices(mesh:T.SkinnedMesh){mesh.updateWorldMatrix(true,false);mesh.updateMatrixWorld(true);return Array.from({length:mesh.geometry.attributes.position.count},(_,i)=>mesh.getVertexPosition(i,new T.Vector3()).applyMatrix4(mesh.matrixWorld));}
 for(const form of ['humanoid','animal']){
+ test(`PaKaChi ${form}: arm movement cannot pull either rear paw across overlapping projected silhouettes`,async()=>{
+  const {gltf}=await load(form);try{
+   const body=gltf.scene.getObjectByName('PaKaChi_body') as T.SkinnedMesh,report=evidence.forms.find((r:any)=>r.form===form);gltf.scene.updateMatrixWorld(true);const original=vertices(body);
+   const footSamples=['LeftFoot','RightFoot'].flatMap(name=>{const center=new T.Vector3().fromArray(report.landmarks[name]),indices=original.flatMap((p,i)=>p.y<center.y+.04&&p.distanceTo(center)<.105?[i]:[]);assert.ok(indices.length>20,name+' has actual paw samples');return indices;});
+   for(const name of ['LeftElbow','RightElbow','LeftShoulder','RightShoulder']){const bone=body.skeleton.bones.find(b=>b.name===name)!;bone.rotation.x=.6;gltf.scene.updateMatrixWorld(true);for(const i of footSamples)assert.ok(body.getVertexPosition(i,new T.Vector3()).applyMatrix4(body.matrixWorld).distanceTo(original[i])<1e-6,name+' must not drag a rear paw');bone.rotation.x=0;gltf.scene.updateMatrixWorld(true);}
+   if(form==='animal'){
+    const back=original.flatMap((p,i)=>p.x>-.03&&p.x<.05&&p.y>.015&&p.y<.06&&p.z>-.30&&p.z<-.20?[i]:[]);assert.ok(back.length>20,'actual upper-back samples behind the head');
+    for(const name of ['Neck','Head']){const bone=body.skeleton.bones.find(b=>b.name===name)!;bone.rotation.x=.6;gltf.scene.updateMatrixWorld(true);for(const i of back)assert.ok(body.getVertexPosition(i,new T.Vector3()).applyMatrix4(body.matrixWorld).distanceTo(original[i])<1e-6,name+' must not drag the rear upper back');bone.rotation.x=0;gltf.scene.updateMatrixWorld(true);}
+   }
+  }finally{disposeModel(gltf.scene);}
+ });
  test(`PaKaChi ${form}: repaired body has closed manifold edges and finite normals`,async()=>{
   const {gltf}=await load(form);try{
    const geometry=(gltf.scene.getObjectByName('PaKaChi_body') as T.SkinnedMesh).geometry,index=geometry.index!,edges=new Map<string,{count:number;balance:number}>();

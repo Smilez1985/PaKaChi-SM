@@ -8,7 +8,7 @@ Alle Prüfnachweise stehen in dieser Datei: ein Abschnitt je Softwareversion sow
 
 | Prüfung | Bestätigter Stand | Umfang und Grenze |
 | --- | --- | --- |
-| Node-Tests | [0.85.0](#version-0850): 343 lokal bestanden | Daten, Geometrie, DOM-/Transportabläufe und Erhaltungsprüfung; keine manuelle Qualitätsabnahme. |
+| Node-Tests | [0.85.0](#version-0850): 345 lokal bestanden | Daten, Geometrie, DOM-/Transportabläufe und Erhaltungsprüfung; keine manuelle Qualitätsabnahme. |
 | TypeScript und Produktionsbuild | [0.85.0](#version-0850): lokal bestanden | Bekannte Bundle-Größenwarnung; keine Aussage über Zielhardware-Leistung. |
 | Chromium-Browserfälle | [0.85.0](#version-0850): zwei erweiterte Charakterfälle lokal bestanden; vollständige CI im PR | Software-WebGL, simulierte KI-Anbieter; keine reale KI-Inferenzabnahme. |
 | Produktionsbrowser-Importmessung | [0.82.0](#version-0820): drei Durchläufe bestanden | Mika mit 256 Gewichtsaufträgen; keine allgemeine Laufzeitgarantie. |
@@ -64,15 +64,15 @@ Die jüngste Version steht zuerst. Für eine bestimmte Version die Dokumentglied
 
 Zeitstempel: 2026-11-07T21:01:23+01:00 (Europe/Berlin).
 
-**Charakterarbeit vor der Verwandlung:** Beide erhaltenen Rekonstruktionen werden mit derselben erweiterten 59-Gelenk-Hierarchie aufbereitet. 28 zusätzliche Gelenke führen 14 voneinander unabhängige Finger/Zehen mit echten starren Gliedern und grünen Spitzen. Je Vorderpfote drei Finger und ein Daumen, je Hinterpfote drei Zehen; je zwei Glieder. Die Hände der Arbeitsform drehen um die Handgelenksnaht. Tiefenpositionen mehrerer Handgelenke und Pfoten sind an reale Querschnitte angepasst.
+**Charakterarbeit vor der Verwandlung:** Beide erhaltenen Rekonstruktionen werden mit derselben erweiterten 59-Gelenk-Hierarchie aufbereitet. 28 zusätzliche Gelenke führen 14 voneinander unabhängige Finger/Zehen mit echten starren Gliedern und grünen Spitzen. Je Vorderpfote drei Finger und ein Daumen, je Hinterpfote drei Zehen; je zwei Glieder. Die Hände der Arbeitsform drehen um die Handgelenksnaht. Tiefenpositionen mehrerer Handgelenke und Pfoten sind an reale Querschnitte angepasst. Bei der Tierform entscheidet der Abstand zu den tatsächlichen Körperketten über die Schwanzzuordnung; die Kopfregion wird zusätzlich räumlich gegen den Rumpf abgegrenzt. Eine starre Tiefengrenze darf keine Hinterpfote dem Vorderbein zuschlagen.
 
 **Netzkorrektur:** Humanoide Fäustlinge und vordere Zehenflächen sind lokal ausgeschnitten, Kanten geteilt und Schnittflächen geschlossen. Die übrigen Fellpfoten bleiben erhalten. Quellvertices werden mit Toleranz 0,00001 verschweißt, doppelte/degenerierte Flächen bereinigt und einfache Randringe geschlossen; nicht eindeutige Ränder oder Kanten mit mehr als zwei Flächen brechen die Aufbereitung ab. Die tatsächlichen ausgegebenen Körpernetze besitzen ausschließlich zwei gegensinnig orientierte Flächen je Kante. Das gilt für die Körper, nicht für die absichtlich offenen Fellfasern. Es bestätigt keine Selbstüberschneidungs- oder Kollisionsfreiheit und noch keine gemeinsame Morph-Topologie. Eingaben bleiben bytegleich; Details im [aktuellen Aufbereitungsbericht](benchmarks/pakachi-rigging-2026-11-07.json).
 
 **Nachweise:**
 
-- `npm run verify`: alle 343 Node-Tests und TypeScript/Produktionsbuild bestanden; bekannte Bundle-Größenwarnung.
-- Sechs zusätzliche Fälle an den tatsächlichen GLBs: Körperkanten samt Orientierung, jedes der 28 neuen Gelenke mit tatsächlich bewegter Spitze bei unveränderter Handfläche/Nachbarfinger/Körperprobe, gespeicherte Fingerpose und Rig-GLB-Rundlauf samt weiterer Bewegung nach Import. Bestehende Haut-, Kamera-, Material-, Farb- und Quellerhaltungsprüfungen bestehen weiter.
-- Beide erweiterten Headless-Shell-/SwiftShader-Browserfälle bestanden (54,6 s gesamt): Armbeugung, einzelne Fingerpose, Undo/Redo, Speichern/Laden und Front-/Rück-/Seitenansichten. Charakterbilder und Ansichten geprüft. Keine manuelle Benutzerabnahme.
+- `npm run verify`: alle 345 Node-Tests und TypeScript/Produktionsbuild bestanden; bekannte Bundle-Größenwarnung.
+- Acht zusätzliche Fälle an den tatsächlichen GLBs: Körperkanten samt Orientierung, jedes der 28 neuen Gelenke mit tatsächlich bewegter Spitze bei unveränderter Handfläche/Nachbarfinger/Körperprobe, gespeicherte Fingerpose und Rig-GLB-Rundlauf samt weiterer Bewegung nach Import. Der Vorher/Nachher-Lauf an derselben Quellrekonstruktion zeigt für die rechte Hinterpfote: Vor der Korrektur bewegte eine Ellenbogendrehung 178 von 1151 Stichprobenvertices um bis zu 0,1049 Modelleinheiten; danach bewegen sich davon null Vertices. Zusätzliche Anatomieproben halten beide Hinterpfoten bei Schulter-/Ellenbogenbewegung und den hinteren Rücken der Tierform bei Hals-/Kopfbewegung fest. Bestehende Haut-, Kamera-, Material-, Farb- und Quellerhaltungsprüfungen bestehen weiter.
+- Beide erweiterten Headless-Shell-/SwiftShader-Browserfälle bestanden und nach der Anatomiekorrektur erneut erfolgreich: Armbeugung, einzelne Fingerpose, Undo/Redo, Speichern/Laden und Front-/Rück-/Seitenansichten. Charakterbilder und Ansichten geprüft. Keine manuelle Benutzerabnahme.
 - Erzwungene Neuerzeugung beider GLBs bytegleich; `--if-needed` behält die Änderungszeiten unveränderter Ausgaben.
 - Vollständiger regulärer Chromium-CI-Lauf und Produktionsimportmessungen sind commitgebunden in [PR #1](https://github.com/Smilez1985/PaKaChi-SM/pull/1) nachzuverfolgen; lokale Teilprüfung wird nicht als vollständige Browserprüfung bezeichnet.
 
@@ -580,7 +580,7 @@ Der neue Browserfall dekodiert ein echtes PNG und prüft Alpha-Loch, deckenden B
 
 **0.64.0:** Neue sichtgefilterte Pinselstriche berücksichtigen ausgeblendete Materialien und Materialgruppen sowie transparente Materialien mit Opazität 0. Die ursprünglichen Materialeigenschaften werden beim Laden festgehalten; eine temporäre Gewichtsfärbung verändert die Auswahl nicht. `region.view.materials: true` speichert diese Regel. Ohne das Feld gilt weiterhin die geometrische Sichtprüfung aus 0.63.0, damit alte Verläufe unverändert bleiben.
 
-282 Node-Tests, Produktionsbuild und alle 20 Chromium-Fälle bestanden ([CI-Nachweis](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/40542963343)); Python-Syntax lokal geprüft. Der Browserimport von 256 Aufträgen dauerte in diesem Lauf 6254 ms; Einzelmessung, keine allgemeine Laufzeitgarantie.
+282 Node-Tests, Produktionsbuild und alle 20 Chromium-Fälle bestanden ([CI-Nachweis](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/40542963345)); Python-Syntax lokal geprüft. Der Browserimport von 256 Aufträgen dauerte in diesem Lauf 6254 ms; Einzelmessung, keine allgemeine Laufzeitgarantie.
 
 Teiltransparente Materialien und Alpha-Texturen gelten weiterhin als undurchsichtige Hindernisse; Dreiecke bleiben beidseitig. Große Modelle und Materialdarstellung sind noch nicht manuell abgenommen. Dateien mit dem neuen Feld benötigen mindestens 0.64.0.
 

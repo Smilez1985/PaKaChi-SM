@@ -30,6 +30,7 @@ Zeitstempel: 2026-11-07T21:01:23+01:00 (Europe/Berlin)
 ### Fixed
 
 - Tiefenpositionen an Handgelenken und Pfoten anhand tatsächlicher Modellquerschnitte korrigiert; überlagerte Rumpf-/Schwanzflächen bei der Zuordnung getrennt betrachtet.
+- Falsche Armgewichte an einer Hinterpfote der Tierform beseitigt: Zuordnung folgt den tatsächlichen Kettenabständen statt einer pauschalen Z-Grenze. Schwanz- und Kopfregion räumlich vom hinteren Rücken abgegrenzt. Neue Anatomieproben verhindern Mitziehen der Hinterpfoten bei Armbewegung und des hinteren Rückens bei Hals-/Kopfdrehung.
 
 [Prüfbericht](PRUEFUNG.md#version-0850). Die gemeinsame Morph-Topologie und die Standard-Verwandlung bleiben offen; diese Version ist weitere Rig-/Charakterarbeit und keine endgültige Designfreigabe.
 

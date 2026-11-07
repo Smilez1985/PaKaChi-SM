@@ -56,16 +56,17 @@ function chainWeights(point,names,landmarks){
  return {[names.at(-1)]:1};
 }
 function anatomicalWeights(point,form,config,tailComponent=false){
- const l=config.landmarks,x=point.x,y=point.y,z=point.z;
+ const l=config.landmarks,y=point.y,z=point.z;
  const tail=['TailBase','Tail1','Tail2','Tail3','TailTip'];
  let isTail=tailComponent;
- if(form==='animal'&&x<-.10&&y>-.22){
+ if(form==='animal'){
   const tailDistance=projectChain(point,tail,l).distance;
-  const bodyDistance=Math.min(...[['Pelvis','Spine','Chest'],['LeftHip','LeftKnee','LeftAnkle','LeftFoot'],['RightHip','RightKnee','RightAnkle','RightFoot']].map(names=>projectChain(point,names,l).distance));
+  const bodyDistance=Math.min(...[['Pelvis','Spine','Chest','Neck','Head'],['LeftShoulder','LeftElbow','LeftWrist','LeftHand'],['RightShoulder','RightElbow','RightWrist','RightHand'],['LeftHip','LeftKnee','LeftAnkle','LeftFoot'],['RightHip','RightKnee','RightAnkle','RightFoot']].map(names=>projectChain(point,names,l).distance));
   isTail=tailDistance<bodyDistance;
  }
  if(isTail)return chainWeights(point,tail,l);
- if(y>config.headCut){
+ const headRegion=form!=='animal'||projectChain(point,['Neck','Head','Jaw'],l).distance<projectChain(point,['Pelvis','Spine','Chest'],l).distance+.025;
+ if(y>config.headCut&&headRegion){
   const neck=smooth(config.headCut,config.headCut+.065,y);
   let weights={Neck:1-neck,Head:neck};
   for(const ear of ['LeftEar','RightEar']){const d=point.distanceTo(v(l[ear]));const amount=(1-smooth(.035,.105,d))*smooth(l[ear][1]-.09,l[ear][1],y);if(amount>.05){weights={Head:1-amount,[ear]:amount};break;}}
@@ -77,7 +78,7 @@ function anatomicalWeights(point,form,config,tailComponent=false){
  if(form==='humanoid'){
   // Keep the torso and rear tail out of the hanging forearms and legs.
   for(const score of scores){if(score.i>=3&&y>-.10)score.distance+=.3;if((score.i===1||score.i===2)&&y<-.245)score.distance+=.4;}
- }else{for(const score of scores)if(score.i>=3&&z>.11)score.distance+=.3;}
+ }
  scores.sort((a,b)=>a.distance-b.distance);const winner=scores[0],weights=chainWeights(point,winner.names,l);
  if(winner.i){const start=v(l[winner.names[0]]),root=winner.i<=2?'Chest':'Pelvis',amount=.5*(1-smooth(0,.085,point.distanceTo(start)));for(const k of Object.keys(weights))weights[k]*=1-amount;weights[root]=(weights[root]??0)+amount;}
  return weights;
