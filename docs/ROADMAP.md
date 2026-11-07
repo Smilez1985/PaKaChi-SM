@@ -6,7 +6,7 @@ Diese Roadmap enthält offene Umsetzung und ausstehende Abnahme. Erledigte Ände
 
 ## Prioritäten
 
-1. **Browser- und Bedienabnahme:** Kamera, Körperketten, Hautverformung und Mausgefühl manuell prüfen. Automatisierter Stand 0.80.0: 324 Node-Tests, Build und 29 Chromium-Fälle im [Lauf 42359935481](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/42359935481) bestanden. Neue Prüfungen für 0.81.0 siehe [Prüfbericht](PRUEFUNG-0.81.0.md). Die manuelle Gesamtabnahme bleibt offen.
+1. **Browser- und Bedienabnahme:** Kamera, Körperketten, Hautverformung und Mausgefühl manuell prüfen. Automatisierter Stand 0.81.0: 325 Node-Tests, Build und 31 Chromium-Fälle im [Lauf 42365460756](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/42365460756) bestanden; zusätzlich drei Produktionsbrowser-Importmessungen. [Prüfbericht mit Rohdaten](PRUEFUNG-0.81.0.md). Die manuelle Gesamtabnahme bleibt offen.
 2. **Ladezeiten nachvollziehbar messen:** CPU-Messung seit 0.68.0 und Produktionsbrowser-Messwerkzeug einschließlich Texturen und erstem WebGL-Frame seit 0.81.0 vorhanden ([Messvertrag](IMPORT-BENCHMARK.md)). Als Nächstes große reale Projekte mit Texturen auf Zielhardware messen und erst daraus Optimierungen ableiten. GPU-Fertigstellung und physische Anzeige werden nicht gemessen.
 3. **Gelenkbearbeitung vervollständigen:** Skalierte Knochenketten, Löschen mit Anbauteilen und neue Rigs auf ungeriggten Oberflächen; anschließend Ganzkörper-IK und Qualitätsabnahme.
 4. **KI-Verfahren und Anbieter:** Geometrie/Rigging-Fachadapter, echte Inferenzqualität und unabhängige Rollen/Fallbacks live prüfen; unterstützte OAuth-Verfahren ergänzen.

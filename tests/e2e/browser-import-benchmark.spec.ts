@@ -4,7 +4,7 @@ import {createHash} from 'node:crypto';
 import {measureBrowserProject} from '../../scripts/benchmark-browser-import.mjs';
 
 test('browser benchmark measures a textured project through a new canvas without modifying its source',async({browser,page,baseURL},testInfo)=>{
- await page.goto('/');
+ // Generate the PNG in the empty fixture tab; keep a second avatar renderer out of the measurement.
  const image=await page.evaluate(()=>{const c=document.createElement('canvas');c.width=2;c.height=2;const g=c.getContext('2d')!;g.fillStyle='#34d399';g.fillRect(0,0,2,2);return c.toDataURL('image/png');});
  const data=Buffer.alloc(60);[0,0,0,1,0,0,0,1,0,0,0,1,0,0,1].forEach((n,i)=>data.writeFloatLE(n,i*4));
  const model={asset:{version:'2.0'},scene:0,scenes:[{nodes:[0]}],nodes:[{mesh:0}],

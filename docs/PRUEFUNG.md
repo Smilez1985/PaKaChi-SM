@@ -29,16 +29,16 @@ Unter Linux bei fehlenden Systembibliotheken stattdessen einmalig `npx playwrigh
 
 Lokaler Nachweis am 28.10.2026 für den vorbereiteten Unreleased-Stand: `npm run verify` erfolgreich, **286 Node-Tests bestanden**, TypeScript und Produktionsbuild bestanden. Die bekannte Warnung zum großen JavaScript-Bundle bleibt bestehen. `verify:full` wurde hier wegen des bereits nachgewiesenen Chromium-Startblockers nicht ausgeführt; die 22 Browserfälle bleiben unbestätigt.
 
-Aktueller Meilenstein: [0.81.0](PRUEFUNG-0.81.0.md), lokal 325 Node-Tests und Build bestanden; neue Browserfälle und Produktionsmessung noch ohne CI-Nachweis. Letzter vollständig bestätigter CI-Stand: [0.80.0](PRUEFUNG-0.80.0.md). Mausnavigation ist seit dem CI-Lauf vom 05.11.2026 bestätigt; vollständiger aktueller PR-Status siehe oben.
+Aktueller Meilenstein: [0.81.0](PRUEFUNG-0.81.0.md). [Lauf 42365460756](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/42365460756) bestätigt für Commit `7c706bb4` 325 Node-Tests, Build, alle 31 Chromium-Fälle und drei Produktionsbrowser-Importmessungen; vollständige Logs, Rohdaten und Textur-Screenshot ausgewertet. Median der Mika-/256-Aufträge-Referenz: 3.374,4 ms bis zur Frame-Grenze mit Software-WebGL. Der abschließende PR-Stand ist am jeweiligen Commit oben verlinkt. Mausnavigation ist seit dem CI-Lauf vom 05.11.2026 bestätigt; vollständiger aktueller PR-Status siehe oben.
 
 ## Nachgewiesen
 
 | Prüfung | Letzter Nachweis | Umfang und Grenze |
 | --- | --- | --- |
-| `npm test` | 0.80.0: 324 Tests in CI bestanden | Player, Router, Studio-Daten, reale Three.js-Geometrie, DOM/Ereignisse mit happy-dom, Node-MCP und Erhaltungsprüfung. Kein gerenderter Browser. |
-| `npm run test:e2e` | 0.80.0: 29 Chromium-Fälle bestanden | GitHub-Runner mit Software-WebGL; simulierte Anbieter, keine manuelle Maus-/KI-Qualitätsabnahme. |
+| `npm test` | 0.81.0: 325 Tests in CI bestanden | Player, Router, Studio-Daten, reale Three.js-Geometrie, DOM/Ereignisse mit happy-dom, Node-MCP und Erhaltungsprüfung. Kein gerenderter Browser. |
+| `npm run test:e2e` | 0.81.0: 31 Chromium-Fälle bestanden | GitHub-Runner mit Software-WebGL; simulierte Anbieter, keine manuelle Maus-/KI-Qualitätsabnahme. |
 | `npm run test:legacy` | 0.9.0: beide Programme bestanden | Originalplayer-Steuerung, MQTT-Verhalten und Lebenszyklus. |
-| `npm run build` | 0.80.0: in CI bestanden | TypeScript und Produktionsbuild; Vite meldet weiterhin das große gemeinsame JS-Bundle (rund 1,37 MB / 380 kB gzip). |
+| `npm run build` | 0.81.0: in CI bestanden | TypeScript und Produktionsbuild; Vite meldet weiterhin das große gemeinsame JS-Bundle (rund 1,41 MB / 391 kB gzip). |
 | `npm run test:python` mit `PAKACHI_PYTHON` | 0.10.0: Integration bestanden | Echter Python-MCP-Prozess, eingebetteter aMQTT-Broker, produktiver MQTT-Client, Router und Studio-Editor. Acht Tools, Studio-Änderungen einschließlich gültiger/ungültiger Skalierung, fehlende Freigabe und Revisionskonflikte geprüft. |
 | Originaldateien | 0.49.0: bytegenau erhalten | 83 wiederhergestellte Dateien einschließlich exakt 72 Transformationsbildern. |
 

@@ -24,7 +24,7 @@ Zeitstempel: 2026-11-07T11:46:22+01:00 (Europe/Berlin)
 
 ### Changed
 
-- Roadmap, Dokumentationsindex und Prüfstand auf den bestätigten 0.80.0-Lauf nachgezogen; abgeschlossene Browser-Automatisierung von offener manueller Qualitätsabnahme getrennt.
+- Roadmap, Designdokument, Dokumentationsindex und Prüfstand auf die bestätigten 0.80.0-/0.81.0-Läufe nachgezogen; abgeschlossene Browser-Automatisierung von offener manueller Qualitätsabnahme getrennt. Referenz-Rohdaten der drei Produktionsimporte und ihre Grenzen dokumentiert.
 - CPU- und Browserbenchmark teilen die Erzeugung der Mika-Testkopie. Projektformat, Player und Editor bleiben unverändert.
 
 [Prüfbericht](PRUEFUNG-0.81.0.md) · [Messvertrag und Grenzen](IMPORT-BENCHMARK.md). Kein Nachweis für GPU-Fertigstellung, physische Bildausgabe oder große reale Projekte.

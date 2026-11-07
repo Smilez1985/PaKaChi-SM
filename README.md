@@ -21,7 +21,7 @@ Der archivierte Originalplayer lässt sich auch separat ohne Node öffnen: `publ
 
 Seit **0.11.1** dreht die mittlere Maustaste um die Mitte der ganzen Figur, auch nach Zoom zum Mauszeiger und Verschieben des Bildausschnitts.
 
-**Arbeitsbranch 0.81.0:** `npm run benchmark:browser-import` ergänzt die CPU-Importmessung um den echten Dateiimport im Produktionsbrowser einschließlich Texturen und erster WebGL-Zeichnung ([Anleitung und Grenzen](docs/IMPORT-BENCHMARK.md)). 0.80.0 ist mit 324 Node- und 29 Chromium-Tests vollständig grün; Nachweis für 0.81.0 im [Prüfbericht](docs/PRUEFUNG-0.81.0.md). Noch keine Übernahme nach `main`.
+**Arbeitsbranch 0.81.0:** `npm run benchmark:browser-import` ergänzt die CPU-Importmessung um den echten Dateiimport im Produktionsbrowser einschließlich Texturen und erster WebGL-Zeichnung ([Anleitung und Grenzen](docs/IMPORT-BENCHMARK.md)). 0.81.0 ist mit 325 Node- und 31 Chromium-Tests sowie drei Produktionsmessungen bestätigt; Mika-/256-Aufträge-Referenz mit Software-WebGL: Median 3.374,4 ms bis zur Frame-Grenze ([Prüfbericht und Rohdaten](docs/PRUEFUNG-0.81.0.md)). Noch keine Übernahme nach `main`.
 
 ## Überblendung im Player (0.70.0)
 

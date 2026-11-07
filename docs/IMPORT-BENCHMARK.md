@@ -40,6 +40,10 @@ Build, Server-/Browser-/Anwendungsstart, anfängliches Mika-Laden, Prüfsummen u
 
 Actions führt nach den Browserregressionen drei Produktionsmessungen mit Mika/256 Gewichtsaufträgen aus und legt `test-results/browser-import-benchmark.json` im Artefakt `browser-evidence` ab. Die Texturregression verwendet ein kleines eingebettetes PNG-Modell; das ist keine allgemeine Qualitätsabnahme großer Texturen. [Prüfbericht](PRUEFUNG-0.81.0.md).
 
+## Browser-Referenzmessung
+
+Die [Rohdaten von 0.81.0](benchmarks/browser-import-0.81.0.json) stammen aus drei Produktionsbrowser-Importen im [CI-Lauf 42365460756](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/42365460756): Mika mit 256 Gewichtsaufträgen, Software-WebGL, AMD-EPYC-Runner. Median bis zur folgenden Frame-Grenze: 3.374,4 ms. Eine Referenz, kein Nachweis einer Beschleunigung. Die separate PNG-Regression bestätigt Bilddekodierung und tatsächliche Darstellung; das Mika-Messmodell ist untexturiert. [Einzelwerte und Grenzen](PRUEFUNG-0.81.0.md).
+
 ## CPU-Pfad
 
 Seit 0.68.0 ergänzt `npm run benchmark:import` die bisherigen Rig-Reset- und Sichtprüfungsbenchmarks. Er misst einen CPU-Importpfad mit den produktiven Projekt-, Modell- und Rig-Funktionen. Er ist kein vollständiger Browserimport.

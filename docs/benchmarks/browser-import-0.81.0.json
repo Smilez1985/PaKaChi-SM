@@ -1,0 +1,82 @@
+{
+  "version": 1,
+  "measuredAt": "2026-11-07T10:56:03.658Z",
+  "node": "v24.22.2",
+  "chromium": "141.0.7390.37",
+  "platform": "linux",
+  "arch": "x64",
+  "cpu": "AMD EPYC 9V74 80-Core Processor",
+  "rendererMode": "software",
+  "runs": 3,
+  "fixture": "mika",
+  "scope": "Production app, fresh context per sample, existing Chromium process. Starts at file-input change; includes File.text, JSON validation, model/image decoding, rig replay, UI installation and first WebGL draw submission plus next animation-frame boundary. Excludes build/server/browser/app startup, initial Mika load, Playwright file delivery, file chooser time, IndexedDB persistence and checksum calculation. GPU completion and physical display are not measured; browser/OS/driver caches may be warm. No performance pass/fail threshold.",
+  "medianFrameBoundaryMs": 3374.4,
+  "samples": [
+    {
+      "projectSha256": "f206c004e7f6b1d8372a159d3d0c86fff3ffbe8036636a03b7da4fe9af96ae41",
+      "projectBytes": 979550,
+      "fileReadMs": 7.3,
+      "readyMs": 3090.2,
+      "firstDrawMs": 3180.2,
+      "frameBoundaryMs": 3275.3,
+      "drawCalls": 52,
+      "imageBitmapsDecoded": 0,
+      "canvas": {
+        "width": 822,
+        "height": 1283
+      },
+      "webglVersion": "WebGL 2.0 (OpenGL ES 3.0 Chromium)",
+      "renderer": "WebKit WebGL",
+      "studioCounts": {
+        "points": 15,
+        "poses": 0,
+        "moves": 0,
+        "surfaces": 25
+      }
+    },
+    {
+      "projectSha256": "f206c004e7f6b1d8372a159d3d0c86fff3ffbe8036636a03b7da4fe9af96ae41",
+      "projectBytes": 979550,
+      "fileReadMs": 5.2,
+      "readyMs": 3236.6,
+      "firstDrawMs": 3321.5,
+      "frameBoundaryMs": 3374.4,
+      "drawCalls": 52,
+      "imageBitmapsDecoded": 0,
+      "canvas": {
+        "width": 822,
+        "height": 1283
+      },
+      "webglVersion": "WebGL 2.0 (OpenGL ES 3.0 Chromium)",
+      "renderer": "WebKit WebGL",
+      "studioCounts": {
+        "points": 15,
+        "poses": 0,
+        "moves": 0,
+        "surfaces": 25
+      }
+    },
+    {
+      "projectSha256": "f206c004e7f6b1d8372a159d3d0c86fff3ffbe8036636a03b7da4fe9af96ae41",
+      "projectBytes": 979550,
+      "fileReadMs": 5.4,
+      "readyMs": 3247.2,
+      "firstDrawMs": 3334.6,
+      "frameBoundaryMs": 3387.9,
+      "drawCalls": 52,
+      "imageBitmapsDecoded": 0,
+      "canvas": {
+        "width": 822,
+        "height": 1283
+      },
+      "webglVersion": "WebGL 2.0 (OpenGL ES 3.0 Chromium)",
+      "renderer": "WebKit WebGL",
+      "studioCounts": {
+        "points": 15,
+        "poses": 0,
+        "moves": 0,
+        "surfaces": 25
+      }
+    }
+  ]
+}
