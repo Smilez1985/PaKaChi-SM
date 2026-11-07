@@ -20,6 +20,7 @@ Zeitstempel: 2026-11-07T17:13:02+01:00 (Europe/Berlin)
 
 - Erste echte Bild-zu-3D-Rekonstruktionen des Original-PaKaChi: humanoide und tierische Form als getrennte, statische GLB-Entwürfe im Model Zoo. Aus den unveränderten Einzelvorlagen mit TripoSR auf CPU erzeugt; keine prozeduralen Ersatzpuppen.
 - Vier abgeschlossene Inferenzläufe (beide Formen, jeweils Auflösung 128 und 256), prüfbare Modell-/Eingabehashes, Abhängigkeiten, Parameter, Logs und echte 3D-Rundumansichten. Ausgeliefert werden die 256er Meshes mit 50.870 beziehungsweise 81.388 Vertices; ohne Skelett oder Clips.
+- Zusätzliche Diagnose der tatsächlichen Meshes mit komponentenweiser Dreieckszahl, offenen Randkanten und degenerierten Flächen; Ergebnisse dokumentiert, Modelle unverändert.
 - Nachvollziehbarer Patch für die getestete TripoSR-Revision, der bei bereits transparenten RGBA-Vorlagen die unnötige Initialisierung des Hintergrundentferners vermeidet. Keine automatische Änderung fremder Installationen.
 
 ### Fixed

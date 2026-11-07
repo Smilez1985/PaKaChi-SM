@@ -405,5 +405,62 @@
       },
       "postprocessing": "Orientation applied by converter during the recorded run."
     }
-  ]
+  ],
+  "topologyAssessment": {
+    "method": "Trimesh 4.0.5; GLB loaded with process=False and force=scene, scene.dump(concatenate=True). Face adjacency components include all face indices. Unique edge incidence counts identify boundary (1) and non-manifold (>2) edges. Zero-area means area_faces == 0. No geometry repair or welding applied.",
+    "scope": "Diagnostics, not character or rig approval. Disconnected components and open boundaries are not by themselves a prohibition on skinning.",
+    "models": [
+      {
+        "form": "humanoid",
+        "file": "public/model-zoo/pakachi-drafts/humanoid.glb",
+        "sha256": "debb9c4793368bff6989f41b2a40eba3e4ef6a6100aaf3858abe51117a174d14",
+        "vertices": 50870,
+        "triangles": 101564,
+        "faceConnectedComponents": 3,
+        "largestComponentTriangles": 65892,
+        "largestComponentTriangleShare": 0.6487731873498483,
+        "componentTriangleCounts": [
+          65892,
+          35584,
+          88
+        ],
+        "boundaryEdges": 336,
+        "nonManifoldEdges": 0,
+        "zeroAreaTriangles": 0,
+        "watertight": false,
+        "windingConsistent": true,
+        "seconds": 0.1689741279997179
+      },
+      {
+        "form": "animal",
+        "file": "public/model-zoo/pakachi-drafts/animal.glb",
+        "sha256": "c87b55c51a9bf1872de421d1052f943de05e53119b3e8c6265d5d0016b8e6d42",
+        "vertices": 81388,
+        "triangles": 162500,
+        "faceConnectedComponents": 12,
+        "largestComponentTriangles": 162378,
+        "largestComponentTriangleShare": 0.9992492307692308,
+        "componentTriangleCounts": [
+          162378,
+          24,
+          24,
+          16,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          8,
+          2
+        ],
+        "boundaryEdges": 506,
+        "nonManifoldEdges": 2,
+        "zeroAreaTriangles": 2,
+        "watertight": false,
+        "windingConsistent": true,
+        "seconds": 0.25463528399995994
+      }
+    ]
+  }
 }

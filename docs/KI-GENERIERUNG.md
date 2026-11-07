@@ -17,6 +17,15 @@ Im Player unter **Avatar auswählen** die Einträge **PaKaChi · Humanoid · 3D-
 
 **Sichtbare Mängel:** Gesicht und Augen weichen ab, Finger/Pfoten sind unzureichend getrennt, Fell- und Materialwirkung gehen verloren, seitliches Körpervolumen und verdeckte Flächen sind unzuverlässig. Die Rückseite ist aus einem Einzelbild geschätzt. Mehr Abtastpunkte verfeinern das Mesh, beheben diese Rekonstruktionsfehler aber nicht grundsätzlich. Das sind Arbeitsentwürfe, keine Freigabe als fertiges Maskottchen.
 
+Die unveränderten 256er Meshes wurden zusätzlich auf ihre Flächenstruktur geprüft:
+
+| Entwurf | Getrennte Flächenkomponenten | Offene Randkanten | Kanten mit mehr als zwei Flächen | Dreiecke ohne Fläche |
+| --- | --- | --- | --- | --- |
+| Humanoid | 3 | 336 | 0 | 0 |
+| Tierform | 12 | 506 | 2 | 2 |
+
+Beim Humanoiden verteilen sich die Dreiecke auf 65.892 / 35.584 / 88; bei der Tierform liegen 162.378 von 162.500 Dreiecken in der größten Komponente. Beide Meshes sind nicht wasserdicht. Getrennte Teile oder offene Ränder verhindern Skinning nicht grundsätzlich; die Zahlen dienen der gezielten Sichtprüfung vor dem Rigging. Es wurden keine Teile automatisch verbunden, gelöscht oder repariert. Methode und Modellprüfsummen stehen im Messbericht.
+
 Vier echte CPU-Läufe (beide Formen, jeweils Auflösung 128 und 256), Eingabe-/Ausgabeprüfsummen, Parameter, Abhängigkeiten und Logs sind im [Messbericht](benchmarks/pakachi-generation-2026-11-07.json) dokumentiert; zusammenfassender [Prüfstand](PRUEFUNG.md#version-0830). Die 256er Ergebnisse werden ausgeliefert. Die Abbildungen wurden aus der vom produktiven GLTFLoader geladenen Geometrie mit Software-OpenGL gerendert; sie sind keine generierten 2D-Ansichten und keine vollständige Browser-/Materialabnahme.
 
 Für diese Läufe wurde TripoSR-Revision `107cefdc244c39106fa830359024f6a2f1c78871` mit [einem kleinen Patch](../scripts/patches/triposr-transparent-input.patch) verwendet. Er überspringt die Erzeugung einer Hintergrundentfernungs-Sitzung, wenn alle Eingaben schon transparente RGBA-Bilder sind. Die vorhandene TripoSR-Alphaverarbeitung bleibt aktiv. Ohne den Patch initialisiert das Backend unnötig den Hintergrundentferner samt zusätzlichem Gewichtsdownload. Der Patch wird **nicht automatisch** auf fremde Installationen angewendet.

@@ -8,7 +8,11 @@ test('real PaKaChi reconstruction drafts load in WebGL without advertising a rig
   await expect(page.locator('#viewport canvas')).toBeVisible();
   const capability=await page.evaluate(()=>((window as any).PaKaChiSM.call('get_avatar_capabilities')));
   expect(capability.moves).toEqual([]);
-  await page.reload();await expect(page.locator('#message')).toContainText(`${name} bereit`);
+  // Reload starts the original player; both bundled drafts must remain selectable.
+  await page.reload();await expect(page.locator('#message')).toContainText('Originalstand wiederhergestellt');
+  await expect(page.locator('#avatar-select')).toHaveValue('pakachi-original');
+  await page.locator('#avatar-select').selectOption(id);
+  await expect(page.locator('#message')).toContainText(`${name} bereit`);
   await expect(page.locator('#avatar-select')).toHaveValue(id);
   await page.locator('#studio-tab').click();
   const studio=await page.evaluate(()=>window.PaKaChiSM.call('get_studio') as any);
