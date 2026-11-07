@@ -12,6 +12,18 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.79.0] - 2026-11-07
+
+Zeitstempel: 2026-11-07T09:26:00+01:00 (Europe/Berlin)
+
+### Added
+
+- Ausgewählten eigenen Studio-Move als eigenständige GLB mit Rig und einem Animationsclip exportieren. Knochenbewegung und Gesamtspur für Verschiebung, Drehung um den Figurenmittelpunkt und Größe bleiben enthalten; wiederholte Posen und Schleifenschluss werden berücksichtigt.
+- Ausgabe mit 30 Stützstellen pro Sekunde und exakten Segmentgrenzen. Bewegte freie Oberflächenpunkte, Matrixscherung und zu umfangreiche Sequenzen werden abgewiesen; keine stillschweigende Teilausgabe.
+- GLB-Rundlauftests für tatsächliche Animation nach dem Laden, Quellschutz, wiederholte Posen, Figurentransformationen und Grenzen; Browserprüfung für Download, erneuten Import und Wiedergabe.
+
+[Prüfbericht](PRUEFUNG-0.79.0.md) · [Exportanleitung](GLB-EXPORT.md). Originalclip-Übernahme, animierte freie Punkte und Retargeting bleiben offen.
+
 ## [0.78.1] - 2026-11-07
 
 Zeitstempel: 2026-11-07T09:04:13+01:00 (Europe/Berlin)
@@ -1632,3 +1644,5 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 [0.78.0]: PRUEFUNG-0.78.0.md
 
 [0.78.1]: PRUEFUNG-0.78.1.md
+
+[0.79.0]: PRUEFUNG-0.79.0.md

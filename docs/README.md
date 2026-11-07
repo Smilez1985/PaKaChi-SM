@@ -1,6 +1,6 @@
 # Blaupause – PaKaChi-SM
 
-**Softwarestand: 0.78.1 · Dokumentation abgeglichen am 31.10.2026.**
+**Softwarestand: 0.79.0 · Dokumentation abgeglichen am 31.10.2026.**
 
 Die Blaupause besteht aus drei Dokumenten. Das Designdokument beschreibt das Produktziel, die Roadmap die Umsetzung und das Changelog die bereits erfolgten Änderungen.
 
@@ -197,3 +197,5 @@ Seit **0.77.0** exportiert „Figur als GLB (Standbild)“ die aktuelle sichtbar
 Seit **0.78.0** bietet „Figur als GLB (mit Rig)“ zusätzlich eine eigenständige Datei mit aktuellem Hautskelett an. Knochenhierarchie, Hautgewichte, Bindematrizen, Material-/Geometriedaten und aktuelle Form werden unabhängig kopiert; Studio-Hilfen werden nicht übernommen. Die Quelle und der Undo-/Dirty-Stand bleiben erhalten. Die Datei enthält noch keine Animationsclips oder Studio-Moves. Für Studio-Punkte und weitere Bearbeitung das vollständige Projekt zusätzlich speichern. Modelle ohne sichtbares Hautskelett, externe Knochenverweise, ausgeblendete Knochenhierarchien, Instanzen und ausgeblendete Materialgruppen werden mit einer Meldung abgewiesen.
 
 **Korrektur 0.78.1:** Einfügen, Gewichtsübertragung vom Elternknochen und anschließendes Löschen dieses Knochens bleiben beim Replay erhalten. Frühere Elternbezüge dienen ausschließlich der korrekten Berechnung der Einfügeachse. Projektformat unverändert; Undo/Redo und erneutes Laden geprüft.
+
+Seit **0.79.0** exportiert „Move als GLB (mit Rig)“ den ausgewählten eigenen Studio-Move mit Hautskelett als einen Animationsclip. Gelenkbewegung und Figurenverschiebung/-drehung/-größe werden übernommen, einschließlich Drehung um den Figurenmittelpunkt und Schleifenschluss. Ausgabe mit 30 Stützstellen pro Sekunde und allen Schlüsselposen; Wiedergabeschleifen im Zielprogramm einstellen. Bewegte freie Oberflächenpunkte, geschert aufgebaute Modellräume und zu umfangreiche Sequenzen werden ausdrücklich abgewiesen. Originalclips und Retargeting gehören nicht zu diesem Export. [Exportanleitung](GLB-EXPORT.md).

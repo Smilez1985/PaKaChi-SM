@@ -1,6 +1,6 @@
 # Roadmap – offene Aufgaben
 
-**Entwicklungsstand: 0.78.1 · Abgleich: 07.11.2026.** Teil der [Blaupause](README.md).
+**Entwicklungsstand: 0.79.0 · Abgleich: 07.11.2026.** Teil der [Blaupause](README.md).
 
 Diese Roadmap enthält offene Umsetzung und ausstehende Abnahme. Erledigte Änderungen stehen nach Version im [Changelog](CHANGELOG.md); Nachweise und Grenzen im [Prüfstand](PRUEFUNG.md). Eine implementierte Funktion ist nicht automatisch manuell oder mit realen Anbietern abgenommen.
 
@@ -22,7 +22,7 @@ Der Arbeitsstand liegt auf `work/local-verification-model-zoo`; `main` bleibt bi
 - [ ] Tatsächliche Speichergrenzen und Quotenfehler in realen Browsern prüfen.
 - [ ] Gespeicherte Auswahl zusätzlich mit externem MCP-Host abnehmen.
 - [ ] Veröffentlichungsablauf ergänzen und zusammengeführte Exportpakete im gerenderten Player abnehmen.
-- [ ] Sammlung im Browser bearbeiten und visuell abnehmen; GLB-Clip-Export und Retargeting auf andere Rigs ergänzen.
+- [ ] Sammlung im Browser bearbeiten und visuell abnehmen; GLB-Animationen für bewegte freie Oberflächenpunkte und sichere Originalclip-Übernahme sowie Retargeting auf andere Rigs ergänzen. Eigene Studio-Moves mit Knochen-/Figurenbewegung sind seit 0.79.0 als GLB exportierbar.
 
 ## 2. StateMaschine und externe Steuerung
 
@@ -56,7 +56,7 @@ Der Arbeitsstand liegt auf `work/local-verification-model-zoo`; `main` bleibt bi
 
 - [ ] Lokalisierung von Originalplayer, Modellbeschreibungen und technischen Meldungen vervollständigen.
 - [ ] Modellqualität und Dateigröße skalieren; Quelle neben optimierten Ableitungen bewahren.
-- [ ] Animationen nach Optimierungen prüfen; GLB-Export mit Animationen ergänzen. Statischer GLB-Export ist seit 0.77.0, GLB mit bearbeitetem Hautskelett ohne Clips seit 0.78.0 implementiert.
+- [ ] Animationen nach Optimierungen prüfen; Animations-GLB für bewegte freie Oberflächenpunkte und Originalclips erweitern. Statischer GLB-Export ist seit 0.77.0, GLB mit bearbeitetem Hautskelett seit 0.78.0 und mit ausgewähltem Studio-Move (Knochen/Figur) seit 0.79.0 implementiert.
 - [ ] Gesamten Ablauf ohne Fachwissen erproben.
 
 ## 7. Studio-Harness und Anbieteranbindung

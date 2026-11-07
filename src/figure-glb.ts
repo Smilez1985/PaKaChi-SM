@@ -48,8 +48,8 @@ export function captureRiggedFigure(root:T.Object3D):T.Group{
  }catch(error){for(const item of owned){item.geometry.dispose();item.materials.forEach(m=>m.dispose());}copy.traverse(node=>{if(node instanceof T.SkinnedMesh)node.skeleton.dispose();});throw error;}
 }
 export function disposeStaticFigure(root:T.Group){root.traverse(node=>{if(node instanceof T.Mesh){node.geometry.dispose();for(const material of Array.isArray(node.material)?node.material:[node.material])material.dispose();if(node instanceof T.SkinnedMesh)node.skeleton.dispose();}});}
-async function writeFigureGLB(scene:T.Group):Promise<ArrayBuffer>{
- try{const {GLTFExporter}=await import('three/addons/exporters/GLTFExporter.js');const exporter=new GLTFExporter(),bytes=await exporter.parseAsync(scene,{binary:true,onlyVisible:true});if(!(bytes instanceof ArrayBuffer))throw Error('GLB-Export fehlgeschlagen.');return bytes;}
+export async function writeFigureGLB(scene:T.Group,animations:T.AnimationClip[]=[]):Promise<ArrayBuffer>{
+ try{const {GLTFExporter}=await import('three/addons/exporters/GLTFExporter.js');const exporter=new GLTFExporter(),bytes=await exporter.parseAsync(scene,{binary:true,onlyVisible:true,animations});if(!(bytes instanceof ArrayBuffer))throw Error('GLB-Export fehlgeschlagen.');return bytes;}
  finally{disposeStaticFigure(scene);}
 }
 export function exportRiggedFigureGLB(root:T.Object3D):Promise<ArrayBuffer>{return writeFigureGLB(captureRiggedFigure(root));}

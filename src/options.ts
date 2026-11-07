@@ -5,6 +5,14 @@ export function readOptions(storage?:Pick<Storage,'getItem'>):Options {
 }
 export const options=readOptions();
 const translations:Record<string,string>={
+ 'GLB: Knochen- und Figurenbewegung, ohne bewegte freie Oberflächenpunkte. Schleife im Zielprogramm wählen.':'GLB: bone and whole-figure motion, without animated free surface points. Choose loop playback in the target application.',
+
+ 'Move als GLB (mit Rig)':'Export move as GLB (with rig)',
+ 'GLB mit Rig und ausgewähltem Studio-Move heruntergeladen. Schleifenwiedergabe im Zielprogramm wählen.':'GLB with rig and selected Studio move downloaded. Choose loop playback in the target application.',
+ 'Bewegte freie Oberflächenpunkte sind im GLB-Animationsexport noch nicht unterstützt. Move-Datei verwenden.':'Animated free surface points are not yet supported by GLB animation export. Use a move file.',
+ 'Bewegung ist für den GLB-Export zu umfangreich. Kürzere Sequenz wählen.':'The move is too large for GLB export. Choose a shorter sequence.',
+ 'Gescherten Modellraum kann der GLB-Animationsexport nicht verlustfrei übernehmen.':'GLB animation export cannot preserve a sheared model space.',
+
  'Figur als GLB (mit Rig)':'Export figure as GLB (with rig)',
  'Standbild ohne Rig oder aktuelle Form mit Hautskelett. Beide ohne Animationen. Studio-Projekt zusätzlich speichern.':'Still without rig or current form with skin skeleton. Both without animations. Save the Studio project as well.',
  'GLB mit Hautskelett heruntergeladen. Studio-Posen und Animationen zusätzlich im Projekt speichern.':'GLB with skin skeleton downloaded. Save Studio poses and animations in the project as well.',

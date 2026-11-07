@@ -18,6 +18,8 @@ export class StudioRig {
   private figureRotation=new T.Quaternion();
   private figureScale=1;
   get scale(){return this.figureScale;}
+  /** Original normalized model frame, independent of the current whole-figure pose. */
+  get modelWorldMatrix(){return this.rootWorld.clone();}
   setFigureScale(value:number){this.setFigureTransform(this.figureOffset,this.figureRotation,value);}
   private figureMatrix=new T.Matrix4();
   private rootMatrix:T.Matrix4;
