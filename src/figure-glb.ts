@@ -24,13 +24,14 @@ export function captureStaticFigure(meshes:readonly T.Mesh[]):T.Group{
  }catch(error){disposeStaticFigure(result);throw error;}
 }
 /** Copies geometry/materials only after skeleton remapping; texture images stay read-only. */
-export function captureRiggedFigure(root:T.Object3D):T.Group{
- root.updateWorldMatrix(true,true);const nodes=new Set<T.Object3D>();root.traverse(node=>nodes.add(node));let skins=0;
+export function captureFigureHierarchy(root:T.Object3D,requireSkin=false):T.Group{
+ root.updateWorldMatrix(true,true);const nodes=new Set<T.Object3D>();root.traverse(node=>nodes.add(node));let skins=0,meshes=0;root.traverse(node=>{if(node instanceof T.Mesh){let visible=true;for(let n:T.Object3D|null=node;n;n=n.parent)visible&&=n.visible;if(visible)meshes++;}});
  root.traverse(node=>{if(!(node instanceof T.SkinnedMesh))return;let visible=true;for(let n:T.Object3D|null=node;n;n=n.parent)visible&&=n.visible;if(visible)skins++;
   if(node.skeleton.bones.some(b=>!nodes.has(b)))throw Error('Rig verweist auf Knochen außerhalb der Figur.');
   for(const bone of node.skeleton.bones)for(let n:T.Object3D|null=bone;n&&nodes.has(n);n=n.parent)if(!n.visible)throw Error('Ausgeblendete Knochenhierarchie kann nicht als Rig exportiert werden.');
  });
- if(!skins)throw Error('Die Figur enthält kein exportierbares Hautskelett.');
+ if(requireSkin&&!skins)throw Error('Die Figur enthält kein exportierbares Hautskelett.');
+ if(!meshes)throw Error('Keine sichtbare Figur für den GLB-Export.');
  const result=new T.Group();result.name='PaKaChi rigged figure';const copy=cloneSkeleton(root);
  // Detach from viewer normalization without changing any world transforms.
  copy.matrix.copy(root.matrixWorld);copy.matrixAutoUpdate=false;copy.matrix.decompose(copy.position,copy.quaternion,copy.scale);
@@ -47,6 +48,7 @@ export function captureRiggedFigure(root:T.Object3D):T.Group{
   result.updateMatrixWorld(true);return result;
  }catch(error){for(const item of owned){item.geometry.dispose();item.materials.forEach(m=>m.dispose());}copy.traverse(node=>{if(node instanceof T.SkinnedMesh)node.skeleton.dispose();});throw error;}
 }
+export function captureRiggedFigure(root:T.Object3D):T.Group{return captureFigureHierarchy(root,true);}
 export function disposeStaticFigure(root:T.Group){root.traverse(node=>{if(node instanceof T.Mesh){node.geometry.dispose();for(const material of Array.isArray(node.material)?node.material:[node.material])material.dispose();if(node instanceof T.SkinnedMesh)node.skeleton.dispose();}});}
 export async function writeFigureGLB(scene:T.Group,animations:T.AnimationClip[]=[]):Promise<ArrayBuffer>{
  try{const {GLTFExporter}=await import('three/addons/exporters/GLTFExporter.js');const exporter=new GLTFExporter(),bytes=await exporter.parseAsync(scene,{binary:true,onlyVisible:true,animations});if(!(bytes instanceof ArrayBuffer))throw Error('GLB-Export fehlgeschlagen.');return bytes;}

@@ -1,6 +1,6 @@
 # Blaupause – PaKaChi-SM
 
-**Softwarestand: 0.79.0 · Dokumentation abgeglichen am 31.10.2026.**
+**Softwarestand: 0.80.0 · Dokumentation abgeglichen am 31.10.2026.**
 
 Die Blaupause besteht aus drei Dokumenten. Das Designdokument beschreibt das Produktziel, die Roadmap die Umsetzung und das Changelog die bereits erfolgten Änderungen.
 
@@ -198,4 +198,6 @@ Seit **0.78.0** bietet „Figur als GLB (mit Rig)“ zusätzlich eine eigenstän
 
 **Korrektur 0.78.1:** Einfügen, Gewichtsübertragung vom Elternknochen und anschließendes Löschen dieses Knochens bleiben beim Replay erhalten. Frühere Elternbezüge dienen ausschließlich der korrekten Berechnung der Einfügeachse. Projektformat unverändert; Undo/Redo und erneutes Laden geprüft.
 
-Seit **0.79.0** exportiert „Move als GLB (mit Rig)“ den ausgewählten eigenen Studio-Move mit Hautskelett als einen Animationsclip. Gelenkbewegung und Figurenverschiebung/-drehung/-größe werden übernommen, einschließlich Drehung um den Figurenmittelpunkt und Schleifenschluss. Ausgabe mit 30 Stützstellen pro Sekunde und allen Schlüsselposen; Wiedergabeschleifen im Zielprogramm einstellen. Bewegte freie Oberflächenpunkte, geschert aufgebaute Modellräume und zu umfangreiche Sequenzen werden ausdrücklich abgewiesen. Originalclips und Retargeting gehören nicht zu diesem Export. [Exportanleitung](GLB-EXPORT.md).
+Seit **0.79.0** exportiert „Move als GLB (mit Rig)“ den ausgewählten eigenen Studio-Move mit Hautskelett als einen Animationsclip. Gelenkbewegung und Figurenverschiebung/-drehung/-größe werden übernommen, einschließlich Drehung um den Figurenmittelpunkt und Schleifenschluss. Ausgabe mit 30 Stützstellen pro Sekunde und allen Schlüsselposen; Wiedergabeschleifen im Zielprogramm einstellen. Bis 0.79.0 waren bewegte freie Oberflächenpunkte ausgeschlossen; seit 0.80.0 werden sie als Morph-Animation ausgegeben. Geschert aufgebaute Modellräume und zu umfangreiche Sequenzen werden weiterhin ausdrücklich abgewiesen. Originalclips und Retargeting gehören nicht zu diesem Export. [Exportanleitung](GLB-EXPORT.md).
+
+Seit **0.80.0** übernimmt „Move als GLB (Animation)“ auch bewegte freie Oberflächen-/Gesichtspunkte als Morph-Animation, mit oder ohne vorhandenes Skelett. Unterschiedliche Oberflächenposen werden je betroffenem Mesh zusammengefasst und an den ursprünglichen Schlüsselzeiten linear gewichtet; Knochen- und Figurenbewegung bleiben kombiniert enthalten. Vorhandene Positions-/Normal-Morphs und deren konstante Gewichte werden berücksichtigt. Normale zwischen Posen werden angenähert interpoliert. Speicher-, Zielanzahl- und Arbeitsbudgets werden vor dem Kopieren und Berechnen geprüft; umfangreiche Sequenzen werden mit Hinweis abgewiesen. Studio-Projekt für die ursprünglichen Kontrollpunkte zusätzlich speichern. [Anleitung](GLB-EXPORT.md).

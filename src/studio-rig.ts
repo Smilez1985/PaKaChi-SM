@@ -6,7 +6,7 @@ import { MAX_WEIGHT_TRANSFERS, emptyStudio, FIGURE_TRACK, neutralFigure, validFi
 import type { ControlPoint, StudioData, Transform, Vec3, Pose, StudioMove, WeightRegion } from './studio-data.ts';
 const read = (o:T.Object3D):Transform => ({position:o.position.toArray(),rotation:o.quaternion.toArray()});
 const write = (o:T.Object3D,v:Transform) => {o.position.fromArray(v.position);o.quaternion.fromArray(v.rotation);};
-interface Surface { mesh:T.Mesh; base:Float32Array; world:T.Vector3[]; inverse:T.Matrix3; worldInverse:T.Matrix4 }
+interface Surface { mesh:T.Mesh; base:Float32Array; world:T.Vector3[]; worldBounds:T.Box3; inverse:T.Matrix3; worldInverse:T.Matrix4 }
 
 /** World-space control points on a normalized model; deformation is applied before skinning. */
 export class StudioRig {
@@ -47,7 +47,7 @@ export class StudioRig {
       const base=new Float32Array(attr.count*3);for(let i=0;i<attr.count;i++){base[i*3]=attr.getX(i);base[i*3+1]=attr.getY(i);base[i*3+2]=attr.getZ(i);}
       node.geometry.setAttribute('position',new T.Float32BufferAttribute(base.slice(),3));
       const world=Array.from({length:attr.count},(_,i)=>new T.Vector3().fromBufferAttribute(attr,i).applyMatrix4(node.matrixWorld));
-      this.surfaces.push({mesh:node,base,world,worldInverse:node.matrixWorld.clone().invert(),inverse:new T.Matrix3().setFromMatrix4(node.matrixWorld.clone().invert())});
+      this.surfaces.push({mesh:node,base,world,worldBounds:new T.Box3().setFromPoints(world),worldInverse:node.matrixWorld.clone().invert(),inverse:new T.Matrix3().setFromMatrix4(node.matrixWorld.clone().invert())});
     }});
     sourceGeometries.forEach(g=>g.dispose());
     this.topology=new StudioTopology([...this.bones],root);
@@ -250,14 +250,22 @@ export class StudioRig {
     } else {const local=position.clone().applyMatrix4(this.surfaceMatrix(p).invert());this.surfaceValues[p.id]={position:local.toArray(),rotation:[0,0,0,1]};if(edit)p.rest=local.toArray();}
     this.root.updateWorldMatrix(true,true);this.deform();
   }
+  /** Same additive pre-skin deformation as the editor, without modifying live geometry. */
+  surfacePositions(values:Record<string,Transform>,mesh:number):Float32Array {
+    const surface=this.surfaces[mesh];if(!surface)throw Error('Oberfläche fehlt.');
+    const attr=new T.BufferAttribute(new Float32Array(surface.base.length),3);this.deformSurface(attr,mesh,values);return attr.array as Float32Array;
+  }
+  private deformSurface(attr:T.BufferAttribute,mesh:number,values:Record<string,Transform>){
+    const s=this.surfaces[mesh];attr.copyArray(s.base);
+    for(const p of this.data.points){if(p.kind!=='surface'||p.mesh!==undefined&&p.mesh!==mesh)continue;
+      const delta=new T.Vector3().fromArray(values[p.id]?.position??p.rest).sub(new T.Vector3().fromArray(p.rest));if(!(delta.lengthSq()>1e-12))continue;
+      const center=new T.Vector3().fromArray(p.rest);if(!s.worldBounds.intersectsSphere(new T.Sphere(center,p.radius)))continue;const offset=delta.applyMatrix3(s.inverse);
+      for(let i=0;i<s.world.length;i++){const t=1-s.world[i].distanceTo(center)/p.radius;if(t<=0)continue;const w=t*t*(3-2*t);attr.setXYZ(i,attr.getX(i)+offset.x*w,attr.getY(i)+offset.y*w,attr.getZ(i)+offset.z*w);}
+    }
+  }
   private deform() {
-    const active=this.data.points.filter(p=>p.kind==='surface').map(p=>({p,delta:new T.Vector3().fromArray(this.surfaceValues[p.id]?.position ?? p.rest).sub(new T.Vector3().fromArray(p.rest))})).filter(x=>x.delta.lengthSq()>1e-12);
     for(let m=0;m<this.surfaces.length;m++){
-      const s=this.surfaces[m], attr=s.mesh.geometry.getAttribute('position') as T.BufferAttribute;
-      attr.copyArray(s.base);
-      for(const {p,delta} of active){if(p.mesh!==undefined && p.mesh!==m)continue;const offset=delta.clone().applyMatrix3(s.inverse),center=new T.Vector3().fromArray(p.rest);
-        for(let i=0;i<s.world.length;i++){const t=1-s.world[i].distanceTo(center)/p.radius;if(t<=0)continue;const w=t*t*(3-2*t);attr.setXYZ(i,attr.getX(i)+offset.x*w,attr.getY(i)+offset.y*w,attr.getZ(i)+offset.z*w);}
-      }
+      const s=this.surfaces[m],attr=s.mesh.geometry.getAttribute('position') as T.BufferAttribute;this.deformSurface(attr,m,this.surfaceValues);
       attr.needsUpdate=true;s.mesh.geometry.computeVertexNormals();s.mesh.geometry.computeBoundingSphere();s.mesh.geometry.computeBoundingBox();
     }
   }

@@ -12,6 +12,22 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.80.0] - 2026-11-07
+
+Zeitstempel: 2026-11-07T10:12:57+01:00 (Europe/Berlin)
+
+### Added
+
+- Animierte freie Oberflächen-/Gesichtspunkte im GLB-Export als Positions-/Normal-Morph-Ziele. Unterschiedliche Oberflächenposen werden je Mesh dedupliziert und an den ursprünglichen Schlüsselzeiten gewichtet. Mesh-gebundene und globale Punkte bleiben mit Skinning und Figurenbewegung kombinierbar.
+- Animationsausgabe auch für Figuren ohne Skelett. Die Schaltfläche heißt jetzt „Move als GLB (Animation)“; vorhandene Rigs bleiben enthalten. Native relative/absolute Morph-Ziele, Gewichte und Namen werden berücksichtigt.
+- Vorabgrenzen für Morph-Speicher, Zielanzahl, Kanalwerte und Rechenaufwand. Keine stille Verringerung der Qualität.
+
+### Changed
+
+- Editor und Export verwenden dieselbe additive Oberflächenverformung. Unbeteiligte Oberflächen werden anhand ihres unveränderten Bezugsraums übersprungen.
+
+[Prüfbericht](PRUEFUNG-0.80.0.md) · [Exportanleitung](GLB-EXPORT.md). Originalclip-Übernahme und Retargeting bleiben offen.
+
 ## [0.79.0] - 2026-11-07
 
 Zeitstempel: 2026-11-07T09:26:00+01:00 (Europe/Berlin)
@@ -1646,3 +1662,5 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 [0.78.1]: PRUEFUNG-0.78.1.md
 
 [0.79.0]: PRUEFUNG-0.79.0.md
+
+[0.80.0]: PRUEFUNG-0.80.0.md

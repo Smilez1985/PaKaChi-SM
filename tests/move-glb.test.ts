@@ -23,8 +23,8 @@ test('animated GLB reproduces bone poses, figure pivot/scale, repeated poses and
  for(const time of [0,1/30,.5,.515,1,1.2,1.7,2,2.4]){rig.apply(rig.sample(move,time));mixer.setTime(time);scene.updateMatrixWorld(true);vertices(mesh).forEach((v,i)=>assert.ok(v.distanceTo(vertices(skin)[i])<(time===.515?5e-4:1e-5),`${time}, ${i}: ${v.distanceTo(vertices(skin)[i])}`));}
  mixer.stopAllAction();rig.dispose();disposeModel(scene);
 });
-test('move export rejects unsupported surface motion, shear and excessive size without changing source',()=>{
- const {rig,move}=fixture(),values=rig.capture();rig.data.points.push({id:'surface',name:'Face',kind:'surface',rest:[0,0,0],size:.01,radius:.1});for(const p of rig.data.poses)p.values.surface={position:[0,0,0],rotation:[0,0,0,1]};rig.data.poses[1].values.surface.position[0]=.1;assert.throws(()=>captureMoveGLB(rig,move),/Oberflächenpunkte/);assert.deepEqual(rig.capture()[FIGURE_TRACK],values[FIGURE_TRACK]);rig.dispose();
+test('move export rejects missing point data, shear and excessive size without changing source',()=>{
+ const {rig,move}=fixture(),values=rig.capture();const point=rig.data.points[0];delete rig.data.poses[1].values[point.id];assert.throws(()=>captureMoveGLB(rig,move),/Gelenkspuren/);assert.deepEqual(rig.capture(),values);rig.dispose();
  const f=fixture(true);assert.throws(()=>captureMoveGLB(f.rig,f.move),/Gescherten/);f.rig.data.poses[0].seconds=30;assert.throws(()=>moveGLBTimes(f.rig,{...f.move,poses:Array(100).fill('a')}),/umfangreich/);assert.throws(()=>moveGLBTimes(f.rig,{...f.move,poses:['a','missing']}),/vorhandene/);f.rig.dispose();
 });
 

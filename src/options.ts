@@ -5,6 +5,15 @@ export function readOptions(storage?:Pick<Storage,'getItem'>):Options {
 }
 export const options=readOptions();
 const translations:Record<string,string>={
+ 'GLB mit ausgewähltem Studio-Move heruntergeladen. Schleifenwiedergabe im Zielprogramm wählen.':'GLB with the selected Studio move downloaded. Choose loop playback in the target application.',
+
+ 'Move als GLB (Animation)':'Export move as GLB (animation)',
+ 'GLB: Knochen-, Figuren- und Oberflächenbewegung. Schleife im Zielprogramm wählen.':'GLB: bone, whole-figure and surface motion. Choose loop playback in the target application.',
+ 'Zu viele Morph-Ziele für GLB-Export. Weniger unterschiedliche Oberflächenposen wählen.':'Too many morph targets for GLB export. Choose fewer distinct surface poses.',
+ 'Oberflächenanimation ist für den GLB-Export zu umfangreich. Weniger Posen oder Punkte wählen.':'Surface animation is too large for GLB export. Choose fewer poses or points.',
+ 'Vorhandene Morph-Attribute werden für Oberflächenanimationen nicht unterstützt.':'Existing morph attributes are not supported for surface animation export.',
+ 'Inkonsistente Morph-Ziele im Modell.':'Inconsistent morph targets in the model.',
+
  'GLB: Knochen- und Figurenbewegung, ohne bewegte freie Oberflächenpunkte. Schleife im Zielprogramm wählen.':'GLB: bone and whole-figure motion, without animated free surface points. Choose loop playback in the target application.',
 
  'Move als GLB (mit Rig)':'Export move as GLB (with rig)',
