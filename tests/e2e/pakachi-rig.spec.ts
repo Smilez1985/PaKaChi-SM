@@ -2,7 +2,10 @@ import {test,expect} from '@playwright/test';
 import {readFile} from 'node:fs/promises';
 for(const [id,label] of [['pakachi-work','PaKaChi · Arbeitsform · Rig'],['pakachi-normal','PaKaChi · Normalform · Rig']]){
  test(`${id}: actual rig bends with skin, undoes and reloads the saved pose`,async({page})=>{
-  const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');await page.locator('#avatar-select').selectOption(id);await expect(page.locator('#message')).toContainText(`${label} bereit`);
+  // Two full character imports, a 59-joint project round trip and multiple
+  // traced WebGL views exceed the fixture budget on the CI software renderer.
+  test.setTimeout(90_000);
+  const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');await page.locator('#avatar-select').selectOption(id);await expect(page.locator('#message')).toContainText(`${label} bereit`,{timeout:15_000});
   const canvas=page.locator('#viewport canvas');await expect(canvas).toBeVisible();
   await canvas.screenshot({path:`test-results/${id}-character.png`});
   await page.locator('#studio-tab').click();await page.locator('#skeleton').check();
@@ -22,7 +25,7 @@ for(const [id,label] of [['pakachi-work','PaKaChi · Arbeitsform · Rig'],['paka
   await page.locator('#skeleton').uncheck();await canvas.screenshot({path:`test-results/${id}-fingers.png`});
   const pending=page.waitForEvent('download');await page.locator('#studio-save').click();const file=(await(await pending).path())!;
   const saved=JSON.parse(await readFile(file,'utf8'));expect(saved.studio.boneRest).toHaveLength(59);expect(saved.studio.draft).toBeTruthy();
-  page.once('dialog',d=>d.accept());await page.locator('#project-file').setInputFiles(file);await expect(page.locator('#message')).toContainText(`${label} bereit`);
+  page.once('dialog',d=>d.accept());await page.locator('#project-file').setInputFiles(file);await expect(page.locator('#message')).toContainText(`${label} bereit`,{timeout:15_000});
   await page.locator('#studio-tab').click();const reloaded=(await points()).items.find((p:any)=>p.name==='LeftWrist');reloaded.position.forEach((n:number,i:number)=>expect(n).toBeCloseTo(moved.position[i],6));
   const loadedFinger=(await points()).items.find((p:any)=>p.name==='LeftIndex2');loadedFinger.rotation.forEach((n:number,i:number)=>expect(n).toBeCloseTo(finger.rotation[i],6));
   await page.locator('#skeleton').uncheck();

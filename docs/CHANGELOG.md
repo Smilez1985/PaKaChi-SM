@@ -29,6 +29,7 @@ Zeitstempel: 2026-11-07T21:01:23+01:00 (Europe/Berlin)
 
 ### Fixed
 
+- Browser-Zeitbudget der beiden vollständigen Charakterabläufe an große Modelle, Projekt-Rundlauf und mehrere Software-WebGL-Ansichten angepasst: 90 Sekunden je Fall, 15 Sekunden je Import. Der CI-Trace belegt die vorherigen Abbrüche bei Schlussaufnahmen nach erfolgreichen Funktionsprüfungen.
 - Tiefenpositionen an Handgelenken und Pfoten anhand tatsächlicher Modellquerschnitte korrigiert; überlagerte Rumpf-/Schwanzflächen bei der Zuordnung getrennt betrachtet.
 - Falsche Armgewichte an einer Hinterpfote der Tierform beseitigt: Zuordnung folgt den tatsächlichen Kettenabständen statt einer pauschalen Z-Grenze. Schwanz- und Kopfregion räumlich vom hinteren Rücken abgegrenzt. Neue Anatomieproben verhindern Mitziehen der Hinterpfoten bei Armbewegung und des hinteren Rückens bei Hals-/Kopfdrehung.
 

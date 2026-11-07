@@ -76,6 +76,8 @@ Zeitstempel: 2026-11-07T21:01:23+01:00 (Europe/Berlin).
 - Erzwungene Neuerzeugung beider GLBs bytegleich; `--if-needed` behält die Änderungszeiten unveränderter Ausgaben.
 - Vollständiger regulärer Chromium-CI-Lauf und Produktionsimportmessungen sind commitgebunden in [PR #1](https://github.com/Smilez1985/PaKaChi-SM/pull/1) nachzuverfolgen; lokale Teilprüfung wird nicht als vollständige Browserprüfung bezeichnet.
 
+**CI-Zeitbudget:** [Lauf 42410125768](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/42410125768) bestand 345 Node-Tests und Build; 33 von 35 Browserfällen bestanden. Die zwei vollständigen Charakterabläufe überschritten das allgemeine 45-Sekunden-Budget. Beide Traces bestätigen erfolgreiche Arm-/Fingerprüfung, Projektübernahme und erneute Werteprüfung; der Abbruch geschah erst bei den Schlussansichten (Arbeitsform: Seite, Normalform: Front). Diese beiden Fälle erhalten wie andere umfangreiche Import-/Exportabläufe 90 Sekunden Gesamtbudget und 15 Sekunden je tatsächlichem Modell-/Projektimport. Körper-GLBs aus dem CI-Artefakt sind bytegleich mit den lokal geprüften Ausgaben. Der korrigierte vollständige CI-Lauf ist am PR verknüpft.
+
 **Grenzen:** Anschlussqualität und Proportionen der mechanischen Finger/Zehen bei großen Beugungen weiter prüfen. Die Schulter-/Hüftbrücken der großen Umformung sind damit noch nicht behoben. Keine ausgelieferte Morph-Animation, keine endgültige Charakterfreigabe und kein allgemeines KI-Auto-Rigging. Ältere Projekte behalten ihren eingebetteten 31-Gelenk-Modellstand; alte Moves benötigen für den erweiterten Rig eine ausdrückliche Übertragung.
 
 ## Version 0.84.0
