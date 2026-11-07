@@ -1,20 +1,20 @@
 # Roadmap – offene Aufgaben
 
-**Entwicklungsstand: 0.84.0 · Abgleich: 07.11.2026.** Teil der [Blaupause](README.md).
+**Entwicklungsstand: 0.85.0 · Abgleich: 07.11.2026.** Teil der [Blaupause](README.md).
 
 Diese Roadmap enthält offene Umsetzung und ausstehende Abnahme. Erledigte Änderungen stehen nach Version im [Changelog](CHANGELOG.md); Nachweise und Grenzen im [Prüfstand](PRUEFUNG.md). Eine implementierte Funktion ist nicht automatisch manuell oder mit realen Anbietern abgenommen.
 
 ## Prioritäten
 
-1. **Charakter und Rig verfeinern:** Beide Formen besitzen seit 0.84.0 dieselbe 31-Gelenk-Hierarchie und echte Hautgewichte. Gesicht, Fellmaterial, Fellfasern und Pfotenakzente sind überarbeitet. Finger-/Pfotenform, verdeckte Flächen, Hüft-/Schulterübergänge und große Beugungen weiter korrigieren und designgetreu abnehmen.
+1. **Charakter und Rig verfeinern:** Beide Formen besitzen seit 0.85.0 dieselbe 59-Gelenk-Hierarchie einschließlich 14 beweglicher Finger/Zehen und echte Hautgewichte. Gesicht, Fell und lokale Pfotenflächen sind überarbeitet; die Körpernetze haben geschlossene, konsistent orientierte Kanten. Finger-/Pfotenproportionen, Anschlüsse bei großen Beugungen, verdeckte Flächen und Hüft-/Schulterübergänge weiter korrigieren und designgetreu abnehmen.
 2. **Gemeinsame Morph-Topologie:** Die umformungsbedingten Hautbrücken der unabhängig rekonstruierten Netze beseitigen. Ein Charakter mit kompatibler Netzstruktur und geprüftem Rig für beide Formen.
 3. **Standard-Verwandlung:** Danach eine gespeicherte Animation Normalform → Arbeitsform implementieren; dieselbe Animation rückwärts, Endform halten und laufende Bewegung ohne Sprung umkehren. Zustandszuordnung wie im Originalplayer.
 4. **Reale Generatorqualität:** TripoSR-CPU-Inferenz bleibt belegt. GPU-Abnahme und qualitativer Verfahrensvergleich auf den beiden tatsächlichen Vorlagen bleiben offen.
-5. **Abnahme am tatsächlichen Ablauf:** Kamera, Haut, Posen und Speichern/Laden an beiden Formen weiter prüfen. [Nachweise und Grenzen](PRUEFUNG.md#version-0840).
+5. **Abnahme am tatsächlichen Ablauf:** Kamera, Haut, Posen und Speichern/Laden an beiden Formen weiter prüfen. [Nachweise und Grenzen](PRUEFUNG.md#version-0850).
 
 ## Automatisierte Browserprüfung
 
-- [ ] Weitere Screenshots und tatsächliches Mausgefühl manuell auswerten; haftende Vorschau und mobile Posenfelder wurden in 0.76.3 automatisiert und anhand dreier sichtbarer Bereichsaufnahmen geprüft; vier Artefaktbilder wurden in 0.76.2 stichprobenartig bewertet, Optionen-Kontrast und Versionsanzeige korrigiert; gerenderte Automatisierung ersetzt diese Gesamtabnahme nicht. Lokales Chromium bleibt beim Socket-Aufbau blockiert.
+- [ ] Weitere Screenshots und tatsächliches Mausgefühl manuell auswerten; haftende Vorschau und mobile Posenfelder wurden in 0.76.3 automatisiert und anhand dreier sichtbarer Bereichsaufnahmen geprüft; vier Artefaktbilder wurden in 0.76.2 stichprobenartig bewertet, Optionen-Kontrast und Versionsanzeige korrigiert; gerenderte Automatisierung ersetzt diese Gesamtabnahme nicht. Die beiden echten Charakterabläufe sind lokal mit Chromium Headless Shell geprüft; reguläres Chromium wird zusätzlich in CI ausgeführt.
 
 ## 1. Player und Model Zoo
 

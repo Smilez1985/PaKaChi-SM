@@ -7,6 +7,7 @@ import {pathToFileURL} from 'node:url';
 import {resolve} from 'node:path';
 import {parseModel,disposeModel} from '../src/viewer.ts';
 import {characterForms,hierarchy} from './pakachi-rig-config.mjs';
+import {pawLayout,trimPaws,attachPaws,weldSource,sealBoundaries} from './pakachi-paws.mjs';
 const hash=b=>createHash('sha256').update(b).digest('hex');
 const v=a=>new T.Vector3().fromArray(a);
 const smooth=(a,b,x)=>{const t=T.MathUtils.clamp((x-a)/(b-a),0,1);return t*t*(3-2*t);};
@@ -107,7 +108,8 @@ function attachSkin(geometry,material,skeleton,parent,name){const mesh=new T.Ski
 /** Returns a separately owned scene; original geometry and material are untouched. */
 export function prepareCharacter(source,form){
  const config=structuredClone(characterForms[form]);if(!config)throw Error('Unknown PaKaChi form');source.updateMatrixWorld(true);const meshes=[];source.traverse(n=>{if(n.isMesh)meshes.push(n);});if(meshes.length!==1||meshes[0].isSkinnedMesh)throw Error('Expected one unrigged source mesh');
- const flat=meshes[0].geometry.clone().applyMatrix4(meshes[0].matrixWorld),refined=refineGeometry(flat);flat.dispose();
+ const flat=meshes[0].geometry.clone().applyMatrix4(meshes[0].matrixWorld),sourceVertices=flat.attributes.position.count,paws=pawLayout(form,config.landmarks),welded=weldSource(flat),trimmed=trimPaws(welded,paws),refined=refineGeometry(trimmed.geometry);flat.dispose();welded.dispose();trimmed.geometry.dispose();
+ const sealed=sealBoundaries(refined.geometry);refined.adjacent=neighbors(refined.geometry);
  const bodyGeometry=refined.geometry,bodyMaterial=new T.MeshPhysicalMaterial({vertexColors:true,metalness:0,roughness:1,specularIntensity:.15});bodyMaterial.name='PaKaChi_soft_fur';
  // The image reconstruction's tail has depth that cannot be read from its front
  // silhouette. Fit each centerline depth to a real local cross-section instead.
@@ -120,12 +122,12 @@ export function prepareCharacter(source,form){
  const probe=new T.Mesh(bodyGeometry,new T.MeshBasicMaterial({side:T.DoubleSide}));probe.updateMatrixWorld(true);
  function facePoint(x,y){const hits=new T.Raycaster(new T.Vector3(x,y,2),new T.Vector3(0,0,-1)).intersectObject(probe);if(!hits.length)throw Error(`Face landmark misses surface: ${form} ${x}/${y}`);const hit=hits[0],normal=hit.face.normal.clone();if(normal.z<0)normal.negate();return {position:hit.point,normal};}
  const eyeHits=config.eyes.map(([x,y])=>facePoint(x,y));eyeHits.forEach((h,i)=>config.landmarks[i?'RightEye':'LeftEye']=h.position.toArray());
- const root=new T.Group();root.name=`PaKaChi_${form}`;root.userData={character:'PaKaChi',form,rig:'pakachi-anatomical-1',source:'TripoSR draft; character-specific landmark skinning',morphReady:false};
+ const root=new T.Group();root.name=`PaKaChi_${form}`;root.userData={character:'PaKaChi',form,rig:'pakachi-anatomical-2',source:'TripoSR draft; character-specific landmark skinning and articulated paw replacement',morphReady:false};
  const bones=[],map=new Map();
  for(const [name,parent] of hierarchy){const bone=new T.Bone();bone.name=name;const position=v(config.landmarks[name]);bone.position.copy(parent?position.sub(v(config.landmarks[parent])):position);(parent?map.get(parent):root).add(bone);bones.push(bone);map.set(name,bone);}
  root.updateMatrixWorld(true);const skeleton=new T.Skeleton(bones);skeleton.calculateInverses();const coverage=bindWeights(bodyGeometry,refined.adjacent,form,config,bones);
  const body=attachSkin(bodyGeometry,bodyMaterial,skeleton,root,'PaKaChi_body');
- const socket=new T.MeshStandardMaterial({color:0x101a11,roughness:.4,metalness:0}),iris=new T.MeshStandardMaterial({color:0x328e15,roughness:.38,metalness:0,emissive:0x174300,emissiveIntensity:.23}),pupil=new T.MeshStandardMaterial({color:0x09120b,roughness:.3,metalness:0}),glint=new T.MeshBasicMaterial({color:0xf4ffe5}),claw=new T.MeshStandardMaterial({color:0x76eb58,roughness:.4,metalness:0,emissive:0x286c12,emissiveIntensity:.35});
+ const socket=new T.MeshStandardMaterial({color:0x101a11,roughness:.4,metalness:0}),iris=new T.MeshStandardMaterial({color:0x328e15,roughness:.38,metalness:0,emissive:0x174300,emissiveIntensity:.23}),pupil=new T.MeshStandardMaterial({color:0x09120b,roughness:.3,metalness:0}),glint=new T.MeshBasicMaterial({color:0xf4ffe5});
  function ellipsoid(parent,name,position,scale,material){const mesh=new T.Mesh(new T.SphereGeometry(1,20,14),material);mesh.name=name;mesh.position.copy(position);mesh.scale.fromArray(scale);parent.add(mesh);return mesh;}
  // Real 3D eyes, pupils and highlights, attached to the same head hierarchy in both forms.
  eyeHits.forEach((hit,i)=>{const bone=map.get(i?'RightEye':'LeftEye'),group=new T.Group();group.name=i?'Right_eye_details':'Left_eye_details';group.quaternion.setFromUnitVectors(new T.Vector3(0,0,1),hit.normal);bone.add(group);const r=config.eyeRadius;
@@ -137,10 +139,7 @@ export function prepareCharacter(source,form){
  const nose=facePoint(...config.nose),noseGroup=new T.Group();noseGroup.position.copy(nose.position).sub(v(config.landmarks.Head)).addScaledVector(nose.normal,.001);noseGroup.quaternion.setFromUnitVectors(new T.Vector3(0,0,1),nose.normal);map.get('Head').add(noseGroup);ellipsoid(noseGroup,'Soft_nose',new T.Vector3(),[config.eyeRadius*.43,config.eyeRadius*.30,config.eyeRadius*.20],pupil);
  const mouthGuide=new T.QuadraticBezierCurve3(...config.mouth.map(([x,y])=>new T.Vector3(x,y,0)));
  const mouth=mouthGuide.getPoints(24).map(p=>{const h=facePoint(p.x,p.y);return h.position.addScaledVector(h.normal,.003).sub(v(config.landmarks.Jaw));});const smile=new T.Mesh(new T.TubeGeometry(new T.CatmullRomCurve3(mouth),32,.0009,6,false),pupil);smile.name='Muzzle_smile';map.get('Jaw').add(smile);
- for(const paw of config.paws)for(let toe=0;toe<3;toe++){
-  const x=paw.x+(toe-1)*paw.width*.29;let hit;try{hit=facePoint(x,paw.y);}catch{continue;}
-  const group=new T.Group();group.name=`${paw.bone}_toe_${toe+1}`;group.position.copy(hit.position).sub(v(config.landmarks[paw.bone])).addScaledVector(hit.normal,.001);group.quaternion.setFromUnitVectors(new T.Vector3(0,0,1),hit.normal);map.get(paw.bone).add(group);ellipsoid(group,'Green_claw',new T.Vector3(),[paw.width*.075,.013,.0035],claw);
- }
+ attachPaws(root,map,paws,config.landmarks);
  // Short combed fiber tufts add actual silhouette detail; no billboard or painted replacement.
  const positions=[],normals=[],colors=[],skinIndices=[],skinWeights=[],p=bodyGeometry.attributes.position,n=bodyGeometry.attributes.normal,c=bodyGeometry.attributes.color,si=bodyGeometry.attributes.skinIndex,sw=bodyGeometry.attributes.skinWeight;
  let state=0x50414b41;const random=()=>{state^=state<<13;state^=state>>>17;state^=state<<5;return (state>>>0)/4294967296;};
@@ -156,11 +155,11 @@ export function prepareCharacter(source,form){
  const furGeometry=new T.BufferGeometry();furGeometry.setAttribute('position',new T.Float32BufferAttribute(positions,3));furGeometry.setAttribute('normal',new T.Float32BufferAttribute(normals,3));furGeometry.setAttribute('color',new T.Float32BufferAttribute(colors,3));furGeometry.setAttribute('skinIndex',new T.Uint16BufferAttribute(skinIndices,4));furGeometry.setAttribute('skinWeight',new T.Float32BufferAttribute(skinWeights,4));
  const furMaterial=bodyMaterial.clone();furMaterial.name='PaKaChi_short_fibers';furMaterial.side=T.DoubleSide;attachSkin(furGeometry,furMaterial,skeleton,root,'PaKaChi_fur');
  root.updateMatrixWorld(true);probe.material.dispose();
- return {root,body,bones,config,report:{...refined.report,bones:bones.length,bodyVertices:p.count,furTufts:positions.length/9,coverage,landmarks:config.landmarks,limits:['No morph correspondence between the two independently reconstructed meshes.','Landmark skinning and surface refinement require visual review; source reconstruction defects can remain.']}};
+ return {root,body,bones,config,report:{...refined.report,sourceVertices,bones:bones.length,bodyVertices:p.count,pawTopology:{...trimmed.report,...sealed},digits:root.userData.paws.digits,furTufts:positions.length/9,coverage,landmarks:config.landmarks,limits:['No morph correspondence between the two independently reconstructed meshes.','Articulated paws replace distal source surfaces; no final design or collision approval.','Landmark skinning and surface refinement require visual review; source reconstruction defects can remain.']}};
 }
 
 export async function generateCharacters({ifNeeded=false}={}){
- const pipelineSha256=hash(Buffer.concat(await Promise.all(['prepare-pakachi.mjs','pakachi-rig-config.mjs'].map(p=>readFile(new URL('./'+p,import.meta.url))))));
+ const pipelineSha256=hash(Buffer.concat(await Promise.all(['prepare-pakachi.mjs','pakachi-rig-config.mjs','pakachi-paws.mjs'].map(p=>readFile(new URL('./'+p,import.meta.url))))));
  const reportPath='docs/benchmarks/pakachi-rigging-2026-11-07.json';
  if(ifNeeded){try{
   const previous=JSON.parse(await readFile(reportPath,'utf8'));
@@ -176,6 +175,6 @@ export async function generateCharacters({ifNeeded=false}={}){
   const output=Buffer.from(await new GLTFExporter().parseAsync(prepared.root,{binary:true,onlyVisible:true}));await mkdir('public/model-zoo/pakachi-rigged',{recursive:true});await writeFile(`public/model-zoo/pakachi-rigged/${form}.glb`,output);
   reports.push({form,source:sourcePath,sourceSha256:hash(bytes),output:`public/model-zoo/pakachi-rigged/${form}.glb`,outputSha256:hash(output),bytes:output.length,...prepared.report});disposeModel(gltf.scene);disposeModel(prepared.root);
  }
- await writeFile(reportPath,JSON.stringify({format:'pakachi-character-rigging',version:1,pipelineSha256,method:'Measured landmarks and fitted tail cross-sections, continuous chain weights, three mesh-edge smoothing passes; four influences maximum. Character-specific, not automatic anatomical inference.',forms:reports},null,2)+'\n');return reports;
+ await writeFile(reportPath,JSON.stringify({format:'pakachi-character-rigging',version:2,pipelineSha256,method:'Measured landmarks, corrected wrist/paw depths and fitted tail cross-sections; continuous chain weights, three mesh-edge smoothing passes, four influences maximum. Distal hand/toe clipping, 0.00001-unit source welding and simple boundary-loop caps; 28 extra digit joints with independent rigid geometry. Character-specific, not automatic anatomical inference.',forms:reports},null,2)+'\n');return reports;
 }
 if(process.argv[1]&&import.meta.url===pathToFileURL(resolve(process.argv[1])).href)generateCharacters({ifNeeded:process.argv.includes('--if-needed')}).then(r=>console.log(r.map(x=>({form:x.form,bones:x.bones,vertices:x.bodyVertices,furTufts:x.furTufts,bytes:x.bytes})))).catch(e=>{console.error(e);process.exitCode=1;});

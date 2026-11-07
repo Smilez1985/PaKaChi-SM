@@ -7,7 +7,7 @@ for(const [id,label] of [['pakachi-work','PaKaChi · Arbeitsform · Rig'],['paka
   await canvas.screenshot({path:`test-results/${id}-character.png`});
   await page.locator('#studio-tab').click();await page.locator('#skeleton').check();
   const points=()=>page.evaluate(()=>window.PaKaChiSM.call('get_studio',{section:'points'}) as any);
-  const initial=await points();expect(initial.counts.points).toBe(31);expect(initial.counts.moves).toBe(0);
+  const initial=await points();expect(initial.counts.points).toBe(59);expect(initial.counts.moves).toBe(0);
   const wrist=initial.items.find((p:any)=>p.name==='LeftWrist'),elbow=initial.items.find((p:any)=>p.name==='LeftElbow'),shoulder=initial.items.find((p:any)=>p.name==='LeftShoulder');
   expect(wrist.ikChain).toEqual([elbow.id,shoulder.id]);
   await page.locator('#studio-points').selectOption(wrist.id);
@@ -16,10 +16,15 @@ for(const [id,label] of [['pakachi-work','PaKaChi · Arbeitsform · Rig'],['paka
   const posedImage=await canvas.screenshot({path:`test-results/${id}-posed.png`});expect(posedImage.equals(original)).toBe(false);
   await page.locator('#studio-undo').click();const reset=(await points()).items.find((p:any)=>p.id===wrist.id);reset.position.forEach((n:number,i:number)=>expect(n).toBeCloseTo(wrist.position[i],6));
   await page.locator('#studio-redo').click();
+  await page.locator('#studio-agent-edit').check();
+  const bent=await page.evaluate(()=>{const call=window.PaKaChiSM.call,s=call('get_studio') as any,p=call('get_studio',{section:'points'}) as any,finger=p.items.find((v:any)=>v.name==='LeftIndex2');return call('edit_studio',{command:{session:s.session,expectedRevision:s.revision,action:'update_point',id:finger.id,rotation:[Math.sin(.35),0,0,Math.cos(.35)]}});});expect(bent).toBeTruthy();
+  const finger=(await points()).items.find((p:any)=>p.name==='LeftIndex2');
+  await page.locator('#skeleton').uncheck();await canvas.screenshot({path:`test-results/${id}-fingers.png`});
   const pending=page.waitForEvent('download');await page.locator('#studio-save').click();const file=(await(await pending).path())!;
-  const saved=JSON.parse(await readFile(file,'utf8'));expect(saved.studio.boneRest).toHaveLength(31);expect(saved.studio.draft).toBeTruthy();
+  const saved=JSON.parse(await readFile(file,'utf8'));expect(saved.studio.boneRest).toHaveLength(59);expect(saved.studio.draft).toBeTruthy();
   page.once('dialog',d=>d.accept());await page.locator('#project-file').setInputFiles(file);await expect(page.locator('#message')).toContainText(`${label} bereit`);
   await page.locator('#studio-tab').click();const reloaded=(await points()).items.find((p:any)=>p.name==='LeftWrist');reloaded.position.forEach((n:number,i:number)=>expect(n).toBeCloseTo(moved.position[i],6));
+  const loadedFinger=(await points()).items.find((p:any)=>p.name==='LeftIndex2');loadedFinger.rotation.forEach((n:number,i:number)=>expect(n).toBeCloseTo(finger.rotation[i],6));
   await page.locator('#skeleton').uncheck();
   for(const side of ['front','back','left']){await page.locator('#view-side').selectOption(side);await canvas.screenshot({path:`test-results/${id}-${side}.png`});}
   expect(errors).toEqual([]);

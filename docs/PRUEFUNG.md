@@ -1,6 +1,6 @@
 # Prüfstand und Protokolle
 
-**Softwarestand: 0.84.0 · Dokumentationsabgleich: 2026-11-07T17:13:43+01:00 (Europe/Berlin).**
+**Softwarestand: 0.85.0 · Dokumentationsabgleich: 2026-11-07T21:01:23+01:00 (Europe/Berlin).**
 
 Alle Prüfnachweise stehen in dieser Datei: ein Abschnitt je Softwareversion sowie gesonderte Abschnitte für datierte Zwischenprüfungen. Die Ergebnisse und Grenzen gelten für den jeweils genannten Stand. Spätere Läufe stehen als Nachtrag im selben Abschnitt. Produktänderungen gehören in den [Changelog](CHANGELOG.md), offene Aufgaben in die [Roadmap](ROADMAP.md).
 
@@ -8,15 +8,15 @@ Alle Prüfnachweise stehen in dieser Datei: ein Abschnitt je Softwareversion sow
 
 | Prüfung | Bestätigter Stand | Umfang und Grenze |
 | --- | --- | --- |
-| Node-Tests | [0.84.0](#version-0840): 337 lokal bestanden | Daten, Geometrie, DOM-/Transportabläufe und Erhaltungsprüfung; keine manuelle Qualitätsabnahme. |
-| TypeScript und Produktionsbuild | [0.84.0](#version-0840): lokal bestanden | Bekannte Bundle-Größenwarnung; keine Aussage über Zielhardware-Leistung. |
-| Chromium-Browserfälle | [0.84.0](#version-0840): zwei neue Fälle lokal bestanden; vollständige CI im PR | Software-WebGL, simulierte KI-Anbieter; keine reale KI-Inferenzabnahme. |
+| Node-Tests | [0.85.0](#version-0850): 343 lokal bestanden | Daten, Geometrie, DOM-/Transportabläufe und Erhaltungsprüfung; keine manuelle Qualitätsabnahme. |
+| TypeScript und Produktionsbuild | [0.85.0](#version-0850): lokal bestanden | Bekannte Bundle-Größenwarnung; keine Aussage über Zielhardware-Leistung. |
+| Chromium-Browserfälle | [0.85.0](#version-0850): zwei erweiterte Charakterfälle lokal bestanden; vollständige CI im PR | Software-WebGL, simulierte KI-Anbieter; keine reale KI-Inferenzabnahme. |
 | Produktionsbrowser-Importmessung | [0.82.0](#version-0820): drei Durchläufe bestanden | Mika mit 256 Gewichtsaufträgen; keine allgemeine Laufzeitgarantie. |
 | Legacy-Testprogramme | [0.9.0](#version-090): beide bestanden | Steuerung, MQTT-Verhalten und Lebenszyklus des Originalplayers. |
 | Python-MCP-/MQTT-Integration | [0.10.0](#version-0100): bestanden | Echter Python-Prozess und eingebetteter Testbroker; keine allgemeine externe Hostabnahme. |
 | Originaldateien | [0.49.0](#version-0490): bytegenau erhalten | 83 Originaldateien einschließlich 72 Transformationsbildern. |
 
-Letzter vollständig ausgewerteter Funktionsnachweis vor 0.84.0: [Lauf 42392793897](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/42392793897), Commit `47f216260eee5cc7ed49dfd01fb134a23e7b18d9`. Spätere CI-Ergebnisse sind am jeweiligen Commit in [PR #1](https://github.com/Smilez1985/PaKaChi-SM/pull/1) verknüpft. Ein erfolgreicher Testlauf ist keine visuelle oder anatomische Produktfreigabe.
+Letzter vollständig ausgewerteter CI-Funktionsnachweis vor 0.85.0: [Lauf 42400685757](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/42400685757), Commit `100f5add743f51badc0642a78f383014b2f33237`: 337 Node-Tests, Build, alle 35 Browserfälle und drei Produktionsimportmessungen bestanden. Spätere CI-Ergebnisse sind am jeweiligen Commit in [PR #1](https://github.com/Smilez1985/PaKaChi-SM/pull/1) verknüpft. Ein erfolgreicher Testlauf ist keine visuelle oder anatomische Produktfreigabe.
 
 ## Lokal prüfen
 
@@ -60,6 +60,24 @@ Diese Liste beschreibt ausstehende Abnahmen.
 
 Die jüngste Version steht zuerst. Für eine bestimmte Version die Dokumentgliederung oder die Browser-Suche verwenden.
 
+## Version 0.85.0
+
+Zeitstempel: 2026-11-07T21:01:23+01:00 (Europe/Berlin).
+
+**Charakterarbeit vor der Verwandlung:** Beide erhaltenen Rekonstruktionen werden mit derselben erweiterten 59-Gelenk-Hierarchie aufbereitet. 28 zusätzliche Gelenke führen 14 voneinander unabhängige Finger/Zehen mit echten starren Gliedern und grünen Spitzen. Je Vorderpfote drei Finger und ein Daumen, je Hinterpfote drei Zehen; je zwei Glieder. Die Hände der Arbeitsform drehen um die Handgelenksnaht. Tiefenpositionen mehrerer Handgelenke und Pfoten sind an reale Querschnitte angepasst.
+
+**Netzkorrektur:** Humanoide Fäustlinge und vordere Zehenflächen sind lokal ausgeschnitten, Kanten geteilt und Schnittflächen geschlossen. Die übrigen Fellpfoten bleiben erhalten. Quellvertices werden mit Toleranz 0,00001 verschweißt, doppelte/degenerierte Flächen bereinigt und einfache Randringe geschlossen; nicht eindeutige Ränder oder Kanten mit mehr als zwei Flächen brechen die Aufbereitung ab. Die tatsächlichen ausgegebenen Körpernetze besitzen ausschließlich zwei gegensinnig orientierte Flächen je Kante. Das gilt für die Körper, nicht für die absichtlich offenen Fellfasern. Es bestätigt keine Selbstüberschneidungs- oder Kollisionsfreiheit und noch keine gemeinsame Morph-Topologie. Eingaben bleiben bytegleich; Details im [aktuellen Aufbereitungsbericht](benchmarks/pakachi-rigging-2026-11-07.json).
+
+**Nachweise:**
+
+- `npm run verify`: alle 343 Node-Tests und TypeScript/Produktionsbuild bestanden; bekannte Bundle-Größenwarnung.
+- Sechs zusätzliche Fälle an den tatsächlichen GLBs: Körperkanten samt Orientierung, jedes der 28 neuen Gelenke mit tatsächlich bewegter Spitze bei unveränderter Handfläche/Nachbarfinger/Körperprobe, gespeicherte Fingerpose und Rig-GLB-Rundlauf samt weiterer Bewegung nach Import. Bestehende Haut-, Kamera-, Material-, Farb- und Quellerhaltungsprüfungen bestehen weiter.
+- Beide erweiterten Headless-Shell-/SwiftShader-Browserfälle bestanden (54,6 s gesamt): Armbeugung, einzelne Fingerpose, Undo/Redo, Speichern/Laden und Front-/Rück-/Seitenansichten. Charakterbilder und Ansichten geprüft. Keine manuelle Benutzerabnahme.
+- Erzwungene Neuerzeugung beider GLBs bytegleich; `--if-needed` behält die Änderungszeiten unveränderter Ausgaben.
+- Vollständiger regulärer Chromium-CI-Lauf und Produktionsimportmessungen sind commitgebunden in [PR #1](https://github.com/Smilez1985/PaKaChi-SM/pull/1) nachzuverfolgen; lokale Teilprüfung wird nicht als vollständige Browserprüfung bezeichnet.
+
+**Grenzen:** Anschlussqualität und Proportionen der mechanischen Finger/Zehen bei großen Beugungen weiter prüfen. Die Schulter-/Hüftbrücken der großen Umformung sind damit noch nicht behoben. Keine ausgelieferte Morph-Animation, keine endgültige Charakterfreigabe und kein allgemeines KI-Auto-Rigging. Ältere Projekte behalten ihren eingebetteten 31-Gelenk-Modellstand; alte Moves benötigen für den erweiterten Rig eine ausdrückliche Übertragung.
+
 ## Version 0.84.0
 
 Zeitstempel: 2026-11-07T19:14:08+01:00 (Europe/Berlin).
@@ -73,6 +91,8 @@ Zeitstempel: 2026-11-07T19:14:08+01:00 (Europe/Berlin).
 **Lokale Nachweise:** 337 Node-Tests sowie TypeScript/Produktionsbuild bestanden. Sechs neue geometrische Fälle prüfen beide tatsächlichen GLBs: gemeinsame Hierarchie, normalisierte Hautgewichte, Normalen und Materialien, Quelldateihashes, reale Vertexbewegung bei Ellenbogen/Knie/Kopf/Schwanz, unveränderte Knochenabstände und unbeteiligte Körperbereiche. Schwanzbewegung darf keine bodennahen Pfotenvertices verschieben. Studio-Projekt-Rundlauf vergleicht tatsächlich gebeugte Hautvertices nach erneutem Laden. Kamera-Mittelpunkt wird gegen den unabhängig transformierten Grundkörper geprüft.
 
 Zwei zusätzliche lokale Browserfälle bestanden mit Chromium Headless Shell 141/SwiftShader: Handgelenk beugen, sichtbare Hautänderung, Undo/Redo, Projektdatei und wiederhergestellte Pose; Screenshots von Charakter, Pose sowie Front/Rückseite/Seite für beide Formen geprüft. Die reguläre Chromium-Variante scheitert lokal beim Unix-Socket-Aufbau; Headless Shell startet erfolgreich. Die CI verwendet weiterhin die reguläre Chromium-Konfiguration und die vollständige Suite; commitgebundene Ergebnisse stehen in [PR #1](https://github.com/Smilez1985/PaKaChi-SM/pull/1).
+
+**CI-Nachtrag:** [Lauf 42400685757](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/42400685757) für `100f5add743f51badc0642a78f383014b2f33237` vollständig erfolgreich: 337 Node-Tests, Produktionsbuild, alle 35 Chromium-Fälle und drei Produktionsimportmessungen. Aufbereitung und Artefaktbereitstellung ebenfalls erfolgreich.
 
 **Formwechselprobe:** Eine große Skelettumformung zwischen den Grundformen zeigte aufgezogene Hautbrücken. Sie wurde verworfen und gehört nicht zu den ausgelieferten Assets. Die Standardanimation vorwärts/rückwärts bleibt bis zur Korrektur der gemeinsamen Netzstruktur offen. Der verbesserte Rigging-/Charakterstand ersetzt keine endgültige visuelle Freigabe; Finger-/Pfotenseparation, verdeckte Flächen, große Gelenkbeugungen und Designnähe bleiben weiter zu prüfen. Kein universelles KI-Auto-Rigging, keine neuen Anbieter/GPU-Messungen.
 

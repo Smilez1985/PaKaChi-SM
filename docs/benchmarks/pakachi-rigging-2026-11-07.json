@@ -1,55 +1,91 @@
 {
   "format": "pakachi-character-rigging",
-  "version": 1,
-  "pipelineSha256": "a24b3e296967f1b9698dbe3e9535d2d76c8b4aa5c1fbf0eab6b1a7b96659b714",
-  "method": "Measured landmarks and fitted tail cross-sections, continuous chain weights, three mesh-edge smoothing passes; four influences maximum. Character-specific, not automatic anatomical inference.",
+  "version": 2,
+  "pipelineSha256": "0aad483dc610f65638a18e5e83415f34cee173fcaea4c4bbcba7a3f41304ae62",
+  "method": "Measured landmarks, corrected wrist/paw depths and fitted tail cross-sections; continuous chain weights, three mesh-edge smoothing passes, four influences maximum. Distal hand/toe clipping, 0.00001-unit source welding and simple boundary-loop caps; 28 extra digit joints with independent rigid geometry. Character-specific, not automatic anatomical inference.",
   "forms": [
     {
       "form": "humanoid",
       "source": "public/model-zoo/pakachi-drafts/humanoid.glb",
       "sourceSha256": "debb9c4793368bff6989f41b2a40eba3e4ef6a6100aaf3858abe51117a174d14",
       "output": "public/model-zoo/pakachi-rigged/humanoid.glb",
-      "outputSha256": "b50f77933b4bf2d72186460ee6120f812a90d97275dce2f78e7aa511ccd3444f",
-      "bytes": 11119516,
-      "removedDegenerate": 25,
+      "outputSha256": "8ad651f22eac0222144bf9dcd4eb8987cf9701c67093291123a2ccbbdd6a975f",
+      "bytes": 11774676,
+      "removedDegenerate": 9,
       "taubinPasses": 16,
-      "maxDisplacement": 0.0030896477140198637,
+      "maxDisplacement": 0.005423115222534196,
       "sourceVertices": 50870,
-      "bones": 31,
-      "bodyVertices": 50870,
-      "furTufts": 40108,
+      "bones": 59,
+      "bodyVertices": 49592,
+      "pawTopology": {
+        "removedTriangles": 3787,
+        "capTriangles": 560,
+        "bodyVertices": 49581,
+        "sealedLoops": 11,
+        "sealedEdges": 35
+      },
+      "digits": 14,
+      "furTufts": 40425,
       "coverage": {
-        "Pelvis": 2735,
-        "Spine": 1930,
-        "Chest": 2570,
-        "Neck": 2457,
-        "Head": 8283,
+        "Pelvis": 2757,
+        "Spine": 1913,
+        "Chest": 2567,
+        "Neck": 2454,
+        "Head": 8274,
         "Jaw": 553,
-        "LeftEar": 1251,
-        "RightEar": 1396,
-        "LeftShoulder": 3309,
-        "LeftElbow": 2973,
-        "LeftWrist": 1316,
-        "LeftHand": 541,
-        "RightShoulder": 3322,
-        "RightElbow": 2696,
-        "RightWrist": 1226,
-        "RightHand": 1163,
-        "LeftHip": 2435,
-        "LeftKnee": 2321,
-        "LeftAnkle": 1459,
-        "LeftFoot": 1969,
-        "RightHip": 1363,
-        "RightKnee": 1428,
-        "RightAnkle": 969,
-        "RightFoot": 2501,
-        "TailBase": 5419,
-        "Tail1": 6170,
-        "Tail2": 6954,
-        "Tail3": 5511,
-        "TailTip": 3441,
+        "LeftEar": 1250,
+        "RightEar": 1394,
+        "LeftShoulder": 3279,
+        "LeftElbow": 2479,
+        "LeftWrist": 757,
+        "LeftHand": 193,
+        "RightShoulder": 3309,
+        "RightElbow": 2650,
+        "RightWrist": 1315,
+        "RightHand": 670,
+        "LeftHip": 2703,
+        "LeftKnee": 2615,
+        "LeftAnkle": 1643,
+        "LeftFoot": 1576,
+        "RightHip": 1067,
+        "RightKnee": 2439,
+        "RightAnkle": 1739,
+        "RightFoot": 1369,
+        "TailBase": 5401,
+        "Tail1": 6150,
+        "Tail2": 6937,
+        "Tail3": 5496,
+        "TailTip": 3436,
         "LeftEye": 0,
-        "RightEye": 0
+        "RightEye": 0,
+        "LeftIndex1": 0,
+        "LeftIndex2": 0,
+        "LeftMiddle1": 0,
+        "LeftMiddle2": 0,
+        "LeftRing1": 0,
+        "LeftRing2": 0,
+        "LeftThumb1": 0,
+        "LeftThumb2": 0,
+        "LeftToe1Base": 0,
+        "LeftToe1Tip": 0,
+        "LeftToe2Base": 0,
+        "LeftToe2Tip": 0,
+        "LeftToe3Base": 0,
+        "LeftToe3Tip": 0,
+        "RightIndex1": 0,
+        "RightIndex2": 0,
+        "RightMiddle1": 0,
+        "RightMiddle2": 0,
+        "RightRing1": 0,
+        "RightRing2": 0,
+        "RightThumb1": 0,
+        "RightThumb2": 0,
+        "RightToe1Base": 0,
+        "RightToe1Tip": 0,
+        "RightToe2Base": 0,
+        "RightToe2Tip": 0,
+        "RightToe3Base": 0,
+        "RightToe3Tip": 0
       },
       "landmarks": {
         "Pelvis": [
@@ -105,12 +141,12 @@
         "LeftWrist": [
           0.4,
           -0.155,
-          0.105
+          0.042
         ],
         "LeftHand": [
           0.405,
-          -0.195,
-          0.115
+          -0.17200000000000001,
+          0.049
         ],
         "RightShoulder": [
           0.105,
@@ -125,12 +161,12 @@
         "RightWrist": [
           0.095,
           -0.155,
-          0.13
+          0.19
         ],
         "RightHand": [
           0.095,
-          -0.195,
-          0.145
+          -0.17200000000000001,
+          0.19
         ],
         "LeftHip": [
           0.3,
@@ -145,12 +181,12 @@
         "LeftAnkle": [
           0.295,
           -0.4,
-          0.09
+          0.165
         ],
         "LeftFoot": [
           0.3,
           -0.445,
-          0.16
+          0.17
         ],
         "RightHip": [
           0.13,
@@ -165,12 +201,12 @@
         "RightAnkle": [
           0.105,
           -0.4,
-          0.09
+          0.21
         ],
         "RightFoot": [
           0.105,
           -0.445,
-          0.16
+          0.21
         ],
         "TailBase": [
           0.105,
@@ -180,7 +216,7 @@
         "Tail1": [
           -0.025,
           -0.25,
-          -0.0850028321146965
+          -0.08500283118337393
         ],
         "Tail2": [
           -0.18,
@@ -190,12 +226,152 @@
         "Tail3": [
           -0.325,
           -0.105,
-          -0.09871771791949868
+          -0.09871771698817611
         ],
         "TailTip": [
           -0.4,
           0.025,
-          -0.09368505085876677
+          -0.0937128035875503
+        ],
+        "LeftIndex1": [
+          0.387,
+          -0.21075,
+          0.053000000000000005
+        ],
+        "LeftIndex2": [
+          0.387,
+          -0.22974999999999998,
+          0.061000000000000006
+        ],
+        "LeftMiddle1": [
+          0.405,
+          -0.21075,
+          0.053000000000000005
+        ],
+        "LeftMiddle2": [
+          0.405,
+          -0.22974999999999998,
+          0.061000000000000006
+        ],
+        "LeftRing1": [
+          0.42300000000000004,
+          -0.21075,
+          0.053000000000000005
+        ],
+        "LeftRing2": [
+          0.42300000000000004,
+          -0.22974999999999998,
+          0.061000000000000006
+        ],
+        "LeftThumb1": [
+          0.381,
+          -0.194,
+          0.052000000000000005
+        ],
+        "LeftThumb2": [
+          0.367,
+          -0.20600000000000002,
+          0.066
+        ],
+        "LeftToe1Base": [
+          0.26639999999999997,
+          -0.447,
+          0.22460000000000002
+        ],
+        "LeftToe1Tip": [
+          0.26639999999999997,
+          -0.449,
+          0.2436
+        ],
+        "LeftToe2Base": [
+          0.3,
+          -0.447,
+          0.22460000000000002
+        ],
+        "LeftToe2Tip": [
+          0.3,
+          -0.449,
+          0.2436
+        ],
+        "LeftToe3Base": [
+          0.3336,
+          -0.447,
+          0.22460000000000002
+        ],
+        "LeftToe3Tip": [
+          0.3336,
+          -0.449,
+          0.2436
+        ],
+        "RightIndex1": [
+          0.077,
+          -0.21075,
+          0.194
+        ],
+        "RightIndex2": [
+          0.077,
+          -0.22974999999999998,
+          0.202
+        ],
+        "RightMiddle1": [
+          0.095,
+          -0.21075,
+          0.194
+        ],
+        "RightMiddle2": [
+          0.095,
+          -0.22974999999999998,
+          0.202
+        ],
+        "RightRing1": [
+          0.113,
+          -0.21075,
+          0.194
+        ],
+        "RightRing2": [
+          0.113,
+          -0.22974999999999998,
+          0.202
+        ],
+        "RightThumb1": [
+          0.119,
+          -0.194,
+          0.193
+        ],
+        "RightThumb2": [
+          0.133,
+          -0.20600000000000002,
+          0.20700000000000002
+        ],
+        "RightToe1Base": [
+          0.07139999999999999,
+          -0.447,
+          0.2646
+        ],
+        "RightToe1Tip": [
+          0.07139999999999999,
+          -0.449,
+          0.2836
+        ],
+        "RightToe2Base": [
+          0.105,
+          -0.447,
+          0.2646
+        ],
+        "RightToe2Tip": [
+          0.105,
+          -0.449,
+          0.2836
+        ],
+        "RightToe3Base": [
+          0.1386,
+          -0.447,
+          0.2646
+        ],
+        "RightToe3Tip": [
+          0.1386,
+          -0.449,
+          0.2836
         ],
         "LeftEye": [
           0.255,
@@ -210,6 +386,7 @@
       },
       "limits": [
         "No morph correspondence between the two independently reconstructed meshes.",
+        "Articulated paws replace distal source surfaces; no final design or collision approval.",
         "Landmark skinning and surface refinement require visual review; source reconstruction defects can remain."
       ]
     },
@@ -218,47 +395,83 @@
       "source": "public/model-zoo/pakachi-drafts/animal.glb",
       "sourceSha256": "c87b55c51a9bf1872de421d1052f943de05e53119b3e8c6265d5d0016b8e6d42",
       "output": "public/model-zoo/pakachi-rigged/animal.glb",
-      "outputSha256": "0c0d5b552e866733f9b238dc489f7fe33d48659b015e1fd31a1d005ba34665db",
-      "bytes": 15011936,
-      "removedDegenerate": 40,
+      "outputSha256": "688cdab4ac31e13a14b86e674f9421ed90c38dd193467f43e2c37a8cf57e1cf0",
+      "bytes": 15598084,
+      "removedDegenerate": 12,
       "taubinPasses": 16,
-      "maxDisplacement": 0.003181827426207151,
+      "maxDisplacement": 0.00499418957645464,
       "sourceVertices": 81388,
-      "bones": 31,
-      "bodyVertices": 81388,
-      "furTufts": 43632,
+      "bones": 59,
+      "bodyVertices": 80500,
+      "pawTopology": {
+        "removedTriangles": 2784,
+        "capTriangles": 525,
+        "bodyVertices": 80487,
+        "sealedLoops": 13,
+        "sealedEdges": 40
+      },
+      "digits": 14,
+      "furTufts": 44009,
       "coverage": {
-        "Pelvis": 5105,
-        "Spine": 4751,
-        "Chest": 2799,
-        "Neck": 7525,
-        "Head": 20904,
-        "Jaw": 489,
-        "LeftEar": 1172,
-        "RightEar": 1507,
-        "LeftShoulder": 5181,
-        "LeftElbow": 3804,
-        "LeftWrist": 1352,
-        "LeftHand": 0,
-        "RightShoulder": 5363,
-        "RightElbow": 3615,
-        "RightWrist": 1192,
-        "RightHand": 1554,
-        "LeftHip": 7490,
-        "LeftKnee": 5039,
-        "LeftAnkle": 2018,
-        "LeftFoot": 343,
-        "RightHip": 2310,
-        "RightKnee": 1127,
-        "RightAnkle": 1088,
-        "RightFoot": 2451,
-        "TailBase": 5284,
-        "Tail1": 9090,
-        "Tail2": 9393,
-        "Tail3": 5799,
-        "TailTip": 5029,
+        "Pelvis": 5051,
+        "Spine": 4582,
+        "Chest": 2636,
+        "Neck": 7507,
+        "Head": 20865,
+        "Jaw": 488,
+        "LeftEar": 1170,
+        "RightEar": 1506,
+        "LeftShoulder": 3170,
+        "LeftElbow": 3176,
+        "LeftWrist": 3094,
+        "LeftHand": 855,
+        "RightShoulder": 5341,
+        "RightElbow": 3401,
+        "RightWrist": 1110,
+        "RightHand": 1375,
+        "LeftHip": 7114,
+        "LeftKnee": 4223,
+        "LeftAnkle": 1733,
+        "LeftFoot": 1085,
+        "RightHip": 2100,
+        "RightKnee": 2939,
+        "RightAnkle": 2286,
+        "RightFoot": 941,
+        "TailBase": 5068,
+        "Tail1": 8888,
+        "Tail2": 9379,
+        "Tail3": 5789,
+        "TailTip": 5020,
         "LeftEye": 0,
-        "RightEye": 0
+        "RightEye": 0,
+        "LeftIndex1": 0,
+        "LeftIndex2": 0,
+        "LeftMiddle1": 0,
+        "LeftMiddle2": 0,
+        "LeftRing1": 0,
+        "LeftRing2": 0,
+        "LeftThumb1": 0,
+        "LeftThumb2": 0,
+        "LeftToe1Base": 0,
+        "LeftToe1Tip": 0,
+        "LeftToe2Base": 0,
+        "LeftToe2Tip": 0,
+        "LeftToe3Base": 0,
+        "LeftToe3Tip": 0,
+        "RightIndex1": 0,
+        "RightIndex2": 0,
+        "RightMiddle1": 0,
+        "RightMiddle2": 0,
+        "RightRing1": 0,
+        "RightRing2": 0,
+        "RightThumb1": 0,
+        "RightThumb2": 0,
+        "RightToe1Base": 0,
+        "RightToe1Tip": 0,
+        "RightToe2Base": 0,
+        "RightToe2Tip": 0,
+        "RightToe3Base": 0,
+        "RightToe3Tip": 0
       },
       "landmarks": {
         "Pelvis": [
@@ -314,12 +527,12 @@
         "LeftWrist": [
           0.4,
           -0.36,
-          0.25
+          0.09
         ],
         "LeftHand": [
           0.41,
           -0.395,
-          0.29
+          0.09
         ],
         "RightShoulder": [
           0.105,
@@ -354,12 +567,12 @@
         "LeftAnkle": [
           0.065,
           -0.38,
-          -0.15
+          -0.215
         ],
         "LeftFoot": [
           0.085,
           -0.415,
-          -0.11
+          -0.215
         ],
         "RightHip": [
           -0.125,
@@ -374,12 +587,12 @@
         "RightAnkle": [
           -0.205,
           -0.38,
-          -0.06
+          0.05
         ],
         "RightFoot": [
           -0.18,
           -0.405,
-          -0.005
+          0.05
         ],
         "TailBase": [
           -0.12,
@@ -389,7 +602,7 @@
         "Tail1": [
           -0.26,
           -0.11,
-          -0.051456935703754425
+          -0.05185997486114502
         ],
         "Tail2": [
           -0.35,
@@ -406,10 +619,150 @@
           0.345,
           0.04141425900161266
         ],
+        "LeftIndex1": [
+          0.37639999999999996,
+          -0.397,
+          0.1446
+        ],
+        "LeftIndex2": [
+          0.37639999999999996,
+          -0.399,
+          0.1636
+        ],
+        "LeftMiddle1": [
+          0.41,
+          -0.397,
+          0.1446
+        ],
+        "LeftMiddle2": [
+          0.41,
+          -0.399,
+          0.1636
+        ],
+        "LeftRing1": [
+          0.4436,
+          -0.397,
+          0.1446
+        ],
+        "LeftRing2": [
+          0.4436,
+          -0.399,
+          0.1636
+        ],
+        "LeftThumb1": [
+          0.36519999999999997,
+          -0.393,
+          0.129
+        ],
+        "LeftThumb2": [
+          0.35119999999999996,
+          -0.395,
+          0.14300000000000002
+        ],
+        "LeftToe1Base": [
+          0.05140000000000001,
+          -0.417,
+          -0.1604
+        ],
+        "LeftToe1Tip": [
+          0.05140000000000001,
+          -0.419,
+          -0.1414
+        ],
+        "LeftToe2Base": [
+          0.085,
+          -0.417,
+          -0.1604
+        ],
+        "LeftToe2Tip": [
+          0.085,
+          -0.419,
+          -0.1414
+        ],
+        "LeftToe3Base": [
+          0.11860000000000001,
+          -0.417,
+          -0.1604
+        ],
+        "LeftToe3Tip": [
+          0.11860000000000001,
+          -0.419,
+          -0.1414
+        ],
+        "RightIndex1": [
+          0.1264,
+          -0.382,
+          0.3546
+        ],
+        "RightIndex2": [
+          0.1264,
+          -0.384,
+          0.37360000000000004
+        ],
+        "RightMiddle1": [
+          0.16,
+          -0.382,
+          0.3546
+        ],
+        "RightMiddle2": [
+          0.16,
+          -0.384,
+          0.37360000000000004
+        ],
+        "RightRing1": [
+          0.1936,
+          -0.382,
+          0.3546
+        ],
+        "RightRing2": [
+          0.1936,
+          -0.384,
+          0.37360000000000004
+        ],
+        "RightThumb1": [
+          0.2048,
+          -0.378,
+          0.33899999999999997
+        ],
+        "RightThumb2": [
+          0.21880000000000002,
+          -0.38,
+          0.353
+        ],
+        "RightToe1Base": [
+          -0.21359999999999998,
+          -0.40700000000000003,
+          0.10460000000000001
+        ],
+        "RightToe1Tip": [
+          -0.21359999999999998,
+          -0.40900000000000003,
+          0.12360000000000002
+        ],
+        "RightToe2Base": [
+          -0.18,
+          -0.40700000000000003,
+          0.10460000000000001
+        ],
+        "RightToe2Tip": [
+          -0.18,
+          -0.40900000000000003,
+          0.12360000000000002
+        ],
+        "RightToe3Base": [
+          -0.1464,
+          -0.40700000000000003,
+          0.10460000000000001
+        ],
+        "RightToe3Tip": [
+          -0.1464,
+          -0.40900000000000003,
+          0.12360000000000002
+        ],
         "LeftEye": [
           0.332,
           0.177,
-          0.28761930408760805
+          0.28761926459197196
         ],
         "RightEye": [
           0.178,
@@ -419,6 +772,7 @@
       },
       "limits": [
         "No morph correspondence between the two independently reconstructed meshes.",
+        "Articulated paws replace distal source surfaces; no final design or collision approval.",
         "Landmark skinning and surface refinement require visual review; source reconstruction defects can remain."
       ]
     }

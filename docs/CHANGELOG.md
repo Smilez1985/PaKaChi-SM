@@ -12,6 +12,27 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.85.0] - 2026-11-07
+
+Zeitstempel: 2026-11-07T21:01:23+01:00 (Europe/Berlin)
+
+### Added
+
+- Beide Original-PaKaChi-Formen mit derselben erweiterten Hierarchie aus 59 Gelenken: 28 zusätzliche Gelenke für 14 einzeln bewegliche Finger/Zehen, jeweils zwei Glieder. Vorn drei Finger und ein Daumen, hinten je drei Zehen. Echte getrennte Geometrie mit runden mechanischen Gliedern, dunklen Gelenken und grünen Spitzen folgt den jeweiligen Knochen.
+- Geometrische Prüfungen aller 28 neuen Gelenke sowie Projekt-/Rig-GLB-Rundläufe mit gebeugten Fingern. Die beiden Charakter-Browserfälle prüfen zusätzlich Fingerpose und erneutes Laden.
+
+### Changed
+
+- Humanoide Fäustlinge und vordere Zehenflächen lokal ausgeschnitten und geschlossen, bevor die neuen Teile eingesetzt werden. Fellpfoten außerhalb dieser Bereiche bleiben erhalten. Neue Handdrehpunkte sitzen an der Handgelenksnaht.
+- Ausgangsvertices innerhalb von 0,00001 Modelleinheiten verschweißt, doppelte/degenerierte Flächen entfernt und einfache verbleibende Randringe geschlossen. Beide aufbereiteten Körpernetze besitzen in der automatisierten Kantenprüfung ausschließlich zwei gegensinnig orientierte Flächen je Kante. Die separaten Fellfasern bleiben absichtlich offene Dreiecke. Selbstüberschneidungen und allgemeine Kollisionsfreiheit sind damit nicht bestätigt.
+- Modellaufbereitung berücksichtigt das neue Pfotenmodul im Pipelinehash. Die erhaltenen Rekonstruktionsdateien bleiben bytegleich.
+
+### Fixed
+
+- Tiefenpositionen an Handgelenken und Pfoten anhand tatsächlicher Modellquerschnitte korrigiert; überlagerte Rumpf-/Schwanzflächen bei der Zuordnung getrennt betrachtet.
+
+[Prüfbericht](PRUEFUNG.md#version-0850). Die gemeinsame Morph-Topologie und die Standard-Verwandlung bleiben offen; diese Version ist weitere Rig-/Charakterarbeit und keine endgültige Designfreigabe.
+
 ## [0.84.0] - 2026-11-07
 
 Zeitstempel: 2026-11-07T19:14:08+01:00 (Europe/Berlin)
