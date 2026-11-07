@@ -106,17 +106,22 @@ export class StudioRig {
 
   reparentBone(point:ControlPoint,target:ControlPoint){
     if(point.kind!=='bone'||target.kind!=='bone'||!this.data.points.includes(point)||!this.data.points.includes(target)||(this.data.boneReparents?.length??0)>=256)throw Error('Zwei vorhandene Knochen auswählen (höchstens 256 Umhängungen).');
-    const bone=this.bones[point.bone!],parent=this.bones[target.bone!],common=validateReparent(bone,parent);
+    const bone=this.bones[point.bone!],parent=this.bones[target.bone!],{common,ratio}=validateReparent(bone,parent);
     const oldParent=this.data.points.find(p=>p.kind==='bone'&&this.bones[p.bone!]===bone.parent);
     if(!oldParent)throw Error('Zuerst die vorhandenen Gelenke erkennen.');
     const before=structuredClone(this.data),values=this.capture(),original=structuredClone(values);
-    // Solve the moved bone frame without its own scale; source scale stays on the bone.
+    // Solve without the bone's own scale; topology replay applies the fixed branch ratio.
     // This avoids reflection sign ambiguity when decomposing a negatively scaled matrix.
     const world=(node:T.Bone,v:Record<string,Transform>):T.Matrix4=>{
       const chain:T.Bone[]=[];for(let n:T.Object3D|null=node;n instanceof T.Bone&&n!==common;n=n.parent)chain.unshift(n);
       const matrix=new T.Matrix4();for(const n of chain){const i=this.bones.indexOf(n),p=this.data.points.find(p=>p.kind==='bone'&&p.bone===i),t=p&&v[p.id]||before.boneRest[i];matrix.multiply(new T.Matrix4().compose(new T.Vector3().fromArray(t.position),new T.Quaternion().fromArray(t.rotation),n===bone?new T.Vector3(1,1,1):n.scale));}return matrix;
     };
-    const convert=(v:Record<string,Transform>):Transform=>{const matrix=world(parent,v).invert().multiply(world(bone,v)),position=new T.Vector3(),rotation=new T.Quaternion(),scale=new T.Vector3();matrix.decompose(position,rotation,scale);return {position:position.toArray(),rotation:rotation.normalize().toArray()};};
+    const convert=(v:Record<string,Transform>):Transform=>{
+      const matrix=world(parent,v).invert().multiply(world(bone,v)),position=new T.Vector3(),rotation=new T.Quaternion(),scale=new T.Vector3();matrix.decompose(position,rotation,scale);rotation.normalize();
+      const rebuilt=new T.Matrix4().compose(position,rotation,new T.Vector3(ratio,ratio,ratio));
+      if(!position.toArray().every(n=>Number.isFinite(n)&&Math.abs(n)<=10000)||matrix.elements.some((n,i)=>!Number.isFinite(n)||Math.abs(n-rebuilt.elements[i])>1e-8*Math.max(1,Math.abs(n))))throw Error('Knochenrahmen kann nicht verlustfrei umgerechnet werden.');
+      return {position:position.toArray(),rotation:rotation.toArray()};
+    };
     try{
       const rest=convert({}),poses=this.data.poses.map(p=>convert(p.values)),draft=this.data.draft?convert(this.data.draft):undefined,current=convert(values);
       this.data.boneRest[point.bone!]=rest;this.data.poses.forEach((p,i)=>p.values[point.id]=poses[i]);if(this.data.draft&&draft)this.data.draft[point.id]=draft;values[point.id]=current;
@@ -286,7 +291,7 @@ export class StudioRig {
   checkPoseBends(pose:Pose){
     const results:{jointId:string;name:string;endpointId:string;angle:number|null;min:number;max:number;status:'within'|'outside'|'unmeasurable'}[]=[];
     const evaluated=new Set<string>();
-    const scale=new Map(this.originalNodes.map(item=>[item.node,item.scale]));
+    const scale=new Map(this.bones.map(bone=>[bone,bone.scale.clone()]));
     const local=(point:ControlPoint)=>{const v=pose.values[point.id];if(!v)throw Error('Pose enthält nicht alle Gelenkspuren.');return new T.Matrix4().compose(new T.Vector3().fromArray(v.position),new T.Quaternion().fromArray(v.rotation),scale.get(this.bones[point.bone!])??new T.Vector3(1,1,1));};
     const points=new Map(this.data.points.filter(p=>p.kind==='bone').map(p=>[this.bones[p.bone!],p]));
     const index={byBone:points,edges:new Set(this.data.links.map(edgeKey))};

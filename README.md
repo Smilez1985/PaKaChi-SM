@@ -2,7 +2,7 @@
 
 **SM steht für StateMaschine.** PaKaChi ist die **Panda-KI-Chimera**, das übergeordnete Projekt. PaKaChi-SM vereint Avatar-Player, Model Zoo und das fest integrierte **PaKaChi-Avatar-Studio**.
 
-**Softwarestand: 0.81.0 · Entwicklungsstand, keine fertige Bild-zu-3D-Lösung.**
+**Softwarestand: 0.82.0 · Entwicklungsstand, keine fertige Bild-zu-3D-Lösung.**
 
 Der bestehende PaKaChi mit Tierform, humanoider Arbeitsform und allen 72 Transformationsbildern ist erhalten und beim Start ausgewählt. Mika und Nori sind separate technische 3D-Testavatare. Ein 3D-Modell des Original-PaKaChi und die Qualitätsabnahme echter KI-Ergebnisse stehen noch aus.
 
@@ -21,7 +21,9 @@ Der archivierte Originalplayer lässt sich auch separat ohne Node öffnen: `publ
 
 Seit **0.11.1** dreht die mittlere Maustaste um die Mitte der ganzen Figur, auch nach Zoom zum Mauszeiger und Verschieben des Bildausschnitts.
 
-**Arbeitsbranch 0.81.0:** `npm run benchmark:browser-import` ergänzt die CPU-Importmessung um den echten Dateiimport im Produktionsbrowser einschließlich Texturen und erster WebGL-Zeichnung ([Anleitung und Grenzen](docs/IMPORT-BENCHMARK.md)). 0.81.0 ist mit 325 Node- und 31 Chromium-Tests sowie drei Produktionsmessungen bestätigt; Mika-/256-Aufträge-Referenz mit Software-WebGL: Median 3.374,4 ms bis zur Frame-Grenze ([Prüfbericht und Rohdaten](docs/PRUEFUNG-0.81.0.md)). Noch keine Übernahme nach `main`.
+**Arbeitsbranch 0.82.0:** Knochen können jetzt zwischen unterschiedlich stark skalierten, positiven gleichmäßigen Ästen umgehängt werden; Weltpositionen, gespeicherte Posen und starre Anbauteile bleiben erhalten ([Details und Grenzen](docs/PRUEFUNG-0.82.0.md)).
+
+**Bestätigter Messstand 0.81.0:** `npm run benchmark:browser-import` ergänzt die CPU-Importmessung um den echten Dateiimport im Produktionsbrowser einschließlich Texturen und erster WebGL-Zeichnung ([Anleitung und Grenzen](docs/IMPORT-BENCHMARK.md)). 0.81.0 ist mit 325 Node- und 31 Chromium-Tests sowie drei Produktionsmessungen bestätigt; Mika-/256-Aufträge-Referenz mit Software-WebGL: Median 3.374,4 ms bis zur Frame-Grenze ([Prüfbericht und Rohdaten](docs/PRUEFUNG-0.81.0.md)). Noch keine Übernahme nach `main`.
 
 ## Überblendung im Player (0.70.0)
 
@@ -67,7 +69,7 @@ Seit 0.14.0 besteht zusätzlich der interne [Auftragskern](docs/AUFTRAE.md): fes
 
 ## Was aktuell funktioniert
 
-| Bereich | Stand 0.81.0 |
+| Bereich | Stand 0.82.0 |
 | --- | --- |
 | Player | Avatar-Auswahl, tatsächliche Bewegungen anzeigen, abspielen, pausieren, Tempo und Abspielposition ändern. |
 | Modelle | Mika/Nori mit Skeletten und Clips; eigene eigenständige GLB-Dateien laden oder hineinziehen, bis 50 MiB, lokal für die Sitzung. |
@@ -372,3 +374,4 @@ Seit **0.78.0** bietet „Figur als GLB (mit Rig)“ zusätzlich eine eigenstän
 
 **0.80.0:** Freie Gesichtspunkte und andere Oberflächenbewegungen als Morph-Animation exportieren, auch ohne Skelett. [Exportanleitung](docs/GLB-EXPORT.md).
 
+Seit **0.82.0** können Knochen zwischen unterschiedlich stark, positiv und gleichmäßig skalierten Ästen umgehängt werden. Beispiel: Vom Astmaßstab 2 zu 3 wird die lokale Skalierung des verschobenen Knochens mit 2/3 ausgeglichen. Grundstellung, gespeicherte Schlüsselposen, Entwurf, Hautgewichte und starre Anbauteile behalten ihre bisherigen Welttransformationen. Der Ausgleich wird bei Reset und Projektladen aus der unveränderten Quelle und der Umbaufolge rekonstruiert; Zurück/Wiederholen und Rückkehr zum Original bleiben möglich. Die eigene ungleichmäßige oder negative Skalierung des verschobenen Knochens bleibt mit diesem positiven Faktor kombinierbar. Nicht gleichmäßige/negative Elternäste, Anbauteile mit eigenem Skelett und nicht invertierbare Ausgleiche bleiben gesperrt. Bewegungsverläufe zwischen Schlüsselposen und die Hautqualität weiterhin visuell prüfen. Projekte mit diesem neuen Fall benötigen mindestens 0.82.0; Projektformat bleibt Version 1. [Prüfbericht](docs/PRUEFUNG-0.82.0.md).

@@ -5,7 +5,7 @@ import type {WeightRegion} from './studio-data.ts';
 import type {BoneInsertion} from './studio-data.ts';
 export interface WeightTransfer {from:number;to:number;amount:number;after:number;region?:WeightRegion}
 export interface BoneReparent {bone:number;parent:number;after:number}
-/** Equal positive uniform branch scales cancel; the shared ancestor transform also cancels. */
+/** Positive uniform branch scales admit a fixed compensation on the moved bone. */
 export function validateReparent(bone:T.Bone|undefined,parent:T.Bone|undefined){
  if(!bone||!parent||!(bone.parent instanceof T.Bone)||bone.parent===parent)throw Error('Einen Knochen und einen anderen Elternknochen auswählen. Wurzeln können nicht umgehängt werden.');
  const chain=(start:T.Bone)=>{const result:T.Bone[]=[];let node:T.Object3D|null=start;while(node instanceof T.Bone){if(result.includes(node))throw Error('Kreis im Skelett.');result.push(node);node=node.parent;}return result;};
@@ -19,15 +19,18 @@ export function validateReparent(bone:T.Bone|undefined,parent:T.Bone|undefined){
  },1);
  if(bone.scale.toArray().some(v=>!Number.isFinite(v)||Math.abs(v)<1e-8))throw Error('Knochenskalierung ist nicht invertierbar.');
  const from=uniformProduct(a.slice(1,a.indexOf(common))),to=uniformProduct(b.slice(0,b.indexOf(common)));
- if(!Number.isFinite(from)||!Number.isFinite(to)||Math.min(from,to)<=1e-8||Math.abs(from-to)>1e-10*Math.max(from,to))throw Error('Skalierte Knochenketten benötigen gleiche positive gleichmäßige Astskalierungen.');
+ if(!Number.isFinite(from)||!Number.isFinite(to)||Math.min(from,to)<=1e-8)throw Error('Skalierte Knochenketten benötigen positive gleichmäßige Astskalierungen.');
+ // Preserve the exact old interpretation of already supported equal-scale edits.
+ const ratio=Math.abs(from-to)<=1e-10*Math.max(from,to)?1:from/to;
+ if(!Number.isFinite(ratio)||ratio<=0||bone.scale.toArray().some(v=>!Number.isFinite(v*ratio)||Math.abs(v*ratio)<1e-8))throw Error('Ausgeglichene Knochenskalierung ist nicht invertierbar.');
  if(a.slice(a.indexOf(common)).some(n=>n.scale.toArray().some(v=>!Number.isFinite(v)||Math.abs(v)<1e-8)))throw Error('Gemeinsame Elternskalierung ist nicht invertierbar.');
  // Rigid attachment subtrees follow the bone unchanged. Nested rigs need separate conversion.
  for(const child of bone.children)if(!(child instanceof T.Bone))child.traverse(node=>{if(node instanceof T.Bone||node instanceof T.SkinnedMesh)throw Error('Anbauteile mit eigenem Skelett können nicht umgehängt werden.');});
- return common;
+ return {common,ratio};
 }
 /** Reversible topology overlay. Source skeletons and vertex weights remain recoverable. */
 export class StudioTopology {
- private parents:{bone:T.Bone;parent:T.Object3D;position:T.Vector3}[];
+ private parents:{bone:T.Bone;parent:T.Object3D;position:T.Vector3;scale:T.Vector3}[];
  private skins:{mesh:T.SkinnedMesh;skeleton:T.Skeleton;indices:T.BufferAttribute;weights:T.BufferAttribute;worldPositions:Float64Array}[]=[];
  private added:T.Bone[]=[];
  private generated:T.Skeleton[]=[];
@@ -37,7 +40,7 @@ export class StudioTopology {
  private visibilityCache=new Map<T.SkinnedMesh,Int8Array>();
  constructor(source:T.Bone[],root:T.Object3D){
   this.source=source;const surfaces:T.Mesh[]=[];root.traverse(n=>{if(n instanceof T.Mesh)surfaces.push(n);});this.visibility=new StudioWeightVisibility(surfaces);
-  this.parents=source.map(bone=>({bone,parent:bone.parent!,position:bone.position.clone()}));
+  this.parents=source.map(bone=>({bone,parent:bone.parent!,position:bone.position.clone(),scale:bone.scale.clone()}));
   root.traverse(n=>{if(n instanceof T.SkinnedMesh){
    const positions=n.geometry.getAttribute('position'),worldPositions=new Float64Array(positions.count*3),point=new T.Vector3();
    for(let v=0;v<positions.count;v++)point.fromBufferAttribute(positions,v).applyMatrix4(n.matrixWorld).toArray(worldPositions,v*3);
@@ -45,7 +48,7 @@ export class StudioTopology {
   }});
  }
  restore(){
-  for(const {bone,parent,position} of this.parents){if(bone.parent!==parent)parent.add(bone);bone.position.copy(position);}
+  for(const {bone,parent,position,scale} of this.parents){if(bone.parent!==parent)parent.add(bone);bone.position.copy(position);bone.scale.copy(scale);}
   for(const bone of this.added)bone.removeFromParent();this.added=[];
   for(const s of this.skins){s.mesh.skeleton=s.skeleton;s.mesh.geometry.setAttribute('skinIndex',s.indices.clone());s.mesh.geometry.setAttribute('skinWeight',s.weights.clone());}
   this.generated.forEach(s=>s.dispose());this.generated=[];
@@ -104,7 +107,7 @@ export class StudioTopology {
    weights.push(()=>this.transfer(edit,from,to));
   }};
 
-  const applyReparents=()=>{queueTransfers();while(reparented<reparents.length&&reparents[reparented].after===changes){const edit=reparents[reparented++],bone=bones[edit.bone],parent=bones[edit.parent];validateReparent(bone,parent);parent.add(bone);}};
+  const applyReparents=()=>{queueTransfers();while(reparented<reparents.length&&reparents[reparented].after===changes){const edit=reparents[reparented++],bone=bones[edit.bone],parent=bones[edit.parent],{ratio}=validateReparent(bone,parent);bone.scale.multiplyScalar(ratio);parent.add(bone);}};
   const remove=(index:number)=>{
    applyReparents();
    const bone=bones[index],parent=bone?.parent;

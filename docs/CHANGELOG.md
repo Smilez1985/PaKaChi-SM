@@ -12,6 +12,22 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.82.0] - 2026-11-07
+
+Zeitstempel: 2026-11-07T12:30:50+01:00 (Europe/Berlin)
+
+### Added
+
+- Umhängen zwischen unterschiedlich stark, positiv und gleichmäßig skalierten Knochenästen. Die lokale Skalierung des verschobenen Knochens gleicht das Verhältnis der Äste aus; Grundstellung, gespeicherte Schlüsselposen, Entwurf und starre Anbauteile behalten ihre Welttransformationen. Eigene Spiegelungen und ungleichmäßige Skalierungen bleiben kombinierbar.
+- Regressionen für wiederholten Reset, Rückkehr zur Quelle, gemischte Umbau-/Gewichtsfolgen, Projektladen, Beugeprüfung und tatsächlichen Animations-GLB-Rundlauf. Alle Hautvertices der angepassten Mika-/Nori-Importe werden verglichen; zusätzlicher Chromium-Fall prüft Umhängen, Undo/Redo und Speichern/Laden mit unterschiedlichen Astmaßstäben.
+
+### Changed
+
+- Topologie-Replay rekonstruiert den festen Skalierungsausgleich aus Quelle und Umbaufolge; Quellmodell und Projektstruktur bleiben erhalten. Rückkehr zur Quelle stellt auch die ursprünglichen lokalen Skalierungen wieder her.
+- Prüfung der gespeicherten Beugewinkel berücksichtigt die im Studio rekonstruierten Knochenskalierungen. Nicht verlustfrei darstellbare oder nicht invertierbare Umrechnungen werden abgewiesen.
+
+[Prüfbericht](PRUEFUNG-0.82.0.md). Nicht gleichmäßige/negative Elternäste, eigene Skelette an Anbauteilen und manuelle Haut-/Bewegungsabnahme bleiben offen. Projektformat 1; der neue Umhängungsfall benötigt mindestens Software 0.82.0.
+
 ## [0.81.0] - 2026-11-07
 
 Zeitstempel: 2026-11-07T11:46:22+01:00 (Europe/Berlin)
@@ -1683,3 +1699,5 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 [0.80.0]: PRUEFUNG-0.80.0.md
 
 [0.81.0]: PRUEFUNG-0.81.0.md
+
+[0.82.0]: PRUEFUNG-0.82.0.md

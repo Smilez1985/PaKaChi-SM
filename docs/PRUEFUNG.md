@@ -1,6 +1,6 @@
 # Prüfstand und Abnahme
 
-**Softwarestand: 0.81.0 · Dokumentationsabgleich: 07.11.2026.**
+**Softwarestand: 0.82.0 · Dokumentationsabgleich: 07.11.2026.**
 
 ## CI-Kontingent und Dokumentationsänderungen
 
@@ -29,7 +29,7 @@ Unter Linux bei fehlenden Systembibliotheken stattdessen einmalig `npx playwrigh
 
 Lokaler Nachweis am 28.10.2026 für den vorbereiteten Unreleased-Stand: `npm run verify` erfolgreich, **286 Node-Tests bestanden**, TypeScript und Produktionsbuild bestanden. Die bekannte Warnung zum großen JavaScript-Bundle bleibt bestehen. `verify:full` wurde hier wegen des bereits nachgewiesenen Chromium-Startblockers nicht ausgeführt; die 22 Browserfälle bleiben unbestätigt.
 
-Aktueller Meilenstein: [0.81.0](PRUEFUNG-0.81.0.md). [Lauf 42365460756](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/42365460756) bestätigt für Commit `7c706bb4` 325 Node-Tests, Build, alle 31 Chromium-Fälle und drei Produktionsbrowser-Importmessungen; vollständige Logs, Rohdaten und Textur-Screenshot ausgewertet. Median der Mika-/256-Aufträge-Referenz: 3.374,4 ms bis zur Frame-Grenze mit Software-WebGL. Der abschließende PR-Stand ist am jeweiligen Commit oben verlinkt. Mausnavigation ist seit dem CI-Lauf vom 05.11.2026 bestätigt; vollständiger aktueller PR-Status siehe oben.
+Aktueller Meilenstein: [0.82.0](PRUEFUNG-0.82.0.md): lokale Geometrie-, Replay- und GLB-Nachweise im Versionsbericht; aktueller CI-Nachweis am getesteten Commit in [PR #1](https://github.com/Smilez1985/PaKaChi-SM/pull/1). Der vollständig bestätigte Messstand [0.81.0](PRUEFUNG-0.81.0.md) bleibt als Referenz erhalten. [Lauf 42365460756](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/42365460756) bestätigt für Commit `7c706bb4` 325 Node-Tests, Build, alle 31 Chromium-Fälle und drei Produktionsbrowser-Importmessungen; vollständige Logs, Rohdaten und Textur-Screenshot ausgewertet. Median der Mika-/256-Aufträge-Referenz: 3.374,4 ms bis zur Frame-Grenze mit Software-WebGL. Der abschließende PR-Stand ist am jeweiligen Commit oben verlinkt. Mausnavigation ist seit dem CI-Lauf vom 05.11.2026 bestätigt; vollständiger aktueller PR-Status siehe oben.
 
 ## Nachgewiesen
 

@@ -8,10 +8,10 @@ import type {StudioView} from '../src/studio-view.ts';
 import {parseProject} from '../src/studio-data.ts';
 import {parseStudioCommand} from '../src/studio-command.ts';
 import {exportMoveFile,importMoveFile} from '../src/move-file.ts';
-function fixture(attachment=false,scale=new T.Vector3(1,1,1),branchScale=1,nested=false,footScale=new T.Vector3(1,1,1)){
+function fixture(attachment=false,scale=new T.Vector3(1,1,1),branchScale=1,nested=false,footScale=new T.Vector3(1,1,1),targetScale=branchScale){
  const root=new T.Group(),hip=new T.Bone(),left=new T.Bone(),foot=new T.Bone(),right=new T.Bone();foot.scale.copy(footScale);hip.scale.copy(scale);hip.name='Hip';left.name='Left';foot.name='Foot';right.name='Right';
  hip.add(left,right);left.add(foot);left.position.set(-1,1,0);foot.position.set(0,1,0);right.position.set(1,1,0);root.add(hip);root.scale.setScalar(.7);
- left.scale.setScalar(branchScale*(nested?2:1));right.scale.setScalar(branchScale);if(nested){const pivot=new T.Bone();pivot.name='Pivot';pivot.scale.setScalar(.5);hip.add(pivot);pivot.add(left);}
+ left.scale.setScalar(branchScale*(nested?2:1));right.scale.setScalar(targetScale);if(nested){const pivot=new T.Bone();pivot.name='Pivot';pivot.scale.setScalar(.5);hip.add(pivot);pivot.add(left);}
  const accessory=new T.Group(),ornament=new T.Mesh(new T.BoxGeometry(.2,.2,.2),new T.MeshBasicMaterial());accessory.name='Accessory';accessory.position.set(.2,.3,.1);accessory.rotation.set(.1,.2,.3);accessory.scale.set(1,2,.5);accessory.add(ornament);ornament.position.x=.1;if(attachment)foot.add(accessory);
  const geometry=new T.BufferGeometry();geometry.setAttribute('position',new T.Float32BufferAttribute([-1,1,0,-1,2,0,1,1,0],3));geometry.setAttribute('skinIndex',new T.Uint16BufferAttribute([1,0,0,0,2,0,0,0,3,0,0,0],4));geometry.setAttribute('skinWeight',new T.Float32BufferAttribute([1,0,0,0,1,0,0,0,1,0,0,0],4));
  const mesh=new T.SkinnedMesh(geometry,new T.MeshBasicMaterial());root.add(mesh);root.updateMatrixWorld(true);mesh.bind(new T.Skeleton([hip,left,foot,right]));const rig=new StudioRig(root);
@@ -45,7 +45,7 @@ test('reparent interleaves with insert/delete, catalog export and move binding',
 test('invalid reparent operations leave data, hierarchy and skin unchanged',()=>{
  const f=fixture(),{rig}=f,before=structuredClone(rig.data),rest=f.vertices();
  for(const [bone,parent] of [['Hip','Right'],['Left','Left'],['Left','Foot'],['Foot','Left']]){assert.throws(()=>rig.reparentBone(f.point(bone),f.point(parent)));assert.deepEqual(rig.data,before);near(f.vertices(),rest);}
- f.right.scale.setScalar(2);assert.throws(()=>rig.reparentBone(f.point('Foot'),f.point('Right')),/Skalierte/);f.right.scale.setScalar(1);
+ f.right.scale.set(2,1,2);assert.throws(()=>rig.reparentBone(f.point('Foot'),f.point('Right')),/Skalierte/);f.right.scale.setScalar(1);
  const nested=new T.Group();nested.add(new T.Bone());f.foot.add(nested);assert.throws(()=>rig.reparentBone(f.point('Foot'),f.point('Right')),/eigenem Skelett/);f.foot.clear();
  const skinned=new T.SkinnedMesh();f.foot.add(skinned);assert.throws(()=>rig.reparentBone(f.point('Foot'),f.point('Right')),/eigenem Skelett/);f.foot.clear();
  f.hip.remove(f.right);f.root.add(f.right);assert.throws(()=>rig.reparentBone(f.point('Foot'),f.point('Right')),/Skelettbaum/);f.hip.add(f.right);rig.reset();assert.deepEqual(rig.data,before);near(f.vertices(),rest);
@@ -66,10 +66,12 @@ test('UI and guarded agent reparent are independent undo steps with pose review'
 test('Mika and Nori source bones retain all skinned vertices after reparent and reload',async()=>{
  const {readFileSync}=await import('node:fs');const {parseModel,disposeModel}=await import('../src/viewer.ts');
  if(typeof globalThis.ProgressEvent==='undefined')Object.defineProperty(globalThis,'ProgressEvent',{value:class extends Event{constructor(type:string,init:Record<string,unknown>={}){super(type);Object.assign(this,init);}}});
- for(const name of ['mika','nori']){
-  const bytes=readFileSync(new URL('../public/model-zoo/'+name+'/model.gltf',import.meta.url)),{scene}=await parseModel(Uint8Array.from(bytes).buffer),rig=new StudioRig(scene);
+ for(const [name,scaled] of [['mika',false],['nori',false],['mika',true],['nori',true]] as const){
+  let bytes=readFileSync(new URL('../public/model-zoo/'+name+'/model.gltf',import.meta.url));
+  if(scaled){const model=JSON.parse(bytes.toString('utf8'));model.nodes.find((n:{name:string})=>n.name==='LeftKnee').scale=[2,2,2];model.nodes.find((n:{name:string})=>n.name==='RightHip').scale=[3,3,3];model.nodes.find((n:{name:string})=>n.name==='LeftFoot').scale=[-1,.7,1.2];bytes=Buffer.from(JSON.stringify(model));}
+  const {scene}=await parseModel(Uint8Array.from(bytes).buffer),rig=new StudioRig(scene);
   const vertices=(r:StudioRig)=>r.surfaces.filter(s=>s.mesh instanceof T.SkinnedMesh).flatMap(s=>Array.from({length:s.mesh.geometry.getAttribute('position').count},(_,i)=>(s.mesh as T.SkinnedMesh).getVertexPosition(i,new T.Vector3()).applyMatrix4(s.mesh.matrixWorld)));
-  const before=vertices(rig),foot=rig.data.points.find(p=>p.name==='LeftFoot')!,hip=rig.data.points.find(p=>p.name==='LeftHip')!;rig.reparentBone(foot,hip);near(vertices(rig),before);
+  const before=vertices(rig),foot=rig.data.points.find(p=>p.name==='LeftFoot')!,hip=rig.data.points.find(p=>p.name===(scaled?'RightHip':'LeftHip'))!;rig.reparentBone(foot,hip);near(vertices(rig),before);
   const loaded=await parseModel(Uint8Array.from(bytes).buffer),again=new StudioRig(loaded.scene,parseProject(project(rig)).studio);near(vertices(again),before);assert.equal(again.bones[foot.bone!].parent,again.bones[hip.bone!]);
   rig.dispose();again.dispose();disposeModel(scene);disposeModel(loaded.scene);
  }
@@ -125,8 +127,8 @@ test('equal cumulative uniform scales across distinct branches preserve poses, s
   rig.restoreSource();assert.equal(f.foot.parent,f.left);near(f.vertices(),rest);rig.dispose();other.rig.dispose();
  }
 });
-test('unequal, nonuniform and negative branch scaling is rejected atomically',()=>{
- for(const scale of [new T.Vector3(3,3,3),new T.Vector3(2,1,2),new T.Vector3(-2,-2,-2)]){
+test('nonuniform and negative branch scaling is rejected atomically',()=>{
+ for(const scale of [new T.Vector3(2,1,2),new T.Vector3(-2,-2,-2)]){
   const f=fixture(false,new T.Vector3(1,1,1),2),before=structuredClone(f.rig.data);f.right.scale.copy(scale);assert.throws(()=>f.rig.reparentBone(f.point('Foot'),f.point('Right')),/Astskalierungen/);assert.deepEqual(f.rig.data,before);assert.equal(f.foot.parent,f.left);f.rig.dispose();
  }
 });
@@ -144,4 +146,56 @@ test('reparent keeps the moved bone scale including nonuniform scales and reflec
 });
 test('singular moved bone scale is rejected without changing hierarchy or data',()=>{
  const f=fixture(),before=structuredClone(f.rig.data);f.foot.scale.y=0;assert.throws(()=>f.rig.reparentBone(f.point('Foot'),f.point('Right')),/Knochenskalierung/);assert.deepEqual(f.rig.data,before);assert.equal(f.foot.parent,f.left);f.rig.dispose();
+});
+
+test('unequal uniform branches preserve world skin, rigid attachments, poses and draft with fixed scale compensation',()=>{
+ const close=(a:T.Matrix4,b:T.Matrix4)=>a.elements.forEach((v,i)=>assert.ok(Math.abs(v-b.elements[i])<1e-6));
+ for(const [from,to,nested] of [[2,3,false],[2,.5,true],[.25,4,false]] as const)for(const own of [new T.Vector3(1,1,1),new T.Vector3(-2,.5,1.5)]){
+  const shared=new T.Vector3(-2,.5,1.5),f=fixture(true,shared,from,nested,own,to),{rig}=f,rest=f.vertices(),restAccessory=f.accessory.matrixWorld.clone(),skin=Array.from(f.mesh.geometry.getAttribute('skinWeight').array);
+  f.left.rotation.z=.4;f.right.rotation.y=-.3;f.foot.rotation.set(.2,.1,.3);rig.root.updateMatrixWorld(true);
+  rig.setFigureTransform(new T.Vector3(.2,.1,-.3),new T.Quaternion().setFromAxisAngle(new T.Vector3(0,1,0),.25),1.3);
+  const posed=f.vertices(),posedAccessory=f.accessory.matrixWorld.clone(),values=rig.capture();rig.data.poses=[{id:'unequal',name:'Unequal',seconds:1,values:structuredClone(values)}];rig.data.draft=structuredClone(values);
+  rig.reparentBone(f.point('Foot'),f.point('Right'));near(f.vertices(),posed);close(f.accessory.matrixWorld,posedAccessory);near([f.foot.scale],[own.clone().multiplyScalar(from/to)]);assert.deepEqual(Array.from(f.mesh.geometry.getAttribute('skinWeight').array),skin);
+  for(let i=0;i<5;i++){rig.reset();near(f.vertices(),rest);close(f.accessory.matrixWorld,restAccessory);near([f.foot.scale],[own.clone().multiplyScalar(from/to)]);rig.apply(rig.data.poses[0].values);near(f.vertices(),posed);close(f.accessory.matrixWorld,posedAccessory);}
+  const other=fixture(true,shared,from,nested,own,to);other.rig.data=parseProject(structuredClone(project(rig))).studio;other.rig.reset();near(other.vertices(),rest);other.rig.apply(other.rig.data.draft!);near(other.vertices(),posed);close(other.accessory.matrixWorld,posedAccessory);
+  rig.restoreSource();near([f.foot.scale],[own]);near(f.vertices(),rest);assert.equal(f.foot.parent,f.left);rig.reset();assert.equal(f.foot.parent,f.right);near([f.foot.scale],[own.clone().multiplyScalar(from/to)]);
+  rig.dispose();near([f.foot.scale],[own]);other.rig.dispose();
+ }
+});
+
+test('compensated subtree scales survive repeated reparenting, insertion, weights, deletion and reload',()=>{
+ const f=fixture(true,new T.Vector3(2,.5,1.5),2,true,new T.Vector3(1,1,1),3),{rig}=f,rest=f.vertices(),accessory=f.accessory.matrixWorld.clone();
+ // Moving Left carries Foot and its nested accessory along with it.
+ rig.reparentBone(f.point('Left'),f.point('Right'));near(f.vertices(),rest);assert.equal(f.foot.parent,f.left);near([f.left.scale],[new T.Vector3(2/3,2/3,2/3)]);f.accessory.matrixWorld.elements.forEach((v,i)=>assert.ok(Math.abs(v-accessory.elements[i])<1e-6));
+ rig.reparentBone(f.point('Left'),f.point('Hip'));near(f.vertices(),rest);near([f.left.scale],[new T.Vector3(2,2,2)]);
+ rig.reparentBone(f.point('Foot'),f.point('Right'));rig.transferWeights(f.point('Left'),f.point('Foot'),.25);rig.reparentBone(f.point('Foot'),f.point('Left'));const added=rig.insertJoint(f.point('Foot'),.4);rig.deleteBone(f.point('Right'));
+ const expected=f.vertices(),weights=Array.from(f.mesh.geometry.getAttribute('skinWeight').array),scales=rig.bones.map(b=>b.scale.clone());
+ for(let i=0;i<5;i++){rig.reset();near(f.vertices(),expected);near(rig.bones.map(b=>b.scale),scales);assert.deepEqual(Array.from(f.mesh.geometry.getAttribute('skinWeight').array),weights);}
+ const other=fixture(true,new T.Vector3(2,.5,1.5),2,true,new T.Vector3(1,1,1),3);other.rig.data=parseProject(structuredClone(project(rig))).studio;other.rig.reset();near(other.vertices(),expected);near(other.rig.bones.map(b=>b.scale),scales);assert.deepEqual(Array.from(other.mesh.geometry.getAttribute('skinWeight').array),weights);assert.equal(other.rig.bones[f.point('Foot').bone!].parent,other.rig.bones[added.bone!]);
+ rig.restoreSource();near(f.vertices(),rest);rig.dispose();other.rig.dispose();
+});
+
+test('non-invertible compensated scales are rejected before changing studio data or hierarchy',()=>{
+ const f=fixture(true,new T.Vector3(1,1,1),1,false,new T.Vector3(1e-6,1e-6,1e-6),1e6),before=structuredClone(f.rig.data),rest=f.vertices();
+ assert.throws(()=>f.rig.reparentBone(f.point('Foot'),f.point('Right')),/Ausgeglichene Knochenskalierung/);assert.deepEqual(f.rig.data,before);assert.equal(f.foot.parent,f.left);near(f.vertices(),rest);f.rig.dispose();
+});
+
+test('saved-pose bend checks use compensated scales without changing the live pose',()=>{
+ const f=fixture(false,new T.Vector3(1,1,1),2,false,new T.Vector3(1,1,1),3),{rig}=f;
+ rig.reparentBone(f.point('Left'),f.point('Right'));f.point('Left').bendLimit={min:0,max:175};f.left.rotation.z=.4;f.root.updateMatrixWorld(true);
+ const pose={id:'angle',name:'Angle',seconds:1,values:rig.capture()},a=rig.position(f.point('Right')),b=rig.position(f.point('Left')),c=rig.position(f.point('Foot')),expected=T.MathUtils.radToDeg(b.clone().sub(a).angleTo(c.sub(b)));
+ rig.reset();const current=rig.capture(),data=structuredClone(rig.data),report=rig.checkPoseBends(pose),result=report.results.find(r=>r.jointId===f.point('Left').id)!;
+ assert.ok(result);assert.ok(Math.abs(result.angle!-expected)<1e-6);assert.deepEqual(rig.capture(),current);assert.deepEqual(rig.data,data);rig.dispose();
+});
+
+test('compensated skin and rigid accessories survive animated GLB export without changing the source',async()=>{
+ const {exportMoveGLB}=await import('../src/move-glb.ts'),{parseModel,disposeModel}=await import('../src/viewer.ts');
+ class BinaryReader{result:ArrayBuffer|null=null;onloadend:(()=>void)|null=null;readAsArrayBuffer(blob:Blob){void blob.arrayBuffer().then(value=>{this.result=value;this.onloadend?.();});}}
+ Object.assign(globalThis,{FileReader:BinaryReader});
+ const f=fixture(true,new T.Vector3(1,1,1),2,false,new T.Vector3(-2,.5,1.5),3),{rig}=f;f.mesh.name='Skin';f.ornament.name='Ornament';
+ const a=rig.capture();f.left.rotation.z=.3;f.right.rotation.y=.4;f.foot.rotation.x=-.2;f.root.updateMatrixWorld(true);const b=rig.capture();rig.data.poses=[{id:'a',name:'A',seconds:1,values:a},{id:'b',name:'B',seconds:1,values:b}];
+ rig.reparentBone(f.point('Foot'),f.point('Right'));const move={id:'unequal',name:'Compensated move',loop:false,poses:['a','b']};rig.data.moves=[move];const current=rig.capture(),data=structuredClone(rig.data),bytes=await exportMoveGLB(rig,move);assert.deepEqual(rig.capture(),current);assert.deepEqual(rig.data,data);
+ const {scene,animations}=await parseModel(bytes),skin=scene.getObjectByName('Skin') as T.SkinnedMesh,ornament=scene.getObjectByName('Ornament')!,mixer=new T.AnimationMixer(scene),action=mixer.clipAction(animations[0]);action.setLoop(T.LoopOnce,1);action.clampWhenFinished=true;action.play();
+ for(const time of [0,.3,.7,1]){rig.apply(rig.sample(move,time));mixer.setTime(time);scene.updateMatrixWorld(true);near(Array.from({length:3},(_,i)=>skin.getVertexPosition(i,new T.Vector3()).applyMatrix4(skin.matrixWorld)),f.vertices());ornament.matrixWorld.elements.forEach((v,i)=>assert.ok(Math.abs(v-f.ornament.matrixWorld.elements[i])<1e-5));}
+ mixer.stopAllAction();rig.dispose();disposeModel(scene);
 });
