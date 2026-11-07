@@ -1,10 +1,10 @@
 # Prüfstand und Abnahme
 
-**Softwarestand: 0.80.0 · Dokumentationsabgleich: 07.11.2026.**
+**Softwarestand: 0.81.0 · Dokumentationsabgleich: 07.11.2026.**
 
 ## CI-Kontingent und Dokumentationsänderungen
 
-Actions ist laut Inhaber seit 05.11.2026 wieder verfügbar. [Lauf 41992106544](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/41992106544) prüfte 0.76.0: 312 Node-Tests und Build erfolgreich; 20 von 22 Browserfällen bestanden, einschließlich Mausnavigation. Beide Fehler betrafen denselben mehrdeutigen Statusselektor im Model-Zoo-Test. 0.76.1 vergibt eindeutige Status-IDs und korrigiert die Tests. Der Korrekturlauf [41993440271](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/41993440271) bestätigt 312 Node-Tests, Build und alle 22 Chromium-Fälle für 0.76.1. Der vollständige Prüfstatus des aktuellen Stands ist in [PR #1](https://github.com/Smilez1985/PaKaChi-SM/pull/1) verknüpft. Die alten Kontingentabbrüche sind weiterhin keine Testergebnisse.
+Actions ist laut Inhaber seit 05.11.2026 wieder verfügbar. [Lauf 41992106544](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/41992106544) prüfte 0.76.0: 312 Node-Tests und Build erfolgreich; 20 von 22 Browserfällen bestanden, einschließlich Mausnavigation. Beide Fehler betrafen denselben mehrdeutigen Statusselektor im Model-Zoo-Test. 0.76.1 vergibt eindeutige Status-IDs und korrigiert die Tests. Der Korrekturlauf [41993440271](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/41993440271) bestätigt 312 Node-Tests, Build und alle 22 Chromium-Fälle für 0.76.1. 0.80.0 ist durch [Lauf 42359935481](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/42359935481) mit 324 Node-Tests, Build und 29 Chromium-Fällen vollständig bestätigt. Der vollständige Prüfstatus des aktuellen Stands ist in [PR #1](https://github.com/Smilez1985/PaKaChi-SM/pull/1) verknüpft. Die alten Kontingentabbrüche sind weiterhin keine Testergebnisse.
 
 Auf dem Arbeitsbranch ist mit 0.68.0 eine Workflow-Anpassung vorbereitet: Direkte Pushes nach `main` überspringen den Workflow nur dann, wenn **alle** geänderten Dateien unter `README.md`, `docs/**/*.md` oder `docs/benchmarks/*.json` fallen. Gemischte Änderungen, Code, Tests, Abhängigkeiten, Workflow-Dateien und `docs/references/original-sha256.json` lösen weiterhin die vollständige Prüfung aus. Pull Requests bleiben ungefiltert, damit verpflichtende Checks nicht durch einen Pfadfilter auf „Pending“ verbleiben. `workflow_dispatch` bleibt verfügbar.
 
@@ -29,16 +29,16 @@ Unter Linux bei fehlenden Systembibliotheken stattdessen einmalig `npx playwrigh
 
 Lokaler Nachweis am 28.10.2026 für den vorbereiteten Unreleased-Stand: `npm run verify` erfolgreich, **286 Node-Tests bestanden**, TypeScript und Produktionsbuild bestanden. Die bekannte Warnung zum großen JavaScript-Bundle bleibt bestehen. `verify:full` wurde hier wegen des bereits nachgewiesenen Chromium-Startblockers nicht ausgeführt; die 22 Browserfälle bleiben unbestätigt.
 
-Aktueller lokaler Meilenstein: [0.80.0](PRUEFUNG-0.80.0.md). Mausnavigation ist seit dem CI-Lauf vom 05.11.2026 bestätigt; vollständiger aktueller PR-Status siehe oben.
+Aktueller Meilenstein: [0.81.0](PRUEFUNG-0.81.0.md), lokal 325 Node-Tests und Build bestanden; neue Browserfälle und Produktionsmessung noch ohne CI-Nachweis. Letzter vollständig bestätigter CI-Stand: [0.80.0](PRUEFUNG-0.80.0.md). Mausnavigation ist seit dem CI-Lauf vom 05.11.2026 bestätigt; vollständiger aktueller PR-Status siehe oben.
 
 ## Nachgewiesen
 
 | Prüfung | Letzter Nachweis | Umfang und Grenze |
 | --- | --- | --- |
-| `npm test` | 0.79.0: 322 Tests in CI bestanden | Player, Router, Studio-Daten, reale Three.js-Geometrie, DOM/Ereignisse mit happy-dom, Node-MCP und Erhaltungsprüfung. Kein gerenderter Browser. |
-| `npm run test:e2e` | 0.79.0: 28 Chromium-Fälle bestanden | GitHub-Runner mit Software-WebGL; simulierte Anbieter, keine manuelle Maus-/KI-Qualitätsabnahme. |
+| `npm test` | 0.80.0: 324 Tests in CI bestanden | Player, Router, Studio-Daten, reale Three.js-Geometrie, DOM/Ereignisse mit happy-dom, Node-MCP und Erhaltungsprüfung. Kein gerenderter Browser. |
+| `npm run test:e2e` | 0.80.0: 29 Chromium-Fälle bestanden | GitHub-Runner mit Software-WebGL; simulierte Anbieter, keine manuelle Maus-/KI-Qualitätsabnahme. |
 | `npm run test:legacy` | 0.9.0: beide Programme bestanden | Originalplayer-Steuerung, MQTT-Verhalten und Lebenszyklus. |
-| `npm run build` | 0.79.0: in CI bestanden | TypeScript und Produktionsbuild; Vite meldet weiterhin das große gemeinsame JS-Bundle (rund 1,37 MB / 380 kB gzip). |
+| `npm run build` | 0.80.0: in CI bestanden | TypeScript und Produktionsbuild; Vite meldet weiterhin das große gemeinsame JS-Bundle (rund 1,37 MB / 380 kB gzip). |
 | `npm run test:python` mit `PAKACHI_PYTHON` | 0.10.0: Integration bestanden | Echter Python-MCP-Prozess, eingebetteter aMQTT-Broker, produktiver MQTT-Client, Router und Studio-Editor. Acht Tools, Studio-Änderungen einschließlich gültiger/ungültiger Skalierung, fehlende Freigabe und Revisionskonflikte geprüft. |
 | Originaldateien | 0.49.0: bytegenau erhalten | 83 wiederhergestellte Dateien einschließlich exakt 72 Transformationsbildern. |
 
@@ -296,3 +296,4 @@ Dies ergänzt den automatisierten Navigationsnachweis; tatsächliches Mausgefüh
 ### Automatische Listenaktualisierung – 29.10.2026
 
 290 Node-Tests und Produktionsbuild über `npm run verify` bestanden. Neuer Regressionstest: während des Speicherns eintreffende Tab-Meldung, fehlgeschlagene Listenabfragen, erhaltene Erfolgsmeldung, gesperrte veraltete Auswahl und erfolgreiche Wiederherstellung beim Fensterfokus. Die getrennte Listenwarnung verschwindet danach; es entsteht keine doppelte Kopie. DOM-/Speichersimulation, keine neue gerenderte Browserabnahme.
+

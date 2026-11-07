@@ -1,13 +1,13 @@
 # Roadmap – offene Aufgaben
 
-**Entwicklungsstand: 0.80.0 · Abgleich: 07.11.2026.** Teil der [Blaupause](README.md).
+**Entwicklungsstand: 0.81.0 · Abgleich: 07.11.2026.** Teil der [Blaupause](README.md).
 
 Diese Roadmap enthält offene Umsetzung und ausstehende Abnahme. Erledigte Änderungen stehen nach Version im [Changelog](CHANGELOG.md); Nachweise und Grenzen im [Prüfstand](PRUEFUNG.md). Eine implementierte Funktion ist nicht automatisch manuell oder mit realen Anbietern abgenommen.
 
 ## Prioritäten
 
-1. **Browser- und Bedienabnahme:** Kamera, Körperketten, Hautverformung und Mausgefühl manuell prüfen. Actions ist seit 05.11.2026 wieder verfügbar. Der korrigierte Mausnavigationstest besteht im Lauf 41992106544; zwei mehrdeutige Model-Zoo-Testselektoren wurden in 0.76.1 korrigiert. Vollständigen Prüfstatus in [PR #1](https://github.com/Smilez1985/PaKaChi-SM/pull/1) beachten.
-2. **Ladezeiten nachvollziehbar messen:** Die CPU-Messung ist seit 0.68.0 vorhanden; als Nächstes große reale Projekte und vollständiges Browserladen messen. Erst aus diesen Ergebnissen weitere Optimierungen ableiten.
+1. **Browser- und Bedienabnahme:** Kamera, Körperketten, Hautverformung und Mausgefühl manuell prüfen. Automatisierter Stand 0.80.0: 324 Node-Tests, Build und 29 Chromium-Fälle im [Lauf 42359935481](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/42359935481) bestanden. Neue Prüfungen für 0.81.0 siehe [Prüfbericht](PRUEFUNG-0.81.0.md). Die manuelle Gesamtabnahme bleibt offen.
+2. **Ladezeiten nachvollziehbar messen:** CPU-Messung seit 0.68.0 und Produktionsbrowser-Messwerkzeug einschließlich Texturen und erstem WebGL-Frame seit 0.81.0 vorhanden ([Messvertrag](IMPORT-BENCHMARK.md)). Als Nächstes große reale Projekte mit Texturen auf Zielhardware messen und erst daraus Optimierungen ableiten. GPU-Fertigstellung und physische Anzeige werden nicht gemessen.
 3. **Gelenkbearbeitung vervollständigen:** Skalierte Knochenketten, Löschen mit Anbauteilen und neue Rigs auf ungeriggten Oberflächen; anschließend Ganzkörper-IK und Qualitätsabnahme.
 4. **KI-Verfahren und Anbieter:** Geometrie/Rigging-Fachadapter, echte Inferenzqualität und unabhängige Rollen/Fallbacks live prüfen; unterstützte OAuth-Verfahren ergänzen.
 
@@ -113,7 +113,7 @@ Der Arbeitsstand liegt auf `work/local-verification-model-zoo`; `main` bleibt bi
 
 ## Gewichtsverläufe schneller berechnen
 
-- [ ] Mit dem [CPU-Importbenchmark](IMPORT-BENCHMARK.md) große reale Projekte messen; vollständige Browserzeiten einschließlich Texturen/Rendering ergänzen und anschließend gezielt optimieren. Manuelle Performance-Abnahme bleibt offen.
+- [ ] Mit dem [CPU- und Browser-Importbenchmark](IMPORT-BENCHMARK.md) große reale Projekte einschließlich Texturen auf Zielhardware messen und anschließend gezielt optimieren. Das Browser-Messwerkzeug ist seit 0.81.0 implementiert; repräsentative Großmodelle, GPU-Fertigstellung und manuelle Performance-Abnahme bleiben offen.
 
 ## Noch zu entscheiden
 
@@ -123,3 +123,4 @@ Der Arbeitsstand liegt auf `work/local-verification-model-zoo`; `main` bleibt bi
 - Erweiterungen der Exportformate und sichere Remote-Anbindung.
 
 Three.js, glTF/GLB, JSON-Katalog, Studio-Projektformat 1 und unabhängige Anbieterprofile pro Rolle sind festgelegt.
+

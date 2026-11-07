@@ -44,7 +44,7 @@ async function measure(path){
   return {projectSha256:hash(bytes),modelBytes:buffer.byteLength,projectBytes:bytes.length,transfers:project.studio.weightTransfers?.length??0,meshes,vertices,triangles,bones:rig.bones.length,skinSha256:skin.digest('hex'),stages,totalMs,heapDeltaMiB:round((memory.heapUsed-before.heapUsed)/1048576),rssMiB:round(memory.rss/1048576)};
  }finally{rig?.dispose();if(scene)disposeModel(scene);}
 }
-async function fixture(path,count){
+export async function createImportFixture(path,count){
  const bytes=await readFile(new URL('../public/model-zoo/mika/model.gltf',import.meta.url));let scene,rig;
  try{scene=(await parseModel(Uint8Array.from(bytes).buffer)).scene;normalizedRoot(scene);rig=new StudioRig(scene);
   const from=rig.data.points.find(p=>p.name==='Root'),to=rig.data.points.find(p=>p.name==='Neck');if(!from||!to)throw Error('Missing benchmark bones');
@@ -63,7 +63,7 @@ async function main(){
  if(project&&customTransfers)throw Error('--transfers cannot modify a supplied project');
  let temp;
  try{
-  if(!project){temp=await mkdtemp(join(tmpdir(),'pakachi-import-'));project=join(temp,'fixture.pakachi.json');await fixture(project,transfers);}
+  if(!project){temp=await mkdtemp(join(tmpdir(),'pakachi-import-'));project=join(temp,'fixture.pakachi.json');await createImportFixture(project,transfers);}
   const samples=[];
   for(let i=0;i<runs;i++){
    const child=spawnSync(process.execPath,['--expose-gc',fileURLToPath(import.meta.url),'--case',project],{encoding:'utf8',timeout:300000,maxBuffer:1024*1024});
@@ -74,4 +74,5 @@ async function main(){
   console.log(JSON.stringify({version:1,measuredAt:new Date().toISOString(),node:process.version,platform:process.platform,arch:process.arch,cpu:cpus()[0]?.model,runs,fixture:temp?'mika':'supplied-project',scope:'CPU import stages in fresh processes; startup, fixture creation, checksum calculation, disposal, UI, WebGL, image decoding and browser storage excluded. OS file cache may be warm. Heap delta is not peak or retained memory. No pass/fail performance threshold.',medianTotalMs:round(median),samples},null,2));
  }finally{if(temp)await rm(temp,{recursive:true,force:true});}
 }
-main().catch(error=>{console.error(error.message);process.exitCode=1;});
+if(resolve(process.argv[1]??'')===fileURLToPath(import.meta.url))main().catch(error=>{console.error(error.message);process.exitCode=1;});
+

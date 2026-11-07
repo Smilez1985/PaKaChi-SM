@@ -12,6 +12,23 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.81.0] - 2026-11-07
+
+Zeitstempel: 2026-11-07T11:46:22+01:00 (Europe/Berlin)
+
+### Added
+
+- `npm run benchmark:browser-import` misst den echten Projektdatei-Import im temporär gebauten Produktionsplayer: Dateilesen, JSON-/Modell-/Texturdekodierung, Rig-Replay und UI bis zur ersten WebGL-Zeichnung und nächsten Animationsframe-Grenze. Jeder Durchlauf verwendet einen frischen Browserkontext; eigene Projekte bleiben unverändert.
+- JSON-Bericht mit Einzelzeiten, Median, Dateiprüfsumme, Browser-/CPU-/Rendererangaben und dekodierten ImageBitmaps. Defekte Importe, Browserfehler, Kontextverlust und geänderte Quellen führen zu Fehlerstatus. Keine hardwareunabhängige Laufzeitgrenze.
+- Chromium-Regressionen für ein eingebettetes PNG-Modell, wiederholte Messungen und fehlerhaften Import bei weiterhin vorhandenem Vorgängeravatar. Actions führt zusätzlich drei Messungen mit dem Produktionsbuild und Mika/256 Gewichtsaufträgen aus; der Bericht gehört zu den Browserartefakten.
+
+### Changed
+
+- Roadmap, Dokumentationsindex und Prüfstand auf den bestätigten 0.80.0-Lauf nachgezogen; abgeschlossene Browser-Automatisierung von offener manueller Qualitätsabnahme getrennt.
+- CPU- und Browserbenchmark teilen die Erzeugung der Mika-Testkopie. Projektformat, Player und Editor bleiben unverändert.
+
+[Prüfbericht](PRUEFUNG-0.81.0.md) · [Messvertrag und Grenzen](IMPORT-BENCHMARK.md). Kein Nachweis für GPU-Fertigstellung, physische Bildausgabe oder große reale Projekte.
+
 ## [0.80.0] - 2026-11-07
 
 Zeitstempel: 2026-11-07T10:12:57+01:00 (Europe/Berlin)
@@ -1664,3 +1681,5 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 [0.79.0]: PRUEFUNG-0.79.0.md
 
 [0.80.0]: PRUEFUNG-0.80.0.md
+
+[0.81.0]: PRUEFUNG-0.81.0.md

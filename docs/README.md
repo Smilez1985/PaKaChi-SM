@@ -1,6 +1,6 @@
 # Blaupause – PaKaChi-SM
 
-**Softwarestand: 0.80.0 · Dokumentation abgeglichen am 31.10.2026.**
+**Softwarestand: 0.81.0 · Dokumentation abgeglichen am 07.11.2026.**
 
 Die Blaupause besteht aus drei Dokumenten. Das Designdokument beschreibt das Produktziel, die Roadmap die Umsetzung und das Changelog die bereits erfolgten Änderungen.
 
@@ -9,6 +9,42 @@ Die Blaupause besteht aus drei Dokumenten. Das Designdokument beschreibt das Pro
 | [Designdokument](Design.md) | Begriffe, Bedienprinzip, Anforderungen und noch offene Produktziele. |
 | [Roadmap](ROADMAP.md) | Offene Aufgaben, Prioritäten und ausstehende Abnahmen. |
 | [Changelog](CHANGELOG.md) | Historie mit Version, Datum und ISO-8601-Zeitstempel. |
+
+## Meilenstein 0.81.0
+
+Produktionsbrowser-Importmessung mit Texturen, frischen Browserkontexten und JSON-Artefakten. [Messvertrag](IMPORT-BENCHMARK.md). [Prüfbericht](PRUEFUNG-0.81.0.md).
+
+## Meilenstein 0.80.0
+
+Freie Oberflächen-/Gesichtspunkte als Morph-Animation im GLB-Export, auch ohne Skelett. [Prüfbericht](PRUEFUNG-0.80.0.md).
+
+## Meilenstein 0.79.0
+
+Eigene Studio-Moves mit Rig und Figurenbewegung als eigenständige Animations-GLB. [Prüfbericht](PRUEFUNG-0.79.0.md).
+
+## Meilenstein 0.78.1
+
+Topologie-Replay nach Gewichtsübertragung und anschließender Löschung des Elternknochens korrigiert. [Prüfbericht](PRUEFUNG-0.78.1.md).
+
+## Meilenstein 0.78.0
+
+GLB-Export mit bearbeitetem Hautskelett und erhaltenen Gewichten. [Prüfbericht](PRUEFUNG-0.78.0.md).
+
+## Meilenstein 0.77.0
+
+Eigenständiger GLB-Standbildexport mit aktueller Haut-/Morph-Verformung. [Prüfbericht](PRUEFUNG-0.77.0.md).
+
+## Meilenstein 0.76.3
+
+Haftende Studio-Vorschau und erreichbare Posenfelder mit Mausrad und sichtbaren Screenshots geprüft. [Prüfbericht](PRUEFUNG-0.76.3.md).
+
+## Meilenstein 0.76.2
+
+Lesbarer Optionen-Kontrast und Versionsanzeige aus package.json; Fokus-/Enter-Regression. [Prüfbericht](PRUEFUNG-0.76.2.md).
+
+## Meilenstein 0.76.1
+
+Eindeutige Model-Zoo-Statusselektoren; 312 Node- und 22 Chromium-Tests im Korrekturlauf bestanden. [Prüfbericht](PRUEFUNG-0.76.1.md).
 
 ## Meilenstein 0.76.0
 
@@ -201,3 +237,4 @@ Seit **0.78.0** bietet „Figur als GLB (mit Rig)“ zusätzlich eine eigenstän
 Seit **0.79.0** exportiert „Move als GLB (mit Rig)“ den ausgewählten eigenen Studio-Move mit Hautskelett als einen Animationsclip. Gelenkbewegung und Figurenverschiebung/-drehung/-größe werden übernommen, einschließlich Drehung um den Figurenmittelpunkt und Schleifenschluss. Ausgabe mit 30 Stützstellen pro Sekunde und allen Schlüsselposen; Wiedergabeschleifen im Zielprogramm einstellen. Bis 0.79.0 waren bewegte freie Oberflächenpunkte ausgeschlossen; seit 0.80.0 werden sie als Morph-Animation ausgegeben. Geschert aufgebaute Modellräume und zu umfangreiche Sequenzen werden weiterhin ausdrücklich abgewiesen. Originalclips und Retargeting gehören nicht zu diesem Export. [Exportanleitung](GLB-EXPORT.md).
 
 Seit **0.80.0** übernimmt „Move als GLB (Animation)“ auch bewegte freie Oberflächen-/Gesichtspunkte als Morph-Animation, mit oder ohne vorhandenes Skelett. Unterschiedliche Oberflächenposen werden je betroffenem Mesh zusammengefasst und an den ursprünglichen Schlüsselzeiten linear gewichtet; Knochen- und Figurenbewegung bleiben kombiniert enthalten. Vorhandene Positions-/Normal-Morphs und deren konstante Gewichte werden berücksichtigt. Normale zwischen Posen werden angenähert interpoliert. Speicher-, Zielanzahl- und Arbeitsbudgets werden vor dem Kopieren und Berechnen geprüft; umfangreiche Sequenzen werden mit Hinweis abgewiesen. Studio-Projekt für die ursprünglichen Kontrollpunkte zusätzlich speichern. [Anleitung](GLB-EXPORT.md).
+

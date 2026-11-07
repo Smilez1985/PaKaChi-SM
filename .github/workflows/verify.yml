@@ -31,6 +31,8 @@ jobs:
       - run: npm run build
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
+      - name: Production browser import benchmark
+        run: node scripts/benchmark-browser-import.mjs --runs 3 --transfers 256 > test-results/browser-import-benchmark.json
       - name: Browser evidence
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v7.0.2
@@ -41,3 +43,4 @@ jobs:
             test-results/
           retention-days: 14
           if-no-files-found: ignore
+
