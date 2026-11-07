@@ -1,0 +1,426 @@
+{
+  "format": "pakachi-character-rigging",
+  "version": 1,
+  "pipelineSha256": "a24b3e296967f1b9698dbe3e9535d2d76c8b4aa5c1fbf0eab6b1a7b96659b714",
+  "method": "Measured landmarks and fitted tail cross-sections, continuous chain weights, three mesh-edge smoothing passes; four influences maximum. Character-specific, not automatic anatomical inference.",
+  "forms": [
+    {
+      "form": "humanoid",
+      "source": "public/model-zoo/pakachi-drafts/humanoid.glb",
+      "sourceSha256": "debb9c4793368bff6989f41b2a40eba3e4ef6a6100aaf3858abe51117a174d14",
+      "output": "public/model-zoo/pakachi-rigged/humanoid.glb",
+      "outputSha256": "b50f77933b4bf2d72186460ee6120f812a90d97275dce2f78e7aa511ccd3444f",
+      "bytes": 11119516,
+      "removedDegenerate": 25,
+      "taubinPasses": 16,
+      "maxDisplacement": 0.0030896477140198637,
+      "sourceVertices": 50870,
+      "bones": 31,
+      "bodyVertices": 50870,
+      "furTufts": 40108,
+      "coverage": {
+        "Pelvis": 2735,
+        "Spine": 1930,
+        "Chest": 2570,
+        "Neck": 2457,
+        "Head": 8283,
+        "Jaw": 553,
+        "LeftEar": 1251,
+        "RightEar": 1396,
+        "LeftShoulder": 3309,
+        "LeftElbow": 2973,
+        "LeftWrist": 1316,
+        "LeftHand": 541,
+        "RightShoulder": 3322,
+        "RightElbow": 2696,
+        "RightWrist": 1226,
+        "RightHand": 1163,
+        "LeftHip": 2435,
+        "LeftKnee": 2321,
+        "LeftAnkle": 1459,
+        "LeftFoot": 1969,
+        "RightHip": 1363,
+        "RightKnee": 1428,
+        "RightAnkle": 969,
+        "RightFoot": 2501,
+        "TailBase": 5419,
+        "Tail1": 6170,
+        "Tail2": 6954,
+        "Tail3": 5511,
+        "TailTip": 3441,
+        "LeftEye": 0,
+        "RightEye": 0
+      },
+      "landmarks": {
+        "Pelvis": [
+          0.22,
+          -0.105,
+          0.065
+        ],
+        "Spine": [
+          0.225,
+          0.005,
+          0.065
+        ],
+        "Chest": [
+          0.235,
+          0.135,
+          0.075
+        ],
+        "Neck": [
+          0.235,
+          0.21,
+          0.075
+        ],
+        "Head": [
+          0.225,
+          0.315,
+          0.1
+        ],
+        "Jaw": [
+          0.235,
+          0.255,
+          0.19
+        ],
+        "LeftEar": [
+          0.285,
+          0.445,
+          0.11
+        ],
+        "RightEar": [
+          0.015,
+          0.35,
+          0.105
+        ],
+        "LeftShoulder": [
+          0.325,
+          0.145,
+          0.075
+        ],
+        "LeftElbow": [
+          0.355,
+          -0.005,
+          0.08
+        ],
+        "LeftWrist": [
+          0.4,
+          -0.155,
+          0.105
+        ],
+        "LeftHand": [
+          0.405,
+          -0.195,
+          0.115
+        ],
+        "RightShoulder": [
+          0.105,
+          0.145,
+          0.08
+        ],
+        "RightElbow": [
+          0.085,
+          -0.005,
+          0.1
+        ],
+        "RightWrist": [
+          0.095,
+          -0.155,
+          0.13
+        ],
+        "RightHand": [
+          0.095,
+          -0.195,
+          0.145
+        ],
+        "LeftHip": [
+          0.3,
+          -0.115,
+          0.065
+        ],
+        "LeftKnee": [
+          0.305,
+          -0.28,
+          0.095
+        ],
+        "LeftAnkle": [
+          0.295,
+          -0.4,
+          0.09
+        ],
+        "LeftFoot": [
+          0.3,
+          -0.445,
+          0.16
+        ],
+        "RightHip": [
+          0.13,
+          -0.115,
+          0.065
+        ],
+        "RightKnee": [
+          0.12,
+          -0.28,
+          0.095
+        ],
+        "RightAnkle": [
+          0.105,
+          -0.4,
+          0.09
+        ],
+        "RightFoot": [
+          0.105,
+          -0.445,
+          0.16
+        ],
+        "TailBase": [
+          0.105,
+          -0.19,
+          -0.1260947808623314
+        ],
+        "Tail1": [
+          -0.025,
+          -0.25,
+          -0.0850028321146965
+        ],
+        "Tail2": [
+          -0.18,
+          -0.22,
+          -0.09026845637708902
+        ],
+        "Tail3": [
+          -0.325,
+          -0.105,
+          -0.09871771791949868
+        ],
+        "TailTip": [
+          -0.4,
+          0.025,
+          -0.09368505085876677
+        ],
+        "LeftEye": [
+          0.255,
+          0.337,
+          0.17851543546874704
+        ],
+        "RightEye": [
+          0.145,
+          0.302,
+          0.20119897208809356
+        ]
+      },
+      "limits": [
+        "No morph correspondence between the two independently reconstructed meshes.",
+        "Landmark skinning and surface refinement require visual review; source reconstruction defects can remain."
+      ]
+    },
+    {
+      "form": "animal",
+      "source": "public/model-zoo/pakachi-drafts/animal.glb",
+      "sourceSha256": "c87b55c51a9bf1872de421d1052f943de05e53119b3e8c6265d5d0016b8e6d42",
+      "output": "public/model-zoo/pakachi-rigged/animal.glb",
+      "outputSha256": "0c0d5b552e866733f9b238dc489f7fe33d48659b015e1fd31a1d005ba34665db",
+      "bytes": 15011936,
+      "removedDegenerate": 40,
+      "taubinPasses": 16,
+      "maxDisplacement": 0.003181827426207151,
+      "sourceVertices": 81388,
+      "bones": 31,
+      "bodyVertices": 81388,
+      "furTufts": 43632,
+      "coverage": {
+        "Pelvis": 5105,
+        "Spine": 4751,
+        "Chest": 2799,
+        "Neck": 7525,
+        "Head": 20904,
+        "Jaw": 489,
+        "LeftEar": 1172,
+        "RightEar": 1507,
+        "LeftShoulder": 5181,
+        "LeftElbow": 3804,
+        "LeftWrist": 1352,
+        "LeftHand": 0,
+        "RightShoulder": 5363,
+        "RightElbow": 3615,
+        "RightWrist": 1192,
+        "RightHand": 1554,
+        "LeftHip": 7490,
+        "LeftKnee": 5039,
+        "LeftAnkle": 2018,
+        "LeftFoot": 343,
+        "RightHip": 2310,
+        "RightKnee": 1127,
+        "RightAnkle": 1088,
+        "RightFoot": 2451,
+        "TailBase": 5284,
+        "Tail1": 9090,
+        "Tail2": 9393,
+        "Tail3": 5799,
+        "TailTip": 5029,
+        "LeftEye": 0,
+        "RightEye": 0
+      },
+      "landmarks": {
+        "Pelvis": [
+          -0.045,
+          -0.12,
+          -0.11
+        ],
+        "Spine": [
+          0.065,
+          -0.11,
+          0.025
+        ],
+        "Chest": [
+          0.23,
+          -0.085,
+          0.155
+        ],
+        "Neck": [
+          0.235,
+          0.02,
+          0.17
+        ],
+        "Head": [
+          0.23,
+          0.15,
+          0.19
+        ],
+        "Jaw": [
+          0.265,
+          0.045,
+          0.32
+        ],
+        "LeftEar": [
+          0.37,
+          0.35,
+          0.18
+        ],
+        "RightEar": [
+          0.015,
+          0.215,
+          0.175
+        ],
+        "LeftShoulder": [
+          0.375,
+          -0.085,
+          0.185
+        ],
+        "LeftElbow": [
+          0.375,
+          -0.26,
+          0.22
+        ],
+        "LeftWrist": [
+          0.4,
+          -0.36,
+          0.25
+        ],
+        "LeftHand": [
+          0.41,
+          -0.395,
+          0.29
+        ],
+        "RightShoulder": [
+          0.105,
+          -0.08,
+          0.15
+        ],
+        "RightElbow": [
+          0.135,
+          -0.26,
+          0.21
+        ],
+        "RightWrist": [
+          0.15,
+          -0.355,
+          0.25
+        ],
+        "RightHand": [
+          0.16,
+          -0.38,
+          0.3
+        ],
+        "LeftHip": [
+          0.105,
+          -0.12,
+          -0.165
+        ],
+        "LeftKnee": [
+          0.065,
+          -0.255,
+          -0.19
+        ],
+        "LeftAnkle": [
+          0.065,
+          -0.38,
+          -0.15
+        ],
+        "LeftFoot": [
+          0.085,
+          -0.415,
+          -0.11
+        ],
+        "RightHip": [
+          -0.125,
+          -0.13,
+          -0.14
+        ],
+        "RightKnee": [
+          -0.205,
+          -0.28,
+          -0.13
+        ],
+        "RightAnkle": [
+          -0.205,
+          -0.38,
+          -0.06
+        ],
+        "RightFoot": [
+          -0.18,
+          -0.405,
+          -0.005
+        ],
+        "TailBase": [
+          -0.12,
+          -0.105,
+          -0.18892565369606018
+        ],
+        "Tail1": [
+          -0.26,
+          -0.11,
+          -0.051456935703754425
+        ],
+        "Tail2": [
+          -0.35,
+          0.065,
+          -0.010027505457401276
+        ],
+        "Tail3": [
+          -0.37,
+          0.24,
+          0.01722964644432068
+        ],
+        "TailTip": [
+          -0.35,
+          0.345,
+          0.04141425900161266
+        ],
+        "LeftEye": [
+          0.332,
+          0.177,
+          0.28761930408760805
+        ],
+        "RightEye": [
+          0.178,
+          0.115,
+          0.3422971868445235
+        ]
+      },
+      "limits": [
+        "No morph correspondence between the two independently reconstructed meshes.",
+        "Landmark skinning and surface refinement require visual review; source reconstruction defects can remain."
+      ]
+    }
+  ]
+}

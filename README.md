@@ -2,9 +2,9 @@
 
 PaKaChi ist die **Panda-KI-Chimera**. PaKaChi-SM vereint den Avatar-Player, den Model Zoo und das fest integrierte **PaKaChi-Avatar-Studio**. SM steht für StateMaschine.
 
-**Softwarestand: 0.83.0 · Entwicklungsversion.**
+**Softwarestand: 0.84.0 · Entwicklungsversion.**
 
-Der Original-PaKaChi mit Tierform, humanoider Arbeitsform und 72 Transformationsbildern ist als Bildplayer erhalten und beim Start ausgewählt. Im Model Zoo stehen zusätzlich **zwei echte Bild-zu-3D-Entwürfe des Original-PaKaChi** zur Auswahl: Humanoid und Tierform. Sie sind statisch und noch deutlich korrekturbedürftig; Skelett, Bewegungen und 3D-Transformation fehlen. Mika und Nori bleiben technische Testavatare. [Ergebnisse, Vorlagen und Grenzen](docs/KI-GENERIERUNG.md#erste-echte-pakachi-entwürfe).
+Der Original-PaKaChi mit Normalform, humanoider Arbeitsform und 72 Transformationsbildern ist als Bildplayer erhalten und beim Start ausgewählt. Im Model Zoo stehen außerdem **PaKaChi · Normalform · Rig** und **PaKaChi · Arbeitsform · Rig**: bearbeitete Originalrekonstruktionen mit gemeinsamem 31-Gelenk-Aufbau, Hautgewichten, grünen 3D-Augen und Fellfasern. Im integrierten Studio lassen sie sich posieren und speichern. Die ursprünglichen ungeriggten Entwürfe sowie Mika/Nori bleiben erhalten. Der saubere 3D-Formwechsel und die abschließende Charakterqualität stehen noch aus. [Ergebnisse und Bedienung](docs/KI-GENERIERUNG.md#rigging-und-charakteraufbereitung).
 
 ## Starten
 

@@ -120,6 +120,24 @@
       "model": "model-zoo/pakachi-drafts/animal.glb",
       "rigVersion": "unrigged-draft-1",
       "moves": []
+    },
+    {
+      "id": "pakachi-normal",
+      "name": "PaKaChi · Normalform · Rig",
+      "description": "Original-PaKaChi mit bearbeiteten Fellmaterialien, 3D-Gesicht und gemeinsamem 31-Gelenk-Rig. Im Studio posieren; Charakter- und Hautqualität weiter prüfen. Formwechsel folgt nach dem Rigging.",
+      "model": "model-zoo/pakachi-rigged/animal.glb",
+      "rigVersion": "pakachi-anatomical-1",
+      "moves": [],
+      "states": {}
+    },
+    {
+      "id": "pakachi-work",
+      "name": "PaKaChi · Arbeitsform · Rig",
+      "description": "Original-PaKaChi mit bearbeiteten Fellmaterialien, 3D-Gesicht und gemeinsamem 31-Gelenk-Rig. Im Studio posieren; Charakter- und Hautqualität weiter prüfen. Formwechsel folgt nach dem Rigging.",
+      "model": "model-zoo/pakachi-rigged/humanoid.glb",
+      "rigVersion": "pakachi-anatomical-1",
+      "moves": [],
+      "states": {}
     }
   ]
 }

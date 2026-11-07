@@ -1,17 +1,16 @@
 # Roadmap – offene Aufgaben
 
-**Entwicklungsstand: 0.83.0 · Abgleich: 07.11.2026.** Teil der [Blaupause](README.md).
+**Entwicklungsstand: 0.84.0 · Abgleich: 07.11.2026.** Teil der [Blaupause](README.md).
 
 Diese Roadmap enthält offene Umsetzung und ausstehende Abnahme. Erledigte Änderungen stehen nach Version im [Changelog](CHANGELOG.md); Nachweise und Grenzen im [Prüfstand](PRUEFUNG.md). Eine implementierte Funktion ist nicht automatisch manuell oder mit realen Anbietern abgenommen.
 
 ## Prioritäten
 
-1. **Original-PaKaChi als 3D-Charakter:** Die erstmals wirklich rekonstruierten humanoiden und tierischen Entwürfe stehen seit 0.83.0 im Model Zoo. Als Nächstes Gesicht/Augen, Hände/Pfoten, Fellwirkung, Körpervolumen und verdeckte Flächen korrigieren und designgetreu abnehmen. Danach gemeinsame Vorbereitung für Rigging und Transformation. Mika und Nori bleiben technische Testavatare.
-2. **Bild-zu-3D tatsächlich ausführen:** Echte CPU-Inferenz für beide Formen auf zwei Rekonstruktionsstufen ist seit 0.83.0 belegt. GPU-Betrieb auf Zielhardware und ein qualitativer Vergleich mit einem geeigneten neueren Verfahren bleiben offen. Die vorhandenen Entwürfe ersetzen keine Charakterabnahme. [Ablauf und beide Referenzen](KI-GENERIERUNG.md).
-3. **Den Charakter beweglich machen:** Erst den akzeptierten PaKaChi-Entwurf riggen, Hautgewichte und Bewegungen prüfen und die beiden Formen auf einen abgestimmten Formwechsel vorbereiten. Weitere allgemeine Gelenkerweiterungen nur, wenn sie diesen Ablauf konkret blockieren.
-4. **Abnahme am tatsächlichen Ablauf:** Bedienung, Kamera, Haut und Speichern/Laden am Original-PaKaChi prüfen. Automatisierte Nachweise und offene Qualitätsabnahmen stehen gesammelt im [Prüfstand](PRUEFUNG.md).
-
-Der Arbeitsstand liegt auf `work/local-verification-model-zoo`; `main` bleibt bis zur Übernahme unverändert. Offene Abnahmen werden nicht wegen fehlender Laufzeit oder Konten als erledigt markiert.
+1. **Charakter und Rig verfeinern:** Beide Formen besitzen seit 0.84.0 dieselbe 31-Gelenk-Hierarchie und echte Hautgewichte. Gesicht, Fellmaterial, Fellfasern und Pfotenakzente sind überarbeitet. Finger-/Pfotenform, verdeckte Flächen, Hüft-/Schulterübergänge und große Beugungen weiter korrigieren und designgetreu abnehmen.
+2. **Gemeinsame Morph-Topologie:** Die umformungsbedingten Hautbrücken der unabhängig rekonstruierten Netze beseitigen. Ein Charakter mit kompatibler Netzstruktur und geprüftem Rig für beide Formen.
+3. **Standard-Verwandlung:** Danach eine gespeicherte Animation Normalform → Arbeitsform implementieren; dieselbe Animation rückwärts, Endform halten und laufende Bewegung ohne Sprung umkehren. Zustandszuordnung wie im Originalplayer.
+4. **Reale Generatorqualität:** TripoSR-CPU-Inferenz bleibt belegt. GPU-Abnahme und qualitativer Verfahrensvergleich auf den beiden tatsächlichen Vorlagen bleiben offen.
+5. **Abnahme am tatsächlichen Ablauf:** Kamera, Haut, Posen und Speichern/Laden an beiden Formen weiter prüfen. [Nachweise und Grenzen](PRUEFUNG.md#version-0840).
 
 ## Automatisierte Browserprüfung
 

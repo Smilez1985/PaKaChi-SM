@@ -13,3 +13,6 @@ __pycache__/
 
 # Local model-generation runs and reports
 generated/
+
+# Rebuilt from the preserved PaKaChi source meshes by npm lifecycle hooks.
+public/model-zoo/pakachi-rigged/

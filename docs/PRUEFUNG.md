@@ -1,6 +1,6 @@
 # Prüfstand und Protokolle
 
-**Softwarestand: 0.83.0 · Dokumentationsabgleich: 2026-11-07T17:13:43+01:00 (Europe/Berlin).**
+**Softwarestand: 0.84.0 · Dokumentationsabgleich: 2026-11-07T17:13:43+01:00 (Europe/Berlin).**
 
 Alle Prüfnachweise stehen in dieser Datei: ein Abschnitt je Softwareversion sowie gesonderte Abschnitte für datierte Zwischenprüfungen. Die Ergebnisse und Grenzen gelten für den jeweils genannten Stand. Spätere Läufe stehen als Nachtrag im selben Abschnitt. Produktänderungen gehören in den [Changelog](CHANGELOG.md), offene Aufgaben in die [Roadmap](ROADMAP.md).
 
@@ -8,15 +8,15 @@ Alle Prüfnachweise stehen in dieser Datei: ein Abschnitt je Softwareversion sow
 
 | Prüfung | Bestätigter Stand | Umfang und Grenze |
 | --- | --- | --- |
-| Node-Tests | [0.83.0](#version-0830): 331 lokal bestanden | Daten, Geometrie, DOM-/Transportabläufe und Erhaltungsprüfung; keine manuelle Qualitätsabnahme. |
-| TypeScript und Produktionsbuild | [0.83.0](#version-0830): lokal bestanden | Bekannte Bundle-Größenwarnung; keine Aussage über Zielhardware-Leistung. |
-| Chromium-Browserfälle | [0.82.0](#version-0820): alle 32 bestanden | Software-WebGL, simulierte KI-Anbieter; keine reale KI-Inferenzabnahme. |
+| Node-Tests | [0.84.0](#version-0840): 337 lokal bestanden | Daten, Geometrie, DOM-/Transportabläufe und Erhaltungsprüfung; keine manuelle Qualitätsabnahme. |
+| TypeScript und Produktionsbuild | [0.84.0](#version-0840): lokal bestanden | Bekannte Bundle-Größenwarnung; keine Aussage über Zielhardware-Leistung. |
+| Chromium-Browserfälle | [0.84.0](#version-0840): zwei neue Fälle lokal bestanden; vollständige CI im PR | Software-WebGL, simulierte KI-Anbieter; keine reale KI-Inferenzabnahme. |
 | Produktionsbrowser-Importmessung | [0.82.0](#version-0820): drei Durchläufe bestanden | Mika mit 256 Gewichtsaufträgen; keine allgemeine Laufzeitgarantie. |
 | Legacy-Testprogramme | [0.9.0](#version-090): beide bestanden | Steuerung, MQTT-Verhalten und Lebenszyklus des Originalplayers. |
 | Python-MCP-/MQTT-Integration | [0.10.0](#version-0100): bestanden | Echter Python-Prozess und eingebetteter Testbroker; keine allgemeine externe Hostabnahme. |
 | Originaldateien | [0.49.0](#version-0490): bytegenau erhalten | 83 Originaldateien einschließlich 72 Transformationsbildern. |
 
-Letzter vollständiger Funktionsnachweis: [Lauf 42368610532](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/42368610532), Commit `86260c50781b39b77587d80dd4a3613c0d4b7c65`. Spätere CI-Ergebnisse sind am jeweiligen Commit in [PR #1](https://github.com/Smilez1985/PaKaChi-SM/pull/1) verknüpft. Ein erfolgreicher Testlauf ist keine visuelle oder anatomische Produktfreigabe.
+Letzter vollständig ausgewerteter Funktionsnachweis vor 0.84.0: [Lauf 42392793897](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/42392793897), Commit `47f216260eee5cc7ed49dfd01fb134a23e7b18d9`. Spätere CI-Ergebnisse sind am jeweiligen Commit in [PR #1](https://github.com/Smilez1985/PaKaChi-SM/pull/1) verknüpft. Ein erfolgreicher Testlauf ist keine visuelle oder anatomische Produktfreigabe.
 
 ## Lokal prüfen
 
@@ -59,6 +59,22 @@ Diese Liste beschreibt ausstehende Abnahmen.
 ## Prüfungen nach Version
 
 Die jüngste Version steht zuerst. Für eine bestimmte Version die Dokumentgliederung oder die Browser-Suche verwenden.
+
+## Version 0.84.0
+
+Zeitstempel: 2026-11-07T19:14:08+01:00 (Europe/Berlin).
+
+**Rigging vor Morph:** Normal- und Arbeitsform werden aus den unveränderten realen TripoSR-Quellen reproduzierbar aufbereitet. Beide besitzen 31 Gelenke mit gleicher Hierarchie, eigene anatomische Grundpositionen, zwei SkinnedMeshes (Körper/Fell) und starre Gesichts-/Pfotenanbauten. Vier Gewichte je Vertex maximal, normalisierte Summen, keine erfundenen Clips. Details, Eingabe-/Ausgabehashes, Pipelinehash, Einflussabdeckung und Querschnittspunkte: [Bericht](benchmarks/pakachi-rigging-2026-11-07.json).
+
+**Geometrie und Darstellung:** Explizite Normalen, nichtmetallisches raues Fell, Grün-/Cremezeichnung erhalten und dunkle Fellfarben korrigiert, echte Augen/Pupillen/Lichtpunkte/Nase/Mundlinie und Pfotenakzente. Körper/Tail tragen kurze skinnbare Fasern. 16 Taubin-Teilschritte; maximale Körpervertex-Verschiebung etwa 0,0032 Modelleinheiten. 25 beziehungsweise 40 nahezu flächenlose Dreiecke entfernt. Keine vollständige Retopologie, kein wasserdichtes Mesh zugesichert. Originaldateien unverändert.
+
+**Reproduzierbarkeit:** Fehlende Buildprodukte aus den erhaltenen Quellen neu erzeugt; erneute erzwungene Aufbereitung liefert byteidentische GLBs. Bei unveränderten Eingaben/Ergebnissen schreibt `--if-needed` die Dateien nicht erneut.
+
+**Lokale Nachweise:** 337 Node-Tests sowie TypeScript/Produktionsbuild bestanden. Sechs neue geometrische Fälle prüfen beide tatsächlichen GLBs: gemeinsame Hierarchie, normalisierte Hautgewichte, Normalen und Materialien, Quelldateihashes, reale Vertexbewegung bei Ellenbogen/Knie/Kopf/Schwanz, unveränderte Knochenabstände und unbeteiligte Körperbereiche. Schwanzbewegung darf keine bodennahen Pfotenvertices verschieben. Studio-Projekt-Rundlauf vergleicht tatsächlich gebeugte Hautvertices nach erneutem Laden. Kamera-Mittelpunkt wird gegen den unabhängig transformierten Grundkörper geprüft.
+
+Zwei zusätzliche lokale Browserfälle bestanden mit Chromium Headless Shell 141/SwiftShader: Handgelenk beugen, sichtbare Hautänderung, Undo/Redo, Projektdatei und wiederhergestellte Pose; Screenshots von Charakter, Pose sowie Front/Rückseite/Seite für beide Formen geprüft. Die reguläre Chromium-Variante scheitert lokal beim Unix-Socket-Aufbau; Headless Shell startet erfolgreich. Die CI verwendet weiterhin die reguläre Chromium-Konfiguration und die vollständige Suite; commitgebundene Ergebnisse stehen in [PR #1](https://github.com/Smilez1985/PaKaChi-SM/pull/1).
+
+**Formwechselprobe:** Eine große Skelettumformung zwischen den Grundformen zeigte aufgezogene Hautbrücken. Sie wurde verworfen und gehört nicht zu den ausgelieferten Assets. Die Standardanimation vorwärts/rückwärts bleibt bis zur Korrektur der gemeinsamen Netzstruktur offen. Der verbesserte Rigging-/Charakterstand ersetzt keine endgültige visuelle Freigabe; Finger-/Pfotenseparation, verdeckte Flächen, große Gelenkbeugungen und Designnähe bleiben weiter zu prüfen. Kein universelles KI-Auto-Rigging, keine neuen Anbieter/GPU-Messungen.
 
 ## Version 0.83.0
 

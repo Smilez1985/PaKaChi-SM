@@ -4,6 +4,9 @@ import type {Object3D} from 'three';
 export function modelCenter(model:Object3D|null):Vector3 {
   if(!model)return new Vector3(0,1.2,0);
   model.updateWorldMatrix(true,true);
+  // Skinning's inverse bind matrix is refreshed by updateMatrixWorld, including
+  // after the viewer normalizes a newly attached model through its parent.
+  model.updateMatrixWorld(true);
   const bounds=new Box3().setFromObject(model,true);
   return bounds.isEmpty()?model.getWorldPosition(new Vector3()):bounds.getCenter(new Vector3());
 }

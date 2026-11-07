@@ -4,7 +4,7 @@ Teil der [Blaupause](README.md) · [Roadmap](ROADMAP.md) · [Changelog](CHANGELO
 
 ## Status und Begriffe
 
-Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.83.0: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau, automatische Anatomieerkennung und die Qualitätsabnahme der angeschlossenen lokalen KI-Generierung bleiben offen.
+Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.84.0: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau, automatische Anatomieerkennung und die Qualitätsabnahme der angeschlossenen lokalen KI-Generierung bleiben offen.
 
 - **PaKaChi:** Panda-KI-Chimera, das übergeordnete Projekt.
 - **PaKaChi-SM:** StateMaschine mit Avatar-Player und integriertem Studio.
@@ -16,7 +16,7 @@ Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich gen
 
 | Bereich | Implementiert | Noch offen |
 | --- | --- | --- |
-| Original-PaKaChi | Beide Formen und 72 Transformationsbilder erhalten; echte statische 3D-Entwürfe beider Formen im Model Zoo | Designgetreue 3D-Formen und kompatibler Formwechsel |
+| Original-PaKaChi | Beide Formen und 72 Transformationsbilder erhalten; echte statische Rekonstruktionen und bearbeitete geriggte Formen im Model Zoo | Designgetreue 3D-Formen und kompatibler Formwechsel |
 | Studio | Zwei Modi, Mausnavigation, Punkte/Verbindungen, bestehende Skelettketten, Posen/Moves | Skalierte Knochenketten, neue Rigs ohne vorhandenes Skelett, Ganzkörper-IK und visuelle Abnahme |
 | Anbieter | Mehrere Profile gleichzeitig, drei unabhängige Rollen und Fallback-Routen, editierbare Vorgabeadressen | Weitere Fachadapter, OAuth und reale Kontoabnahme |
 | Schlüssel | Optionale verschlüsselte Persistenz, Entsperren nach F5, Passwortwechsel, Sitzungssperre | Betriebssystem-Schlüsselbund und unabhängiges Sicherheitsaudit |
@@ -33,6 +33,12 @@ Tierform und humanoide Arbeitsform bleiben derselbe bestehende Charakter. Die 72
 Verbindliche Merkmale aus dem erhaltenen Animationsplan: weiches schwarzes künstliches Fell, cremefarbene Schnauze und Brauen, grüne Augen, Wangenflächen und Ohrinnenseiten, buschiger schwarz-grün geringelter Schwanz, dunkle mechanische Gelenke und grüner Brustkern. Kopfgröße, Gesicht und Schwanzmasse sollen konsistent bleiben. Keine neue Panzerung oder zusätzliche Spezies.
 
 [Referenzen und Herkunft](references/README.md) unterscheiden den ursprünglichen, visuell noch fehlerhaften Transformationsstand von der korrigierten Endform als Stilanker. Die 72 Bilder sind ausschließlich die Verwandlung ohne Tablet/Stift; eigene Arbeitsschleifen bleiben eine spätere Ergänzung.
+
+### Verbindlicher Formwechsel und Reihenfolge
+
+PaKaChi besitzt eine Normalform und eine humanoide Arbeitsform. Die Verwandlung ist **eine Standardanimation** von Normal nach Work; die Rückverwandlung spielt **dieselbe Animation rückwärts** ab. Nach dem Ablauf wird die erreichte Form gehalten. Ein Richtungswechsel während des Ablaufs soll von der aktuellen Zwischenform ausgehen. Die Zustandszuordnung des Originalplayers bleibt maßgeblich: idle/talking/error/sleeping → Normalform; thinking/working/waiting/review → Arbeitsform.
+
+Zuerst werden Rigging und Charakterqualität aufgebaut und geprüft, danach die Morph-Animation. Seit 0.84.0 sind beide rekonstruierten Formen mit gleicher 31-Gelenk-Hierarchie, unterschiedlichen gemessenen Grundposen und echten Hautgewichten bearbeitbar. Gesicht, Pfotenakzente, Fellmaterial und Fellfasern sind überarbeitet. Die großen Umformungen zeigen noch Hautbrücken im rekonstruierten Netz; dafür ist eine saubere gemeinsame Netzstruktur erforderlich. Eine gleiche Gelenkliste allein bedeutet noch keine brauchbare Morph-Topologie. Der 0.84.0-Stand veröffentlicht deshalb keine 3D-Verwandlung.
 
 ## 1. Player und Model Zoo
 

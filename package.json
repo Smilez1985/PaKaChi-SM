@@ -16,10 +16,10 @@
     "vite": "8.3.4"
   },
   "name": "pakachi-sm",
-  "version": "0.83.0",
+  "version": "0.84.0",
   "private": true,
   "type": "module",
-  "description": "PaKaChi StateMaschine \u2013 lokaler Avatar-Player und integriertes Studio",
+  "description": "PaKaChi StateMaschine – lokaler Avatar-Player und integriertes Studio",
   "license": "UNLICENSED",
   "engines": {
     "node": ">=24.0.0"
@@ -48,6 +48,10 @@
     "verify:full": "npm run verify && npm run test:e2e",
     "benchmark:import": "node scripts/benchmark-project-import.mjs",
     "benchmark:transitions": "node scripts/benchmark-playback-transition.mjs",
-    "benchmark:browser-import": "node scripts/benchmark-browser-import.mjs"
+    "benchmark:browser-import": "node scripts/benchmark-browser-import.mjs",
+    "prepare:pakachi": "node scripts/prepare-pakachi.mjs",
+    "predev": "npm run prepare:pakachi -- --if-needed",
+    "pretest": "npm run prepare:pakachi -- --if-needed",
+    "prebuild": "npm run prepare:pakachi -- --if-needed"
   }
 }

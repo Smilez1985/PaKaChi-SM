@@ -1,6 +1,20 @@
 # Bild-zu-3D-Generierung
 
-**Seit 0.83.0 erstmals mit echter PaKaChi-Inferenz belegt.** Beide Formen wurden mit TripoSR auf CPU rekonstruiert und stehen als statische 3D-Entwürfe im Model Zoo. Die Studio-Oberfläche existiert seit 0.22.0. GPU-Ausführung, designgetreue Charakterqualität, anatomisches Rigging und die 3D-Transformation bleiben offen.
+**Seit 0.83.0 erstmals mit echter PaKaChi-Inferenz belegt.** Beide Formen wurden mit TripoSR auf CPU rekonstruiert und stehen als statische 3D-Entwürfe im Model Zoo. Die Studio-Oberfläche existiert seit 0.22.0. Seit 0.84.0 sind bearbeitete Formen mit einem gemeinsamen anatomischen Rig verfügbar. GPU-Ausführung, endgültige Charakterqualität und die 3D-Transformation bleiben offen.
+
+## Rigging und Charakteraufbereitung
+
+Im Player **PaKaChi · Normalform · Rig** oder **PaKaChi · Arbeitsform · Rig** auswählen und das integrierte Avatar-Studio öffnen. Beide haben dieselben 31 benannten Gelenke und Verbindungen, jeweils passend zu ihrer Grundform. **Skelett anzeigen** macht sie sichtbar. In **Figur bewegen** beispielsweise das Handgelenk oder den Knöchel greifen: Oberarm/Unterarm beziehungsweise Ober-/Unterschenkel werden als Zweiglied-Kette gebeugt. Hände und Füße bleiben als nachgelagerte Kontrollpunkte separat drehbar. Gelenke lassen sich im zweiten Modus weiter bearbeiten. Projekt speichern, um die Pose und Korrekturen zu behalten.
+
+Die Aufbereitung ergänzt echte 3D-Augen, Pupillen, Lichtpunkte, Nase, eine Oberflächen-Mundlinie und grüne Pfotenakzente. Raue nichtmetallische Materialien, glatte Normalen und kurze skinnbare Fellfasern ersetzen die vollständig metallische flache Standardschattierung der rohen Rekonstruktion. Kleine beziehungsweise nahezu flächenlose Dreiecke und Rekonstruktionsstufen wurden bearbeitet; dies ist keine vollständige Retopologie oder wasserdichte Reparatur. Die unabhängigen Original-GLBs bleiben unverändert.
+
+```sh
+npm run prepare:pakachi
+```
+
+Das Kommando erzeugt `public/model-zoo/pakachi-rigged/humanoid.glb` und `animal.glb` aus den erhaltenen Dateien unter `pakachi-drafts/`. `npm run dev`, `npm test` und `npm run build` führen die Vorbereitung automatisch mit `--if-needed` aus. Benötigt werden die ohnehin vorhandenen Node-/Three-Abhängigkeiten; kein erneuter KI-Gewichtsdownload und keine Python-Laufzeit. Pipeline-, Eingabe- und Ausgabeprüfsummen verhindern das Wiederverwenden veralteter Ergebnisse. Die GLBs sind ignorierte Buildprodukte; der [Aufbereitungsbericht](benchmarks/pakachi-rigging-2026-11-07.json) enthält die reproduzierbaren Parameter und Hashes. CI bietet sie zusammen mit den Browsernachweisen an.
+
+**Reihenfolge und Grenze:** Rigging und Charakterqualität kommen vor der Morph-Animation. Eine große Umformungsprobe zog Flächen zwischen Körperteilen auf; dieser Versuch wird nicht als fertige Verwandlung angeboten. Ein gemeinsames sauberes Netz, feinere Finger/Pfoten, verdeckte Flächen und anspruchsvolle Posen bleiben zu bearbeiten. Gleich benannte Gelenke machen die zwei unabhängigen Netze noch nicht morph-kompatibel. Dies ist eine charakterspezifische Aufbereitung mit gemessenen Gelenkpunkten, keine automatische Anatomieerkennung für beliebige Bilder.
 
 ## Erste echte PaKaChi-Entwürfe
 

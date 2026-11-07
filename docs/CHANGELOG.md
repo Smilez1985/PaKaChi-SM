@@ -12,6 +12,30 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.84.0] - 2026-11-07
+
+Zeitstempel: 2026-11-07T19:14:08+01:00 (Europe/Berlin)
+
+### Added
+
+- Original-PaKaChi als getrennt auswählbare, bearbeitete Normal- und Arbeitsform mit derselben anatomischen Hierarchie aus 31 Gelenken: Rumpf, Hals/Kopf, Kiefer, Ohren/Augen, Schultern/Ellenbogen/Handgelenke/Hände, Hüften/Knie/Knöchel/Füße und fünfgliedriger Schwanz.
+- Echte Hautgewichte mit höchstens vier Einflüssen je Vertex und Glättung entlang vorhandener Meshkanten; Fellfasern übernehmen dieselben Gewichte. Augen-, Schnauzen- und Pfotendetails hängen am jeweiligen Skelettteil. Beide Modelle lassen sich im integrierten Studio posieren und als Projekt sichern.
+- Reproduzierbare Aufbereitung aus den unveränderten TripoSR-Quellen. `prepare:pakachi` erzeugt die GLBs automatisch vor `dev`, `test` und `build`; unveränderte Eingaben/Ergebnisse werden anhand von Pipeline- und Dateihashes wiederverwendet. Generierte GLBs sind Buildprodukte und werden mit den CI-Browsernachweisen angeboten.
+- Geometrische Rig-Prüfungen sowie Browserfälle für beide tatsächlichen Charakterformen: Beugen, Undo/Redo, Projektdatei, erneutes Laden und Ansichten von vorn, hinten und der Seite.
+
+### Changed
+
+- Gesicht mit grünen 3D-Augen, Pupillen, Lichtpunkten, Nase und oberflächennah geführter Mundlinie ergänzt. Dunklere Fellfarben, raue nichtmetallische Materialien und kurze tatsächliche Fellfasern auf Körper und Schwanz; grüne Pfotenakzente als eigene Geometrie.
+- Nahezu flächenlose Dreiecke entfernt, Rekonstruktionsstufen mit 16 Taubin-Teilschritten geglättet und explizite glatte Normalen exportiert. Maximale Körpervertex-Verschiebung gegenüber der Quelle rund 0,0032 Modelleinheiten. Die ursprünglichen GLBs bleiben erhalten.
+- Die Schwanzkette wird in ihrer Tiefe an tatsächliche lokale Meshquerschnitte angepasst. In der humanoiden Form folgt ihre Gewichtszuordnung der getrennten Schwanzkomponente, damit sie keine Pfoten mitzieht.
+- Blaupause und Roadmap halten die Reihenfolge fest: Rigging und Charakterqualität, danach ein gemeinsamer sauberer Formwechsel als eine vorwärts/rückwärts abspielbare Standardanimation.
+
+### Fixed
+
+- Die Kamera bestimmt nach der Normalisierung neu angehängter SkinnedMeshes den richtigen Figurenmittelpunkt: inverse Bindematrizen werden vor der Mittelpunktberechnung aktualisiert. Die neuen Charaktermodelle werden beim Laden vollständig eingerahmt.
+
+[Prüfbericht](PRUEFUNG.md#version-0840) · [Aufbereitung und Grenzen](KI-GENERIERUNG.md#rigging-und-charakteraufbereitung). Keine fertige Morph-Animation: Die große Umformungsprobe zeigte Hautbrücken der rekonstruierten Netze. Eine dafür geeignete gemeinsame Netzstruktur, Finger-/Pfotenfeinarbeit und die endgültige Charakterfreigabe bleiben offen. Kein KI-Auto-Rigging beliebiger Bilder.
+
 ## [0.83.0] - 2026-11-07
 
 Zeitstempel: 2026-11-07T17:13:02+01:00 (Europe/Berlin)
