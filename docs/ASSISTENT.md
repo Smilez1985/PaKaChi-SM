@@ -24,9 +24,9 @@ Automatisierte Protokoll- und DOM-Prüfungen sind bestanden; eine echte Modellan
 
 Quellen: [Ollama Chat-API](https://docs.ollama.com/api/chat), [LM Studio Werkzeugaufrufe](https://lmstudio.ai/docs/developer/openai-compat/tools).
 
-[Anbieter](ANBIETER.md) · [Roadmap](ROADMAP.md) · [Prüfbericht](PRUEFUNG-0.16.0.md)
+[Anbieter](ANBIETER.md) · [Roadmap](ROADMAP.md) · [Prüfbericht](PRUEFUNG.md#version-0160)
 
-Anthropic nutzt nativ `/v1/messages` mit API-Schlüssel. Werkzeug- und Thinking-Blöcke bleiben für Folgerunden erhalten; nur Text wird angezeigt. Kein Extended-Thinking-Modus wird ausdrücklich angefordert. Bei ausgeschöpftem Tokenbudget wird die Antwort verworfen. [Einrichtung](ANBIETER.md#anthropic-seit-0170).
+Anthropic nutzt nativ `/v1/messages` mit API-Schlüssel. Werkzeug- und Thinking-Blöcke bleiben für Folgerunden erhalten; nur Text wird angezeigt. Kein Extended-Thinking-Modus wird ausdrücklich angefordert. Bei ausgeschöpftem Tokenbudget wird die Antwort verworfen. [Einrichtung](ANBIETER.md#anthropic-und-verbindungsgrenzen).
 
 Seit 0.18.0 zeigt der Assistent die vollständige konfigurierte Route vor dem Senden und den tatsächlich antwortenden Anbieter danach. Schlüssel werden aus den jeweiligen Profilen übernommen. [Einrichtung und genaue Fallback-Regeln](ANBIETER.md).
 

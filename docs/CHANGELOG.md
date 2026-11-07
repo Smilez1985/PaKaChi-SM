@@ -12,6 +12,12 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+### Changed
+
+- Dokumentation neu geordnet (2026-11-07T15:22:04+01:00, Europe/Berlin): Versionschroniken aus beiden READMEs entfernt; die Historie wird ausschließlich hier gepflegt.
+- 91 einzelne Versions-Prüfberichte in `PRUEFUNG.md` mit einem Abschnitt je Version zusammengeführt. Datierte Zwischenprüfungen, bisherige Nachweise und Einschränkungen erhalten; alle Verweise auf die neuen Abschnittsanker umgestellt und die Einzeldateien entfernt.
+- Roadmap-Prioritäten auf den Original-PaKaChi und einen tatsächlichen Bild-zu-3D-Lauf ausgerichtet; allgemeine Gelenkerweiterungen dem konkreten Charakterablauf untergeordnet.
+
 ## [0.82.0] - 2026-11-07
 
 Zeitstempel: 2026-11-07T12:30:50+01:00 (Europe/Berlin)
@@ -26,7 +32,7 @@ Zeitstempel: 2026-11-07T12:30:50+01:00 (Europe/Berlin)
 - Topologie-Replay rekonstruiert den festen Skalierungsausgleich aus Quelle und Umbaufolge; Quellmodell und Projektstruktur bleiben erhalten. Rückkehr zur Quelle stellt auch die ursprünglichen lokalen Skalierungen wieder her.
 - Prüfung der gespeicherten Beugewinkel berücksichtigt die im Studio rekonstruierten Knochenskalierungen. Nicht verlustfrei darstellbare oder nicht invertierbare Umrechnungen werden abgewiesen.
 
-[Prüfbericht](PRUEFUNG-0.82.0.md). Nicht gleichmäßige/negative Elternäste, eigene Skelette an Anbauteilen und manuelle Haut-/Bewegungsabnahme bleiben offen. Projektformat 1; der neue Umhängungsfall benötigt mindestens Software 0.82.0.
+[Prüfbericht](PRUEFUNG.md#version-0820). Nicht gleichmäßige/negative Elternäste, eigene Skelette an Anbauteilen und manuelle Haut-/Bewegungsabnahme bleiben offen. Projektformat 1; der neue Umhängungsfall benötigt mindestens Software 0.82.0.
 
 ## [0.81.0] - 2026-11-07
 
@@ -43,7 +49,7 @@ Zeitstempel: 2026-11-07T11:46:22+01:00 (Europe/Berlin)
 - Roadmap, Designdokument, Dokumentationsindex und Prüfstand auf die bestätigten 0.80.0-/0.81.0-Läufe nachgezogen; abgeschlossene Browser-Automatisierung von offener manueller Qualitätsabnahme getrennt. Referenz-Rohdaten der drei Produktionsimporte und ihre Grenzen dokumentiert.
 - CPU- und Browserbenchmark teilen die Erzeugung der Mika-Testkopie. Projektformat, Player und Editor bleiben unverändert.
 
-[Prüfbericht](PRUEFUNG-0.81.0.md) · [Messvertrag und Grenzen](IMPORT-BENCHMARK.md). Kein Nachweis für GPU-Fertigstellung, physische Bildausgabe oder große reale Projekte.
+[Prüfbericht](PRUEFUNG.md#version-0810) · [Messvertrag und Grenzen](IMPORT-BENCHMARK.md). Kein Nachweis für GPU-Fertigstellung, physische Bildausgabe oder große reale Projekte.
 
 ## [0.80.0] - 2026-11-07
 
@@ -59,7 +65,7 @@ Zeitstempel: 2026-11-07T10:12:57+01:00 (Europe/Berlin)
 
 - Editor und Export verwenden dieselbe additive Oberflächenverformung. Unbeteiligte Oberflächen werden anhand ihres unveränderten Bezugsraums übersprungen.
 
-[Prüfbericht](PRUEFUNG-0.80.0.md) · [Exportanleitung](GLB-EXPORT.md). Originalclip-Übernahme und Retargeting bleiben offen.
+[Prüfbericht](PRUEFUNG.md#version-0800) · [Exportanleitung](GLB-EXPORT.md). Originalclip-Übernahme und Retargeting bleiben offen.
 
 ## [0.79.0] - 2026-11-07
 
@@ -71,7 +77,7 @@ Zeitstempel: 2026-11-07T09:26:00+01:00 (Europe/Berlin)
 - Ausgabe mit 30 Stützstellen pro Sekunde und exakten Segmentgrenzen. Bewegte freie Oberflächenpunkte, Matrixscherung und zu umfangreiche Sequenzen werden abgewiesen; keine stillschweigende Teilausgabe.
 - GLB-Rundlauftests für tatsächliche Animation nach dem Laden, Quellschutz, wiederholte Posen, Figurentransformationen und Grenzen; Browserprüfung für Download, erneuten Import und Wiedergabe.
 
-[Prüfbericht](PRUEFUNG-0.79.0.md) · [Exportanleitung](GLB-EXPORT.md). Originalclip-Übernahme, animierte freie Punkte und Retargeting bleiben offen.
+[Prüfbericht](PRUEFUNG.md#version-0790) · [Exportanleitung](GLB-EXPORT.md). Originalclip-Übernahme, animierte freie Punkte und Retargeting bleiben offen.
 
 ## [0.78.1] - 2026-11-07
 
@@ -86,7 +92,7 @@ Zeitstempel: 2026-11-07T09:04:13+01:00 (Europe/Berlin)
 
 - Chromium-Regression für die Bearbeitungsfolge einschließlich Undo/Redo, Speichern und erneutem Laden.
 
-[Prüfbericht](PRUEFUNG-0.78.1.md). Keine Projektformatänderung.
+[Prüfbericht](PRUEFUNG.md#version-0781). Keine Projektformatänderung.
 
 ## [0.78.0] - 2026-11-07
 
@@ -98,7 +104,7 @@ Zeitstempel: 2026-11-07T02:12:55+01:00 (Europe/Berlin)
 - Unabhängige Kopien schützen Quelldaten. Nicht unterstützte Rig-/Sichtbarkeitsfälle werden ausdrücklich abgewiesen; bestehende Verwerfungsprüfung bei überholtem Export bleibt erhalten.
 - Tatsächliche GLB-Rundlauftests einschließlich Hautbewegung nach dem Laden, bearbeitetem Mika sowie Browser-Download und erneuter Gelenkbearbeitung.
 
-[Prüfbericht](PRUEFUNG-0.78.0.md). Animationsausgabe, Retargeting und das separat reproduzierte Topologie-Replay-Problem bleiben offen.
+[Prüfbericht](PRUEFUNG.md#version-0780). Animationsausgabe, Retargeting und das separat reproduzierte Topologie-Replay-Problem bleiben offen.
 
 ## [0.77.0] - 2026-11-07
 
@@ -110,7 +116,7 @@ Zeitstempel: 2026-11-07T01:14:27+01:00 (Europe/Berlin)
 - Exporter wird bei Bedarf geladen. Projekt- und Quelldaten bleiben erhalten; während der Erstellung überholte Ergebnisse werden nicht heruntergeladen.
 - Geometrie-Regressionen und Browserprüfung für Download und erneuten Import der Datei. Instanzen und teilweise ausgeblendete Materialgruppen werden ausdrücklich abgewiesen.
 
-[Prüfbericht](PRUEFUNG-0.77.0.md). GLB-Export mit Rig/Animationen und Retargeting bleiben offen.
+[Prüfbericht](PRUEFUNG.md#version-0770). GLB-Export mit Rig/Animationen und Retargeting bleiben offen.
 
 ## [0.76.3] - 2026-11-07
 
@@ -121,7 +127,7 @@ Zeitstempel: 2026-11-07T00:47:32+01:00 (Europe/Berlin)
 - Gezielte Chromium-Prüfung der haftenden Studio-Vorschau beim Scrollen in normalen und niedrigen Desktopfenstern sowie nicht überdeckter Eingabefelder auf Mobilgeräten. Echte Mausradereignisse prüfen die Erreichbarkeit der Zeichenfläche; Projektdaten bleiben unverändert.
 - Screenshots des sichtbaren Bereichs statt Ganzseitenaufnahmen zur Bewertung der haftenden Vorschau.
 
-[Prüfbericht](PRUEFUNG-0.76.3.md). Das subjektive Mausgefühl und anatomische Bewegungsqualität bleiben getrennte manuelle Abnahmen.
+[Prüfbericht](PRUEFUNG.md#version-0763). Das subjektive Mausgefühl und anatomische Bewegungsqualität bleiben getrennte manuelle Abnahmen.
 
 ## [0.76.2] - 2026-11-06
 
@@ -136,7 +142,7 @@ Zeitstempel: 2026-11-06T19:13:55+01:00 (Europe/Berlin)
 
 - Chromium-Regression für Paketversion, mindestens 4,5:1 Textkontrast im Normal-/Hoverzustand, sichtbaren Tastaturfokus und Öffnen der Optionen per Enter.
 
-[Prüfbericht und Screenshotbefunde](PRUEFUNG-0.76.2.md).
+[Prüfbericht und Screenshotbefunde](PRUEFUNG.md#version-0762).
 
 ## [0.76.1] - 2026-11-05
 
@@ -150,7 +156,7 @@ Zeitstempel: 2026-11-05T09:17:35+01:00 (Europe/Berlin)
 
 - Actions-Abnahme nach wieder verfügbarem Kontingent aufgenommen. Der erste Lauf bestätigte 312 Node-Tests, Build und 20 Browserfälle einschließlich Mausnavigation. Korrigierter Stand und vollständige CI-Ergebnisse werden in PR #1 geprüft.
 
-[Prüfbericht](PRUEFUNG-0.76.1.md).
+[Prüfbericht](PRUEFUNG.md#version-0761).
 
 ## [0.76.0] - 2026-11-04
 
@@ -161,7 +167,7 @@ Zeitstempel: 2026-11-04T14:54:49+01:00 (Europe/Berlin)
 - Umhängen von Knochen mit eigener gleichmäßiger, ungleichmäßiger oder negativer Quellskalierung. Die eigene Skalierung bleibt erhalten; Positions-/Drehungsumrechnung ohne Spiegelungsmehrdeutigkeit.
 - Regressionen für sechs Skalierungsvarianten einschließlich Spiegelungen verschiedener Achsen, Hautgeometrie, starre Anbauteile, Posen/Entwurf, Rekonstruktion und Quellwiederherstellung. Nicht invertierbare eigene Skalierungen werden atomar abgewiesen.
 
-[Prüfbericht](PRUEFUNG-0.76.0.md). Elternäste benötigen weiterhin gleiche positive gleichmäßige Gesamtskalierungen; gerenderte Abnahme bleibt offen.
+[Prüfbericht](PRUEFUNG.md#version-0760). Elternäste benötigen weiterhin gleiche positive gleichmäßige Gesamtskalierungen; gerenderte Abnahme bleibt offen.
 
 ## [0.75.0] - 2026-11-04
 
@@ -172,7 +178,7 @@ Zeitstempel: 2026-11-04T14:51:57+01:00 (Europe/Berlin)
 - Umhängen zwischen Ästen mit gleicher kumulierter positiver gleichmäßiger Skalierung. Die Umrechnung von Grundpose, gespeicherten Posen und Entwurf berücksichtigt die tatsächlichen Quellskalierungen.
 - Regressionen für gleich skalierte sowie unterschiedlich aufgebaute Äste (4 × 0,5 gegenüber 2), Hautgeometrie, starre Anbauteile, Projektrekonstruktion und Quellwiederherstellung. Ungleiche, nicht gleichmäßige und negative Astskalierungen bleiben atomar abgewiesen.
 
-[Prüfbericht](PRUEFUNG-0.75.0.md). Gerenderte Haut-/Bewegungsabnahme bleibt offen.
+[Prüfbericht](PRUEFUNG.md#version-0750). Gerenderte Haut-/Bewegungsabnahme bleibt offen.
 
 ## [0.74.0] - 2026-10-31
 
@@ -183,7 +189,7 @@ Zeitstempel: 2026-10-31T02:45:35+01:00 (Europe/Berlin)
 - Knochen innerhalb eines gemeinsam skalierten Teilbaums umhängen: Die Umrechnung erfolgt relativ zum nächsten gemeinsamen Vorfahren. Gleichmäßige, ungleichmäßige und negative gemeinsame Skalierung bleiben erhalten.
 - Regressionen für Hautgeometrie und starre Anbauteile in Grundpose, gespeicherter Pose, Entwurf, Projektrekonstruktion und Quellwiederherstellung; nicht invertierbare gemeinsame Skalierung wird ohne Datenänderung abgewiesen.
 
-[Prüfbericht](PRUEFUNG-0.74.0.md). Unterschiedlich skalierte Äste und gerenderte Qualitätsabnahme bleiben offen.
+[Prüfbericht](PRUEFUNG.md#version-0740). Unterschiedlich skalierte Äste und gerenderte Qualitätsabnahme bleiben offen.
 
 ## [0.73.0] - 2026-10-31
 
@@ -194,7 +200,7 @@ Zeitstempel: 2026-10-31T02:32:53+01:00 (Europe/Berlin)
 - Skalierte Endknochen ohne Kinder oder Anbauteile können gelöscht werden. Hautgewichte werden dem Elternknochen zugeordnet; gespeicherte Posenspuren des entfernten Knochens entfallen.
 - Regressionen für gleichmäßige, ungleichmäßige und negative Skalierung, unveränderte Grundgeometrie, Projektrekonstruktion und Wiederherstellung der Quelle. Skalierte Zwischenknochen bleiben geschützt.
 
-[Prüfbericht](PRUEFUNG-0.73.0.md). Gerenderte Haut-/Bewegungsabnahme bleibt offen.
+[Prüfbericht](PRUEFUNG.md#version-0730). Gerenderte Haut-/Bewegungsabnahme bleibt offen.
 
 ## [0.72.0] - 2026-10-31
 
@@ -205,7 +211,7 @@ Zeitstempel: 2026-10-31T01:51:23+01:00 (Europe/Berlin)
 - Neue Knochenabzweigungen unter skalierten Quellknochen: gleichmäßige, ungleichmäßige und negative Skalierungen werden bei der Welt-/Lokalkoordinaten-Umrechnung berücksichtigt.
 - Regressionen für Platzierung, unveränderte Hautgeometrie, gespeicherte Posen, Rekonstruktion und Wiederherstellung der Quelle. Nicht invertierbare Elternmatrizen und extreme lokale Positionen werden atomar abgewiesen.
 
-[Prüfbericht](PRUEFUNG-0.72.0.md). Umhängen/Löschen skalierter Knochen und gerenderte Qualitätsabnahme bleiben offen.
+[Prüfbericht](PRUEFUNG.md#version-0720). Umhängen/Löschen skalierter Knochen und gerenderte Qualitätsabnahme bleiben offen.
 
 
 ## [0.71.1] - 2026-10-30
@@ -218,7 +224,7 @@ Zeitstempel: 2026-10-30T19:06:33+01:00 (Europe/Berlin)
 - Größenlimit von 50 MiB, ausdrückliche Ablehnung von Bildtexturen und Prüfung unveränderter Modelle über alle Messprozesse. Quelldateien bleiben unangetastet.
 - CLI-Regressionen für eigene Geometrie, Prüfsummen, unveränderte Quelldateien, ungültige Argumente und nicht unterstützte Eingaben.
 
-[Prüfbericht](PRUEFUNG-0.71.1.md). Große reale Modelle und Browserabnahme bleiben offen.
+[Prüfbericht](PRUEFUNG.md#version-0711). Große reale Modelle und Browserabnahme bleiben offen.
 
 ## [0.71.0] - 2026-10-30
 
@@ -233,7 +239,7 @@ Zeitstempel: 2026-10-30T09:42:50+01:00 (Europe/Berlin)
 - Oberflächenüberblendungen verwenden Zielpuffer innerhalb eines Übergangs wieder und kopieren zusammenhängende Float32-Attribute direkt. Andere Attributlayouts behalten den allgemeinen Zugriff. Ausgangspose und Zielzustand bleiben getrennt; beim Abschluss oder Abbruch werden die wiederverwendeten Puffer freigegeben.
 - Lokale Messreihe für alle Mika-Meshes: Medianzeiten pro Prozess von 24,94–26,86 ms auf 13,10–16,93 ms reduziert. Positionen-/Normalen-Prüfsummen identisch; festgehaltener ArrayBuffer-Bedarf weiterhin rund 8,34 MiB. Keine allgemeine Laufzeitgarantie.
 
-[Prüfbericht](PRUEFUNG-0.71.0.md) · [Messvertrag](TRANSITION-BENCHMARK.md). Gerenderte Abnahme und große reale Importmodelle bleiben offen.
+[Prüfbericht](PRUEFUNG.md#version-0710) · [Messvertrag](TRANSITION-BENCHMARK.md). Gerenderte Abnahme und große reale Importmodelle bleiben offen.
 
 ## [0.70.0] - 2026-10-30
 
@@ -248,7 +254,7 @@ Zeitstempel: 2026-10-30T08:51:57+01:00 (Europe/Berlin)
 
 - Freie Oberflächenpunkte verhindern die Überblendung nicht mehr. Zusätzliche Geometriekopien sind auf Meshes beschränkt, denen solche Punkte zugeordnet sind; Punkte ohne Mesh-Zuordnung betreffen alle Studio-Meshes.
 
-Bearbeitete Knochen-Grundstellung, Knochenumbau, Gewichtsaufträge, geänderte Geometrieidentität und Schertransformationen bleiben ausgeschlossen. Zusätzlicher CPU-/Speicherbedarf während des Übergangs; große Modelle und gerenderte Hautqualität sind noch nicht abgenommen. [Prüfbericht](PRUEFUNG-0.70.0.md).
+Bearbeitete Knochen-Grundstellung, Knochenumbau, Gewichtsaufträge, geänderte Geometrieidentität und Schertransformationen bleiben ausgeschlossen. Zusätzlicher CPU-/Speicherbedarf während des Übergangs; große Modelle und gerenderte Hautqualität sind noch nicht abgenommen. [Prüfbericht](PRUEFUNG.md#version-0700).
 
 ## [0.69.2] - 2026-10-30
 
@@ -259,7 +265,7 @@ Zeitstempel: 2026-10-30T07:18:04+01:00 (Europe/Berlin)
 - Auch bei Überblendungen zwischen Originalclips wird die Mischung vollständig beendet, wenn ein kurzer einmaliger Zielclip bereits seine Endpose erreicht hat. Der beendete Clip bleibt dabei an seinem Ende; manuelle Pause während eines laufenden Clips bleibt wirksam.
 - Ein Sprung auf der Zeitleiste beendet die alte Clip-Überblendung und zeigt die gewählte Zielpose ohne Restgewicht des vorherigen Clips. Der manuelle Pausenstatus bleibt erhalten.
 
-Beide Fehler vor der Korrektur durch Regressionstests reproduziert. Entwicklungsstand auf dem Arbeitsbranch; gerenderte Abnahme bleibt offen. [Prüfbericht](PRUEFUNG-0.69.2.md).
+Beide Fehler vor der Korrektur durch Regressionstests reproduziert. Entwicklungsstand auf dem Arbeitsbranch; gerenderte Abnahme bleibt offen. [Prüfbericht](PRUEFUNG.md#version-0692).
 
 ## [0.69.1] - 2026-10-29
 
@@ -270,7 +276,7 @@ Zeitstempel: 2026-10-29T21:45:22+01:00 (Europe/Berlin)
 - Überblendungen erreichen auch dann die vollständige Zielpose, wenn ein einmaliger Originalclip kürzer als der Übergang ist. Natürliches Clip-Ende wird von manueller Pause unterschieden; manuelle Pause hält die Überblendung weiterhin an.
 - Gemeinsame Berechnung der Übergangszeit berücksichtigt fehlenden Grundclip, Tempo und ungültige Framezeiten. Wiederholen oder Springen auf der Zeitleiste hebt den erkannten Abschlusszustand korrekt auf.
 
-Entwicklungsstand auf dem Arbeitsbranch, keine neue gerenderte Browserabnahme. [Prüfbericht](PRUEFUNG-0.69.1.md).
+Entwicklungsstand auf dem Arbeitsbranch, keine neue gerenderte Browserabnahme. [Prüfbericht](PRUEFUNG.md#version-0691).
 
 ## [0.69.0] - 2026-10-29
 
@@ -283,7 +289,7 @@ Entwicklungsmeilenstein auf `work/local-verification-model-zoo`; Browserabnahme 
 - Kurze Überblendung beim Wechsel zwischen Originalclips und Studio-Moves im Player sowie bei der automatischen Rückkehr zur Grundbewegung. Die sichtbare Ausgangspose wird über 0,18 Animationssekunden in die weiterlaufende Zielpose überführt; Position, Rotation, Größe und vorhandene Morph-Gewichte werden berücksichtigt.
 - Pause hält die Überblendung an, Tempo skaliert sie. Erneuter Wechsel startet an der sichtbaren Zwischenpose. Springen auf der Zeitleiste oder Öffnen des Studios beendet die temporäre Überblendung; Projekt, Undo-Verlauf und gespeicherte Posen bleiben unverändert.
 
-Nur unveränderte Grundskelette ohne freie Oberflächenpunkte, Knochenumbau oder Gewichtsaufträge. Geänderte Hierarchien und Schertransformationen werden nicht interpoliert; dort bleibt der direkte Wechsel erhalten. Originalclip-Überblendungen untereinander bleiben bestehen. [Prüfbericht](PRUEFUNG-0.69.0.md).
+Nur unveränderte Grundskelette ohne freie Oberflächenpunkte, Knochenumbau oder Gewichtsaufträge. Geänderte Hierarchien und Schertransformationen werden nicht interpoliert; dort bleibt der direkte Wechsel erhalten. Originalclip-Überblendungen untereinander bleiben bestehen. [Prüfbericht](PRUEFUNG.md#version-0690).
 
 ## [0.68.0] - 2026-10-29
 
@@ -1540,16 +1546,16 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 - Bestehendes Bedienkonzept ausdrücklich als Designdokument eingeordnet und mit Roadmap und Changelog verknüpft.
 
 [Unreleased]: https://github.com/Smilez1985/PaKaChi-SM/commits/work/local-verification-model-zoo
-[0.20.0]: ./PRUEFUNG-0.20.0.md
-[0.19.0]: ./PRUEFUNG-0.19.0.md
-[0.18.0]: ./PRUEFUNG-0.18.0.md
-[0.17.1]: ./PRUEFUNG-0.17.1.md
-[0.17.0]: ./PRUEFUNG-0.17.0.md
-[0.16.0]: ./PRUEFUNG-0.16.0.md
-[0.15.0]: ./PRUEFUNG-0.15.0.md
-[0.14.0]: ./PRUEFUNG-0.14.0.md
-[0.13.0]: ./PRUEFUNG-0.13.0.md
-[0.12.0]: ./PRUEFUNG-0.12.0.md
+[0.20.0]: ./PRUEFUNG.md#version-0200
+[0.19.0]: ./PRUEFUNG.md#version-0190
+[0.18.0]: ./PRUEFUNG.md#version-0180
+[0.17.1]: ./PRUEFUNG.md#version-0171
+[0.17.0]: ./PRUEFUNG.md#version-0170
+[0.16.0]: ./PRUEFUNG.md#version-0160
+[0.15.0]: ./PRUEFUNG.md#version-0150
+[0.14.0]: ./PRUEFUNG.md#version-0140
+[0.13.0]: ./PRUEFUNG.md#version-0130
+[0.12.0]: ./PRUEFUNG.md#version-0120
 [0.11.1]: https://github.com/Smilez1985/PaKaChi-SM/compare/3febc7f6a9c7326bdb7295284d2a042e97bd24f3...207faaac1f0c35dbf0bda71d1142792f1e5bab0c
 [0.11.0]: https://github.com/Smilez1985/PaKaChi-SM/compare/fd8fabe5a194d211a4389673f05fc4363b3fa049...3febc7f6a9c7326bdb7295284d2a042e97bd24f3
 [0.10.0]: https://github.com/Smilez1985/PaKaChi-SM/compare/b0c0782b4e54f1c15032f98648d0af59fc61028d...fd8fabe5a194d211a4389673f05fc4363b3fa049
@@ -1564,140 +1570,140 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 [0.1.0]: https://github.com/Smilez1985/PaKaChi-SM/compare/2fd20e09bb518f1e3edde27e060209c57a56f103...4c54448062977dbee105fe553f5ce1617a788f7f
 [0.0.1]: https://github.com/Smilez1985/PaKaChi-SM/tree/2fd20e09bb518f1e3edde27e060209c57a56f103
 
-[0.21.0]: ./PRUEFUNG-0.21.0.md
+[0.21.0]: ./PRUEFUNG.md#version-0210
 
-[0.22.0]: ./PRUEFUNG-0.22.0.md
+[0.22.0]: ./PRUEFUNG.md#version-0220
 
-[0.23.0]: ./PRUEFUNG-0.23.0.md
+[0.23.0]: ./PRUEFUNG.md#version-0230
 
-[0.24.0]: ./PRUEFUNG-0.24.0.md
+[0.24.0]: ./PRUEFUNG.md#version-0240
 
-[0.25.0]: PRUEFUNG-0.25.0.md
+[0.25.0]: PRUEFUNG.md#version-0250
 
-[0.26.0]: PRUEFUNG-0.26.0.md
+[0.26.0]: PRUEFUNG.md#version-0260
 
-[0.27.0]: PRUEFUNG-0.27.0.md
+[0.27.0]: PRUEFUNG.md#version-0270
 
-[0.28.0]: PRUEFUNG-0.28.0.md
+[0.28.0]: PRUEFUNG.md#version-0280
 
-[0.29.0]: PRUEFUNG-0.29.0.md
+[0.29.0]: PRUEFUNG.md#version-0290
 
-[0.30.0]: PRUEFUNG-0.30.0.md
+[0.30.0]: PRUEFUNG.md#version-0300
 
-[0.31.0]: PRUEFUNG-0.31.0.md
+[0.31.0]: PRUEFUNG.md#version-0310
 
-[0.32.0]: PRUEFUNG-0.32.0.md
+[0.32.0]: PRUEFUNG.md#version-0320
 
-[0.33.0]: PRUEFUNG-0.33.0.md
+[0.33.0]: PRUEFUNG.md#version-0330
 
-[0.34.0]: PRUEFUNG-0.34.0.md
+[0.34.0]: PRUEFUNG.md#version-0340
 
-[0.35.0]: PRUEFUNG-0.35.0.md
+[0.35.0]: PRUEFUNG.md#version-0350
 
-[0.36.0]: PRUEFUNG-0.36.0.md
+[0.36.0]: PRUEFUNG.md#version-0360
 
-[0.37.0]: PRUEFUNG-0.37.0.md
+[0.37.0]: PRUEFUNG.md#version-0370
 
-[0.38.0]: PRUEFUNG-0.38.0.md
+[0.38.0]: PRUEFUNG.md#version-0380
 
-[0.39.0]: PRUEFUNG-0.39.0.md
+[0.39.0]: PRUEFUNG.md#version-0390
 
-[0.40.0]: PRUEFUNG-0.40.0.md
+[0.40.0]: PRUEFUNG.md#version-0400
 
-[0.41.0]: PRUEFUNG-0.41.0.md
+[0.41.0]: PRUEFUNG.md#version-0410
 
-[0.42.0]: PRUEFUNG-0.42.0.md
+[0.42.0]: PRUEFUNG.md#version-0420
 
-[0.43.0]: PRUEFUNG-0.43.0.md
+[0.43.0]: PRUEFUNG.md#version-0430
 
-[0.44.0]: PRUEFUNG-0.44.0.md
+[0.44.0]: PRUEFUNG.md#version-0440
 
-[0.45.0]: PRUEFUNG-0.45.0.md
+[0.45.0]: PRUEFUNG.md#version-0450
 
-[0.46.0]: PRUEFUNG-0.46.0.md
+[0.46.0]: PRUEFUNG.md#version-0460
 
-[0.47.0]: PRUEFUNG-0.47.0.md
+[0.47.0]: PRUEFUNG.md#version-0470
 
-[0.48.0]: PRUEFUNG-0.48.0.md
+[0.48.0]: PRUEFUNG.md#version-0480
 
-[0.49.0]: PRUEFUNG-0.49.0.md
+[0.49.0]: PRUEFUNG.md#version-0490
 
-[0.50.0]: PRUEFUNG-0.50.0.md
+[0.50.0]: PRUEFUNG.md#version-0500
 
-[0.51.0]: PRUEFUNG-0.51.0.md
+[0.51.0]: PRUEFUNG.md#version-0510
 
-[0.52.0]: PRUEFUNG-0.52.0.md
+[0.52.0]: PRUEFUNG.md#version-0520
 
-[0.53.0]: PRUEFUNG-0.53.0.md
+[0.53.0]: PRUEFUNG.md#version-0530
 
-[0.54.0]: PRUEFUNG-0.54.0.md
+[0.54.0]: PRUEFUNG.md#version-0540
 
-[0.55.0]: PRUEFUNG-0.55.0.md
+[0.55.0]: PRUEFUNG.md#version-0550
 
-[0.56.0]: PRUEFUNG-0.56.0.md
+[0.56.0]: PRUEFUNG.md#version-0560
 
-[0.57.0]: PRUEFUNG-0.57.0.md
+[0.57.0]: PRUEFUNG.md#version-0570
 
-[0.58.0]: PRUEFUNG-0.58.0.md
+[0.58.0]: PRUEFUNG.md#version-0580
 
-[0.59.0]: PRUEFUNG-0.59.0.md
+[0.59.0]: PRUEFUNG.md#version-0590
 
-[0.60.0]: PRUEFUNG-0.60.0.md
+[0.60.0]: PRUEFUNG.md#version-0600
 
-[0.61.0]: PRUEFUNG-0.61.0.md
+[0.61.0]: PRUEFUNG.md#version-0610
 
-[0.62.0]: PRUEFUNG-0.62.0.md
+[0.62.0]: PRUEFUNG.md#version-0620
 
-[0.63.0]: PRUEFUNG-0.63.0.md
+[0.63.0]: PRUEFUNG.md#version-0630
 
-[0.64.0]: PRUEFUNG-0.64.0.md
+[0.64.0]: PRUEFUNG.md#version-0640
 
-[0.65.0]: PRUEFUNG-0.65.0.md
+[0.65.0]: PRUEFUNG.md#version-0650
 
-[0.66.0]: PRUEFUNG-0.66.0.md
+[0.66.0]: PRUEFUNG.md#version-0660
 
-[0.67.0]: PRUEFUNG-0.67.0.md
+[0.67.0]: PRUEFUNG.md#version-0670
 
-[0.68.0]: PRUEFUNG-0.68.0.md
+[0.68.0]: PRUEFUNG.md#version-0680
 
-[0.69.0]: PRUEFUNG-0.69.0.md
+[0.69.0]: PRUEFUNG.md#version-0690
 
-[0.69.1]: PRUEFUNG-0.69.1.md
+[0.69.1]: PRUEFUNG.md#version-0691
 
-[0.69.2]: PRUEFUNG-0.69.2.md
+[0.69.2]: PRUEFUNG.md#version-0692
 
-[0.70.0]: PRUEFUNG-0.70.0.md
+[0.70.0]: PRUEFUNG.md#version-0700
 
-[0.71.0]: PRUEFUNG-0.71.0.md
+[0.71.0]: PRUEFUNG.md#version-0710
 
-[0.71.1]: PRUEFUNG-0.71.1.md
+[0.71.1]: PRUEFUNG.md#version-0711
 
-[0.72.0]: PRUEFUNG-0.72.0.md
+[0.72.0]: PRUEFUNG.md#version-0720
 
-[0.73.0]: PRUEFUNG-0.73.0.md
+[0.73.0]: PRUEFUNG.md#version-0730
 
-[0.74.0]: PRUEFUNG-0.74.0.md
+[0.74.0]: PRUEFUNG.md#version-0740
 
-[0.75.0]: PRUEFUNG-0.75.0.md
+[0.75.0]: PRUEFUNG.md#version-0750
 
-[0.76.0]: PRUEFUNG-0.76.0.md
+[0.76.0]: PRUEFUNG.md#version-0760
 
-[0.76.1]: PRUEFUNG-0.76.1.md
+[0.76.1]: PRUEFUNG.md#version-0761
 
-[0.76.2]: PRUEFUNG-0.76.2.md
+[0.76.2]: PRUEFUNG.md#version-0762
 
-[0.76.3]: PRUEFUNG-0.76.3.md
+[0.76.3]: PRUEFUNG.md#version-0763
 
-[0.77.0]: PRUEFUNG-0.77.0.md
+[0.77.0]: PRUEFUNG.md#version-0770
 
-[0.78.0]: PRUEFUNG-0.78.0.md
+[0.78.0]: PRUEFUNG.md#version-0780
 
-[0.78.1]: PRUEFUNG-0.78.1.md
+[0.78.1]: PRUEFUNG.md#version-0781
 
-[0.79.0]: PRUEFUNG-0.79.0.md
+[0.79.0]: PRUEFUNG.md#version-0790
 
-[0.80.0]: PRUEFUNG-0.80.0.md
+[0.80.0]: PRUEFUNG.md#version-0800
 
-[0.81.0]: PRUEFUNG-0.81.0.md
+[0.81.0]: PRUEFUNG.md#version-0810
 
-[0.82.0]: PRUEFUNG-0.82.0.md
+[0.82.0]: PRUEFUNG.md#version-0820

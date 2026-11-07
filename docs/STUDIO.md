@@ -179,7 +179,7 @@ Regleränderungen und Abschalten lassen sich rückgängig machen. Projekt, lokal
 
 **Geltungsbereich:** Nur Ziehen des Endpunkts einer Zweiglied-IK-Kette. Direkte Drehung, vorhandene Animationsclips, gespeicherte Posen und deren Zwischenbilder werden nicht begrenzt. Es gibt keine automatische Anatomie-/Beugerichtungserkennung, keine Twistgrenzen, keine Kollisionsprüfung und keine Ganzkörper-IK. Die bisherige Beugeseite wird beibehalten; bei gestreckter Kette wird eine stabile geometrische Ersatzrichtung verwendet.
 
-Projektformat bleibt 1. Für die Auswertung von `bendLimit` und neuen Prüfhinweisen ist Software ab 0.33.0 nötig; ältere Versionen können Grenzen ignorieren oder den neuen Prüfgrund ablehnen. [Prüfbericht](PRUEFUNG-0.33.0.md).
+Projektformat bleibt 1. Für die Auswertung von `bendLimit` und neuen Prüfhinweisen ist Software ab 0.33.0 nötig; ältere Versionen können Grenzen ignorieren oder den neuen Prüfgrund ablehnen. [Prüfbericht](PRUEFUNG.md#version-0330).
 
 ## Gespeicherte Pose prüfen (0.34.0)
 
@@ -187,7 +187,7 @@ Eine gespeicherte Pose auswählen und **Beugegrenzen der Pose prüfen** anklicke
 
 Die Messung liest gespeicherte Transformationen; sie zeigt die Pose nicht automatisch an und verändert weder die aktuelle Figur noch Projekt, Undo-Verlauf oder bestehende Prüfmarkierungen. Ein erfolgreicher Einzeltest bedeutet nicht, dass die Bewegung insgesamt geprüft ist. Die Anzeige wird bei neuer Auswahl oder Editor-Neudarstellung verworfen; nach Änderungen erneut prüfen. Während Wiedergabe oder Ziehgesten ist die Prüfung gesperrt.
 
-Gemessen wird im selben Anker-Elternraum wie beim IK-Ziehen, mit den ursprünglichen lokalen Knochenskalierungen. Eine Toleranz von 0,0001 Grad verhindert falsche Grenzverletzungen durch Rundung. Segmente ohne messbare Länge werden nicht als bestanden behandelt. Es werden nur gespeicherte Einzelposen geprüft: keine Zwischenbilder, Originalclips, Twistgrenzen, Kollisionen oder allgemeine Anatomie. **Keine automatische Korrektur.** Pose bei Bedarf anzeigen, manuell korrigieren, ersetzen und erneut prüfen. Der Bericht wird nicht gespeichert. [Prüfbericht](PRUEFUNG-0.34.0.md).
+Gemessen wird im selben Anker-Elternraum wie beim IK-Ziehen, mit den ursprünglichen lokalen Knochenskalierungen. Eine Toleranz von 0,0001 Grad verhindert falsche Grenzverletzungen durch Rundung. Segmente ohne messbare Länge werden nicht als bestanden behandelt. Es werden nur gespeicherte Einzelposen geprüft: keine Zwischenbilder, Originalclips, Twistgrenzen, Kollisionen oder allgemeine Anatomie. **Keine automatische Korrektur.** Pose bei Bedarf anzeigen, manuell korrigieren, ersetzen und erneut prüfen. Der Bericht wird nicht gespeichert. [Prüfbericht](PRUEFUNG.md#version-0340).
 
 ## Bewegung stichprobenartig prüfen (0.35.0)
 
@@ -197,7 +197,7 @@ Jeder Übergang wird in 16 gleichmäßigen Schritten geprüft, zusätzlich die e
 
 Der Bericht zeigt Stichprobenzahl, gemessenen Winkelbereich je Gelenk, eingestellte Grenzen und den ersten auffälligen Zeitpunkt in Sekunden ab Bewegungsstart. Nicht messbare Segmente und nicht verbundene Ketten werden nicht als bestanden behandelt. Seit 0.36.0 öffnet „Auffälliges Bild ansehen“ den gemeldeten Zeitpunkt direkt als pausierte Vorschau.
 
-Änderungen, Verlassen oder Schließen des Studios machen laufende Ergebnisse ungültig. Während Wiedergabe und Ziehgesten startet keine Prüfung. Die Berechnung gibt regelmäßig die Oberfläche frei. Berichte sind flüchtig und werden bei Auswahlwechsel oder Neudarstellung entfernt. Es werden keine Prüfmarkierungen gelöscht und keine Korrekturen ausgeführt. Originalclips, Kollisionen, Twistgrenzen und allgemeine Anatomie bleiben ungeprüft. [Prüfbericht](PRUEFUNG-0.35.0.md).
+Änderungen, Verlassen oder Schließen des Studios machen laufende Ergebnisse ungültig. Während Wiedergabe und Ziehgesten startet keine Prüfung. Die Berechnung gibt regelmäßig die Oberfläche frei. Berichte sind flüchtig und werden bei Auswahlwechsel oder Neudarstellung entfernt. Es werden keine Prüfmarkierungen gelöscht und keine Korrekturen ausgeführt. Originalclips, Kollisionen, Twistgrenzen und allgemeine Anatomie bleiben ungeprüft. [Prüfbericht](PRUEFUNG.md#version-0350).
 
 ## Prüfbilder ansehen und übernehmen (0.36.0)
 
@@ -208,7 +208,7 @@ Der Bericht zeigt Stichprobenzahl, gemessenen Winkelbereich je Gelenk, eingestel
 
 Die neue Pose wird nicht automatisch in einen bestehenden Move eingefügt. Sie ist auch nicht automatisch korrigiert oder als geprüft bestätigt. Im Modus „Figur bewegen“ bei Bedarf manuell korrigieren und ersetzen, anschließend erneut prüfen. Die bisherigen gespeicherten Posen und Moves bleiben erhalten. Bei bereits 100 Posen wird keine weitere angelegt.
 
-Veraltete Berichte, ungültige Zeitpunkte und geschlossene Studios werden abgewiesen. Die Vorschau verwendet die bestehende Interpolation und bleibt von der Stichprobenbegrenzung der Prüfung abhängig. Stopp bezieht sich hier auf die Prüfbildvorschau; die normale Vorschau behält ihr bisheriges Verhalten. Gerenderte Bedienabnahme steht aus. [Prüfbericht](PRUEFUNG-0.36.0.md).
+Veraltete Berichte, ungültige Zeitpunkte und geschlossene Studios werden abgewiesen. Die Vorschau verwendet die bestehende Interpolation und bleibt von der Stichprobenbegrenzung der Prüfung abhängig. Stopp bezieht sich hier auf die Prüfbildvorschau; die normale Vorschau behält ihr bisheriges Verhalten. Gerenderte Bedienabnahme steht aus. [Prüfbericht](PRUEFUNG.md#version-0360).
 
 ## Bestehende Posenfolge bearbeiten (0.37.0)
 
@@ -223,7 +223,7 @@ So kann eine zuvor übernommene Prüfpose gezielt an die Stelle einer bisherigen
 
 Erlaubt sind 2–100 Verweise auf vorhandene Projektposen. Während Wiedergabe/Ziehgesten und im Modus „Gelenke bearbeiten“ ist die Sequenzbearbeitung gesperrt. Die Reihenfolge der allgemeinen Projekt-Posenliste ist davon unabhängig. Neue Moves werden weiterhin zunächst aus der allgemeinen Posenliste erstellt.
 
-Die Zeit gehört weiterhin zur referenzierten Pose: Ändern ihrer Dauer betrifft alle Vorkommen und Moves, die diese Pose verwenden. Bei Schleifen gilt die Dauer der ersten Pose für den Rückweg. Es gibt keine unabhängigen Zeiten pro Vorkommen. Sequenzbearbeitung korrigiert keine Gelenkwinkel automatisch; Vorschau und Prüfung anschließend erneut ausführen. Seit 0.38.0 können MCP-Clients und der Assistent bestehende Sequenzen auslesen und ändern; siehe [MCP-Anleitung](MCP-STUDIO.md#bestehende-sequenzen-ab-0380). Die gerenderte Abnahme steht aus. [Prüfbericht](PRUEFUNG-0.37.0.md).
+Die Zeit gehört weiterhin zur referenzierten Pose: Ändern ihrer Dauer betrifft alle Vorkommen und Moves, die diese Pose verwenden. Bei Schleifen gilt die Dauer der ersten Pose für den Rückweg. Es gibt keine unabhängigen Zeiten pro Vorkommen. Sequenzbearbeitung korrigiert keine Gelenkwinkel automatisch; Vorschau und Prüfung anschließend erneut ausführen. Seit 0.38.0 können MCP-Clients und der Assistent bestehende Sequenzen auslesen und ändern; siehe [MCP-Anleitung](MCP-STUDIO.md#bestehende-sequenzen-ab-0380). Die gerenderte Abnahme steht aus. [Prüfbericht](PRUEFUNG.md#version-0370).
 
 
 ## Gemeinsame KI-Änderungen an Bewegungsfolgen (0.40.0)
@@ -411,4 +411,4 @@ Seit **0.79.0** exportiert „Move als GLB (mit Rig)“ den ausgewählten eigene
 
 Seit **0.80.0** übernimmt „Move als GLB (Animation)“ auch bewegte freie Oberflächen-/Gesichtspunkte als Morph-Animation, mit oder ohne vorhandenes Skelett. Unterschiedliche Oberflächenposen werden je betroffenem Mesh zusammengefasst und an den ursprünglichen Schlüsselzeiten linear gewichtet; Knochen- und Figurenbewegung bleiben kombiniert enthalten. Vorhandene Positions-/Normal-Morphs und deren konstante Gewichte werden berücksichtigt. Normale zwischen Posen werden angenähert interpoliert. Speicher-, Zielanzahl- und Arbeitsbudgets werden vor dem Kopieren und Berechnen geprüft; umfangreiche Sequenzen werden mit Hinweis abgewiesen. Studio-Projekt für die ursprünglichen Kontrollpunkte zusätzlich speichern. [Anleitung](GLB-EXPORT.md).
 
-Seit **0.82.0** können Knochen zwischen unterschiedlich stark, positiv und gleichmäßig skalierten Ästen umgehängt werden. Beispiel: Vom Astmaßstab 2 zu 3 wird die lokale Skalierung des verschobenen Knochens mit 2/3 ausgeglichen. Grundstellung, gespeicherte Schlüsselposen, Entwurf, Hautgewichte und starre Anbauteile behalten ihre bisherigen Welttransformationen. Der Ausgleich wird bei Reset und Projektladen aus der unveränderten Quelle und der Umbaufolge rekonstruiert; Zurück/Wiederholen und Rückkehr zum Original bleiben möglich. Die eigene ungleichmäßige oder negative Skalierung des verschobenen Knochens bleibt mit diesem positiven Faktor kombinierbar. Nicht gleichmäßige/negative Elternäste, Anbauteile mit eigenem Skelett und nicht invertierbare Ausgleiche bleiben gesperrt. Bewegungsverläufe zwischen Schlüsselposen und die Hautqualität weiterhin visuell prüfen. Projekte mit diesem neuen Fall benötigen mindestens 0.82.0; Projektformat bleibt Version 1. [Prüfbericht](PRUEFUNG-0.82.0.md).
+Seit **0.82.0** können Knochen zwischen unterschiedlich stark, positiv und gleichmäßig skalierten Ästen umgehängt werden. Beispiel: Vom Astmaßstab 2 zu 3 wird die lokale Skalierung des verschobenen Knochens mit 2/3 ausgeglichen. Grundstellung, gespeicherte Schlüsselposen, Entwurf, Hautgewichte und starre Anbauteile behalten ihre bisherigen Welttransformationen. Der Ausgleich wird bei Reset und Projektladen aus der unveränderten Quelle und der Umbaufolge rekonstruiert; Zurück/Wiederholen und Rückkehr zum Original bleiben möglich. Die eigene ungleichmäßige oder negative Skalierung des verschobenen Knochens bleibt mit diesem positiven Faktor kombinierbar. Nicht gleichmäßige/negative Elternäste, Anbauteile mit eigenem Skelett und nicht invertierbare Ausgleiche bleiben gesperrt. Bewegungsverläufe zwischen Schlüsselposen und die Hautqualität weiterhin visuell prüfen. Projekte mit diesem neuen Fall benötigen mindestens 0.82.0; Projektformat bleibt Version 1. [Prüfbericht](PRUEFUNG.md#version-0820).

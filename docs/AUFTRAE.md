@@ -41,7 +41,7 @@ Diese atomare Host-Anbindung ist noch nicht implementiert; seit 0.22.0 besteht s
 - Anatomische Rigging-Prüfung und gerenderte Abnahme der seit 0.24.0 abgesicherten 3D-Übernahme; Geometrieprüfung und Modellwechsel-Rücksprung sind angeschlossen.
 - Fernseitige Abbruchbestätigung, Wiederaufnahme nach App-Neustart und begrenzte Auftragshistorie.
 
-[Roadmap](ROADMAP.md#7-studio-harness-und-anbieteranbindung) · [Prüfbericht](PRUEFUNG-0.14.0.md)
+[Roadmap](ROADMAP.md#7-studio-harness-und-anbieteranbindung) · [Prüfbericht](PRUEFUNG.md#version-0140)
 
 ## Lokaler Fachadapter
 

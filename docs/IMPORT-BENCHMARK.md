@@ -38,11 +38,11 @@ node scripts/benchmark-browser-import.mjs --runs 3 > browser-import-messung.json
 
 Build, Server-/Browser-/Anwendungsstart, anfängliches Mika-Laden, Prüfsummen und IndexedDB-Speicherung sind ausgeschlossen. Die Browserkontexte sind neu; der Chromium-Prozess und OS-/GPU-Treibercaches können warm bleiben. Werte nur bei gleicher Hardware, Rendererwahl, Projektprüfsumme und vergleichbarer Last vergleichen. Der Bericht enthält Hardwareangaben, keine Quelldaten oder Zugangsschlüssel. Große reale Projekte und Zielhardware bleiben separat zu prüfen.
 
-Actions führt nach den Browserregressionen drei Produktionsmessungen mit Mika/256 Gewichtsaufträgen aus und legt `test-results/browser-import-benchmark.json` im Artefakt `browser-evidence` ab. Die Texturregression verwendet ein kleines eingebettetes PNG-Modell; das ist keine allgemeine Qualitätsabnahme großer Texturen. [Prüfbericht](PRUEFUNG-0.81.0.md).
+Actions führt nach den Browserregressionen drei Produktionsmessungen mit Mika/256 Gewichtsaufträgen aus und legt `test-results/browser-import-benchmark.json` im Artefakt `browser-evidence` ab. Die Texturregression verwendet ein kleines eingebettetes PNG-Modell; das ist keine allgemeine Qualitätsabnahme großer Texturen. [Prüfbericht](PRUEFUNG.md#version-0810).
 
 ## Browser-Referenzmessung
 
-Die [Rohdaten von 0.81.0](benchmarks/browser-import-0.81.0.json) stammen aus drei Produktionsbrowser-Importen im [CI-Lauf 42365460756](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/42365460756): Mika mit 256 Gewichtsaufträgen, Software-WebGL, AMD-EPYC-Runner. Median bis zur folgenden Frame-Grenze: 3.374,4 ms. Eine Referenz, kein Nachweis einer Beschleunigung. Die separate PNG-Regression bestätigt Bilddekodierung und tatsächliche Darstellung; das Mika-Messmodell ist untexturiert. [Einzelwerte und Grenzen](PRUEFUNG-0.81.0.md).
+Die [Rohdaten von 0.81.0](benchmarks/browser-import-0.81.0.json) stammen aus drei Produktionsbrowser-Importen im [CI-Lauf 42365460756](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/42365460756): Mika mit 256 Gewichtsaufträgen, Software-WebGL, AMD-EPYC-Runner. Median bis zur folgenden Frame-Grenze: 3.374,4 ms. Eine Referenz, kein Nachweis einer Beschleunigung. Die separate PNG-Regression bestätigt Bilddekodierung und tatsächliche Darstellung; das Mika-Messmodell ist untexturiert. [Einzelwerte und Grenzen](PRUEFUNG.md#version-0810).
 
 ## CPU-Pfad
 
@@ -90,5 +90,5 @@ Ein CPU-Durchlauf hat höchstens fünf Minuten Zeit; bei Fehlern endet das Werkz
 
 ## Referenzmessung
 
-Die [Rohdaten von 0.68.0](benchmarks/project-import-0.68.0.json) enthalten drei lokale Messungen des mitgelieferten Mika mit 256 Gewichtsaufträgen. Sie sind eine Ausgangsmessung, kein Vorher/Nachher-Nachweis einer Beschleunigung. Ergebnisse und Prüfstand stehen im [Versionsbericht](PRUEFUNG-0.68.0.md).
+Die [Rohdaten von 0.68.0](benchmarks/project-import-0.68.0.json) enthalten drei lokale Messungen des mitgelieferten Mika mit 256 Gewichtsaufträgen. Sie sind eine Ausgangsmessung, kein Vorher/Nachher-Nachweis einer Beschleunigung. Ergebnisse und Prüfstand stehen im [Versionsbericht](PRUEFUNG.md#version-0680).
 

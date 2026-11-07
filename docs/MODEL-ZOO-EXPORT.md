@@ -40,7 +40,7 @@ Die Ausgabe enthält `model-zoo/`, `merge-report.json` mit Größen und SHA-256-
 3. Alle Avatare auswählen, Geometrie/Rig/Texturen prüfen, Moves abspielen und Projekte speichern/erneut laden.
 4. Erst nach dieser Abnahme den geprüften Katalog mit dem eigenen Hosting-/Repository-Verfahren veröffentlichen.
 
-Manuelles Kopieren der Projektdatei und Ergänzen ihres Eintrags im bestehenden Katalog bleibt möglich. Ein einzelnes Exportpaket darf nicht ungeprüft den vorhandenen Katalog ersetzen. Kein Upload oder Deployment erfolgt automatisch. Paketdateien enthalten das vollständige Modell und sämtliche Studio-Daten. [Prüfbericht zum Merger](PRUEFUNG-0.30.0.md).
+Manuelles Kopieren der Projektdatei und Ergänzen ihres Eintrags im bestehenden Katalog bleibt möglich. Ein einzelnes Exportpaket darf nicht ungeprüft den vorhandenen Katalog ersetzen. Kein Upload oder Deployment erfolgt automatisch. Paketdateien enthalten das vollständige Modell und sämtliche Studio-Daten. [Prüfbericht zum Merger](PRUEFUNG.md#version-0300).
 
 ## Katalogformat und Laden
 
@@ -50,4 +50,4 @@ Bei Projektquellen muss `project.avatar.id` mit der Katalog-ID übereinstimmen. 
 
 Projektabrufe verwenden die konfigurierte Anwendungsbasis, keine im Katalog frei eingebbaren externen URLs, keine Redirects und keine Zugangsdaten. Die tatsächliche Streamgröße wird auf 80 MiB begrenzt; der eingebettete Modellimport bleibt auf 50 MiB begrenzt. Abbruch, falsche IDs, ungültiges JSON und veraltete Ladevorgänge verhindern die Übernahme. Die bestehenden Modell-/Geometrieprüfungen, Rückfragen zu ungespeicherten Änderungen und der Modellwechsel-Verlauf gelten weiterhin.
 
-Das Exportskript prüft die Datenstruktur, keine Anatomie, Texturdarstellung oder Bewegungsqualität. Ein synthetisches reales GLB und der HTTP-Ladeweg sind automatisiert geprüft; der gerenderte Veröffentlichungsablauf ist noch nicht abgenommen. [Prüfbericht](PRUEFUNG-0.29.0.md).
+Das Exportskript prüft die Datenstruktur, keine Anatomie, Texturdarstellung oder Bewegungsqualität. Ein synthetisches reales GLB und der HTTP-Ladeweg sind automatisiert geprüft; der gerenderte Veröffentlichungsablauf ist noch nicht abgenommen. [Prüfbericht](PRUEFUNG.md#version-0290).
