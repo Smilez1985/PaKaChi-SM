@@ -1,5 +1,6 @@
 /** Reproducible character-specific refinement and skinning; no changes to source assets. */
 import * as T from 'three';
+import {compactMorphGLB} from '../src/sparse-morph-glb.ts';
 import {preparePoseCorrections} from './pakachi-pose-corrections.mjs';
 import {GLTFExporter} from 'three/addons/exporters/GLTFExporter.js';
 import {readFile,writeFile,mkdir} from 'node:fs/promises';
@@ -162,7 +163,7 @@ export function prepareCharacter(source,form){
 }
 
 export async function generateCharacters({ifNeeded=false}={}){
- const pipelineSha256=hash(Buffer.concat(await Promise.all(['prepare-pakachi.mjs','pakachi-rig-config.mjs','pakachi-paws.mjs','pakachi-skin-optimization.mjs','pakachi-pose-corrections.mjs','../src/surface-check.ts','../src/pose-morphs.ts'].map(p=>readFile(new URL('./'+p,import.meta.url))))));
+ const pipelineSha256=hash(Buffer.concat(await Promise.all(['prepare-pakachi.mjs','pakachi-rig-config.mjs','pakachi-paws.mjs','pakachi-skin-optimization.mjs','pakachi-pose-corrections.mjs','../src/surface-check.ts','../src/pose-morphs.ts','../src/sparse-morph-glb.ts'].map(p=>readFile(new URL('./'+p,import.meta.url))))));
  const reportPath='docs/benchmarks/pakachi-rigging-2026-11-07.json';
  if(ifNeeded){try{
   const previous=JSON.parse(await readFile(reportPath,'utf8'));
@@ -175,9 +176,9 @@ export async function generateCharacters({ifNeeded=false}={}){
  globalThis.FileReader??=class{readAsArrayBuffer(blob){blob.arrayBuffer().then(result=>{this.result=result;this.onloadend?.();});}readAsDataURL(blob){blob.arrayBuffer().then(result=>{this.result='data:application/octet-stream;base64,'+Buffer.from(result).toString('base64');this.onloadend?.();});}};
  const reports=[];for(const form of Object.keys(characterForms)){
   const sourcePath=`public/model-zoo/pakachi-drafts/${form}.glb`,bytes=await readFile(sourcePath),gltf=await parseModel(Uint8Array.from(bytes).buffer),prepared=prepareCharacter(gltf.scene,form);
-  const output=Buffer.from(await new GLTFExporter().parseAsync(prepared.root,{binary:true,onlyVisible:true}));await mkdir('public/model-zoo/pakachi-rigged',{recursive:true});await writeFile(`public/model-zoo/pakachi-rigged/${form}.glb`,output);
+  const output=Buffer.from(compactMorphGLB(await new GLTFExporter().parseAsync(prepared.root,{binary:true,onlyVisible:true})));await mkdir('public/model-zoo/pakachi-rigged',{recursive:true});await writeFile(`public/model-zoo/pakachi-rigged/${form}.glb`,output);
   reports.push({form,source:sourcePath,sourceSha256:hash(bytes),output:`public/model-zoo/pakachi-rigged/${form}.glb`,outputSha256:hash(output),bytes:output.length,...prepared.report});disposeModel(gltf.scene);disposeModel(prepared.root);
  }
- await writeFile(reportPath,JSON.stringify({format:'pakachi-character-rigging',version:3,pipelineSha256,method:'Measured landmarks, corrected wrist/paw depths and fitted tail cross-sections; continuous chain weights, three mesh-edge smoothing passes, four influences maximum. Distal hand/toe clipping, 0.00001-unit source welding and simple boundary-loop caps; 28 extra digit joints with independent rigid geometry. Accepted pose-space elbow morphs from constrained edge-length fitting; original weights and rest surface unchanged. Character-specific, not automatic anatomical inference.',forms:reports},null,2)+'\n');return reports;
+ await writeFile(reportPath,JSON.stringify({format:'pakachi-character-rigging',version:4,pipelineSha256,method:'Measured landmarks, corrected wrist/paw depths and fitted tail cross-sections; continuous chain weights, three mesh-edge smoothing passes, four influences maximum. Distal hand/toe clipping, 0.00001-unit source welding and simple boundary-loop caps; 28 extra digit joints with independent rigid geometry. Accepted context-guarded elbow/knee morphs with attachment-preserving fur offsets from constrained edge-length fitting; original weights and rest surface unchanged. Character-specific, not automatic anatomical inference.',forms:reports},null,2)+'\n');return reports;
 }
 if(process.argv[1]&&import.meta.url===pathToFileURL(resolve(process.argv[1])).href)generateCharacters({ifNeeded:process.argv.includes('--if-needed')}).then(r=>console.log(r.map(x=>({form:x.form,bones:x.bones,vertices:x.bodyVertices,furTufts:x.furTufts,bytes:x.bytes})))).catch(e=>{console.error(e);process.exitCode=1;});

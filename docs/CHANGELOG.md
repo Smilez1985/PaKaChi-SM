@@ -14,6 +14,26 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 Noch keine weiteren Änderungen.
 
+## [0.90.0] - 2026-11-09
+
+Zeitstempel: 2026-11-09T00:32:51+01:00 (Europe/Berlin)
+
+### Added
+
+- CPU-Aufbereitung prüft beide Ellenbogen und beide Knie. Arbeitsform: 16 akzeptierte Korrekturhaltungen; Tierform: 11. Zielwinkel, Grundgeometrie, 59 Gelenke und ursprüngliche Hautgewichte bleiben erhalten. Körper und Fell werden gemeinsam geprüft, ungeeignete Varianten verworfen. Die linke Tierform-Ellenbogenkorrektur aus 0.89.0 wird wegen schlechterer Mischachsenproben zurückgenommen.
+- Bewegungskontext in Korrektur-Metadaten: benannte Nachbargelenke und optionaler Achsenbereich begrenzen die Freigabe mit weicher Ein-/Ausblendung. Erkannte ungeeignete Kontexte fallen auf die ursprüngliche Hautbewegung zurück. Renderer, reine Studio-Prüfung und gebackener Export verwenden dieselbe Berechnung. Das ist keine allgemeine Reparatur kombinierter Bewegungen.
+- Erweiterte Prüfungen: Achsenwinkel, gleichzeitige Gelenke, Elternbewegungen, Mischachsen und Übergänge der Kontextfreigaben. Nach Aufnahme aller Formen werden 347 bzw. 178 eindeutige Posen einschließlich aller Paare unterschiedlicher korrigierter Gelenke nochmals gegen die unkorrigierte Haut gemessen. [Messdaten, Formatversion 4](benchmarks/pakachi-rigging-2026-11-07.json).
+
+### Fixed
+
+- Unabhängige Gelenkkorrekturen schwächen sich nicht länger gegenseitig ab: Gewichtssumme wird pro Gelenk begrenzt. Gleichzeitige volle Korrekturen verschiedener Gelenke bleiben möglich.
+- Fellkorrekturen verschieben jedes Büschel mit seinem Körperansatz. Die zusätzliche Verformung innerhalb eines Büschels entfällt, seine ursprünglichen Normalen bleiben erhalten. Ungeeignete Eltern-/Gelenkkombinationen dürfen in den geprüften Stichproben keine höhere Fehlerzahl oder maximale Hauptdehnung erzeugen.
+
+### Changed
+
+- Relative Positions-/Normal-Morphs werden beim Modell-/GLB-Export verlustfrei als sparse glTF-Accessors gespeichert, wenn dies Platz spart. Animationen, Basisattribute, Indizes, eingebettete Bilder und Anwendungsmetadaten bleiben erhalten. Reale GLTFLoader-Rundläufe prüfen auch Strides, große Indizes, Nullziele und negative Null. Dateien: Arbeitsform 13.804.988 Byte, Tierform 17.813.052 Byte; das bestehende 50-MiB-Importlimit bleibt erhalten. Dekodierter Speicherbedarf bleibt größer als die Datei.
+- Vollständigen CI-Lauf von 0.89.0 ausgewertet: 388 Node-Tests, Build, 39 Chromium-Fälle und drei Produktionsimportmessungen bestanden. Prüfbericht und Roadmap nachgeführt; gemeinsame Morph-Oberfläche, Standard-Verwandlung und Hardwareabnahme bleiben offen.
+
 ## [0.89.0] - 2026-11-08
 
 Zeitstempel: 2026-11-08T22:19:25+01:00 (Europe/Berlin)
@@ -1867,3 +1887,5 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 [0.88.0]: PRUEFUNG.md#version-0880
 
 [0.89.0]: PRUEFUNG.md#version-0890
+
+[0.90.0]: PRUEFUNG.md#version-0900

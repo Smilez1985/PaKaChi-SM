@@ -1,4 +1,5 @@
 import * as T from 'three';
+import {compactMorphGLB} from './sparse-morph-glb.ts';
 import {POSE_MORPHS,POSE_MORPH_BIND,poseMorphsEnabled} from './pose-morphs.ts';
 import {clone as cloneSkeleton} from 'three/addons/utils/SkeletonUtils.js';
 /** Independent static geometry. Skin/morph deformation is baked; no editor rig or clips. */
@@ -53,7 +54,7 @@ export function captureFigureHierarchy(root:T.Object3D,requireSkin=false):T.Grou
 export function captureRiggedFigure(root:T.Object3D):T.Group{return captureFigureHierarchy(root,true);}
 export function disposeStaticFigure(root:T.Group){root.traverse(node=>{if(node instanceof T.Mesh){node.geometry.dispose();for(const material of Array.isArray(node.material)?node.material:[node.material])material.dispose();if(node instanceof T.SkinnedMesh)node.skeleton.dispose();}});}
 export async function writeFigureGLB(scene:T.Group,animations:T.AnimationClip[]=[]):Promise<ArrayBuffer>{
- try{const {GLTFExporter}=await import('three/addons/exporters/GLTFExporter.js');const exporter=new GLTFExporter(),bytes=await exporter.parseAsync(scene,{binary:true,onlyVisible:true,animations});if(!(bytes instanceof ArrayBuffer))throw Error('GLB-Export fehlgeschlagen.');return bytes;}
+ try{const {GLTFExporter}=await import('three/addons/exporters/GLTFExporter.js');const exporter=new GLTFExporter(),bytes=await exporter.parseAsync(scene,{binary:true,onlyVisible:true,animations});if(!(bytes instanceof ArrayBuffer))throw Error('GLB-Export fehlgeschlagen.');return compactMorphGLB(bytes);}
  finally{disposeStaticFigure(scene);}
 }
 export function exportRiggedFigureGLB(root:T.Object3D):Promise<ArrayBuffer>{return writeFigureGLB(captureRiggedFigure(root));}

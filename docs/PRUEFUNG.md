@@ -1,6 +1,6 @@
 # Prüfstand und Protokolle
 
-**Softwarestand: 0.89.0 · Dokumentationsabgleich: 2026-11-08T22:19:25+01:00 (Europe/Berlin).**
+**Softwarestand: 0.90.0 · Dokumentationsabgleich: 2026-11-09T00:32:51+01:00 (Europe/Berlin).**
 
 Alle Prüfnachweise stehen in dieser Datei: ein Abschnitt je Softwareversion sowie gesonderte Abschnitte für datierte Zwischenprüfungen. Die Ergebnisse und Grenzen gelten für den jeweils genannten Stand. Spätere Läufe stehen als Nachtrag im selben Abschnitt. Produktänderungen gehören in den [Changelog](CHANGELOG.md), offene Aufgaben in die [Roadmap](ROADMAP.md).
 
@@ -8,10 +8,10 @@ Alle Prüfnachweise stehen in dieser Datei: ein Abschnitt je Softwareversion sow
 
 | Prüfung | Bestätigter Stand | Umfang und Grenze |
 | --- | --- | --- |
-| Node-Tests | [0.89.0](#version-0890): 388 lokal bestanden | Einschließlich echter MCP-/OAuth-/Python-/ACP-Prozesse; keine manuelle Qualitätsabnahme. |
-| TypeScript und Produktionsbuild | [0.89.0](#version-0890): lokal bestanden | Bekannte Bundle-Größenwarnung; keine Aussage über Zielhardware-Leistung. |
-| Chromium-Browserfälle | [0.88.0](#version-0880): 38 im vollständigen CI-Lauf; drei gezielte Originalmodellfälle lokal für 0.89.0 bestanden | Software-WebGL, simulierte KI-Anbieter; keine reale KI-Inferenzabnahme. |
-| Produktionsbrowser-Importmessung | [0.88.0](#version-0880): drei CI-Durchläufe bestanden | Mika mit 256 Gewichtsaufträgen; keine allgemeine Laufzeitgarantie. |
+| Node-Tests | [0.90.0](#version-0900): 396 lokal bestanden | Einschließlich echter MCP-/OAuth-/Python-/ACP-Prozesse; keine manuelle Qualitätsabnahme. |
+| TypeScript und Produktionsbuild | [0.90.0](#version-0900): lokal bestanden | Bekannte Bundle-Größenwarnung; keine Aussage über Zielhardware-Leistung. |
+| Chromium-Browserfälle | [0.89.0](#version-0890): 39 im vollständigen CI-Lauf; drei gezielte Originalmodellfälle lokal für 0.90.0 bestanden | Software-WebGL, simulierte KI-Anbieter; keine reale KI-Inferenzabnahme. |
+| Produktionsbrowser-Importmessung | [0.89.0](#version-0890): drei CI-Durchläufe bestanden | Mika mit 256 Gewichtsaufträgen; keine allgemeine Laufzeitgarantie. |
 | Legacy-Testprogramme | [0.9.0](#version-090): beide bestanden | Steuerung, MQTT-Verhalten und Lebenszyklus des Originalplayers. |
 | Python-MCP-/MQTT-Integration | [0.10.0](#version-0100): bestanden | Echter Python-Prozess und eingebetteter Testbroker; keine allgemeine externe Hostabnahme. |
 | Originaldateien | [0.49.0](#version-0490): bytegenau erhalten | 83 Originaldateien einschließlich 72 Transformationsbildern. |
@@ -60,6 +60,22 @@ Diese Liste beschreibt ausstehende Abnahmen.
 
 Die jüngste Version steht zuerst. Für eine bestimmte Version die Dokumentgliederung oder die Browser-Suche verwenden.
 
+## Version 0.90.0
+
+**Prüfzeitpunkt:** 2026-11-09T00:32:51+01:00 (Europe/Berlin).
+
+- `npm run verify`: alle 396 Node-Tests, TypeScript und Produktionsbuild bestanden. Darunter tatsächliche Originalmodelle, gemeinsame Posen und binärer GLB-Animationsexport mit drei gleichzeitig korrigierten Gelenken; normale AnimationMixer-Wiedergabe stimmt an geprüften Vertices mit der Studio-Vorhersage überein. Bekannte Bundle-Größenwarnung bleibt bestehen.
+- Tatsächliche Original-GLBs: 16 übernommene Korrekturziele an linkem Ellenbogen/beiden Knien der Arbeitsform, 11 an rechtem Ellenbogen/linkem Knie der Tierform. Alle 24 ±90°-Kandidaten je Form werden geprüft; ungeeignete oder über dem 16-Ziel-Budget liegende Kandidaten verworfen. Die frühere linke Ellenbogenkorrektur der Tierform wird wegen schlechterer Mischachsenproben nicht weiter ausgeliefert.
+- Nach Abschluss der Auswahl werden alle aufgenommenen Prüfspezifikationen und sämtliche Zielhaltungs-Paare verschiedener Gelenke mit dem endgültigen Korrektursatz erneut ausgewertet: 347 bzw. 178 eindeutige Posen an Körper und Fell. Kein Anstieg der gemessenen Fehlerzahl oder maximalen Hauptdehnung über Toleranz 0,00001, keine ungültigen Messungen. An jeder übernommenen Zielhaltung weniger auffällige Körperdreiecke. Vollständige Daten, Parameter und Ausgabe-Hashes im [Charakterbericht](benchmarks/pakachi-rigging-2026-11-07.json), Formatversion 4.
+- Gemeinsame Kontextberechnung für Vorbereitung, Vorschau, reine Prüfung und Export. Schutzbereiche für benannte Nachbargelenke blenden innerhalb 0,5° aus; ein optionaler Achsenkegel ist implementiert und synthetisch geprüft. Unabhängige Gelenke behalten Gewicht 1; überlappende Ziele desselben Gelenks werden gemeinsam begrenzt. Reziproke Kontextübergänge und der endgültige Satz werden nachgeprüft. Grenzen und ungültige Metadaten sind getestet.
+- Fellbüschel erhalten je drei Vertices dieselbe relative Verschiebung ihres Körperansatzes, ihre Korrektur-Normalen sind null. Dadurch wird ihre ursprüngliche Hautverformung nicht um zusätzliche Büschelverzerrung ergänzt. Die unabhängigen Golden-Digests der ursprünglichen Körperattribute aus 0.88.0 bleiben unverändert.
+- Verlustfreie sparse glTF-Accessors: echter binärer GLTFLoader-Rundlauf für Basis-/Morphdaten, Bildbytes und unveränderte Extras; interleavte Daten, Uint32-Indizes über 65.535, negative Null und ausschließlich Nullwerte geprüft. Fehlerhafte Grenzen und nicht endliche Werte werden abgewiesen. Die abgeleiteten Dateien belegen 13.804.988 bzw. 17.813.052 Byte. Dies ist eine Dateispeicher-, keine Grafik-/RAM-Einsparungszusage.
+- Drei gezielte Chromium-Headless-Shell-Fälle bestanden: beide Originalformen posieren, Undo/Redo, Finger, Projekt-Rundlauf und mehrere Ansichten; Arbeitsform zusätzlich Ellenbogen und beide Knie gemeinsam, Oberflächenvergleich an/aus und erneutes Laden derselben kombinierten Pose. Die Ansichtsaufnahmen wurden stichprobenartig gesichtet. Weiterhin sichtbare Verdrehungen und Oberflächenfehler verhindern eine anatomische Gesamtfreigabe.
+
+**Grenzen:** Stichproben einzelner und kombinierter Haltungen, keine lückenlose Bewegungsfreigabe. Kontext-Ausblendung repariert keine weiterhin fehlerhafte ursprüngliche Verformung. Keine Kollisions-, Volumen-, Silhouetten- oder allgemeine anatomische Abnahme. 180°-Stresshaltung, gemeinsame Morph-Oberfläche und Standard-Verwandlung bleiben offen; Windows/Caddy/GPU wurden nicht live abgenommen.
+
+**CI:** Die vollständige CI für 0.89.0 wurde erfolgreich ausgewertet. Der Lauf dieses Meilensteins wird commitbezogen in PR #1 geprüft.
+
 ## Version 0.89.0
 
 **Prüfzeitpunkt:** 2026-11-08T22:19:25+01:00 (Europe/Berlin).
@@ -76,7 +92,7 @@ Die jüngste Version steht zuerst. Für eine bestimmte Version die Dokumentglied
 
 **Grenzen:** Korrekturen gelten nur nahe den übernommenen linken Ellenbogenhaltungen; der maximale Quaternion-Abstand beträgt 45°. Keine allgemeine Reparatur beliebiger Modelle, weiterer Gelenke oder kombinierter Bewegungen. Keine Kollisions-, Volumen-, Silhouetten- oder anatomische Gesamtabnahme. Die 180°-Stresshaltung bleibt unkorrigiert. Eine neue gemeinsame Oberfläche zwischen den Formen und die Standard-Verwandlung werden hierdurch nicht erzeugt.
 
-**CI:** 0.88.0 ist vollständig erfolgreich, siehe folgenden Abschnitt. Der vollständige GitHub-Lauf für 0.89.0 ist nach Veröffentlichung gesondert auszuwerten.
+**CI-Nachtrag:** [Lauf 42525441374](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/42525441374), Commit `c6582a46ff016928bfa95740bee32072927943f9`, vollständig erfolgreich: 388 Node-Tests, TypeScript/Build, alle 39 Chromium-Fälle und drei Produktionsbrowser-Importmessungen. Job-Protokoll nach Abschluss ausgewertet.
 
 ## Version 0.88.0
 

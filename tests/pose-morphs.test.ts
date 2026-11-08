@@ -4,7 +4,7 @@ import * as T from 'three';
 import {clone} from 'three/addons/utils/SkeletonUtils.js';
 import {twistFixture} from './helpers/twist-fixture.ts';
 import {StudioRig} from '../src/studio-rig.ts';
-import {POSE_MORPHS,POSE_MORPH_BIND,poseMorphBindings} from '../src/pose-morphs.ts';
+import {POSE_MORPHS,POSE_MORPH_BIND,poseMorphBindings,poseMorphAmount} from '../src/pose-morphs.ts';
 import {poseSurfacePositions} from '../src/pose-surface-check.ts';
 import {captureMoveGLB,exportMoveGLB} from '../src/move-glb.ts';
 import {parseModel,disposeModel} from '../src/viewer.ts';
@@ -12,15 +12,21 @@ import {captureRiggedFigure,disposeStaticFigure} from '../src/figure-glb.ts';
 import {parseProject} from '../src/studio-data.ts';
 import {optimizeSkinWeights} from '../scripts/pakachi-skin-optimization.mjs';
 
-function fixture(){
+function fixture(extra?:'independent'|'same',context=false){
  const f=twistFixture();f.rig.dispose();const g=f.mesh.geometry,delta=new Float32Array(g.attributes.position.array.length);for(let v=16;v<32;v++)delta[v*3]=.08;
  const native=new T.Float32BufferAttribute(new Float32Array(delta.length),3),corrective=new T.Float32BufferAttribute(delta,3);native.name='Native';corrective.name='Corrective';g.morphTargetsRelative=true;g.morphAttributes.position=[native,corrective];f.mesh.updateMorphTargets();f.mesh.morphTargetInfluences![0]=.2;
  f.mesh.userData[POSE_MORPHS]=[{joint:'Forearm',target:'Corrective',rest:[0,0,0,1],pose:new T.Quaternion().setFromAxisAngle(new T.Vector3(0,1,0),Math.PI/2).toArray(),radius:Math.PI/4}];
+ if(extra){const target=corrective.clone();target.name='Additional';g.morphAttributes.position.push(target);f.mesh.updateMorphTargets();f.mesh.morphTargetInfluences![0]=.2;f.mesh.userData[POSE_MORPHS].push({joint:extra==='independent'?'Upper arm':'Forearm',target:'Additional',rest:[0,0,0,1],pose:new T.Quaternion().setFromAxisAngle(new T.Vector3(0,extra==='same'?1:0,extra==='independent'?1:0),Math.PI/2).toArray(),radius:Math.PI/4});}
+ if(context)Object.assign(f.mesh.userData[POSE_MORPHS][0],{constraints:[{joint:'Upper arm',rest:[0,0,0,1],radius:Math.PI/360}],axisCone:{inner:2*Math.PI/180,outer:5*Math.PI/180}});
  f.mesh.userData[POSE_MORPH_BIND]=f.mesh.skeleton.boneInverses.map(m=>m.clone().multiply(f.mesh.bindMatrix).toArray());const root=new T.Group();root.add(f.root);const rig=new StudioRig(root),joint=rig.data.points.find(p=>p.name==='Forearm')!;
  const values=(degrees:number)=>{const values=rig.capture();values[joint.id].rotation=new T.Quaternion().setFromAxisAngle(new T.Vector3(0,1,0),degrees*Math.PI/180).toArray();return values;};return {...f,root,rig,joint,values};
 }
 test('pose-space weights are neutral outside the authored range, smooth, sign-invariant and read-only',()=>{
  const f=fixture(),live=f.rig.capture();for(const [angle,expected]of [[0,0],[45,0],[67.5,.5],[90,1],[112.5,.5],[135,0],[180,0]]){const weights=f.rig.correctionWeights(f.values(angle)).get(f.mesh)!;assert.ok(Math.abs(weights[1]-expected)<1e-7);assert.equal(weights[0],.2);}const values=f.values(90);values[f.joint.id].rotation=values[f.joint.id].rotation.map(v=>-v) as [number,number,number,number];assert.equal(f.rig.correctionWeights(values).get(f.mesh)![1],1);assert.deepEqual(f.rig.capture(),live);assert.deepEqual(f.mesh.morphTargetInfluences,[.2,0]);f.rig.dispose();
+});
+test('corrections on independent joints keep full strength while same-joint overlap stays bounded',()=>{
+ const f=fixture('independent'),values=f.values(90),upper=f.rig.data.points.find(p=>p.name==='Upper arm')!;values[upper.id].rotation=new T.Quaternion().setFromAxisAngle(new T.Vector3(0,0,1),Math.PI/2).toArray();assert.deepEqual(f.rig.correctionWeights(values).get(f.mesh),[.2,1,1]);f.rig.apply(values);assert.deepEqual(f.mesh.morphTargetInfluences,[.2,1,1]);f.rig.dispose();
+ const same=fixture('same');assert.deepEqual(same.rig.correctionWeights(same.values(90)).get(same.mesh),[.2,.5,.5]);same.rig.dispose();
 });
 test('pure surface evaluation agrees with actual corrected skin and preserves full target transforms',()=>{
  const f=fixture(),values=f.values(90),predicted=poseSurfacePositions(f.rig,values,0);f.rig.apply(values);assert.equal(f.mesh.morphTargetInfluences![1],1);assert.deepEqual(f.rig.capture(),values);const inverse=f.root.matrixWorld.clone().invert();for(let v=0;v<predicted.length/3;v++){const actual=f.mesh.getVertexPosition(v,new T.Vector3()).applyMatrix4(f.mesh.matrixWorld).applyMatrix4(inverse);assert.ok(actual.distanceTo(new T.Vector3().fromArray(predicted,v*3))<1e-7);}f.rig.dispose();
@@ -45,4 +51,25 @@ test('authored bind checks survive viewer normalization and reject a different n
  const f=fixture(),source=clone(f.root);source.traverse(n=>{if(n instanceof T.Mesh)n.geometry=n.geometry.clone();});
  const parent=new T.Group();parent.scale.set(1.5,.8,2);parent.position.set(2,3,4);parent.add(source);parent.updateMatrixWorld(true);const normalized=new StudioRig(source);assert.equal(normalized.poseCorrectionsCompatible,true);normalized.dispose();
  const changed=clone(f.root);changed.getObjectByName('Forearm')!.quaternion.setFromAxisAngle(new T.Vector3(0,1,0),.5);changed.updateMatrixWorld(true);const incompatible=new StudioRig(changed);assert.equal(incompatible.poseCorrectionsCompatible,false);assert.equal(incompatible.poseCorrectionsActive,false);incompatible.dispose();f.rig.dispose();
+});
+
+test('context guards fade continuously, reject mixed axes, and match live/pure skinning',()=>{
+ const f=fixture(undefined,true),upper=f.rig.data.points.find(p=>p.name==='Upper arm')!;
+ for(const [angle,expected]of [[0,1],[.25,.5],[.5,0],[30,0],[-30,0]]){
+  const values=f.values(90);values[upper.id].rotation=new T.Quaternion().setFromAxisAngle(new T.Vector3(1,0,0),angle*Math.PI/180).toArray();
+  assert.ok(Math.abs(f.rig.correctionWeights(values).get(f.mesh)![1]-expected)<1e-7);
+  const positions=poseSurfacePositions(f.rig,values,0);f.rig.apply(values);assert.deepEqual(f.rig.capture(),values);
+  for(let v=0;v<positions.length/3;v++){const actual=f.mesh.getVertexPosition(v,new T.Vector3()).applyMatrix4(f.mesh.matrixWorld);assert.ok(actual.distanceTo(new T.Vector3().fromArray(positions,v*3))<1e-7);}
+ }
+ const shape=f.mesh.userData[POSE_MORPHS][0],neutral=()=>new T.Quaternion();
+ for(const [angle,factor]of [[0,1],[2,1],[3.5,.5],[5,0],[15,0]]){
+  const a=angle*Math.PI/180,q=new T.Quaternion().setFromAxisAngle(new T.Vector3(Math.sin(a),Math.cos(a),0),Math.PI/2),plain=poseMorphAmount(q,{...shape,axisCone:undefined},neutral),guarded=poseMorphAmount(q,shape,neutral);
+  assert.ok(Math.abs(guarded-plain*factor)<1e-7);q.set(-q.x,-q.y,-q.z,-q.w);assert.ok(Math.abs(poseMorphAmount(q,shape,neutral)-guarded)<1e-7);
+ }
+ f.rig.dispose();
+});
+test('invalid context bones, quaternions, ranges and axis cones are rejected at binding',()=>{
+ for(const metadata of [{constraints:[{joint:'Missing',rest:[0,0,0,1],radius:.1}]},{constraints:[{joint:'Upper arm',rest:[0,0,0,2],radius:.1}]},{constraints:[{joint:'Upper arm',rest:[0,0,0,1],radius:0}]},{axisCone:{inner:.5,outer:.1}}]){
+  const f=fixture(),root=clone(f.root),mesh=root.getObjectByName('Arm skin')!;Object.assign(mesh.userData[POSE_MORPHS][0],metadata);assert.throws(()=>poseMorphBindings(root));f.rig.dispose();
+ }
 });

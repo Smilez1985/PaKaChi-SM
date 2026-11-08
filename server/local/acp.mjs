@@ -31,7 +31,7 @@ export function createAcpHost({launch=launchProcess}={}){
    const rejectPending=()=>{for(const r of requests.values()){clearTimeout(r.timer);r.reject(Error('ACP-Agent beendet.'));}requests.clear();};
    const exited=process.done.then(result=>{rejectPending();return result;},error=>{rejectPending();throw error;});exited.catch(()=>{});
    try{
-    const initialized=await request('initialize',{protocolVersion:1,clientCapabilities:{fs:{readTextFile:false,writeTextFile:false},terminal:false},clientInfo:{name:'pakachi-sm',version:'0.89.0'}});
+    const initialized=await request('initialize',{protocolVersion:1,clientCapabilities:{fs:{readTextFile:false,writeTextFile:false},terminal:false},clientInfo:{name:'pakachi-sm',version:'0.90.0'}});
     if(initialized.protocolVersion!==1)throw Error('ACP-Protokollversion wird nicht unterstützt.');
     const session=await request('session/new',{cwd,mcpServers:[mcp]});if(typeof session.sessionId!=='string')throw Error('ACP-Sitzung fehlt.');sessionId=session.sessionId;
     const result=await request('session/prompt',{sessionId,prompt:[{type:'text',text:prompt}]},timeout);signal.throwIfAborted();onData('\nACP: '+result.stopReason+'\n');return result;

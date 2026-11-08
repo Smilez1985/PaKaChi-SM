@@ -14,6 +14,8 @@ npm run prepare:pakachi
 
 Das Kommando erzeugt `public/model-zoo/pakachi-rigged/humanoid.glb` und `animal.glb` aus den erhaltenen Dateien unter `pakachi-drafts/`. `npm run dev`, `npm test` und `npm run build` führen die Vorbereitung automatisch mit `--if-needed` aus. Benötigt werden die ohnehin vorhandenen Node-/Three-Abhängigkeiten; kein erneuter KI-Gewichtsdownload und keine Python-Laufzeit. Pipeline-, Eingabe- und Ausgabeprüfsummen verhindern das Wiederverwenden veralteter Ergebnisse. Die GLBs sind ignorierte Buildprodukte; der [Aufbereitungsbericht](benchmarks/pakachi-rigging-2026-11-07.json) enthält die reproduzierbaren Parameter und Hashes. CI bietet sie zusammen mit den Browsernachweisen an.
 
+Seit 0.90.0 ergänzen geprüfte Korrekturformen auch Kniehaltungen. Kontextfreigaben blenden ungeeignete Korrekturen bei bestimmten gleichzeitigen Bewegungen aus; Fellbüschel bleiben an ihrem Hautansatz. Details und Grenzen stehen unter [poseabhängige Hautkorrekturen](STUDIO.md#poseabhängige-hautkorrekturen-des-original-pakachi).
+
 **Reihenfolge und Grenze:** Rigging und Charakterqualität kommen vor der Morph-Animation. Eine große Umformungsprobe zog Flächen zwischen Körperteilen auf; dieser Versuch wird nicht als fertige Verwandlung angeboten. Ein gemeinsames sauberes Netz, endgültige Finger-/Pfotenproportionen und Anschlüsse, verdeckte Flächen und anspruchsvolle Posen bleiben zu bearbeiten. Gleich benannte Gelenke machen die zwei unabhängigen Netze noch nicht morph-kompatibel. Dies ist eine charakterspezifische Aufbereitung mit gemessenen Gelenkpunkten, keine automatische Anatomieerkennung für beliebige Bilder.
 
 ## Erste echte PaKaChi-Entwürfe
