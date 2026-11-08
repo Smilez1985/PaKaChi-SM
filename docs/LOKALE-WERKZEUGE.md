@@ -2,6 +2,18 @@
 
 Ab 0.86.0 kann PaKaChi-SM selbst den lokalen MCP-Arbeitsplatz betreiben. Player, Studio, Programmkonfiguration, Dateien, Aufträge, Verbindungsfreigaben und Tunnel-Bedienung liegen in derselben Anwendung. Die Rechenarbeit läuft auf dem Rechner, auf dem du PaKaChi startest; eine GPU muss dem Chatbrowser nicht zugewiesen werden.
 
+## Verbindung zu deinem Rechner
+
+Jetzt folgt die Verbindung zu deinem Rechner:
+
+1. Branch `work/local-verification-model-zoo` aktualisieren und `Start-Windows.cmd` starten.
+2. **Lokale Werkzeuge** öffnen, MCP einschalten und **Player koppeln**.
+3. Blender-/Python-Pfade eintragen und **Programme prüfen** ausführen.
+4. Deine DuckDNS-MCP-Adresse eintragen, **Caddy-Abschnitt erstellen** und diesen im bestehenden Caddy übernehmen.
+5. Den MCP-Server in ChatGPT hinzufügen und die Verbindungsanfrage lokal freigeben.
+
+Der erste externe Test ist dann `local_get_status`. Damit lässt sich die tatsächliche Verbindung bestätigen.
+
 ## Starten und einschalten
 
 Node.js 24 oder neuer installieren und **Start-Windows.cmd** ausführen. Alternativ:
