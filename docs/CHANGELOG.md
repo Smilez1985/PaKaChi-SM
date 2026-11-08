@@ -12,7 +12,17 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
-Dokumentationsabgleich: 2026-11-08T19:54:23+01:00 (Europe/Berlin). Softwarestand bleibt 0.86.0; keine neue Softwareversion.
+Noch keine weiteren Änderungen.
+
+## [0.87.0] - 2026-11-08
+
+Zeitstempel: 2026-11-08T20:33:00+01:00 (Europe/Berlin)
+
+### Added
+
+- Oberflächenprüfung gespeicherter Studio-Posen: rotationsunabhängige Hauptdehnungen und Flächenverhältnisse jedes auswertbaren Dreiecks gegenüber der aktuellen Grundform. Tatsächliche Hautgewichte, freie Oberflächenpunkte, vorhandene Morphziele und an Knochen befestigte Teile werden berücksichtigt. Ganze Figurenbewegung zählt nicht als Hautverzerrung; nicht messbare Ausgangsdreiecke werden ausgewiesen.
+- **Schonendere Pose erstellen** versucht sechs abgeschwächte Varianten zwischen Grundform und Zielpose. Nur bei bestandenen Oberflächen- und vorhandenen Beugegrenzen wird ein eigener Prüfkandidat angelegt. Originalpose und Moves bleiben erhalten; Abbruch, veralteter Studio-Stand und Undo/Redo sind abgesichert. Das ist keine automatische Reparatur von Hautgewichten, Anatomie oder Topologie.
+- Reproduzierbare CPU-Diagnose `npm run check:pakachi-surface` und [Messdaten beider Originalformen](benchmarks/pakachi-surface-2026-11-08.json). Der absichtlich ungeeignete reine Knochenumbau erzeugt 6.787 bzw. 11.914 auffällige Körperdreiecke; die jeweilige Grundpose überschreitet keine Dehnungsgrenze. Gemeinsame Morph-Oberfläche, Kollisionsprüfung und Bildvergleich bleiben offen.
 
 ### Added
 
@@ -20,6 +30,7 @@ Dokumentationsabgleich: 2026-11-08T19:54:23+01:00 (Europe/Berlin). Softwarestand
 
 ### Changed
 
+- Roadmap priorisiert Charakterqualität, Rig und gemeinsame Morph-Topologie vor der umfassenden GPU-Abnahme. CPU-basierte Entwicklung läuft unabhängig von der lokalen Anbindung weiter.
 - Roadmap für die Übergabe abgeglichen: Arbeitsbranch und Entwurfs-PR, bestätigter Softwarestand und nächste lokale Schritte festgehalten. Reale Windows-/GPU-/Caddy-Abnahme und optionale Tunnel-/ACP-Abnahmen bleiben getrennt offen; Charakter-/Rigkorrektur, gemeinsame Morph-Topologie und Standard-Verwandlung behalten ihre Reihenfolge.
 - Zusammengefassten [Prüfbericht](PRUEFUNG.md#version-0860) um den vollständigen erfolgreichen GitHub-Lauf für `05cf07ce6d81a0c0de76194470c9c47e642e8322` ergänzt: 359 Node-Tests, TypeScript/Build, alle 36 Chromium-Fälle und drei Produktionsimportmessungen. Keine Behauptung eines bereits verbundenen Benutzerrechners.
 
@@ -1817,3 +1828,5 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 [0.85.0]: PRUEFUNG.md#version-0850
 
 [0.86.0]: PRUEFUNG.md#version-0860
+
+[0.87.0]: PRUEFUNG.md#version-0870

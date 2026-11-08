@@ -1,6 +1,6 @@
 # Prüfstand und Protokolle
 
-**Softwarestand: 0.86.0 · Dokumentationsabgleich: 2026-11-08T19:54:23+01:00 (Europe/Berlin).**
+**Softwarestand: 0.87.0 · Dokumentationsabgleich: 2026-11-08T20:33:00+01:00 (Europe/Berlin).**
 
 Alle Prüfnachweise stehen in dieser Datei: ein Abschnitt je Softwareversion sowie gesonderte Abschnitte für datierte Zwischenprüfungen. Die Ergebnisse und Grenzen gelten für den jeweils genannten Stand. Spätere Läufe stehen als Nachtrag im selben Abschnitt. Produktänderungen gehören in den [Changelog](CHANGELOG.md), offene Aufgaben in die [Roadmap](ROADMAP.md).
 
@@ -8,8 +8,8 @@ Alle Prüfnachweise stehen in dieser Datei: ein Abschnitt je Softwareversion sow
 
 | Prüfung | Bestätigter Stand | Umfang und Grenze |
 | --- | --- | --- |
-| Node-Tests | [0.86.0](#version-0860): 359 lokal und in CI bestanden | Einschließlich echter MCP-/OAuth-/Python-/ACP-Prozesse; keine manuelle Qualitätsabnahme. |
-| TypeScript und Produktionsbuild | [0.86.0](#version-0860): lokal und in CI bestanden | Bekannte Bundle-Größenwarnung; keine Aussage über Zielhardware-Leistung. |
+| Node-Tests | [0.87.0](#version-0870): 372 lokal bestanden | Einschließlich echter MCP-/OAuth-/Python-/ACP-Prozesse; keine manuelle Qualitätsabnahme. |
+| TypeScript und Produktionsbuild | [0.87.0](#version-0870): lokal bestanden | Bekannte Bundle-Größenwarnung; keine Aussage über Zielhardware-Leistung. |
 | Chromium-Browserfälle | [0.86.0](#version-0860): alle 36 Fälle im vollständigen CI-Lauf bestanden | Software-WebGL, simulierte KI-Anbieter; keine reale KI-Inferenzabnahme. |
 | Produktionsbrowser-Importmessung | [0.86.0](#version-0860): drei CI-Durchläufe bestanden | Mika mit 256 Gewichtsaufträgen; keine allgemeine Laufzeitgarantie. |
 | Legacy-Testprogramme | [0.9.0](#version-090): beide bestanden | Steuerung, MQTT-Verhalten und Lebenszyklus des Originalplayers. |
@@ -59,6 +59,21 @@ Diese Liste beschreibt ausstehende Abnahmen.
 ## Prüfungen nach Version
 
 Die jüngste Version steht zuerst. Für eine bestimmte Version die Dokumentgliederung oder die Browser-Suche verwenden.
+
+## Version 0.87.0
+
+**Prüfzeitpunkt:** 2026-11-08T20:33:00+01:00 (Europe/Berlin).
+
+- `npm run verify`: alle 372 Node-Tests bestanden, keine Fehler und keine übersprungenen Fälle; TypeScript und Produktionsbuild bestanden. Nach abschließender Ergänzung der Bindungsprüfung die 13 gezielten Oberflächenfälle und den Build erneut erfolgreich geprüft. Bekannte Bundle-Größenwarnung bleibt bestehen.
+- Neuer gerenderter Chromium-Headless-Shell-Fall: eine übertriebene freie Oberflächenverschiebung als Projekt laden, Warnbericht ohne Datenänderung, schonenderer Prüfkandidat als zusätzliche Pose, erneute Prüfung innerhalb der Grenzwerte, Undo/Redo sowie Speichern/Laden. Originalpose und Moves bleiben gleich. Berichtaufnahme visuell geprüft. Dieser lokale Lauf ersetzt keinen vollständigen aktuellen CI-Lauf.
+- Reine Vorausberechnung der Hautpositionen stimmt mit den tatsächlichen Three.js-Vertices überein: gewichtete Knochen, an Knochen befestigte Teile, freie Oberflächenpunkte, bestehende Morphziele, bearbeitete Bindungsrahmen und getrennte Hautbindung. Die Prüfung verändert weder Modellmatrizen noch gespeicherte Daten.
+- Analytische Fälle prüfen starre Drehung/Verschiebung, Dehnung, Scherung, Flächenkollaps, kleine Maßstäbe, fehlerhafte Indizes, nicht endliche Werte und degenerierte Ausgangsdreiecke. Abbruch, Studioänderung, Posewechsel und Verlassen verhindern veraltete Korrekturen; der ausdrücklich erzeugte Kandidat ist eine Undo-Aktion.
+- Beide tatsächlichen Original-PaKaChi-Rigs geladen. Grundposen ohne Dehnungsüberschreitung; 672 bereits degenerierte Dreiecke je Modell separat ausgewiesen, keines davon am Körpernetz. An Körper, Fell und Augen stimmen die vorausberechneten Positionen bei mehreren echten Knochendrehungen mit dem gerenderten Hautmodell rechnerisch überein.
+- CPU-Diagnose erneut ausführbar mit `npm run check:pakachi-surface`. [Messdaten mit GLB-SHA-256](benchmarks/pakachi-surface-2026-11-08.json): absichtlich ungeeigneter Umbau nur der Knochenpositionen zur jeweils anderen Form erzeugt am humanoiden Körper 6.787 auffällige von 99.176 Dreiecken (maximale Hauptdehnung ca. 150×), am Tierkörper 11.914 von 160.976 (ca. 103×). Das belegt Fehlererkennung, keine behobene Transformation.
+
+**Verfahren und Grenzen:** Eigenwerte der relativen Dreiecks-Grammatrix liefern die beiden Hauptdehnungen, das Verhältnis der Determinanten die Flächenänderung. Die festen Grenzen 0,25–3× und Fläche mindestens 0,1× sind technische Warnschwellen. Die Suche prüft sechs absteigende Bewegungsanteile und übernimmt höchstens eine zusätzliche Pose nach Oberflächen- und vorhandener Beugeprüfung. Keine Gewichts-/Topologiereparatur, kein ARAP-Optimierer, kein Bildvergleich, kein Kollisions-/Volumennachweis und keine lückenlose Zwischenbildprüfung. Bereits unbrauchbare, aber unveränderte Grundformen können die Prüfung bestehen. Gemeinsame Morph-Topologie und designgetreue Charakterabnahme bleiben offen.
+
+**CI:** Der vorherige Dokumentationsstand `243f88dd5f1d54e4acfb41456c74100a9ca61719` ist im [Lauf 42512496731](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/42512496731) erfolgreich. Dieser Lauf gilt für 0.86.0. Ein neuer CI-Lauf für 0.87.0 ist bei der Veröffentlichung auszuwerten.
 
 ## Version 0.86.0
 

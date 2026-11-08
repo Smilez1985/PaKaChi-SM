@@ -1,6 +1,6 @@
-# Avatar-Studio – 0.24.0
+# Avatar-Studio – 0.87.0
 
-Das Studio ist Teil des Players. Mika, Nori und eigene GLB-Modelle können bearbeitet werden. Der Original-PaKaChi bleibt mit beiden Formen und 72 Bildern erhalten; für ihn fehlt weiterhin das entsprechende 3D-Modell. Seine Bilder werden durch den Editor nicht verändert.
+Das Studio ist Teil des Players. Mika, Nori und eigene GLB-Modelle können bearbeitet werden. Der Original-Bildplayer mit beiden Formen und 72 Bildern bleibt erhalten. Die bearbeitbaren 3D-Rekonstruktionen beider PaKaChi-Formen sind zusätzlich im Model Zoo verfügbar; Charakterqualität und gemeinsame 3D-Verwandlung bleiben in Arbeit.
 
 ## Eine erste eigene Bewegung
 
@@ -12,7 +12,7 @@ Das Studio ist Teil des Players. Mika, Nori und eigene GLB-Modelle können bearb
 6. **Vorschau** abspielen oder zurück zum Player wechseln. Die eigene Bewegung steht dort in der Bewegungslegende und über MQTT/MCP zur Verfügung.
 7. **Speichern** lädt eine `.pakachi.json`-Projektdatei herunter. Sie enthält das ursprüngliche Modell, das bearbeitete Kontrollsystem, die aktuelle Arbeitspose, gespeicherte Posen und Bewegungen. **Projekt laden** öffnet diese Datei später wieder vollständig, auch ohne die ursprüngliche GLB-Datei.
 
-Die Zeit der ersten Pose bestimmt bei Schleifen den Rückweg von der letzten zur ersten Pose. Bei einmaligen Bewegungen startet die erste Pose sofort; die folgenden Zeiten bestimmen die jeweiligen Übergänge. Nach einer einmaligen Bewegung im Player folgt wieder der aktive Grundzustand. Eigene Bewegungen verwenden Positionsinterpolation und Quaternion-Interpolation für Drehungen. Der Wechsel zwischen Originalclips und eigenen Moves erfolgt in dieser Version direkt; die 180-ms-Überblendung gilt für Originalclips untereinander.
+Die Zeit der ersten Pose bestimmt bei Schleifen den Rückweg von der letzten zur ersten Pose. Bei einmaligen Bewegungen startet die erste Pose sofort; die folgenden Zeiten bestimmen die jeweiligen Übergänge. Nach einer einmaligen Bewegung im Player folgt wieder der aktive Grundzustand. Eigene Bewegungen verwenden Positionsinterpolation und Quaternion-Interpolation für Drehungen. Die Überblendung zwischen Originalclips und eigenen Moves besitzt Grenzen bei bearbeiteten Rigs; siehe [Roadmap](ROADMAP.md).
 
 ## Maussteuerung
 
@@ -76,8 +76,8 @@ Eine Pose speichern, die Figur erneut versetzen und eine zweite Pose speichern. 
 - Während der Studio-Bearbeitung werden Zustands-/Move-Befehle aus MQTT, MCP und der Browser-API mit einer verständlichen Fehlermeldung abgewiesen. Es gibt keine nachträglich abgespielte Warteschlange. Zurück im Player sind eigene Moves normal steuerbar.
 - Maximal 256 Kontrollpunkte, 2048 Verbindungen, 100 Posen und 100 eigene Moves pro Projekt; maximal 80 MiB beim Projektimport. Eingebettete Modelldaten unterliegen zusätzlich dem GLB-Limit von 50 MiB. Aufwendige Modelle und viele gleichzeitig verformende Punkte können langsam sein.
 - Die Datei ist ein versioniertes Studio-Projekt, kein GLB-Export und kein automatischer Eintrag im gemeinsamen Model Zoo auf GitHub. Die eigenen Moves werden mit dem geladenen Projekt im Player angeboten.
-- Keine automatische 3D-/Skelettgenerierung, Gewichts-Malwerkzeuge, anatomische Gelenkgrenzen, Ganzkörper-IK oder eigenständiger GLB-Export.
-- Automatisierte Geometrie-, Daten- und DOM-Tests sind bestanden. Die visuelle Maus-/WebGL-Abnahme muss weiterhin in einem Browser erfolgen; Chromium kann in der aktuellen Ausführungsumgebung nicht starten.
+- Allgemeines anatomisches Auto-Rigging, Gewichts-Malwerkzeuge und Ganzkörper-IK bleiben offen. Bild-zu-3D benötigt eine eingerichtete Laufzeit; [Generierung](KI-GENERIERUNG.md), vorhandene Beugegrenzen und [GLB-Export](GLB-EXPORT.md) beschreiben den jeweiligen Umfang.
+- Automatisierte Geometrie-, Daten-, DOM- und Browsernachweise stehen im [Prüfbericht](PRUEFUNG.md). Manuelle Design-/Anatomieabnahme bleibt erforderlich.
 
 ## Posen nach Gelenkänderungen prüfen
 
@@ -418,3 +418,14 @@ Seit **0.84.0** stehen die bearbeiteten Original-PaKaChi-Formen mit gemeinsamer 
 
 
 Seit **0.85.0** besitzen beide Formen 59 Gelenke einschließlich Finger und Zehen. Im Modus **Figur bewegen** im Gelenkfeld beispielsweise `LeftIndex1` oder `LeftIndex2` auswählen, die Griffe auf **Drehen** stellen und einen Drehring ziehen. `LeftThumb1/2` bewegt den Daumen, `LeftToe1Base/Tip` eine hintere Zehe; die rechte Seite heißt entsprechend `Right…`. Jedes Glied bewegt seine eigene Geometrie, einschließlich der grünen Spitze. Posen, Projektdateien und Rig-GLB-Export erhalten die Fingerstellung. Die 31-Gelenk-Projekte enthalten weiterhin ihre eingebettete frühere Modellfassung; alte Moves werden nicht automatisch auf den erweiterten Rig übertragen. Große Beugungen und Anschlüsse weiter visuell prüfen.
+
+
+## Oberflächenverformung einer Pose prüfen
+
+Eine gespeicherte Pose auswählen und **Oberfläche der Pose prüfen** anklicken. Die Prüfung verändert weder die aktuelle Figur noch gespeicherte Daten. Verglichen werden die Dreiecke der aktuellen Grundform mit derselben Oberfläche in der gespeicherten Pose. Die Meldung unterscheidet eine Überschreitung der Warnschwellen von einer nicht auswertbaren Oberfläche. **Messwerte nach Teilmodell** zeigt die einzelnen Netze, kleinste/größte Hauptdehnung und bereits in der Grundform degenerierte, nicht messbare Dreiecke (`∅`). Die Zähler beziehen sich auf Dreiecke (`△`), nicht auf Gelenke.
+
+Die festen Warnschwellen sind Dehnung unter 0,25× oder über 3× sowie eine Dreiecksfläche unter 0,1× der Grundfläche. Sie sind ein erster Filter für starke Verzerrungen, keine bestätigten Material- oder Anatomiegrenzen. Reines Verschieben/Drehen der Figur und ihrer starren Teile erzeugt keine Dehnung. Schon fehlerhafte, aber unverformte Grundformen können diese Prüfung bestehen.
+
+Im Modus **Figur bewegen** versucht **Schonendere Pose erstellen** nacheinander 87,5 %, 75 %, 50 %, 25 %, 12,5 % und 6,25 % der Bewegung von der Grundform zur gespeicherten Pose. Positionen werden interpoliert, Drehungen per Quaternion interpoliert; die Gesamtposition/-drehung/-skalierung bleibt erhalten. Der erste Kandidat innerhalb der Oberflächen- und vorhandenen Beugegrenzen wird als zusätzliche Pose **… · Prüfkandidat** gespeichert und angezeigt. Die übrigen gespeicherten Posen und Bewegungen bleiben erhalten. Mit **Zurück** lässt sich die gesamte Anlage rückgängig machen; zum dauerhaften Aufbewahren das Projekt speichern. **Vorschlag abbrechen** beendet die Suche; Änderungen am Projekt oder ein anderer ausgewählter Poseintrag verwerfen veraltete Ergebnisse.
+
+Die Suche schwächt Bewegungen ab. Sie repariert keine falschen Hautgewichte, keine Knochenhierarchie und keine ungeeignete Netzstruktur. Sie prüft weder Kollisionen noch Faltungen, verdeckte Anatomie, Silhouetten oder sämtliche Zwischenbilder einer Bewegung. Ein Prüfkandidat muss deshalb in der Vorschau bewertet werden; er wird keiner bestehenden Bewegung automatisch zugeordnet. Werden selbst die kleinsten Varianten verworfen, bleiben die Daten unverändert.

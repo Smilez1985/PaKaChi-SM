@@ -16,7 +16,7 @@
     "vite": "8.3.4"
   },
   "name": "pakachi-sm",
-  "version": "0.86.0",
+  "version": "0.87.0",
   "private": true,
   "type": "module",
   "description": "PaKaChi StateMaschine – lokaler Avatar-Player und integriertes Studio",
@@ -53,6 +53,7 @@
     "predev": "npm run prepare:pakachi -- --if-needed",
     "pretest": "npm run prepare:pakachi -- --if-needed",
     "prebuild": "npm run prepare:pakachi -- --if-needed",
-    "local": "node scripts/prepare-pakachi.mjs --if-needed && npm run build && node server/local.mjs"
+    "local": "node scripts/prepare-pakachi.mjs --if-needed && npm run build && node server/local.mjs",
+    "check:pakachi-surface": "node scripts/check-pakachi-surface.mjs"
   }
 }

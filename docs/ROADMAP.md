@@ -1,17 +1,18 @@
 # Roadmap – offene Aufgaben
 
-**Entwicklungsstand: 0.86.0 · Abgleich: 08.11.2026.** Teil der [Blaupause](README.md).
+**Entwicklungsstand: 0.87.0 · Abgleich: 08.11.2026.** Teil der [Blaupause](README.md).
 
 Diese Roadmap enthält offene Umsetzung und ausstehende Abnahme. Erledigte Änderungen stehen nach Version im [Changelog](CHANGELOG.md); Nachweise und Grenzen im [Prüfstand](PRUEFUNG.md). Eine implementierte Funktion ist nicht automatisch manuell oder mit realen Anbietern abgenommen.
 
 ## Übergabe und nächster Schritt
 
-**Übergabe aktualisiert:** 2026-11-08T19:54:23+01:00 (Europe/Berlin). Softwarestand bleibt **0.86.0**.
+**Übergabe aktualisiert:** 2026-11-08T20:33:00+01:00 (Europe/Berlin). Softwarestand **0.87.0**.
 
 - **Arbeitsbranch:** `work/local-verification-model-zoo`, [Entwurfs-PR #1](https://github.com/Smilez1985/PaKaChi-SM/pull/1); noch nicht nach `main` zusammengeführt.
-- **Bestätigter Softwarestand:** Commit `05cf07ce6d81a0c0de76194470c9c47e642e8322` besteht 359 Node-Tests, TypeScript/Build und alle 36 Chromium-Browserfälle. [Vollständiger CI-Lauf](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/42486376327) · [Prüfbericht](PRUEFUNG.md#version-0860).
-- **Nächste Aktion:** Die [fünf Schritte „Verbindung zu deinem Rechner“](LOKALE-WERKZEUGE.md#verbindung-zu-deinem-rechner) auf Steffens Rechner ausführen. Der erfolgreiche externe Aufruf von `local_get_status` ist der erste Verbindungsnachweis; die bisherigen Protokolltests bestätigen noch keinen Zugriff auf diesen Rechner.
-- **Anschließend:** Charakter und Rig auf der angebundenen Laufzeit weiter korrigieren, danach die gemeinsame Morph-Topologie und erst dann die eine vorwärts/rückwärts abspielbare Standard-Verwandlung bearbeiten.
+- **Neue Grundlage:** Mathematische Oberflächenprüfung gespeicherter Posen und ausdrücklich erzeugter, rückgängig machbarer schonenderer Prüfkandidat. Die Prüfung erkennt die Hautbrücken des verworfenen reinen Knochenumbaus an beiden Originalformen. [Prüfbericht](PRUEFUNG.md#version-0870).
+- **Nächste Aktion:** Designgetreue Charakterqualität und belastbares Rig der beiden Originalformen verbessern, danach eine gemeinsame Morph-Topologie erzeugen. Die neue Prüfung liefert Warnwerte; sie erzeugt selbst keine kompatible Oberfläche.
+- **Danach:** Eine gespeicherte Standard-Verwandlung auf dieser Oberfläche, vorwärts und rückwärts mit identischen Zwischenformen; Qualität auch zwischen den Endposen prüfen.
+- **Hardware parallel:** Die [fünf Verbindungsschritte](LOKALE-WERKZEUGE.md#verbindung-zu-deinem-rechner) bleiben verfügbar. Windows-/Caddy-/GPU-Abnahme ist offen, blockiert die CPU-basierte Charakter-/Rigarbeit jedoch nicht. Ein tatsächlicher externer Aufruf von `local_get_status` bleibt der erste Verbindungsnachweis.
 
 ## Prioritäten
 
@@ -61,7 +62,7 @@ Die Umsetzung des integrierten MCP-Arbeitsplatzes, der Caddy-/DuckDNS-Konfigurat
 - [ ] Anatomische Gelenkketten aus ungeriggter Oberfläche erzeugen; allgemeine Dreh-/Twistgrenzen, fixierte Füße und gekoppelte Ganzkörper-IK ergänzen.
 - [ ] Beugegrenzen, Posen- und Bewegungsprüfung samt Prüfbildübernahme im gerenderten Studio abnehmen; lückenlose Bewegungsprüfung, direkte Drehgrenzen und Korrekturen ergänzen.
 - [ ] Bewegungsfähige Rigs unterschiedlicher Körperformen systematisch prüfen.
-- [ ] Bewegungen geometrisch auf Fehlstellungen, Gelenkgrenzen und Kollisionen prüfen und automatisch korrigieren.
+- [ ] Die seit 0.87.0 vorhandene Dreiecks-Dehnungsprüfung einzelner Posen um Zwischenbilder, Selbstüberschneidung, Volumen-/Orientierungsprüfung und Referenzansichten erweitern; anschließend gezielte Gewichts-/Oberflächenkorrekturen statt bloßer Abschwächung der Pose. Die aktuellen Warnschwellen sind keine anatomische Abnahme.
 
 ## 5. Bild zu 3D und KI-Korrektur
 
