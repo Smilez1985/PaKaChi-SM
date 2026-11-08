@@ -12,6 +12,17 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+Dokumentationsabgleich: 2026-11-08T19:54:23+01:00 (Europe/Berlin). Softwarestand bleibt 0.86.0; keine neue Softwareversion.
+
+### Added
+
+- Zusammenhängende Fünf-Schritte-Anleitung [„Verbindung zu deinem Rechner“](LOKALE-WERKZEUGE.md#verbindung-zu-deinem-rechner): Arbeitsbranch aktualisieren, Windows-Start, MCP-/Player-Kopplung, Programmprüfung, Caddy/DuckDNS und lokale ChatGPT-Verbindungsfreigabe. Erster externer Verbindungsnachweis ist `local_get_status`.
+
+### Changed
+
+- Roadmap für die Übergabe abgeglichen: Arbeitsbranch und Entwurfs-PR, bestätigter Softwarestand und nächste lokale Schritte festgehalten. Reale Windows-/GPU-/Caddy-Abnahme und optionale Tunnel-/ACP-Abnahmen bleiben getrennt offen; Charakter-/Rigkorrektur, gemeinsame Morph-Topologie und Standard-Verwandlung behalten ihre Reihenfolge.
+- Zusammengefassten [Prüfbericht](PRUEFUNG.md#version-0860) um den vollständigen erfolgreichen GitHub-Lauf für `05cf07ce6d81a0c0de76194470c9c47e642e8322` ergänzt: 359 Node-Tests, TypeScript/Build, alle 36 Chromium-Fälle und drei Produktionsimportmessungen. Keine Behauptung eines bereits verbundenen Benutzerrechners.
+
 ## [0.86.0] - 2026-11-08
 
 Zeitstempel: 2026-11-08T14:33:07+01:00 (Europe/Berlin)

@@ -4,6 +4,15 @@
 
 Diese Roadmap enthält offene Umsetzung und ausstehende Abnahme. Erledigte Änderungen stehen nach Version im [Changelog](CHANGELOG.md); Nachweise und Grenzen im [Prüfstand](PRUEFUNG.md). Eine implementierte Funktion ist nicht automatisch manuell oder mit realen Anbietern abgenommen.
 
+## Übergabe und nächster Schritt
+
+**Übergabe aktualisiert:** 2026-11-08T19:54:23+01:00 (Europe/Berlin). Softwarestand bleibt **0.86.0**.
+
+- **Arbeitsbranch:** `work/local-verification-model-zoo`, [Entwurfs-PR #1](https://github.com/Smilez1985/PaKaChi-SM/pull/1); noch nicht nach `main` zusammengeführt.
+- **Bestätigter Softwarestand:** Commit `05cf07ce6d81a0c0de76194470c9c47e642e8322` besteht 359 Node-Tests, TypeScript/Build und alle 36 Chromium-Browserfälle. [Vollständiger CI-Lauf](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/42486376327) · [Prüfbericht](PRUEFUNG.md#version-0860).
+- **Nächste Aktion:** Die [fünf Schritte „Verbindung zu deinem Rechner“](LOKALE-WERKZEUGE.md#verbindung-zu-deinem-rechner) auf Steffens Rechner ausführen. Der erfolgreiche externe Aufruf von `local_get_status` ist der erste Verbindungsnachweis; die bisherigen Protokolltests bestätigen noch keinen Zugriff auf diesen Rechner.
+- **Anschließend:** Charakter und Rig auf der angebundenen Laufzeit weiter korrigieren, danach die gemeinsame Morph-Topologie und erst dann die eine vorwärts/rückwärts abspielbare Standard-Verwandlung bearbeiten.
+
 ## Prioritäten
 
 1. **Charakter und Rig verfeinern:** Beide Formen besitzen seit 0.85.0 dieselbe 59-Gelenk-Hierarchie einschließlich 14 beweglicher Finger/Zehen und echte Hautgewichte. Gesicht, Fell und lokale Pfotenflächen sind überarbeitet; die Körpernetze haben geschlossene, konsistent orientierte Kanten. Finger-/Pfotenproportionen, Anschlüsse bei großen Beugungen, verdeckte Flächen und Hüft-/Schulterübergänge weiter korrigieren und designgetreu abnehmen.
@@ -14,15 +23,17 @@ Diese Roadmap enthält offene Umsetzung und ausstehende Abnahme. Erledigte Ände
 
 ## Lokale Hardware anbinden
 
-Der integrierte MCP-Arbeitsplatz, Caddy-/DuckDNS-Konfiguration, OAuth-Freigaben, offizieller Tunnel-Client und ACP-v1-Client sind umgesetzt. [Einrichtung](LOKALE-WERKZEUGE.md).
+Die Umsetzung des integrierten MCP-Arbeitsplatzes, der Caddy-/DuckDNS-Konfiguration, der OAuth-Freigaben, des offiziellen Tunnel-Clients und des ACP-v1-Clients ist in [0.86.0 dokumentiert](CHANGELOG.md). Offen ist die reale Abnahme:
 
-- [ ] Auf Steffens Windows-Rechner Blender/Python und die echte GPU prüfen, vorhandenen Caddy verbinden oder OpenAI-Tunnel registrieren und einen externen MCP-Werkzeugaufruf erfolgreich ausführen.
-- [ ] Danach Charakterkorrekturen und gemeinsames Morph-Netz auf dieser Laufzeit bearbeiten; erst anschließend die eine vorwärts/rückwärts abspielbare Standard-Verwandlung.
-- [ ] Windows-/macOS-Tunnelprozess und einen produktiven authentifizierten ACP-Agenten live abnehmen. Lokale Protokolltests ersetzen diese Abnahme nicht.
+- [ ] Auf Steffens Windows-Rechner `Start-Windows.cmd` ausführen, MCP einschalten, Player koppeln und die tatsächlichen Blender-/Python-Pfade sowie GPU/PyTorch prüfen.
+- [ ] Den vorhandenen Caddy/DuckDNS-Zugang mit dem erzeugten Abschnitt verbinden, den MCP-Server in ChatGPT hinzufügen und die OAuth-Verbindungsanfrage lokal freigeben. Keine zusätzliche öffentliche Portfreigabe.
+- [ ] `local_get_status` über diese externe MCP-Verbindung erfolgreich aufrufen und die tatsächlichen Werkzeugfreigaben, Player-Kopplung und Programm-/GPU-Prüfergebnisse prüfen.
+- [ ] Einen tatsächlichen Python-/Blender-Auftrag über MCP starten, Ergebnisdateien abrufen und einen GLB-Import ins Studio prüfen.
+- [ ] Den alternativen Secure MCP Tunnel auf Windows/macOS mit einem berechtigten OpenAI-Konto sowie einen produktiven authentifizierten ACP-Agenten live abnehmen. Diese Alternativen sind keine Voraussetzung für den Caddy-Weg.
 
 ## Automatisierte Browserprüfung
 
-- [ ] Weitere Screenshots und tatsächliches Mausgefühl manuell auswerten; haftende Vorschau und mobile Posenfelder wurden in 0.76.3 automatisiert und anhand dreier sichtbarer Bereichsaufnahmen geprüft; vier Artefaktbilder wurden in 0.76.2 stichprobenartig bewertet, Optionen-Kontrast und Versionsanzeige korrigiert; gerenderte Automatisierung ersetzt diese Gesamtabnahme nicht. Die beiden echten Charakterabläufe sind lokal mit Chromium Headless Shell geprüft; reguläres Chromium wird zusätzlich in CI ausgeführt.
+- [ ] Weitere Screenshots und tatsächliches Mausgefühl manuell auswerten; haftende Vorschau und mobile Posenfelder wurden in 0.76.3 automatisiert und anhand dreier sichtbarer Bereichsaufnahmen geprüft; vier Artefaktbilder wurden in 0.76.2 stichprobenartig bewertet, Optionen-Kontrast und Versionsanzeige korrigiert; gerenderte Automatisierung ersetzt diese Gesamtabnahme nicht. Die automatisierten Charakter- und Arbeitsplatzabläufe sind im vollständigen Chromium-CI-Lauf von 0.86.0 belegt; die manuelle Gesamtabnahme bleibt offen.
 
 ## 1. Player und Model Zoo
 
