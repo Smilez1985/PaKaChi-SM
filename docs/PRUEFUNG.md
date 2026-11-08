@@ -1,6 +1,6 @@
 # Prüfstand und Protokolle
 
-**Softwarestand: 0.85.0 · Dokumentationsabgleich: 2026-11-07T21:01:23+01:00 (Europe/Berlin).**
+**Softwarestand: 0.86.0 · Dokumentationsabgleich: 2026-11-08T14:38:11+01:00 (Europe/Berlin).**
 
 Alle Prüfnachweise stehen in dieser Datei: ein Abschnitt je Softwareversion sowie gesonderte Abschnitte für datierte Zwischenprüfungen. Die Ergebnisse und Grenzen gelten für den jeweils genannten Stand. Spätere Läufe stehen als Nachtrag im selben Abschnitt. Produktänderungen gehören in den [Changelog](CHANGELOG.md), offene Aufgaben in die [Roadmap](ROADMAP.md).
 
@@ -8,15 +8,15 @@ Alle Prüfnachweise stehen in dieser Datei: ein Abschnitt je Softwareversion sow
 
 | Prüfung | Bestätigter Stand | Umfang und Grenze |
 | --- | --- | --- |
-| Node-Tests | [0.85.0](#version-0850): 345 lokal bestanden | Daten, Geometrie, DOM-/Transportabläufe und Erhaltungsprüfung; keine manuelle Qualitätsabnahme. |
-| TypeScript und Produktionsbuild | [0.85.0](#version-0850): lokal bestanden | Bekannte Bundle-Größenwarnung; keine Aussage über Zielhardware-Leistung. |
-| Chromium-Browserfälle | [0.85.0](#version-0850): zwei erweiterte Charakterfälle lokal bestanden; vollständige CI im PR | Software-WebGL, simulierte KI-Anbieter; keine reale KI-Inferenzabnahme. |
+| Node-Tests | [0.86.0](#version-0860): 359 lokal bestanden | Einschließlich echter MCP-/OAuth-/Python-/ACP-Prozesse; keine manuelle Qualitätsabnahme. |
+| TypeScript und Produktionsbuild | [0.86.0](#version-0860): lokal bestanden | Bekannte Bundle-Größenwarnung; keine Aussage über Zielhardware-Leistung. |
+| Chromium-Browserfälle | [0.86.0](#version-0860): 35 grün im Gesamtlauf; mobile Korrektur in fünf betroffenen Fällen nachgeprüft; vollständige CI im PR | Software-WebGL, simulierte KI-Anbieter; keine reale KI-Inferenzabnahme. |
 | Produktionsbrowser-Importmessung | [0.82.0](#version-0820): drei Durchläufe bestanden | Mika mit 256 Gewichtsaufträgen; keine allgemeine Laufzeitgarantie. |
 | Legacy-Testprogramme | [0.9.0](#version-090): beide bestanden | Steuerung, MQTT-Verhalten und Lebenszyklus des Originalplayers. |
 | Python-MCP-/MQTT-Integration | [0.10.0](#version-0100): bestanden | Echter Python-Prozess und eingebetteter Testbroker; keine allgemeine externe Hostabnahme. |
 | Originaldateien | [0.49.0](#version-0490): bytegenau erhalten | 83 Originaldateien einschließlich 72 Transformationsbildern. |
 
-Letzter vollständig ausgewerteter CI-Funktionsnachweis vor 0.85.0: [Lauf 42400685757](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/42400685757), Commit `100f5add743f51badc0642a78f383014b2f33237`: 337 Node-Tests, Build, alle 35 Browserfälle und drei Produktionsimportmessungen bestanden. Spätere CI-Ergebnisse sind am jeweiligen Commit in [PR #1](https://github.com/Smilez1985/PaKaChi-SM/pull/1) verknüpft. Ein erfolgreicher Testlauf ist keine visuelle oder anatomische Produktfreigabe.
+Letzter vollständig ausgewerteter CI-Funktionsnachweis vor 0.86.0: [Lauf 42411549342](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/42411549342), Commit `f43bf7189fc1e6441fca931bda1739eff60535f3`: 345 Node-Tests, Build, alle 35 Browserfälle und drei Produktionsimportmessungen bestanden. Spätere CI-Ergebnisse sind am jeweiligen Commit in [PR #1](https://github.com/Smilez1985/PaKaChi-SM/pull/1) verknüpft. Ein erfolgreicher Testlauf ist keine visuelle oder anatomische Produktfreigabe.
 
 ## Lokal prüfen
 
@@ -59,6 +59,26 @@ Diese Liste beschreibt ausstehende Abnahmen.
 ## Prüfungen nach Version
 
 Die jüngste Version steht zuerst. Für eine bestimmte Version die Dokumentgliederung oder die Browser-Suche verwenden.
+
+## Version 0.86.0
+
+359 Node-Tests und der TypeScript-/Produktionsbuild bestanden. Bekannte Bundle-Größenwarnung bleibt bestehen.
+
+**Prüfzeitpunkt:** 2026-11-08T14:38:11+01:00 (Europe/Berlin).
+
+- `npm run verify` nach Wiederaufnahme: alle 359 Node-Tests bestanden, kein Fehler und kein übersprungener Fall; TypeScript und Produktionsbuild bestanden. Die bekannte Bundle-Größenwarnung bleibt bestehen.
+- Regression bei Abbruch während der Skriptvorbereitung gefunden und behoben: Vor der Korrektur startete der bereits abgebrochene Auftrag trotzdem einen Prozess. Ein gezielt blockierter Vorbereitungsablauf beweist, dass nach Abbruch kein Prozessstart mehr stattfindet. ACP verarbeitet außerdem über Transportblöcke geteiltes UTF-8 korrekt und redigiert Zugangsschlüssel auch über mehrere Textnachrichten.
+- Echter lokaler HTTP-MCP-Client: 17 Werkzeuge, Dateieingabe, Python-Skript, asynchroner Auftrag, unveränderte Eingabedatei, Ausgabe und blockweises Lesen samt SHA-256. Kein eingebauter Shell-/Einstellungs-/Tunnel-Schlüsselzugriff über MCP.
+- OAuth mit tatsächlichem SDK-Client ohne vorgegebenen Bearer: Discovery über Caddy-artigen HTTPS-Host und `/pakachi`-Präfix, dynamische Registrierung, lokale Zustimmung/Ablehnung, PKCE, Resource, bestehende Callback-Parameter, einmaliger Code, Refresh-Rotation und Ausschalten. Der Proxy wird im Test nachgebildet; kein Zugriff auf Steffens Caddy.
+- Verwaltungsgrenzen: ausgeschalteter Start, Loopback-/Host-/Origin-/Proxyprüfung, Sitzung und CSRF; öffentlich simulierte Verwaltung verweigert. Assets prüfen Traversal, Symlink-Ausbruch, Upload-Konflikte und Dateierhalt.
+- Tatsächlicher Python-Prozess: Abbruch während der Skriptvorbereitung verhindert den Prozessstart; gleichzeitige Starts werden serialisiert/abgewiesen, MCP-Abbruch beendet den Auftrag, Entzug der Skriptfreigabe beendet den Nachfolgeauftrag. Fremde API-Schlüssel aus der Elternumgebung werden nicht vererbt.
+- ACP-v1-Testagent als echter Unterprozess: initialize/session/new/session/prompt, lokale Berechtigungswahl, tatsächlicher stdio-MCP-Client mit den 17 Werkzeugen; Ablehnung und Abbruch räumen Anfragen auf, eine neue Sitzung bleibt nutzbar. Das ist ein Protokolltestagent, kein produktiv authentifizierter KI-Anbieter.
+- Tunneltests mit kontrollierten Release-/Prozessantworten prüfen offiziellen Downloadpfad und Digest, beide Binärdateien, ZIP-CRC, doppelte Einträge/Symlinks, Windows-Dateinamen, Start/Stopp, echte Bereitschaftsbedingung, Diagnoseargumente und geheimnisfreie Konfigurationsdatei. Tatsächlich aus OS-Pipes über mehrere Blöcke ausgegebene Geheimnisse werden redigiert.
+- Zusätzlich echtes offizielles Linux-x64-Archiv v0.0.20 heruntergeladen: SHA-256 `2f06ce5a17425c74a827e7038692936e973ae388e7eec728c40efee1fb5f139d`. Extraktion von Client, Cloudflared und Begleitdateien bestanden; tatsächliche `run --help` und `doctor --help` ausgeführt. Kein Runtime-API-Schlüssel und kein live angemeldeter OpenAI-Tunnel verwendet.
+- Vollständiger lokaler Headless-Shell-Lauf: 35 Fälle bestanden, ein horizontaler Überlauf der mobilen Navigation gefunden. Nach echtem Zeilenumbruch im Layout alle fünf betroffenen Player-/Arbeitsplatzfälle erneut bestanden. Die GitHub-CI prüft den endgültigen Stand nochmals vollständig mit regulärem Chromium.
+- Neuer gerenderter Browserablauf bestanden: ausgeschalteter Arbeitsplatz, Caddy-Abschnitt, echte Player-/MCP-Kopplung, echter Python-Auftrag, Ergebnisdownload und GLB-Upload mit Import ins Studio. Bildschirmaufnahme des lokalen Dialogs geprüft. Der Ablauf fand und korrigierte eine Einbettungssperre des erhaltenen Originalplayers.
+
+**Offene reale Abnahme:** Windows/macOS-Prozesse, Blender, Ziel-GPU/PyTorch, Steffens Caddy/DuckDNS, ein autorisierter ChatGPT-Tunnel und ein produktiver ACP-Agent. Keine Behauptung eines bereits verbundenen Benutzerrechners. Charakterqualität, gemeinsame Morph-Topologie und Standard-Verwandlung bleiben offen.
 
 ## Version 0.85.0
 

@@ -2,9 +2,9 @@
 
 PaKaChi ist die **Panda-KI-Chimera**. PaKaChi-SM vereint den Avatar-Player, den Model Zoo und das fest integrierte **PaKaChi-Avatar-Studio**. SM steht für StateMaschine.
 
-**Softwarestand: 0.85.0 · Entwicklungsversion.**
+**Softwarestand: 0.86.0 · Entwicklungsversion.**
 
-Der Original-PaKaChi mit Normalform, humanoider Arbeitsform und 72 Transformationsbildern ist als Bildplayer erhalten und beim Start ausgewählt. Im Model Zoo stehen außerdem **PaKaChi · Normalform · Rig** und **PaKaChi · Arbeitsform · Rig**: bearbeitete Originalrekonstruktionen mit gemeinsamem 31-Gelenk-Aufbau, Hautgewichten, grünen 3D-Augen und Fellfasern. Im integrierten Studio lassen sie sich posieren und speichern. Die ursprünglichen ungeriggten Entwürfe sowie Mika/Nori bleiben erhalten. Der saubere 3D-Formwechsel und die abschließende Charakterqualität stehen noch aus. [Ergebnisse und Bedienung](docs/KI-GENERIERUNG.md#rigging-und-charakteraufbereitung).
+Der Original-PaKaChi mit Normalform, humanoider Arbeitsform und 72 Transformationsbildern ist als Bildplayer erhalten und beim Start ausgewählt. Im Model Zoo stehen außerdem **PaKaChi · Normalform · Rig** und **PaKaChi · Arbeitsform · Rig**: bearbeitete Originalrekonstruktionen mit gemeinsamem 59-Gelenk-Aufbau, Hautgewichten, grünen 3D-Augen und Fellfasern. Im integrierten Studio lassen sie sich posieren und speichern. Die ursprünglichen ungeriggten Entwürfe sowie Mika/Nori bleiben erhalten. Der saubere 3D-Formwechsel und die abschließende Charakterqualität stehen noch aus. [Ergebnisse und Bedienung](docs/KI-GENERIERUNG.md#rigging-und-charakteraufbereitung).
 
 ## Starten
 
@@ -12,10 +12,12 @@ Voraussetzungen: Node.js ab Version 24 und ein aktueller Browser mit WebGL2 für
 
 ```sh
 npm ci
-npm run dev
+npm run local -- --open
 ```
 
-Die angezeigte Adresse öffnen, normalerweise `http://127.0.0.1:5173`. Unter Windows übernimmt **Start-Windows.cmd** den Start. Ein EXE-Installer ist noch nicht vorhanden. Der archivierte Bildplayer lässt sich separat über `public/legacy/pakachi/index.html` öffnen.
+Die angezeigte Adresse öffnen, normalerweise `http://127.0.0.1:8787`. `npm run dev` bleibt für die Webentwicklung verfügbar. Unter Windows übernimmt **Start-Windows.cmd** den Start. Ein EXE-Installer ist noch nicht vorhanden. Der archivierte Bildplayer lässt sich separat über `public/legacy/pakachi/index.html` öffnen.
+
+**Lokale Werkzeuge** konfiguriert Blender/Python, GPU-Prüfung, Dateien, Rechenaufträge, Caddy/DuckDNS, den offiziellen Secure MCP Tunnel und optionale ACP-Agenten. Dein vorhandener Reverse Proxy genügt; der Tunnel verbindet sich ausgehend. [Einrichten und verbinden](docs/LOKALE-WERKZEUGE.md).
 
 ## Player und Studio
 
@@ -57,7 +59,7 @@ Assistent, 3D-Generator und Rigging-Dienst haben unabhängig wählbare Profile u
 
 Ein Zustand wie `idle`, `talking`, `thinking` oder `working` bleibt bis zur nächsten Anforderung aktiv. Moves sind gespeicherte einmalige oder wiederholte Bewegungen. Verfügbar sind die Fähigkeiten des ausgewählten Avatars.
 
-MQTT und MCP sind zunächst ausgeschaltet. Der bevorzugte Weg ist ein MCP-Host über den Python-MCP-Server und einen MQTT-Broker zum geöffneten Player. Während der Studio-Bearbeitung werden externe Wiedergabebefehle abgewiesen. [Python-MCP](docs/PYTHON-MCP.md) · [Steuerungsprotokoll](docs/ANSTEUERUNG.md) · [Studio über MCP](docs/MCP-STUDIO.md).
+MQTT und MCP sind zunächst ausgeschaltet. Für lokale Programme und den Zugang über Caddy oder Secure MCP Tunnel den [integrierten MCP-Arbeitsplatz](docs/LOKALE-WERKZEUGE.md) verwenden. Der Python-MCP-Server mit MQTT bleibt als getrennter Steuerungsweg verfügbar. Während der Studio-Bearbeitung werden externe Wiedergabebefehle abgewiesen. [Python-MCP](docs/PYTHON-MCP.md) · [Steuerungsprotokoll](docs/ANSTEUERUNG.md) · [Studio über MCP](docs/MCP-STUDIO.md).
 
 ## Entwicklung
 

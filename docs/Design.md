@@ -710,3 +710,12 @@ Seit **0.80.0** übernimmt „Move als GLB (Animation)“ auch bewegte freie Obe
 ### Ungleiche positive Astskalierungen (0.82.0)
 
 Seit **0.82.0** können Knochen zwischen unterschiedlich stark, positiv und gleichmäßig skalierten Ästen umgehängt werden. Beispiel: Vom Astmaßstab 2 zu 3 wird die lokale Skalierung des verschobenen Knochens mit 2/3 ausgeglichen. Grundstellung, gespeicherte Schlüsselposen, Entwurf, Hautgewichte und starre Anbauteile behalten ihre bisherigen Welttransformationen. Der Ausgleich wird bei Reset und Projektladen aus der unveränderten Quelle und der Umbaufolge rekonstruiert; Zurück/Wiederholen und Rückkehr zum Original bleiben möglich. Die eigene ungleichmäßige oder negative Skalierung des verschobenen Knochens bleibt mit diesem positiven Faktor kombinierbar. Nicht gleichmäßige/negative Elternäste, Anbauteile mit eigenem Skelett und nicht invertierbare Ausgleiche bleiben gesperrt. Bewegungsverläufe zwischen Schlüsselposen und die Hautqualität weiterhin visuell prüfen. Projekte mit diesem neuen Fall benötigen mindestens 0.82.0; Projektformat bleibt Version 1. [Prüfbericht](PRUEFUNG.md#version-0820).
+
+
+## Integrierter lokaler MCP-Arbeitsplatz
+
+PaKaChi-SM stellt die lokalen Werkzeuge selbst bereit: Blender/Python, vorhandenes TripoSR, Dateien und asynchrone Aufträge. Ein lokaler Node-Dienst verbindet den Player über die bestehende authentifizierte Brücke und bietet dieselben Studiowerkzeuge mit unveränderten Freigaben an. Die Oberfläche enthält Programm-/GPU-Prüfung, Ergebnisse, Abbruch und Verbindungsverwaltung. Keine GPU-Zuweisung an den Chatbrowser erforderlich.
+
+Externer Zugang verwendet den vorhandenen Caddy/DuckDNS-Reverse-Proxy mit HTTPS und OAuth-PKCE oder den ausgehend betriebenen offiziellen Secure MCP Tunnel. Kein zusätzlicher öffentlich geöffneter Port 443. Lokale Verwaltung wird nicht veröffentlicht. Konto-/Workspace-Verknüpfung im externen Client bleibt eine Handlung des Kontoinhabers; ein gestarteter Tunnel ist noch kein bestätigter ChatGPT-Werkzeugaufruf.
+
+ACP ergänzt einen lokalen Client, der einen konfigurierten ACP-v1-Agenten startet und ihm denselben MCP-Arbeitsplatz gibt. Externer Werkzeugzugriff aus ChatGPT bleibt MCP. Skript-/Agentenausführung erfordert eine eigene lokale Freigabe und läuft mit Benutzerrechten; keine Betriebssystem-Sandbox. [Bedienung, Grenzen und Protokolle](LOKALE-WERKZEUGE.md).

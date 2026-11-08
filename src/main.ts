@@ -1,4 +1,5 @@
 import {version as appVersion} from '../package.json';
+import {mountLocalRuntimePanel} from './local-runtime-panel.ts';
 import {playbackTransitionDelta} from './playback-transition.ts';
 import {loadCatalogProject} from './catalog-project.ts';
 import type {ZooEntry} from './local-zoo.ts';
@@ -27,7 +28,7 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
   <aside class="rail">
     <a class="brand" href="./" aria-label="PaKaChi-SM Startseite"><span class="brand-mark">P<span>•</span></span><span>PaKaChi<span class="brand-sub">STATE MASCHINE</span></span></a>
     <p class="rail-label">DEIN AVATAR, IN BEWEGUNG</p>
-    <button id="options-open" class="button outline">Optionen</button><nav aria-label="Anwendungsbereiche">
+    <button id="options-open" class="button outline">Optionen</button><button id="runtime-open" class="button outline">Lokale Werkzeuge</button><nav aria-label="Anwendungsbereiche">
       <button id="player-tab" class="nav-button active" aria-pressed="true"><span>◉</span> Player</button>
       <button id="studio-tab" class="nav-button" aria-pressed="false"><span>◇</span> Avatar-Studio</button>
     </nav>
@@ -353,6 +354,7 @@ async function boot(): Promise<void> {
   },()=>options.language);
   window.addEventListener('pakachi-options',renderCatalog);
   const agents = mountAgentPanel(rpc);
+  const runtime=mountLocalRuntimePanel(el<HTMLButtonElement>('runtime-open'),{connectPlayer:agents.connectLocal,importModel:async file=>{if(busy)return false;const loaded=await loadAvatar(undefined,file);if(loaded)changeView(true);return loaded;}},()=>options.language);
   mountAssistantPanel(document.querySelector('.agent-panel')!,rpc,()=>options.language,localStorage,undefined,(id,poses,session,revision)=>{if(busy||!editor)throw Error('Studio nicht verfügbar.');return editor.previewSequence(id,poses,session,revision);});
   const generation=mountGenerationPanel(el('generation-host'),{
     target:()=>studio&&!busy&&!editor?.interactionActive?generationTarget():null,
@@ -414,6 +416,6 @@ async function boot(): Promise<void> {
     catalog = parseCatalog(await response.json()); renderCatalog();
     showOriginal();
   } catch (error) { message(`Model Zoo: ${error instanceof Error ? error.message : String(error)}`, true); }
-  window.addEventListener('pagehide', () => { zoo.dispose();agents.dispose(); editor?.dispose(); fetchController?.abort(); request++; playback?.dispose(); viewer?.dispose(); }, { once: true });
+  window.addEventListener('pagehide', () => { runtime.dispose();zoo.dispose();agents.dispose(); editor?.dispose(); fetchController?.abort(); request++; playback?.dispose(); viewer?.dispose(); }, { once: true });
 }
 void boot();

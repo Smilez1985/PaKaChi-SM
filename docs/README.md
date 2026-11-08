@@ -16,7 +16,8 @@ Die [Projekt-README](../README.md) erklärt Einstieg und Bedienung. Die Dokument
 | Aufgabenbezogene Modellwahl und lokale Einrichtung | [Lokale Modelle](LOKALE-MODELLE.md) |
 | Bestätigte Studio-Vorschläge des Assistenten | [Assistent](ASSISTENT.md) |
 | Interne Aufträge, Abbruch und Ergebnisübernahme | [Auftragskern](AUFTRAE.md) |
-| Bevorzugte Verbindung über Python-MCP und MQTT | [Python-MCP](PYTHON-MCP.md) |
+| Lokale Programme, Caddy, Secure MCP Tunnel und ACP | [Lokale Werkzeuge](LOKALE-WERKZEUGE.md) |
+| Verbindung über Python-MCP und MQTT | [Python-MCP](PYTHON-MCP.md) |
 | Agentenaktionen im freigegebenen Studio | [Studio über MCP](MCP-STUDIO.md) |
 | Zustände, Nachrichten und Browser-API | [Externe Steuerung](ANSTEUERUNG.md) |
 | Eigene Avatare im Browserbestand | [Lokaler Model Zoo](LOKALER-MODEL-ZOO.md) |

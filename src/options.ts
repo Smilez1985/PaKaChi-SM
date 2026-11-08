@@ -168,6 +168,7 @@ const translations:Record<string,string>={
   'Bereit':'Ready','Standbild':'Still image','Pausiert':'Paused','Schleife':'Loop','einmalig':'once','3D · TESTAVATAR':'3D · TEST AVATAR','3D · EIGENER IMPORT':'3D · IMPORTED MODEL','3D-Testavatar':'3D test avatar',
   'Dieses Modell enthält keine abspielbaren Bewegungen.':'This model contains no playable moves.',
   'GLB-Import bleibt lokal im Browser und gilt für diese Sitzung. Es werden keine Modelle hochgeladen.':'GLB imports remain local in this browser session. No models are uploaded.',
+  'Lokale Werkzeuge':'Local tools',
   'Zustandssteuerung · MQTT · MCP':'State control · MQTT · MCP','Agent verbinden · MQTT / MCP':'Connect agent · MQTT / MCP','Zustand':'State','Kein Avatar bereit':'No avatar ready',
   'MQTT-Empfang einschalten':'Enable MQTT reception','Python-MCP über diesen Broker erlauben':'Allow Python MCP through this broker','Broker-Adresse':'Broker address','Benutzername':'Username','Passwort':'Password',
   'Aus · keine Verbindung':'Off · no connection','MCP · bisherige Node-Brücke':'MCP · legacy Node bridge','MCP-Kopplung einschalten':'Enable MCP pairing','Lokale Brücke':'Local bridge','Kopplungsschlüssel':'Pairing key',

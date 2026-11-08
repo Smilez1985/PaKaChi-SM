@@ -1,6 +1,6 @@
 # Roadmap – offene Aufgaben
 
-**Entwicklungsstand: 0.85.0 · Abgleich: 07.11.2026.** Teil der [Blaupause](README.md).
+**Entwicklungsstand: 0.86.0 · Abgleich: 08.11.2026.** Teil der [Blaupause](README.md).
 
 Diese Roadmap enthält offene Umsetzung und ausstehende Abnahme. Erledigte Änderungen stehen nach Version im [Changelog](CHANGELOG.md); Nachweise und Grenzen im [Prüfstand](PRUEFUNG.md). Eine implementierte Funktion ist nicht automatisch manuell oder mit realen Anbietern abgenommen.
 
@@ -11,6 +11,14 @@ Diese Roadmap enthält offene Umsetzung und ausstehende Abnahme. Erledigte Ände
 3. **Standard-Verwandlung:** Danach eine gespeicherte Animation Normalform → Arbeitsform implementieren; dieselbe Animation rückwärts, Endform halten und laufende Bewegung ohne Sprung umkehren. Zustandszuordnung wie im Originalplayer.
 4. **Reale Generatorqualität:** TripoSR-CPU-Inferenz bleibt belegt. GPU-Abnahme und qualitativer Verfahrensvergleich auf den beiden tatsächlichen Vorlagen bleiben offen.
 5. **Abnahme am tatsächlichen Ablauf:** Kamera, Haut, Posen und Speichern/Laden an beiden Formen weiter prüfen. [Nachweise und Grenzen](PRUEFUNG.md#version-0850).
+
+## Lokale Hardware anbinden
+
+Der integrierte MCP-Arbeitsplatz, Caddy-/DuckDNS-Konfiguration, OAuth-Freigaben, offizieller Tunnel-Client und ACP-v1-Client sind umgesetzt. [Einrichtung](LOKALE-WERKZEUGE.md).
+
+- [ ] Auf Steffens Windows-Rechner Blender/Python und die echte GPU prüfen, vorhandenen Caddy verbinden oder OpenAI-Tunnel registrieren und einen externen MCP-Werkzeugaufruf erfolgreich ausführen.
+- [ ] Danach Charakterkorrekturen und gemeinsames Morph-Netz auf dieser Laufzeit bearbeiten; erst anschließend die eine vorwärts/rückwärts abspielbare Standard-Verwandlung.
+- [ ] Windows-/macOS-Tunnelprozess und einen produktiven authentifizierten ACP-Agenten live abnehmen. Lokale Protokolltests ersetzen diese Abnahme nicht.
 
 ## Automatisierte Browserprüfung
 

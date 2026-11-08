@@ -12,6 +12,34 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.86.0] - 2026-11-08
+
+Zeitstempel: 2026-11-08T14:33:07+01:00 (Europe/Berlin)
+
+### Added
+
+- Integrierter lokaler Arbeitsplatz mit 17 Streamable-HTTP-MCP-Werkzeugen: bisherige Player-/Studioaktionen sowie unveränderliche Dateien, blockweise Übertragung und asynchrone Blender-/Python-/TripoSR-/GLB-Prüfaufträge mit Status, Protokoll, Ergebnissen und Abbruch. Tatsächliche Programm-/PyTorch-/CUDA-Probe und GLB-Übernahme ins Studio.
+- Caddy-/DuckDNS-Abschnitt für den vorhandenen Reverse Proxy, einschließlich Pfadpräfix und OAuth-Metadaten. OAuth-PKCE mit lokaler Verbindungsfreigabe; Verwaltung ausschließlich direkt am Rechner. Keine zusätzliche öffentliche Portfreigabe.
+- Bedienung des offiziellen Secure MCP Tunnel Clients innerhalb PaKaChi: plattformspezifischer Download mit SHA-256-Prüfung, Client samt Cloudflared, Diagnose, Start/Stopp und tatsächliche lokale Bereitschaft. Runtime-Schlüssel nur im Speicher/Prozessumfeld. Konto-/Workspace-Verknüpfung bleibt extern erforderlich.
+- ACP-v1-Client für einen konfigurierten lokalen Agenten, einschließlich tatsächlicher MCP-stdio-Delegation und lokaler Berechtigungsanfragen. Keine Behauptung eines öffentlichen ACP-Servers.
+
+### Changed
+
+- Windows-Start baut und öffnet den integrierten Arbeitsplatz auf Loopback-Port 8787. Entwicklungs-Webserver und getrennte Python-MCP-/MQTT-Steuerung bleiben verfügbar. Playerwerkzeuge werden zwischen bisherigen und integriertem Node-MCP-Server geteilt.
+- MCP-/Skriptfreigaben starten ausgeschaltet. Programme laufen nach ausdrücklicher lokaler Freigabe mit Benutzerrechten, ohne Betriebssystem-Sandbox. Lange Aufgaben werden abgefragt; große Dateien in Blöcken übertragen.
+
+### Fixed
+
+- Abbruch während der Skriptvorbereitung verhindert den anschließenden Prozessstart. ACP-Ausgaben erhalten UTF-8-Zeichen auch bei geteilten Pipeblöcken und redigieren Schlüssel über mehrere Nachrichten hinweg.
+- Der lokale Dienst erlaubt die eigene Einbettung des erhaltenen Originalplayers; fremde Einbettungen bleiben gesperrt. Die Navigation bricht mit dem neuen Werkzeugknopf auf kleinen Bildschirmen passend um.
+
+### Security
+
+- Verwaltungszugriff mit Loopback-/Host-/Proxyprüfung, lokaler Sitzung und CSRF-Schutz; ausführbare Programme und Tunnelschlüssel sind nicht über MCP änderbar. Bereinigte Unterprozessumgebung; Geheimnisse werden auch bei geteilten Ausgabeblöcken redigiert.
+- Dateinamen, Asset-Offsets, Größen/Quoten, Symlinks und offizielle ZIP-Binärdateien werden geprüft; Prozessabbruch beendet die Prozessgruppe.
+
+[Prüfbericht](PRUEFUNG.md#version-0860). Reale Windows-/GPU-/Caddy-/OpenAI-Tunnel-Abnahme bleibt offen. Charakterrig und Standard-Verwandlung werden durch diese Infrastruktur nicht als fertig erklärt.
+
 ## [0.85.0] - 2026-11-07
 
 Zeitstempel: 2026-11-07T21:01:23+01:00 (Europe/Berlin)
@@ -1774,3 +1802,7 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 [0.82.0]: PRUEFUNG.md#version-0820
 
 [0.83.0]: PRUEFUNG.md#version-0830
+
+[0.85.0]: PRUEFUNG.md#version-0850
+
+[0.86.0]: PRUEFUNG.md#version-0860

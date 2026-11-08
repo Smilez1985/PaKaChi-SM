@@ -16,3 +16,6 @@ generated/
 
 # Rebuilt from the preserved PaKaChi source meshes by npm lifecycle hooks.
 public/model-zoo/pakachi-rigged/
+
+# Local workspace credentials, programs, uploads and job results.
+.pakachi-local/
