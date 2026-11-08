@@ -1,4 +1,5 @@
 import * as T from 'three';
+import {POSE_MORPHS,POSE_MORPH_BIND,poseMorphsEnabled} from './pose-morphs.ts';
 import {clone as cloneSkeleton} from 'three/addons/utils/SkeletonUtils.js';
 /** Independent static geometry. Skin/morph deformation is baked; no editor rig or clips. */
 export function captureStaticFigure(meshes:readonly T.Mesh[]):T.Group{
@@ -36,6 +37,7 @@ export function captureFigureHierarchy(root:T.Object3D,requireSkin=false):T.Grou
  // Detach from viewer normalization without changing any world transforms.
  copy.matrix.copy(root.matrixWorld);copy.matrixAutoUpdate=false;copy.matrix.decompose(copy.position,copy.quaternion,copy.scale);
  result.add(copy);
+ const sources:T.Mesh[]=[],copies:T.Mesh[]=[];root.traverse(n=>{if(n instanceof T.Mesh)sources.push(n);});copy.traverse(n=>{if(n instanceof T.Mesh)copies.push(n);});sources.forEach((mesh,i)=>{if(!poseMorphsEnabled(mesh)){delete copies[i].userData[POSE_MORPHS];delete copies[i].userData[POSE_MORPH_BIND];}});
  // A failed copy must never dispose geometry/materials still owned by the source.
  const owned:{geometry:T.BufferGeometry;materials:T.Material[]}[]=[];
  try{

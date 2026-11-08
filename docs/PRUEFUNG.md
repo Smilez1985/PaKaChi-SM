@@ -1,6 +1,6 @@
 # Prüfstand und Protokolle
 
-**Softwarestand: 0.88.0 · Dokumentationsabgleich: 2026-11-08T20:56:00+01:00 (Europe/Berlin).**
+**Softwarestand: 0.89.0 · Dokumentationsabgleich: 2026-11-08T22:19:25+01:00 (Europe/Berlin).**
 
 Alle Prüfnachweise stehen in dieser Datei: ein Abschnitt je Softwareversion sowie gesonderte Abschnitte für datierte Zwischenprüfungen. Die Ergebnisse und Grenzen gelten für den jeweils genannten Stand. Spätere Läufe stehen als Nachtrag im selben Abschnitt. Produktänderungen gehören in den [Changelog](CHANGELOG.md), offene Aufgaben in die [Roadmap](ROADMAP.md).
 
@@ -8,10 +8,10 @@ Alle Prüfnachweise stehen in dieser Datei: ein Abschnitt je Softwareversion sow
 
 | Prüfung | Bestätigter Stand | Umfang und Grenze |
 | --- | --- | --- |
-| Node-Tests | [0.88.0](#version-0880): 380 lokal bestanden | Einschließlich echter MCP-/OAuth-/Python-/ACP-Prozesse; keine manuelle Qualitätsabnahme. |
-| TypeScript und Produktionsbuild | [0.88.0](#version-0880): lokal bestanden | Bekannte Bundle-Größenwarnung; keine Aussage über Zielhardware-Leistung. |
-| Chromium-Browserfälle | [0.87.0](#version-0870): alle 37 Fälle im vollständigen CI-Lauf bestanden; lokaler neuer Korrekturablauf für 0.88.0 bestanden | Software-WebGL, simulierte KI-Anbieter; keine reale KI-Inferenzabnahme. |
-| Produktionsbrowser-Importmessung | [0.86.0](#version-0860): drei CI-Durchläufe bestanden | Mika mit 256 Gewichtsaufträgen; keine allgemeine Laufzeitgarantie. |
+| Node-Tests | [0.89.0](#version-0890): 388 lokal bestanden | Einschließlich echter MCP-/OAuth-/Python-/ACP-Prozesse; keine manuelle Qualitätsabnahme. |
+| TypeScript und Produktionsbuild | [0.89.0](#version-0890): lokal bestanden | Bekannte Bundle-Größenwarnung; keine Aussage über Zielhardware-Leistung. |
+| Chromium-Browserfälle | [0.88.0](#version-0880): 38 im vollständigen CI-Lauf; drei gezielte Originalmodellfälle lokal für 0.89.0 bestanden | Software-WebGL, simulierte KI-Anbieter; keine reale KI-Inferenzabnahme. |
+| Produktionsbrowser-Importmessung | [0.88.0](#version-0880): drei CI-Durchläufe bestanden | Mika mit 256 Gewichtsaufträgen; keine allgemeine Laufzeitgarantie. |
 | Legacy-Testprogramme | [0.9.0](#version-090): beide bestanden | Steuerung, MQTT-Verhalten und Lebenszyklus des Originalplayers. |
 | Python-MCP-/MQTT-Integration | [0.10.0](#version-0100): bestanden | Echter Python-Prozess und eingebetteter Testbroker; keine allgemeine externe Hostabnahme. |
 | Originaldateien | [0.49.0](#version-0490): bytegenau erhalten | 83 Originaldateien einschließlich 72 Transformationsbildern. |
@@ -60,6 +60,24 @@ Diese Liste beschreibt ausstehende Abnahmen.
 
 Die jüngste Version steht zuerst. Für eine bestimmte Version die Dokumentgliederung oder die Browser-Suche verwenden.
 
+## Version 0.89.0
+
+**Prüfzeitpunkt:** 2026-11-08T22:19:25+01:00 (Europe/Berlin).
+
+- `npm run verify`: 388 Node-Tests, TypeScript und Produktionsbuild bestanden. Abschließend acht gezielte Korrektur-/Originalmodellfälle und TypeScript erneut erfolgreich geprüft. Bekannte Bundle-Größenwarnung bleibt bestehen.
+- Neue Korrekturformen an den tatsächlichen Original-GLBs: Arbeitsform sechs akzeptierte linke Ellenbogenhaltungen, Tierform eine. Die übrigen fünf Tierform-Kandidaten werden wegen schlechterer Ziel-/Zwischenmessungen verworfen. Die Aufbereitung prüft je Kandidat Körper und Fell bei 0°, 45°, 67,5°, 90°, 112,5°, 135° und 180° in der jeweiligen Richtung. Fehlerzahl und maximale Hauptdehnung dürfen in diesen Stichproben nicht steigen; an der Zielpose müssen weniger Körperdreiecke auffällig sein.
+- Beispiele am Körpernetz: Arbeitsform +90° um Y von 442 auf 61 auffällige Dreiecke, maximale Hauptdehnung 25,205× → 2,504×; −90° um X 503 → 30, 38,503× → 3,470×. Tierform −90° um Z 511 → 425, 39,338× → 5,560×. Verbleibende Fehler sind ausdrücklich vorhanden. Alle Kandidaten und Winkelproben samt GLB-SHA-256 im [Charakterbericht](benchmarks/pakachi-rigging-2026-11-07.json), Formatversion 3.
+- Grundoberfläche, Basisnormalen, Farben, Dreiecksindizes und ursprüngliche Hautgewichte beider Körpernetze stimmen bytegenau mit 0.88.0 überein. Ein unabhängiger Golden-Digest wird im Originalmodelltest geprüft: humanoid `d0d2786c7f8e464bad2e0cf6fc5657bcc9474f09829262c86a6369c8e67d418c`, Tierform `7b042901ab603b683e24779231aaf327f4a064fd8c7d4494af5ba575ba0fbf58`. Die Originaldatei-Prüfung bleibt bestanden; 59 Gelenke und Pfotenaufbau bleiben erhalten.
+- Reine Vorhersage stimmt an Körper und Fell mit tatsächlichen korrigierten Three.js-Vertices überein. Quaternion-Vorzeichen, exakte Grund-/Zielhaltung, weiche Einblendung und ausgeschalteter Zustand außerhalb des Winkelbereichs geprüft. Bei 180°-Stresshaltung sowie reiner Handgelenk-/Kopfbewegung sind die Korrekturgewichte null. Die vollständige Zielrotation bleibt gespeichert und ausgeführt.
+- Projekt-Einstellung, inkompatible Rig-/Gewichtsänderung und Prüfung des ursprünglichen Bindungsrahmens abgesichert. Zusätzliche Viewer-Normalisierung erhält die Kompatibilität; eine andere neutrale Skelettstellung wird erkannt. Inkompatible Rig-Exporte tragen keine ausführbaren Korrekturtreiber.
+- Animationsaufnahme kombiniert native Korrekturziele und freie Oberflächenpunkte in gewöhnlichen Morph-Kurven. Ein tatsächlicher binärer GLB-Export wird erneut geladen; ein gewöhnlicher Three.js-AnimationMixer spielt ihn ohne PaKaChi-Treiber ab. Die unabhängige Wiedergabe vergleicht Vertices auch zwischen den mit 30 Hz gebackenen Abtastpunkten; die Toleranz des synthetischen Tests beträgt 0,0005 Modelleinheiten. Keine Aussage über eine allgemeine lückenlose Bewegungs- oder Zielprogrammabnahme.
+- Neuer gerenderter Chromium-Headless-Shell-Fall bestanden: tatsächliche Arbeitsform laden, vollen 90°-Ellenbogen per Studio-Befehl einstellen, Korrektur an/aus und Oberflächenbericht vergleichen, Projekt speichern und wieder laden. Die Vorher-/Nachher-Aufnahmen zeigen, dass die lange Hautspitze an der Hüfte in dieser Pose verschwindet. Beide bisherigen Original-Rig-Browserfälle mit Posieren, Fingern, Undo/Redo, Projekt-Rundlauf und mehreren Ansichten zusätzlich bestanden (drei gezielte Fälle insgesamt).
+- Abgeleitete GLBs: Arbeitsform 36.396.504 Byte, Tierform 20.707.832 Byte; beide unter 50 MiB. Die größeren Dateien erfordern mehr Import-/Grafikspeicher. Keine Ziel-GPU-Leistungsabnahme.
+
+**Grenzen:** Korrekturen gelten nur nahe den übernommenen linken Ellenbogenhaltungen; der maximale Quaternion-Abstand beträgt 45°. Keine allgemeine Reparatur beliebiger Modelle, weiterer Gelenke oder kombinierter Bewegungen. Keine Kollisions-, Volumen-, Silhouetten- oder anatomische Gesamtabnahme. Die 180°-Stresshaltung bleibt unkorrigiert. Eine neue gemeinsame Oberfläche zwischen den Formen und die Standard-Verwandlung werden hierdurch nicht erzeugt.
+
+**CI:** 0.88.0 ist vollständig erfolgreich, siehe folgenden Abschnitt. Der vollständige GitHub-Lauf für 0.89.0 ist nach Veröffentlichung gesondert auszuwerten.
+
 ## Version 0.88.0
 
 **Prüfzeitpunkt:** 2026-11-08T20:56:00+01:00 (Europe/Berlin).
@@ -73,7 +91,7 @@ Die jüngste Version steht zuerst. Für eine bestimmte Version die Dokumentglied
 
 **Grenzen:** Begrenzte Suche in sechs lokalen Übertragungen, keine allgemeine Gewichtsoptimierung. Verglichen werden aggregierte Messwerte pro Teilmodell: Fehlerzahlen, Kategorien und Überschreitungen der Hauptdehnungsgrenzen. Keine Aussage über einzelne neu betroffene Dreiecke bei gleicher Fehlerzahl, Kollisionen, Silhouette, Volumen oder Charakterdesign. Alle gespeicherten Posen und drei Zwischenposen der gewählten Grundform-Zielpose-Strecke werden verglichen; nicht alle Übergänge gespeicherter Moves. Modell, Hautbindung und Referenzbildqualität müssen weiter verbessert werden. Gemeinsame Morph-Oberfläche und Standard-Verwandlung bleiben offen.
 
-**CI:** Vorheriger vollständiger Stand 0.87.0 erfolgreich, siehe folgenden Abschnitt. Ein vollständiger aktueller GitHub-Lauf für 0.88.0 ist nach Veröffentlichung gesondert auszuwerten.
+**CI:** Vorheriger vollständiger Stand 0.87.0 erfolgreich, siehe folgenden Abschnitt. Der vollständige [Lauf 42517700197](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/42517700197) für `50bed4aa828e008d1265c16b15400fe72e9bc482` ist erfolgreich. Die ausgewerteten Joblogs bestätigen 380 Node-Tests, TypeScript/Build, alle 38 Chromium-Fälle (7,8 Minuten), drei Produktionsimportmessungen und Browserartefakte. Dieser Nachweis gilt für 0.88.0.
 
 ## Version 0.87.0
 

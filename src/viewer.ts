@@ -1,3 +1,4 @@
+import {enablePoseMorphs,poseMorphBindingCompatible,updatePoseMorphs} from './pose-morphs.ts';
 import {AnimationClock} from './animation-clock.ts';
 import * as THREE from 'three';
 import { StudioView } from './studio-view.ts';
@@ -117,7 +118,7 @@ export class Viewer {
       this.frame = requestAnimationFrame(render);
       const elapsed = this.clock.tick(now);
       const delta = document.hidden ? 0 : elapsed;
-      this.onFrame(delta);
+      this.onFrame(delta);if(this.model)updatePoseMorphs(this.model);
       if(this.skeleton?.visible)this.refreshSkeleton();
       this.controls.update();
       this.renderer.render(this.scene, this.camera);
@@ -136,6 +137,7 @@ export class Viewer {
     this.holder.position.set(-center.x * scale, -bounds.min.y * scale, -center.z * scale);
     this.holder.add(root);
     this.model = root;
+    enablePoseMorphs(root,poseMorphBindingCompatible(root));updatePoseMorphs(root);
     this.skeleton = new THREE.SkeletonHelper(root);
     this.skeleton.visible = false;
     this.scene.add(this.skeleton);

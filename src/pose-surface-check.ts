@@ -19,7 +19,7 @@ export function poseSurfacePositions(rig:StudioRig,values:Record<string,Transfor
     const result=world(node.parent).clone().multiply(local);worlds.set(node,result);return result;
   };
   const mesh=surface.mesh,geometry=mesh.geometry,positions=rig.surfacePositions(values,meshIndex),out=new Float64Array(positions.length),vertex=new T.Vector3();
-  const isSkin=mesh instanceof T.SkinnedMesh;
+  const isSkin=mesh instanceof T.SkinnedMesh,morphWeights=rig.correctionWeights(values,!overrides&&rig.poseCorrectionsActive).get(mesh)??mesh.morphTargetInfluences;
   const skinFrame=inverse.clone();
   if(isSkin&&mesh.bindMode==='detached')skinFrame.multiply(world(mesh)).multiply(mesh.bindMatrixInverse);
   else if(isSkin&&mesh.bindMode!=='attached')throw Error('Unbekannte Hautbindung.');
@@ -29,8 +29,8 @@ export function poseSurfacePositions(rig:StudioRig,values:Record<string,Transfor
   for(let i=0;i<out.length/3;i++){
     vertex.fromArray(positions,i*3);
     const base=new T.Vector3().fromArray(surface.base,i*3);
-    for(let m=0;m<(mesh.morphTargetInfluences?.length??0);m++){
-      const amount=mesh.morphTargetInfluences![m],target=geometry.morphAttributes.position?.[m];if(!amount||!target)continue;
+    for(let m=0;m<(morphWeights?.length??0);m++){
+      const amount=morphWeights![m],target=geometry.morphAttributes.position?.[m];if(!amount||!target)continue;
       const delta=new T.Vector3().fromBufferAttribute(target,i);if(!geometry.morphTargetsRelative)delta.sub(base);vertex.addScaledVector(delta,amount);
     }
     if(local){vertex.applyMatrix4(local).toArray(out,i*3);continue;}

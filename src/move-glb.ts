@@ -1,4 +1,5 @@
 import {prepareMoveMorphs,installMoveMorphs} from './move-glb-morphs.ts';
+import {POSE_MORPHS,POSE_MORPH_BIND,poseMorphBindings} from './pose-morphs.ts';
 import * as T from 'three';
 import type {StudioRig} from './studio-rig.ts';
 import type {StudioMove} from './studio-data.ts';
@@ -39,6 +40,12 @@ export function captureMoveGLB(rig:StudioRig,move:StudioMove){
   scene.traverse(node=>{const recomposed=new T.Matrix4().compose(node.position,node.quaternion,node.scale);if(node.matrix.elements.some((v,i)=>!Number.isFinite(v)||Math.abs(v-recomposed.elements[i])>1e-6*Math.max(1,Math.abs(v))))throw Error('Gescherten Modellraum kann der GLB-Animationsexport nicht verlustfrei übernehmen.');});
   for(const c of channels){tracks.push(new T.VectorKeyframeTrack(c.node.uuid+'.position',timeArray,c.position),new T.QuaternionKeyframeTrack(c.node.uuid+'.quaternion',timeArray,c.rotation));}
   tracks.push(...installMoveMorphs(rig,mapping,morphs));
+  // Bake driven native targets into ordinary glTF morph tracks for other players.
+  for(const {mesh:source}of poseMorphBindings(rig.root)){
+   const mesh=mapping.get(source) as T.Mesh,path=mesh.uuid+'.morphTargetInfluences',previous=tracks.find(t=>t.name===path),interpolant=previous?new T.LinearInterpolant(previous.times,previous.values,previous.getValueSize()):null,count=mesh.morphTargetInfluences?.length??0,native=source.morphTargetInfluences?.length??0,values=new Float32Array(size*count);
+   times.forEach((time,i)=>{const original=interpolant?.evaluate(time)??mesh.morphTargetInfluences??[],weights=rig.correctionWeights(rig.sample(move,time)).get(source)??[];for(let k=0;k<count;k++)values[i*count+k]=k<native?(weights[k]??0):(original[k]??0);});
+   const at=tracks.findIndex(t=>t.name===path);if(at>=0)tracks.splice(at,1);tracks.push(new T.NumberKeyframeTrack(path,timeArray,values));mesh.morphTargetInfluences=Array.from(values.subarray(0,count));delete mesh.userData[POSE_MORPHS];delete mesh.userData[POSE_MORPH_BIND];
+  }
   tracks.push(new T.VectorKeyframeTrack(scene.uuid+'.position',timeArray,position),new T.QuaternionKeyframeTrack(scene.uuid+'.quaternion',timeArray,rotation),new T.VectorKeyframeTrack(scene.uuid+'.scale',timeArray,scale));
   scene.updateMatrixWorld(true);return {scene,clip:new T.AnimationClip(move.name,times.at(-1)!,tracks)};
  }catch(error){disposeStaticFigure(scene);throw error;}

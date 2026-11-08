@@ -1,3 +1,4 @@
+import {enablePoseMorphs,poseMorphBindings,poseMorphBindingCompatible,poseMorphWeights,updatePoseMorphs} from './pose-morphs.ts';
 import {StudioTopology,validateReparent} from './studio-topology.ts';
 import {solveLimb} from './studio-ik.ts';
 import {detectConnections,edgeKey} from './studio-detection.ts';
@@ -32,7 +33,9 @@ export class StudioRig {
   private bindings:{mesh:T.SkinnedMesh;inverses:T.Matrix4[];bind:T.Matrix4}[]=[];
   private topology:StudioTopology;
   private surfaceValues:Record<string,Transform>={};
+  private correctionsBindCompatible=true;
   constructor(root:T.Object3D, saved?:StudioData) {
+    poseMorphBindings(root);
     this.root=root;root.updateWorldMatrix(true,true);this.rootMatrix=root.matrix.clone();this.rootWorld=root.matrixWorld.clone();this.rootAutoUpdate=root.matrixAutoUpdate;
     const bounds=new T.Box3().setFromObject(root);if(!bounds.isEmpty())this.figure.rest=bounds.getCenter(new T.Vector3()).toArray();
     root.traverse(node=>{this.originalNodes.push({node,value:read(node),scale:node.scale.clone()});if(node instanceof T.Bone)this.bones.push(node);});
@@ -162,16 +165,17 @@ export class StudioRig {
     this.deform();
   }
   restoreSource() {
+    enablePoseMorphs(this.root,this.data.poseCorrections!==false);
     this.figureOffset.set(0,0,0);this.figureRotation.identity();this.figureScale=1;this.figureMatrix.identity();this.root.matrixAutoUpdate=this.rootAutoUpdate;this.root.matrix.copy(this.rootMatrix);
     this.topology.restore();
     this.bones.slice(0,this.originalBoneRest.length).forEach((b,i)=>write(b,this.originalBoneRest[i]));
     for(const item of this.originalNodes){write(item.node,item.value);item.node.scale.copy(item.scale);}
     this.root.updateWorldMatrix(true,true);
     for(const b of this.bindings){b.mesh.skeleton.boneInverses=b.inverses.map(m=>m.clone());b.mesh.bind(b.mesh.skeleton,b.bind);}
-    this.root.updateMatrixWorld(true);
+    this.root.updateMatrixWorld(true);updatePoseMorphs(this.root);
     for(const s of this.surfaces){(s.mesh.geometry.getAttribute('position') as T.BufferAttribute).copyArray(s.base);s.mesh.geometry.getAttribute('position').needsUpdate=true;s.mesh.geometry.computeVertexNormals();s.mesh.geometry.computeBoundingSphere();s.mesh.geometry.computeBoundingBox();}
   }
-  private rebind(){for(const b of this.bindings){b.mesh.skeleton.calculateInverses();b.mesh.bind(b.mesh.skeleton,b.mesh.matrixWorld);}}
+  private rebind(){for(const b of this.bindings){b.mesh.skeleton.calculateInverses();b.mesh.bind(b.mesh.skeleton,b.mesh.matrixWorld);}this.correctionsBindCompatible=poseMorphBindingCompatible(this.root);}
   private anchors=new Map<string,{key:string;index:number}>();
   private surfaceMatrix(p:ControlPoint):T.Matrix4 {
     const surface=p.mesh===undefined?undefined:this.surfaces[p.mesh];if(!surface)return this.figureMatrix.clone();
@@ -268,7 +272,14 @@ export class StudioRig {
       for(let i=0;i<s.world.length;i++){const t=1-s.world[i].distanceTo(center)/p.radius;if(t<=0)continue;const w=t*t*(3-2*t);attr.setXYZ(i,attr.getX(i)+offset.x*w,attr.getY(i)+offset.y*w,attr.getZ(i)+offset.z*w);}
     }
   }
+  get poseCorrectionsCompatible(){return this.correctionsBindCompatible&&!(this.data.boneInsertions?.length||this.data.boneDeletions?.length||this.data.boneReparents?.length||this.data.weightTransfers?.length)&&JSON.stringify(this.data.boneRest)===JSON.stringify(this.initial.boneRest);}
+  get poseCorrectionsActive(){return poseMorphBindings(this.root).length>0&&this.poseCorrectionsCompatible&&this.data.poseCorrections!==false;}
+  correctionWeights(values:Record<string,Transform>,enabled=this.poseCorrectionsActive){
+    const points=new Map(this.data.points.filter(p=>p.kind==='bone').map(p=>[this.bones[p.bone!],p]));
+    return poseMorphWeights(this.root,bone=>{const point=points.get(bone),value=point?values[point.id]:undefined;return value?new T.Quaternion().fromArray(value.rotation):bone.quaternion;},enabled);
+  }
   private deform() {
+    enablePoseMorphs(this.root,this.poseCorrectionsActive);updatePoseMorphs(this.root);
     for(let m=0;m<this.surfaces.length;m++){
       const s=this.surfaces[m],attr=s.mesh.geometry.getAttribute('position') as T.BufferAttribute;this.deformSurface(attr,m,this.surfaceValues);
       attr.needsUpdate=true;s.mesh.geometry.computeVertexNormals();s.mesh.geometry.computeBoundingSphere();s.mesh.geometry.computeBoundingBox();

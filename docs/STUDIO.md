@@ -1,4 +1,4 @@
-# Avatar-Studio – 0.88.0
+# Avatar-Studio – 0.89.0
 
 Das Studio ist Teil des Players. Mika, Nori und eigene GLB-Modelle können bearbeitet werden. Der Original-Bildplayer mit beiden Formen und 72 Bildern bleibt erhalten. Die bearbeitbaren 3D-Rekonstruktionen beider PaKaChi-Formen sind zusätzlich im Model Zoo verfügbar; Charakterqualität und gemeinsame 3D-Verwandlung bleiben in Arbeit.
 
@@ -442,3 +442,18 @@ Der Bericht zeigt Quell-/Zielgelenk, Übertragungsanteil und auffällige Dreieck
 **Vorschlag abbrechen**, Projektänderungen, Wechsel des Gelenks oder Verlassen des Studios verhindern die Übernahme veralteter Ergebnisse. Ohne akzeptierte Variante bleiben die Daten unverändert. `get_studio` liefert die Messwerte eines noch verfügbaren Vorschlags mit `requiresVisualReview: true`; die Suche wird bisher lokal über die Oberfläche gestartet.
 
 Das Verfahren optimiert nur sechs lokale Übertragungen und vergleicht aggregierte Messwerte je Teilmodell. Es erzeugt kein allgemeines anatomisches Rig und beweist weder Kollisionsfreiheit noch korrekte Silhouette oder erhaltenes Volumen. Auch ein erfolgreicher synthetischer Messfall kann noch eine sichtbare Einschnürung zeigen. Die drei Zwischenposen sind Stichproben, keine Prüfung einer vollständigen gespeicherten Bewegung. Die extremer gedrehten Original-PaKaChi-Ellenbogen werden von der aktuellen Suche noch nicht repariert. Eine Meldung „keine Korrektur gefunden“ ist deshalb ein gültiges Ergebnis.
+
+
+## Poseabhängige Hautkorrekturen des Original-PaKaChi
+
+Bei den aktuellen riggten Originalformen ist **Poseabhängige Hautkorrekturen** standardmäßig eingeschaltet. Der Schalter ermöglicht einen direkten Vorher-/Nachher-Vergleich; Änderung, Undo/Redo und Projekt-Speichern erhalten dieselbe Einstellung. Die Oberflächenprüfung berücksichtigt genau die Korrektur, die auch der Renderer zeigt. `get_studio` liefert dafür `poseCorrections.available`, `enabled` und `compatible`.
+
+Die Arbeitsform enthält sechs Korrekturziele am **linken Ellenbogen** (lokal jeweils ±90° um X/Y/Z), die Tierform bisher eines (lokal −90° um Z). Sie ändern die Hautform von Körper und Fell bei unverändertem Gelenkwinkel. Beispielsweise sinken die auffälligen Körperdreiecke der Arbeitsform bei +90° um Y von 442 auf 61; die maximale gemessene Hauptdehnung sinkt von etwa 25,2× auf 2,50×. Verbleibende Stauchungen und andere Fehler sind damit nicht vollständig behoben.
+
+Die Einblendung richtet sich nach dem Quaternion-Winkelabstand zur jeweiligen Zielhaltung. Innerhalb von 45° Abstand läuft eine weiche kubische Kurve von 0 auf 1; außerhalb bleibt das Ziel ausgeschaltet. In der Grundpose und bei reinen Handgelenk-/Kopfbewegungen wird keine Korrektur eingeblendet. Eine 180°-Drehung wird ebenfalls nicht von diesen Zielen korrigiert. Die Aufbereitung hat je Variante sieben Achsenstichproben zwischen 0° und 180° an Körper und Fell geprüft und schlechtere Varianten verworfen. Andere Achsenmischungen, gleichzeitige Gelenkbewegungen, Kollisionen und Volumen sind nicht freigegeben.
+
+Die Korrekturziele sind an die ursprüngliche Hautbindung gebunden. Rig-Umbau, geänderte Grundstellung/Hautgewichte oder eine davon abweichende Neubindung schalten sie aus. Der Schalter ist dann deaktiviert; passende Undo-/Wiederherstellung kann die Kompatibilität wiederherstellen. Das verhindert, dass eine für die alte Bindung berechnete Form auf ein geändertes Rig angewendet wird. Nach solchen Änderungen sind neue Korrekturformen nötig.
+
+**Projekt speichern/laden** erhält die eingebetteten Ziele und den Schalter. Ein **Animations-GLB** backt die Einblendungen mit 30 Bildern pro Sekunde in gewöhnliche Morph-Kurven; andere glTF-Player brauchen dafür keinen PaKaChi-Treiber. Zwischen den Abtastpunkten interpoliert der fremde Player, daher ist das eine zeitlich abgetastete Wiedergabe. Ein **Rig-GLB** enthält Ziele und aktuelle Einblendung; automatische Reaktion auf spätere Posen erfordert kompatible PaKaChi-Metadaten oder selbst eingerichtete Treiber im Zielprogramm. Bei inkompatibler Bindung entfernt der Export die Treiber-Metadaten.
+
+Die GLBs sind mit rund 36,4 MB (Arbeitsform) und 20,7 MB (Tierform) größer geworden, bleiben aber unter dem 50-MiB-Modelllimit. Die ursprünglichen Modelle, Bilder, Hautgewichte und unverformten Körperoberflächen bleiben erhalten. Diese Korrekturziele verbessern einzelne Posen; die gemeinsame Oberfläche und die Normalform↔Arbeitsform-Verwandlung bleiben eigenständige offene Aufgaben.

@@ -9,7 +9,7 @@ import {parseArgs} from 'node:util';
 const {values}=parseArgs({options:{url:{type:'string',default:'http://127.0.0.1:8787/mcp'}}});
 const url=new URL(values.url),token=process.env.PAKACHI_MCP_TOKEN;
 if(url.protocol!=='http:'||!['localhost','127.0.0.1','[::1]'].includes(url.hostname)||url.username||url.password||url.search||url.hash||!token)throw Error('Lokale MCP-Adresse und PAKACHI_MCP_TOKEN erforderlich.');
-const client=new Client({name:'pakachi-local-stdio',version:'0.88.0'}),server=new Server({name:'pakachi-local-workspace',version:'0.88.0'},{capabilities:{tools:{}}});
+const client=new Client({name:'pakachi-local-stdio',version:'0.89.0'}),server=new Server({name:'pakachi-local-workspace',version:'0.89.0'},{capabilities:{tools:{}}});
 await client.connect(new StreamableHTTPClientTransport(url,{requestInit:{headers:{Authorization:'Bearer '+token}}}));
 server.setRequestHandler(ListToolsRequestSchema,()=>client.listTools());server.setRequestHandler(CallToolRequestSchema,request=>client.callTool(request.params));
 await server.connect(new StdioServerTransport());

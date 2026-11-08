@@ -14,6 +14,23 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 Noch keine weiteren Änderungen.
 
+## [0.89.0] - 2026-11-08
+
+Zeitstempel: 2026-11-08T22:19:25+01:00 (Europe/Berlin)
+
+### Added
+
+- Echte poseabhängige Korrekturformen an beiden Original-PaKaChi-Rekonstruktionen: sechs geprüfte ±90°-Haltungen des linken Ellenbogens der Arbeitsform und eine −90°-Z-Haltung der Tierform. Körper und Fell werden gemeinsam korrigiert; volle Gelenkdrehung, Grundoberfläche, ursprüngliche Hautgewichte und 59-Gelenk-Aufbau bleiben erhalten.
+- CPU-Aufbereitung passt lokale Einflussfelder anhand unveränderter Gelenkhaltungen an und backt daraus relative Korrekturziele in die ursprüngliche Hautbindung. Nur Varianten mit weniger auffälligen Körperdreiecken und ohne schlechtere Fehlerzahl/maximale Dehnung in den geprüften Körper-/Fellstichproben werden aufgenommen. Ungeeignete Tierform-Varianten bleiben verworfen. [Messdaten](benchmarks/pakachi-rigging-2026-11-07.json).
+- Gemeinsame Laufzeit für Renderer, Studio und reine Oberflächenprüfung. Korrekturen blenden im Winkelabstand bis 45° um ihre Zielhaltung weich ein/aus; Grundpose, reine Handgelenk-/Kopfbewegung und 180°-Stresshaltung bleiben unverändert. Keine Behauptung einer allgemeinen Verformungs-, Volumen- oder Kollisionsreparatur.
+- **Poseabhängige Hautkorrekturen** lässt sich im Studio vergleichen, rückgängig machen und im Projekt speichern. `get_studio` meldet Verfügbarkeit, Aktivität und Bindungskompatibilität. Nach Rig-/Gewichtsänderungen oder inkompatibler Neubindung werden die dafür berechneten Korrekturen ausgeschaltet.
+
+### Changed
+
+- Animations-GLB enthält die Korrekturgewichte als mit 30 Hz abgetastete normale Morph-Kurven und benötigt für die Wiedergabe keinen PaKaChi-Treiber. Rig-GLB erhält Korrekturziele und Momentaufnahme; inkompatible Treiber werden entfernt. Projektdateien erhalten eine optionale boolesche Einstellung, ältere Projekte starten mit eingeschalteten kompatiblen Korrekturen.
+- Modellaufbereitung berücksichtigt beide Korrekturmodule und den Mess-/Treibervertrag im Pipelinehash. Die abgeleiteten GLBs wachsen auf rund 36,4 MB bzw. 20,7 MB und bleiben unter dem 50-MiB-Importlimit. Die erhaltenen Originaldateien werden nicht verändert.
+- Vollständigen CI-Lauf von 0.88.0 ausgewertet: 380 Node-Tests, Build, alle 38 Chromium-Fälle und drei Produktionsimportmessungen bestanden. [Prüfbericht](PRUEFUNG.md#version-0880).
+
 ## [0.88.0] - 2026-11-08
 
 Zeitstempel: 2026-11-08T20:56:00+01:00 (Europe/Berlin)
@@ -1848,3 +1865,5 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 [0.87.0]: PRUEFUNG.md#version-0870
 
 [0.88.0]: PRUEFUNG.md#version-0880
+
+[0.89.0]: PRUEFUNG.md#version-0890

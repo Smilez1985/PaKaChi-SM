@@ -1,16 +1,16 @@
 {
   "format": "pakachi-character-rigging",
-  "version": 2,
-  "pipelineSha256": "fc3adf7132656d5f3d6282dddf530812abde40c29abcbfd3a00390a332bd3da6",
-  "method": "Measured landmarks, corrected wrist/paw depths and fitted tail cross-sections; continuous chain weights, three mesh-edge smoothing passes, four influences maximum. Distal hand/toe clipping, 0.00001-unit source welding and simple boundary-loop caps; 28 extra digit joints with independent rigid geometry. Character-specific, not automatic anatomical inference.",
+  "version": 3,
+  "pipelineSha256": "cb3d062deca34d48c065f6a9fd3dc795edbe169bd80b978c2aacbb399e25f7d4",
+  "method": "Measured landmarks, corrected wrist/paw depths and fitted tail cross-sections; continuous chain weights, three mesh-edge smoothing passes, four influences maximum. Distal hand/toe clipping, 0.00001-unit source welding and simple boundary-loop caps; 28 extra digit joints with independent rigid geometry. Accepted pose-space elbow morphs from constrained edge-length fitting; original weights and rest surface unchanged. Character-specific, not automatic anatomical inference.",
   "forms": [
     {
       "form": "humanoid",
       "source": "public/model-zoo/pakachi-drafts/humanoid.glb",
       "sourceSha256": "debb9c4793368bff6989f41b2a40eba3e4ef6a6100aaf3858abe51117a174d14",
       "output": "public/model-zoo/pakachi-rigged/humanoid.glb",
-      "outputSha256": "8ad651f22eac0222144bf9dcd4eb8987cf9701c67093291123a2ccbbdd6a975f",
-      "bytes": 11774676,
+      "outputSha256": "c35d33ac308c08cb993acd58c8976601459c686a0f62af6b56d641d3257f2327",
+      "bytes": 36396504,
       "removedDegenerate": 9,
       "taubinPasses": 16,
       "maxDisplacement": 0.005423115222534196,
@@ -26,6 +26,1531 @@
       },
       "digits": 14,
       "furTufts": 40425,
+      "poseCorrections": {
+        "method": "Pose-space corrective morphs from projected edge-length fitting; original weights, joints and rest geometry preserved.",
+        "joint": "LeftElbow",
+        "iterations": 480,
+        "activeVertices": 2355,
+        "trials": [
+          {
+            "axis": "x",
+            "degrees": 90,
+            "accepted": true,
+            "samples": [
+              {
+                "degrees": 0,
+                "meshes": [
+                  {
+                    "name": "PaKaChi_body",
+                    "before": {
+                      "issues": 0,
+                      "maximumStretch": 1.0001467749301869,
+                      "minimumStretch": 0.9999102743358561,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 0,
+                      "maximumStretch": 1.0001467749301869,
+                      "minimumStretch": 0.9999102743358561,
+                      "invalid": 0
+                    }
+                  },
+                  {
+                    "name": "PaKaChi_fur",
+                    "before": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000516301877,
+                      "minimumStretch": 0.9999999502313198,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000516301877,
+                      "minimumStretch": 0.9999999502313198,
+                      "invalid": 0
+                    }
+                  }
+                ]
+              },
+              {
+                "degrees": 45,
+                "meshes": [
+                  {
+                    "name": "PaKaChi_body",
+                    "before": {
+                      "issues": 290,
+                      "maximumStretch": 21.518757791171808,
+                      "minimumStretch": 0.03475848230998181,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 290,
+                      "maximumStretch": 21.518757791171808,
+                      "minimumStretch": 0.03475848230998181,
+                      "invalid": 0
+                    }
+                  },
+                  {
+                    "name": "PaKaChi_fur",
+                    "before": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000516301877,
+                      "minimumStretch": 0.9238796131795763,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000516301877,
+                      "minimumStretch": 0.9238796131795763,
+                      "invalid": 0
+                    }
+                  }
+                ]
+              },
+              {
+                "degrees": 67.5,
+                "meshes": [
+                  {
+                    "name": "PaKaChi_body",
+                    "before": {
+                      "issues": 391,
+                      "maximumStretch": 30.95892562422237,
+                      "minimumStretch": 0.03774631848867625,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 343,
+                      "maximumStretch": 11.61385912512607,
+                      "minimumStretch": 0.025494047835602017,
+                      "invalid": 0
+                    }
+                  },
+                  {
+                    "name": "PaKaChi_fur",
+                    "before": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000516301877,
+                      "minimumStretch": 0.831469801219262,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000516301877,
+                      "minimumStretch": 0.715994827352922,
+                      "invalid": 0
+                    }
+                  }
+                ]
+              },
+              {
+                "degrees": 90,
+                "meshes": [
+                  {
+                    "name": "PaKaChi_body",
+                    "before": {
+                      "issues": 494,
+                      "maximumStretch": 39.21524257539357,
+                      "minimumStretch": 0.010942022553163424,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 82,
+                      "maximumStretch": 3.324314608281194,
+                      "minimumStretch": 0.019041358293083944,
+                      "invalid": 0
+                    }
+                  },
+                  {
+                    "name": "PaKaChi_fur",
+                    "before": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000516301877,
+                      "minimumStretch": 0.7071071410384285,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000468147496,
+                      "minimumStretch": 0.7071069203717066,
+                      "invalid": 0
+                    }
+                  }
+                ]
+              },
+              {
+                "degrees": 112.5,
+                "meshes": [
+                  {
+                    "name": "PaKaChi_body",
+                    "before": {
+                      "issues": 540,
+                      "maximumStretch": 45.96733695483345,
+                      "minimumStretch": 0.03694861041951037,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 448,
+                      "maximumStretch": 29.602184990217484,
+                      "minimumStretch": 0.022692082875098094,
+                      "invalid": 0
+                    }
+                  },
+                  {
+                    "name": "PaKaChi_fur",
+                    "before": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000516301877,
+                      "minimumStretch": 0.5555708662947314,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000516301877,
+                      "minimumStretch": 0.5555708662947323,
+                      "invalid": 0
+                    }
+                  }
+                ]
+              },
+              {
+                "degrees": 135,
+                "meshes": [
+                  {
+                    "name": "PaKaChi_body",
+                    "before": {
+                      "issues": 602,
+                      "maximumStretch": 50.95464829906468,
+                      "minimumStretch": 0.018805838515480268,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 602,
+                      "maximumStretch": 50.95464829906468,
+                      "minimumStretch": 0.018805838515480268,
+                      "invalid": 0
+                    }
+                  },
+                  {
+                    "name": "PaKaChi_fur",
+                    "before": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000516301877,
+                      "minimumStretch": 0.3826845674524101,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000516301877,
+                      "minimumStretch": 0.3826845674524101,
+                      "invalid": 0
+                    }
+                  }
+                ]
+              },
+              {
+                "degrees": 180,
+                "meshes": [
+                  {
+                    "name": "PaKaChi_body",
+                    "before": {
+                      "issues": 897,
+                      "maximumStretch": 54.94190566295439,
+                      "minimumStretch": 0.002624527537041907,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 897,
+                      "maximumStretch": 54.94190566295439,
+                      "minimumStretch": 0.002624527537041907,
+                      "invalid": 0
+                    }
+                  },
+                  {
+                    "name": "PaKaChi_fur",
+                    "before": {
+                      "issues": 343,
+                      "maximumStretch": 1.0000000516301877,
+                      "minimumStretch": 0.0010088682174660354,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 343,
+                      "maximumStretch": 1.0000000516301877,
+                      "minimumStretch": 0.0010088682174660354,
+                      "invalid": 0
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "axis": "x",
+            "degrees": -90,
+            "accepted": true,
+            "samples": [
+              {
+                "degrees": 0,
+                "meshes": [
+                  {
+                    "name": "PaKaChi_body",
+                    "before": {
+                      "issues": 0,
+                      "maximumStretch": 1.0001467749301869,
+                      "minimumStretch": 0.9999102743358561,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 0,
+                      "maximumStretch": 1.0001467749301869,
+                      "minimumStretch": 0.9999102743358561,
+                      "invalid": 0
+                    }
+                  },
+                  {
+                    "name": "PaKaChi_fur",
+                    "before": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000516301877,
+                      "minimumStretch": 0.9999999502313198,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000516301877,
+                      "minimumStretch": 0.9999999502313198,
+                      "invalid": 0
+                    }
+                  }
+                ]
+              },
+              {
+                "degrees": -45,
+                "meshes": [
+                  {
+                    "name": "PaKaChi_body",
+                    "before": {
+                      "issues": 281,
+                      "maximumStretch": 20.589827653147587,
+                      "minimumStretch": 0.0318140967236986,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 281,
+                      "maximumStretch": 20.589827653147587,
+                      "minimumStretch": 0.0318140967236986,
+                      "invalid": 0
+                    }
+                  },
+                  {
+                    "name": "PaKaChi_fur",
+                    "before": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000516301877,
+                      "minimumStretch": 0.9238796131795756,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000516301877,
+                      "minimumStretch": 0.9238796131795756,
+                      "invalid": 0
+                    }
+                  }
+                ]
+              },
+              {
+                "degrees": -67.5,
+                "meshes": [
+                  {
+                    "name": "PaKaChi_body",
+                    "before": {
+                      "issues": 407,
+                      "maximumStretch": 30.121524366536327,
+                      "minimumStretch": 0.0169411035839424,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 217,
+                      "maximumStretch": 11.066126637553822,
+                      "minimumStretch": 0.058235724510433406,
+                      "invalid": 0
+                    }
+                  },
+                  {
+                    "name": "PaKaChi_fur",
+                    "before": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000516301877,
+                      "minimumStretch": 0.8314698012192612,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000516301877,
+                      "minimumStretch": 0.7159942587682483,
+                      "invalid": 0
+                    }
+                  }
+                ]
+              },
+              {
+                "degrees": -90,
+                "meshes": [
+                  {
+                    "name": "PaKaChi_body",
+                    "before": {
+                      "issues": 503,
+                      "maximumStretch": 38.5026833630206,
+                      "minimumStretch": 0.030224127720352607,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 30,
+                      "maximumStretch": 3.4704085630084585,
+                      "minimumStretch": 0.20893891786535704,
+                      "invalid": 0
+                    }
+                  },
+                  {
+                    "name": "PaKaChi_fur",
+                    "before": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000516301877,
+                      "minimumStretch": 0.7071071410384285,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000468147496,
+                      "minimumStretch": 0.7071069454154895,
+                      "invalid": 0
+                    }
+                  }
+                ]
+              },
+              {
+                "degrees": -112.5,
+                "meshes": [
+                  {
+                    "name": "PaKaChi_body",
+                    "before": {
+                      "issues": 566,
+                      "maximumStretch": 45.40733957155784,
+                      "minimumStretch": 0.0353155315889184,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 494,
+                      "maximumStretch": 28.983643968172004,
+                      "minimumStretch": 0.0139864968060934,
+                      "invalid": 0
+                    }
+                  },
+                  {
+                    "name": "PaKaChi_fur",
+                    "before": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000516301877,
+                      "minimumStretch": 0.5555708662947255,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000516301877,
+                      "minimumStretch": 0.5555708662947255,
+                      "invalid": 0
+                    }
+                  }
+                ]
+              },
+              {
+                "degrees": -135,
+                "meshes": [
+                  {
+                    "name": "PaKaChi_body",
+                    "before": {
+                      "issues": 616,
+                      "maximumStretch": 50.56886639343415,
+                      "minimumStretch": 0.034755553602501287,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 616,
+                      "maximumStretch": 50.56886639343415,
+                      "minimumStretch": 0.034755553602501287,
+                      "invalid": 0
+                    }
+                  },
+                  {
+                    "name": "PaKaChi_fur",
+                    "before": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000516301877,
+                      "minimumStretch": 0.38268456745240864,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000516301877,
+                      "minimumStretch": 0.38268456745240864,
+                      "invalid": 0
+                    }
+                  }
+                ]
+              },
+              {
+                "degrees": -180,
+                "meshes": [
+                  {
+                    "name": "PaKaChi_body",
+                    "before": {
+                      "issues": 897,
+                      "maximumStretch": 54.94190566295439,
+                      "minimumStretch": 0.002624527537041907,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 897,
+                      "maximumStretch": 54.94190566295439,
+                      "minimumStretch": 0.002624527537041907,
+                      "invalid": 0
+                    }
+                  },
+                  {
+                    "name": "PaKaChi_fur",
+                    "before": {
+                      "issues": 343,
+                      "maximumStretch": 1.0000000516301877,
+                      "minimumStretch": 0.0010088682174660354,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 343,
+                      "maximumStretch": 1.0000000516301877,
+                      "minimumStretch": 0.0010088682174660354,
+                      "invalid": 0
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "axis": "y",
+            "degrees": 90,
+            "accepted": true,
+            "samples": [
+              {
+                "degrees": 0,
+                "meshes": [
+                  {
+                    "name": "PaKaChi_body",
+                    "before": {
+                      "issues": 0,
+                      "maximumStretch": 1.0001467749301869,
+                      "minimumStretch": 0.9999102743358561,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 0,
+                      "maximumStretch": 1.0001467749301869,
+                      "minimumStretch": 0.9999102743358561,
+                      "invalid": 0
+                    }
+                  },
+                  {
+                    "name": "PaKaChi_fur",
+                    "before": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000516301877,
+                      "minimumStretch": 0.9999999502313198,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000516301877,
+                      "minimumStretch": 0.9999999502313198,
+                      "invalid": 0
+                    }
+                  }
+                ]
+              },
+              {
+                "degrees": 45,
+                "meshes": [
+                  {
+                    "name": "PaKaChi_body",
+                    "before": {
+                      "issues": 204,
+                      "maximumStretch": 13.71632535905493,
+                      "minimumStretch": 0.07693258437918127,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 204,
+                      "maximumStretch": 13.71632535905493,
+                      "minimumStretch": 0.07693258437918127,
+                      "invalid": 0
+                    }
+                  },
+                  {
+                    "name": "PaKaChi_fur",
+                    "before": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000516301877,
+                      "minimumStretch": 0.923879613179583,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000516301877,
+                      "minimumStretch": 0.923879613179583,
+                      "invalid": 0
+                    }
+                  }
+                ]
+              },
+              {
+                "degrees": 67.5,
+                "meshes": [
+                  {
+                    "name": "PaKaChi_body",
+                    "before": {
+                      "issues": 331,
+                      "maximumStretch": 19.836936926213376,
+                      "minimumStretch": 0.004694434442946114,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 109,
+                      "maximumStretch": 7.044501649620172,
+                      "minimumStretch": 0.088127981102723,
+                      "invalid": 0
+                    }
+                  },
+                  {
+                    "name": "PaKaChi_fur",
+                    "before": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000516301877,
+                      "minimumStretch": 0.8314698012192556,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000516301877,
+                      "minimumStretch": 0.7159933201362051,
+                      "invalid": 0
+                    }
+                  }
+                ]
+              },
+              {
+                "degrees": 90,
+                "meshes": [
+                  {
+                    "name": "PaKaChi_body",
+                    "before": {
+                      "issues": 442,
+                      "maximumStretch": 25.205084052797474,
+                      "minimumStretch": 0.031436879364058756,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 61,
+                      "maximumStretch": 2.503637682753732,
+                      "minimumStretch": 0.015034069020505154,
+                      "invalid": 0
+                    }
+                  },
+                  {
+                    "name": "PaKaChi_fur",
+                    "before": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000516301877,
+                      "minimumStretch": 0.7071071410384292,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000468147496,
+                      "minimumStretch": 0.7071064438380298,
+                      "invalid": 0
+                    }
+                  }
+                ]
+              },
+              {
+                "degrees": 112.5,
+                "meshes": [
+                  {
+                    "name": "PaKaChi_body",
+                    "before": {
+                      "issues": 503,
+                      "maximumStretch": 29.60919363287057,
+                      "minimumStretch": 0.010296578069711858,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 386,
+                      "maximumStretch": 19.85648151512631,
+                      "minimumStretch": 0.02384656370766351,
+                      "invalid": 0
+                    }
+                  },
+                  {
+                    "name": "PaKaChi_fur",
+                    "before": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000516301877,
+                      "minimumStretch": 0.5555708662947302,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000516301877,
+                      "minimumStretch": 0.5555708662947205,
+                      "invalid": 0
+                    }
+                  }
+                ]
+              },
+              {
+                "degrees": 135,
+                "meshes": [
+                  {
+                    "name": "PaKaChi_body",
+                    "before": {
+                      "issues": 595,
+                      "maximumStretch": 32.87820621838121,
+                      "minimumStretch": 0.011398472330207101,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 595,
+                      "maximumStretch": 32.87820621838121,
+                      "minimumStretch": 0.011398472330207101,
+                      "invalid": 0
+                    }
+                  },
+                  {
+                    "name": "PaKaChi_fur",
+                    "before": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000516301877,
+                      "minimumStretch": 0.38268456745240387,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000516301877,
+                      "minimumStretch": 0.38268456745240387,
+                      "invalid": 0
+                    }
+                  }
+                ]
+              },
+              {
+                "degrees": 180,
+                "meshes": [
+                  {
+                    "name": "PaKaChi_body",
+                    "before": {
+                      "issues": 1105,
+                      "maximumStretch": 35.632314643135075,
+                      "minimumStretch": 0.007883393399010369,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 1105,
+                      "maximumStretch": 35.632314643135075,
+                      "minimumStretch": 0.007883393399010369,
+                      "invalid": 0
+                    }
+                  },
+                  {
+                    "name": "PaKaChi_fur",
+                    "before": {
+                      "issues": 353,
+                      "maximumStretch": 1.0000000516301877,
+                      "minimumStretch": 0.0010088682174672857,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 353,
+                      "maximumStretch": 1.0000000516301877,
+                      "minimumStretch": 0.0010088682174672857,
+                      "invalid": 0
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "axis": "y",
+            "degrees": -90,
+            "accepted": true,
+            "samples": [
+              {
+                "degrees": 0,
+                "meshes": [
+                  {
+                    "name": "PaKaChi_body",
+                    "before": {
+                      "issues": 0,
+                      "maximumStretch": 1.0001467749301869,
+                      "minimumStretch": 0.9999102743358561,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 0,
+                      "maximumStretch": 1.0001467749301869,
+                      "minimumStretch": 0.9999102743358561,
+                      "invalid": 0
+                    }
+                  },
+                  {
+                    "name": "PaKaChi_fur",
+                    "before": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000516301877,
+                      "minimumStretch": 0.9999999502313198,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000516301877,
+                      "minimumStretch": 0.9999999502313198,
+                      "invalid": 0
+                    }
+                  }
+                ]
+              },
+              {
+                "degrees": -45,
+                "meshes": [
+                  {
+                    "name": "PaKaChi_body",
+                    "before": {
+                      "issues": 193,
+                      "maximumStretch": 13.947067441427732,
+                      "minimumStretch": 0.16511315051064437,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 193,
+                      "maximumStretch": 13.947067441427732,
+                      "minimumStretch": 0.16511315051064437,
+                      "invalid": 0
+                    }
+                  },
+                  {
+                    "name": "PaKaChi_fur",
+                    "before": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000516301877,
+                      "minimumStretch": 0.9238796131795951,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000516301877,
+                      "minimumStretch": 0.9238796131795951,
+                      "invalid": 0
+                    }
+                  }
+                ]
+              },
+              {
+                "degrees": -67.5,
+                "meshes": [
+                  {
+                    "name": "PaKaChi_body",
+                    "before": {
+                      "issues": 312,
+                      "maximumStretch": 20.06559025447343,
+                      "minimumStretch": 0.13011304902667847,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 94,
+                      "maximumStretch": 7.3563736913295275,
+                      "minimumStretch": 0.036880737044460425,
+                      "invalid": 0
+                    }
+                  },
+                  {
+                    "name": "PaKaChi_fur",
+                    "before": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000516301877,
+                      "minimumStretch": 0.8314698012192806,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000516301877,
+                      "minimumStretch": 0.7159938799916623,
+                      "invalid": 0
+                    }
+                  }
+                ]
+              },
+              {
+                "degrees": -90,
+                "meshes": [
+                  {
+                    "name": "PaKaChi_body",
+                    "before": {
+                      "issues": 403,
+                      "maximumStretch": 25.419893612858537,
+                      "minimumStretch": 0.10069170212164469,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 34,
+                      "maximumStretch": 2.6234958546670994,
+                      "minimumStretch": 0.1242734363018753,
+                      "invalid": 0
+                    }
+                  },
+                  {
+                    "name": "PaKaChi_fur",
+                    "before": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000516301877,
+                      "minimumStretch": 0.7071071410384292,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000468147496,
+                      "minimumStretch": 0.7071071410383323,
+                      "invalid": 0
+                    }
+                  }
+                ]
+              },
+              {
+                "degrees": -112.5,
+                "meshes": [
+                  {
+                    "name": "PaKaChi_body",
+                    "before": {
+                      "issues": 485,
+                      "maximumStretch": 29.800561001524738,
+                      "minimumStretch": 0.049455502498513576,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 362,
+                      "maximumStretch": 19.777951065534314,
+                      "minimumStretch": 0.03914638762820548,
+                      "invalid": 0
+                    }
+                  },
+                  {
+                    "name": "PaKaChi_fur",
+                    "before": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000516301877,
+                      "minimumStretch": 0.555570866294748,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000516301877,
+                      "minimumStretch": 0.5555708662947274,
+                      "invalid": 0
+                    }
+                  }
+                ]
+              },
+              {
+                "degrees": -135,
+                "meshes": [
+                  {
+                    "name": "PaKaChi_body",
+                    "before": {
+                      "issues": 571,
+                      "maximumStretch": 33.03797971437776,
+                      "minimumStretch": 0.008021426839898406,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 571,
+                      "maximumStretch": 33.03797971437776,
+                      "minimumStretch": 0.008021426839898406,
+                      "invalid": 0
+                    }
+                  },
+                  {
+                    "name": "PaKaChi_fur",
+                    "before": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000516301877,
+                      "minimumStretch": 0.38268456745238044,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000516301877,
+                      "minimumStretch": 0.38268456745238044,
+                      "invalid": 0
+                    }
+                  }
+                ]
+              },
+              {
+                "degrees": -180,
+                "meshes": [
+                  {
+                    "name": "PaKaChi_body",
+                    "before": {
+                      "issues": 1105,
+                      "maximumStretch": 35.632314643135075,
+                      "minimumStretch": 0.007883393399010369,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 1105,
+                      "maximumStretch": 35.632314643135075,
+                      "minimumStretch": 0.007883393399010369,
+                      "invalid": 0
+                    }
+                  },
+                  {
+                    "name": "PaKaChi_fur",
+                    "before": {
+                      "issues": 353,
+                      "maximumStretch": 1.0000000516301877,
+                      "minimumStretch": 0.0010088682174672857,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 353,
+                      "maximumStretch": 1.0000000516301877,
+                      "minimumStretch": 0.0010088682174672857,
+                      "invalid": 0
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "axis": "z",
+            "degrees": 90,
+            "accepted": true,
+            "samples": [
+              {
+                "degrees": 0,
+                "meshes": [
+                  {
+                    "name": "PaKaChi_body",
+                    "before": {
+                      "issues": 0,
+                      "maximumStretch": 1.0001467749301869,
+                      "minimumStretch": 0.9999102743358561,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 0,
+                      "maximumStretch": 1.0001467749301869,
+                      "minimumStretch": 0.9999102743358561,
+                      "invalid": 0
+                    }
+                  },
+                  {
+                    "name": "PaKaChi_fur",
+                    "before": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000516301877,
+                      "minimumStretch": 0.9999999502313198,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000516301877,
+                      "minimumStretch": 0.9999999502313198,
+                      "invalid": 0
+                    }
+                  }
+                ]
+              },
+              {
+                "degrees": 45,
+                "meshes": [
+                  {
+                    "name": "PaKaChi_body",
+                    "before": {
+                      "issues": 287,
+                      "maximumStretch": 21.687287345277955,
+                      "minimumStretch": 0.06669186333010058,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 287,
+                      "maximumStretch": 21.687287345277955,
+                      "minimumStretch": 0.06669186333010058,
+                      "invalid": 0
+                    }
+                  },
+                  {
+                    "name": "PaKaChi_fur",
+                    "before": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000516301877,
+                      "minimumStretch": 0.9238796131795357,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000516301877,
+                      "minimumStretch": 0.9238796131795357,
+                      "invalid": 0
+                    }
+                  }
+                ]
+              },
+              {
+                "degrees": 67.5,
+                "meshes": [
+                  {
+                    "name": "PaKaChi_body",
+                    "before": {
+                      "issues": 400,
+                      "maximumStretch": 31.553840245856055,
+                      "minimumStretch": 0.054107716855243126,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 274,
+                      "maximumStretch": 11.749583760028136,
+                      "minimumStretch": 0.027610921782394077,
+                      "invalid": 0
+                    }
+                  },
+                  {
+                    "name": "PaKaChi_fur",
+                    "before": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000516301877,
+                      "minimumStretch": 0.8314698012192664,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000516301877,
+                      "minimumStretch": 0.7159925799932472,
+                      "invalid": 0
+                    }
+                  }
+                ]
+              },
+              {
+                "degrees": 90,
+                "meshes": [
+                  {
+                    "name": "PaKaChi_body",
+                    "before": {
+                      "issues": 490,
+                      "maximumStretch": 40.212962015366166,
+                      "minimumStretch": 0.0480327745831956,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 41,
+                      "maximumStretch": 3.2468676188356045,
+                      "minimumStretch": 0.08958785259072695,
+                      "invalid": 0
+                    }
+                  },
+                  {
+                    "name": "PaKaChi_fur",
+                    "before": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000516301877,
+                      "minimumStretch": 0.7071071410384285,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000468147496,
+                      "minimumStretch": 0.7071062157055742,
+                      "invalid": 0
+                    }
+                  }
+                ]
+              },
+              {
+                "degrees": 112.5,
+                "meshes": [
+                  {
+                    "name": "PaKaChi_body",
+                    "before": {
+                      "issues": 515,
+                      "maximumStretch": 47.3290846887778,
+                      "minimumStretch": 0.038933040481153675,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 450,
+                      "maximumStretch": 30.320642558944,
+                      "minimumStretch": 0.027179356844713207,
+                      "invalid": 0
+                    }
+                  },
+                  {
+                    "name": "PaKaChi_fur",
+                    "before": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000516301877,
+                      "minimumStretch": 0.5555708662947308,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000516301877,
+                      "minimumStretch": 0.5555708662947308,
+                      "invalid": 0
+                    }
+                  }
+                ]
+              },
+              {
+                "degrees": 135,
+                "meshes": [
+                  {
+                    "name": "PaKaChi_body",
+                    "before": {
+                      "issues": 531,
+                      "maximumStretch": 52.62779205655179,
+                      "minimumStretch": 0.00355431175106164,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 531,
+                      "maximumStretch": 52.62779205655179,
+                      "minimumStretch": 0.00355431175106164,
+                      "invalid": 0
+                    }
+                  },
+                  {
+                    "name": "PaKaChi_fur",
+                    "before": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000516301877,
+                      "minimumStretch": 0.38268456745243234,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000516301877,
+                      "minimumStretch": 0.38268456745243234,
+                      "invalid": 0
+                    }
+                  }
+                ]
+              },
+              {
+                "degrees": 180,
+                "meshes": [
+                  {
+                    "name": "PaKaChi_body",
+                    "before": {
+                      "issues": 715,
+                      "maximumStretch": 57.03477067026206,
+                      "minimumStretch": 0.022108913374288313,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 715,
+                      "maximumStretch": 57.03477067026206,
+                      "minimumStretch": 0.022108913374288313,
+                      "invalid": 0
+                    }
+                  },
+                  {
+                    "name": "PaKaChi_fur",
+                    "before": {
+                      "issues": 343,
+                      "maximumStretch": 1.0000000516301877,
+                      "minimumStretch": 0.0010088682174682552,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 343,
+                      "maximumStretch": 1.0000000516301877,
+                      "minimumStretch": 0.0010088682174682552,
+                      "invalid": 0
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "axis": "z",
+            "degrees": -90,
+            "accepted": true,
+            "samples": [
+              {
+                "degrees": 0,
+                "meshes": [
+                  {
+                    "name": "PaKaChi_body",
+                    "before": {
+                      "issues": 0,
+                      "maximumStretch": 1.0001467749301869,
+                      "minimumStretch": 0.9999102743358561,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 0,
+                      "maximumStretch": 1.0001467749301869,
+                      "minimumStretch": 0.9999102743358561,
+                      "invalid": 0
+                    }
+                  },
+                  {
+                    "name": "PaKaChi_fur",
+                    "before": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000516301877,
+                      "minimumStretch": 0.9999999502313198,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000516301877,
+                      "minimumStretch": 0.9999999502313198,
+                      "invalid": 0
+                    }
+                  }
+                ]
+              },
+              {
+                "degrees": -45,
+                "meshes": [
+                  {
+                    "name": "PaKaChi_body",
+                    "before": {
+                      "issues": 258,
+                      "maximumStretch": 22.010757194149118,
+                      "minimumStretch": 0.10245118131798595,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 258,
+                      "maximumStretch": 22.010757194149118,
+                      "minimumStretch": 0.10245118131798595,
+                      "invalid": 0
+                    }
+                  },
+                  {
+                    "name": "PaKaChi_fur",
+                    "before": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000516301877,
+                      "minimumStretch": 0.9238796131794891,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000516301877,
+                      "minimumStretch": 0.9238796131794891,
+                      "invalid": 0
+                    }
+                  }
+                ]
+              },
+              {
+                "degrees": -67.5,
+                "meshes": [
+                  {
+                    "name": "PaKaChi_body",
+                    "before": {
+                      "issues": 394,
+                      "maximumStretch": 31.84520525591401,
+                      "minimumStretch": 0.053129340309575834,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 277,
+                      "maximumStretch": 11.938211281292471,
+                      "minimumStretch": 0.018385239758116824,
+                      "invalid": 0
+                    }
+                  },
+                  {
+                    "name": "PaKaChi_fur",
+                    "before": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000516301877,
+                      "minimumStretch": 0.8314698012193149,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000516301877,
+                      "minimumStretch": 0.715994065131522,
+                      "invalid": 0
+                    }
+                  }
+                ]
+              },
+              {
+                "degrees": -90,
+                "meshes": [
+                  {
+                    "name": "PaKaChi_body",
+                    "before": {
+                      "issues": 523,
+                      "maximumStretch": 40.46082109210821,
+                      "minimumStretch": 0.006015990025642659,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 151,
+                      "maximumStretch": 3.2293705800400416,
+                      "minimumStretch": 0.015403374691261922,
+                      "invalid": 0
+                    }
+                  },
+                  {
+                    "name": "PaKaChi_fur",
+                    "before": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000516301877,
+                      "minimumStretch": 0.7071071410384285,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000468147496,
+                      "minimumStretch": 0.7071071410384195,
+                      "invalid": 0
+                    }
+                  }
+                ]
+              },
+              {
+                "degrees": -112.5,
+                "meshes": [
+                  {
+                    "name": "PaKaChi_body",
+                    "before": {
+                      "issues": 600,
+                      "maximumStretch": 47.52385211233891,
+                      "minimumStretch": 0.008689195452563721,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 525,
+                      "maximumStretch": 30.535254894386693,
+                      "minimumStretch": 0.020475307666494746,
+                      "invalid": 0
+                    }
+                  },
+                  {
+                    "name": "PaKaChi_fur",
+                    "before": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000516301877,
+                      "minimumStretch": 0.5555708662947231,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000516301877,
+                      "minimumStretch": 0.5555708662947341,
+                      "invalid": 0
+                    }
+                  }
+                ]
+              },
+              {
+                "degrees": -135,
+                "meshes": [
+                  {
+                    "name": "PaKaChi_body",
+                    "before": {
+                      "issues": 638,
+                      "maximumStretch": 52.7619590174529,
+                      "minimumStretch": 0.005305432328230083,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 638,
+                      "maximumStretch": 52.7619590174529,
+                      "minimumStretch": 0.005305432328230083,
+                      "invalid": 0
+                    }
+                  },
+                  {
+                    "name": "PaKaChi_fur",
+                    "before": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000516301877,
+                      "minimumStretch": 0.3826845674524019,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000516301877,
+                      "minimumStretch": 0.3826845674524019,
+                      "invalid": 0
+                    }
+                  }
+                ]
+              },
+              {
+                "degrees": -180,
+                "meshes": [
+                  {
+                    "name": "PaKaChi_body",
+                    "before": {
+                      "issues": 715,
+                      "maximumStretch": 57.03477067026206,
+                      "minimumStretch": 0.02210891337428791,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 715,
+                      "maximumStretch": 57.03477067026206,
+                      "minimumStretch": 0.02210891337428791,
+                      "invalid": 0
+                    }
+                  },
+                  {
+                    "name": "PaKaChi_fur",
+                    "before": {
+                      "issues": 343,
+                      "maximumStretch": 1.0000000516301877,
+                      "minimumStretch": 0.0010088682174682552,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 343,
+                      "maximumStretch": 1.0000000516301877,
+                      "minimumStretch": 0.0010088682174682552,
+                      "invalid": 0
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "limits": [
+          "Only accepted axis-aligned elbow probes; not arbitrary combined poses.",
+          "No collision, volume or final design approval.",
+          "Disabled after changes to skin weights or bind skeleton."
+        ]
+      },
       "coverage": {
         "Pelvis": 2757,
         "Spine": 1913,
@@ -395,8 +1920,8 @@
       "source": "public/model-zoo/pakachi-drafts/animal.glb",
       "sourceSha256": "c87b55c51a9bf1872de421d1052f943de05e53119b3e8c6265d5d0016b8e6d42",
       "output": "public/model-zoo/pakachi-rigged/animal.glb",
-      "outputSha256": "8480a0e6035d8ae7f1f7bd7113ba68de5b7171ce2253dced6f6829c412bb0b0c",
-      "bytes": 15598084,
+      "outputSha256": "5ad48e9a438d764583a1c43a70564236e080e9ab761c72b88aa765f1c81c18c5",
+      "bytes": 20707832,
       "removedDegenerate": 12,
       "taubinPasses": 16,
       "maxDisplacement": 0.00499418957645464,
@@ -412,6 +1937,1531 @@
       },
       "digits": 14,
       "furTufts": 44009,
+      "poseCorrections": {
+        "method": "Pose-space corrective morphs from projected edge-length fitting; original weights, joints and rest geometry preserved.",
+        "joint": "LeftElbow",
+        "iterations": 480,
+        "activeVertices": 1494,
+        "trials": [
+          {
+            "axis": "x",
+            "degrees": 90,
+            "accepted": false,
+            "samples": [
+              {
+                "degrees": 0,
+                "meshes": [
+                  {
+                    "name": "PaKaChi_body",
+                    "before": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000886157794844,
+                      "minimumStretch": 0.999928561234657,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000886157794844,
+                      "minimumStretch": 0.999928561234657,
+                      "invalid": 0
+                    }
+                  },
+                  {
+                    "name": "PaKaChi_fur",
+                    "before": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000552401953,
+                      "minimumStretch": 0.9999999535211841,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000552401953,
+                      "minimumStretch": 0.9999999535211841,
+                      "invalid": 0
+                    }
+                  }
+                ]
+              },
+              {
+                "degrees": 45,
+                "meshes": [
+                  {
+                    "name": "PaKaChi_body",
+                    "before": {
+                      "issues": 500,
+                      "maximumStretch": 46.111696747917144,
+                      "minimumStretch": 0.041584965451434315,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 500,
+                      "maximumStretch": 46.111696747917144,
+                      "minimumStretch": 0.041584965451434315,
+                      "invalid": 0
+                    }
+                  },
+                  {
+                    "name": "PaKaChi_fur",
+                    "before": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000552401953,
+                      "minimumStretch": 0.9259508882435353,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000552401953,
+                      "minimumStretch": 0.9259508882435353,
+                      "invalid": 0
+                    }
+                  }
+                ]
+              },
+              {
+                "degrees": 67.5,
+                "meshes": [
+                  {
+                    "name": "PaKaChi_body",
+                    "before": {
+                      "issues": 610,
+                      "maximumStretch": 67.44439221224435,
+                      "minimumStretch": 0.0173701812925671,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 885,
+                      "maximumStretch": 21.433613372216946,
+                      "minimumStretch": 0.02535429223708443,
+                      "invalid": 0
+                    }
+                  },
+                  {
+                    "name": "PaKaChi_fur",
+                    "before": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000552401953,
+                      "minimumStretch": 0.8363118201406571,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000552401953,
+                      "minimumStretch": 0.78015164647392,
+                      "invalid": 0
+                    }
+                  }
+                ]
+              },
+              {
+                "degrees": 90,
+                "meshes": [
+                  {
+                    "name": "PaKaChi_body",
+                    "before": {
+                      "issues": 641,
+                      "maximumStretch": 86.18538371673094,
+                      "minimumStretch": 0.010190188932229593,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 1105,
+                      "maximumStretch": 11.412355340987379,
+                      "minimumStretch": 0.031926367371890356,
+                      "invalid": 0
+                    }
+                  },
+                  {
+                    "name": "PaKaChi_fur",
+                    "before": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000552401953,
+                      "minimumStretch": 0.7162974150764829,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000552401953,
+                      "minimumStretch": 0.7071045742868667,
+                      "invalid": 0
+                    }
+                  }
+                ]
+              },
+              {
+                "degrees": 112.5,
+                "meshes": [
+                  {
+                    "name": "PaKaChi_body",
+                    "before": {
+                      "issues": 652,
+                      "maximumStretch": 101.61438465754499,
+                      "minimumStretch": 0.01849830831626812,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 1000,
+                      "maximumStretch": 65.70642269276506,
+                      "minimumStretch": 0.028139993490382403,
+                      "invalid": 0
+                    }
+                  },
+                  {
+                    "name": "PaKaChi_fur",
+                    "before": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000552401953,
+                      "minimumStretch": 0.5716174535329706,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000552401953,
+                      "minimumStretch": 0.5646822759440304,
+                      "invalid": 0
+                    }
+                  }
+                ]
+              },
+              {
+                "degrees": 135,
+                "meshes": [
+                  {
+                    "name": "PaKaChi_body",
+                    "before": {
+                      "issues": 666,
+                      "maximumStretch": 113.13844042605069,
+                      "minimumStretch": 0.03435315938832974,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 666,
+                      "maximumStretch": 113.13844042605069,
+                      "minimumStretch": 0.03435315938832974,
+                      "invalid": 0
+                    }
+                  },
+                  {
+                    "name": "PaKaChi_fur",
+                    "before": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000552401953,
+                      "minimumStretch": 0.4108271245323433,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000552401953,
+                      "minimumStretch": 0.4108271245323433,
+                      "invalid": 0
+                    }
+                  }
+                ]
+              },
+              {
+                "degrees": 180,
+                "meshes": [
+                  {
+                    "name": "PaKaChi_body",
+                    "before": {
+                      "issues": 688,
+                      "maximumStretch": 122.86731040221474,
+                      "minimumStretch": 0.03818811817481744,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 688,
+                      "maximumStretch": 122.86731040221474,
+                      "minimumStretch": 0.03818811817481744,
+                      "invalid": 0
+                    }
+                  },
+                  {
+                    "name": "PaKaChi_fur",
+                    "before": {
+                      "issues": 1,
+                      "maximumStretch": 1.0000000552401953,
+                      "minimumStretch": 0.16175267845392227,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 1,
+                      "maximumStretch": 1.0000000552401953,
+                      "minimumStretch": 0.16175267845392227,
+                      "invalid": 0
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "axis": "x",
+            "degrees": -90,
+            "accepted": false,
+            "samples": [
+              {
+                "degrees": 0,
+                "meshes": [
+                  {
+                    "name": "PaKaChi_body",
+                    "before": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000886157794844,
+                      "minimumStretch": 0.999928561234657,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000886157794844,
+                      "minimumStretch": 0.999928561234657,
+                      "invalid": 0
+                    }
+                  },
+                  {
+                    "name": "PaKaChi_fur",
+                    "before": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000552401953,
+                      "minimumStretch": 0.9999999535211841,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000552401953,
+                      "minimumStretch": 0.9999999535211841,
+                      "invalid": 0
+                    }
+                  }
+                ]
+              },
+              {
+                "degrees": -45,
+                "meshes": [
+                  {
+                    "name": "PaKaChi_body",
+                    "before": {
+                      "issues": 586,
+                      "maximumStretch": 47.928086174198356,
+                      "minimumStretch": 0.2757717283794171,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 586,
+                      "maximumStretch": 47.928086174198356,
+                      "minimumStretch": 0.2757717283794171,
+                      "invalid": 0
+                    }
+                  },
+                  {
+                    "name": "PaKaChi_fur",
+                    "before": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000552401953,
+                      "minimumStretch": 0.9259508882435357,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000552401953,
+                      "minimumStretch": 0.9259508882435357,
+                      "invalid": 0
+                    }
+                  }
+                ]
+              },
+              {
+                "degrees": -67.5,
+                "meshes": [
+                  {
+                    "name": "PaKaChi_body",
+                    "before": {
+                      "issues": 634,
+                      "maximumStretch": 69.0791254506089,
+                      "minimumStretch": 0.13973447813343878,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 1152,
+                      "maximumStretch": 23.029733154071263,
+                      "minimumStretch": 0.059860250435221,
+                      "invalid": 0
+                    }
+                  },
+                  {
+                    "name": "PaKaChi_fur",
+                    "before": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000552401953,
+                      "minimumStretch": 0.8363118201406603,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000552401953,
+                      "minimumStretch": 0.7801522309188216,
+                      "invalid": 0
+                    }
+                  }
+                ]
+              },
+              {
+                "degrees": -90,
+                "meshes": [
+                  {
+                    "name": "PaKaChi_body",
+                    "before": {
+                      "issues": 659,
+                      "maximumStretch": 87.57561767278183,
+                      "minimumStretch": 0.0015783981689674001,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 1467,
+                      "maximumStretch": 12.631002093599802,
+                      "minimumStretch": 0.1436027419715174,
+                      "invalid": 0
+                    }
+                  },
+                  {
+                    "name": "PaKaChi_fur",
+                    "before": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000552401953,
+                      "minimumStretch": 0.7162974150764829,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000552401953,
+                      "minimumStretch": 0.7071076411325833,
+                      "invalid": 0
+                    }
+                  }
+                ]
+              },
+              {
+                "degrees": -112.5,
+                "meshes": [
+                  {
+                    "name": "PaKaChi_body",
+                    "before": {
+                      "issues": 677,
+                      "maximumStretch": 102.70668713719493,
+                      "minimumStretch": 0.07531504177403862,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 1196,
+                      "maximumStretch": 66.84926394112111,
+                      "minimumStretch": 0.10822222042390536,
+                      "invalid": 0
+                    }
+                  },
+                  {
+                    "name": "PaKaChi_fur",
+                    "before": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000552401953,
+                      "minimumStretch": 0.5716174535329743,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000552401953,
+                      "minimumStretch": 0.5646822842618995,
+                      "invalid": 0
+                    }
+                  }
+                ]
+              },
+              {
+                "degrees": -135,
+                "meshes": [
+                  {
+                    "name": "PaKaChi_body",
+                    "before": {
+                      "issues": 685,
+                      "maximumStretch": 113.89083237300117,
+                      "minimumStretch": 0.07697642715195167,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 685,
+                      "maximumStretch": 113.89083237300117,
+                      "minimumStretch": 0.07697642715195167,
+                      "invalid": 0
+                    }
+                  },
+                  {
+                    "name": "PaKaChi_fur",
+                    "before": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000552401953,
+                      "minimumStretch": 0.4108271245323389,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000552401953,
+                      "minimumStretch": 0.4108271245323389,
+                      "invalid": 0
+                    }
+                  }
+                ]
+              },
+              {
+                "degrees": -180,
+                "meshes": [
+                  {
+                    "name": "PaKaChi_body",
+                    "before": {
+                      "issues": 688,
+                      "maximumStretch": 122.86731040221474,
+                      "minimumStretch": 0.03818811817481744,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 688,
+                      "maximumStretch": 122.86731040221474,
+                      "minimumStretch": 0.03818811817481744,
+                      "invalid": 0
+                    }
+                  },
+                  {
+                    "name": "PaKaChi_fur",
+                    "before": {
+                      "issues": 1,
+                      "maximumStretch": 1.0000000552401953,
+                      "minimumStretch": 0.16175267845392227,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 1,
+                      "maximumStretch": 1.0000000552401953,
+                      "minimumStretch": 0.16175267845392227,
+                      "invalid": 0
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "axis": "y",
+            "degrees": 90,
+            "accepted": false,
+            "samples": [
+              {
+                "degrees": 0,
+                "meshes": [
+                  {
+                    "name": "PaKaChi_body",
+                    "before": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000886157794844,
+                      "minimumStretch": 0.999928561234657,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000886157794844,
+                      "minimumStretch": 0.999928561234657,
+                      "invalid": 0
+                    }
+                  },
+                  {
+                    "name": "PaKaChi_fur",
+                    "before": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000552401953,
+                      "minimumStretch": 0.9999999535211841,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000552401953,
+                      "minimumStretch": 0.9999999535211841,
+                      "invalid": 0
+                    }
+                  }
+                ]
+              },
+              {
+                "degrees": 45,
+                "meshes": [
+                  {
+                    "name": "PaKaChi_body",
+                    "before": {
+                      "issues": 551,
+                      "maximumStretch": 44.042100411938605,
+                      "minimumStretch": 0.0875417438756762,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 551,
+                      "maximumStretch": 44.042100411938605,
+                      "minimumStretch": 0.0875417438756762,
+                      "invalid": 0
+                    }
+                  },
+                  {
+                    "name": "PaKaChi_fur",
+                    "before": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000552401953,
+                      "minimumStretch": 0.9259508882435159,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000552401953,
+                      "minimumStretch": 0.9259508882435159,
+                      "invalid": 0
+                    }
+                  }
+                ]
+              },
+              {
+                "degrees": 67.5,
+                "meshes": [
+                  {
+                    "name": "PaKaChi_body",
+                    "before": {
+                      "issues": 616,
+                      "maximumStretch": 64.02887786760401,
+                      "minimumStretch": 0.016006943979579327,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 967,
+                      "maximumStretch": 20.79564828577232,
+                      "minimumStretch": 0.026118300534981383,
+                      "invalid": 0
+                    }
+                  },
+                  {
+                    "name": "PaKaChi_fur",
+                    "before": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000552401953,
+                      "minimumStretch": 0.8363118201406589,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000552401953,
+                      "minimumStretch": 0.780151490419269,
+                      "invalid": 0
+                    }
+                  }
+                ]
+              },
+              {
+                "degrees": 90,
+                "meshes": [
+                  {
+                    "name": "PaKaChi_body",
+                    "before": {
+                      "issues": 648,
+                      "maximumStretch": 81.55921603631869,
+                      "minimumStretch": 0.020580310615033265,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 1360,
+                      "maximumStretch": 12.052848007344432,
+                      "minimumStretch": 0.020340516519333558,
+                      "invalid": 0
+                    }
+                  },
+                  {
+                    "name": "PaKaChi_fur",
+                    "before": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000552401953,
+                      "minimumStretch": 0.7162974150764829,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000552401953,
+                      "minimumStretch": 0.707105210026194,
+                      "invalid": 0
+                    }
+                  }
+                ]
+              },
+              {
+                "degrees": 112.5,
+                "meshes": [
+                  {
+                    "name": "PaKaChi_body",
+                    "before": {
+                      "issues": 659,
+                      "maximumStretch": 95.95718072103179,
+                      "minimumStretch": 0.03842555848659045,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 1057,
+                      "maximumStretch": 62.2006362805126,
+                      "minimumStretch": 0.02330193816309087,
+                      "invalid": 0
+                    }
+                  },
+                  {
+                    "name": "PaKaChi_fur",
+                    "before": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000552401953,
+                      "minimumStretch": 0.5716174535329699,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000552401953,
+                      "minimumStretch": 0.5646821069975009,
+                      "invalid": 0
+                    }
+                  }
+                ]
+              },
+              {
+                "degrees": 135,
+                "meshes": [
+                  {
+                    "name": "PaKaChi_body",
+                    "before": {
+                      "issues": 677,
+                      "maximumStretch": 106.66870405222168,
+                      "minimumStretch": 0.022925820656175506,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 677,
+                      "maximumStretch": 106.66870405222168,
+                      "minimumStretch": 0.022925820656175506,
+                      "invalid": 0
+                    }
+                  },
+                  {
+                    "name": "PaKaChi_fur",
+                    "before": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000552401953,
+                      "minimumStretch": 0.410827124532325,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000552401953,
+                      "minimumStretch": 0.410827124532325,
+                      "invalid": 0
+                    }
+                  }
+                ]
+              },
+              {
+                "degrees": 180,
+                "meshes": [
+                  {
+                    "name": "PaKaChi_body",
+                    "before": {
+                      "issues": 686,
+                      "maximumStretch": 115.54227436336892,
+                      "minimumStretch": 0.00790662965403383,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 686,
+                      "maximumStretch": 115.54227436336892,
+                      "minimumStretch": 0.00790662965403383,
+                      "invalid": 0
+                    }
+                  },
+                  {
+                    "name": "PaKaChi_fur",
+                    "before": {
+                      "issues": 1,
+                      "maximumStretch": 1.0000000552401953,
+                      "minimumStretch": 0.16175267845392227,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 1,
+                      "maximumStretch": 1.0000000552401953,
+                      "minimumStretch": 0.16175267845392227,
+                      "invalid": 0
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "axis": "y",
+            "degrees": -90,
+            "accepted": false,
+            "samples": [
+              {
+                "degrees": 0,
+                "meshes": [
+                  {
+                    "name": "PaKaChi_body",
+                    "before": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000886157794844,
+                      "minimumStretch": 0.999928561234657,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000886157794844,
+                      "minimumStretch": 0.999928561234657,
+                      "invalid": 0
+                    }
+                  },
+                  {
+                    "name": "PaKaChi_fur",
+                    "before": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000552401953,
+                      "minimumStretch": 0.9999999535211841,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000552401953,
+                      "minimumStretch": 0.9999999535211841,
+                      "invalid": 0
+                    }
+                  }
+                ]
+              },
+              {
+                "degrees": -45,
+                "meshes": [
+                  {
+                    "name": "PaKaChi_body",
+                    "before": {
+                      "issues": 549,
+                      "maximumStretch": 44.42682371838816,
+                      "minimumStretch": 0.1263217575821219,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 549,
+                      "maximumStretch": 44.42682371838816,
+                      "minimumStretch": 0.1263217575821219,
+                      "invalid": 0
+                    }
+                  },
+                  {
+                    "name": "PaKaChi_fur",
+                    "before": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000552401953,
+                      "minimumStretch": 0.9259508882435225,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000552401953,
+                      "minimumStretch": 0.9259508882435225,
+                      "invalid": 0
+                    }
+                  }
+                ]
+              },
+              {
+                "degrees": -67.5,
+                "meshes": [
+                  {
+                    "name": "PaKaChi_body",
+                    "before": {
+                      "issues": 621,
+                      "maximumStretch": 64.37529588565785,
+                      "minimumStretch": 0.033486957543110686,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 974,
+                      "maximumStretch": 21.03097013628599,
+                      "minimumStretch": 0.009305091339877957,
+                      "invalid": 0
+                    }
+                  },
+                  {
+                    "name": "PaKaChi_fur",
+                    "before": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000552401953,
+                      "minimumStretch": 0.836311820140662,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000552401953,
+                      "minimumStretch": 0.7801519311601993,
+                      "invalid": 0
+                    }
+                  }
+                ]
+              },
+              {
+                "degrees": -90,
+                "meshes": [
+                  {
+                    "name": "PaKaChi_body",
+                    "before": {
+                      "issues": 649,
+                      "maximumStretch": 81.85387216149225,
+                      "minimumStretch": 0.014998875122712753,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 1421,
+                      "maximumStretch": 12.657787398922247,
+                      "minimumStretch": 0.04755100589183267,
+                      "invalid": 0
+                    }
+                  },
+                  {
+                    "name": "PaKaChi_fur",
+                    "before": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000552401953,
+                      "minimumStretch": 0.7162974150764827,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000552401953,
+                      "minimumStretch": 0.7071066381952008,
+                      "invalid": 0
+                    }
+                  }
+                ]
+              },
+              {
+                "degrees": -112.5,
+                "meshes": [
+                  {
+                    "name": "PaKaChi_body",
+                    "before": {
+                      "issues": 671,
+                      "maximumStretch": 96.18870873617954,
+                      "minimumStretch": 0.04515802321304375,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 1052,
+                      "maximumStretch": 62.44277200844817,
+                      "minimumStretch": 0.0094966502153645,
+                      "invalid": 0
+                    }
+                  },
+                  {
+                    "name": "PaKaChi_fur",
+                    "before": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000552401953,
+                      "minimumStretch": 0.5716174535329568,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000552401953,
+                      "minimumStretch": 0.5646822015189273,
+                      "invalid": 0
+                    }
+                  }
+                ]
+              },
+              {
+                "degrees": -135,
+                "meshes": [
+                  {
+                    "name": "PaKaChi_body",
+                    "before": {
+                      "issues": 677,
+                      "maximumStretch": 106.8281895437142,
+                      "minimumStretch": 0.005276321873013875,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 677,
+                      "maximumStretch": 106.8281895437142,
+                      "minimumStretch": 0.005276321873013875,
+                      "invalid": 0
+                    }
+                  },
+                  {
+                    "name": "PaKaChi_fur",
+                    "before": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000552401953,
+                      "minimumStretch": 0.41082712453232845,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000552401953,
+                      "minimumStretch": 0.41082712453232845,
+                      "invalid": 0
+                    }
+                  }
+                ]
+              },
+              {
+                "degrees": -180,
+                "meshes": [
+                  {
+                    "name": "PaKaChi_body",
+                    "before": {
+                      "issues": 686,
+                      "maximumStretch": 115.54227436336892,
+                      "minimumStretch": 0.00790662965403383,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 686,
+                      "maximumStretch": 115.54227436336892,
+                      "minimumStretch": 0.00790662965403383,
+                      "invalid": 0
+                    }
+                  },
+                  {
+                    "name": "PaKaChi_fur",
+                    "before": {
+                      "issues": 1,
+                      "maximumStretch": 1.0000000552401953,
+                      "minimumStretch": 0.16175267845392227,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 1,
+                      "maximumStretch": 1.0000000552401953,
+                      "minimumStretch": 0.16175267845392227,
+                      "invalid": 0
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "axis": "z",
+            "degrees": 90,
+            "accepted": false,
+            "samples": [
+              {
+                "degrees": 0,
+                "meshes": [
+                  {
+                    "name": "PaKaChi_body",
+                    "before": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000886157794844,
+                      "minimumStretch": 0.999928561234657,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000886157794844,
+                      "minimumStretch": 0.999928561234657,
+                      "invalid": 0
+                    }
+                  },
+                  {
+                    "name": "PaKaChi_fur",
+                    "before": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000552401953,
+                      "minimumStretch": 0.9999999535211841,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000552401953,
+                      "minimumStretch": 0.9999999535211841,
+                      "invalid": 0
+                    }
+                  }
+                ]
+              },
+              {
+                "degrees": 45,
+                "meshes": [
+                  {
+                    "name": "PaKaChi_body",
+                    "before": {
+                      "issues": 320,
+                      "maximumStretch": 21.45207300540124,
+                      "minimumStretch": 0.10265838036959465,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 320,
+                      "maximumStretch": 21.45207300540124,
+                      "minimumStretch": 0.10265838036959465,
+                      "invalid": 0
+                    }
+                  },
+                  {
+                    "name": "PaKaChi_fur",
+                    "before": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000552401953,
+                      "minimumStretch": 0.9259508882435522,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000552401953,
+                      "minimumStretch": 0.9259508882435522,
+                      "invalid": 0
+                    }
+                  }
+                ]
+              },
+              {
+                "degrees": 67.5,
+                "meshes": [
+                  {
+                    "name": "PaKaChi_body",
+                    "before": {
+                      "issues": 439,
+                      "maximumStretch": 31.06890579236666,
+                      "minimumStretch": 0.03283251587987105,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 387,
+                      "maximumStretch": 9.869776744519324,
+                      "minimumStretch": 0.03141722593773999,
+                      "invalid": 0
+                    }
+                  },
+                  {
+                    "name": "PaKaChi_fur",
+                    "before": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000552401953,
+                      "minimumStretch": 0.8363118201406426,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000552401953,
+                      "minimumStretch": 0.7801532129048917,
+                      "invalid": 0
+                    }
+                  }
+                ]
+              },
+              {
+                "degrees": 90,
+                "meshes": [
+                  {
+                    "name": "PaKaChi_body",
+                    "before": {
+                      "issues": 515,
+                      "maximumStretch": 39.49615027586903,
+                      "minimumStretch": 0.07613350269266772,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 404,
+                      "maximumStretch": 5.540917827555219,
+                      "minimumStretch": 0.020084538112383185,
+                      "invalid": 0
+                    }
+                  },
+                  {
+                    "name": "PaKaChi_fur",
+                    "before": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000552401953,
+                      "minimumStretch": 0.7162974150764806,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000552401953,
+                      "minimumStretch": 0.7071074938009868,
+                      "invalid": 0
+                    }
+                  }
+                ]
+              },
+              {
+                "degrees": 112.5,
+                "meshes": [
+                  {
+                    "name": "PaKaChi_body",
+                    "before": {
+                      "issues": 558,
+                      "maximumStretch": 46.40760088408233,
+                      "minimumStretch": 0.05760068640513436,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 596,
+                      "maximumStretch": 29.85650162679928,
+                      "minimumStretch": 0.050016433516106365,
+                      "invalid": 0
+                    }
+                  },
+                  {
+                    "name": "PaKaChi_fur",
+                    "before": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000552401953,
+                      "minimumStretch": 0.5716174535329489,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000552401953,
+                      "minimumStretch": 0.5646821234244247,
+                      "invalid": 0
+                    }
+                  }
+                ]
+              },
+              {
+                "degrees": 135,
+                "meshes": [
+                  {
+                    "name": "PaKaChi_body",
+                    "before": {
+                      "issues": 576,
+                      "maximumStretch": 51.53685179210253,
+                      "minimumStretch": 0.029160966613653833,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 576,
+                      "maximumStretch": 51.53685179210253,
+                      "minimumStretch": 0.029160966613653833,
+                      "invalid": 0
+                    }
+                  },
+                  {
+                    "name": "PaKaChi_fur",
+                    "before": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000552401953,
+                      "minimumStretch": 0.4108271245323146,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000552401953,
+                      "minimumStretch": 0.4108271245323146,
+                      "invalid": 0
+                    }
+                  }
+                ]
+              },
+              {
+                "degrees": 180,
+                "meshes": [
+                  {
+                    "name": "PaKaChi_body",
+                    "before": {
+                      "issues": 585,
+                      "maximumStretch": 55.73521197172054,
+                      "minimumStretch": 0.03671554733187483,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 585,
+                      "maximumStretch": 55.73521197172054,
+                      "minimumStretch": 0.03671554733187483,
+                      "invalid": 0
+                    }
+                  },
+                  {
+                    "name": "PaKaChi_fur",
+                    "before": {
+                      "issues": 1,
+                      "maximumStretch": 1.0000000552401953,
+                      "minimumStretch": 0.16175267845391955,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 1,
+                      "maximumStretch": 1.0000000552401953,
+                      "minimumStretch": 0.16175267845391955,
+                      "invalid": 0
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "axis": "z",
+            "degrees": -90,
+            "accepted": true,
+            "samples": [
+              {
+                "degrees": 0,
+                "meshes": [
+                  {
+                    "name": "PaKaChi_body",
+                    "before": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000886157794844,
+                      "minimumStretch": 0.999928561234657,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000886157794844,
+                      "minimumStretch": 0.999928561234657,
+                      "invalid": 0
+                    }
+                  },
+                  {
+                    "name": "PaKaChi_fur",
+                    "before": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000552401953,
+                      "minimumStretch": 0.9999999535211841,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000552401953,
+                      "minimumStretch": 0.9999999535211841,
+                      "invalid": 0
+                    }
+                  }
+                ]
+              },
+              {
+                "degrees": -45,
+                "meshes": [
+                  {
+                    "name": "PaKaChi_body",
+                    "before": {
+                      "issues": 326,
+                      "maximumStretch": 21.24551392124579,
+                      "minimumStretch": 0.025296350373529577,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 326,
+                      "maximumStretch": 21.24551392124579,
+                      "minimumStretch": 0.025296350373529577,
+                      "invalid": 0
+                    }
+                  },
+                  {
+                    "name": "PaKaChi_fur",
+                    "before": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000552401953,
+                      "minimumStretch": 0.9259508882435274,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000552401953,
+                      "minimumStretch": 0.9259508882435274,
+                      "invalid": 0
+                    }
+                  }
+                ]
+              },
+              {
+                "degrees": -67.5,
+                "meshes": [
+                  {
+                    "name": "PaKaChi_body",
+                    "before": {
+                      "issues": 449,
+                      "maximumStretch": 30.882899971142578,
+                      "minimumStretch": 0.02629801486421549,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 388,
+                      "maximumStretch": 9.664102344844194,
+                      "minimumStretch": 0.015040187654116079,
+                      "invalid": 0
+                    }
+                  },
+                  {
+                    "name": "PaKaChi_fur",
+                    "before": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000552401953,
+                      "minimumStretch": 0.8363118201406577,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000552401953,
+                      "minimumStretch": 0.7801512934465377,
+                      "invalid": 0
+                    }
+                  }
+                ]
+              },
+              {
+                "degrees": -90,
+                "meshes": [
+                  {
+                    "name": "PaKaChi_body",
+                    "before": {
+                      "issues": 511,
+                      "maximumStretch": 39.337933689998344,
+                      "minimumStretch": 0.03965091987335691,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 425,
+                      "maximumStretch": 5.560445205155731,
+                      "minimumStretch": 0.017226091455506354,
+                      "invalid": 0
+                    }
+                  },
+                  {
+                    "name": "PaKaChi_fur",
+                    "before": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000552401953,
+                      "minimumStretch": 0.7162974150764806,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000552401953,
+                      "minimumStretch": 0.7071074438788261,
+                      "invalid": 0
+                    }
+                  }
+                ]
+              },
+              {
+                "degrees": -112.5,
+                "meshes": [
+                  {
+                    "name": "PaKaChi_body",
+                    "before": {
+                      "issues": 547,
+                      "maximumStretch": 46.283279807579376,
+                      "minimumStretch": 0.055310883675659714,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 538,
+                      "maximumStretch": 29.73091143549938,
+                      "minimumStretch": 0.012919726143896882,
+                      "invalid": 0
+                    }
+                  },
+                  {
+                    "name": "PaKaChi_fur",
+                    "before": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000552401953,
+                      "minimumStretch": 0.571617453532969,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000552401953,
+                      "minimumStretch": 0.564682532370484,
+                      "invalid": 0
+                    }
+                  }
+                ]
+              },
+              {
+                "degrees": -135,
+                "meshes": [
+                  {
+                    "name": "PaKaChi_body",
+                    "before": {
+                      "issues": 569,
+                      "maximumStretch": 51.45121414661195,
+                      "minimumStretch": 0.030533720197144936,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 569,
+                      "maximumStretch": 51.45121414661195,
+                      "minimumStretch": 0.030533720197144936,
+                      "invalid": 0
+                    }
+                  },
+                  {
+                    "name": "PaKaChi_fur",
+                    "before": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000552401953,
+                      "minimumStretch": 0.41082712453235093,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 0,
+                      "maximumStretch": 1.0000000552401953,
+                      "minimumStretch": 0.41082712453235093,
+                      "invalid": 0
+                    }
+                  }
+                ]
+              },
+              {
+                "degrees": -180,
+                "meshes": [
+                  {
+                    "name": "PaKaChi_body",
+                    "before": {
+                      "issues": 585,
+                      "maximumStretch": 55.73521197172054,
+                      "minimumStretch": 0.03671554733187483,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 585,
+                      "maximumStretch": 55.73521197172054,
+                      "minimumStretch": 0.03671554733187483,
+                      "invalid": 0
+                    }
+                  },
+                  {
+                    "name": "PaKaChi_fur",
+                    "before": {
+                      "issues": 1,
+                      "maximumStretch": 1.0000000552401953,
+                      "minimumStretch": 0.16175267845392502,
+                      "invalid": 0
+                    },
+                    "after": {
+                      "issues": 1,
+                      "maximumStretch": 1.0000000552401953,
+                      "minimumStretch": 0.16175267845392502,
+                      "invalid": 0
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "limits": [
+          "Only accepted axis-aligned elbow probes; not arbitrary combined poses.",
+          "No collision, volume or final design approval.",
+          "Disabled after changes to skin weights or bind skeleton."
+        ]
+      },
       "coverage": {
         "Pelvis": 6019,
         "Spine": 5412,

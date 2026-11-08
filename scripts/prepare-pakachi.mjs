@@ -1,5 +1,6 @@
 /** Reproducible character-specific refinement and skinning; no changes to source assets. */
 import * as T from 'three';
+import {preparePoseCorrections} from './pakachi-pose-corrections.mjs';
 import {GLTFExporter} from 'three/addons/exporters/GLTFExporter.js';
 import {readFile,writeFile,mkdir} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
@@ -142,7 +143,7 @@ export function prepareCharacter(source,form){
  const mouth=mouthGuide.getPoints(24).map(p=>{const h=facePoint(p.x,p.y);return h.position.addScaledVector(h.normal,.003).sub(v(config.landmarks.Jaw));});const smile=new T.Mesh(new T.TubeGeometry(new T.CatmullRomCurve3(mouth),32,.0009,6,false),pupil);smile.name='Muzzle_smile';map.get('Jaw').add(smile);
  attachPaws(root,map,paws,config.landmarks);
  // Short combed fiber tufts add actual silhouette detail; no billboard or painted replacement.
- const positions=[],normals=[],colors=[],skinIndices=[],skinWeights=[],p=bodyGeometry.attributes.position,n=bodyGeometry.attributes.normal,c=bodyGeometry.attributes.color,si=bodyGeometry.attributes.skinIndex,sw=bodyGeometry.attributes.skinWeight;
+ const positions=[],normals=[],colors=[],skinIndices=[],skinWeights=[],furBodyVertices=[],p=bodyGeometry.attributes.position,n=bodyGeometry.attributes.normal,c=bodyGeometry.attributes.color,si=bodyGeometry.attributes.skinIndex,sw=bodyGeometry.attributes.skinWeight;
  let state=0x50414b41;const random=()=>{state^=state<<13;state^=state>>>17;state^=state<<5;return (state>>>0)/4294967296;};
  for(let sample=0;sample<50000;sample++){
   const i=Math.floor(random()*p.count),point=new T.Vector3().fromBufferAttribute(p,i),normal=new T.Vector3().fromBufferAttribute(n,i),rgb=new T.Vector3(c.getX(i),c.getY(i),c.getZ(i));
@@ -151,16 +152,17 @@ export function prepareCharacter(source,form){
   if(Math.max(rgb.x,rgb.y,rgb.z)>.22&&!(tail&&green)||point.y<-.38||form==='humanoid'&&point.y>.235&&point.z>.14||form==='animal'&&point.y>.035&&point.z>.26)continue;
   const tangent=new T.Vector3().crossVectors(normal,new T.Vector3(.15,1,.12)).normalize();if(tangent.lengthSq()<.1)continue;
   const length=(tail?.003:.002)+random()*.004,base=point.clone().addScaledVector(normal,.00015),tip=base.clone().addScaledVector(normal,length).addScaledVector(new T.Vector3(0,-1,0),length*.65),width=.00055;
-  for(const vertex of [base.clone().addScaledVector(tangent,width),base.clone().addScaledVector(tangent,-width),tip]){positions.push(...vertex.toArray());normals.push(...normal.toArray());colors.push(rgb.x*.8,rgb.y*.8,rgb.z*.8);for(let k=0;k<4;k++){skinIndices.push(si.getComponent(i,k));skinWeights.push(sw.getComponent(i,k));}}
+  for(const vertex of [base.clone().addScaledVector(tangent,width),base.clone().addScaledVector(tangent,-width),tip]){furBodyVertices.push(i);positions.push(...vertex.toArray());normals.push(...normal.toArray());colors.push(rgb.x*.8,rgb.y*.8,rgb.z*.8);for(let k=0;k<4;k++){skinIndices.push(si.getComponent(i,k));skinWeights.push(sw.getComponent(i,k));}}
  }
  const furGeometry=new T.BufferGeometry();furGeometry.setAttribute('position',new T.Float32BufferAttribute(positions,3));furGeometry.setAttribute('normal',new T.Float32BufferAttribute(normals,3));furGeometry.setAttribute('color',new T.Float32BufferAttribute(colors,3));furGeometry.setAttribute('skinIndex',new T.Uint16BufferAttribute(skinIndices,4));furGeometry.setAttribute('skinWeight',new T.Float32BufferAttribute(skinWeights,4));
- const furMaterial=bodyMaterial.clone();furMaterial.name='PaKaChi_short_fibers';furMaterial.side=T.DoubleSide;attachSkin(furGeometry,furMaterial,skeleton,root,'PaKaChi_fur');
+ const furMaterial=bodyMaterial.clone();furMaterial.name='PaKaChi_short_fibers';furMaterial.side=T.DoubleSide;const fur=attachSkin(furGeometry,furMaterial,skeleton,root,'PaKaChi_fur');
+ const poseCorrections=preparePoseCorrections(root,body,fur,furBodyVertices);
  root.updateMatrixWorld(true);probe.material.dispose();
- return {root,body,bones,config,report:{...refined.report,sourceVertices,bones:bones.length,bodyVertices:p.count,pawTopology:{...trimmed.report,...sealed},digits:root.userData.paws.digits,furTufts:positions.length/9,coverage,landmarks:config.landmarks,limits:['No morph correspondence between the two independently reconstructed meshes.','Articulated paws replace distal source surfaces; no final design or collision approval.','Landmark skinning and surface refinement require visual review; source reconstruction defects can remain.']}};
+ return {root,body,bones,config,report:{...refined.report,sourceVertices,bones:bones.length,bodyVertices:p.count,pawTopology:{...trimmed.report,...sealed},digits:root.userData.paws.digits,furTufts:positions.length/9,poseCorrections,coverage,landmarks:config.landmarks,limits:['No morph correspondence between the two independently reconstructed meshes.','Articulated paws replace distal source surfaces; no final design or collision approval.','Landmark skinning and surface refinement require visual review; source reconstruction defects can remain.']}};
 }
 
 export async function generateCharacters({ifNeeded=false}={}){
- const pipelineSha256=hash(Buffer.concat(await Promise.all(['prepare-pakachi.mjs','pakachi-rig-config.mjs','pakachi-paws.mjs'].map(p=>readFile(new URL('./'+p,import.meta.url))))));
+ const pipelineSha256=hash(Buffer.concat(await Promise.all(['prepare-pakachi.mjs','pakachi-rig-config.mjs','pakachi-paws.mjs','pakachi-skin-optimization.mjs','pakachi-pose-corrections.mjs','../src/surface-check.ts','../src/pose-morphs.ts'].map(p=>readFile(new URL('./'+p,import.meta.url))))));
  const reportPath='docs/benchmarks/pakachi-rigging-2026-11-07.json';
  if(ifNeeded){try{
   const previous=JSON.parse(await readFile(reportPath,'utf8'));
@@ -176,6 +178,6 @@ export async function generateCharacters({ifNeeded=false}={}){
   const output=Buffer.from(await new GLTFExporter().parseAsync(prepared.root,{binary:true,onlyVisible:true}));await mkdir('public/model-zoo/pakachi-rigged',{recursive:true});await writeFile(`public/model-zoo/pakachi-rigged/${form}.glb`,output);
   reports.push({form,source:sourcePath,sourceSha256:hash(bytes),output:`public/model-zoo/pakachi-rigged/${form}.glb`,outputSha256:hash(output),bytes:output.length,...prepared.report});disposeModel(gltf.scene);disposeModel(prepared.root);
  }
- await writeFile(reportPath,JSON.stringify({format:'pakachi-character-rigging',version:2,pipelineSha256,method:'Measured landmarks, corrected wrist/paw depths and fitted tail cross-sections; continuous chain weights, three mesh-edge smoothing passes, four influences maximum. Distal hand/toe clipping, 0.00001-unit source welding and simple boundary-loop caps; 28 extra digit joints with independent rigid geometry. Character-specific, not automatic anatomical inference.',forms:reports},null,2)+'\n');return reports;
+ await writeFile(reportPath,JSON.stringify({format:'pakachi-character-rigging',version:3,pipelineSha256,method:'Measured landmarks, corrected wrist/paw depths and fitted tail cross-sections; continuous chain weights, three mesh-edge smoothing passes, four influences maximum. Distal hand/toe clipping, 0.00001-unit source welding and simple boundary-loop caps; 28 extra digit joints with independent rigid geometry. Accepted pose-space elbow morphs from constrained edge-length fitting; original weights and rest surface unchanged. Character-specific, not automatic anatomical inference.',forms:reports},null,2)+'\n');return reports;
 }
 if(process.argv[1]&&import.meta.url===pathToFileURL(resolve(process.argv[1])).href)generateCharacters({ifNeeded:process.argv.includes('--if-needed')}).then(r=>console.log(r.map(x=>({form:x.form,bones:x.bones,vertices:x.bodyVertices,furTufts:x.furTufts,bytes:x.bytes})))).catch(e=>{console.error(e);process.exitCode=1;});
