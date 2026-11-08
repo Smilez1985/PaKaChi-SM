@@ -1,6 +1,6 @@
 # Prüfstand und Protokolle
 
-**Softwarestand: 0.87.0 · Dokumentationsabgleich: 2026-11-08T20:33:00+01:00 (Europe/Berlin).**
+**Softwarestand: 0.88.0 · Dokumentationsabgleich: 2026-11-08T20:56:00+01:00 (Europe/Berlin).**
 
 Alle Prüfnachweise stehen in dieser Datei: ein Abschnitt je Softwareversion sowie gesonderte Abschnitte für datierte Zwischenprüfungen. Die Ergebnisse und Grenzen gelten für den jeweils genannten Stand. Spätere Läufe stehen als Nachtrag im selben Abschnitt. Produktänderungen gehören in den [Changelog](CHANGELOG.md), offene Aufgaben in die [Roadmap](ROADMAP.md).
 
@@ -8,9 +8,9 @@ Alle Prüfnachweise stehen in dieser Datei: ein Abschnitt je Softwareversion sow
 
 | Prüfung | Bestätigter Stand | Umfang und Grenze |
 | --- | --- | --- |
-| Node-Tests | [0.87.0](#version-0870): 372 lokal bestanden | Einschließlich echter MCP-/OAuth-/Python-/ACP-Prozesse; keine manuelle Qualitätsabnahme. |
-| TypeScript und Produktionsbuild | [0.87.0](#version-0870): lokal bestanden | Bekannte Bundle-Größenwarnung; keine Aussage über Zielhardware-Leistung. |
-| Chromium-Browserfälle | [0.86.0](#version-0860): alle 36 Fälle im vollständigen CI-Lauf bestanden | Software-WebGL, simulierte KI-Anbieter; keine reale KI-Inferenzabnahme. |
+| Node-Tests | [0.88.0](#version-0880): 380 lokal bestanden | Einschließlich echter MCP-/OAuth-/Python-/ACP-Prozesse; keine manuelle Qualitätsabnahme. |
+| TypeScript und Produktionsbuild | [0.88.0](#version-0880): lokal bestanden | Bekannte Bundle-Größenwarnung; keine Aussage über Zielhardware-Leistung. |
+| Chromium-Browserfälle | [0.87.0](#version-0870): alle 37 Fälle im vollständigen CI-Lauf bestanden; lokaler neuer Korrekturablauf für 0.88.0 bestanden | Software-WebGL, simulierte KI-Anbieter; keine reale KI-Inferenzabnahme. |
 | Produktionsbrowser-Importmessung | [0.86.0](#version-0860): drei CI-Durchläufe bestanden | Mika mit 256 Gewichtsaufträgen; keine allgemeine Laufzeitgarantie. |
 | Legacy-Testprogramme | [0.9.0](#version-090): beide bestanden | Steuerung, MQTT-Verhalten und Lebenszyklus des Originalplayers. |
 | Python-MCP-/MQTT-Integration | [0.10.0](#version-0100): bestanden | Echter Python-Prozess und eingebetteter Testbroker; keine allgemeine externe Hostabnahme. |
@@ -60,6 +60,21 @@ Diese Liste beschreibt ausstehende Abnahmen.
 
 Die jüngste Version steht zuerst. Für eine bestimmte Version die Dokumentgliederung oder die Browser-Suche verwenden.
 
+## Version 0.88.0
+
+**Prüfzeitpunkt:** 2026-11-08T20:56:00+01:00 (Europe/Berlin).
+
+- `npm run verify`: alle 380 Node-Tests und TypeScript/Produktionsbuild bestanden. Bekannte Bundle-Größenwarnung bleibt bestehen. Die abschließenden gezielten Oberflächen-/Korrekturfälle und TypeScript zusätzlich geprüft.
+- Neue synthetische Armgeometrie mit absichtlich kollabierendem 50/50-Übergang und voller 180°-Drehung: Gewichtssuche verbessert die gemessene Dehnung bei exakt unveränderten Posekanälen, gleicher Move-Sequenz und erhaltener Grundform innerhalb der Rechentoleranz. Vertices außerhalb des lokalen Bereichs bleiben unverändert. Vorschau verändert weder Geometrie, Matrizen, Gewichte, Daten noch Dirty-/Revisionsstand. Tatsächliche Gewichtsübertragung und erneute Messung bestätigen das Ergebnis; nach Projektvalidierung/reinem Replay entstehen dieselben korrigierten Positionen.
+- Gegenprobe: Eine weitere gespeicherte, stark verschobene Pose macht die Varianten unzulässig. Die Suche liefert `null`, statt die gewählte Pose auf Kosten der anderen zu optimieren. Abbruch, anderer ausgewählter Punkt, Studioänderung und Verlassen verhindern veraltete Ergebnisse. Übernahme ist ausdrücklich, markiert gespeicherte Posen zur Nachprüfung und ist eine Undo-/Redo-Aktion.
+- Bestehender unabhängiger Map-Vergleich des nun gemeinsam verwendeten Gewichtskerns sowie manuelle/regionale Übertragung, Pinsel, vier Einflüsse, Gleichstände, Mehrfachindizes, gemischte Topologie, Interleaved-Attribute und Wiederherstellung bestehen weiter.
+- Neuer gerenderter Chromium-Headless-Shell-Ablauf mit echter Rig-GLB im Projekt: Kollaps anzeigen, Warnung prüfen, unverändernden Vorschlag suchen, ausdrücklich übernehmen, erneut messen, Undo/Redo, Projekt speichern und laden. Posekanäle und Moves bleiben gleich. Vorher-/Nachher-Ansichten geprüft: Der gemessene Kollaps am mittleren Ring sinkt, eine sichtbare Einschnürung bleibt; kein Nachweis vollständiger Form-/Volumenkorrektur.
+- Tatsächliche humanoide und tierische Original-GLBs mit 180°-Drehung von `LeftElbow` um dessen lokale Y-Achse, Radius 0,3: vorher 1.458 bzw. 687 auffällige Dreiecke, in beiden Fällen **kein akzeptierter Vorschlag**. Tests bestätigen unveränderte Daten und Hautgewichte. [Reproduzierbare Messdaten samt Asset-SHA-256](benchmarks/pakachi-weight-correction-2026-11-08.json), Befehl `npm run check:pakachi-surface -- --weights`.
+
+**Grenzen:** Begrenzte Suche in sechs lokalen Übertragungen, keine allgemeine Gewichtsoptimierung. Verglichen werden aggregierte Messwerte pro Teilmodell: Fehlerzahlen, Kategorien und Überschreitungen der Hauptdehnungsgrenzen. Keine Aussage über einzelne neu betroffene Dreiecke bei gleicher Fehlerzahl, Kollisionen, Silhouette, Volumen oder Charakterdesign. Alle gespeicherten Posen und drei Zwischenposen der gewählten Grundform-Zielpose-Strecke werden verglichen; nicht alle Übergänge gespeicherter Moves. Modell, Hautbindung und Referenzbildqualität müssen weiter verbessert werden. Gemeinsame Morph-Oberfläche und Standard-Verwandlung bleiben offen.
+
+**CI:** Vorheriger vollständiger Stand 0.87.0 erfolgreich, siehe folgenden Abschnitt. Ein vollständiger aktueller GitHub-Lauf für 0.88.0 ist nach Veröffentlichung gesondert auszuwerten.
+
 ## Version 0.87.0
 
 **Prüfzeitpunkt:** 2026-11-08T20:33:00+01:00 (Europe/Berlin).
@@ -73,7 +88,7 @@ Die jüngste Version steht zuerst. Für eine bestimmte Version die Dokumentglied
 
 **Verfahren und Grenzen:** Eigenwerte der relativen Dreiecks-Grammatrix liefern die beiden Hauptdehnungen, das Verhältnis der Determinanten die Flächenänderung. Die festen Grenzen 0,25–3× und Fläche mindestens 0,1× sind technische Warnschwellen. Die Suche prüft sechs absteigende Bewegungsanteile und übernimmt höchstens eine zusätzliche Pose nach Oberflächen- und vorhandener Beugeprüfung. Keine Gewichts-/Topologiereparatur, kein ARAP-Optimierer, kein Bildvergleich, kein Kollisions-/Volumennachweis und keine lückenlose Zwischenbildprüfung. Bereits unbrauchbare, aber unveränderte Grundformen können die Prüfung bestehen. Gemeinsame Morph-Topologie und designgetreue Charakterabnahme bleiben offen.
 
-**CI:** Der vorherige Dokumentationsstand `243f88dd5f1d54e4acfb41456c74100a9ca61719` ist im [Lauf 42512496731](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/42512496731) erfolgreich. Dieser Lauf gilt für 0.86.0. Ein neuer CI-Lauf für 0.87.0 ist bei der Veröffentlichung auszuwerten.
+**CI:** Der vorherige Dokumentationsstand `243f88dd5f1d54e4acfb41456c74100a9ca61719` ist im [Lauf 42512496731](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/42512496731) erfolgreich. Dieser Lauf gilt für 0.86.0. Der nachfolgende [Lauf 42515722341](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/42515722341) für `d08b9171d1364187026917794e15000b25940fbd` ist vollständig erfolgreich: Die ausgewerteten Joblogs bestätigen 372 Node-Tests, TypeScript/Build, alle 37 Chromium-Fälle (10,3 Minuten), drei Produktionsimportmessungen und die Bereitstellung der Browsernachweise. Dieser Nachweis gilt für 0.87.0, nicht für die nachfolgende lokale Gewichtssuche.
 
 ## Version 0.86.0
 

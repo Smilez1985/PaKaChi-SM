@@ -2,7 +2,7 @@
 
 PaKaChi ist die **Panda-KI-Chimera**. PaKaChi-SM vereint den Avatar-Player, den Model Zoo und das fest integrierte **PaKaChi-Avatar-Studio**. SM steht für StateMaschine.
 
-**Softwarestand: 0.87.0 · Entwicklungsversion.**
+**Softwarestand: 0.88.0 · Entwicklungsversion.**
 
 Der Original-PaKaChi mit Normalform, humanoider Arbeitsform und 72 Transformationsbildern ist als Bildplayer erhalten und beim Start ausgewählt. Im Model Zoo stehen außerdem **PaKaChi · Normalform · Rig** und **PaKaChi · Arbeitsform · Rig**: bearbeitete Originalrekonstruktionen mit gemeinsamem 59-Gelenk-Aufbau, Hautgewichten, grünen 3D-Augen und Fellfasern. Im integrierten Studio lassen sie sich posieren und speichern. Die ursprünglichen ungeriggten Entwürfe sowie Mika/Nori bleiben erhalten. Der saubere 3D-Formwechsel und die abschließende Charakterqualität stehen noch aus. [Ergebnisse und Bedienung](docs/KI-GENERIERUNG.md#rigging-und-charakteraufbereitung).
 
@@ -25,7 +25,7 @@ Die angezeigte Adresse öffnen, normalerweise `http://127.0.0.1:8787`. `npm run 
 | --- | --- |
 | Player | Avatar auswählen, Clips und eigene Moves abspielen, pausieren, Tempo und Abspielposition ändern. |
 | Model Zoo | Mitgelieferte Avatare auswählen, eigene GLB-Dateien laden und Projektkopien im lokalen Browserbestand verwalten. |
-| Avatar-Studio | Zwei Modi: **Figur bewegen** und **Gelenke bearbeiten**. Vorhandene Skelettketten, freie Gesichtspunkte, Posen und Moves bearbeiten, Oberflächendehnung prüfen und eine schonendere Pose als eigenen Prüfkandidaten erstellen; Änderungen rückgängig machen. |
+| Avatar-Studio | Zwei Modi: **Figur bewegen** und **Gelenke bearbeiten**. Vorhandene Skelettketten, freie Gesichtspunkte, Posen und Moves bearbeiten, Oberflächendehnung prüfen, lokale Hautkorrekturen bei erhaltener Zielpose suchen und eine schonendere Pose als eigenen Prüfkandidaten erstellen; Änderungen rückgängig machen. |
 | Projekte und Export | Projekte mit eingebettetem Modell speichern/laden, einzelne Moves austauschen sowie GLB-Standbilder, bearbeitete Rigs und ausgewählte Studio-Moves exportieren. |
 | Agenten | Zustände und Moves über optionales MQTT und MCP steuern; Studio-Änderungen nur nach Freigabe. |
 | KI-Anbindung | Unabhängige Anbieterprofile für Assistent, 3D-Generator und Rigging; Assistentenvorschläge prüfen und ausdrücklich übernehmen. |

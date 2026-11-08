@@ -1,4 +1,4 @@
-# Avatar-Studio – 0.87.0
+# Avatar-Studio – 0.88.0
 
 Das Studio ist Teil des Players. Mika, Nori und eigene GLB-Modelle können bearbeitet werden. Der Original-Bildplayer mit beiden Formen und 72 Bildern bleibt erhalten. Die bearbeitbaren 3D-Rekonstruktionen beider PaKaChi-Formen sind zusätzlich im Model Zoo verfügbar; Charakterqualität und gemeinsame 3D-Verwandlung bleiben in Arbeit.
 
@@ -68,7 +68,7 @@ Eine Pose speichern, die Figur erneut versetzen und eine zweite Pose speichern. 
 
 **Grundpose** setzt auch Gesamtverschiebung und -drehung zurück. Undo/Redo, Projekt-Speichern, Laden und die bestehenden Player-/Agentenbefehle für eigene Moves verwenden dieselbe Spur. Beim Bearbeiten von Gelenken steht die Figur in ihrer Grundposition; dort gibt es keinen Gesamtgriff. Beim Zurückkehren zu Originalclips wird die Gesamtverschiebung zurückgesetzt.
 
-Ältere Projekte ohne Gesamtspur laden mit neutraler Position. Neu gespeicherte Projekte mit Gesamtspur benötigen Version 0.6.0 oder neuer. Gesamtdrehung ist seit 0.8.0 vorhanden; Skalierung als Bewegungsspur bleibt offen.
+Ältere Projekte ohne Gesamtspur laden mit neutraler Position. Neu gespeicherte Projekte mit Gesamtspur benötigen Version 0.6.0 oder neuer. Gesamtdrehung und gleichmäßige Skalierung werden ebenfalls als Bewegungsspuren gespeichert.
 
 ## Dateien, Agenten und Grenzen
 
@@ -76,7 +76,7 @@ Eine Pose speichern, die Figur erneut versetzen und eine zweite Pose speichern. 
 - Während der Studio-Bearbeitung werden Zustands-/Move-Befehle aus MQTT, MCP und der Browser-API mit einer verständlichen Fehlermeldung abgewiesen. Es gibt keine nachträglich abgespielte Warteschlange. Zurück im Player sind eigene Moves normal steuerbar.
 - Maximal 256 Kontrollpunkte, 2048 Verbindungen, 100 Posen und 100 eigene Moves pro Projekt; maximal 80 MiB beim Projektimport. Eingebettete Modelldaten unterliegen zusätzlich dem GLB-Limit von 50 MiB. Aufwendige Modelle und viele gleichzeitig verformende Punkte können langsam sein.
 - Die Datei ist ein versioniertes Studio-Projekt, kein GLB-Export und kein automatischer Eintrag im gemeinsamen Model Zoo auf GitHub. Die eigenen Moves werden mit dem geladenen Projekt im Player angeboten.
-- Allgemeines anatomisches Auto-Rigging, Gewichts-Malwerkzeuge und Ganzkörper-IK bleiben offen. Bild-zu-3D benötigt eine eingerichtete Laufzeit; [Generierung](KI-GENERIERUNG.md), vorhandene Beugegrenzen und [GLB-Export](GLB-EXPORT.md) beschreiben den jeweiligen Umfang.
+- Allgemeines anatomisches Auto-Rigging und Ganzkörper-IK bleiben offen. Gewichtsübertragung und lokaler Gewichtspinsel sind vorhanden. Bild-zu-3D benötigt eine eingerichtete Laufzeit; [Generierung](KI-GENERIERUNG.md), vorhandene Beugegrenzen und [GLB-Export](GLB-EXPORT.md) beschreiben den jeweiligen Umfang.
 - Automatisierte Geometrie-, Daten-, DOM- und Browsernachweise stehen im [Prüfbericht](PRUEFUNG.md). Manuelle Design-/Anatomieabnahme bleibt erforderlich.
 
 ## Posen nach Gelenkänderungen prüfen
@@ -429,3 +429,16 @@ Die festen Warnschwellen sind Dehnung unter 0,25× oder über 3× sowie eine Dre
 Im Modus **Figur bewegen** versucht **Schonendere Pose erstellen** nacheinander 87,5 %, 75 %, 50 %, 25 %, 12,5 % und 6,25 % der Bewegung von der Grundform zur gespeicherten Pose. Positionen werden interpoliert, Drehungen per Quaternion interpoliert; die Gesamtposition/-drehung/-skalierung bleibt erhalten. Der erste Kandidat innerhalb der Oberflächen- und vorhandenen Beugegrenzen wird als zusätzliche Pose **… · Prüfkandidat** gespeichert und angezeigt. Die übrigen gespeicherten Posen und Bewegungen bleiben erhalten. Mit **Zurück** lässt sich die gesamte Anlage rückgängig machen; zum dauerhaften Aufbewahren das Projekt speichern. **Vorschlag abbrechen** beendet die Suche; Änderungen am Projekt oder ein anderer ausgewählter Poseintrag verwerfen veraltete Ergebnisse.
 
 Die Suche schwächt Bewegungen ab. Sie repariert keine falschen Hautgewichte, keine Knochenhierarchie und keine ungeeignete Netzstruktur. Sie prüft weder Kollisionen noch Faltungen, verdeckte Anatomie, Silhouetten oder sämtliche Zwischenbilder einer Bewegung. Ein Prüfkandidat muss deshalb in der Vorschau bewertet werden; er wird keiner bestehenden Bewegung automatisch zugeordnet. Werden selbst die kleinsten Varianten verworfen, bleiben die Daten unverändert.
+
+
+## Hautkorrektur bei unveränderter Zielpose
+
+Im Modus **Figur bewegen** eine gespeicherte Pose und den betroffenen Gelenkpunkt auswählen. Der Punkt muss einen vorhandenen Elternknochen haben. **Korrekturradius** begrenzt den Bereich in der ursprünglichen Grundpose. **Lokale Hautkorrektur suchen** prüft sechs Varianten: 10 %, 20 % und 35 % Einflussübertragung zwischen Gelenk und Elternknochen, jeweils in beiden Richtungen und mit weichem räumlichem Abfall. Die Suche verändert weder das aktuelle Modell noch Projektdateien, gespeicherte Posen oder Moves.
+
+Ein Vorschlag muss die Anzahl auffälliger Dreiecke an der gewählten Pose senken. Für jedes Teilmodell werden Fehlerzahlen, Kategorien für Dehnung/Stauchung/Flächenkollaps und Überschreitungen der Dehnungsgrenzen mit dem Ausgangszustand verglichen. Diese Messwerte dürfen weder an den gespeicherten Posen noch an den drei Zwischenposen (25 %, 50 %, 75 % von Grundform zu Zielpose) schlechter werden. Die Grundform muss positionsbezogen innerhalb einer Toleranz von 0,000001 × max(1, Koordinatenbetrag) erhalten bleiben. Vorhandene Beugegrenzen der Zielpose müssen bereits eingehalten sein. Die Suche verändert keine Gelenkwinkel, Knochenlängen oder Move-Zeiten.
+
+Der Bericht zeigt Quell-/Zielgelenk, Übertragungsanteil und auffällige Dreiecke vorher → nachher sowie die Anzahl verglichener Posen. **Hautkorrektur übernehmen** ändert die tatsächliche Hautbindung, zeigt die unveränderte Zielpose und lässt sich mit einem **Zurück** rückgängig machen. Die Übernahme gilt für alle Bewegungen; gespeicherte Posen bleiben deshalb zur visuellen Nachprüfung markiert. **Speichern** sichert die Änderung im Projekt. Auch der vorhandene Export **Figur als GLB (mit Rig)** übernimmt die bearbeiteten Gewichte.
+
+**Vorschlag abbrechen**, Projektänderungen, Wechsel des Gelenks oder Verlassen des Studios verhindern die Übernahme veralteter Ergebnisse. Ohne akzeptierte Variante bleiben die Daten unverändert. `get_studio` liefert die Messwerte eines noch verfügbaren Vorschlags mit `requiresVisualReview: true`; die Suche wird bisher lokal über die Oberfläche gestartet.
+
+Das Verfahren optimiert nur sechs lokale Übertragungen und vergleicht aggregierte Messwerte je Teilmodell. Es erzeugt kein allgemeines anatomisches Rig und beweist weder Kollisionsfreiheit noch korrekte Silhouette oder erhaltenes Volumen. Auch ein erfolgreicher synthetischer Messfall kann noch eine sichtbare Einschnürung zeigen. Die drei Zwischenposen sind Stichproben, keine Prüfung einer vollständigen gespeicherten Bewegung. Die extremer gedrehten Original-PaKaChi-Ellenbogen werden von der aktuellen Suche noch nicht repariert. Eine Meldung „keine Korrektur gefunden“ ist deshalb ein gültiges Ergebnis.

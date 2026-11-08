@@ -3,9 +3,10 @@ import type {StudioRig} from './studio-rig.ts';
 import {neutralFigure,FIGURE_TRACK} from './studio-data.ts';
 import type {Pose,Transform} from './studio-data.ts';
 import {checkSurfaceShape,SURFACE_LIMITS} from './surface-check.ts';
+export type SkinOverrides=ReadonlyMap<number,{indices:T.BufferAttribute|T.InterleavedBufferAttribute;weights:T.BufferAttribute|T.InterleavedBufferAttribute}>;
 
 /** Evaluate the actual skinning equation without applying a pose to the live model. */
-export function poseSurfacePositions(rig:StudioRig,values:Record<string,Transform>,meshIndex:number):Float64Array {
+export function poseSurfacePositions(rig:StudioRig,values:Record<string,Transform>,meshIndex:number,overrides?:SkinOverrides):Float64Array {
   const surface=rig.surfaces[meshIndex];if(!surface)throw Error('Oberfläche fehlt.');
   for(const point of rig.data.points){const value=values[point.id];if(!value||![...value.position,...value.rotation].every(Number.isFinite))throw Error('Pose enthält nicht alle gültigen Gelenkspuren.');}
   const frame=rig.modelWorldMatrix,inverse=frame.clone().invert(),worlds=new Map<T.Object3D,T.Matrix4>();worlds.set(rig.root,frame);
@@ -23,7 +24,7 @@ export function poseSurfacePositions(rig:StudioRig,values:Record<string,Transfor
   if(isSkin&&mesh.bindMode==='detached')skinFrame.multiply(world(mesh)).multiply(mesh.bindMatrixInverse);
   else if(isSkin&&mesh.bindMode!=='attached')throw Error('Unbekannte Hautbindung.');
   const transforms=isSkin?mesh.skeleton.bones.map((bone,i)=>skinFrame.clone().multiply(world(bone)).multiply(mesh.skeleton.boneInverses[i]).multiply(mesh.bindMatrix)):[];
-  const local=isSkin?null:inverse.clone().multiply(world(mesh)),indices=geometry.getAttribute('skinIndex'),weights=geometry.getAttribute('skinWeight');
+  const local=isSkin?null:inverse.clone().multiply(world(mesh)),binding=overrides?.get(meshIndex),indices=binding?.indices??geometry.getAttribute('skinIndex'),weights=binding?.weights??geometry.getAttribute('skinWeight');
   if(isSkin&&(!indices||!weights||indices.count!==positions.length/3||weights.count!==indices.count))throw Error('Hautgewichte fehlen oder passen nicht zur Oberfläche.');
   for(let i=0;i<out.length/3;i++){
     vertex.fromArray(positions,i*3);
@@ -48,8 +49,8 @@ export function neutralPoseValues(rig:StudioRig):Record<string,Transform>{
 }
 export function createPoseSurfaceChecker(rig:StudioRig){
   const rest=neutralPoseValues(rig),references=rig.surfaces.map((s,i)=>({name:s.mesh.name||`Mesh ${i+1}`,positions:poseSurfacePositions(rig,rest,i),index:s.mesh.geometry.index?.array??null}));
-  return (pose:Pose)=>{
-    const meshes=references.map((r,i)=>({mesh:i,name:r.name,...checkSurfaceShape(r.positions,poseSurfacePositions(rig,pose.values,i),r.index)}));
+  return (pose:Pose,overrides?:SkinOverrides)=>{
+    const meshes=references.map((r,i)=>({mesh:i,name:r.name,...checkSurfaceShape(r.positions,poseSurfacePositions(rig,pose.values,i,overrides),r.index)}));
     const issues=meshes.reduce((sum,m)=>sum+m.issues,0),compared=meshes.reduce((sum,m)=>sum+m.compared,0),referenceDegenerate=meshes.reduce((sum,m)=>sum+m.referenceDegenerate,0);
     return {poseId:pose.id,status:issues?'outside' as const:compared?'within' as const:'unmeasurable' as const,issues,compared,referenceDegenerate,limits:{...SURFACE_LIMITS},meshes};
   };

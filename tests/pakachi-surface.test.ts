@@ -5,9 +5,17 @@ import * as T from 'three';
 import {parseModel,disposeModel} from '../src/viewer.ts';
 import {StudioRig} from '../src/studio-rig.ts';
 import {checkPoseSurface,poseSurfacePositions} from '../src/pose-surface-check.ts';
+import {searchWeightCorrection} from '../src/pose-weight-correction.ts';
 globalThis.ProgressEvent??=class extends Event{readonly lengthComputable=false;readonly loaded=0;readonly total=0;} as typeof ProgressEvent;
 const evidence=JSON.parse(await readFile(new URL('../docs/benchmarks/pakachi-rigging-2026-11-07.json',import.meta.url),'utf8'));
 for(const form of ['humanoid','animal']){
+  test(`PaKaChi ${form}: bounded local search refuses an unsupported extreme elbow twist without changing rig or skin`,async()=>{
+    const bytes=await readFile(new URL(`../public/model-zoo/pakachi-rigged/${form}.glb`,import.meta.url)),gltf=await parseModel(Uint8Array.from(bytes).buffer),rig=new StudioRig(gltf.scene);
+    try{
+      const joint=rig.data.points.find(p=>p.name==='LeftElbow')!,values=rig.capture();values[joint.id].rotation=new T.Quaternion().setFromAxisAngle(new T.Vector3(0,1,0),Math.PI).toArray();const pose={id:'twist',name:'Twist',seconds:1,values};rig.data.poses=[pose,{id:'neutral',name:'Neutral',seconds:1,values:rig.capture()}];
+      const before=structuredClone(rig.data),weights=rig.surfaces.filter(s=>s.mesh instanceof T.SkinnedMesh).map(s=>Array.from(s.mesh.geometry.attributes.skinWeight.array));assert.equal(checkPoseSurface(rig,pose).status,'outside');assert.equal(await searchWeightCorrection(rig,pose,joint,.3,new AbortController().signal),null);assert.deepEqual(rig.data,before);assert.deepEqual(rig.surfaces.filter(s=>s.mesh instanceof T.SkinnedMesh).map(s=>Array.from(s.mesh.geometry.attributes.skinWeight.array)),weights);
+    }finally{rig.dispose();disposeModel(gltf.scene);}
+  });
   test(`PaKaChi ${form}: actual neutral surface passes and bone-only form retarget exposes skin bridges`,async()=>{
     const bytes=await readFile(new URL(`../public/model-zoo/pakachi-rigged/${form}.glb`,import.meta.url)),gltf=await parseModel(Uint8Array.from(bytes).buffer),rig=new StudioRig(gltf.scene);
     try{

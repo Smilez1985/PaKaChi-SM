@@ -4,6 +4,7 @@ import {PlaybackTransition} from './playback-transition.ts';
 import {StudioWeightStroke} from './studio-weight-stroke.ts';
 import {checkMoveBends} from './move-limit-check.ts';
 import {checkPoseSurface as inspectPoseSurface,suggestGentlerPose} from './pose-surface-check.ts';
+import {searchWeightCorrection} from './pose-weight-correction.ts';
 import {loadMoveLibrary,loadLibraryMove} from './move-library.ts';
 import type {LibraryMove} from './move-library.ts';
 import {exportMoveFile,importMoveFile,MAX_MOVE_FILE} from './move-file.ts';
@@ -55,6 +56,7 @@ export class StudioEditor {
   private exportingFigure=false;
   private moveCheck:AbortController|null=null;
   private surfaceCheck:AbortController|null=null;
+  private weightCorrection:(NonNullable<Awaited<ReturnType<typeof searchWeightCorrection>>>&{revision:number;jointId:string})|null=null;
   private library:LibraryMove[]=[];
   private libraryRequest:AbortController|null=null;
   dirty=false;
@@ -62,7 +64,7 @@ export class StudioEditor {
   speed=1;
   constructor(rig:StudioRig,view:StudioView,host:HTMLElement,project:Omit<StudioProject,'studio'>,hooks:Hooks) {
     this.rig=rig;this.playbackTransition=new PlaybackTransition(rig.root);this.view=view;this.host=host;this.project=project;this.hooks=hooks;this.initial=structuredClone(rig.initial);
-    view.onSelect=id=>{this.selected=id;this.render();};
+    view.onSelect=id=>{this.surfaceCheck?.abort();this.weightCorrection=null;this.selected=id;this.render();};
     view.onAdd=(position,mesh)=>{
       const parent=this.data.points.find(p=>p.id===this.addingBoneParent);
       if(!this.addingBoneParent){this.addPoint(position,mesh);return;}
@@ -99,7 +101,7 @@ export class StudioEditor {
   private refreshWeightPreview(){const p=this.point;this.view.setWeightRegion?.(this.active&&this.edit&&!this.playing&&this.weightLocal&&p?.kind==='bone'?{center:[...p.rest],radius:this.weightRadius}:null);}
   private snapshot():Snapshot{return {data:structuredClone(this.data),values:this.rig.capture()};}
   private restore(s:Snapshot){this.rig.data=structuredClone(s.data);this.rig.reset();this.rig.apply(s.values);this.mark();this.render();}
-  private mark(){this.moveCheck?.abort();this.surfaceCheck?.abort();this.revision++;this.dirty=true;this.hooks.changed();}
+  private mark(){this.moveCheck?.abort();this.surfaceCheck?.abort();this.weightCorrection=null;this.revision++;this.dirty=true;this.hooks.changed();}
   private mutate(fn:()=>void){const before=this.snapshot();fn();flagAffectedPoses(before.data,this.data);this.history.push(before);this.mark();this.render();}
   beginPlaybackTransition(){
     const d=this.data;
@@ -108,7 +110,7 @@ export class StudioEditor {
     this.playbackTransition.begin(this.rig.surfaces.filter((_,i)=>points.some(p=>p.mesh===undefined||p.mesh===i)).map(s=>s.mesh));
   }
   enter(){this.playbackTransition.cancel();this.revision++;this.hooks.suspend();this.stopMove();this.active=true;this.rig.reset();if(this.data.draft)this.rig.apply(this.data.draft);this.view.setEnabled(true);this.render();}
-  leave(){this.playbackTransition.cancel();this.view.setAction('select');this.moveCheck?.abort();this.surfaceCheck?.abort();this.libraryRequest?.abort();this.agentEditing=false;this.revision++;if(this.active&&this.proposalOrigin)this.data.draft=structuredClone(this.proposalOrigin);else if(this.active&&!this.playing)this.data.draft=this.rig.capture();this.active=false;this.stopMove();this.view.setEnabled(false);this.rig.restoreSource();this.hooks.resume();}
+  leave(){this.playbackTransition.cancel();this.view.setAction('select');this.moveCheck?.abort();this.surfaceCheck?.abort();this.libraryRequest?.abort();this.agentEditing=false;this.revision++;if(this.active&&this.proposalOrigin)this.data.draft=structuredClone(this.proposalOrigin);else if(this.active&&!this.playing)this.data.draft=this.rig.capture();this.weightCorrection=null;this.active=false;this.stopMove();this.view.setEnabled(false);this.rig.restoreSource();this.hooks.resume();}
   stopMove(){if(this.proposalOrigin){this.rig.apply(this.proposalOrigin);this.proposalOrigin=null;this.view.refresh();}if(this.inspectionOrigin){this.rig.apply(this.inspectionOrigin);this.inspectionOrigin=null;this.view.refresh();}this.timeline=null;this.paused=false;this.view.setEnabled(this.active);}
   stopPreview(){this.stopMove();this.render();}
   play(id:string,preview=false):boolean {
@@ -135,6 +137,7 @@ export class StudioEditor {
   }
   private refreshNumbers(){const label=this.host.querySelector('#figure-scale-value');if(label)label.textContent=`${Math.round(this.rig.scale*100)} %`;const p=this.point;if(!p)return;const pos=this.rig.position(p);['x','y','z'].forEach((axis,i)=>{const input=this.host.querySelector<HTMLInputElement>(`#point-${axis}`);if(input)input.value=pos.toArray()[i].toFixed(3);});}
   private render(){
+    if(this.weightCorrection&&this.weightCorrection.jointId!==this.point?.id)this.weightCorrection=null;
     const remembered = Object.fromEntries(['pose-name','move-name','move-id','pose-list','studio-moves','library-moves','move-steps'].map(id=>[id,this.host.querySelector<HTMLInputElement>(`#${id}`)?.value ?? '']));
     const loop = this.host.querySelector<HTMLInputElement>('#move-loop')?.checked ?? false;
     const selected=this.selected;const poses=this.data.poses;
@@ -161,6 +164,7 @@ export class StudioEditor {
     <label for="pose-list">Gespeicherte Posen</label><select id="pose-list"></select><div class="studio-actions"><button id="pose-show">Anzeigen</button><button id="pose-replace">Ersetzen</button><button id="pose-delete">Löschen</button></div>
     <button id="pose-check-limits">Beugegrenzen der Pose prüfen</button><div id="pose-limit-result" role="status"></div>
     <div class="studio-actions"><button id="pose-check-surface">Oberfläche der Pose prüfen</button><button id="pose-gentler">Schonendere Pose erstellen</button><button id="pose-surface-cancel">Vorschlag abbrechen</button></div><div id="pose-surface-result" role="status"></div><p class="subtle">Vergleicht die gespeicherte Pose mit der Grundform. Eine schonendere Variante wird als neue Pose gespeichert. Anatomie, Kollisionen und Charakterdesign bleiben visuell zu prüfen.</p>
+    <label>Korrekturradius<input id="pose-weight-radius" type="number" min="0.005" max="2" step="0.005" value="${this.weightRadius}"></label><div class="studio-actions"><button id="pose-weight-search">Lokale Hautkorrektur suchen</button><button id="pose-weight-apply">Hautkorrektur übernehmen</button></div><div id="pose-weight-result" role="status"></div><p class="subtle">Gespeicherte Pose und Gelenk auswählen. Prüft kleine Gewichtsänderungen zwischen Gelenk und Elternknochen. Zielbewegung bleibt erhalten; Übernahme ändert die Hautbindung für alle Bewegungen. Visuell prüfen.</p>
     <div id="pose-review" class="studio-review" hidden><strong>Pose prüfen</strong><ul id="pose-review-reasons"></ul><p>Pose anzeigen und bei Bedarf korrigieren. „Ersetzen“ speichert die Korrektur.</p><button id="pose-reviewed">Pose als geprüft markieren</button></div>
     <label>Übergang zu dieser Pose (Sekunden)<input id="pose-seconds" type="number" min="0.1" max="30" step="0.1" value="1"></label><div class="studio-actions"><button id="pose-up">↑ Früher</button><button id="pose-down">↓ Später</button></div>
     <p class="subtle">Eine Bewegung nutzt alle Posen in dieser Reihenfolge. Bei Schleifen bestimmt die Zeit der ersten Pose den Rückweg.</p>
@@ -171,7 +175,7 @@ export class StudioEditor {
     const input=(id:string)=>q<HTMLInputElement>(id);
     const on=(id:string,fn:()=>void)=>{q<HTMLButtonElement>(id).onclick=()=>{try{fn();}catch(e){this.hooks.feedback(e instanceof Error?e.message:String(e));}};};
     const points=q<HTMLSelectElement>('studio-points');if(!this.edit){const option=new Option('Gesamte Figur',FIGURE_TRACK);option.dataset.figureLabel='';points.add(option);}for(const p of this.data.points)points.add(new Option(`${p.kind==='bone'?'◇':'●'} ${p.name}`,p.id));points.value=selected??'';
-    points.onchange=()=>{this.selected=points.value||null;this.addingBoneParent=null;this.view.setAction('select');this.render();};
+    points.onchange=()=>{this.surfaceCheck?.abort();this.weightCorrection=null;this.selected=points.value||null;this.addingBoneParent=null;this.view.setAction('select');this.render();};
     input('studio-agent-edit').onchange=()=>{this.agentEditing=input('studio-agent-edit').checked;this.revision++;};
     on('figure-select',()=>{this.selected=FIGURE_TRACK;this.addingBoneParent=null;this.view.setAction('select');this.render();});
     on('mode-pose',()=>{this.revision++;this.edit=false;this.addingBoneParent=null;this.view.setAction('select');this.rig.reset();this.render();});
@@ -236,7 +240,7 @@ export class StudioEditor {
     on('pose-reset',()=>this.mutate(()=>this.rig.reset()));
     on('pose-add',()=>{if(this.data.poses.length>=100)throw new Error('Höchstens 100 Posen.');const name=input('pose-name').value.trim()||`Pose ${poses.length+1}`;this.mutate(()=>this.data.poses.push({id:uid(),name,seconds:1,values:this.rig.capture()}));});
     const list=q<HTMLSelectElement>('pose-list');poses.forEach((p,i)=>list.add(new Option(`${p.review?.length?'⚠ ':''}${i+1}. ${p.name}`,p.id)));list.value=poses.some(p=>p.id===remembered['pose-list'])?remembered['pose-list']:(poses[0]?.id??'');const pose=()=>this.data.poses.find(p=>p.id===list.value);
-    list.onchange=()=>{q('pose-limit-result').replaceChildren();q('pose-surface-result').replaceChildren();q<HTMLButtonElement>('pose-check-limits').disabled=!pose();q<HTMLButtonElement>('pose-check-surface').disabled=!pose()||!!this.surfaceCheck;q<HTMLButtonElement>('pose-gentler').disabled=!pose()||this.edit||!!this.surfaceCheck||this.data.poses.length>=100;q<HTMLButtonElement>('pose-surface-cancel').disabled=!this.surfaceCheck;const p=pose();input('pose-seconds').value=String(p?.seconds??1);q('pose-review').hidden=!p?.review?.length;q('pose-review-reasons').replaceChildren();for(const reason of p?.review??[]){const li=document.createElement('li');li.textContent=reviewLabels[reason];q('pose-review-reasons').append(li);}};list.onchange(new Event('change'));
+    list.onchange=()=>{if(this.weightCorrection?.poseId!==list.value){this.weightCorrection=null;q('pose-weight-result').replaceChildren();}q('pose-limit-result').replaceChildren();q('pose-surface-result').replaceChildren();q<HTMLButtonElement>('pose-check-limits').disabled=!pose();q<HTMLButtonElement>('pose-check-surface').disabled=!pose()||!!this.surfaceCheck;q<HTMLButtonElement>('pose-gentler').disabled=!pose()||this.edit||!!this.surfaceCheck||this.data.poses.length>=100;q<HTMLButtonElement>('pose-surface-cancel').disabled=!this.surfaceCheck;q<HTMLButtonElement>('pose-weight-search').disabled=!pose()||this.edit||this.point?.kind!=='bone'||!!this.surfaceCheck;q<HTMLButtonElement>('pose-weight-apply').disabled=!this.weightCorrection||this.edit||!!this.surfaceCheck;q<HTMLInputElement>('pose-weight-radius').disabled=!!this.surfaceCheck;const p=pose();input('pose-seconds').value=String(p?.seconds??1);q('pose-review').hidden=!p?.review?.length;q('pose-review-reasons').replaceChildren();for(const reason of p?.review??[]){const li=document.createElement('li');li.textContent=reviewLabels[reason];q('pose-review-reasons').append(li);}};list.onchange(new Event('change'));
     on('pose-show',()=>{const p=pose();if(p)this.mutate(()=>{this.rig.reset();this.rig.apply(p.values);});});
     on('pose-replace',()=>{const p=pose();if(p)this.mutate(()=>{p.values=this.rig.capture();delete p.review;});});
     on('pose-check-limits',()=>{const p=pose();if(!p)return;const report=this.checkPoseLimits(p.id),host=q('pose-limit-result');host.replaceChildren();const summary=document.createElement('p');summary.textContent='Prüfung der gespeicherten Einzelpose. Zwischenbilder und Kollisionen sind nicht geprüft.';host.append(summary);
@@ -253,6 +257,10 @@ export class StudioEditor {
       const limits=document.createElement('p');limits.textContent='Prüfgrenzen: Dehnung 0,25–3×, Fläche mindestens 0,1×. ∅: bereits in der Grundform nicht messbar.';host.append(limits);
     });
     q<HTMLButtonElement>('pose-gentler').onclick=()=>{const p=pose();if(!p)return;void this.createGentlerPose(p.id).then(result=>{if(!this.disposed&&!result)this.hooks.feedback('Keine schonendere Pose innerhalb der Prüfgrenzen gefunden. Rig und Hautgewichte gezielt korrigieren.');}).catch(error=>{if(!this.disposed)this.hooks.feedback(error instanceof Error&&error.name==='AbortError'?'Prüfung abgebrochen.':error instanceof Error?error.message:'Prüfung fehlgeschlagen.');});};
+    const correction=this.weightCorrection;if(correction){const row=q('pose-weight-result');const numbers=document.createElement('span');numbers.dataset.userText='';const from=this.data.points.find(p=>p.id===correction.from)?.name,to=this.data.points.find(p=>p.id===correction.to)?.name;numbers.textContent=`${from} → ${to}: ${Math.round(correction.amount*100)} % · ${correction.before.issues} → ${correction.after.issues} △ · ${correction.checkedPoses} / ${correction.intermediateSamples}`;row.append(numbers);const legend=document.createElement('p');legend.textContent='Vergleich: gespeicherte Posen / Zwischenposen. Dreiecke: vorher → nachher.';row.append(legend);const note=document.createElement('p');note.textContent='Verbesserung gemessen. Noch nicht übernommen; Kollisionen und Charakterdesign sind nicht geprüft.';row.append(note);}
+    input('pose-weight-radius').onchange=()=>{const radius=Number(input('pose-weight-radius').value);if(!Number.isFinite(radius)||radius<.005||radius>2){this.hooks.feedback('Gelenk und gültigen Korrekturradius wählen.');input('pose-weight-radius').value=String(this.weightRadius);return;}this.weightRadius=radius;this.weightCorrection=null;this.render();};
+    q<HTMLButtonElement>('pose-weight-search').onclick=()=>{const p=pose();if(!p)return;void this.findWeightCorrection(p.id).then(result=>{if(!this.disposed&&!result)this.hooks.feedback('Keine lokale Hautkorrektur mit bestandener Vergleichsprüfung gefunden.');}).catch(error=>{if(!this.disposed)this.hooks.feedback(error instanceof Error&&error.name==='AbortError'?'Prüfung abgebrochen.':error instanceof Error?error.message:'Prüfung fehlgeschlagen.');});};
+    on('pose-weight-apply',()=>this.applyWeightCorrection());
     on('pose-surface-cancel',()=>this.surfaceCheck?.abort());
     on('pose-delete',()=>{const p=pose();if(p){if(this.data.moves.some(m=>m.poses.includes(p.id)))throw new Error('Diese Pose wird noch von einer Bewegung verwendet. Zuerst die Bewegung löschen.');this.mutate(()=>this.data.poses=this.data.poses.filter(x=>x!==p));}});
     input('pose-seconds').onchange=()=>{const p=pose(),v=Number(input('pose-seconds').value);if(p && v>=.1&&v<=30)this.mutate(()=>p.seconds=v);};
@@ -308,7 +316,7 @@ export class StudioEditor {
   inspect(args:Record<string,unknown>={}) {
     const section=args.section??'info',offset=args.offset??0,limit=args.limit??32;
     if(Object.keys(args).some(k=>!['section','offset','limit'].includes(k))||!['info','points','poses','moves'].includes(section as string)||!Number.isInteger(offset)||(offset as number)<0||!Number.isInteger(limit)||(limit as number)<1||(limit as number)>32)throw new Error('Ungültige Studio-Abfrage.');
-    const info={view:this.view.weightView?.(),session:this.session,revision:this.revision,dirty:this.dirty,open:this.active,editable:this.active&&this.agentEditing&&!this.interactionActive,mode:this.edit?'rig':'pose',figure:{id:FIGURE_TRACK,scale:this.rig.scale,position:this.rig.position(this.rig.figure).toArray(),rotation:this.rig.rotation(this.rig.figure).toArray()},counts:{points:this.data.points.length,poses:this.data.poses.length,moves:this.data.moves.length,surfaces:this.rig.surfaces.length},undo:this.history.canUndo,redo:this.history.canRedo};
+    const info={view:this.view.weightView?.(),session:this.session,revision:this.revision,dirty:this.dirty,open:this.active,editable:this.active&&this.agentEditing&&!this.interactionActive,mode:this.edit?'rig':'pose',figure:{id:FIGURE_TRACK,scale:this.rig.scale,position:this.rig.position(this.rig.figure).toArray(),rotation:this.rig.rotation(this.rig.figure).toArray()},counts:{points:this.data.points.length,poses:this.data.poses.length,moves:this.data.moves.length,surfaces:this.rig.surfaces.length},undo:this.history.canUndo,redo:this.history.canRedo,weightCorrection:this.weightCorrection?{status:'proposal',poseId:this.weightCorrection.poseId,from:this.weightCorrection.from,to:this.weightCorrection.to,amount:this.weightCorrection.amount,region:structuredClone(this.weightCorrection.region),beforeIssues:this.weightCorrection.before.issues,afterIssues:this.weightCorrection.after.issues,checkedPoses:this.weightCorrection.checkedPoses,intermediateSamples:this.weightCorrection.intermediateSamples,requiresVisualReview:true,unchecked:['collisions','character-design','continuous-motion']}:null};
     if(section==='info')return info;
     const items=section==='points'?this.data.points.map(p=>({...p,...(p.kind==='bone'?{parentBone:this.rig.bones.indexOf(this.rig.bones[p.bone!].parent as T.Bone)<0?null:this.rig.bones.indexOf(this.rig.bones[p.bone!].parent as T.Bone),parentId:this.data.points.find(q=>q.kind==='bone'&&this.rig.bones[q.bone!]===this.rig.bones[p.bone!].parent)?.id??null}:{}),position:this.rig.position(p).toArray(),rotation:this.rig.rotation(p).toArray(),ikChain:this.rig.poseChain(p).map(b=>this.data.points.find(p=>p.kind==='bone'&&this.rig.bones[p.bone!]===b)!.id),connections:this.data.links.filter(l=>l.includes(p.id)).map(l=>l[0]===p.id?l[1]:l[0])})):section==='poses'?this.data.poses.map(p=>({id:p.id,name:p.name,seconds:p.seconds,review:p.review??[]})):this.data.moves.map(m=>({id:m.id,name:m.name,loop:m.loop,poseCount:m.poses.length,poses:[...m.poses],...moveReview(this.data,m)}));
     // Bound pages by count and UTF-8 size so both MCP bridges stay below their payload limit.
@@ -468,7 +476,21 @@ export class StudioEditor {
       this.surfaceCheck=null;this.mutate(()=>{this.rig.apply(next.values);this.data.poses.push(next);});
       const select=this.host.querySelector<HTMLSelectElement>('#pose-list');if(select){select.value=next.id;select.dispatchEvent(new Event('change'));}
       this.hooks.feedback('Schonendere Pose als Prüfkandidat erstellt. Originalpose und Bewegung bleiben erhalten. Vorschau prüfen.');return {id:next.id,fraction:proposal.fraction};
-    }finally{if(this.surfaceCheck===request)this.surfaceCheck=null;if(!this.disposed){const selected=this.host.querySelector<HTMLSelectElement>('#pose-list')?.value;for(const id of ['pose-check-surface','pose-gentler']){const button=this.host.querySelector<HTMLButtonElement>('#'+id);if(button)button.disabled=!this.active||this.interactionActive||!selected||(id==='pose-gentler'&&(this.edit||this.data.poses.length>=100));}const cancel=this.host.querySelector<HTMLButtonElement>('#pose-surface-cancel');if(cancel)cancel.disabled=true;}}
+    }finally{if(this.surfaceCheck===request)this.surfaceCheck=null;if(!this.disposed){const selected=this.host.querySelector<HTMLSelectElement>('#pose-list')?.value;for(const id of ['pose-check-surface','pose-gentler','pose-weight-search','pose-weight-apply']){const button=this.host.querySelector<HTMLButtonElement>('#'+id);if(button)button.disabled=!this.active||this.interactionActive||!selected||(id==='pose-gentler'&&(this.edit||this.data.poses.length>=100))||(id==='pose-weight-search'&&(this.edit||this.point?.kind!=='bone'))||(id==='pose-weight-apply'&&(this.edit||!this.weightCorrection));}const cancel=this.host.querySelector<HTMLButtonElement>('#pose-surface-cancel');if(cancel)cancel.disabled=true;const radius=this.host.querySelector<HTMLInputElement>('#pose-weight-radius');if(radius)radius.disabled=false;}}
+  }
+  async findWeightCorrection(id:string){
+    if(this.disposed||!this.active||this.edit||this.interactionActive||this.surfaceCheck||this.moveCheck)throw Error('Studio ist beschäftigt oder geschlossen.');
+    const pose=this.data.poses.find(p=>p.id===id),joint=this.point;if(!pose||joint?.kind!=='bone')throw Error('Gespeicherte Pose und Gelenk auswählen.');
+    const request=new AbortController(),revision=this.revision,pointId=joint.id,selection=this.host.querySelector<HTMLSelectElement>('#pose-list')?.value;this.weightCorrection=null;this.surfaceCheck=request;this.render();
+    const valid=()=>!this.disposed&&this.active&&!this.edit&&!this.interactionActive&&this.revision===revision&&this.point?.id===pointId&&this.host.querySelector<HTMLSelectElement>('#pose-list')?.value===selection;
+    try{const proposal=await searchWeightCorrection(this.rig,structuredClone(pose),joint,this.weightRadius,request.signal,valid);if(!proposal)return null;if(!valid())throw Error('Studio-Stand hat sich geändert. Prüfung erneut starten.');this.weightCorrection={...proposal,revision,jointId:pointId};return proposal;}
+    finally{if(this.surfaceCheck===request)this.surfaceCheck=null;if(!this.disposed&&this.active)this.render();}
+  }
+  applyWeightCorrection(){
+    const proposal=this.weightCorrection;if(this.disposed||!this.active||this.edit||this.interactionActive||this.surfaceCheck||!proposal||proposal.revision!==this.revision||proposal.jointId!==this.point?.id||proposal.poseId!==this.host.querySelector<HTMLSelectElement>('#pose-list')?.value)throw Error('Studio-Stand hat sich geändert. Prüfung erneut starten.');
+    const from=this.data.points.find(p=>p.id===proposal.from),to=this.data.points.find(p=>p.id===proposal.to),pose=this.data.poses.find(p=>p.id===proposal.poseId);if(!from||!to||!pose)throw Error('Studio-Stand hat sich geändert. Prüfung erneut starten.');
+    this.mutate(()=>{const before=this.snapshot();try{this.rig.transferWeights(from,to,proposal.amount,proposal.region);const actual=inspectPoseSurface(this.rig,pose);if(actual.issues>=proposal.before.issues)throw Error('Korrektur verbessert die tatsächliche Oberfläche nicht.');this.rig.apply(pose.values);}catch(error){this.rig.data=before.data;this.rig.reset();this.rig.apply(before.values);throw error;}});
+    this.hooks.feedback('Lokale Hautkorrektur übernommen. Zielpose bleibt erhalten. Bewegungen visuell prüfen.');
   }
   restoreDirty(value:boolean){this.dirty=value;this.render();}
   exportProject():StudioProject {

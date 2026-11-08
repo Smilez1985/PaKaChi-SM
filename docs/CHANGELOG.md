@@ -14,6 +14,22 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 Noch keine weiteren Änderungen.
 
+## [0.88.0] - 2026-11-08
+
+Zeitstempel: 2026-11-08T20:56:00+01:00 (Europe/Berlin)
+
+### Added
+
+- **Lokale Hautkorrektur suchen**: sechs begrenzte lokale Gewichtsübertragungen (10 %, 20 %, 35 % in beiden Richtungen) zwischen gewähltem Gelenk und Elternknochen. Die gespeicherte Zielbewegung wird nicht abgeschwächt. Ein Vorschlag erfordert weniger auffällige Dreiecke an der Zielpose und besteht Vergleichsprüfungen aller gespeicherten Posen sowie dreier Zwischenposen von Grundform zu Zielpose.
+- Grundform wird positionsbezogen mit Toleranz geprüft. Pro Teilmodell dürfen die gemessenen Fehlerzahlen und Überschreitungen der Dehnungsgrenzen nicht zunehmen. Die Suche verändert keine Daten; **Hautkorrektur übernehmen** speichert die tatsächliche lokale Gewichtsänderung als eine Undo-Aktion. Posen und Move-Sequenzen bleiben erhalten, erhaltene Posen werden zur visuellen Nachprüfung markiert. Projekt-Rundlauf und bestehender Rig-GLB-Export verwenden dieselbe gespeicherte Gewichtsübertragung.
+- `get_studio` meldet die Messwerte eines verfügbaren Vorschlags einschließlich weiterhin ungeprüfter Kollisionen, Charaktergestaltung und durchgehender Bewegung. Kein pauschales „Rigging fehlerfrei“ und noch kein eigener MCP-Aufruf zum Starten der Suche.
+- Reproduzierbare Prüfung mit `npm run check:pakachi-surface -- --weights`: Beide Originalformen verweigern bei extremer 180°-Ellenbogendrehung noch eine Korrektur durch diese sechs lokalen Varianten. [Messdaten](benchmarks/pakachi-weight-correction-2026-11-08.json). Der gezielte synthetische Armtest zeigt dagegen weniger gemessene Verzerrung bei identischem vollen Gelenkwinkel; das ist keine visuelle Anatomieabnahme.
+
+### Changed
+
+- Bestehende manuelle Gewichtsübertragung, Pinsel und Suchvorschau verwenden denselben reinen Rechenkern für Zusammenführen, höchstens vier Einflüsse und Normalisierung. Bestehende Tests vergleichen den Kern weiterhin mit der unabhängigen Map-Referenz.
+- Vorherigen vollständigen [CI-Lauf für 0.87.0](PRUEFUNG.md#version-0870) ausgewertet: 372 Node-Tests, Build, 37 Chromium-Fälle und Produktionsimportmessungen erfolgreich. Charakterqualität, gemeinsame Morph-Oberfläche und Standard-Verwandlung bleiben offen.
+
 ## [0.87.0] - 2026-11-08
 
 Zeitstempel: 2026-11-08T20:33:00+01:00 (Europe/Berlin)
@@ -1830,3 +1846,5 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 [0.86.0]: PRUEFUNG.md#version-0860
 
 [0.87.0]: PRUEFUNG.md#version-0870
+
+[0.88.0]: PRUEFUNG.md#version-0880

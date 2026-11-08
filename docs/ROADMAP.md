@@ -1,15 +1,15 @@
 # Roadmap – offene Aufgaben
 
-**Entwicklungsstand: 0.87.0 · Abgleich: 08.11.2026.** Teil der [Blaupause](README.md).
+**Entwicklungsstand: 0.88.0 · Abgleich: 08.11.2026.** Teil der [Blaupause](README.md).
 
 Diese Roadmap enthält offene Umsetzung und ausstehende Abnahme. Erledigte Änderungen stehen nach Version im [Changelog](CHANGELOG.md); Nachweise und Grenzen im [Prüfstand](PRUEFUNG.md). Eine implementierte Funktion ist nicht automatisch manuell oder mit realen Anbietern abgenommen.
 
 ## Übergabe und nächster Schritt
 
-**Übergabe aktualisiert:** 2026-11-08T20:33:00+01:00 (Europe/Berlin). Softwarestand **0.87.0**.
+**Übergabe aktualisiert:** 2026-11-08T20:56:00+01:00 (Europe/Berlin). Softwarestand **0.88.0**.
 
 - **Arbeitsbranch:** `work/local-verification-model-zoo`, [Entwurfs-PR #1](https://github.com/Smilez1985/PaKaChi-SM/pull/1); noch nicht nach `main` zusammengeführt.
-- **Neue Grundlage:** Mathematische Oberflächenprüfung gespeicherter Posen und ausdrücklich erzeugter, rückgängig machbarer schonenderer Prüfkandidat. Die Prüfung erkennt die Hautbrücken des verworfenen reinen Knochenumbaus an beiden Originalformen. [Prüfbericht](PRUEFUNG.md#version-0870).
+- **Neue Grundlage:** Oberflächenprüfung gespeicherter Posen und lokale Suche nach Hautgewichten bei unveränderter Zielbewegung. Vorschläge müssen gespeicherte Posen und drei Zwischenposen vergleichend bestehen; Übernahme bleibt ausdrücklich und rückgängig machbar. Die extreme Original-PaKaChi-Ellenbogendrehung ist damit noch nicht repariert. [Prüfbericht](PRUEFUNG.md#version-0880).
 - **Nächste Aktion:** Designgetreue Charakterqualität und belastbares Rig der beiden Originalformen verbessern, danach eine gemeinsame Morph-Topologie erzeugen. Die neue Prüfung liefert Warnwerte; sie erzeugt selbst keine kompatible Oberfläche.
 - **Danach:** Eine gespeicherte Standard-Verwandlung auf dieser Oberfläche, vorwärts und rückwärts mit identischen Zwischenformen; Qualität auch zwischen den Endposen prüfen.
 - **Hardware parallel:** Die [fünf Verbindungsschritte](LOKALE-WERKZEUGE.md#verbindung-zu-deinem-rechner) bleiben verfügbar. Windows-/Caddy-/GPU-Abnahme ist offen, blockiert die CPU-basierte Charakter-/Rigarbeit jedoch nicht. Ein tatsächlicher externer Aufruf von `local_get_status` bleibt der erste Verbindungsnachweis.
@@ -62,7 +62,7 @@ Die Umsetzung des integrierten MCP-Arbeitsplatzes, der Caddy-/DuckDNS-Konfigurat
 - [ ] Anatomische Gelenkketten aus ungeriggter Oberfläche erzeugen; allgemeine Dreh-/Twistgrenzen, fixierte Füße und gekoppelte Ganzkörper-IK ergänzen.
 - [ ] Beugegrenzen, Posen- und Bewegungsprüfung samt Prüfbildübernahme im gerenderten Studio abnehmen; lückenlose Bewegungsprüfung, direkte Drehgrenzen und Korrekturen ergänzen.
 - [ ] Bewegungsfähige Rigs unterschiedlicher Körperformen systematisch prüfen.
-- [ ] Die seit 0.87.0 vorhandene Dreiecks-Dehnungsprüfung einzelner Posen um Zwischenbilder, Selbstüberschneidung, Volumen-/Orientierungsprüfung und Referenzansichten erweitern; anschließend gezielte Gewichts-/Oberflächenkorrekturen statt bloßer Abschwächung der Pose. Die aktuellen Warnschwellen sind keine anatomische Abnahme.
+- [ ] Die seit 0.87.0 vorhandene Dreiecks-Dehnungsprüfung einzelner Posen um Zwischenbilder, Selbstüberschneidung, Volumen-/Orientierungsprüfung und Referenzansichten erweitern; die seit 0.88.0 begrenzte lokale Gewichtssuche um gezielte Oberflächenkorrekturen, weitere Zwischenposen und charakterbezogene Qualitätskriterien erweitern. Die aktuellen Warnschwellen sind keine anatomische Abnahme.
 
 ## 5. Bild zu 3D und KI-Korrektur
 
