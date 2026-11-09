@@ -1,6 +1,6 @@
 # Prüfstand und Protokolle
 
-**Softwarestand: 0.92.0 · Dokumentationsabgleich: 2026-11-09T07:15:16+01:00 (Europe/Berlin).**
+**Softwarestand: 0.93.0 · Dokumentationsabgleich: 2026-11-09T10:52:35+01:00 (Europe/Berlin).**
 
 Alle Prüfnachweise stehen in dieser Datei: ein Abschnitt je Softwareversion sowie gesonderte Abschnitte für datierte Zwischenprüfungen. Die Ergebnisse und Grenzen gelten für den jeweils genannten Stand. Spätere Läufe stehen als Nachtrag im selben Abschnitt. Produktänderungen gehören in den [Changelog](CHANGELOG.md), offene Aufgaben in die [Roadmap](ROADMAP.md).
 
@@ -8,10 +8,10 @@ Alle Prüfnachweise stehen in dieser Datei: ein Abschnitt je Softwareversion sow
 
 | Prüfung | Bestätigter Stand | Umfang und Grenze |
 | --- | --- | --- |
-| Node-Tests | [0.92.0](#version-0920): 413 lokal bestanden; Originaldatei-Prüfung folgt in CI | Einschließlich echter MCP-/OAuth-/Python-/ACP-Prozesse; keine manuelle Qualitätsabnahme. |
-| TypeScript und Produktionsbuild | [0.92.0](#version-0920): lokal bestanden | Bekannte Bundle-Größenwarnung; keine Aussage über Zielhardware-Leistung. |
-| Chromium-Browserfälle | [0.91.0](#version-0910): 40 im vollständigen CI-Lauf; fünf gezielte Fälle lokal für 0.92.0 bestanden | Software-WebGL, simulierte KI-Anbieter; keine reale KI-Inferenzabnahme. |
-| Produktionsbrowser-Importmessung | [0.91.0](#version-0910): drei CI-Durchläufe bestanden | Mika mit 256 Gewichtsaufträgen; keine allgemeine Laufzeitgarantie. |
+| Node-Tests | [0.92.0](#version-0920): 414 in vollständiger CI bestanden | Einschließlich echter MCP-/OAuth-/Python-/ACP-Prozesse; keine manuelle Qualitätsabnahme. |
+| TypeScript und Produktionsbuild | [0.92.0](#version-0920): vollständige CI bestanden | Bekannte Bundle-Größenwarnung; keine Aussage über Zielhardware-Leistung. |
+| Chromium-Browserfälle | [0.92.0](#version-0920): alle 42 im vollständigen CI-Lauf bestanden | Software-WebGL, simulierte KI-Anbieter; keine reale KI-Inferenzabnahme. |
+| Produktionsbrowser-Importmessung | [0.92.0](#version-0920): drei CI-Durchläufe bestanden | Mika mit 256 Gewichtsaufträgen; keine allgemeine Laufzeitgarantie. |
 | Legacy-Testprogramme | [0.9.0](#version-090): beide bestanden | Steuerung, MQTT-Verhalten und Lebenszyklus des Originalplayers. |
 | Python-MCP-/MQTT-Integration | [0.10.0](#version-0100): bestanden | Echter Python-Prozess und eingebetteter Testbroker; keine allgemeine externe Hostabnahme. |
 | Originaldateien | [0.49.0](#version-0490): bytegenau erhalten | 83 Originaldateien einschließlich 72 Transformationsbildern. |
@@ -60,6 +60,21 @@ Diese Liste beschreibt ausstehende Abnahmen.
 
 Die jüngste Version steht zuerst. Für eine bestimmte Version die Dokumentgliederung oder die Browser-Suche verwenden.
 
+## Version 0.93.0
+
+**Prüfzeitpunkt:** 2026-11-09T10:52:35+01:00 (Europe/Berlin).
+
+- Geschlossene Komponenten werden über exakte Grundform-Positionsgleichheit und orientierte Kanten-/Vertex-Fächer erkannt. Algebraisches Volumen mit komponentenlokalem Bezugspunkt und kompensierter Summe; starre Bewegung und Größenverhältnisse analytisch geprüft. Keine Änderung von Quelldaten.
+- Offene, entartete, ungültige, nicht-mannigfaltige oder inkonsistent orientierte Netze und verschwindende Referenzvolumen werden nicht als erfolgreiche Volumenmessung ausgegeben. Pose-Nahttrennung, ungültige Koordinaten, Orientierungsumkehr und Kollaps geprüft. Zwei getrennte Schalen mit sich rechnerisch aufhebenden Volumenänderungen erzeugen getrennte Warnungen.
+- Tatsächlicher geschlossener 180°-Hautprüffall: Ausgangsvolumenverhältnis 1/3. Lokale Korrektur verbessert die Dreiecksdehnung, das Volumen bleibt unter 0,8× und deshalb weiterhin auffällig. Zusätzlicher Fall hat ausschließlich eine Volumenwarnung; der automatische Auftrag kann ihn selbst auswählen und verbessern. Sämtliche Move-Stichproben werden weiterhin gegengeprüft.
+- Gemeinsamer Schutz verwirft Kandidaten bei erhöhten Grenzüberschreitungen oder Verlust messbarer Netzteile. Reine Volumenwarnungen erscheinen in Pose-/Move-Berichten und KI-Ausgaben. Neuer gerenderter Ablauf zeigt nach Übernahme weiterhin die Volumenwarnung bei null Dreiecksdehnungswarnungen, liefert dieselben KI-Messwerte und öffnet das auffällige Move-Bild. Sechs gezielte Chromium-Fälle bestanden. Aufnahme gesichtet: deutliche Einschnürung bleibt, daher keine Körperformfreigabe.
+
+- Lokal 421 Tests im Gesamtlauf bestanden; anschließend der hinzugefügte neunte Volumentest und betroffene Diagnose-/KI-/Editorfälle erfolgreich nachgeprüft (422 unterschiedliche Fälle insgesamt). TypeScript und Produktionsbuild bestanden; bekannte Bundle-Größenwarnung. Eine bytegenaue Originaldatei-Prüfung folgt zusätzlich in vollständiger CI.
+- Tatsächliche PaKaChi-Grundformen vermessen: Körper der Arbeitsform drei, Tierform elf geschlossene messbare Komponenten, jeweils Verhältnis 1. Fellkomponenten offen und nicht messbar. [Messabdeckung samt Modell-Hashes](benchmarks/studio-volume-2026-11-09.json). Keine neue Prüfung aller verformten Charakterhaltungen auf Volumenerhaltung.
+- Reale Gegenprobe mit weitreichendem Gewichtstransfer: 32 → 0 Dreieckswarnungen, aber Volumenverhältnis 0,3333 → 0,2972. Gemeinsame Gegenprüfung und lokale Suche verwerfen diese Variante. KI-Details priorisieren auffällige/große Netze vor der Begrenzung auf 32 Teilmodelle.
+
+**Verfahren und Grenzen:** Geschlossene Komponenten werden getrennt geschätzt; 0,8–1,2× ist eine feste technische Warnschwelle. Kein Selbstüberschneidungstest, keine Erkennung jeder lokalen Einschnürung, kein physikalischer Volumen- oder Anatomienachweis. Offene Fellflächen bleiben nicht messbar. Drei Radien, vier Gelenke und sechs lokale Transfers je Radius; unveränderte Stichproben-/Vertexbudgets. Keine Änderung der PaKaChi-GLBs oder ihrer CPU-Aufbereitung. [Fachlicher Bezug: CGAL, Volumen geschlossener Dreiecksnetze](https://doc.cgal.org/latest/Polygon_mesh_processing/group__PMP__measure__grp.html); eigene Implementierung ohne CGAL-Abhängigkeit.
+
 ## Version 0.92.0
 
 **Prüfzeitpunkt:** 2026-11-09T07:15:16+01:00 (Europe/Berlin).
@@ -75,6 +90,8 @@ Die jüngste Version steht zuerst. Für eine bestimmte Version die Dokumentglied
 **Grenzen:** Höchstens vier Gelenke, zwei Radien und sechs Transfers je Radius, 512 Ausgangsstichproben und 100 Millionen Vertex-Auswertungen je Auftrag. Eine Gewichtsübertragung je angebotener Änderung. Keine neue ungeriggte Anatomie, freie Mesh-Korrekturen, Kollisionen, Volumenfreigabe oder lückenlose Bewegungsgarantie. Kein echter Anbieter-/Caddy-/GPU-Lauf. PaKaChi-Geometrie und die charakterspezifische Aufbereitung bleiben auf dem vorherigen Stand.
 
 **CI-Vorgänger vollständig ausgewertet:** [Lauf 42539989715](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/42539989715), Commit `fe8ae105d84d35fc1d401dfdda84ebff78ffa9b8`: 404 Node-Tests, Build, 40 Browserfälle, drei Importmessungen und Artefakte erfolgreich. Frischer Pipelinehash und beide GLB-Hashes stimmen mit dem lokal validierten Modellstand überein. Neuer Lauf wird commitbezogen in PR #1 geprüft.
+
+**CI-Nachtrag:** [Lauf 42572232538](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/42572232538), Commit `b895bb84d475ccc770100264c688d6b7dc82d138`: 414 Node-Tests ohne Fehler, Abbrüche oder übersprungene Fälle; TypeScript/Produktionsbuild, alle 42 Chromium-Fälle (13,6 Minuten), drei Produktionsimportmessungen und Artefakte erfolgreich. Bytegenaue Prüfung von 83 Originaldateien einschließlich 72 Frames bestanden. Frischer Pipelinehash und beide GLB-Hashes entsprechen dem lokal validierten Charakterstand. Mika/256 Aufträge, Software-WebGL: 4.646,5 / 4.579,0 / 4.472,7 ms, Median 4.579,0 ms; keine kontrollierte Leistungsvergleichsmessung. Original-/Korrekturbilder gesichtet, Einschnürung bleibt; keine Volumen-/Anatomiefreigabe für diesen Stand.
 
 ## Version 0.91.0
 

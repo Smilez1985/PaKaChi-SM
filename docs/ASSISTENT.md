@@ -41,3 +41,10 @@ Beispiel: „Untersuche die Haut, suche selbst ein geeignetes Gelenk und prüfe 
 Das Werkzeug gibt einen begrenzten Messbericht und bei Erfolg einen konkreten Befehl `apply_skin_correction` mit nicht frei wählbarer Vorschlags-ID zurück. Das Modell darf diese ID nicht erfinden. Der Assistent zeigt Original-/Korrekturvorschau und bietet die gemessene Änderung zur einmaligen Übernahme an. Die KI-Schreibfreigabe sowie Sitzung und Revision werden bei der Übernahme erneut geprüft. Abbruch der laufenden Assistentenanfrage wird an die lokale Suche weitergegeben. Modellbytes bleiben lokal.
 
 Die Tests verwenden simulierte Werkzeugantworten der Anbieter bei tatsächlich ausgeführter lokaler Geometrieberechnung. Eine reale Anbieter-/Modellabnahme wird dadurch nicht behauptet. Die getrennte Rolle Rigging bleibt für künftige Fachadapter erhalten; dieser lokale Auftrag wird über den integrierten Assistenten koordiniert. [Ablauf und Grenzen](STUDIO.md#automatischer-korrekturauftrag-0920).
+
+
+### Ergänzte Messwerte (0.93.0)
+
+Der lokale Auftrag und `analyze_studio_surface` liefern neben Dreiecksdehnung eine komponentenweise algebraische Volumenschätzung geschlossener Netzteile: Verhältnisgrenzen 0,8–1,2, Warnungen und Messabdeckung. Offene Flächen gelten als nicht messbar. Kandidaten dürfen Grenzüberschreitungen nicht erhöhen oder bisherige Messbarkeit verlieren; auch reine Volumenwarnungen sind Suchziele. Der Übernahmevorschlag enthält kompakte Vorher-/Nachher-Werte je Teilmodell. Höchstens 32 Teilmodelle werden in Werkzeugdetails ausgegeben, priorisiert nach Auffälligkeiten und dann Dreieckszahl; die Gegenprüfung berücksichtigt alle.
+
+Die Schätzung ist kein Nachweis lokaler Volumenerhaltung, natürlicher Anatomie oder fehlender Selbstüberschneidungen. `unchecked` benennt diese Grenzen weiterhin. Eine Verbesserung kann verbleibende Warnungen enthalten. Die externen MCP-Werkzeuge werden hierdurch nicht erweitert; Diagnose und Suche laufen weiterhin im integrierten Assistenten beziehungsweise der lokalen Browser-API.

@@ -4,13 +4,16 @@ import type {Pose,ControlPoint,WeightRegion,Transform} from './studio-data.ts';
 import {MAX_WEIGHT_TRANSFERS,FIGURE_TRACK,neutralFigure} from './studio-data.ts';
 import {createPoseSurfaceChecker,neutralPoseValues,poseSurfacePositions} from './pose-surface-check.ts';
 import {transferSkinInfluences} from './studio-weight-transfer.ts';
+import {noVolumeRegression,volumeSeverity} from './surface-volume.ts';
 export type SurfaceReport=ReturnType<ReturnType<typeof createPoseSurfaceChecker>>;
 type Report=SurfaceReport;
 export interface WeightCorrectionProposal {from:string;to:string;amount:number;region:WeightRegion;poseId:string;before:Report;after:Report;affectedVertices:number;checkedPoses:number;intermediateSamples:number}
 /** Compare threshold excesses and counts. Ordinary motion within limits is allowed. */
 export function noMeasuredRegression(before:Report,after:Report){
- return before.meshes.every((b,i)=>{const a=after.meshes[i];return a.invalid===0&&a.compared===b.compared&&a.referenceDegenerate===b.referenceDegenerate&&a.issues<=b.issues&&a.stretched<=b.stretched&&a.compressed<=b.compressed&&a.collapsed<=b.collapsed&&Math.max(0,before.limits.minimumStretch-(a.minimumStretch??0))<=Math.max(0,before.limits.minimumStretch-(b.minimumStretch??0))+1e-6&&Math.max(0,(a.maximumStretch??0)-before.limits.maximumStretch)<=Math.max(0,(b.maximumStretch??0)-before.limits.maximumStretch)+1e-6;});
+ return before.meshes.length===after.meshes.length&&before.meshes.every((b,i)=>{const a=after.meshes[i];return a.invalid===0&&a.compared===b.compared&&a.referenceDegenerate===b.referenceDegenerate&&a.issues<=b.issues&&a.stretched<=b.stretched&&a.compressed<=b.compressed&&a.collapsed<=b.collapsed&&Math.max(0,before.limits.minimumStretch-(a.minimumStretch??0))<=Math.max(0,before.limits.minimumStretch-(b.minimumStretch??0))+1e-6&&Math.max(0,(a.maximumStretch??0)-before.limits.maximumStretch)<=Math.max(0,(b.maximumStretch??0)-before.limits.maximumStretch)+1e-6&&noVolumeRegression(b.volume,a.volume);});
 }
+/** Strain count first, then measured volume excess; unmeasurable volumes never count as fixed. */
+export function betterSurfaceReport(after:Report,before:Report){return after.issues<before.issues||after.issues===before.issues&&after.meshes.reduce((n,m)=>n+volumeSeverity(m.volume),0)<before.meshes.reduce((n,m)=>n+volumeSeverity(m.volume),0)-1e-6;}
 export function correctionSamples(rig:StudioRig,target:Pose){
  const rest=neutralPoseValues(rig),samples:Pose[]=[];
  for(const fraction of [.25,.5,.75]){
@@ -50,12 +53,12 @@ export async function searchWeightCorrection(rig:StudioRig,target:Pose,joint:Con
    const positions=poseSurfacePositions(rig,rest,i,overrides);if(positions.some((v,k)=>Math.abs(v-reference[i][k])>1e-6*Math.max(1,Math.abs(reference[i][k])))){preserved=false;break;}
   }
   if(!preserved)continue;
-  const after=inspect(target,overrides);if(after.issues>=before.issues||!noMeasuredRegression(before,after))continue;
+  const after=inspect(target,overrides);if(!betterSurfaceReport(after,before)||!noMeasuredRegression(before,after))continue;
   let safe=true;for(let i=0;i<poses.length;i++){
    await new Promise<void>(resolve=>setTimeout(resolve,0));ensure();if(!noMeasuredRegression(baselines[i],inspect(poses[i],overrides))){safe=false;break;}
   }
   const proposal={from:from.id,to:to.id,amount,region:structuredClone(region),poseId:target.id,before,after,affectedVertices,checkedPoses:rig.data.poses.length,intermediateSamples:3};
-  if(safe&&(!options.accept||await options.accept(proposal,overrides))&&(!best||after.issues<best.after.issues))best=proposal;
+  if(safe&&(!options.accept||await options.accept(proposal,overrides))&&(!best||betterSurfaceReport(after,best.after)))best=proposal;
  }
  ensure();return best;
 }

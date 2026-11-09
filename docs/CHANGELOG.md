@@ -14,6 +14,24 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 Noch keine weiteren Änderungen.
 
+## [0.93.0] - 2026-11-09
+
+Zeitstempel: 2026-11-09T10:52:35+01:00 (Europe/Berlin)
+
+### Added
+
+- Komponentenweise algebraische Volumenschätzung ergänzt die allgemeine Studio-Pose-/Move-Prüfung und KI-Messwerte. Nur geschlossene, konsistent orientierte Netzteile mit gültiger Referenz werden gemessen; offene Flächen und ungeeignete Topologie werden ausdrücklich als nicht messbar ausgewiesen. UV-/Normalennähte werden für die Prüfung exakt zusammengefasst, ohne Geometrie zu verändern; aufreißende Nähte verlieren ihre Messabdeckung.
+- Neue automatische Gegenprüfung verhindert erhöhte Volumen-Grenzüberschreitungen und den Verlust bisheriger Messbarkeit je Netzteil. Verschiedene Komponenten können ihre Abweichungen nicht gegenseitig aufheben. Reine Volumenwarnungen sind ebenfalls Suchziele. Kandidaten und KI-Berichte zeigen verbleibende Volumenwarnungen zusätzlich zu den Dreieckskennzahlen.
+- Analytische Tests für bekannte Volumen, starre Bewegung, kubische Skalierung, Orientierungsumkehr, Kollaps, offene/ungültige/nicht-mannigfaltige Netze, getrennte Schalen und Nahttrennung; geschlossener Haut-Prüffall samt tatsächlicher Gewichtssuche und Move-Gegenprüfung. Gerenderter Ablauf prüft verbleibende Volumenwarnungen nach verschwundener Dreiecksdehnungswarnung.
+
+### Changed
+
+- Automatische Suche prüft höchstens drei statt zwei Radien je Gelenk, einschließlich eines kleineren Einflussbereichs. Die bisherigen Auftragsbudgets und sechs lokalen Transfers je Radius bleiben erhalten. Übernahme überprüft dieselben zusätzlichen Messwerte; Undo und gespeicherte Posen/Moves bleiben erhalten.
+- Begrenzte KI-Diagnose priorisiert auffällige und große Teilmodelle, damit wichtige Körpernetze hinter vielen Anbauteilen sichtbar bleiben. Messabdeckung der tatsächlichen PaKaChi-Grundformen mit Modell-Hashes protokolliert.
+- Vollständige CI 0.92.0 ausgewertet: 414 Node-Tests, Produktionsbuild, alle 42 Chromium-Fälle und drei Importmessungen erfolgreich. Originaldateien sowie frischer Pipeline-/Modellstand bestätigt. [Nachweis](PRUEFUNG.md#version-0920).
+
+Die Volumengrenzen 0,8–1,2× sind technische Warnschwellen. Algebraische Volumen können Selbstüberschneidungen und lokale Einschnürungen verdecken; kein Volumenerhaltungs- oder Kollisionslöser und keine Anatomiefreigabe. PaKaChi-Modelle und charakterspezifische CPU-Aufbereitung bleiben unverändert.
+
 ## [0.92.0] - 2026-11-09
 
 Zeitstempel: 2026-11-09T07:15:16+01:00 (Europe/Berlin)
@@ -1928,3 +1946,5 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 [0.91.0]: PRUEFUNG.md#version-0910
 
 [0.92.0]: PRUEFUNG.md#version-0920
+
+[0.93.0]: PRUEFUNG.md#version-0930

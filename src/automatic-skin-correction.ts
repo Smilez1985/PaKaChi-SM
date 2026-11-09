@@ -5,7 +5,7 @@ import {createPoseSurfaceChecker} from './pose-surface-check.ts';
 import type {SkinOverrides} from './pose-surface-check.ts';
 import {moveCheckTimes} from './move-limit-check.ts';
 import {transferSkinInfluences} from './studio-weight-transfer.ts';
-import {searchWeightCorrection,noMeasuredRegression} from './pose-weight-correction.ts';
+import {searchWeightCorrection,noMeasuredRegression,betterSurfaceReport} from './pose-weight-correction.ts';
 import type {SurfaceReport,WeightCorrectionProposal} from './pose-weight-correction.ts';
 export const AUTOMATIC_SKIN_VERTEX_BUDGET=100_000_000;
 export const AUTOMATIC_SKIN_SAMPLE_LIMIT=512;
@@ -28,8 +28,9 @@ function transferOverrides(rig:StudioRig,from:ControlPoint,to:ControlPoint,amoun
 function correctionJoints(rig:StudioRig,report:SurfaceReport){
  const scores=new Map<ControlPoint,{score:number;distance:number}>();
  for(const m of report.meshes){const s=rig.surfaces[m.mesh],mesh=s.mesh;if(!(mesh instanceof T.SkinnedMesh))continue;const si=mesh.geometry.getAttribute('skinIndex'),sw=mesh.geometry.getAttribute('skinWeight');
-  for(const triangle of m.worst)for(let k=0;k<3;k++){
-   const v=mesh.geometry.index?.getX(triangle.triangle*3+k)??triangle.triangle*3+k;
+  const vertices=new Set(m.worst.flatMap(triangle=>[0,1,2].map(k=>mesh.geometry.index?.getX(triangle.triangle*3+k)??triangle.triangle*3+k)));
+  for(const c of m.volume.components)if(!m.worst.length&&(c.ratio===null||c.ratio<m.volume.limits.minimumRatio||c.ratio>m.volume.limits.maximumRatio))for(const v of c.sampleVertices)vertices.add(v);
+  for(const v of vertices){
    for(let influence=0;influence<4;influence++){
     const weight=sw.getComponent(v,influence);if(weight<=0)continue;const bone=mesh.skeleton.bones[si.getComponent(v,influence)],p=rig.data.points.find(p=>p.kind==='bone'&&rig.bones[p.bone!]===bone);
     if(!p||!rig.data.points.some(q=>q.kind==='bone'&&rig.bones[q.bone!]===bone.parent))continue;
@@ -55,18 +56,18 @@ export async function findAutomaticSkinCorrection(rig:StudioRig,signal:AbortSign
  const add=async(pose:Pose,origin:AutomaticSkinProposal['targetOrigin'])=>{await tick();measure();const before=inspect(pose);if(before.meshes.some(m=>m.invalid||!m.compared))throw Error('Oberfläche ist nicht vollständig auswertbar.');frames.push({pose,origin,before});state.samples++;};
  for(const p of rig.data.poses)await add(p,{kind:'pose',id:p.id});
  let motionSamples=0;for(const {move,times}of motions)for(const time of times){await add({id:'motion-sample',name:move.name,seconds:1,values:rig.sample(move,time)},{kind:'move',id:move.id,time});motionSamples++;}
- const target=frames.filter(f=>options.poseId===undefined||f.origin.kind==='pose'&&f.origin.id===options.poseId).sort((a,b)=>b.before.issues-a.before.issues)[0];
- if(!target||!target.before.issues){ensure();return null;}
+ const target=frames.filter(f=>options.poseId===undefined||f.origin.kind==='pose'&&f.origin.id===options.poseId).sort((a,b)=>betterSurfaceReport(a.before,b.before)?1:betterSurfaceReport(b.before,a.before)?-1:0)[0];
+ if(!target||target.before.status!=='outside'){ensure();return null;}
  const joints=correctionJoints(rig,target.before);let best:AutomaticSkinProposal|null=null;
  for(const {joint,radius}of joints){
   state.phase='search';state.joints++;await tick();
-  for(const chosenRadius of [...new Set(options.radius===undefined?[radius,Math.min(2,radius*2)]:[options.radius])]){
+  for(const chosenRadius of [...new Set(options.radius===undefined?[Math.max(.005,radius/2),radius,Math.min(2,radius*2)]:[options.radius])]){
   const proposal=await searchWeightCorrection(rig,target.pose,joint,chosenRadius,signal,valid,{measure,candidate:()=>{state.candidates++;},accept:async(_candidate,overrides)=>{
    state.phase='validation';
    for(const frame of frames){await tick();measure();if(!noMeasuredRegression(frame.before,inspect(frame.pose,overrides))){state.phase='search';return false;}}
    state.phase='search';return true;
   }});
-  if(proposal&&(!best||proposal.after.issues<best.after.issues))best={...proposal,target:structuredClone(target.pose),targetOrigin:{...target.origin},jointId:joint.id,motionSamples,checkedMoves:rig.data.moves.length,checkedJoints:state.joints,checkedCandidates:state.candidates};
+  if(proposal&&(!best||betterSurfaceReport(proposal.after,best.after)))best={...proposal,target:structuredClone(target.pose),targetOrigin:{...target.origin},jointId:joint.id,motionSamples,checkedMoves:rig.data.moves.length,checkedJoints:state.joints,checkedCandidates:state.candidates};
   }
  }
  ensure();if(best){best.checkedJoints=state.joints;best.checkedCandidates=state.candidates;}return best;

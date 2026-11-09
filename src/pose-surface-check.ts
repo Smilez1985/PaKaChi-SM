@@ -3,6 +3,7 @@ import type {StudioRig} from './studio-rig.ts';
 import {neutralFigure,FIGURE_TRACK} from './studio-data.ts';
 import type {Pose,Transform} from './studio-data.ts';
 import {checkSurfaceShape,SURFACE_LIMITS} from './surface-check.ts';
+import {createSurfaceVolumeChecker} from './surface-volume.ts';
 export type SkinOverrides=ReadonlyMap<number,{indices:T.BufferAttribute|T.InterleavedBufferAttribute;weights:T.BufferAttribute|T.InterleavedBufferAttribute}>;
 
 /** Evaluate the actual skinning equation without applying a pose to the live model. */
@@ -48,11 +49,12 @@ export function neutralPoseValues(rig:StudioRig):Record<string,Transform>{
   return {[FIGURE_TRACK]:neutralFigure(),...Object.fromEntries(rig.data.points.map(p=>[p.id,p.kind==='bone'?structuredClone(rig.data.boneRest[p.bone!]):{position:[...p.rest],rotation:[0,0,0,1]}]))};
 }
 export function createPoseSurfaceChecker(rig:StudioRig){
-  const rest=neutralPoseValues(rig),references=rig.surfaces.map((s,i)=>({name:s.mesh.name||`Mesh ${i+1}`,positions:poseSurfacePositions(rig,rest,i),index:s.mesh.geometry.index?.array??null}));
+  const rest=neutralPoseValues(rig),references=rig.surfaces.map((s,i)=>{const positions=poseSurfacePositions(rig,rest,i),index=s.mesh.geometry.index?.array??null;return {name:s.mesh.name||`Mesh ${i+1}`,positions,index,volume:createSurfaceVolumeChecker(positions,index)};});
   return (pose:Pose,overrides?:SkinOverrides)=>{
-    const meshes=references.map((r,i)=>({mesh:i,name:r.name,...checkSurfaceShape(r.positions,poseSurfacePositions(rig,pose.values,i,overrides),r.index)}));
+    const meshes=references.map((r,i)=>{const positions=poseSurfacePositions(rig,pose.values,i,overrides);return {mesh:i,name:r.name,...checkSurfaceShape(r.positions,positions,r.index),volume:r.volume(positions)};});
     const issues=meshes.reduce((sum,m)=>sum+m.issues,0),compared=meshes.reduce((sum,m)=>sum+m.compared,0),referenceDegenerate=meshes.reduce((sum,m)=>sum+m.referenceDegenerate,0);
-    return {poseId:pose.id,status:issues?'outside' as const:compared?'within' as const:'unmeasurable' as const,issues,compared,referenceDegenerate,limits:{...SURFACE_LIMITS},meshes};
+    const volumeIssues=meshes.reduce((n,m)=>n+m.volume.issues,0);
+    return {poseId:pose.id,status:issues||volumeIssues?'outside' as const:compared?'within' as const:'unmeasurable' as const,issues,volumeIssues,compared,referenceDegenerate,limits:{...SURFACE_LIMITS},meshes};
   };
 }
 export function checkPoseSurface(rig:StudioRig,pose:Pose){return createPoseSurfaceChecker(rig)(pose);}

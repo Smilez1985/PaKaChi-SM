@@ -3,9 +3,9 @@ import {readFile} from 'node:fs/promises';
 import {twistFixture} from '../helpers/twist-fixture.ts';
 import {exportRiggedFigureGLB} from '../../src/figure-glb.ts';
 
-async function projectFixture(){
+async function projectFixture(closed=false){
  class Reader{result:ArrayBuffer|null=null;onloadend:(()=>void)|null=null;readAsArrayBuffer(blob:Blob){void blob.arrayBuffer().then(value=>{this.result=value;this.onloadend?.();});}}
- const reader=globalThis.FileReader;Object.assign(globalThis,{FileReader:Reader});const f=twistFixture(true);let glb:ArrayBuffer;
+ const reader=globalThis.FileReader;Object.assign(globalThis,{FileReader:Reader});const f=twistFixture(true,closed);let glb:ArrayBuffer;
  try{glb=await exportRiggedFigureGLB(f.root);}finally{Object.assign(globalThis,{FileReader:reader});}f.rig.data.moves[0].loop=true;
  const project={format:'pakachi-studio',version:1,model:Buffer.from(glb).toString('base64'),avatar:{id:'automatic-skin',name:'Automatic skin',description:'Test fixture',moves:[]},studio:structuredClone(f.rig.data)};f.rig.dispose();return project;
 }
@@ -31,4 +31,13 @@ test('integrated assistant delegates a real local repair job and offers the meas
  });
  await page.locator('.assistant-panel > summary').click();await page.locator('#assistant-prompt').fill('Haut automatisch korrigieren und alle eigenen Moves gegenprüfen.');await page.locator('#assistant-send').click();await expect(page.locator('#assistant-apply')).toBeVisible();expect(requests).toBe(3);expect((await page.evaluate(()=>window.PaKaChiSM.call('get_studio') as any)).revision).toBe(before.revision);
  await page.locator('[data-skin-preview="original"]').click();await page.locator('[data-skin-preview="corrected"]').click();await page.locator('#assistant-apply').click();expect((await page.evaluate(()=>window.PaKaChiSM.call('get_studio') as any)).revision).toBe(before.revision+1);await expect(page.locator('#assistant-apply')).toBeHidden();await page.locator('#studio-undo').click();expect((await page.evaluate(()=>window.PaKaChiSM.call('get_studio') as any)).revision).toBe(before.revision+2);expect(errors).toEqual([]);
+});
+
+test('closed skin keeps volume warnings visible after a strain improvement and exposes the same bounds to KI',async({page})=>{
+ const project=await projectFixture(true);await page.goto('/');await page.locator('#project-file').setInputFiles({name:'closed-skin.pakachi.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(project))});await expect(page.locator('#message')).toContainText('Automatic skin bereit');await page.locator('#studio-tab').click();
+ const info=()=>page.evaluate(()=>window.PaKaChiSM.call('get_studio') as any),before=await info();await page.locator('#pose-list').selectOption('twist');await page.locator('#pose-check-surface').click();await expect(page.locator('#pose-surface-result')).toContainText('Volumenschätzung: min 0.333');
+ await page.locator('#skin-auto-start').click();await expect(page.locator('#skin-auto-apply')).toBeEnabled();const p=(await info()).automaticSkinCorrection;expect(p.afterIssues).toBe(0);expect(p.afterVolumeIssues).toBe(1);expect(p.volume[0].after.minimumRatio).toBeGreaterThan(p.volume[0].before.minimumRatio);expect(p.volume[0].after.minimumRatio).toBeLessThan(.8);expect(p.volume[0].after.selfIntersectionsChecked).toBe(false);expect(p.volume[0].after.measuredComponents).toBe(1);expect((await info()).revision).toBe(before.revision);
+ await page.locator('#skin-auto-preview').click();await page.locator('#viewport canvas').screenshot({path:'test-results/closed-skin-volume-candidate.png'});await page.locator('#skin-auto-apply').click();await page.locator('#pose-check-surface').click();await expect(page.locator('#pose-surface-result')).toContainText('Auffällige');await expect(page.locator('#pose-surface-result')).toContainText('0 / 96');
+ const measured=await page.evaluate(async()=>{const s=window.PaKaChiSM.call('get_studio') as any;return await window.PaKaChiSM.call('analyze_studio_surface',{session:s.session,expectedRevision:s.revision,kind:'pose',id:'twist'}) as any;});expect(measured.maximumIssues).toBe(0);expect(measured.maximumVolumeIssues).toBe(1);expect(measured.meshes[0].volume.minimumMeasuredComponents).toBe(1);expect(measured.unchecked).toContain('self-intersections');
+ await page.locator('#move-check-surface').click();await expect(page.locator('#move-surface-result')).toContainText('Volumenschätzung: 1 auffällig');await page.locator('#move-surface-result button').first().click();await expect(page.locator('#move-inspect-save')).toBeVisible();
 });

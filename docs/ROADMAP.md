@@ -1,16 +1,16 @@
 # Roadmap – offene Aufgaben
 
-**Entwicklungsstand: 0.92.0 · Abgleich: 09.11.2026.** Teil der [Blaupause](README.md).
+**Entwicklungsstand: 0.93.0 · Abgleich: 09.11.2026.** Teil der [Blaupause](README.md).
 
 Diese Roadmap enthält offene Umsetzung und ausstehende Abnahme. Erledigte Änderungen stehen nach Version im [Changelog](CHANGELOG.md); Nachweise und Grenzen im [Prüfstand](PRUEFUNG.md). Eine implementierte Funktion ist nicht automatisch manuell oder mit realen Anbietern abgenommen.
 
 ## Übergabe und nächster Schritt
 
-**Übergabe aktualisiert:** 2026-11-09T07:15:16+01:00 (Europe/Berlin). Softwarestand **0.92.0**.
+**Übergabe aktualisiert:** 2026-11-09T10:52:35+01:00 (Europe/Berlin). Softwarestand **0.93.0**.
 
 - **Arbeitsbranch:** `work/local-verification-model-zoo`, [Entwurfs-PR #1](https://github.com/Smilez1985/PaKaChi-SM/pull/1); noch nicht nach `main` zusammengeführt.
-- **Neue Grundlage:** Automatischer lokaler Hautkorrekturauftrag: Diagnose, Gelenkauswahl aus der tatsächlichen Haut, begrenzte Suche, Gegenprüfung sämtlicher gespeicherter Posen und eigener Move-Stichproben, Original-/Korrekturvorschau und einmalige Undo-fähige Übernahme. Aufruf durch integrierten KI-Assistenten möglich. [Prüfbericht](PRUEFUNG.md#version-0920).
-- **Nächste Aktion:** Kandidaten über lokale Gewichtsübertragungen hinaus erzeugen: geprüfte Korrekturformen und bessere Schulter-/Hüftverformung; Volumen, Silhouette und Selbstüberschneidungen in die Gegenprüfung aufnehmen. Mehrere abgestimmte Korrekturen pro Auftrag und adaptive Zwischenbildprüfung ergänzen. Der bestehende Auftrag bleibt begrenzt und darf bei fehlender Verbesserung ablehnen. Fachadapter der Rigging-Rolle und externe MCP-Suche anschließend anbinden.
+- **Neue Grundlage:** Automatischer lokaler Hautkorrekturauftrag: Diagnose, Gelenkauswahl aus der tatsächlichen Haut, begrenzte Suche, Gegenprüfung sämtlicher gespeicherter Posen und eigener Move-Stichproben, Original-/Korrekturvorschau und einmalige Undo-fähige Übernahme. Zusätzlich komponentenweise Volumenschätzung geschlossener Netze mit messwertgebundener Gegenprüfung; offene Flächen bleiben nicht messbar. Aufruf durch integrierten KI-Assistenten möglich. [Prüfbericht](PRUEFUNG.md#version-0920).
+- **Nächste Aktion:** Kandidaten über lokale Gewichtsübertragungen hinaus erzeugen: geprüfte Korrekturformen und bessere Schulter-/Hüftverformung; Lokale Volumenerhaltung, Silhouette und Selbstüberschneidungen in die Gegenprüfung aufnehmen; die neue globale Schätzung allein erkennt nicht jede lokale Einschnürung. Mehrere abgestimmte Korrekturen pro Auftrag und adaptive Zwischenbildprüfung ergänzen. Der bestehende Auftrag bleibt begrenzt und darf bei fehlender Verbesserung ablehnen. Fachadapter der Rigging-Rolle und externe MCP-Suche anschließend anbinden.
 - **Charakterstand:** 21 akzeptierte Korrekturhaltungen der Arbeitsform (fünf zusätzliche linke Hüfthaltungen), 11 der Tierform. Schulterkandidaten und weitere Hüftkandidaten bleiben nach den Messungen verworfen; die zugrunde liegenden Fehler bestehen weiter.
 - **Danach:** Eine gespeicherte Standard-Verwandlung auf dieser Oberfläche, vorwärts und rückwärts mit identischen Zwischenformen; Qualität auch zwischen den Endposen prüfen.
 - **Hardware parallel:** Die [fünf Verbindungsschritte](LOKALE-WERKZEUGE.md#verbindung-zu-deinem-rechner) bleiben verfügbar. Windows-/Caddy-/GPU-Abnahme ist offen, blockiert die CPU-basierte Charakter-/Rigarbeit jedoch nicht. Ein tatsächlicher externer Aufruf von `local_get_status` bleibt der erste Verbindungsnachweis.
@@ -64,7 +64,7 @@ Die Umsetzung des integrierten MCP-Arbeitsplatzes, der Caddy-/DuckDNS-Konfigurat
 - [ ] Anatomische Gelenkketten aus ungeriggter Oberfläche erzeugen; allgemeine Dreh-/Twistgrenzen, fixierte Füße und gekoppelte Ganzkörper-IK ergänzen.
 - [ ] Beugegrenzen, Posen- und Bewegungsprüfung samt Prüfbildübernahme im gerenderten Studio abnehmen; lückenlose Bewegungsprüfung, direkte Drehgrenzen und Korrekturen ergänzen.
 - [ ] Bewegungsfähige Rigs unterschiedlicher Körperformen systematisch prüfen.
-- [ ] Die seit 0.87.0 vorhandene Dreiecks-Dehnungsprüfung einzelner Posen um Zwischenbilder, Selbstüberschneidung, Volumen-/Orientierungsprüfung und Referenzansichten erweitern; die seit 0.88.0 begrenzte Gewichtssuche und die seit 0.91.0 auf Ellenbogen und Knie erweiterten Korrekturformen um weitere Gelenke, durchgehende kombinierte Bewegungen und charakterbezogene Qualitätskriterien ergänzen. Die aktuellen Warnschwellen sind keine anatomische Abnahme.
+- [ ] Die seit 0.87.0 vorhandene Dreiecks-Dehnungsprüfung einzelner Posen nach der Move-Stichprobenprüfung und komponentenweisen Volumenschätzung um adaptive Zwischenbilder, Selbstüberschneidung, lokale Volumenerhaltung und Referenzansichten erweitern; die seit 0.88.0 begrenzte Gewichtssuche und die seit 0.91.0 auf Ellenbogen und Knie erweiterten Korrekturformen um weitere Gelenke, durchgehende kombinierte Bewegungen und charakterbezogene Qualitätskriterien ergänzen. Die aktuellen Warnschwellen sind keine anatomische Abnahme.
 
 ## 5. Bild zu 3D und KI-Korrektur
 
