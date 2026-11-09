@@ -1,0 +1,1914 @@
+{
+  "format": "pakachi-standing-frame-evidence",
+  "version": 1,
+  "date": "2026-11-10",
+  "measuredAt": "2026-11-09T23:03:49.325Z",
+  "runtimeSourcesSha256": "acf953cd3161c0f2f8e59de380c1feefbead7922409a539c61a106ac8c4b3ad9",
+  "evaluationLandmarksSha256": "aaa6923a8fa564eb22ebc240126c3b0b080a952c36731e13a29d1a9b98ce4242",
+  "scope": "Six initial-rig variants on existing CPU reconstruction drafts. No new inference. Generic occupancy estimator; character landmarks used only to evaluate placement. Probes remain independent 30-degree bends, not anatomy/collision/move approval. Bounds and support use identical probe rotations per template.",
+  "runs": [
+    {
+      "form": "humanoid",
+      "template": "biped",
+      "mode": "bounds",
+      "source": "public/model-zoo/pakachi-drafts/humanoid.glb",
+      "sha256": "debb9c4793368bff6989f41b2a40eba3e4ef6a6100aaf3858abe51117a174d14",
+      "report": {
+        "template": "biped",
+        "bones": 21,
+        "meshes": 1,
+        "vertices": 50870,
+        "method": "proportional-template",
+        "review": "required",
+        "frame": {
+          "mode": "bounds",
+          "reason": "manual-bounds",
+          "center": [
+            -0.01589834690093994,
+            0.013261988759040833,
+            0.05301821231842041
+          ],
+          "right": [
+            1,
+            0,
+            0
+          ],
+          "forward": [
+            0,
+            0,
+            1
+          ],
+          "width": 0.9372127056121826,
+          "depth": 0.5269479751586914,
+          "height": 1.0008727014064789,
+          "floor": -0.4871743619441986,
+          "supports": []
+        }
+      },
+      "seconds": 1.0239074659999998,
+      "neutralMaximumDisplacement": 2.6618550595937584e-8,
+      "placement": {
+        "count": 16,
+        "rmsDistance": 0.28902395510571105,
+        "joints": [
+          {
+            "joint": "LeftShoulder",
+            "reference": [
+              0.325,
+              0.145,
+              0.075
+            ],
+            "actual": [
+              0.15279994010925294,
+              0.2334539830684662,
+              0.05301821231842041
+            ],
+            "distance": 0.19483368994281106
+          },
+          {
+            "joint": "LeftElbow",
+            "reference": [
+              0.355,
+              -0.005,
+              0.08
+            ],
+            "actual": [
+              0.26526546478271484,
+              0.08332307785749427,
+              0.05301821231842041
+            ],
+            "distance": 0.12876827932133372
+          },
+          {
+            "joint": "LeftWrist",
+            "reference": [
+              0.4,
+              -0.155,
+              0.042
+            ],
+            "actual": [
+              0.3589867353439331,
+              -0.07681655436754231,
+              0.05301821231842041
+            ],
+            "distance": 0.0889726927287572
+          },
+          {
+            "joint": "LeftHand",
+            "reference": [
+              0.405,
+              -0.195,
+              0.049
+            ],
+            "actual": [
+              0.3964752435684204,
+              -0.136868916451931,
+              0.05301821231842041
+            ],
+            "distance": 0.058890070274420996
+          },
+          {
+            "joint": "RightShoulder",
+            "reference": [
+              0.105,
+              0.145,
+              0.08
+            ],
+            "actual": [
+              -0.18459663391113282,
+              0.2334539830684662,
+              0.05301821231842041
+            ],
+            "distance": 0.3040038393833687
+          },
+          {
+            "joint": "RightElbow",
+            "reference": [
+              0.085,
+              -0.005,
+              0.1
+            ],
+            "actual": [
+              -0.2970621585845947,
+              0.08332307785749427,
+              0.05301821231842041
+            ],
+            "distance": 0.39494271417295196
+          },
+          {
+            "joint": "RightWrist",
+            "reference": [
+              0.095,
+              -0.155,
+              0.19
+            ],
+            "actual": [
+              -0.390783429145813,
+              -0.07681655436754231,
+              0.05301821231842041
+            ],
+            "distance": 0.5107467095929937
+          },
+          {
+            "joint": "RightHand",
+            "reference": [
+              0.095,
+              -0.195,
+              0.19
+            ],
+            "actual": [
+              -0.4282719373703003,
+              -0.136868916451931,
+              0.05301821231842041
+            ],
+            "distance": 0.5440190745462712
+          },
+          {
+            "joint": "LeftHip",
+            "reference": [
+              0.3,
+              -0.115,
+              0.065
+            ],
+            "actual": [
+              0.07782292366027832,
+              -0.02677291929721831,
+              0.05301821231842041
+            ],
+            "distance": 0.2393537847126051
+          },
+          {
+            "joint": "LeftKnee",
+            "reference": [
+              0.305,
+              -0.28,
+              0.095
+            ],
+            "actual": [
+              0.09656717777252197,
+              -0.2269474595785141,
+              0.06355717182159423
+            ],
+            "distance": 0.21736481976332234
+          },
+          {
+            "joint": "LeftAnkle",
+            "reference": [
+              0.295,
+              -0.4,
+              0.165
+            ],
+            "actual": [
+              0.1059393048286438,
+              -0.41711327284574506,
+              0.05301821231842041
+            ],
+            "distance": 0.22040129613623363
+          },
+          {
+            "joint": "LeftFoot",
+            "reference": [
+              0.3,
+              -0.445,
+              0.17
+            ],
+            "actual": [
+              0.1059393048286438,
+              -0.44713945388793946,
+              0.17948572635650634
+            ],
+            "distance": 0.19430416793738411
+          },
+          {
+            "joint": "RightHip",
+            "reference": [
+              0.13,
+              -0.115,
+              0.065
+            ],
+            "actual": [
+              -0.1096196174621582,
+              -0.02677291929721831,
+              0.05301821231842041
+            ],
+            "distance": 0.2556269588249499
+          },
+          {
+            "joint": "RightKnee",
+            "reference": [
+              0.12,
+              -0.28,
+              0.095
+            ],
+            "actual": [
+              -0.12836387157440185,
+              -0.2269474595785141,
+              0.06355717182159423
+            ],
+            "distance": 0.255905912773535
+          },
+          {
+            "joint": "RightAnkle",
+            "reference": [
+              0.105,
+              -0.4,
+              0.21
+            ],
+            "actual": [
+              -0.1377359986305237,
+              -0.41711327284574506,
+              0.05301821231842041
+            ],
+            "distance": 0.28958057739143184
+          },
+          {
+            "joint": "RightFoot",
+            "reference": [
+              0.105,
+              -0.445,
+              0.21
+            ],
+            "actual": [
+              -0.1377359986305237,
+              -0.44713945388793946,
+              0.17948572635650634
+            ],
+            "distance": 0.24465580555156716
+          }
+        ]
+      },
+      "probes": [
+        {
+          "joint": "LeftElbow",
+          "axis": "X",
+          "degrees": 30,
+          "status": "outside",
+          "surfaceIssues": 1044,
+          "volumeIssues": 0,
+          "unmeasurableVolumeComponents": 2
+        },
+        {
+          "joint": "LeftKnee",
+          "axis": "X",
+          "degrees": 30,
+          "status": "outside",
+          "surfaceIssues": 493,
+          "volumeIssues": 0,
+          "unmeasurableVolumeComponents": 2
+        },
+        {
+          "joint": "RightElbow",
+          "axis": "X",
+          "degrees": 30,
+          "status": "outside",
+          "surfaceIssues": 569,
+          "volumeIssues": 0,
+          "unmeasurableVolumeComponents": 2
+        },
+        {
+          "joint": "RightKnee",
+          "axis": "X",
+          "degrees": 30,
+          "status": "outside",
+          "surfaceIssues": 394,
+          "volumeIssues": 0,
+          "unmeasurableVolumeComponents": 2
+        }
+      ]
+    },
+    {
+      "form": "humanoid",
+      "template": "biped",
+      "mode": "support",
+      "source": "public/model-zoo/pakachi-drafts/humanoid.glb",
+      "sha256": "debb9c4793368bff6989f41b2a40eba3e4ef6a6100aaf3858abe51117a174d14",
+      "report": {
+        "template": "biped",
+        "bones": 21,
+        "meshes": 1,
+        "vertices": 50870,
+        "method": "proportional-template",
+        "review": "required",
+        "frame": {
+          "mode": "support",
+          "reason": "separated-supports",
+          "center": [
+            0.18676036502464866,
+            0.013261988759040833,
+            0.10195597594138912
+          ],
+          "right": [
+            0.978965921631512,
+            0,
+            -0.20402383263767152
+          ],
+          "forward": [
+            0.20402383263767152,
+            0,
+            0.978965921631512
+          ],
+          "width": 0.7751315824184026,
+          "depth": 0.5269479751586914,
+          "height": 1.0008727014064789,
+          "floor": -0.4871743619441986,
+          "supports": [
+            [
+              0.10588411519722653,
+              -0.43713072687387466,
+              0.20778681435297394
+            ],
+            [
+              0.3031792402288867,
+              -0.43713072687387466,
+              0.16666903212966247
+            ]
+          ]
+        }
+      },
+      "seconds": 0.8762826629999999,
+      "neutralMaximumDisplacement": 2.677226705080042e-8,
+      "placement": {
+        "count": 16,
+        "rmsDistance": 0.12345223869422858,
+        "joints": [
+          {
+            "joint": "LeftShoulder",
+            "reference": [
+              0.325,
+              0.145,
+              0.075
+            ],
+            "actual": [
+              0.32334929773887494,
+              0.2334539830684662,
+              0.0734898190175581
+            ],
+            "distance": 0.08848227271737047
+          },
+          {
+            "joint": "LeftElbow",
+            "reference": [
+              0.355,
+              -0.005,
+              0.08
+            ],
+            "actual": [
+              0.4144085862150258,
+              0.08332307785749427,
+              0.054512381068337425
+            ],
+            "distance": 0.10945302607554894
+          },
+          {
+            "joint": "LeftWrist",
+            "reference": [
+              0.4,
+              -0.155,
+              0.042
+            ],
+            "actual": [
+              0.4902913266118182,
+              -0.07681655436754231,
+              0.038697849443986854
+            ],
+            "distance": 0.11948254697059343
+          },
+          {
+            "joint": "LeftHand",
+            "reference": [
+              0.405,
+              -0.195,
+              0.049
+            ],
+            "actual": [
+              0.5206444227705351,
+              -0.136868916451931,
+              0.032372036794246634
+            ],
+            "distance": 0.13049653080743076
+          },
+          {
+            "joint": "RightShoulder",
+            "reference": [
+              0.105,
+              0.145,
+              0.08
+            ],
+            "actual": [
+              0.05017143231042237,
+              0.2334539830684662,
+              0.13042213286522014
+            ],
+            "distance": 0.11564026304987816
+          },
+          {
+            "joint": "RightElbow",
+            "reference": [
+              0.085,
+              -0.005,
+              0.1
+            ],
+            "actual": [
+              -0.04088785616572849,
+              0.08332307785749427,
+              0.14939957081444083
+            ],
+            "distance": 0.1615210079490439
+          },
+          {
+            "joint": "RightWrist",
+            "reference": [
+              0.095,
+              -0.155,
+              0.19
+            ],
+            "actual": [
+              -0.11677059656252087,
+              -0.07681655436754231,
+              0.1652141024387914
+            ],
+            "distance": 0.2270986073434273
+          },
+          {
+            "joint": "RightHand",
+            "reference": [
+              0.095,
+              -0.195,
+              0.19
+            ],
+            "actual": [
+              -0.14712369272123782,
+              -0.136868916451931,
+              0.1715399150885316
+            ],
+            "distance": 0.2496875651416778
+          },
+          {
+            "joint": "LeftHip",
+            "reference": [
+              0.3,
+              -0.115,
+              0.065
+            ],
+            "actual": [
+              0.26264310542144104,
+              -0.02677291929721831,
+              0.08614144431703856
+            ],
+            "distance": 0.098114810348383
+          },
+          {
+            "joint": "LeftKnee",
+            "reference": [
+              0.305,
+              -0.28,
+              0.095
+            ],
+            "actual": [
+              0.2910488239963758,
+              -0.2269474595785141,
+              0.15405440233597723
+            ],
+            "distance": 0.08060167363223279
+          },
+          {
+            "joint": "LeftAnkle",
+            "reference": [
+              0.295,
+              -0.4,
+              0.165
+            ],
+            "actual": [
+              0.3031792402288867,
+              -0.3970958188176155,
+              0.16666903212966247
+            ],
+            "distance": 0.008838546674188055
+          },
+          {
+            "joint": "LeftFoot",
+            "reference": [
+              0.3,
+              -0.445,
+              0.17
+            ],
+            "actual": [
+              0.3031792402288867,
+              -0.44713945388793946,
+              0.16666903212966247
+            ],
+            "distance": 0.005077418470523376
+          },
+          {
+            "joint": "RightHip",
+            "reference": [
+              0.13,
+              -0.115,
+              0.065
+            ],
+            "actual": [
+              0.11087762462785627,
+              -0.02677291929721831,
+              0.11777050756573969
+            ],
+            "distance": 0.10456772675139359
+          },
+          {
+            "joint": "RightKnee",
+            "reference": [
+              0.12,
+              -0.28,
+              0.095
+            ],
+            "actual": [
+              0.11196555665994581,
+              -0.2269474595785141,
+              0.19137669696944454
+            ],
+            "distance": 0.11030680869147688
+          },
+          {
+            "joint": "RightAnkle",
+            "reference": [
+              0.105,
+              -0.4,
+              0.21
+            ],
+            "actual": [
+              0.10588411519722653,
+              -0.3970958188176155,
+              0.20778681435297394
+            ],
+            "distance": 0.0037568761931004954
+          },
+          {
+            "joint": "RightFoot",
+            "reference": [
+              0.105,
+              -0.445,
+              0.21
+            ],
+            "actual": [
+              0.10588411519722653,
+              -0.44713945388793946,
+              0.20778681435297394
+            ],
+            "distance": 0.003202672841360523
+          }
+        ]
+      },
+      "probes": [
+        {
+          "joint": "LeftElbow",
+          "axis": "X",
+          "degrees": 30,
+          "status": "outside",
+          "surfaceIssues": 91,
+          "volumeIssues": 0,
+          "unmeasurableVolumeComponents": 2
+        },
+        {
+          "joint": "LeftKnee",
+          "axis": "X",
+          "degrees": 30,
+          "status": "outside",
+          "surfaceIssues": 122,
+          "volumeIssues": 0,
+          "unmeasurableVolumeComponents": 2
+        },
+        {
+          "joint": "RightElbow",
+          "axis": "X",
+          "degrees": 30,
+          "status": "outside",
+          "surfaceIssues": 821,
+          "volumeIssues": 0,
+          "unmeasurableVolumeComponents": 2
+        },
+        {
+          "joint": "RightKnee",
+          "axis": "X",
+          "degrees": 30,
+          "status": "outside",
+          "surfaceIssues": 771,
+          "volumeIssues": 0,
+          "unmeasurableVolumeComponents": 2
+        }
+      ]
+    },
+    {
+      "form": "humanoid",
+      "template": "biped-relaxed",
+      "mode": "bounds",
+      "source": "public/model-zoo/pakachi-drafts/humanoid.glb",
+      "sha256": "debb9c4793368bff6989f41b2a40eba3e4ef6a6100aaf3858abe51117a174d14",
+      "report": {
+        "template": "biped-relaxed",
+        "bones": 21,
+        "meshes": 1,
+        "vertices": 50870,
+        "method": "proportional-template",
+        "review": "required",
+        "frame": {
+          "mode": "bounds",
+          "reason": "manual-bounds",
+          "center": [
+            -0.01589834690093994,
+            0.013261988759040833,
+            0.05301821231842041
+          ],
+          "right": [
+            1,
+            0,
+            0
+          ],
+          "forward": [
+            0,
+            0,
+            1
+          ],
+          "width": 0.9372127056121826,
+          "depth": 0.5269479751586914,
+          "height": 1.0008727014064789,
+          "floor": -0.4871743619441986,
+          "supports": []
+        }
+      },
+      "seconds": 0.748526676,
+      "neutralMaximumDisplacement": 2.443809087176414e-8,
+      "placement": {
+        "count": 16,
+        "rmsDistance": 0.2604888727806235,
+        "joints": [
+          {
+            "joint": "LeftShoulder",
+            "reference": [
+              0.325,
+              0.145,
+              0.075
+            ],
+            "actual": [
+              0.15279994010925294,
+              0.2334539830684662,
+              0.05301821231842041
+            ],
+            "distance": 0.19483368994281106
+          },
+          {
+            "joint": "LeftElbow",
+            "reference": [
+              0.355,
+              -0.005,
+              0.08
+            ],
+            "actual": [
+              0.17154419422149658,
+              0.08332307785749427,
+              0.05301821231842041
+            ],
+            "distance": 0.20538991119953967
+          },
+          {
+            "joint": "LeftWrist",
+            "reference": [
+              0.4,
+              -0.155,
+              0.042
+            ],
+            "actual": [
+              0.19966057538986207,
+              -0.07681655436754231,
+              0.05301821231842041
+            ],
+            "distance": 0.2153367995182858
+          },
+          {
+            "joint": "LeftHand",
+            "reference": [
+              0.405,
+              -0.195,
+              0.049
+            ],
+            "actual": [
+              0.20903270244598388,
+              -0.136868916451931,
+              0.05301821231842041
+            ],
+            "distance": 0.2044469383858139
+          },
+          {
+            "joint": "RightShoulder",
+            "reference": [
+              0.105,
+              0.145,
+              0.08
+            ],
+            "actual": [
+              -0.18459663391113282,
+              0.2334539830684662,
+              0.05301821231842041
+            ],
+            "distance": 0.3040038393833687
+          },
+          {
+            "joint": "RightElbow",
+            "reference": [
+              0.085,
+              -0.005,
+              0.1
+            ],
+            "actual": [
+              -0.20334088802337646,
+              0.08332307785749427,
+              0.05301821231842041
+            ],
+            "distance": 0.3052027558232189
+          },
+          {
+            "joint": "RightWrist",
+            "reference": [
+              0.095,
+              -0.155,
+              0.19
+            ],
+            "actual": [
+              -0.23145726919174195,
+              -0.07681655436754231,
+              0.05301821231842041
+            ],
+            "distance": 0.3625617325856857
+          },
+          {
+            "joint": "RightHand",
+            "reference": [
+              0.095,
+              -0.195,
+              0.19
+            ],
+            "actual": [
+              -0.24082939624786376,
+              -0.136868916451931,
+              0.05301821231842041
+            ],
+            "distance": 0.3673208630272975
+          },
+          {
+            "joint": "LeftHip",
+            "reference": [
+              0.3,
+              -0.115,
+              0.065
+            ],
+            "actual": [
+              0.07782292366027832,
+              -0.02677291929721831,
+              0.05301821231842041
+            ],
+            "distance": 0.2393537847126051
+          },
+          {
+            "joint": "LeftKnee",
+            "reference": [
+              0.305,
+              -0.28,
+              0.095
+            ],
+            "actual": [
+              0.09656717777252197,
+              -0.2269474595785141,
+              0.06355717182159423
+            ],
+            "distance": 0.21736481976332234
+          },
+          {
+            "joint": "LeftAnkle",
+            "reference": [
+              0.295,
+              -0.4,
+              0.165
+            ],
+            "actual": [
+              0.1059393048286438,
+              -0.41711327284574506,
+              0.05301821231842041
+            ],
+            "distance": 0.22040129613623363
+          },
+          {
+            "joint": "LeftFoot",
+            "reference": [
+              0.3,
+              -0.445,
+              0.17
+            ],
+            "actual": [
+              0.1059393048286438,
+              -0.44713945388793946,
+              0.17948572635650634
+            ],
+            "distance": 0.19430416793738411
+          },
+          {
+            "joint": "RightHip",
+            "reference": [
+              0.13,
+              -0.115,
+              0.065
+            ],
+            "actual": [
+              -0.1096196174621582,
+              -0.02677291929721831,
+              0.05301821231842041
+            ],
+            "distance": 0.2556269588249499
+          },
+          {
+            "joint": "RightKnee",
+            "reference": [
+              0.12,
+              -0.28,
+              0.095
+            ],
+            "actual": [
+              -0.12836387157440185,
+              -0.2269474595785141,
+              0.06355717182159423
+            ],
+            "distance": 0.255905912773535
+          },
+          {
+            "joint": "RightAnkle",
+            "reference": [
+              0.105,
+              -0.4,
+              0.21
+            ],
+            "actual": [
+              -0.1377359986305237,
+              -0.41711327284574506,
+              0.05301821231842041
+            ],
+            "distance": 0.28958057739143184
+          },
+          {
+            "joint": "RightFoot",
+            "reference": [
+              0.105,
+              -0.445,
+              0.21
+            ],
+            "actual": [
+              -0.1377359986305237,
+              -0.44713945388793946,
+              0.17948572635650634
+            ],
+            "distance": 0.24465580555156716
+          }
+        ]
+      },
+      "probes": [
+        {
+          "joint": "LeftElbow",
+          "axis": "X",
+          "degrees": 30,
+          "status": "outside",
+          "surfaceIssues": 1160,
+          "volumeIssues": 1,
+          "unmeasurableVolumeComponents": 2
+        },
+        {
+          "joint": "LeftKnee",
+          "axis": "X",
+          "degrees": 30,
+          "status": "outside",
+          "surfaceIssues": 408,
+          "volumeIssues": 0,
+          "unmeasurableVolumeComponents": 2
+        },
+        {
+          "joint": "RightElbow",
+          "axis": "X",
+          "degrees": 30,
+          "status": "outside",
+          "surfaceIssues": 590,
+          "volumeIssues": 0,
+          "unmeasurableVolumeComponents": 2
+        },
+        {
+          "joint": "RightKnee",
+          "axis": "X",
+          "degrees": 30,
+          "status": "outside",
+          "surfaceIssues": 363,
+          "volumeIssues": 0,
+          "unmeasurableVolumeComponents": 2
+        }
+      ]
+    },
+    {
+      "form": "humanoid",
+      "template": "biped-relaxed",
+      "mode": "support",
+      "source": "public/model-zoo/pakachi-drafts/humanoid.glb",
+      "sha256": "debb9c4793368bff6989f41b2a40eba3e4ef6a6100aaf3858abe51117a174d14",
+      "report": {
+        "template": "biped-relaxed",
+        "bones": 21,
+        "meshes": 1,
+        "vertices": 50870,
+        "method": "proportional-template",
+        "review": "required",
+        "frame": {
+          "mode": "support",
+          "reason": "separated-supports",
+          "center": [
+            0.18676036502464866,
+            0.013261988759040833,
+            0.10195597594138912
+          ],
+          "right": [
+            0.978965921631512,
+            0,
+            -0.20402383263767152
+          ],
+          "forward": [
+            0.20402383263767152,
+            0,
+            0.978965921631512
+          ],
+          "width": 0.7751315824184026,
+          "depth": 0.5269479751586914,
+          "height": 1.0008727014064789,
+          "floor": -0.4871743619441986,
+          "supports": [
+            [
+              0.10588411519722653,
+              -0.43713072687387466,
+              0.20778681435297394
+            ],
+            [
+              0.3031792402288867,
+              -0.43713072687387466,
+              0.16666903212966247
+            ]
+          ]
+        }
+      },
+      "seconds": 0.827916499,
+      "neutralMaximumDisplacement": 2.677226705080042e-8,
+      "placement": {
+        "count": 16,
+        "rmsDistance": 0.08764732977945669,
+        "joints": [
+          {
+            "joint": "LeftShoulder",
+            "reference": [
+              0.325,
+              0.145,
+              0.075
+            ],
+            "actual": [
+              0.32334929773887494,
+              0.2334539830684662,
+              0.0734898190175581
+            ],
+            "distance": 0.08848227271737047
+          },
+          {
+            "joint": "LeftElbow",
+            "reference": [
+              0.355,
+              -0.005,
+              0.08
+            ],
+            "actual": [
+              0.3385258458182334,
+              0.08332307785749427,
+              0.07032691269268798
+            ],
+            "distance": 0.09036554905648773
+          },
+          {
+            "joint": "LeftWrist",
+            "reference": [
+              0.4,
+              -0.155,
+              0.042
+            ],
+            "actual": [
+              0.36129066793727116,
+              -0.07681655436754231,
+              0.06558255320538281
+            ],
+            "distance": 0.09037256428469198
+          },
+          {
+            "joint": "LeftHand",
+            "reference": [
+              0.405,
+              -0.195,
+              0.049
+            ],
+            "actual": [
+              0.36887894197695037,
+              -0.136868916451931,
+              0.06400110004294776
+            ],
+            "distance": 0.07006416137852238
+          },
+          {
+            "joint": "RightShoulder",
+            "reference": [
+              0.105,
+              0.145,
+              0.08
+            ],
+            "actual": [
+              0.05017143231042237,
+              0.2334539830684662,
+              0.13042213286522014
+            ],
+            "distance": 0.11564026304987816
+          },
+          {
+            "joint": "RightElbow",
+            "reference": [
+              0.085,
+              -0.005,
+              0.1
+            ],
+            "actual": [
+              0.034994884231063894,
+              0.08332307785749427,
+              0.13358503919009027
+            ],
+            "distance": 0.10690852418158991
+          },
+          {
+            "joint": "RightWrist",
+            "reference": [
+              0.095,
+              -0.155,
+              0.19
+            ],
+            "actual": [
+              0.01223006211202618,
+              -0.07681655436754231,
+              0.13832939867739544
+            ],
+            "distance": 0.12503345484302214
+          },
+          {
+            "joint": "RightHand",
+            "reference": [
+              0.095,
+              -0.195,
+              0.19
+            ],
+            "actual": [
+              0.004641788072346942,
+              -0.136868916451931,
+              0.13991085183983049
+            ],
+            "distance": 0.1185443043787708
+          },
+          {
+            "joint": "LeftHip",
+            "reference": [
+              0.3,
+              -0.115,
+              0.065
+            ],
+            "actual": [
+              0.26264310542144104,
+              -0.02677291929721831,
+              0.08614144431703856
+            ],
+            "distance": 0.098114810348383
+          },
+          {
+            "joint": "LeftKnee",
+            "reference": [
+              0.305,
+              -0.28,
+              0.095
+            ],
+            "actual": [
+              0.2910488239963758,
+              -0.2269474595785141,
+              0.15405440233597723
+            ],
+            "distance": 0.08060167363223279
+          },
+          {
+            "joint": "LeftAnkle",
+            "reference": [
+              0.295,
+              -0.4,
+              0.165
+            ],
+            "actual": [
+              0.3031792402288867,
+              -0.3970958188176155,
+              0.16666903212966247
+            ],
+            "distance": 0.008838546674188055
+          },
+          {
+            "joint": "LeftFoot",
+            "reference": [
+              0.3,
+              -0.445,
+              0.17
+            ],
+            "actual": [
+              0.3031792402288867,
+              -0.44713945388793946,
+              0.16666903212966247
+            ],
+            "distance": 0.005077418470523376
+          },
+          {
+            "joint": "RightHip",
+            "reference": [
+              0.13,
+              -0.115,
+              0.065
+            ],
+            "actual": [
+              0.11087762462785627,
+              -0.02677291929721831,
+              0.11777050756573969
+            ],
+            "distance": 0.10456772675139359
+          },
+          {
+            "joint": "RightKnee",
+            "reference": [
+              0.12,
+              -0.28,
+              0.095
+            ],
+            "actual": [
+              0.11196555665994581,
+              -0.2269474595785141,
+              0.19137669696944454
+            ],
+            "distance": 0.11030680869147688
+          },
+          {
+            "joint": "RightAnkle",
+            "reference": [
+              0.105,
+              -0.4,
+              0.21
+            ],
+            "actual": [
+              0.10588411519722653,
+              -0.3970958188176155,
+              0.20778681435297394
+            ],
+            "distance": 0.0037568761931004954
+          },
+          {
+            "joint": "RightFoot",
+            "reference": [
+              0.105,
+              -0.445,
+              0.21
+            ],
+            "actual": [
+              0.10588411519722653,
+              -0.44713945388793946,
+              0.20778681435297394
+            ],
+            "distance": 0.003202672841360523
+          }
+        ]
+      },
+      "probes": [
+        {
+          "joint": "LeftElbow",
+          "axis": "X",
+          "degrees": 30,
+          "status": "outside",
+          "surfaceIssues": 302,
+          "volumeIssues": 0,
+          "unmeasurableVolumeComponents": 2
+        },
+        {
+          "joint": "LeftKnee",
+          "axis": "X",
+          "degrees": 30,
+          "status": "outside",
+          "surfaceIssues": 115,
+          "volumeIssues": 0,
+          "unmeasurableVolumeComponents": 2
+        },
+        {
+          "joint": "RightElbow",
+          "axis": "X",
+          "degrees": 30,
+          "status": "outside",
+          "surfaceIssues": 784,
+          "volumeIssues": 0,
+          "unmeasurableVolumeComponents": 2
+        },
+        {
+          "joint": "RightKnee",
+          "axis": "X",
+          "degrees": 30,
+          "status": "outside",
+          "surfaceIssues": 469,
+          "volumeIssues": 0,
+          "unmeasurableVolumeComponents": 2
+        }
+      ]
+    },
+    {
+      "form": "animal",
+      "template": "quadruped",
+      "mode": "bounds",
+      "source": "public/model-zoo/pakachi-drafts/animal.glb",
+      "sha256": "c87b55c51a9bf1872de421d1052f943de05e53119b3e8c6265d5d0016b8e6d42",
+      "report": {
+        "template": "quadruped",
+        "bones": 23,
+        "meshes": 1,
+        "vertices": 81388,
+        "method": "proportional-template",
+        "review": "required",
+        "frame": {
+          "mode": "bounds",
+          "reason": "manual-bounds",
+          "center": [
+            -0.019243896007537842,
+            0.0014453083276748657,
+            0.045553505420684814
+          ],
+          "right": [
+            1,
+            0,
+            0
+          ],
+          "forward": [
+            0,
+            0,
+            1
+          ],
+          "width": 1.0118604898452759,
+          "depth": 0.7322100400924683,
+          "height": 0.8896391093730927,
+          "floor": -0.44337424635887146,
+          "supports": []
+        }
+      },
+      "seconds": 1.4507722980000004,
+      "neutralMaximumDisplacement": 2.687961878652665e-8,
+      "placement": {
+        "count": 16,
+        "rmsDistance": 0.2848888621214735,
+        "joints": [
+          {
+            "joint": "LeftShoulder",
+            "reference": [
+              0.375,
+              -0.085,
+              0.185
+            ],
+            "actual": [
+              0.2134840166568756,
+              0.10820200145244596,
+              0.21396181464195252
+            ],
+            "distance": 0.2534821748129091
+          },
+          {
+            "joint": "LeftElbow",
+            "reference": [
+              0.375,
+              -0.26,
+              0.22
+            ],
+            "actual": [
+              0.23372122645378113,
+              -0.0875186026096344,
+              0.19199551343917848
+            ],
+            "distance": 0.22470820093621915
+          },
+          {
+            "joint": "LeftWrist",
+            "reference": [
+              0.4,
+              -0.36,
+              0.09
+            ],
+            "actual": [
+              0.23372122645378113,
+              -0.3544103354215622,
+              0.23592811584472656
+            ],
+            "distance": 0.22130271095521203
+          },
+          {
+            "joint": "LeftHand",
+            "reference": [
+              0.41,
+              -0.395,
+              0.09
+            ],
+            "actual": [
+              0.23372122645378113,
+              -0.3988922908902168,
+              0.3018270194530487
+            ],
+            "distance": 0.2756084942480827
+          },
+          {
+            "joint": "RightShoulder",
+            "reference": [
+              0.105,
+              -0.08,
+              0.15
+            ],
+            "actual": [
+              -0.2519718086719513,
+              0.10820200145244596,
+              0.21396181464195252
+            ],
+            "distance": 0.40858289155264704
+          },
+          {
+            "joint": "RightElbow",
+            "reference": [
+              0.135,
+              -0.26,
+              0.21
+            ],
+            "actual": [
+              -0.2722090184688568,
+              -0.0875186026096344,
+              0.19199551343917848
+            ],
+            "distance": 0.44259821362543006
+          },
+          {
+            "joint": "RightWrist",
+            "reference": [
+              0.15,
+              -0.355,
+              0.25
+            ],
+            "actual": [
+              -0.2722090184688568,
+              -0.3544103354215622,
+              0.23592811584472656
+            ],
+            "distance": 0.4224438671639464
+          },
+          {
+            "joint": "RightHand",
+            "reference": [
+              0.16,
+              -0.38,
+              0.3
+            ],
+            "actual": [
+              -0.2722090184688568,
+              -0.3988922908902168,
+              0.3018270194530487
+            ],
+            "distance": 0.4326255798042633
+          },
+          {
+            "joint": "LeftHip",
+            "reference": [
+              0.105,
+              -0.12,
+              -0.165
+            ],
+            "actual": [
+              0.2134840166568756,
+              0.06372004598379133,
+              -0.12285480380058289
+            ],
+            "distance": 0.2174811594805008
+          },
+          {
+            "joint": "LeftKnee",
+            "reference": [
+              0.065,
+              -0.255,
+              -0.19
+            ],
+            "actual": [
+              0.23372122645378113,
+              -0.14979334026575086,
+              -0.05695590019226075
+            ],
+            "distance": 0.23924051914790237
+          },
+          {
+            "joint": "LeftAnkle",
+            "reference": [
+              0.065,
+              -0.38,
+              -0.215
+            ],
+            "actual": [
+              0.23372122645378113,
+              -0.3544103354215622,
+              -0.15214320540428164
+            ],
+            "distance": 0.18185890084390527
+          },
+          {
+            "joint": "LeftFoot",
+            "reference": [
+              0.085,
+              -0.415,
+              -0.215
+            ],
+            "actual": [
+              0.23372122645378113,
+              -0.3988922908902168,
+              -0.08624430179595946
+            ],
+            "distance": 0.19737145515674803
+          },
+          {
+            "joint": "RightHip",
+            "reference": [
+              -0.125,
+              -0.13,
+              -0.14
+            ],
+            "actual": [
+              -0.2519718086719513,
+              0.06372004598379133,
+              -0.12285480380058289
+            ],
+            "distance": 0.23225687108480847
+          },
+          {
+            "joint": "RightKnee",
+            "reference": [
+              -0.205,
+              -0.28,
+              -0.13
+            ],
+            "actual": [
+              -0.2722090184688568,
+              -0.14979334026575086,
+              -0.05695590019226075
+            ],
+            "distance": 0.16372619497020216
+          },
+          {
+            "joint": "RightAnkle",
+            "reference": [
+              -0.205,
+              -0.38,
+              0.05
+            ],
+            "actual": [
+              -0.2722090184688568,
+              -0.3544103354215622,
+              -0.15214320540428164
+            ],
+            "distance": 0.21455479157525634
+          },
+          {
+            "joint": "RightFoot",
+            "reference": [
+              -0.18,
+              -0.405,
+              0.05
+            ],
+            "actual": [
+              -0.2722090184688568,
+              -0.3988922908902168,
+              -0.08624430179595946
+            ],
+            "distance": 0.16462781347460154
+          }
+        ]
+      },
+      "probes": [
+        {
+          "joint": "LeftElbow",
+          "axis": "X",
+          "degrees": 30,
+          "status": "outside",
+          "surfaceIssues": 711,
+          "volumeIssues": 0,
+          "unmeasurableVolumeComponents": 1
+        },
+        {
+          "joint": "LeftKnee",
+          "axis": "X",
+          "degrees": 30,
+          "status": "outside",
+          "surfaceIssues": 797,
+          "volumeIssues": 2,
+          "unmeasurableVolumeComponents": 1
+        },
+        {
+          "joint": "RightElbow",
+          "axis": "X",
+          "degrees": 30,
+          "status": "outside",
+          "surfaceIssues": 698,
+          "volumeIssues": 0,
+          "unmeasurableVolumeComponents": 1
+        },
+        {
+          "joint": "RightKnee",
+          "axis": "X",
+          "degrees": 30,
+          "status": "outside",
+          "surfaceIssues": 808,
+          "volumeIssues": 0,
+          "unmeasurableVolumeComponents": 1
+        }
+      ]
+    },
+    {
+      "form": "animal",
+      "template": "quadruped",
+      "mode": "support",
+      "source": "public/model-zoo/pakachi-drafts/animal.glb",
+      "sha256": "c87b55c51a9bf1872de421d1052f943de05e53119b3e8c6265d5d0016b8e6d42",
+      "report": {
+        "template": "quadruped",
+        "bones": 23,
+        "meshes": 1,
+        "vertices": 81388,
+        "method": "proportional-template",
+        "review": "required",
+        "frame": {
+          "mode": "support",
+          "reason": "separated-supports",
+          "center": [
+            0.11736010329822662,
+            0.0014453083276748657,
+            0.06057607159735885
+          ],
+          "right": [
+            0.6047404171399461,
+            0,
+            -0.7964226440009123
+          ],
+          "forward": [
+            0.7964226440009123,
+            0,
+            0.6047404171399461
+          ],
+          "width": 0.7234657872312519,
+          "depth": 1.0202341646897213,
+          "height": 0.8896391093730927,
+          "floor": -0.44337424635887146,
+          "torsoHeight": -0.00782176572829485,
+          "upperCenter": [
+            0.2968236207962036,
+            0.27732813358306885,
+            0.1467059850692749
+          ],
+          "supports": [
+            [
+              -0.17048303215080393,
+              -0.3988922908902168,
+              0.053493837314962815
+            ],
+            [
+              0.3913836121293051,
+              -0.3988922908902168,
+              0.08958270573722465
+            ],
+            [
+              0.07237392271725604,
+              -0.3988922908902168,
+              -0.21629693149589002
+            ],
+            [
+              0.17616591049714925,
+              -0.3988922908902168,
+              0.31552467483313795
+            ]
+          ]
+        }
+      },
+      "seconds": 1.4255403940000007,
+      "neutralMaximumDisplacement": 2.517118776931944e-8,
+      "placement": {
+        "count": 16,
+        "rmsDistance": 0.11268211833664694,
+        "joints": [
+          {
+            "joint": "LeftShoulder",
+            "reference": [
+              0.375,
+              -0.085,
+              0.185
+            ],
+            "actual": [
+              0.40487081966498667,
+              -0.03451093900948765,
+              0.0699583004188723
+            ],
+            "distance": 0.12913560233210772
+          },
+          {
+            "joint": "LeftElbow",
+            "reference": [
+              0.375,
+              -0.26,
+              0.22
+            ],
+            "actual": [
+              0.41094906977744844,
+              -0.230231543071568,
+              0.0924929581320096
+            ],
+            "distance": 0.13578122982094845
+          },
+          {
+            "joint": "LeftWrist",
+            "reference": [
+              0.4,
+              -0.36,
+              0.09
+            ],
+            "actual": [
+              0.3913836121293051,
+              -0.3633067265152931,
+              0.08958270573722467
+            ],
+            "distance": 0.009238545052493177
+          },
+          {
+            "joint": "LeftHand",
+            "reference": [
+              0.41,
+              -0.395,
+              0.09
+            ],
+            "actual": [
+              0.3913836121293051,
+              -0.40778868198394774,
+              0.08958270573722467
+            ],
+            "distance": 0.022589697181247228
+          },
+          {
+            "joint": "RightShoulder",
+            "reference": [
+              0.105,
+              -0.08,
+              0.15
+            ],
+            "actual": [
+              0.20361667876490158,
+              -0.03451093900948765,
+              0.33500318656989325
+            ],
+            "distance": 0.21452431806541905
+          },
+          {
+            "joint": "RightElbow",
+            "reference": [
+              0.135,
+              -0.26,
+              0.21
+            ],
+            "actual": [
+              0.20131679243812087,
+              -0.230231543071568,
+              0.33407609404996597
+            ],
+            "distance": 0.1438017910245791
+          },
+          {
+            "joint": "RightWrist",
+            "reference": [
+              0.15,
+              -0.355,
+              0.25
+            ],
+            "actual": [
+              0.17616591049714925,
+              -0.3633067265152931,
+              0.31552467483313795
+            ],
+            "distance": 0.07104322338923792
+          },
+          {
+            "joint": "RightHand",
+            "reference": [
+              0.16,
+              -0.38,
+              0.3
+            ],
+            "actual": [
+              0.17616591049714925,
+              -0.40778868198394774,
+              0.31552467483313795
+            ],
+            "distance": 0.035701022916458415
+          },
+          {
+            "joint": "LeftHip",
+            "reference": [
+              0.105,
+              -0.12,
+              -0.165
+            ],
+            "actual": [
+              0.031103527831551625,
+              -0.07899289447814228,
+              -0.21385104337517552
+            ],
+            "distance": 0.09761503849851372
+          },
+          {
+            "joint": "LeftKnee",
+            "reference": [
+              0.065,
+              -0.255,
+              -0.19
+            ],
+            "actual": [
+              0.07003633939684498,
+              -0.2925062807276845,
+              -0.20455856172547834
+            ],
+            "distance": 0.040546732643440594
+          },
+          {
+            "joint": "LeftAnkle",
+            "reference": [
+              0.065,
+              -0.38,
+              -0.215
+            ],
+            "actual": [
+              0.07237392271725604,
+              -0.3633067265152931,
+              -0.21629693149589002
+            ],
+            "distance": 0.018295413282577534
+          },
+          {
+            "joint": "LeftFoot",
+            "reference": [
+              0.085,
+              -0.415,
+              -0.215
+            ],
+            "actual": [
+              0.07237392271725604,
+              -0.40778868198394774,
+              -0.21629693149589002
+            ],
+            "distance": 0.014598046663286646
+          },
+          {
+            "joint": "RightHip",
+            "reference": [
+              -0.125,
+              -0.13,
+              -0.14
+            ],
+            "actual": [
+              -0.17015061306853346,
+              -0.07899289447814228,
+              0.05119384277584539
+            ],
+            "distance": 0.20296647060432677
+          },
+          {
+            "joint": "RightKnee",
+            "reference": [
+              -0.205,
+              -0.28,
+              -0.13
+            ],
+            "actual": [
+              -0.15617948988402505,
+              -0.2925062807276845,
+              0.06333385402144172
+            ],
+            "distance": 0.19979446532976783
+          },
+          {
+            "joint": "RightAnkle",
+            "reference": [
+              -0.205,
+              -0.38,
+              0.05
+            ],
+            "actual": [
+              -0.17048303215080393,
+              -0.3633067265152931,
+              0.0534938373149628
+            ],
+            "distance": 0.0385005629610929
+          },
+          {
+            "joint": "RightFoot",
+            "reference": [
+              -0.18,
+              -0.405,
+              0.05
+            ],
+            "actual": [
+              -0.17048303215080393,
+              -0.40778868198394774,
+              0.0534938373149628
+            ],
+            "distance": 0.010514576712053251
+          }
+        ]
+      },
+      "probes": [
+        {
+          "joint": "LeftElbow",
+          "axis": "X",
+          "degrees": 30,
+          "status": "outside",
+          "surfaceIssues": 34,
+          "volumeIssues": 1,
+          "unmeasurableVolumeComponents": 1
+        },
+        {
+          "joint": "LeftKnee",
+          "axis": "X",
+          "degrees": 30,
+          "status": "outside",
+          "surfaceIssues": 147,
+          "volumeIssues": 0,
+          "unmeasurableVolumeComponents": 1
+        },
+        {
+          "joint": "RightElbow",
+          "axis": "X",
+          "degrees": 30,
+          "status": "outside",
+          "surfaceIssues": 112,
+          "volumeIssues": 0,
+          "unmeasurableVolumeComponents": 1
+        },
+        {
+          "joint": "RightKnee",
+          "axis": "X",
+          "degrees": 30,
+          "status": "outside",
+          "surfaceIssues": 147,
+          "volumeIssues": 0,
+          "unmeasurableVolumeComponents": 1
+        }
+      ]
+    }
+  ]
+}

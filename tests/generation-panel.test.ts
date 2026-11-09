@@ -67,8 +67,9 @@ test('local skeleton preparation preserves the generator original and imports on
  Object.assign(globalThis,{FileReader:Reader,ProgressEvent:class extends Event{}});const source=new Uint8Array(await writeFigureGLB(draftFigure()));
  const f=fixture(t,async()=>({kind:'model',bytes:source}));f.choose();f.button('start').click();await until(()=>!f.button('apply').hidden);
  f.button('rig').click();assert.ok(f.button('apply').disabled);await until(()=>f.host.textContent!.includes('21 Gelenke'));assert.equal(f.calls,1);assert.equal(f.adoptions,0);assert.equal(f.previewCalls,2);
+ assert.ok(f.host.textContent!.includes('2 Standflächen erkannt'));
  f.button('original').click();await until(()=>f.host.textContent!.includes('Unveränderte Generatorausgabe'));assert.equal(f.calls,1);assert.ok(f.button('original').hidden);
- (f.host.querySelector('#generation-rig-template') as HTMLSelectElement).value='quadruped';f.button('rig').click();await until(()=>f.host.textContent!.includes('23 Gelenke'));
+ (f.host.querySelector('#generation-rig-template') as HTMLSelectElement).value='quadruped';(f.host.querySelector('#generation-rig-alignment') as HTMLSelectElement).value='bounds';f.button('rig').click();await until(()=>f.host.textContent!.includes('23 Gelenke'));assert.ok(f.host.textContent!.includes('Vorlage nach Gesamtmaßen gewählt'));
  f.button('apply').click();await until(()=>f.adoptions===1);const model=await parseModel(Uint8Array.from(f.adopted!).buffer);let bones=0;model.scene.traverse(n=>{if(n.type==='Bone')bones++;});assert.equal(bones,23);disposeModel(model.scene);assert.equal(f.calls,1);
 });
 test('failed skeleton preparation retains the raw preview and its original import bytes',async t=>{

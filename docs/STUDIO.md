@@ -512,3 +512,7 @@ Die Auswahl bewertet die Fehler über sämtliche geprüften Posen und Move-Bilde
 ## Erstes Skelett auf dem Generierungsentwurf (0.95.0)
 
 Nach erfolgreicher Bildgenerierung **Optionales erstes Skelett → Zweibeiner / Vierbeiner → Skelettentwurf vorbereiten** verwenden. Vorschau und Beugewarnungen prüfen, dann ausdrücklich übernehmen. Die Knochen stehen sofort in beiden Studio-Modi bereit; Gelenkpunkte ändern, IK benutzen, Posen/Moves und Projekt speichern. Der Generator-Originalentwurf bleibt bis zum Verwerfen oder Übernehmen separat verfügbar. Dieser Einstieg gilt für neue statische Generatorausgaben, nicht als Umrigging vorhandener Projekte. [Vollständiger Ablauf und Grenzen](KI-GENERIERUNG.md#erster-beweglicher-entwurf-seit-0950).
+
+## Körperausrichtung des ersten Skeletts (0.96.0)
+
+Nach der Generierung **Körperausrichtung → An Standflächen ausrichten** wählen. Zwei getrennte Füße beziehungsweise vier Pfoten bestimmen den Ausgangsrahmen; ein großer seitlicher Schwanz geht damit nicht in die Körperbreite ein. Nicht eindeutige Standflächen werden ausdrücklich gemeldet. **Nach Gesamtmaßen · bisherige Vorlage** und **Generator-Original zeigen** ermöglichen den Vergleich. Für gesenkte Arme gibt es **Zweibeiner · Arme unten**. Erst nach Prüfung übernehmen; Gelenke, Haut und gespeicherte Bewegungen weiter korrigieren. [Methode, Messungen und Grenzen](KI-GENERIERUNG.md#körperausrichtung-anhand-der-standflächen-seit-0960).

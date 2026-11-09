@@ -1,6 +1,6 @@
 # Prüfstand und Protokolle
 
-**Softwarestand: 0.95.0 · Dokumentationsabgleich: 2026-11-09T22:46:22+01:00 (Europe/Berlin).**
+**Softwarestand: 0.96.0 · Dokumentationsabgleich: 2026-11-10T00:00:33+01:00 (Europe/Berlin).**
 
 Alle Prüfnachweise stehen in dieser Datei: ein Abschnitt je Softwareversion sowie gesonderte Abschnitte für datierte Zwischenprüfungen. Die Ergebnisse und Grenzen gelten für den jeweils genannten Stand. Spätere Läufe stehen als Nachtrag im selben Abschnitt. Produktänderungen gehören in den [Changelog](CHANGELOG.md), offene Aufgaben in die [Roadmap](ROADMAP.md).
 
@@ -8,10 +8,10 @@ Alle Prüfnachweise stehen in dieser Datei: ein Abschnitt je Softwareversion sow
 
 | Prüfung | Bestätigter Stand | Umfang und Grenze |
 | --- | --- | --- |
-| Node-Tests | [0.93.1](#version-0931): 424 in vollständiger CI bestanden | Einschließlich echter MCP-/OAuth-/Python-/ACP-Prozesse; keine manuelle Qualitätsabnahme. |
-| TypeScript und Produktionsbuild | [0.93.1](#version-0931): vollständige CI bestanden | Bekannte Bundle-Größenwarnung; keine Aussage über Zielhardware-Leistung. |
-| Chromium-Browserfälle | [0.93.1](#version-0931): alle 43 im vollständigen CI-Lauf bestanden | Software-WebGL, simulierte KI-Anbieter; keine reale KI-Inferenzabnahme. |
-| Produktionsbrowser-Importmessung | [0.93.1](#version-0931): drei CI-Durchläufe bestanden | Mika mit 256 Gewichtsaufträgen; keine allgemeine Laufzeitgarantie. |
+| Node-Tests | [0.95.0](#version-0950): 449 in vollständiger CI bestanden | Einschließlich echter MCP-/OAuth-/Python-/ACP-Prozesse; keine manuelle Qualitätsabnahme. |
+| TypeScript und Produktionsbuild | [0.95.0](#version-0950): vollständige CI bestanden | Bekannte Bundle-Größenwarnung; keine Aussage über Zielhardware-Leistung. |
+| Chromium-Browserfälle | [0.95.0](#version-0950): alle 45 im vollständigen CI-Lauf bestanden | Software-WebGL, simulierte KI-Anbieter; keine reale KI-Inferenzabnahme. |
+| Produktionsbrowser-Importmessung | [0.95.0](#version-0950): drei CI-Durchläufe bestanden | Mika mit 256 Gewichtsaufträgen; keine allgemeine Laufzeitgarantie. |
 | Legacy-Testprogramme | [0.9.0](#version-090): beide bestanden | Steuerung, MQTT-Verhalten und Lebenszyklus des Originalplayers. |
 | Python-MCP-/MQTT-Integration | [0.10.0](#version-0100): bestanden | Echter Python-Prozess und eingebetteter Testbroker; keine allgemeine externe Hostabnahme. |
 | Originaldateien | [0.49.0](#version-0490): bytegenau erhalten | 83 Originaldateien einschließlich 72 Transformationsbildern. |
@@ -60,7 +60,20 @@ Diese Liste beschreibt ausstehende Abnahmen.
 
 Die jüngste Version steht zuerst. Für eine bestimmte Version die Dokumentgliederung oder die Browser-Suche verwenden.
 
+## Version 0.96.0
+
+Prüfzeit: 2026-11-10T00:00:33+01:00 (Europe/Berlin). Generischer Standflächenrahmen für neue Skelettentwürfe, keine neue Inferenz oder Anatomiefreigabe.
+
+- Zwei/vier räumlich getrennte Bodengruppen, begrenztes belegungsbasiertes Raster, 24 Gruppierungsiterationen, Horizontalachsen und optionale Rumpfhöhe. Kein Import der gemessenen PaKaChi-Punkte in die Laufzeit. Maximal 4.096 Bodenrasterzellen und bisherige Modellbudgets. Bei uneindeutiger Gruppierung ausdrücklicher Rückfall auf Gesamtmaßvorlage; diese ist zusätzlich manuell wählbar.
+- Vier neue Tests prüfen große seitliche Anbauteile, verschobene/gleichmäßig skalierte/um Y gedrehte Figuren, vier Pfoten, kontinuierlichen Sockel, manuelle Vergleichsvorlage sowie beide realen Rohrekonstruktionen. Auf 16 zuvor gemessenen Arm-/Beinpunkten verbessert sich die RMS-Platzierung bei denselben Vorlagen: Arbeitsform 0,2890 → 0,1235; Tierform 0,2849 → 0,1127 Modelleinheiten. Gesenkte Armvorlage Arbeitsform: 0,0876. [Sechs Varianten mit Einzelwerten](benchmarks/draft-body-frame-2026-11-10.json).
+- Bestehende Neutralform-, Gewichts-, GLB-/Projekt-Replay-, Abbruch- und Vorschauprüfungen bleiben erfolgreich. Drei gezielte Chromium-Fälle bestanden: synthetische Figur mit großem seitlichem Schwanz, bisherige/nach Standflächen ausgerichtete Vorschau, Originalrückkehr, Übernahme, IK, Undo/Redo, Speichern/Laden und gespeicherte Rahmenmetadaten. Generator simuliert, Skelett-/Hautberechnung produktiv.
+- Lokaler vollständiger Node-Lauf: 452 Tests ohne Fehler, Abbrüche oder übersprungene Fälle; TypeScript und Produktionsbuild bestanden (bekannte Bundle-Größenwarnung). Der Originaldatei-Test bleibt lokal wegen des unvollständigen Frame-Checkouts ausgespart; die vollständige CI prüft ihn. Vier direkte gerenderte Vergleiche der echten Rekonstruktionen (je Form Gesamtmaße/Standflächen) gesichtet: Körpermitte und Pfotenanker liegen deutlich passender, Hals-/Schulter-/Hüft-/Schwanzdetails bleiben sichtbar unzureichend. Abschluss der vollständigen CI auf develop wird am jeweiligen Commit ausgewertet; erst danach Integration nach main.
+
+Grenzen: Geometrische Schätzung für stehende Figuren. Keine allgemeine Körper-/Gliedmaßensegmentierung, Anatomie-/Pose-/Orientierungserkennung, Finger-/Gesichtsrig oder korrekte Schwanzkette. Alle vier 30°-Proben je Form haben weiterhin Oberflächenwarnungen. Eine Tierform-Ellenbogenprobe erhält trotz weniger Dreiecksfehlern eine neue Volumenwarnung; auch in der Arbeitsform verschlechtern sich einzelne Beugemetriken. Bessere Gelenkplatzierung bedeutet keine allgemeine Hautfreigabe. Grundform/Originalbilder und bisherige bearbeitete 59-Gelenk-Avatare werden nicht ersetzt. Spärliche Netze, fehlende Standflächen, bodennahe Anbauteile und ungewöhnliche Proportionen benötigen Nacharbeit.
+
 ## Version 0.95.0
+
+Abschlussnachweis: [CI-Lauf 42706009235](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/42706009235), Commit `46a4d57`: 449 Node-Tests, Build, alle 45 Chromium-Fälle (8,3 Minuten) und drei Produktionsimportmessungen erfolgreich. Abschlusslogs, bytegenaue Originalprüfung und Browserartefakte ausgewertet. Über PR #1 als `67f5ea0` nach main übernommen; develop wurde von diesem Stand angelegt.
 
 Prüfzeit: 2026-11-09T22:46:22+01:00 (Europe/Berlin). Allgemeine erste Skelettvorlagen für den Bild-zu-3D-Ablauf; keine neue Generatorinferenz oder anatomische Freigabe.
 

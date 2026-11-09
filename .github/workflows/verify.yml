@@ -1,7 +1,7 @@
 name: Verify player and studio
 on:
   push:
-    branches: [main]
+    branches: [main, develop]
     paths-ignore:
       - 'README.md'
       - 'docs/**/*.md'

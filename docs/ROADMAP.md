@@ -1,24 +1,24 @@
 # Roadmap – offene Aufgaben
 
-**Entwicklungsstand: 0.95.0 · Abgleich: 09.11.2026.** Teil der [Blaupause](README.md).
+**Entwicklungsstand: 0.96.0 · Abgleich: 10.11.2026.** Teil der [Blaupause](README.md).
 
 Diese Roadmap enthält offene Umsetzung und ausstehende Abnahme. Erledigte Änderungen stehen nach Version im [Changelog](CHANGELOG.md); Nachweise und Grenzen im [Prüfstand](PRUEFUNG.md). Eine implementierte Funktion ist nicht automatisch manuell oder mit realen Anbietern abgenommen.
 
 ## Übergabe und nächster Schritt
 
-**Übergabe aktualisiert:** 2026-11-09T22:46:22+01:00 (Europe/Berlin). Softwarestand **0.95.0**.
+**Übergabe aktualisiert:** 2026-11-10T00:00:33+01:00 (Europe/Berlin). Softwarestand **0.96.0**.
 
-- **Arbeitsbranch:** `work/local-verification-model-zoo`, [Entwurfs-PR #1](https://github.com/Smilez1985/PaKaChi-SM/pull/1); noch nicht nach `main` zusammengeführt.
-- **Bild-zu-3D:** Seit 0.95.0 optionales erstes Zweibeiner-/Vierbeinerskelett mit Hautbindung auf statischer Generatorausgabe, getrennte Vorschau, Beugewarnungen und Übernahme ins Studio. Echte Anatomieerkennung und zuverlässige Charakterqualität bleiben offen. [Ablauf](KI-GENERIERUNG.md#erster-beweglicher-entwurf-seit-0950).
+- **Arbeitsbranch:** `develop`. Laufende Änderungen dort committen; geprüfte Meilensteine nach `main` integrieren. 0.95.0 ist über [PR #1](https://github.com/Smilez1985/PaKaChi-SM/pull/1) zusammengeführt. Die vollständige CI läuft nun auch auf `develop`. Diese Arbeitsweise ist in `AGENTS.md` festgehalten.
+- **Bild-zu-3D:** Seit 0.95.0 optionales erstes Zweibeiner-/Vierbeinerskelett mit Hautbindung auf statischer Generatorausgabe, getrennte Vorschau, Beugewarnungen und Übernahme ins Studio. Seit 0.96.0 unterstützen getrennte Standflächen die Körperausrichtung, Pfoten-/Fußanker und Vierbeiner-Rumpfhöhe; die Ausgangspose „Arme unten“ ist ergänzt. Echte Anatomieerkennung und zuverlässige Charakterqualität bleiben offen. [Ablauf](KI-GENERIERUNG.md#erster-beweglicher-entwurf-seit-0950).
 - **Neue Grundlage:** Automatischer Auftrag vergleicht Gewichtsänderungen mit lokalen poseabhängigen geometrischen Korrekturformen; gemeinsame Pose-/Move-Gegenprüfung, Original-/Korrekturvorschau, KI-Aufruf, Undo und Projekt-/GLB-Export. Zusätzliche adaptive Bewegungsdiagnose und begrenzte separate Schnittdiagnose sind vorhanden. [Prüfbericht](PRUEFUNG.md#version-0940).
-- **Nächste Aktion:** Geometrische Kandidaten an tatsächlichen Schulter-/Hüft-/Kniefehlern weiterentwickeln. Die geprüften neuen PaKaChi-Proben werden bisher verworfen. Lokale Formziele und Fellansätze verbessern, mehrere Korrekturen gemeinsam optimieren; adaptive Zwischenbilder und zuverlässige Selbstüberschneidungsprüfung in den automatischen Auftrag integrieren. Externe MCP-Suche und produktive Fachadapter ergänzen.
+- **Nächste Aktion:** Anatomie und Gliedmaßen aus der rekonstruierten Oberfläche zuverlässiger erkennen. Standflächen lösen die seitliche Schwanz-Verzerrung der Ausgangsvorlage, aber weder richtige Schulter-/Hüftpunkte noch ein Gesicht-/Fingerrig sind damit garantiert. Beugequalität unabhängig von der Platzierung optimieren. Geometrische Kandidaten an tatsächlichen Schulter-/Hüft-/Kniefehlern weiterentwickeln. Die geprüften neuen PaKaChi-Proben werden bisher verworfen. Lokale Formziele und Fellansätze verbessern, mehrere Korrekturen gemeinsam optimieren; adaptive Zwischenbilder und zuverlässige Selbstüberschneidungsprüfung in den automatischen Auftrag integrieren. Externe MCP-Suche und produktive Fachadapter ergänzen.
 - **Charakterstand:** 21 akzeptierte Korrekturhaltungen der Arbeitsform (fünf zusätzliche linke Hüfthaltungen), 11 der Tierform. Schulterkandidaten und weitere Hüftkandidaten bleiben nach den Messungen verworfen; die zugrunde liegenden Fehler bestehen weiter.
 - **Danach:** Eine gespeicherte Standard-Verwandlung auf dieser Oberfläche, vorwärts und rückwärts mit identischen Zwischenformen; Qualität auch zwischen den Endposen prüfen.
 - **Hardware parallel:** Die [fünf Verbindungsschritte](LOKALE-WERKZEUGE.md#verbindung-zu-deinem-rechner) bleiben verfügbar. Windows-/Caddy-/GPU-Abnahme ist offen, blockiert die CPU-basierte Charakter-/Rigarbeit jedoch nicht. Ein tatsächlicher externer Aufruf von `local_get_status` bleibt der erste Verbindungsnachweis.
 
 ## Prioritäten
 
-1. **Automatische Korrekturqualität erweitern:** Gewichts- und geometrische Kandidaten sowie separate adaptive Move-Diagnose sind implementiert. Bessere geometrische Kandidaten am Originalcharakter, mehrere abgestimmte Änderungen, adaptive Gegenprüfung im Auftrag und echte Fachmodell-Abnahme fehlen.
+1. **Bild-zu-3D und automatische Korrekturqualität erweitern:** Körper-/Gliedmaßenerkennung, passende Grundpose und besseres initiales Skinning weiterentwickeln.  Gewichts- und geometrische Kandidaten sowie separate adaptive Move-Diagnose sind implementiert. Bessere geometrische Kandidaten am Originalcharakter, mehrere abgestimmte Änderungen, adaptive Gegenprüfung im Auftrag und echte Fachmodell-Abnahme fehlen.
 2. **Charakter und Rig verfeinern:** Beide Formen besitzen seit 0.85.0 dieselbe 59-Gelenk-Hierarchie einschließlich 14 beweglicher Finger/Zehen und echte Hautgewichte. Gesicht, Fell und lokale Pfotenflächen sind überarbeitet; die Körpernetze haben geschlossene, konsistent orientierte Kanten. Finger-/Pfotenproportionen, Anschlüsse bei großen Beugungen, verdeckte Flächen und Hüft-/Schulterübergänge weiter korrigieren und designgetreu abnehmen.
 3. **Gemeinsame Morph-Topologie:** Die umformungsbedingten Hautbrücken der unabhängig rekonstruierten Netze beseitigen. Ein Charakter mit kompatibler Netzstruktur und geprüftem Rig für beide Formen.
 4. **Standard-Verwandlung:** Danach eine gespeicherte Animation Normalform → Arbeitsform implementieren; dieselbe Animation rückwärts, Endform halten und laufende Bewegung ohne Sprung umkehren. Zustandszuordnung wie im Originalplayer.

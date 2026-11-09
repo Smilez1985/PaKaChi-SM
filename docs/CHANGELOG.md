@@ -14,6 +14,20 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 Noch keine weiteren Änderungen.
 
+## [0.96.0] - 2026-11-10
+
+Zeitstempel: 2026-11-10T00:00:33+01:00 (Europe/Berlin)
+
+### Added
+
+- Erstes Skelett kann Körpermitte und horizontale Ausrichtung aus zwei beziehungsweise vier getrennten Standflächen schätzen. Fuß-/Pfotenanker und Seitenzuordnung der Hautbindung folgen diesem Rahmen; bei Vierbeinern wird die Rumpfhöhe zusätzlich geometrisch angepasst. Große seitliche Anbauteile bestimmen dadurch nicht mehr automatisch die Körperbreite. Unklare Standflächen werden sichtbar gemeldet; bisherige Gesamtmaßvorlage bleibt ausdrücklich wählbar.
+- Zweibeiner-Ausgangspose mit gesenkten Armen ergänzt. Vier Beugeproben, getrennte Vorschau, Originalrückkehr, Abbruch, Undo, Projekt-/GLB-Speicherung bleiben erhalten. Rahmenparameter stehen als GLB-Metadaten für die Nachvollziehbarkeit bereit.
+- Sechs reproduzierbare Vergleiche auf beiden echten Rekonstruktionen, unabhängiger gemessener Gelenkvergleich, künstliche große Anbauteile, verschobene/skalierte/gedrehte Modelle und Sockel-Gegenprobe ergänzt. Platzierungsabweichung gleicher Vorlagen sinkt um rund 57 / 60 Prozent; Beugewarnungen bleiben bestehen und einzelne Teilmetriken verschlechtern sich. Keine Anatomie-/Kollisions-/Charakterfreigabe.
+
+### Changed
+
+- Laufende Entwicklung erfolgt auf `develop`, vollständige CI prüft auch dessen Pushes. Geprüfte Meilensteine werden nach `main` integriert. Arbeitsweise in `AGENTS.md` und Übergabe dokumentiert; 0.95.0 wurde über PR #1 zusammengeführt.
+
 ## [0.95.0] - 2026-11-09
 
 Zeitstempel: 2026-11-09T22:46:22+01:00 (Europe/Berlin)
@@ -1997,5 +2011,6 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 
 [0.93.1]: PRUEFUNG.md#version-0931
 
+[0.96.0]: PRUEFUNG.md#version-0960
 [0.95.0]: PRUEFUNG.md#version-0950
 [0.94.0]: PRUEFUNG.md#version-0940
