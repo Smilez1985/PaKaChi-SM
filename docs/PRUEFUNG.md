@@ -1,6 +1,6 @@
 # Prüfstand und Protokolle
 
-**Softwarestand: 0.93.1 · Dokumentationsabgleich: 2026-11-09T14:23:44+01:00 (Europe/Berlin).**
+**Softwarestand: 0.94.0 · Dokumentationsabgleich: 2026-11-09T20:52:52+01:00 (Europe/Berlin).**
 
 Alle Prüfnachweise stehen in dieser Datei: ein Abschnitt je Softwareversion sowie gesonderte Abschnitte für datierte Zwischenprüfungen. Die Ergebnisse und Grenzen gelten für den jeweils genannten Stand. Spätere Läufe stehen als Nachtrag im selben Abschnitt. Produktänderungen gehören in den [Changelog](CHANGELOG.md), offene Aufgaben in die [Roadmap](ROADMAP.md).
 
@@ -8,10 +8,10 @@ Alle Prüfnachweise stehen in dieser Datei: ein Abschnitt je Softwareversion sow
 
 | Prüfung | Bestätigter Stand | Umfang und Grenze |
 | --- | --- | --- |
-| Node-Tests | [0.93.0](#version-0930): 423 in vollständiger CI bestanden | Einschließlich echter MCP-/OAuth-/Python-/ACP-Prozesse; keine manuelle Qualitätsabnahme. |
-| TypeScript und Produktionsbuild | [0.93.0](#version-0930): vollständige CI bestanden | Bekannte Bundle-Größenwarnung; keine Aussage über Zielhardware-Leistung. |
-| Chromium-Browserfälle | [0.92.0](#version-0920): alle 42 im vollständigen CI-Lauf bestanden | Software-WebGL, simulierte KI-Anbieter; keine reale KI-Inferenzabnahme. |
-| Produktionsbrowser-Importmessung | [0.92.0](#version-0920): drei CI-Durchläufe bestanden | Mika mit 256 Gewichtsaufträgen; keine allgemeine Laufzeitgarantie. |
+| Node-Tests | [0.93.1](#version-0931): 424 in vollständiger CI bestanden | Einschließlich echter MCP-/OAuth-/Python-/ACP-Prozesse; keine manuelle Qualitätsabnahme. |
+| TypeScript und Produktionsbuild | [0.93.1](#version-0931): vollständige CI bestanden | Bekannte Bundle-Größenwarnung; keine Aussage über Zielhardware-Leistung. |
+| Chromium-Browserfälle | [0.93.1](#version-0931): alle 43 im vollständigen CI-Lauf bestanden | Software-WebGL, simulierte KI-Anbieter; keine reale KI-Inferenzabnahme. |
+| Produktionsbrowser-Importmessung | [0.93.1](#version-0931): drei CI-Durchläufe bestanden | Mika mit 256 Gewichtsaufträgen; keine allgemeine Laufzeitgarantie. |
 | Legacy-Testprogramme | [0.9.0](#version-090): beide bestanden | Steuerung, MQTT-Verhalten und Lebenszyklus des Originalplayers. |
 | Python-MCP-/MQTT-Integration | [0.10.0](#version-0100): bestanden | Echter Python-Prozess und eingebetteter Testbroker; keine allgemeine externe Hostabnahme. |
 | Originaldateien | [0.49.0](#version-0490): bytegenau erhalten | 83 Originaldateien einschließlich 72 Transformationsbildern. |
@@ -60,6 +60,20 @@ Diese Liste beschreibt ausstehende Abnahmen.
 
 Die jüngste Version steht zuerst. Für eine bestimmte Version die Dokumentgliederung oder die Browser-Suche verwenden.
 
+## Version 0.94.0
+
+**Prüfzeitpunkt:** 2026-11-09T20:52:52+01:00 (Europe/Berlin).
+
+- Allgemeiner geometrischer Kandidat am geschlossenen 90°-Prüfarm: Volumenverhältnis rund 0,634 → über 0,8 bei unveränderten Gelenk- und Posewerten. Tatsächliche Oberfläche, reine Vorausberechnung und gespeichertes Replay stimmen überein. DQ-Mathematik mit starren Referenztransformationen geprüft; echte Skalierung/Reflexion und singuläre volle 180°-Bindung werden nicht geometrisch freigegeben.
+- Native und neue Formen behalten getrennte Treibergruppen; mehrere neue Formen werden gemeinsam ausgewertet. Ursprüngliche Knochennamen mit Leerzeichen bleiben über einen echten GLB-Rundlauf eindeutig gebunden. Geometrische Vorschau erhält Daten und stellt importierte Morph-Attribute und Livepose wieder her. Übernahme ist eine Undo-/Redo-Aktion, erhält die gespeicherten Posekanäle und Move-Folgen und setzt Prüfhilfen.
+- Neue eigenständige Tests für Kandidaten, native/pure/live-Parität, Speichern/Laden, Model Zoo, Move-Kompatibilität, valide Daten-/Vertexlimits, Abbruch-/Revisionsschutz durch den vorhandenen Auftrag und tatsächliche GLB-Animation einschließlich Zwischenbildern. Rigged-GLB erhält native Treiber; gebackener Animations-GLB spielt in einem gewöhnlichen AnimationMixer ohne PaKaChi-Treiber.
+- Gerenderter neuer Ablauf prüft Auswahl der geometrischen Variante, Original-/Korrekturansichten, tatsächlich verschwundene Volumenwarnung, explizite Übernahme, Undo/Redo, Speichern und erneutes Laden. Der vorhandene volle 180°-Prüffall wird ausdrücklich als Suchziel gewählt und prüft weiterhin den Gewichtskandidaten mit verbleibender Volumenwarnung.
+- Tatsächliche neue Knie-/Hüftproben beider PaKaChi-Formen mit Radien 0,3/0,6 und Stärken 0,25/0,5/1 untersucht. Keine Variante besteht die gemeinsame Ziel-Gegenprüfung: teilweise weniger Dreiecksfehler (Tierform-Hüfte etwa 1566 → 1545), aber schlechtere Teilmetriken; deshalb verworfen. Keine neue akzeptierte Charakterkorrektur behauptet. [Reproduzierbare Messdaten](benchmarks/geometric-corrections-2026-11-09.json), erneut mit `node scripts/benchmark-geometric-corrections.mjs` erzeugbar.
+- Gesamtbewertung über alle Stichproben getestet: Eine geometrische Variante verbessert ein isoliertes Zwischenbild, lässt aber die volle Kollaps-Haltung schlechter als eine Gewichtsvariante; die Suche wählt die insgesamt bessere Gewichtsvariante. Unabhängige gewöhnliche Morph-/Gesichtseinflüsse bleiben beim Reset und Vergleich erhalten.
+- Die vorherigen Ergänzungen adaptiver Move-Diagnose und der eigenständigen Schnittdiagnose werden in diesen Meilenstein aufgenommen. Letzter vorheriger [CI-Lauf 42640052991](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/42640052991), Commit `6958574`, vollständig erfolgreich; kein Nachweis für die neuen geometrischen Formen.
+
+**Verfahren und Grenzen:** Eigene Implementierung eines starren Dualquaternion-Vergleichs nach [Kavan et al., Skinning with Dual Quaternions](https://users.cs.utah.edu/~ladislav/kavan07skinning/kavan07skinning.html), keine übernommene Quellcodebibliothek. Der Vergleich liefert ein Formziel, keine Qualitätsgarantie. Die Umrechnung in lineare Haut-Morphs verlangt eine nicht singuläre Bindung. Maximal vier Formen, 32.768 betroffene Vertices insgesamt, bis zu acht Kontextknochen; höchstens 32 native Treiber je Teilmodell. Absolute native Morphs und umgebaute Hautbindungen werden für die neue Erzeugung ausgeschlossen. Gegenprüfung aller gespeicherten Posen und bisherigen 16 Move-Schritte je Übergang, keine kontinuierliche oder adaptive Auftragsprüfung. Keine automatische Selbstüberschneidungs-/Anatomiefreigabe. Neue Projektfelder und Treibergruppen benötigen mindestens 0.94.0; ältere Leser können sie ignorieren. Lokale Prüfung abgeschlossen: 438 Fälle im Gesamtlauf sowie der anschließend ergänzte Test für gewöhnliche Morph-Einflüsse bestanden (439 unterschiedliche Fälle); die 37 betroffenen Export-/Rig-/Korrekturfälle abschließend erneut bestanden. TypeScript/Produktionsbuild und sechs gezielte Browserfälle bestanden; vier Korrektur-/KI-Fälle nach dem letzten Reset-Fix erneut grün. Vorher-/Nachher-Aufnahmen des neuen 90°-Prüfarms gesichtet: sichtbare Einschnürung deutlich verringert, keine Anatomiefreigabe. Frische CPU-Aufbereitung mit Pipelinehash `cb22146972091016b945f526b0a18848e2e3ef78f01fed2418309146df4b7dff`; beide GLBs sind bytegleich zum zuvor validierten Charakterstand. Vollständiger neuer CI-Lauf wird commitbezogen in PR #1 ausgewertet.
+
 ## Version 0.93.1
 
 **Prüfzeitpunkt:** 2026-11-09T14:23:44+01:00 (Europe/Berlin).
@@ -69,6 +83,8 @@ Die jüngste Version steht zuerst. Für eine bestimmte Version die Dokumentglied
 - Neuer unabhängiger Regressionstest mit kleinem geschlossenem Tetraedernetz scheitert vor der Korrektur und besteht danach bei 1/512. Prüft Oberflächen-/Volumengrenzen und Erhalt von Livepose, gespeicherter Pose und Geometrie. 19 betroffene Node-Fälle bestanden. Produktionsbuild und vier gezielte Chromium-Fälle bestanden: der zuvor fehlgeschlagene Mika-Ablauf einschließlich tatsächlicher Volumenmessung sowie die drei automatischen Studio-/KI-Korrekturfälle. Vollständiger neuer Lauf wird in PR #1 ausgewertet.
 
 **Grenzen:** Schonendere Pose erhält einen kleineren Bewegungsumfang und repariert kein Rig. Die Grenzen der algebraischen Volumenschätzung aus 0.93.0 bleiben bestehen.
+
+**CI-Nachtrag:** [Lauf 42625352516](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/42625352516), Commit `15ef43b`: 424 Node-Tests ohne Fehler/Abbrüche/übersprungene Fälle, Produktionsbuild, alle 43 Chromium-Fälle (13,8 Minuten), drei Importmessungen und Artefakte erfolgreich. Der zuvor fehlgeschlagene Mika-Fall ist bestanden. Frische Modellbytes und Pipelinehash stimmen mit dem lokal validierten Stand überein. Mika/256 Aufträge, Software-WebGL: 4.191,4 / 4.389,1 / 4.607,8 ms; Median 4.389,1 ms. Keine Zielhardware-Leistungszusage.
 
 ## Version 0.93.0
 

@@ -48,3 +48,10 @@ Die Tests verwenden simulierte Werkzeugantworten der Anbieter bei tatsächlich a
 Der lokale Auftrag und `analyze_studio_surface` liefern neben Dreiecksdehnung eine komponentenweise algebraische Volumenschätzung geschlossener Netzteile: Verhältnisgrenzen 0,8–1,2, Warnungen und Messabdeckung. Offene Flächen gelten als nicht messbar. Kandidaten dürfen Grenzüberschreitungen nicht erhöhen oder bisherige Messbarkeit verlieren; auch reine Volumenwarnungen sind Suchziele. Der Übernahmevorschlag enthält kompakte Vorher-/Nachher-Werte je Teilmodell. Höchstens 32 Teilmodelle werden in Werkzeugdetails ausgegeben, priorisiert nach Auffälligkeiten und dann Dreieckszahl; die Gegenprüfung berücksichtigt alle.
 
 Die Schätzung ist kein Nachweis lokaler Volumenerhaltung, natürlicher Anatomie oder fehlender Selbstüberschneidungen. `unchecked` benennt diese Grenzen weiterhin. Eine Verbesserung kann verbleibende Warnungen enthalten. Die externen MCP-Werkzeuge werden hierdurch nicht erweitert; Diagnose und Suche laufen weiterhin im integrierten Assistenten beziehungsweise der lokalen Browser-API.
+
+
+### Geometrische Vorschläge (0.94.0)
+
+Der bestehende lokale Suchauftrag kann zusätzlich eine geometrische Form erzeugen. Das kompakte Ergebnis enthält `kind: "geometry"` oder `kind: "weights"`; Modellbytes und Verschiebungsfelder werden nicht an das Sprachmodell zurückgegeben. Der revisionsgebundene `apply_skin_correction`-Befehl übernimmt genau diesen bereits gemessenen Kandidaten. Vorschau und explizite Übernahme verwenden dieselbe Form, mit einer Undo-Aktion. Keine neue externe MCP-Suche behauptet.
+
+Die geometrische Variante hält Gelenk-/Posekanäle unverändert. Persistenz und gebackener Move-GLB-Export sind eingebunden; Projekte mit neuen Formen benötigen mindestens 0.94.0. Messgrenzen, Abbruch und Gegenprüfung bleiben erhalten. Die neue Erzeugung ist ein begrenzter Dualquaternion-basierter Kandidat, kein vollständiger Volumen-, Kollisions- oder Anatomielöser.

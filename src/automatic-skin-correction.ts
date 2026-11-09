@@ -5,12 +5,15 @@ import {createPoseSurfaceChecker} from './pose-surface-check.ts';
 import type {SkinOverrides} from './pose-surface-check.ts';
 import {moveCheckTimes} from './move-limit-check.ts';
 import {transferSkinInfluences} from './studio-weight-transfer.ts';
-import {searchWeightCorrection,noMeasuredRegression,betterSurfaceReport} from './pose-weight-correction.ts';
+import {volumeSeverity} from './surface-volume.ts';
+import {buildGeometricCorrection} from './geometric-skin-correction.ts';
+import type {StudioCorrectiveShape} from './studio-corrective-shapes.ts';
+import {searchWeightCorrection,noMeasuredRegression,betterSurfaceReport,correctionSamples} from './pose-weight-correction.ts';
 import type {SurfaceReport,WeightCorrectionProposal} from './pose-weight-correction.ts';
 export const AUTOMATIC_SKIN_VERTEX_BUDGET=100_000_000;
 export const AUTOMATIC_SKIN_SAMPLE_LIMIT=512;
 export type SkinProgress={phase:'diagnosis'|'search'|'validation';samples:number;joints:number;candidates:number;vertexSamples:number};
-export interface AutomaticSkinProposal extends WeightCorrectionProposal {target:Pose;targetOrigin:{kind:'pose'|'move';id:string;time?:number};jointId:string;motionSamples:number;checkedMoves:number;checkedJoints:number;checkedCandidates:number}
+export interface AutomaticSkinProposal extends WeightCorrectionProposal {kind?:'geometry';shape?:StudioCorrectiveShape;sampledIssues:number;sampledVolumeExcess:number;target:Pose;targetOrigin:{kind:'pose'|'move';id:string;time?:number};jointId:string;motionSamples:number;checkedMoves:number;checkedJoints:number;checkedCandidates:number}
 export function skinCorrectionOverrides(rig:StudioRig,proposal:WeightCorrectionProposal):SkinOverrides{
  // Use the same transfer kernel as committed topology replay.
  const from=rig.data.points.find(p=>p.id===proposal.from),to=rig.data.points.find(p=>p.id===proposal.to);if(!from||!to)throw Error('Korrekturgelenke fehlen.');
@@ -59,15 +62,28 @@ export async function findAutomaticSkinCorrection(rig:StudioRig,signal:AbortSign
  const target=frames.filter(f=>options.poseId===undefined||f.origin.kind==='pose'&&f.origin.id===options.poseId).sort((a,b)=>betterSurfaceReport(a.before,b.before)?1:betterSurfaceReport(b.before,a.before)?-1:0)[0];
  if(!target||target.before.status!=='outside'){ensure();return null;}
  const joints=correctionJoints(rig,target.before);let best:AutomaticSkinProposal|null=null;
+ const emptyScore=()=>({sampledIssues:0,sampledVolumeExcess:0}),scoreReport=(score:ReturnType<typeof emptyScore>,report:SurfaceReport)=>{score.sampledIssues+=report.issues;score.sampledVolumeExcess+=report.meshes.reduce((n,m)=>n+volumeSeverity(m.volume),0);},beats=(score:ReturnType<typeof emptyScore>,report:SurfaceReport)=>!best||score.sampledIssues<best.sampledIssues||score.sampledIssues===best.sampledIssues&&(score.sampledVolumeExcess<best.sampledVolumeExcess-1e-6||Math.abs(score.sampledVolumeExcess-best.sampledVolumeExcess)<=1e-6&&betterSurfaceReport(report,best.after));
  for(const {joint,radius}of joints){
   state.phase='search';state.joints++;await tick();
   for(const chosenRadius of [...new Set(options.radius===undefined?[Math.max(.005,radius/2),radius,Math.min(2,radius*2)]:[options.radius])]){
+  const scores=new Map<string,ReturnType<typeof emptyScore>>(),key=(p:WeightCorrectionProposal)=>[p.from,p.to,p.amount,p.region.radius].join(':');
   const proposal=await searchWeightCorrection(rig,target.pose,joint,chosenRadius,signal,valid,{measure,candidate:()=>{state.candidates++;},accept:async(_candidate,overrides)=>{
-   state.phase='validation';
-   for(const frame of frames){await tick();measure();if(!noMeasuredRegression(frame.before,inspect(frame.pose,overrides))){state.phase='search';return false;}}
-   state.phase='search';return true;
+   state.phase='validation';const score=emptyScore();
+   for(const frame of frames){await tick();measure();const report=inspect(frame.pose,overrides);if(!noMeasuredRegression(frame.before,report)){state.phase='search';return false;}scoreReport(score,report);}
+   scores.set(key(_candidate),score);state.phase='search';return true;
   }});
-  if(proposal&&(!best||betterSurfaceReport(proposal.after,best.after)))best={...proposal,target:structuredClone(target.pose),targetOrigin:{...target.origin},jointId:joint.id,motionSamples,checkedMoves:rig.data.moves.length,checkedJoints:state.joints,checkedCandidates:state.candidates};
+  if(proposal&&beats(scores.get(key(proposal))!,proposal.after))best={...proposal,...scores.get(key(proposal))!,target:structuredClone(target.pose),targetOrigin:{...target.origin},jointId:joint.id,motionSamples,checkedMoves:rig.data.moves.length,checkedJoints:state.joints,checkedCandidates:state.candidates};
+  for(const strength of [.5,1]){
+   await tick();measure();state.candidates++;const shape=buildGeometricCorrection(rig,target.pose,joint,chosenRadius,strength);if(!shape)continue;
+   measure();const after=inspect(target.pose,undefined,shape);if(!betterSurfaceReport(after,target.before)||!noMeasuredRegression(target.before,after))continue;
+   state.phase='validation';let safe=true;const score=emptyScore();
+   for(const frame of frames){await tick();measure();const report=inspect(frame.pose,undefined,shape);if(!noMeasuredRegression(frame.before,report)){safe=false;break;}scoreReport(score,report);}
+   if(safe)for(const pose of correctionSamples(rig,target.pose)){await tick();measure();const before=inspect(pose);measure();if(!noMeasuredRegression(before,inspect(pose,undefined,shape))){safe=false;break;}}
+   state.phase='search';if(!safe||!beats(score,after))continue;
+   const parent=rig.data.points.find(p=>p.kind==='bone'&&rig.bones[p.bone!]===rig.bones[joint.bone!].parent)!;
+   best={kind:'geometry',shape,...score,from:joint.id,to:parent.id,amount:strength,region:{center:[...joint.rest],radius:chosenRadius},poseId:target.pose.id,before:target.before,after,affectedVertices:shape.meshes.reduce((n,m)=>n+m.indices.length,0),checkedPoses:rig.data.poses.length,intermediateSamples:3,target:structuredClone(target.pose),targetOrigin:{...target.origin},jointId:joint.id,motionSamples,checkedMoves:rig.data.moves.length,checkedJoints:state.joints,checkedCandidates:state.candidates};
+  }
+
   }
  }
  ensure();if(best){best.checkedJoints=state.joints;best.checkedCandidates=state.candidates;}return best;

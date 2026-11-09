@@ -1,4 +1,6 @@
 import {enablePoseMorphs,poseMorphBindings,poseMorphBindingCompatible,poseMorphWeights,updatePoseMorphs} from './pose-morphs.ts';
+import {createCorrectiveInstaller} from './studio-corrective-shapes.ts';
+import type {StudioCorrectiveShape} from './studio-corrective-shapes.ts';
 import {StudioTopology,validateReparent} from './studio-topology.ts';
 import {solveLimb} from './studio-ik.ts';
 import {detectConnections,edgeKey} from './studio-detection.ts';
@@ -36,8 +38,17 @@ export class StudioRig {
   private correctionsBindCompatible=true;
   private skinPreviewRestore:(()=>void)|null=null;
   private previewDisablesCorrections=false;
+  private installCorrectives:(shapes:readonly StudioCorrectiveShape[])=>void;
   get skinPreviewActive(){return this.skinPreviewRestore!==null;}
   stopSkinPreview(){this.skinPreviewRestore?.();}
+  previewCorrective(values:Record<string,Transform>,shape:StudioCorrectiveShape){
+    this.stopSkinPreview();const origin=this.capture();let active=true;
+    const restore=()=>{if(!active)return;active=false;this.skinPreviewRestore=null;this.installCorrectives(this.data.correctiveShapes??[]);this.apply(origin);};
+    this.skinPreviewRestore=restore;try{this.installCorrectives([...(this.data.correctiveShapes??[]),shape]);this.apply(values);}catch(error){restore();throw error;}return restore;
+  }
+  addCorrective(shape:StudioCorrectiveShape){
+    const before=this.data.correctiveShapes;try{this.data.correctiveShapes=[...(before??[]),structuredClone(shape)];this.installCorrectives(this.data.correctiveShapes);poseMorphBindings(this.root);}catch(error){this.data.correctiveShapes=before;this.installCorrectives(before??[]);throw error;}
+  }
   /** Ephemeral weights for a measured preview. Project data and source binding stay unchanged. */
   previewSkin(values:Record<string,Transform>,overrides:import('./pose-surface-check.ts').SkinOverrides){
     this.stopSkinPreview();const origin=this.capture(),bindings=[...overrides].map(([i,binding])=>{const mesh=this.surfaces[i]?.mesh;if(!(mesh instanceof T.SkinnedMesh))throw Error('Vorschau passt nicht zur Haut.');return {mesh,binding,indices:mesh.geometry.getAttribute('skinIndex'),weights:mesh.geometry.getAttribute('skinWeight')};});
@@ -63,6 +74,7 @@ export class StudioRig {
       this.surfaces.push({mesh:node,base,world,worldBounds:new T.Box3().setFromPoints(world),worldInverse:node.matrixWorld.clone().invert(),inverse:new T.Matrix3().setFromMatrix4(node.matrixWorld.clone().invert())});
     }});
     sourceGeometries.forEach(g=>g.dispose());
+    this.installCorrectives=createCorrectiveInstaller(root,this.surfaces);
     this.topology=new StudioTopology([...this.bones],root);
     this.initial={...emptyStudio(),boneRest:this.bones.map(read),points:this.bones.map((bone,i)=>({id:`bone-${i}`,kind:'bone',bone:i,name:(bone.name || `Gelenk ${i+1}`).slice(0,100),rest:bone.getWorldPosition(new T.Vector3()).toArray(),size:.025,radius:.18}))};
     this.data=saved ? structuredClone(saved) : structuredClone(this.initial);
@@ -166,17 +178,21 @@ export class StudioRig {
   dispose(){this.stopSkinPreview();this.topology.restore();}
   reset() {
     this.stopSkinPreview();
+    this.installCorrectives([]);
     this.figureOffset.set(0,0,0);this.figureRotation.identity();this.figureScale=1;this.figureMatrix.identity();this.root.matrixAutoUpdate=this.rootAutoUpdate;this.root.matrix.copy(this.rootMatrix);
     for(const item of this.originalNodes){write(item.node,item.value);item.node.scale.copy(item.scale);}
     const bones=this.topology.build(this.data.boneInsertions??[],this.data.boneRest,this.data.boneDeletions??[],this.data.boneReparents??[],this.data.weightTransfers??[]);this.bones.splice(0,this.bones.length,...bones);
     this.bones.forEach((b,i)=>write(b,this.data.boneRest[i]));
     this.root.updateWorldMatrix(true,true);
     this.rebind();
+    this.installCorrectives(this.data.correctiveShapes??[]);
+    this.correctionsBindCompatible=poseMorphBindingCompatible(this.root);
     this.surfaceValues=Object.fromEntries(this.data.points.filter(p=>p.kind==='surface').map(p=>[p.id,{position:[...p.rest] as Vec3,rotation:[0,0,0,1]}]));
     this.deform();
   }
   restoreSource() {
     this.stopSkinPreview();
+    this.installCorrectives([]);
     enablePoseMorphs(this.root,this.data.poseCorrections!==false);
     this.figureOffset.set(0,0,0);this.figureRotation.identity();this.figureScale=1;this.figureMatrix.identity();this.root.matrixAutoUpdate=this.rootAutoUpdate;this.root.matrix.copy(this.rootMatrix);
     this.topology.restore();

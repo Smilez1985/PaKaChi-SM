@@ -1,23 +1,23 @@
 # Roadmap – offene Aufgaben
 
-**Entwicklungsstand: 0.93.1 · Abgleich: 09.11.2026.** Teil der [Blaupause](README.md).
+**Entwicklungsstand: 0.94.0 · Abgleich: 09.11.2026.** Teil der [Blaupause](README.md).
 
 Diese Roadmap enthält offene Umsetzung und ausstehende Abnahme. Erledigte Änderungen stehen nach Version im [Changelog](CHANGELOG.md); Nachweise und Grenzen im [Prüfstand](PRUEFUNG.md). Eine implementierte Funktion ist nicht automatisch manuell oder mit realen Anbietern abgenommen.
 
 ## Übergabe und nächster Schritt
 
-**Übergabe aktualisiert:** 2026-11-09T14:23:44+01:00 (Europe/Berlin). Softwarestand **0.93.1**.
+**Übergabe aktualisiert:** 2026-11-09T20:52:52+01:00 (Europe/Berlin). Softwarestand **0.94.0**.
 
 - **Arbeitsbranch:** `work/local-verification-model-zoo`, [Entwurfs-PR #1](https://github.com/Smilez1985/PaKaChi-SM/pull/1); noch nicht nach `main` zusammengeführt.
-- **Neue Grundlage:** Schonendere Posen werden seit 0.93.1 auch mit kleineren Bewegungsanteilen gegen Volumen geprüft; CI-Fehler der zu früh endenden Suche behoben. Automatischer lokaler Hautkorrekturauftrag: Diagnose, Gelenkauswahl aus der tatsächlichen Haut, begrenzte Suche, Gegenprüfung sämtlicher gespeicherter Posen und eigener Move-Stichproben, Original-/Korrekturvorschau und einmalige Undo-fähige Übernahme. Zusätzlich komponentenweise Volumenschätzung geschlossener Netze mit messwertgebundener Gegenprüfung; offene Flächen bleiben nicht messbar. Aufruf durch integrierten KI-Assistenten möglich. [Prüfbericht](PRUEFUNG.md#version-0931).
-- **Nächste Aktion:** Kandidaten über lokale Gewichtsübertragungen hinaus erzeugen: geprüfte Korrekturformen und bessere Schulter-/Hüftverformung; lokale Volumenerhaltung, Silhouette und Selbstüberschneidungen in die Gegenprüfung aufnehmen; die neue globale Schätzung allein erkennt nicht jede lokale Einschnürung. Mehrere abgestimmte Korrekturen pro Auftrag und adaptive Zwischenbildprüfung ergänzen. Der bestehende Auftrag bleibt begrenzt und darf bei fehlender Verbesserung ablehnen. Fachadapter der Rigging-Rolle und externe MCP-Suche anschließend anbinden.
+- **Neue Grundlage:** Automatischer Auftrag vergleicht Gewichtsänderungen mit lokalen poseabhängigen geometrischen Korrekturformen; gemeinsame Pose-/Move-Gegenprüfung, Original-/Korrekturvorschau, KI-Aufruf, Undo und Projekt-/GLB-Export. Zusätzliche adaptive Bewegungsdiagnose und begrenzte separate Schnittdiagnose sind vorhanden. [Prüfbericht](PRUEFUNG.md#version-0940).
+- **Nächste Aktion:** Geometrische Kandidaten an tatsächlichen Schulter-/Hüft-/Kniefehlern weiterentwickeln. Die geprüften neuen PaKaChi-Proben werden bisher verworfen. Lokale Formziele und Fellansätze verbessern, mehrere Korrekturen gemeinsam optimieren; adaptive Zwischenbilder und zuverlässige Selbstüberschneidungsprüfung in den automatischen Auftrag integrieren. Externe MCP-Suche und produktive Fachadapter ergänzen.
 - **Charakterstand:** 21 akzeptierte Korrekturhaltungen der Arbeitsform (fünf zusätzliche linke Hüfthaltungen), 11 der Tierform. Schulterkandidaten und weitere Hüftkandidaten bleiben nach den Messungen verworfen; die zugrunde liegenden Fehler bestehen weiter.
 - **Danach:** Eine gespeicherte Standard-Verwandlung auf dieser Oberfläche, vorwärts und rückwärts mit identischen Zwischenformen; Qualität auch zwischen den Endposen prüfen.
 - **Hardware parallel:** Die [fünf Verbindungsschritte](LOKALE-WERKZEUGE.md#verbindung-zu-deinem-rechner) bleiben verfügbar. Windows-/Caddy-/GPU-Abnahme ist offen, blockiert die CPU-basierte Charakter-/Rigarbeit jedoch nicht. Ein tatsächlicher externer Aufruf von `local_get_status` bleibt der erste Verbindungsnachweis.
 
 ## Prioritäten
 
-1. **Automatische Korrekturqualität erweitern:** Begrenzter Gewichts-Korrekturauftrag ist implementiert. Weitere geometrische Kandidaten, mehrere abgestimmte Änderungen, adaptive Move-Prüfung und echte Fachmodell-Abnahme fehlen.
+1. **Automatische Korrekturqualität erweitern:** Gewichts- und geometrische Kandidaten sowie separate adaptive Move-Diagnose sind implementiert. Bessere geometrische Kandidaten am Originalcharakter, mehrere abgestimmte Änderungen, adaptive Gegenprüfung im Auftrag und echte Fachmodell-Abnahme fehlen.
 2. **Charakter und Rig verfeinern:** Beide Formen besitzen seit 0.85.0 dieselbe 59-Gelenk-Hierarchie einschließlich 14 beweglicher Finger/Zehen und echte Hautgewichte. Gesicht, Fell und lokale Pfotenflächen sind überarbeitet; die Körpernetze haben geschlossene, konsistent orientierte Kanten. Finger-/Pfotenproportionen, Anschlüsse bei großen Beugungen, verdeckte Flächen und Hüft-/Schulterübergänge weiter korrigieren und designgetreu abnehmen.
 3. **Gemeinsame Morph-Topologie:** Die umformungsbedingten Hautbrücken der unabhängig rekonstruierten Netze beseitigen. Ein Charakter mit kompatibler Netzstruktur und geprüftem Rig für beide Formen.
 4. **Standard-Verwandlung:** Danach eine gespeicherte Animation Normalform → Arbeitsform implementieren; dieselbe Animation rückwärts, Endform halten und laufende Bewegung ohne Sprung umkehren. Zustandszuordnung wie im Originalplayer.

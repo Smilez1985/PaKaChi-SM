@@ -1,4 +1,5 @@
 import type {WeightView} from './studio-weight-visibility.ts';
+import {validCorrectiveShapes} from './studio-corrective-shapes.ts';
 import {REVIEW_REASONS} from './studio-review.ts';
 import type {ReviewReason} from './studio-review.ts';
 export type Vec3 = [number, number, number];
@@ -22,6 +23,7 @@ export function validWeightRegion(value:unknown):value is WeightRegion {
 }
 export type BoneInsertion = ({child:number;ratio:number;parent?:never}|{parent:number;child?:never;ratio?:never}) & {afterDeletions?:number};
 export interface StudioData {
+  correctiveShapes?: import('./studio-corrective-shapes.ts').StudioCorrectiveShape[];
   poseCorrections?: boolean;
   weightTransfers?: {from:number;to:number;amount:number;after:number;region?:WeightRegion}[];
   boneReparents?: {bone:number;parent:number;after:number}[];
@@ -53,6 +55,7 @@ export function parseProject(input: unknown): StudioProject {
   require(a.defaultMove===undefined || moveIds.has(a.defaultMove as string));
   if(a.states!==undefined) {require(obj(a.states));for(const [key,value] of Object.entries(a.states))require(['idle','talking','thinking','working','waiting','review','error','sleeping'].includes(key) && moveIds.has(value as string));}
   const d=input.studio; require(obj(d) && Array.isArray(d.points) && d.points.length<=256 && Array.isArray(d.links) && d.links.length<=2048 && Array.isArray(d.boneRest) && d.boneRest.length<=512 && d.boneRest.every(v=>transform(v)) && Array.isArray(d.poses) && d.poses.length<=100 && Array.isArray(d.moves) && d.moves.length<=100);
+  require(validCorrectiveShapes(d.correctiveShapes),'Ungültige geometrische Hautkorrekturen.');
   if(d.boneInsertions!==undefined){
     require(Array.isArray(d.boneInsertions)&&d.boneInsertions.length<=64&&d.boneRest.length<=256,'Ungültige Knochenänderungen.');
     const count=d.boneRest.length-d.boneInsertions.length;require(count>0);

@@ -1,7 +1,7 @@
 import * as T from 'three';
 export const POSE_MORPHS='pakachiPoseMorphs';
 export const POSE_MORPH_BIND='pakachiPoseMorphBind';
-export interface PoseMorphShape {joint:string;rest:number[];pose:number[];radius?:number;constraints?:{joint:string;rest:number[];radius:number}[];axisCone?:{inner:number;outer:number}}
+export interface PoseMorphShape {group?:string;joint:string;rest:number[];pose:number[];radius?:number;constraints?:{joint:string;rest:number[];radius:number}[];axisCone?:{inner:number;outer:number}}
 interface Binding {mesh:T.Mesh;entries:{bone:T.Bone;index:number;pose:T.Quaternion;radius:number;shape:PoseMorphShape;lookup:Map<string,T.Bone>}[]}
 const cubic=(t:number)=>{const x=T.MathUtils.clamp(t,0,1);return x*x*(3-2*x);};
 /** Shared by preparation, live playback, pure geometry checks and animation export. */
@@ -12,19 +12,23 @@ export function poseMorphAmount(rotation:T.Quaternion,shape:PoseMorphShape,rotat
  return value;
 }
 const cache=new WeakMap<T.Object3D,Binding[]>(),disabled=new WeakSet<T.Mesh>();
+export function invalidatePoseMorphBindings(root:T.Object3D){cache.delete(root);}
 export function poseMorphBindings(root:T.Object3D):Binding[]{
  const previous=cache.get(root);if(previous)return previous;
  const bones:T.Bone[]=[];root.traverse(n=>{if(n instanceof T.Bone)bones.push(n);});const bindings:Binding[]=[];
+ const matchesName=(bone:T.Bone,name:string)=>bone.name===name||bone.userData.name===name;
+ const lookup=new Map<string,T.Bone>();for(const bone of bones)for(const name of [bone.name,bone.userData.name])if(typeof name==='string'&&bones.filter(b=>matchesName(b,name)).length===1)lookup.set(name,bone);
  const quaternion=(v:unknown)=>Array.isArray(v)&&v.length===4&&v.every(n=>typeof n==='number'&&Number.isFinite(n))&&Math.abs(v.reduce((s,n)=>s+n*n,0)-1)<1e-5;
  root.traverse(mesh=>{if(!(mesh instanceof T.Mesh)||mesh.userData[POSE_MORPHS]===undefined)return;
   const raw=mesh.userData[POSE_MORPHS];if(!Array.isArray(raw)||raw.length>32)throw Error('Ungültige poseabhängige Korrekturformen.');const used=new Set<number>();
   const entries=raw.map(item=>{
    if(!item||typeof item.joint!=='string'||item.joint.length>100||typeof item.target!=='string'||item.target.length>100||!quaternion(item.rest)||!quaternion(item.pose))throw Error('Ungültige poseabhängige Korrekturformen.');
-   const matches=bones.filter(b=>b.name===item.joint),index=mesh.morphTargetDictionary?.[item.target];if(matches.length!==1||index===undefined||used.has(index)||!mesh.geometry.morphAttributes.position?.[index])throw Error('Korrekturform passt nicht zum Modell.');used.add(index);
+   const matches=bones.filter(b=>matchesName(b,item.joint)),index=mesh.morphTargetDictionary?.[item.target];if(matches.length!==1||index===undefined||used.has(index)||!mesh.geometry.morphAttributes.position?.[index])throw Error('Korrekturform passt nicht zum Modell.');used.add(index);
    const rest=new T.Quaternion().fromArray(item.rest),pose=new T.Quaternion().fromArray(item.pose),distance=rest.angleTo(pose),radius=item.radius??distance;if(!Number.isFinite(radius)||radius<.01||radius>distance+1e-8)throw Error('Korrekturform benötigt Abstand zur Grundpose.');
-   if(item.constraints!==undefined&&(!Array.isArray(item.constraints)||item.constraints.length>8||item.constraints.some((c:any)=>!c||typeof c.joint!=='string'||bones.filter(b=>b.name===c.joint).length!==1||!quaternion(c.rest)||!Number.isFinite(c.radius)||c.radius<=1e-6||c.radius>Math.PI)))throw Error('Ungültiger Bewegungskontext der Korrekturform.');
+   if(item.group!==undefined&&(typeof item.group!=='string'||!item.group||item.group.length>100))throw Error('Ungültige Korrekturgruppe.');
+   if(item.constraints!==undefined&&(!Array.isArray(item.constraints)||item.constraints.length>8||item.constraints.some((c:any)=>!c||typeof c.joint!=='string'||bones.filter(b=>matchesName(b,c.joint)).length!==1||!quaternion(c.rest)||!Number.isFinite(c.radius)||c.radius<=1e-6||c.radius>Math.PI)))throw Error('Ungültiger Bewegungskontext der Korrekturform.');
    if(item.axisCone&&(!Number.isFinite(item.axisCone.inner)||!Number.isFinite(item.axisCone.outer)||item.axisCone.inner<0||item.axisCone.outer<=item.axisCone.inner||item.axisCone.outer>Math.PI))throw Error('Ungültiger Achsenbereich der Korrekturform.');
-   return {bone:matches[0],index,pose,radius,shape:structuredClone(item),lookup:new Map(bones.map(b=>[b.name,b]))};
+   return {bone:matches[0],index,pose,radius,shape:structuredClone(item),lookup};
   });bindings.push({mesh,entries});
  });cache.set(root,bindings);return bindings;
 }
@@ -38,9 +42,9 @@ export function enablePoseMorphs(root:T.Object3D,enabled:boolean){for(const {mes
 export function poseMorphWeights(root:T.Object3D,rotation:(bone:T.Bone)=>T.Quaternion=bone=>bone.quaternion,enabled=true){
  const result=new Map<T.Mesh,number[]>();
  for(const {mesh,entries}of poseMorphBindings(root)){
-  const weights=[...(mesh.morphTargetInfluences??[])],sums=new Map<T.Bone,number>();
-  for(const entry of entries){const value=enabled&&poseMorphsEnabled(mesh)?poseMorphAmount(rotation(entry.bone),entry.shape,name=>rotation(entry.lookup.get(name)!)):0;weights[entry.index]=value;sums.set(entry.bone,(sums.get(entry.bone)??0)+value);}
-  for(const e of entries){const sum=sums.get(e.bone)!;if(sum>1)weights[e.index]/=sum;}result.set(mesh,weights);
+  const weights=[...(mesh.morphTargetInfluences??[])],sums=new Map<string,number>(),key=(e:Binding['entries'][number])=>e.bone.uuid+'|'+(e.shape.group??'joint');
+  for(const entry of entries){const value=enabled&&poseMorphsEnabled(mesh)?poseMorphAmount(rotation(entry.bone),entry.shape,name=>rotation(entry.lookup.get(name)!)):0;weights[entry.index]=value;sums.set(key(entry),(sums.get(key(entry))??0)+value);}
+  for(const e of entries){const sum=sums.get(key(e))!;if(sum>1)weights[e.index]/=sum;}result.set(mesh,weights);
  }return result;
 }
 export function updatePoseMorphs(root:T.Object3D){for(const [mesh,weights]of poseMorphWeights(root))mesh.morphTargetInfluences=weights;}

@@ -20,6 +20,7 @@ export function flagAffectedPoses(before:StudioData,after:StudioData):void {
   const current=new Map(after.points.map(p=>[p.id,p]));
   for(const pose of after.poses){const previous=before.poses.find(p=>p.id===pose.id);if(!previous)continue;
     const reasons=new Set<ReviewReason>(pose.review??[]);
+    if(JSON.stringify(before.correctiveShapes??[])!==JSON.stringify(after.correctiveShapes??[]))reasons.add('pose-corrections');
     if((before.poseCorrections!==false)!==(after.poseCorrections!==false))reasons.add('pose-corrections');
     // Skin weights and descendant joints can affect any stored pose; conservatively flag all.
     if(bonesChanged)reasons.add('bone-rest');

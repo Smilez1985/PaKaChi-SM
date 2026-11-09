@@ -12,16 +12,29 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+Noch keine weiteren Änderungen.
+
+## [0.94.0] - 2026-11-09
+
+Zeitstempel: 2026-11-09T20:52:52+01:00 (Europe/Berlin)
+
 ### Added
 
+- Automatischer Studio-Auftrag erzeugt neben Gewichtsänderungen nun lokale geometrische Korrekturformen. Dualquaternion-basierte Zielpositionen werden durch die bestehende lineare Hautbindung zurückgerechnet und als dünn gespeicherte Morph-Verschiebungen angeboten. Gelenkwinkel, gespeicherte Posekanäle, Move-Folgen und Grundform bleiben erhalten. Singuläre Bindungen und ungeeignete Transformationen liefern keinen geometrischen Kandidaten.
+- Beide Kandidatentypen müssen dieselben Dehnungs-/Volumen-Gegenprüfungen sämtlicher gespeicherter Posen und 16 Stichproben je Übergang der eigenen Moves einschließlich Schleifenschluss bestehen. Geometrische Kandidaten werden zusätzlich entlang der Grundform-Zielpose-Strecke geprüft. Eigenständige Vorschau, explizite Übernahme mit einer Undo-/Redo-Aktion, KI-Aufruf und Speichern/Laden sind eingebunden.
+- Poseabhängige Korrekturen werden in Studio-Projekten und Model-Zoo-Paketen erhalten und in die Move-Kompatibilität einbezogen. Rigged-GLB erhält Morph-Ziele und PaKaChi-Treiber, Move-GLB bäckt die Treiber in gewöhnliche Morph-Animationsspuren. Höchstens vier geometrische Formen und insgesamt 32.768 betroffene Vertices je Projekt; weiterhin höchstens 32 Treiber je Teilmodell.
 - Bewegungs-Oberflächendiagnose ergänzt die 16 Grundschritte je Übergang um höchstens 64 adaptive Zwischenbilder bei Warnungen oder deutlichen Messwertänderungen, maximal zwei Verfeinerungsstufen und weiterhin höchstens 20 Millionen Vertex-Auswertungen. Ergebnisse enthalten die Anzahl zusätzlicher Stichproben. Abbruch, Revision, Schleifenschluss und unveränderte Modelldaten bleiben erhalten. Dies ist keine kontinuierliche Bewegungs- oder Kollisionsfreigabe.
 
 - Eigenständiger, paarbudgetierter Test auf transversale Dreieck-Selbstüberschneidungen ergänzt. Angrenzende Flächen sind ausgenommen, coplanare Fälle und Budgetüberschreitungen werden ausdrücklich als unvollständig markiert. Noch keine automatische Freigabe oder Korrekturentscheidung anhand dieser Diagnose.
 
-### Tests
 
-- Geometrische Schnitt-, Nicht-Schnitt-, Nachbarschafts-, Budget- und Ungültigkeitsfälle.
-- Regressionen für auffällige Zwischenbilder und eine konstante, sichere Bewegung; Chromium-Diagnose prüft das begrenzte Zusatzsampling.
+### Changed
+
+- Kandidatenauswahl berücksichtigt Fehler und Volumen-Grenzüberschreitungen über alle geprüften Pose-/Move-Stichproben; ein besseres Einzelbild verdrängt keine insgesamt bessere Bewegung.
+- Pose-Treiber unterstützen getrennte Gruppen, sodass neue geometrische Formen vorhandene charakterspezifische Korrekturen nicht heruntergewichten. Eingelesene ursprüngliche Knochennamen werden nach glTF-Namensnormalisierung eindeutig zugeordnet. Importierte positive statische Modellskalierung wird vor dem starren Blend-Vergleich herausgerechnet.
+- Suche je Gelenk/Radius um zwei geometrische Stärken erweitert; bisherige Begrenzungen auf vier Gelenke, drei Radien, 512 Ausgangsstichproben und 100 Millionen Vertex-Auswertungen bleiben bestehen. Modelle mit geänderter Hautbindung, abgeschalteten Korrekturen, absoluten nativen Morph-Zielen oder ungeeigneter Skalierung werden für diese Kandidaten nicht verwendet.
+
+Die neue Form ist ein begrenzter geometrischer Kandidat, keine allgemeine Anatomie- oder Kollisionsfreigabe. Der geschlossene 90°-Prüfarm verbessert sein Volumenverhältnis von rund 0,634 auf über 0,8 bei gleichen Gelenkwinkeln. Die geprüften neuen PaKaChi-Knie-/Hüftvarianten werden wegen fehlender Verbesserung oder schlechterer Teilmetriken verworfen; die ursprünglichen Charakterformen bleiben erhalten. Projekte mit `correctiveShapes` und deren gruppierten Laufzeittreibern benötigen mindestens 0.94.0; ältere Projektleser führen diese Erweiterung nicht korrekt aus. Gebackene GLB-Animationen benötigen diese Studio-Erweiterung nicht.
 
 ## [0.93.1] - 2026-11-09
 
@@ -1968,3 +1981,5 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 [0.93.0]: PRUEFUNG.md#version-0930
 
 [0.93.1]: PRUEFUNG.md#version-0931
+
+[0.94.0]: PRUEFUNG.md#version-0940

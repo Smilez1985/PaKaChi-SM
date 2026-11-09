@@ -495,3 +495,16 @@ Move-Berichte enthalten Minimum/Maximum der Volumenverhältnisse, Warnungen, tei
 
 
 **Korrektur 0.93.1:** „Schonendere Pose erstellen“ sucht bis zu zwölf Bewegungsanteile und bei Bedarf bis 1/1024 der ursprünglichen Bewegung. Der frühere kleinste Anteil 1/16 konnte gerade kleine geschlossene Flächen weiterhin über die Volumengrenze hinaus verformen. Jeder angebotene Kandidat besteht weiterhin Dreiecks-, Volumen- und Beugeprüfung. Die Grundform mit Bewegungsanteil null wird nicht als gefundene Variante angeboten. Ohne bestandenen Kandidaten bleibt die Suche erfolglos; ursprüngliche Posen bleiben erhalten.
+
+
+## Geometrische Korrekturformen (0.94.0)
+
+„Hautkorrektur automatisch suchen“ vergleicht jetzt Gewichtsänderungen und lokale geometrische Korrekturformen. Die zweite Variante verändert die Oberfläche abhängig von der Gelenkhaltung und erhält die vorhandenen Posewerte. Das Ergebnis zeigt „Geometrische Korrekturform“ oder „Gewichtsänderung“. Beide lassen sich mit „Original ansehen“ und „Korrektur ansehen“ vergleichen. Erst „Geprüfte Korrektur übernehmen“ ändert das Projekt; Rückgängig/Wiederholen umfasst die ganze Übernahme.
+
+Eine geometrische Form ist nahe der geprüften Gelenkrotation aktiv, blendet zur neutralen Haltung aus und berücksichtigt bis zu acht benachbarte Hautknochen als Bewegungskontext. Sie wird zusätzlich zu vorhandenen importierten Formen ausgewertet. Die Suche kann eine Variante ablehnen; ein voller 180°-Kollaps lässt sich bei singulärer linearer Bindung nicht auf diesem Weg zurückrechnen. Geeignete Gewichtsvarianten bleiben dann möglich. Statische positive Modellskalierung ist unterstützt; nicht starre Hauttransformationen und Modelle mit bereits umgebauter Bindung sind für die neue Erzeugung ausgeschlossen.
+
+Höchstens vier neue Formen und insgesamt 32.768 betroffene Vertices sind speicherbar. Projekt-/Model-Zoo-Export erhält sie. Solche Projekte und die PaKaChi-Treiber eines Rigged-GLB benötigen mindestens Studio/Player 0.94.0. Ältere Projektleser können das zusätzliche Feld ignorieren und dadurch die Form falsch wiedergeben. Ein Move als GLB erhält gewöhnliche, mit 30 Hz abgetastete Morph-Spuren für andere Player. Neue Formen werden wie vorhandene Formen bei inkompatiblen Skelett-/Gewichtsänderungen deaktiviert; die Posen erhalten Prüfhinweise.
+
+Die automatische Kandidaten-Gegenprüfung verwendet weiterhin 16 Schritte je Übergang. Die separate Bewegungsdiagnose kann bis zu 64 weitere adaptive Zwischenbilder ergänzen. Selbstüberschneidungsdiagnose, lückenlose Bewegungssicherheit und anatomische Qualität sind weiterhin keine automatische Freigabe.
+
+Die Auswahl bewertet die Fehler über sämtliche geprüften Posen und Move-Bilder. Bei gleicher Gesamtbewertung entscheidet die Zielpose. Ein isoliert schöneres Zielbild allein genügt damit nicht, um eine über die Bewegung hinweg bessere Variante zu ersetzen.
