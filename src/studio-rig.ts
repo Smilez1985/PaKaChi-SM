@@ -47,6 +47,7 @@ export class StudioRig {
     this.skinPreviewRestore=restore;try{this.installCorrectives([...(this.data.correctiveShapes??[]),shape]);this.apply(values);}catch(error){restore();throw error;}return restore;
   }
   addCorrective(shape:StudioCorrectiveShape){
+    if(!this.poseCorrectionsCompatible)throw Error('Hautbindung passt nicht zu geometrischen Korrekturen.');
     const before=this.data.correctiveShapes;try{this.data.correctiveShapes=[...(before??[]),structuredClone(shape)];this.installCorrectives(this.data.correctiveShapes);poseMorphBindings(this.root);}catch(error){this.data.correctiveShapes=before;this.installCorrectives(before??[]);throw error;}
   }
   /** Ephemeral weights for a measured preview. Project data and source binding stay unchanged. */
@@ -185,7 +186,7 @@ export class StudioRig {
     this.bones.forEach((b,i)=>write(b,this.data.boneRest[i]));
     this.root.updateWorldMatrix(true,true);
     this.rebind();
-    this.installCorrectives(this.data.correctiveShapes??[]);
+    if(this.poseCorrectionsCompatible)this.installCorrectives(this.data.correctiveShapes??[]);
     this.correctionsBindCompatible=poseMorphBindingCompatible(this.root);
     this.surfaceValues=Object.fromEntries(this.data.points.filter(p=>p.kind==='surface').map(p=>[p.id,{position:[...p.rest] as Vec3,rotation:[0,0,0,1]}]));
     this.deform();

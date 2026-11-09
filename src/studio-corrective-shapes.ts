@@ -1,5 +1,5 @@
 import * as T from 'three';
-import {POSE_MORPHS,POSE_MORPH_BIND,invalidatePoseMorphBindings} from './pose-morphs.ts';
+import {POSE_MORPHS,POSE_MORPH_BIND,invalidatePoseMorphBindings,poseMorphBindings} from './pose-morphs.ts';
 import type {PoseMorphShape} from './pose-morphs.ts';
 export const MAX_STUDIO_SHAPES=4,MAX_CORRECTIVE_VERTICES=32768;
 export interface StudioCorrectiveShape extends PoseMorphShape {id:string;meshes:{mesh:number;indices:number[];deltas:number[]}[]}
@@ -40,5 +40,6 @@ export function createCorrectiveInstaller(root:T.Object3D,surfaces:readonly {mes
    mesh.userData[POSE_MORPH_BIND]??=mesh.skeleton.boneInverses.map(m=>m.clone().multiply(mesh.bindMatrix).toArray());
   }
   invalidatePoseMorphBindings(root);
+  if(!shapes.length)poseMorphBindings(root);
  };
 }

@@ -3,7 +3,7 @@
   "version": 1,
   "software": "0.94.0",
   "scope": "Individual X90 target probes, not stored-pose or move acceptance. Rejected candidates do not alter the character.",
-  "methodSha256": "79b70b3af715f9d9de61d4baee2833a35de1193c97be3a95f2caa0ae7774d13d",
+  "methodSha256": "3bd98b08248b58f8e9272346cfaf89dd9bc6828ddcd86619ce8febac72c48f3f",
   "forms": [
     {
       "form": "humanoid",

@@ -31,6 +31,7 @@ Zeitstempel: 2026-11-09T20:52:52+01:00 (Europe/Berlin)
 ### Changed
 
 - Kandidatenauswahl berücksichtigt Fehler und Volumen-Grenzüberschreitungen über alle geprüften Pose-/Move-Stichproben; ein besseres Einzelbild verdrängt keine insgesamt bessere Bewegung.
+- Geometrische Formen bleiben bei inkompatiblen Skelettumbauten gespeichert und werden deaktiviert. Gelöschte Korrekturknochen blockieren den Umbau nicht; Wiederherstellung/Undo aktiviert die passende Form erneut. Projekt-Replay und gerenderter Knochenumbau sind geprüft.
 - Pose-Treiber unterstützen getrennte Gruppen, sodass neue geometrische Formen vorhandene charakterspezifische Korrekturen nicht heruntergewichten. Eingelesene ursprüngliche Knochennamen werden nach glTF-Namensnormalisierung eindeutig zugeordnet. Importierte positive statische Modellskalierung wird vor dem starren Blend-Vergleich herausgerechnet.
 - Suche je Gelenk/Radius um zwei geometrische Stärken erweitert; bisherige Begrenzungen auf vier Gelenke, drei Radien, 512 Ausgangsstichproben und 100 Millionen Vertex-Auswertungen bleiben bestehen. Modelle mit geänderter Hautbindung, abgeschalteten Korrekturen, absoluten nativen Morph-Zielen oder ungeeigneter Skalierung werden für diese Kandidaten nicht verwendet.
 
