@@ -7,6 +7,9 @@ import {checkMoveSurface as inspectMoveSurface} from './move-surface-check.ts';
 import {checkPoseSurface as inspectPoseSurface,suggestGentlerPose} from './pose-surface-check.ts';
 import {poseMorphBindings} from './pose-morphs.ts';
 import {searchWeightCorrection} from './pose-weight-correction.ts';
+import {findAutomaticSkinCorrection,skinCorrectionOverrides} from './automatic-skin-correction.ts';
+import type {AutomaticSkinProposal,SkinProgress} from './automatic-skin-correction.ts';
+import {noMeasuredRegression} from './pose-weight-correction.ts';
 import {loadMoveLibrary,loadLibraryMove} from './move-library.ts';
 import type {LibraryMove} from './move-library.ts';
 import {exportMoveFile,importMoveFile,MAX_MOVE_FILE} from './move-file.ts';
@@ -50,7 +53,7 @@ export class StudioEditor {
   private timeline:{move:Move;time:number;preview:boolean;sequence?:StudioMove}|null=null;
   private gesture:Snapshot|null=null;
   private gesturePosition:T.Vector3|null=null;
-  get interactionActive(){return this.playing||!!this.gesture||!!this.weightStroke;}
+  get interactionActive(){return this.playing||!!this.gesture||!!this.weightStroke||this.rig.skinPreviewActive;}
   readonly session=crypto.randomUUID();
   private revision=0;
   private agentEditing=false;
@@ -58,6 +61,10 @@ export class StudioEditor {
   private exportingFigure=false;
   private moveCheck:AbortController|null=null;
   private surfaceCheck:AbortController|null=null;
+  private automaticCheck:AbortController|null=null;
+  private automaticProposal:(AutomaticSkinProposal&{id:string;revision:number})|null=null;
+  private automaticProgress:SkinProgress|null=null;
+  private automaticOutcome:''|'none'='';
   private weightCorrection:(NonNullable<Awaited<ReturnType<typeof searchWeightCorrection>>>&{revision:number;jointId:string})|null=null;
   private library:LibraryMove[]=[];
   private libraryRequest:AbortController|null=null;
@@ -103,8 +110,8 @@ export class StudioEditor {
   private refreshWeightPreview(){const p=this.point;this.view.setWeightRegion?.(this.active&&this.edit&&!this.playing&&this.weightLocal&&p?.kind==='bone'?{center:[...p.rest],radius:this.weightRadius}:null);}
   private snapshot():Snapshot{return {data:structuredClone(this.data),values:this.rig.capture()};}
   private restore(s:Snapshot){this.rig.data=structuredClone(s.data);this.rig.reset();this.rig.apply(s.values);this.mark();this.render();}
-  private mark(){this.moveCheck?.abort();this.surfaceCheck?.abort();this.weightCorrection=null;this.revision++;this.dirty=true;this.hooks.changed();}
-  private mutate(fn:()=>void){const before=this.snapshot();fn();flagAffectedPoses(before.data,this.data);this.history.push(before);this.mark();this.render();}
+  private mark(){this.automaticCheck?.abort();this.automaticProposal=null;this.automaticOutcome='';this.moveCheck?.abort();this.surfaceCheck?.abort();this.weightCorrection=null;this.revision++;this.dirty=true;this.hooks.changed();}
+  private mutate(fn:()=>void){this.rig.stopSkinPreview();const before=this.snapshot();fn();flagAffectedPoses(before.data,this.data);this.history.push(before);this.mark();this.render();}
   beginPlaybackTransition(){
     const d=this.data;
     if(this.active||d.boneInsertions?.length||d.boneDeletions?.length||d.boneReparents?.length||d.weightTransfers?.length||JSON.stringify(d.boneRest)!==JSON.stringify(this.initial.boneRest)){this.playbackTransition.cancel();return;}
@@ -112,8 +119,8 @@ export class StudioEditor {
     this.playbackTransition.begin(this.rig.surfaces.filter((_,i)=>points.some(p=>p.mesh===undefined||p.mesh===i)).map(s=>s.mesh));
   }
   enter(){this.playbackTransition.cancel();this.revision++;this.hooks.suspend();this.stopMove();this.active=true;this.rig.reset();if(this.data.draft)this.rig.apply(this.data.draft);this.view.setEnabled(true);this.render();}
-  leave(){this.playbackTransition.cancel();this.view.setAction('select');this.moveCheck?.abort();this.surfaceCheck?.abort();this.libraryRequest?.abort();this.agentEditing=false;this.revision++;if(this.active&&this.proposalOrigin)this.data.draft=structuredClone(this.proposalOrigin);else if(this.active&&!this.playing)this.data.draft=this.rig.capture();this.weightCorrection=null;this.active=false;this.stopMove();this.view.setEnabled(false);this.rig.restoreSource();this.hooks.resume();}
-  stopMove(){if(this.proposalOrigin){this.rig.apply(this.proposalOrigin);this.proposalOrigin=null;this.view.refresh();}if(this.inspectionOrigin){this.rig.apply(this.inspectionOrigin);this.inspectionOrigin=null;this.view.refresh();}this.timeline=null;this.paused=false;this.view.setEnabled(this.active);}
+  leave(){this.rig.stopSkinPreview();this.automaticCheck?.abort();this.automaticProposal=null;this.playbackTransition.cancel();this.view.setAction('select');this.moveCheck?.abort();this.surfaceCheck?.abort();this.libraryRequest?.abort();this.agentEditing=false;this.revision++;if(this.active&&this.proposalOrigin)this.data.draft=structuredClone(this.proposalOrigin);else if(this.active&&!this.playing)this.data.draft=this.rig.capture();this.weightCorrection=null;this.active=false;this.stopMove();this.view.setEnabled(false);this.rig.restoreSource();this.hooks.resume();}
+  stopMove(){this.rig.stopSkinPreview();if(this.proposalOrigin){this.rig.apply(this.proposalOrigin);this.proposalOrigin=null;this.view.refresh();}if(this.inspectionOrigin){this.rig.apply(this.inspectionOrigin);this.inspectionOrigin=null;this.view.refresh();}this.timeline=null;this.paused=false;this.view.setEnabled(this.active);}
   stopPreview(){this.stopMove();this.render();}
   play(id:string,preview=false):boolean {
     const move=this.data.moves.find(m=>m.id===id);if(!move)return false;
@@ -166,6 +173,7 @@ export class StudioEditor {
     <label for="pose-list">Gespeicherte Posen</label><select id="pose-list"></select><div class="studio-actions"><button id="pose-show">Anzeigen</button><button id="pose-replace">Ersetzen</button><button id="pose-delete">Löschen</button></div>
     <button id="pose-check-limits">Beugegrenzen der Pose prüfen</button><div id="pose-limit-result" role="status"></div>
     <div class="studio-actions"><button id="pose-check-surface">Oberfläche der Pose prüfen</button><button id="pose-gentler">Schonendere Pose erstellen</button><button id="pose-surface-cancel">Vorschlag abbrechen</button></div><div id="pose-surface-result" role="status"></div><p class="subtle">Vergleicht die gespeicherte Pose mit der Grundform. Eine schonendere Variante wird als neue Pose gespeichert. Anatomie, Kollisionen und Charakterdesign bleiben visuell zu prüfen.</p>
+    <h3>Automatischer Korrekturauftrag</h3><div class="studio-actions"><button id="skin-auto-start">Hautkorrektur automatisch suchen</button><button id="skin-auto-cancel">Auftrag abbrechen</button></div><div id="skin-auto-progress" role="status"></div><div id="skin-auto-result" role="status"></div><div class="studio-actions"><button id="skin-auto-original">Original ansehen</button><button id="skin-auto-preview">Korrektur ansehen</button><button id="skin-auto-stop">Vergleich beenden</button><button id="skin-auto-apply">Geprüfte Korrektur übernehmen</button></div><p class="subtle">Wählt auffällige Hautbereiche und Gelenke selbst. Prüft gespeicherte Posen sowie Zwischenbilder aller eigenen Moves. Vorschau verändert das Projekt nicht. Eine übernommene Korrektur ist rückgängig machbar. Kollisionen, Volumen und Charakterdesign sind nicht geprüft.</p>
     <label>Korrekturradius<input id="pose-weight-radius" type="number" min="0.005" max="2" step="0.005" value="${this.weightRadius}"></label><div class="studio-actions"><button id="pose-weight-search">Lokale Hautkorrektur suchen</button><button id="pose-weight-apply">Hautkorrektur übernehmen</button></div><div id="pose-weight-result" role="status"></div><p class="subtle">Gespeicherte Pose und Gelenk auswählen. Prüft kleine Gewichtsänderungen zwischen Gelenk und Elternknochen. Zielbewegung bleibt erhalten; Übernahme ändert die Hautbindung für alle Bewegungen. Visuell prüfen.</p>
     <div id="pose-review" class="studio-review" hidden><strong>Pose prüfen</strong><ul id="pose-review-reasons"></ul><p>Pose anzeigen und bei Bedarf korrigieren. „Ersetzen“ speichert die Korrektur.</p><button id="pose-reviewed">Pose als geprüft markieren</button></div>
     <label>Übergang zu dieser Pose (Sekunden)<input id="pose-seconds" type="number" min="0.1" max="30" step="0.1" value="1"></label><div class="studio-actions"><button id="pose-up">↑ Früher</button><button id="pose-down">↓ Später</button></div>
@@ -264,6 +272,20 @@ export class StudioEditor {
     input('pose-weight-radius').onchange=()=>{const radius=Number(input('pose-weight-radius').value);if(!Number.isFinite(radius)||radius<.005||radius>2){this.hooks.feedback('Gelenk und gültigen Korrekturradius wählen.');input('pose-weight-radius').value=String(this.weightRadius);return;}this.weightRadius=radius;this.weightCorrection=null;this.render();};
     q<HTMLButtonElement>('pose-weight-search').onclick=()=>{const p=pose();if(!p)return;void this.findWeightCorrection(p.id).then(result=>{if(!this.disposed&&!result)this.hooks.feedback('Keine lokale Hautkorrektur mit bestandener Vergleichsprüfung gefunden.');}).catch(error=>{if(!this.disposed)this.hooks.feedback(error instanceof Error&&error.name==='AbortError'?'Prüfung abgebrochen.':error instanceof Error?error.message:'Prüfung fehlgeschlagen.');});};
     on('pose-weight-apply',()=>this.applyWeightCorrection());
+    const automatic=this.automaticSummary();q<HTMLButtonElement>('skin-auto-start').disabled=!!this.automaticCheck||!!this.surfaceCheck||!!this.moveCheck||this.edit||this.interactionActive||!this.data.poses.length;
+    q<HTMLButtonElement>('skin-auto-cancel').disabled=!this.automaticCheck;
+    for(const id of ['skin-auto-original','skin-auto-preview','skin-auto-apply'])q<HTMLButtonElement>(id).disabled=!automatic;
+    q<HTMLButtonElement>('skin-auto-stop').disabled=!this.rig.skinPreviewActive;
+    const fail=(error:unknown)=>{if(!this.disposed&&this.active)this.hooks.feedback(error instanceof Error&&error.name==='AbortError'?'Prüfung abgebrochen.':error instanceof Error?error.message:'Prüfung fehlgeschlagen.');};
+    q<HTMLButtonElement>('skin-auto-start').onclick=()=>{void this.startAutomaticSkinCorrection().catch(fail);};
+    q<HTMLButtonElement>('skin-auto-cancel').onclick=()=>this.automaticCheck?.abort();
+    on('skin-auto-original',()=>{if(automatic)this.previewAutomaticSkinCorrection(automatic.id,false);});on('skin-auto-preview',()=>{if(automatic)this.previewAutomaticSkinCorrection(automatic.id,true);});
+    on('skin-auto-stop',()=>{this.rig.stopSkinPreview();this.view.setEnabled(this.active);this.view.refresh();this.render();});
+    on('skin-auto-apply',()=>{if(automatic)this.applyAutomaticSkinCorrection(automatic.id);});
+    if(automatic){const result=q('skin-auto-result'),numbers=document.createElement('p');numbers.dataset.userText='';numbers.textContent=`${automatic.beforeIssues} → ${automatic.afterIssues} △ · ${automatic.checkedPoses} P · ${automatic.checkedMoves} M · ${automatic.motionSamples} F · ${automatic.checkedCandidates} V`;result.append(numbers);const legend=document.createElement('p');legend.textContent='Gemessene Zielpose: vorher → nachher. P: gespeicherte Posen, M: eigene Moves, F: Move-Stichproben, V: Suchvarianten. Noch nicht übernommen.';result.append(legend);}
+    else if(this.automaticOutcome==='none')q('skin-auto-result').textContent='Keine Korrektur mit bestandener Gegenprüfung gefunden.';
+    if(this.automaticProgress)this.showAutomaticProgress(this.automaticProgress);
+
     on('pose-surface-cancel',()=>this.surfaceCheck?.abort());
     on('pose-delete',()=>{const p=pose();if(p){if(this.data.moves.some(m=>m.poses.includes(p.id)))throw new Error('Diese Pose wird noch von einer Bewegung verwendet. Zuerst die Bewegung löschen.');this.mutate(()=>this.data.poses=this.data.poses.filter(x=>x!==p));}});
     input('pose-seconds').onchange=()=>{const p=pose(),v=Number(input('pose-seconds').value);if(p && v>=.1&&v<=30)this.mutate(()=>p.seconds=v);};
@@ -321,23 +343,25 @@ export class StudioEditor {
     q<HTMLButtonElement>('library-import').onclick=()=>{const item=this.library.find(m=>m.id===library.value);if(item)void this.importLibraryMove(item).catch(report);};
     input('move-file').onchange=()=>{const file=input('move-file').files?.[0],revision=this.revision;input('move-file').value='';if(!file)return;void (async()=>{if(file.size>MAX_MOVE_FILE)throw Error('Move-Datei ist größer als 8 MiB.');await this.importMove(JSON.parse(await file.text()),revision);})().catch(error=>{if(!this.disposed)this.hooks.feedback(error instanceof Error?error.message:'Move-Import fehlgeschlagen.');});};
     if(this.playing){this.host.querySelectorAll<HTMLButtonElement|HTMLInputElement|HTMLSelectElement>('button,input,select').forEach(e=>e.disabled=e.id!=='move-stop'&&e.id!=='studio-agent-edit'&&!(e.id==='move-inspect-save'&&this.inspectionOrigin&&this.paused&&this.data.poses.length<100));}
+    if(this.rig.skinPreviewActive){this.host.querySelectorAll<HTMLButtonElement|HTMLInputElement|HTMLSelectElement>('button,input,select').forEach(e=>e.disabled=!['skin-auto-original','skin-auto-preview','skin-auto-stop','skin-auto-apply'].includes(e.id)||e.id!=='skin-auto-stop'&&!this.automaticSummary());}
     this.view.setFigureEnabled(!this.edit);this.view.setRotation(this.rotate && !this.edit);this.view.select(this.selected);this.refreshWeightPreview();this.refreshWeightColors();this.refreshNumbers();
   }
   inspect(args:Record<string,unknown>={}) {
     const section=args.section??'info',offset=args.offset??0,limit=args.limit??32;
     if(Object.keys(args).some(k=>!['section','offset','limit'].includes(k))||!['info','points','poses','moves'].includes(section as string)||!Number.isInteger(offset)||(offset as number)<0||!Number.isInteger(limit)||(limit as number)<1||(limit as number)>32)throw new Error('Ungültige Studio-Abfrage.');
     const info={view:this.view.weightView?.(),session:this.session,revision:this.revision,dirty:this.dirty,open:this.active,editable:this.active&&this.agentEditing&&!this.interactionActive,mode:this.edit?'rig':'pose',figure:{id:FIGURE_TRACK,scale:this.rig.scale,position:this.rig.position(this.rig.figure).toArray(),rotation:this.rig.rotation(this.rig.figure).toArray()},counts:{points:this.data.points.length,poses:this.data.poses.length,moves:this.data.moves.length,surfaces:this.rig.surfaces.length},undo:this.history.canUndo,redo:this.history.canRedo,poseCorrections:{available:poseMorphBindings(this.rig.root).length>0,enabled:this.rig.poseCorrectionsActive,compatible:this.rig.poseCorrectionsCompatible},weightCorrection:this.weightCorrection?{status:'proposal',poseId:this.weightCorrection.poseId,from:this.weightCorrection.from,to:this.weightCorrection.to,amount:this.weightCorrection.amount,region:structuredClone(this.weightCorrection.region),beforeIssues:this.weightCorrection.before.issues,afterIssues:this.weightCorrection.after.issues,checkedPoses:this.weightCorrection.checkedPoses,intermediateSamples:this.weightCorrection.intermediateSamples,requiresVisualReview:true,unchecked:['collisions','character-design','continuous-motion']}:null};
-    if(section==='info')return info;
+    const extended={...info,automaticSkinCorrection:this.automaticSummary(),automaticSkinJob:this.automaticProgress&&this.automaticCheck?{...this.automaticProgress}:null};if(section==='info')return extended;
     const items=section==='points'?this.data.points.map(p=>({...p,...(p.kind==='bone'?{parentBone:this.rig.bones.indexOf(this.rig.bones[p.bone!].parent as T.Bone)<0?null:this.rig.bones.indexOf(this.rig.bones[p.bone!].parent as T.Bone),parentId:this.data.points.find(q=>q.kind==='bone'&&this.rig.bones[q.bone!]===this.rig.bones[p.bone!].parent)?.id??null}:{}),position:this.rig.position(p).toArray(),rotation:this.rig.rotation(p).toArray(),ikChain:this.rig.poseChain(p).map(b=>this.data.points.find(p=>p.kind==='bone'&&this.rig.bones[p.bone!]===b)!.id),connections:this.data.links.filter(l=>l.includes(p.id)).map(l=>l[0]===p.id?l[1]:l[0])})):section==='poses'?this.data.poses.map(p=>({id:p.id,name:p.name,seconds:p.seconds,review:p.review??[]})):this.data.moves.map(m=>({id:m.id,name:m.name,loop:m.loop,poseCount:m.poses.length,poses:[...m.poses],...moveReview(this.data,m)}));
     // Bound pages by count and UTF-8 size so both MCP bridges stay below their payload limit.
     const page:unknown[]=[];let bytes=0;for(const item of items.slice(offset as number,(offset as number)+(limit as number))){const length=new TextEncoder().encode(JSON.stringify(item)).length;if(page.length&&bytes+length>40000)break;page.push(item);bytes+=length;}
-    return {...info,section,total:items.length,items:page,nextOffset:(offset as number)+page.length<items.length?(offset as number)+page.length:null};
+    return {...extended,section,total:items.length,items:page,nextOffset:(offset as number)+page.length<items.length?(offset as number)+page.length:null};
   }
   execute(raw:unknown) {
     const c=parseStudioCommand(raw);
     if(!this.active||!this.agentEditing)throw new Error('Studio-Bearbeitung durch KI ist nicht freigegeben.');
-    if(this.interactionActive)throw new Error('Studio ist beschäftigt. Nach Vorschau oder Ziehgeste erneut abfragen.');
+    if(this.interactionActive&&!(c.action==='apply_skin_correction'&&this.rig.skinPreviewActive))throw new Error('Studio ist beschäftigt. Nach Vorschau oder Ziehgeste erneut abfragen.');
     if(c.session!==this.session||c.expectedRevision!==this.revision)throw new Error('Studio-Stand hat sich geändert. get_studio erneut abfragen.');
+    if(c.action==='apply_skin_correction'){this.applyAutomaticSkinCorrection(c.id!);return {accepted:true,session:this.session,revision:this.revision};}
     const point=c.id===FIGURE_TRACK?this.rig.figure:this.data.points.find(p=>p.id===c.id),pose=this.data.poses.find(p=>p.id===c.id);
     const require=(ok:unknown,message='Studio-Aktion passt nicht zum aktuellen Modus oder Ziel.'):void=>{if(!ok)throw new Error(message);};
     let resultId:string|undefined;
@@ -465,7 +489,7 @@ export class StudioEditor {
     return this.runMoveCheck(id,inspectMoveSurface,signal);
   }
   private async runMoveCheck<Report>(id:string,check:(rig:StudioRig,move:StudioMove,signal:AbortSignal,valid:()=>boolean)=>Promise<Report>,signal?:AbortSignal){
-    if(this.disposed||!this.active||this.interactionActive||this.moveCheck||this.surfaceCheck)throw Error('Studio ist beschäftigt oder geschlossen.');
+    if(this.disposed||!this.active||this.interactionActive||this.moveCheck||this.surfaceCheck||this.automaticCheck)throw Error('Studio ist beschäftigt oder geschlossen.');
     const move=this.data.moves.find(m=>m.id===id);if(!move)throw Error('Bewegung nicht gefunden.');
     signal?.throwIfAborted();const request=new AbortController(),revision=this.revision,abort=()=>request.abort();signal?.addEventListener('abort',abort,{once:true});this.moveCheck=request;this.render();
     const selection=this.host.querySelector<HTMLSelectElement>('#studio-moves')?.value;
@@ -486,11 +510,11 @@ export class StudioEditor {
     return this.rig.checkPoseBends(pose);
   }
   checkPoseSurface(id:string){
-    if(this.disposed||!this.active||this.interactionActive||this.surfaceCheck)throw Error('Studio ist beschäftigt oder geschlossen.');
+    if(this.disposed||!this.active||this.interactionActive||this.surfaceCheck||this.automaticCheck)throw Error('Studio ist beschäftigt oder geschlossen.');
     const pose=this.data.poses.find(p=>p.id===id);if(!pose)throw Error('Pose nicht gefunden.');return inspectPoseSurface(this.rig,pose);
   }
   async createGentlerPose(id:string){
-    if(this.disposed||!this.active||this.edit||this.interactionActive||this.surfaceCheck||this.moveCheck)throw Error('Studio ist beschäftigt oder geschlossen.');
+    if(this.disposed||!this.active||this.edit||this.interactionActive||this.surfaceCheck||this.moveCheck||this.automaticCheck)throw Error('Studio ist beschäftigt oder geschlossen.');
     const pose=this.data.poses.find(p=>p.id===id);if(!pose)throw Error('Pose nicht gefunden.');if(this.data.poses.length>=100)throw Error('Höchstens 100 Posen.');
     const request=new AbortController(),revision=this.revision,selection=this.host.querySelector<HTMLSelectElement>('#pose-list')?.value;this.surfaceCheck=request;this.render();
     const valid=()=>!this.disposed&&this.active&&!this.edit&&!this.interactionActive&&this.revision===revision&&this.host.querySelector<HTMLSelectElement>('#pose-list')?.value===selection;
@@ -504,7 +528,7 @@ export class StudioEditor {
     }finally{if(this.surfaceCheck===request)this.surfaceCheck=null;if(!this.disposed){const selected=this.host.querySelector<HTMLSelectElement>('#pose-list')?.value;for(const id of ['pose-check-surface','pose-gentler','pose-weight-search','pose-weight-apply']){const button=this.host.querySelector<HTMLButtonElement>('#'+id);if(button)button.disabled=!this.active||this.interactionActive||!selected||(id==='pose-gentler'&&(this.edit||this.data.poses.length>=100))||(id==='pose-weight-search'&&(this.edit||this.point?.kind!=='bone'))||(id==='pose-weight-apply'&&(this.edit||!this.weightCorrection));}const cancel=this.host.querySelector<HTMLButtonElement>('#pose-surface-cancel');if(cancel)cancel.disabled=true;const radius=this.host.querySelector<HTMLInputElement>('#pose-weight-radius');if(radius)radius.disabled=false;}}
   }
   async findWeightCorrection(id:string){
-    if(this.disposed||!this.active||this.edit||this.interactionActive||this.surfaceCheck||this.moveCheck)throw Error('Studio ist beschäftigt oder geschlossen.');
+    if(this.disposed||!this.active||this.edit||this.interactionActive||this.surfaceCheck||this.moveCheck||this.automaticCheck)throw Error('Studio ist beschäftigt oder geschlossen.');
     const pose=this.data.poses.find(p=>p.id===id),joint=this.point;if(!pose||joint?.kind!=='bone')throw Error('Gespeicherte Pose und Gelenk auswählen.');
     const request=new AbortController(),revision=this.revision,pointId=joint.id,selection=this.host.querySelector<HTMLSelectElement>('#pose-list')?.value;this.weightCorrection=null;this.surfaceCheck=request;this.render();
     const valid=()=>!this.disposed&&this.active&&!this.edit&&!this.interactionActive&&this.revision===revision&&this.point?.id===pointId&&this.host.querySelector<HTMLSelectElement>('#pose-list')?.value===selection;
@@ -517,6 +541,33 @@ export class StudioEditor {
     this.mutate(()=>{const before=this.snapshot();try{this.rig.transferWeights(from,to,proposal.amount,proposal.region);const actual=inspectPoseSurface(this.rig,pose);if(actual.issues>=proposal.before.issues)throw Error('Korrektur verbessert die tatsächliche Oberfläche nicht.');this.rig.apply(pose.values);}catch(error){this.rig.data=before.data;this.rig.reset();this.rig.apply(before.values);throw error;}});
     this.hooks.feedback('Lokale Hautkorrektur übernommen. Zielpose bleibt erhalten. Bewegungen visuell prüfen.');
   }
+  private showAutomaticProgress(value:SkinProgress){
+    const host=this.host.querySelector('#skin-auto-progress');if(!host)return;host.replaceChildren();const phase=document.createElement('span');phase.textContent=value.phase==='diagnosis'?'Oberfläche untersuchen':value.phase==='search'?'Korrekturvarianten suchen':'Posen und Bewegungen gegenprüfen';const counts=document.createElement('span');counts.dataset.userText='';counts.textContent=` · ${value.samples} / ${value.joints} / ${value.candidates}`;host.append(phase,counts);
+  }
+  private automaticSummary(){
+    const p=this.automaticProposal;if(!p||p.revision!==this.revision)return null;
+    return {id:p.id,target:{...p.targetOrigin},jointId:p.jointId,from:p.from,to:p.to,amount:p.amount,radius:p.region.radius,beforeIssues:p.before.issues,afterIssues:p.after.issues,checkedPoses:p.checkedPoses,checkedMoves:p.checkedMoves,motionSamples:p.motionSamples,checkedJoints:p.checkedJoints,checkedCandidates:p.checkedCandidates,requiresVisualReview:true,continuous:false,command:{session:this.session,expectedRevision:this.revision,action:'apply_skin_correction',id:p.id}};
+  }
+  async proposeSkinCorrection(args:Record<string,unknown>,signal?:AbortSignal){
+    if(Object.keys(args).some(k=>!['session','expectedRevision','poseId','radius'].includes(k))||args.session!==this.session||args.expectedRevision!==this.revision||args.poseId!==undefined&&(typeof args.poseId!=='string'||!args.poseId||args.poseId.length>100)||args.radius!==undefined&&(typeof args.radius!=='number'||!Number.isFinite(args.radius)||args.radius<.005||args.radius>2))throw Error('Studio-Stand oder Prüfziel ungültig. get_studio erneut abfragen.');
+    return this.startAutomaticSkinCorrection(signal,{poseId:args.poseId as string|undefined,radius:args.radius as number|undefined});
+  }
+  async startAutomaticSkinCorrection(signal?:AbortSignal,options:{poseId?:string;radius?:number}={}){
+    if(this.disposed||!this.active||this.edit||this.interactionActive||this.automaticCheck||this.surfaceCheck||this.moveCheck||this.exportingFigure)throw Error('Studio ist beschäftigt oder geschlossen.');
+    signal?.throwIfAborted();const request=new AbortController(),revision=this.revision,abort=()=>request.abort();signal?.addEventListener('abort',abort,{once:true});this.automaticCheck=request;this.automaticProposal=null;this.automaticOutcome='';this.automaticProgress={phase:'diagnosis',samples:0,joints:0,candidates:0,vertexSamples:0};this.render();
+    const valid=()=>!this.disposed&&this.active&&!this.edit&&!this.interactionActive&&this.revision===revision;
+    try{const proposal=await findAutomaticSkinCorrection(this.rig,request.signal,valid,{...options,progress:value=>{this.automaticProgress=value;this.showAutomaticProgress(value);}});request.signal.throwIfAborted();if(!valid())throw Error('Studio-Stand hat sich geändert. Prüfung erneut starten.');if(proposal)this.automaticProposal={...proposal,id:'skin-'+crypto.randomUUID(),revision};else this.automaticOutcome='none';return this.automaticSummary();}
+    finally{signal?.removeEventListener('abort',abort);if(this.automaticCheck===request)this.automaticCheck=null;this.automaticProgress=null;if(!this.disposed&&this.active)this.render();}
+  }
+  previewAutomaticSkinCorrection(id:string,corrected=true){
+    const p=this.automaticProposal;if(this.disposed||!this.active||this.edit||this.automaticCheck||this.surfaceCheck||this.moveCheck||!p||p.id!==id||p.revision!==this.revision||this.playing||this.gesture||this.weightStroke)throw Error('Studio-Stand hat sich geändert. Prüfung erneut starten.');
+    this.rig.stopSkinPreview();const restore=this.rig.previewSkin(p.target.values,corrected?skinCorrectionOverrides(this.rig,p):new Map());this.view.setEnabled(false);this.view.refresh();this.render();return ()=>{restore();if(!this.disposed){this.view.setEnabled(this.active&&!this.rig.skinPreviewActive);this.view.refresh();this.render();}};
+  }
+  applyAutomaticSkinCorrection(id:string){
+    const p=this.automaticProposal;if(this.disposed||!this.active||this.edit||this.automaticCheck||this.surfaceCheck||this.moveCheck||!p||p.id!==id||p.revision!==this.revision||this.playing||this.gesture||this.weightStroke)throw Error('Studio-Stand hat sich geändert. Prüfung erneut starten.');
+    this.rig.stopSkinPreview();const from=this.data.points.find(q=>q.id===p.from),to=this.data.points.find(q=>q.id===p.to);if(!from||!to)throw Error('Korrekturgelenke fehlen.');
+    this.mutate(()=>{const before=this.snapshot();try{this.rig.transferWeights(from,to,p.amount,p.region);const actual=inspectPoseSurface(this.rig,p.target);if(!noMeasuredRegression(p.after,actual)||actual.issues>p.after.issues)throw Error('Korrektur stimmt nicht mit dem geprüften Vorschlag überein.');this.rig.apply(before.values);}catch(error){this.rig.data=before.data;this.rig.reset();this.rig.apply(before.values);throw error;}});this.view.setEnabled(true);this.view.refresh();this.hooks.feedback('Geprüfte Hautkorrektur übernommen. Posen und Moves bleiben erhalten.');
+  }
   restoreDirty(value:boolean){this.dirty=value;this.render();}
   exportProject():StudioProject {
     if(this.interactionActive)throw new Error('Studio-Bewegung zuerst beenden.');
@@ -528,7 +579,7 @@ export class StudioEditor {
     const value=this.exportProject();
     const url=URL.createObjectURL(new Blob([JSON.stringify(value)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download=`${this.project.avatar.id}.pakachi.json`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);this.dirty=false;this.render();this.hooks.feedback('Studio-Projekt mit Modell, Kontrollpunkten, Posen und Bewegungen heruntergeladen.');
   }
-  dispose(){this.playbackTransition.cancel();if(this.proposalOrigin)this.stopMove();this.moveCheck?.abort();this.surfaceCheck?.abort();this.libraryRequest?.abort();this.disposed=true;this.view.dispose();this.rig.dispose();this.host.replaceChildren();}
+  dispose(){this.rig.stopSkinPreview();this.automaticCheck?.abort();this.automaticProposal=null;this.playbackTransition.cancel();if(this.proposalOrigin)this.stopMove();this.moveCheck?.abort();this.surfaceCheck?.abort();this.libraryRequest?.abort();this.disposed=true;this.view.dispose();this.rig.dispose();this.host.replaceChildren();}
 }
 export function encodeModel(buffer:ArrayBuffer):string {let s='';const bytes=new Uint8Array(buffer);for(let i=0;i<bytes.length;i+=16384)s+=String.fromCharCode(...bytes.subarray(i,i+16384));return btoa(s);}
 export function decodeModel(base64:string):ArrayBuffer {return Uint8Array.from(atob(base64),c=>c.charCodeAt(0)).buffer;}

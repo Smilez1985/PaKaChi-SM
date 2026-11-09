@@ -1,0 +1,34 @@
+import {test,expect} from '@playwright/test';
+import {readFile} from 'node:fs/promises';
+import {twistFixture} from '../helpers/twist-fixture.ts';
+import {exportRiggedFigureGLB} from '../../src/figure-glb.ts';
+
+async function projectFixture(){
+ class Reader{result:ArrayBuffer|null=null;onloadend:(()=>void)|null=null;readAsArrayBuffer(blob:Blob){void blob.arrayBuffer().then(value=>{this.result=value;this.onloadend?.();});}}
+ const reader=globalThis.FileReader;Object.assign(globalThis,{FileReader:Reader});const f=twistFixture(true);let glb:ArrayBuffer;
+ try{glb=await exportRiggedFigureGLB(f.root);}finally{Object.assign(globalThis,{FileReader:reader});}f.rig.data.moves[0].loop=true;
+ const project={format:'pakachi-studio',version:1,model:Buffer.from(glb).toString('base64'),avatar:{id:'automatic-skin',name:'Automatic skin',description:'Test fixture',moves:[]},studio:structuredClone(f.rig.data)};f.rig.dispose();return project;
+}
+test('automatic studio job discovers the joint, previews, applies, undoes and reloads without changing moves',async({page})=>{
+ const project=await projectFixture(),errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');await page.locator('#project-file').setInputFiles({name:'automatic.pakachi.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(project))});await expect(page.locator('#message')).toContainText('Automatic skin bereit');await page.locator('#studio-tab').click();
+ const info=()=>page.evaluate(()=>window.PaKaChiSM.call('get_studio') as any),before=await info();await expect(page.locator('#studio-points')).toHaveValue('');await page.locator('#skin-auto-start').click();await expect(page.locator('#skin-auto-result')).toContainText('→ 0');const proposed=(await info()).automaticSkinCorrection;expect(proposed.checkedMoves).toBe(1);expect(proposed.motionSamples).toBe(33);expect((await info()).revision).toBe(before.revision);expect((await info()).dirty).toBe(before.dirty);
+ await page.locator('#skin-auto-original').click();const original=await page.locator('#viewport canvas').screenshot({path:'test-results/automatic-skin-original.png'});await expect(page.locator('#studio-save')).toBeDisabled();await page.locator('#skin-auto-preview').click();const corrected=await page.locator('#viewport canvas').screenshot({path:'test-results/automatic-skin-candidate.png'});expect(corrected.equals(original)).toBe(false);await page.locator('#skin-auto-stop').click();expect((await info()).revision).toBe(before.revision);
+ await page.locator('#skin-auto-preview').click();await page.locator('#skin-auto-apply').click();expect((await info()).revision).toBe(before.revision+1);await page.locator('#pose-list').selectOption('twist');await page.locator('#pose-check-surface').click();await expect(page.locator('#pose-surface-result')).toContainText('Keine Überschreitung');
+ await page.locator('#studio-undo').click();await page.locator('#pose-list').selectOption('twist');await page.locator('#pose-check-surface').click();await expect(page.locator('#pose-surface-result')).toContainText('Auffällige');await page.locator('#studio-redo').click();
+ const pending=page.waitForEvent('download');await page.locator('#studio-save').click();const file=(await(await pending).path())!,saved=JSON.parse(await readFile(file,'utf8'));expect(saved.studio.weightTransfers).toHaveLength(1);expect(saved.studio.poses.map((p:any)=>p.values)).toEqual(project.studio.poses.map(p=>p.values));expect(saved.studio.moves).toEqual(project.studio.moves);
+ await page.locator('#project-file').setInputFiles(file);await expect(page.locator('#message')).toContainText('Automatic skin bereit');await page.locator('#studio-tab').click();await page.locator('#move-check-surface').click();await expect(page.locator('#move-surface-result')).toContainText('Keine Auffälligkeit');expect(errors).toEqual([]);
+});
+test('integrated assistant delegates a real local repair job and offers the measured proposal for preview and approval',async({page})=>{
+ const profile={id:'test-assistant',name:'Test assistant',adapter:'ollama',endpoint:'http://127.0.0.1:11434',model:'test-model'};
+ await page.addInitScript(profile=>localStorage.setItem('pakachi-providers-v1',JSON.stringify({version:1,profiles:[profile],assignments:{assistant:profile.id,generation:null,rigging:null}})),profile);
+ const project=await projectFixture(),errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');await page.locator('#project-file').setInputFiles({name:'assistant-skin.pakachi.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(project))});await expect(page.locator('#message')).toContainText('Automatic skin bereit');await page.locator('#studio-tab').click();await page.locator('#studio-agent-edit').check();
+ const before=await page.evaluate(()=>window.PaKaChiSM.call('get_studio') as any);let requests=0;
+ await page.route('http://127.0.0.1:11434/**',async route=>{
+  const headers={'Access-Control-Allow-Origin':'http://127.0.0.1:5173'};if(route.request().method()==='OPTIONS'){await route.fulfill({status:204,headers:{...headers,'Access-Control-Allow-Methods':'POST','Access-Control-Allow-Headers':'content-type'}});return;}
+  const body=route.request().postDataJSON();let name:string,args:unknown;
+  if(requests===0){name='get_studio';args={};}else if(requests===1){const state=JSON.parse(body.messages.at(-1).content);name='propose_studio_skin_correction';args={session:state.session,expectedRevision:state.revision};}else{const measured=JSON.parse(body.messages.at(-1).content);expect(measured.afterIssues).toBeLessThan(measured.beforeIssues);expect(measured.motionSamples).toBe(33);name='edit_studio';args={command:measured.command};}
+  requests++;await route.fulfill({headers,contentType:'application/json',body:JSON.stringify({done:true,message:{role:'assistant',content:'',tool_calls:[{function:{name,arguments:args}}]}})});
+ });
+ await page.locator('.assistant-panel > summary').click();await page.locator('#assistant-prompt').fill('Haut automatisch korrigieren und alle eigenen Moves gegenprüfen.');await page.locator('#assistant-send').click();await expect(page.locator('#assistant-apply')).toBeVisible();expect(requests).toBe(3);expect((await page.evaluate(()=>window.PaKaChiSM.call('get_studio') as any)).revision).toBe(before.revision);
+ await page.locator('[data-skin-preview="original"]').click();await page.locator('[data-skin-preview="corrected"]').click();await page.locator('#assistant-apply').click();expect((await page.evaluate(()=>window.PaKaChiSM.call('get_studio') as any)).revision).toBe(before.revision+1);await expect(page.locator('#assistant-apply')).toBeHidden();await page.locator('#studio-undo').click();expect((await page.evaluate(()=>window.PaKaChiSM.call('get_studio') as any)).revision).toBe(before.revision+2);expect(errors).toEqual([]);
+});

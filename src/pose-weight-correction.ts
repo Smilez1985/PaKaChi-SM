@@ -4,9 +4,11 @@ import type {Pose,ControlPoint,WeightRegion,Transform} from './studio-data.ts';
 import {MAX_WEIGHT_TRANSFERS,FIGURE_TRACK,neutralFigure} from './studio-data.ts';
 import {createPoseSurfaceChecker,neutralPoseValues,poseSurfacePositions} from './pose-surface-check.ts';
 import {transferSkinInfluences} from './studio-weight-transfer.ts';
-type Report=ReturnType<ReturnType<typeof createPoseSurfaceChecker>>;
+export type SurfaceReport=ReturnType<ReturnType<typeof createPoseSurfaceChecker>>;
+type Report=SurfaceReport;
+export interface WeightCorrectionProposal {from:string;to:string;amount:number;region:WeightRegion;poseId:string;before:Report;after:Report;affectedVertices:number;checkedPoses:number;intermediateSamples:number}
 /** Compare threshold excesses and counts. Ordinary motion within limits is allowed. */
-function noMeasuredRegression(before:Report,after:Report){
+export function noMeasuredRegression(before:Report,after:Report){
  return before.meshes.every((b,i)=>{const a=after.meshes[i];return a.invalid===0&&a.compared===b.compared&&a.referenceDegenerate===b.referenceDegenerate&&a.issues<=b.issues&&a.stretched<=b.stretched&&a.compressed<=b.compressed&&a.collapsed<=b.collapsed&&Math.max(0,before.limits.minimumStretch-(a.minimumStretch??0))<=Math.max(0,before.limits.minimumStretch-(b.minimumStretch??0))+1e-6&&Math.max(0,(a.maximumStretch??0)-before.limits.maximumStretch)<=Math.max(0,(b.maximumStretch??0)-before.limits.maximumStretch)+1e-6;});
 }
 export function correctionSamples(rig:StudioRig,target:Pose){
@@ -19,19 +21,20 @@ export function correctionSamples(rig:StudioRig,target:Pose){
  return samples;
 }
 /** Six bounded local transfers between a joint and its parent; live data is never modified. */
-export async function searchWeightCorrection(rig:StudioRig,target:Pose,joint:ControlPoint,radius:number,signal:AbortSignal,valid:()=>boolean=()=>true){
+export async function searchWeightCorrection(rig:StudioRig,target:Pose,joint:ControlPoint,radius:number,signal:AbortSignal,valid:()=>boolean=()=>true,options:{measure?:()=>void;candidate?:()=>void;accept?:(proposal:WeightCorrectionProposal,overrides:import('./pose-surface-check.ts').SkinOverrides)=>Promise<boolean>}={}){
  const ensure=()=>{signal.throwIfAborted();if(!valid())throw Error('Studio-Stand hat sich geändert. Prüfung erneut starten.');};ensure();
  if(joint.kind!=='bone'||!rig.data.points.includes(joint)||!Number.isFinite(radius)||radius<.005||radius>2||(rig.data.weightTransfers?.length??0)>=MAX_WEIGHT_TRANSFERS)throw Error('Gelenk und gültigen Korrekturradius wählen.');
  const parent=rig.data.points.find(p=>p.kind==='bone'&&rig.bones[p.bone!]===rig.bones[joint.bone!].parent);if(!parent)throw Error('Einen Gelenkübergang mit vorhandenem Elternknochen wählen.');
- const inspect=createPoseSurfaceChecker(rig),before=inspect(target),bends=rig.checkPoseBends(target);
+ options.measure?.();const checker=createPoseSurfaceChecker(rig),inspect:typeof checker=(...args)=>{options.measure?.();return checker(...args);},before=inspect(target),bends=rig.checkPoseBends(target);
  if(before.status!=='outside'||before.meshes.some(m=>m.invalid)||bends.unmatched.length||bends.results.some(r=>r.status!=='within'))return null;
- const rest=neutralPoseValues(rig),reference=rig.surfaces.map((_,i)=>poseSurfacePositions(rig,rest,i));
+ options.measure?.();const rest=neutralPoseValues(rig),reference=rig.surfaces.map((_,i)=>poseSurfacePositions(rig,rest,i));
  const poses=[...rig.data.poses.filter(p=>p.id!==target.id),...correctionSamples(rig,target)],baselines:Report[]=[];
  for(const pose of poses){await new Promise<void>(resolve=>setTimeout(resolve,0));ensure();baselines.push(inspect(pose));}
  const region:WeightRegion={center:[...joint.rest],radius},center=new T.Vector3().fromArray(region.center);
- type Proposal={from:string;to:string;amount:number;region:WeightRegion;poseId:string;before:Report;after:Report;affectedVertices:number;checkedPoses:number;intermediateSamples:number};let best:Proposal|null=null;
+ let best:WeightCorrectionProposal|null=null;
  for(const amount of [.1,.2,.35])for(const [from,to] of [[joint,parent],[parent,joint]]){
   await new Promise<void>(resolve=>setTimeout(resolve,0));ensure();
+  options.candidate?.();
   const overrides=new Map<number,ReturnType<typeof transferSkinInfluences>>();let affectedVertices=0,unsupported=false;
   for(let i=0;i<rig.surfaces.length;i++){
    const s=rig.surfaces[i],mesh=s.mesh;if(!(mesh instanceof T.SkinnedMesh))continue;
@@ -43,7 +46,7 @@ export async function searchWeightCorrection(rig:StudioRig,target:Pose,joint:Con
   }
   if(unsupported||!affectedVertices)continue;
   // All originally captured rest vertices must stay in place, not merely retain their lengths.
-  let preserved=true;for(const i of overrides.keys()){
+  options.measure?.();let preserved=true;for(const i of overrides.keys()){
    const positions=poseSurfacePositions(rig,rest,i,overrides);if(positions.some((v,k)=>Math.abs(v-reference[i][k])>1e-6*Math.max(1,Math.abs(reference[i][k])))){preserved=false;break;}
   }
   if(!preserved)continue;
@@ -51,7 +54,8 @@ export async function searchWeightCorrection(rig:StudioRig,target:Pose,joint:Con
   let safe=true;for(let i=0;i<poses.length;i++){
    await new Promise<void>(resolve=>setTimeout(resolve,0));ensure();if(!noMeasuredRegression(baselines[i],inspect(poses[i],overrides))){safe=false;break;}
   }
-  if(safe&&(!best||after.issues<best.after.issues))best={from:from.id,to:to.id,amount,region:structuredClone(region),poseId:target.id,before,after,affectedVertices,checkedPoses:rig.data.poses.length,intermediateSamples:3};
+  const proposal={from:from.id,to:to.id,amount,region:structuredClone(region),poseId:target.id,before,after,affectedVertices,checkedPoses:rig.data.poses.length,intermediateSamples:3};
+  if(safe&&(!options.accept||await options.accept(proposal,overrides))&&(!best||after.issues<best.after.issues))best=proposal;
  }
  ensure();return best;
 }

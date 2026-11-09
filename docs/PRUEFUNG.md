@@ -1,6 +1,6 @@
 # Prüfstand und Protokolle
 
-**Softwarestand: 0.91.0 · Dokumentationsabgleich: 2026-11-09T01:19:09+01:00 (Europe/Berlin).**
+**Softwarestand: 0.92.0 · Dokumentationsabgleich: 2026-11-09T07:15:16+01:00 (Europe/Berlin).**
 
 Alle Prüfnachweise stehen in dieser Datei: ein Abschnitt je Softwareversion sowie gesonderte Abschnitte für datierte Zwischenprüfungen. Die Ergebnisse und Grenzen gelten für den jeweils genannten Stand. Spätere Läufe stehen als Nachtrag im selben Abschnitt. Produktänderungen gehören in den [Changelog](CHANGELOG.md), offene Aufgaben in die [Roadmap](ROADMAP.md).
 
@@ -8,10 +8,10 @@ Alle Prüfnachweise stehen in dieser Datei: ein Abschnitt je Softwareversion sow
 
 | Prüfung | Bestätigter Stand | Umfang und Grenze |
 | --- | --- | --- |
-| Node-Tests | [0.91.0](#version-0910): 403 lokal bestanden; vollständige Originaldatei-Prüfung folgt in CI | Einschließlich echter MCP-/OAuth-/Python-/ACP-Prozesse; keine manuelle Qualitätsabnahme. |
-| TypeScript und Produktionsbuild | [0.91.0](#version-0910): lokal bestanden | Bekannte Bundle-Größenwarnung; keine Aussage über Zielhardware-Leistung. |
-| Chromium-Browserfälle | [0.90.0](#version-0900): 39 im vollständigen CI-Lauf; vier gezielte Fälle lokal für 0.91.0 bestanden | Software-WebGL, simulierte KI-Anbieter; keine reale KI-Inferenzabnahme. |
-| Produktionsbrowser-Importmessung | [0.90.0](#version-0900): drei CI-Durchläufe bestanden | Mika mit 256 Gewichtsaufträgen; keine allgemeine Laufzeitgarantie. |
+| Node-Tests | [0.92.0](#version-0920): 413 lokal bestanden; Originaldatei-Prüfung folgt in CI | Einschließlich echter MCP-/OAuth-/Python-/ACP-Prozesse; keine manuelle Qualitätsabnahme. |
+| TypeScript und Produktionsbuild | [0.92.0](#version-0920): lokal bestanden | Bekannte Bundle-Größenwarnung; keine Aussage über Zielhardware-Leistung. |
+| Chromium-Browserfälle | [0.91.0](#version-0910): 40 im vollständigen CI-Lauf; fünf gezielte Fälle lokal für 0.92.0 bestanden | Software-WebGL, simulierte KI-Anbieter; keine reale KI-Inferenzabnahme. |
+| Produktionsbrowser-Importmessung | [0.91.0](#version-0910): drei CI-Durchläufe bestanden | Mika mit 256 Gewichtsaufträgen; keine allgemeine Laufzeitgarantie. |
 | Legacy-Testprogramme | [0.9.0](#version-090): beide bestanden | Steuerung, MQTT-Verhalten und Lebenszyklus des Originalplayers. |
 | Python-MCP-/MQTT-Integration | [0.10.0](#version-0100): bestanden | Echter Python-Prozess und eingebetteter Testbroker; keine allgemeine externe Hostabnahme. |
 | Originaldateien | [0.49.0](#version-0490): bytegenau erhalten | 83 Originaldateien einschließlich 72 Transformationsbildern. |
@@ -59,6 +59,22 @@ Diese Liste beschreibt ausstehende Abnahmen.
 ## Prüfungen nach Version
 
 Die jüngste Version steht zuerst. Für eine bestimmte Version die Dokumentgliederung oder die Browser-Suche verwenden.
+
+## Version 0.92.0
+
+**Prüfzeitpunkt:** 2026-11-09T07:15:16+01:00 (Europe/Berlin).
+
+- Lokaler automatischer Korrekturauftrag am tatsächlichen synthetischen Hautmodell getestet: Gelenkauswahl ohne Namen oder manuelle Auswahl, automatische Radiensuche, Verbesserung bei unveränderten Posen/Livewerten/Geometrie und vollständige unabhängige Gegenprüfung der Move-Stichproben. Ergebnisse und fehlende Verbesserung werden getrennt behandelt.
+- Gegenprobe mit tatsächlicher Interpolation: Eine lokale Korrektur besteht alle gespeicherten Einzelposen und bisherige Neutral-Zielpose-Proben, verschlechtert jedoch ein Move-Zwischenbild. Der automatische Auftrag verwirft sie. Abbruch, Revision, zu große Aufträge, neutrale Ziele und spätere Suchvarianten geprüft.
+- Vorschau stimmt vertexweise mit der reinen Kandidatenberechnung überein, erhält gespeicherte Daten und stellt ursprüngliche Attribute/Livepose wieder her. Native Korrekturtreiber sind im Original aktiv, bei temporären veränderten Gewichten deaktiviert und danach wiederhergestellt.
+- Übernahme erhält Posewerte und Move-Folgen, markiert Posen zur Sichtprüfung und ist eine Undo-/Redo-Aktion. Unbekannte/veraltete/verwendete Vorschlags-IDs und fehlende KI-Freigabe werden abgewiesen.
+- Zwei neue gerenderte Browserfälle bestanden: kompletter Studio-Auftrag mit Original-/Korrekturvergleich, Übernahme, Undo, Speichern/Laden; integrierter Assistent delegiert eine echte lokale Suche an das Studio, wertet deren Ergebnisse aus, bietet Vergleich und übernimmt erst nach Zustimmung. Anbieterantworten simuliert, Geometrieberechnung tatsächlich ausgeführt.
+- Abschließender gezielter Browserlauf: fünf Fälle bestanden, einschließlich bisheriger Move-Diagnose, KI-Sequenzvorschau und manueller lokaler Gewichtssuche. Vorher-/Nachher-Aufnahmen gesichtet: Kollaps wird gemindert, deutliche Einschnürung bleibt sichtbar. Keine Volumen- oder Anatomieabnahme.
+- 413 Node-Tests lokal bestanden, TypeScript und Produktionsbuild erfolgreich (bekannte Bundle-Größenwarnung). Python-MCP-Modul syntaktisch geprüft. Die eine bytegenaue Originaldatei-Prüfung läuft in vollständiger CI; lokal sind nicht alle unveränderten Originalframes vorhanden.
+
+**Grenzen:** Höchstens vier Gelenke, zwei Radien und sechs Transfers je Radius, 512 Ausgangsstichproben und 100 Millionen Vertex-Auswertungen je Auftrag. Eine Gewichtsübertragung je angebotener Änderung. Keine neue ungeriggte Anatomie, freie Mesh-Korrekturen, Kollisionen, Volumenfreigabe oder lückenlose Bewegungsgarantie. Kein echter Anbieter-/Caddy-/GPU-Lauf. PaKaChi-Geometrie und die charakterspezifische Aufbereitung bleiben auf dem vorherigen Stand.
+
+**CI-Vorgänger vollständig ausgewertet:** [Lauf 42539989715](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/42539989715), Commit `fe8ae105d84d35fc1d401dfdda84ebff78ffa9b8`: 404 Node-Tests, Build, 40 Browserfälle, drei Importmessungen und Artefakte erfolgreich. Frischer Pipelinehash und beide GLB-Hashes stimmen mit dem lokal validierten Modellstand überein. Neuer Lauf wird commitbezogen in PR #1 geprüft.
 
 ## Version 0.91.0
 

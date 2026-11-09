@@ -1,4 +1,4 @@
-# Avatar-Studio – 0.91.0
+# Avatar-Studio – 0.92.0
 
 Das Studio ist Teil des Players. Mika, Nori und eigene GLB-Modelle können bearbeitet werden. Der Original-Bildplayer mit beiden Formen und 72 Bildern bleibt erhalten. Die bearbeitbaren 3D-Rekonstruktionen beider PaKaChi-Formen sind zusätzlich im Model Zoo verfügbar; Charakterqualität und gemeinsame 3D-Verwandlung bleiben in Arbeit.
 
@@ -467,3 +467,17 @@ Abbrechen, Änderungen, Bewegungswechsel und Verlassen verwerfen laufende Ergebn
 Der integrierte KI-Assistent kann denselben allgemeinen Messkern über `analyze_studio_surface` für gespeicherte Posen oder Moves aufrufen. Zuerst `get_studio` lesen; danach `session`, `expectedRevision`, `kind=pose|move` und die tatsächliche `id` übergeben. Ergebnisse enthalten höchstens 32 Teilmodelldetails und melden abgeschnittene Details ausdrücklich. `maximumIssues` summiert die Maxima der Teilmodelle, nicht zwingend einen einzelnen Zeitpunkt. Der Aufruf ist lesend, bleibt an Sitzung/Revision gebunden und wird mit der Assistentenanfrage abgebrochen. Er ist derzeit über den integrierten Assistenten und die lokale Browser-API verfügbar; die externen MCP-Brücken bieten diesen neuen Aufruf noch nicht an.
 
 Das ist der Messbaustein einer späteren KI-gestützten Reparaturschleife. Automatische Kandidatensuche am beliebigen Modell, Prüfung über alle betroffenen Bewegungen, Korrekturvorschau und gemeinsame rückgängig machbare Übernahme sind noch nicht vollständig integriert. Die PaKaChi-Aufbereitung bleibt ein charakterspezifischer Testfall und ersetzt kein allgemeines Auto-Rigging.
+
+## Automatischer Korrekturauftrag (0.92.0)
+
+In **Figur bewegen** mindestens eine Pose speichern, bei Bedarf eigene Moves anlegen und **Hautkorrektur automatisch suchen** starten. Das Studio untersucht die gespeicherten Posen und 16 Schritte je Übergang aller eigenen Moves einschließlich Schleifenschluss. Es wählt die auffälligste untersuchte Haltung und bis zu vier Gelenke anhand tatsächlicher Hauteinflüsse an auffälligen Dreiecken. Eine manuelle Gelenkauswahl oder feste Anatomienamen sind nicht erforderlich.
+
+Je Gelenk werden höchstens zwei aus der Fehlerregion abgeleitete Radien und je Radius sechs lokale Gewichtsübertragungen zwischen Gelenk und Elternknochen versucht. Ein optionaler fester Radius im KI-Werkzeug ersetzt die automatische Radiensuche. Die Grundform muss erhalten bleiben. Jede angebotene Variante besteht die bisherigen Einzelpose-/Zwischenpose-Prüfungen sowie sämtliche zuvor aufgenommenen Move-Stichproben. Fehlerzahlen, Fehlerkategorien und Überschreitungen der Dehnungsgrenzen dürfen in diesen Stichproben nicht steigen. Eine Verbesserung einer Pose allein reicht nicht.
+
+**Original ansehen** und **Korrektur ansehen** zeigen dieselbe gemessene Haltung. **Vergleich beenden** stellt die vorherige Bearbeitungspose und Hautbindung wieder her. Die Vorschau schreibt keine Projektdaten; Speichern und andere Änderungen sind währenddessen gesperrt. Native poseabhängige Korrekturen bleiben in der Originalvorschau aktiv und werden in der Gewichts-Korrekturvorschau wie nach einer tatsächlichen Hautänderung deaktiviert. Ihre ursprüngliche Einstellung wird beim Beenden wiederhergestellt.
+
+**Geprüfte Korrektur übernehmen** wendet exakt den aktuellen Vorschlag an und prüft die tatsächlich angewendete Haut gegen dessen Messwerte. Die Änderung kann mit einem Undo rückgängig gemacht werden. Posewerte, Move-Folgen und ursprüngliche Modellbytes bleiben erhalten; Posen werden zur visuellen Kontrolle markiert. Erneutes Speichern/Laden rekonstruiert die Änderung aus den Hautübertragungen.
+
+Ein Auftrag ist auf 512 untersuchte Pose-/Move-Bilder und 100 Millionen Vertex-Auswertungen begrenzt. Überschreitungen werden ausdrücklich abgewiesen, statt Bewegungen still auszulassen. **Auftrag abbrechen**, eine Änderung oder das Verlassen des Studios verwirft laufende Berechnungen. Ohne nachgewiesenen Kandidaten erscheint kein Übernahmevorschlag.
+
+Der Auftrag verbessert höchstens eine ausgewählte Gewichtsübertragung je Durchlauf. Er ist kein allgemeines Auto-Rigging und kein Beweis für natürliche Anatomie, Silhouette, Volumen, Kollisionen oder alle Zeitpunkte zwischen Stichproben. Die Suche kann trotz verbleibender Fehler keinen Vorschlag liefern. Weitere Verfahren und mehrere aufeinander abgestimmte Korrekturen bleiben Entwicklungsaufgaben.

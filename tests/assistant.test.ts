@@ -11,6 +11,12 @@ const info={session:'test',revision:2};
 const proposal={...info,expectedRevision:2,action:'set_mode',mode:'pose'};delete (proposal as any).revision;
 const response=(message:unknown,ollama=true)=>new Response(JSON.stringify(ollama?{done:true,message}:{choices:[{finish_reason:'tool_calls',message}]}));
 const call=(name:string,args:unknown,ollama=true)=>({role:'assistant',content:'',tool_calls:[{id:'c1',type:'function',function:{name,arguments:ollama?args:JSON.stringify(args)}}]});
+test('assistant requests a measured automatic skin proposal and returns only its opaque approval command',async()=>{
+ const command={session:'test',expectedRevision:2,action:'apply_skin_correction',id:'skin-measured'},methods:string[]=[];let requests=0;
+ const result=await runAssistant({profile:local,prompt:'Repair skin automatically',rpc(method,args,signal){methods.push(method);if(method==='get_studio')return info;assert.equal(method,'propose_studio_skin_correction');assert.equal(args?.session,'test');assert.ok(signal);return Promise.resolve({id:command.id,beforeIssues:32,afterIssues:0,checkedMoves:1,motionSamples:17,command});},fetcher:async(_url,init)=>{
+  const body=JSON.parse(String(init?.body));if(requests++===0)return response(call('get_studio',{}));if(requests===2)return response(call('propose_studio_skin_correction',{session:'test',expectedRevision:2}));assert.equal(JSON.parse(body.messages.at(-1).content).afterIssues,0);return response(call('edit_studio',{command}));
+ }});assert.deepEqual(result.proposal,command);assert.equal(result.reads,2);assert.ok(!methods.includes('edit_studio'));
+});
 test('assistant awaits real diagnostic tool results before answering, without applying edits',async()=>{
  for(const profile of [local,cloud]){
   const ollama=profile.adapter==='ollama',report={session:'test',revision:2,samples:33,maximumIssues:16,meshes:[{name:'Skin',firstIssue:.25}]};let requests=0,analyses=0;
@@ -63,6 +69,12 @@ test('HTTP errors and oversized bodies fail without returning provider secrets',
  for(const reply of [new Response('sensitive',{status:401}),new Response('x',{headers:{'content-length':'2000000'}})])await assert.rejects(runAssistant({profile:local,prompt:'x',rpc(){},fetcher:async()=>reply}),error=>error instanceof Error&&!error.message.includes('sensitive'));
 });
 function setup(){const w=new Window();Object.assign(globalThis,{window:w,document:w.document});const config={...emptyProviderConfig(),profiles:[local],assignments:{assistant:'a',generation:null,rigging:null}};saveProviderConfig(config,w.localStorage);const host=document.createElement('section');document.body.append(host);return {w,host};}
+test('assistant skin comparison uses the actual cached proposal and ends preview before applying',async()=>{
+ const {w,host}=setup(),events:string[]=[],command={session:'test',expectedRevision:2,action:'apply_skin_correction' as const,id:'skin-measured'};
+ const panel=mountAssistantPanel(host,(method)=>{if(method==='edit_studio'){events.push('apply');return {};}return {...info,automaticSkinCorrection:{id:command.id,beforeIssues:32,afterIssues:0}};},()=> 'de',w.localStorage,async()=>({text:'Measured proposal',proposal:command,reads:2}),undefined,(id,corrected,session,revision)=>{assert.equal(id,command.id);assert.equal(session,'test');assert.equal(revision,2);events.push(corrected?'corrected':'original');return()=>{events.push('stop');};});
+ host.querySelector<HTMLTextAreaElement>('textarea')!.value='Repair';host.querySelector('form')!.dispatchEvent(new w.Event('submit',{cancelable:true}) as unknown as Event);await new Promise(r=>setTimeout(r,0));assert.match(host.querySelector('#assistant-sequence-comparison')!.textContent!,/32 → 0/);
+ host.querySelector<HTMLButtonElement>('[data-skin-preview="original"]')!.click();host.querySelector<HTMLButtonElement>('[data-skin-preview="corrected"]')!.click();host.querySelector<HTMLButtonElement>('#assistant-apply')!.click();assert.deepEqual(events,['original','stop','corrected','stop','apply']);panel.dispose();await w.happyDOM.abort();
+});
 test('panel sends only explicitly, escapes responses, applies once, retains profile key on profile changes',async()=>{
  const {w,host}=setup();let runs=0,edits=0;const panel=mountAssistantPanel(host,()=>{edits++;return {};},()=> 'de',w.localStorage,async()=>{runs++;return {text:'<img src=x>',proposal:proposal as any,reads:1};});
  assert.equal(runs,0);host.querySelector<HTMLTextAreaElement>('textarea')!.value='task';host.querySelector<HTMLInputElement>('input')!.value='secret';host.querySelector('form')!.dispatchEvent(new w.Event('submit',{cancelable:true}) as any);await new Promise(r=>setTimeout(r,0));assert.equal(runs,1);assert.equal(host.querySelector('img'),null);assert.equal(edits,0);

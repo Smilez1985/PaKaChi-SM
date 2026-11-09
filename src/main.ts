@@ -147,6 +147,7 @@ function rpc(method: string, args: Record<string, unknown> = {},signal?:AbortSig
   if (method === 'list_avatars') return choices().map(({id,name,selected})=>({id,name,selected}));
   if (method === 'get_state') return {state:machine.state, capability:machine.capability, ready:!busy && !studio && !!machine.capability};
   if (busy) throw new Error('Avatar wird geladen. Bitte erneut versuchen.');
+  if(method==='propose_studio_skin_correction'){if(!editor||original)throw new Error('Zuerst einen 3D-Avatar laden.');return editor.proposeSkinCorrection(args,signal);}
   if(method==='analyze_studio_surface'){if(!editor||original)throw new Error('Zuerst einen 3D-Avatar laden.');return editor.analyzeSurface(args,signal);}
   if(method==='get_studio'||method==='edit_studio'){if(!editor||original)throw new Error('Zuerst einen 3D-Avatar laden.');if(method==='get_studio')return editor.inspect(args);if(Object.keys(args).some(k=>k!=='command'))throw new Error('Ungültige Studio-Argumente.');return editor.execute(args.command);}
   if (args.avatar && args.avatar !== machine.capability?.id) throw new Error('Bitte diesen Avatar zuerst im Player auswählen.');
@@ -356,7 +357,7 @@ async function boot(): Promise<void> {
   window.addEventListener('pakachi-options',renderCatalog);
   const agents = mountAgentPanel(rpc);
   const runtime=mountLocalRuntimePanel(el<HTMLButtonElement>('runtime-open'),{connectPlayer:agents.connectLocal,importModel:async file=>{if(busy)return false;const loaded=await loadAvatar(undefined,file);if(loaded)changeView(true);return loaded;}},()=>options.language);
-  mountAssistantPanel(document.querySelector('.agent-panel')!,rpc,()=>options.language,localStorage,undefined,(id,poses,session,revision)=>{if(busy||!editor)throw Error('Studio nicht verfügbar.');return editor.previewSequence(id,poses,session,revision);});
+  mountAssistantPanel(document.querySelector('.agent-panel')!,rpc,()=>options.language,localStorage,undefined,(id,poses,session,revision)=>{if(busy||!editor)throw Error('Studio nicht verfügbar.');return editor.previewSequence(id,poses,session,revision);},(id,corrected,session,revision)=>{if(busy||!editor)throw Error('Studio nicht verfügbar.');const current=editor.inspect();if(current.session!==session||current.revision!==revision)throw Error('Studio-Stand hat sich geändert.');return editor.previewAutomaticSkinCorrection(id,corrected);});
   const generation=mountGenerationPanel(el('generation-host'),{
     target:()=>studio&&!busy&&!editor?.interactionActive?generationTarget():null,
     adopt:(bytes,expected,valid)=>{

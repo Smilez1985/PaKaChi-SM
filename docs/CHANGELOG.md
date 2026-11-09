@@ -14,6 +14,25 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 Noch keine weiteren Änderungen.
 
+## [0.92.0] - 2026-11-09
+
+Zeitstempel: 2026-11-09T07:15:16+01:00 (Europe/Berlin)
+
+### Added
+
+- Automatischer lokaler Korrekturauftrag verbindet Diagnose, Gelenkauswahl, Kandidatensuche und Gegenprüfung. Wählt die auffälligste gespeicherte Pose oder Move-Stichprobe; bestimmt bis zu vier Gelenke aus den tatsächlichen Hauteinflüssen auffälliger Dreiecke. Keine PaKaChi-Namen oder manuelle Gelenkauswahl erforderlich.
+- Sucht je Gelenk in höchstens zwei aus der Fehlerregion abgeleiteten Radien und sechs Gewichtsübertragungen. Jeder angebotene Kandidat muss die vorhandenen Pose-Gegenprüfungen und alle 16 Stichproben je Übergang sämtlicher eigener Moves einschließlich Schleifenschluss bestehen. Schlechtere Zwischenbilder verwerfen einen Kandidaten auch dann, wenn alle gespeicherten Einzelposen bestehen.
+- Original-/Korrekturvorschau verwendet flüchtige Hautgewichte und stellt Originalgewichte, Livepose und native Korrekturen wieder her. Die Übernahme prüft die tatsächlich angewendete Haut und ist ein einzelner Undo-/Redo-Schritt. Gespeicherte Posewerte und Move-Folgen bleiben erhalten; Prüfmarkierungen werden wie bei anderen Hautänderungen gesetzt.
+- Integrierter KI-Assistent kann `propose_studio_skin_correction` anfordern und danach genau den gemessenen, revisionsgebundenen Vorschlag mit `apply_skin_correction` zur Übernahme anbieten. Assistentenpanel zeigt Original-/Korrekturvergleich; unbekannte, veraltete oder bereits verwendete Vorschlags-IDs werden abgewiesen. KI-Schreibfreigabe bleibt für die KI-Übernahme erforderlich.
+
+### Changed
+
+- Suchauftrag begrenzt: höchstens 512 Pose-/Move-Stichproben und 100 Millionen Vertex-Auswertungen einschließlich Kandidatenprüfung; kein stilles Auslassen großer Bewegungsfolgen. Abbruch, Änderungen und Verlassen verhindern die Veröffentlichung laufender Ergebnisse. Fehlende Verbesserung liefert keinen erfundenen Erfolg.
+- MCP-Befehlsschemata kennen die Übernahme eines bereits im Studio berechneten Vorschlags. Der neue Suchaufruf ist zunächst im integrierten Assistenten und in der lokalen Browser-API verfügbar; keine neue externe MCP-Suche behauptet.
+- Vollständige CI 0.91.0 ausgewertet: 404 Node-Tests, Build, 40 Chromium-Fälle, drei Produktionsimportmessungen; frische Modell-Hashes stimmen mit dem lokal geprüften Stand überein.
+
+Der Auftrag ist eine begrenzte automatische Gewichtskorrektur, kein allgemeines Auto-Rigging, kein Volumen-/Kollisionslöser und keine lückenlose Bewegungsfreigabe. Der synthetische Prüffall zeigt eine gemessene Verbesserung; eine sichtbare Einschnürung bleibt. Die PaKaChi-Modelle werden in dieser Version nicht neu gestaltet.
+
 ## [0.91.0] - 2026-11-09
 
 Zeitstempel: 2026-11-09T01:19:09+01:00 (Europe/Berlin)
@@ -1907,3 +1926,5 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 [0.90.0]: PRUEFUNG.md#version-0900
 
 [0.91.0]: PRUEFUNG.md#version-0910
+
+[0.92.0]: PRUEFUNG.md#version-0920

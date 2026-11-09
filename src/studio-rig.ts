@@ -34,6 +34,16 @@ export class StudioRig {
   private topology:StudioTopology;
   private surfaceValues:Record<string,Transform>={};
   private correctionsBindCompatible=true;
+  private skinPreviewRestore:(()=>void)|null=null;
+  private previewDisablesCorrections=false;
+  get skinPreviewActive(){return this.skinPreviewRestore!==null;}
+  stopSkinPreview(){this.skinPreviewRestore?.();}
+  /** Ephemeral weights for a measured preview. Project data and source binding stay unchanged. */
+  previewSkin(values:Record<string,Transform>,overrides:import('./pose-surface-check.ts').SkinOverrides){
+    this.stopSkinPreview();const origin=this.capture(),bindings=[...overrides].map(([i,binding])=>{const mesh=this.surfaces[i]?.mesh;if(!(mesh instanceof T.SkinnedMesh))throw Error('Vorschau passt nicht zur Haut.');return {mesh,binding,indices:mesh.geometry.getAttribute('skinIndex'),weights:mesh.geometry.getAttribute('skinWeight')};});
+    let active=true;const restore=()=>{if(!active)return;active=false;this.skinPreviewRestore=null;this.previewDisablesCorrections=false;for(const b of bindings){b.mesh.geometry.setAttribute('skinIndex',b.indices);b.mesh.geometry.setAttribute('skinWeight',b.weights);}this.apply(origin);};
+    this.skinPreviewRestore=restore;this.previewDisablesCorrections=overrides.size>0;try{for(const b of bindings){b.mesh.geometry.setAttribute('skinIndex',b.binding.indices);b.mesh.geometry.setAttribute('skinWeight',b.binding.weights);}this.apply(values);}catch(error){restore();throw error;}return restore;
+  }
   constructor(root:T.Object3D, saved?:StudioData) {
     poseMorphBindings(root);
     this.root=root;root.updateWorldMatrix(true,true);this.rootMatrix=root.matrix.clone();this.rootWorld=root.matrixWorld.clone();this.rootAutoUpdate=root.matrixAutoUpdate;
@@ -153,8 +163,9 @@ export class StudioRig {
       this.reset();this.apply(values);return parentPoint.id;
     }catch(error){this.data=before;this.reset();this.apply(original);throw error;}
   }
-  dispose(){this.topology.restore();}
+  dispose(){this.stopSkinPreview();this.topology.restore();}
   reset() {
+    this.stopSkinPreview();
     this.figureOffset.set(0,0,0);this.figureRotation.identity();this.figureScale=1;this.figureMatrix.identity();this.root.matrixAutoUpdate=this.rootAutoUpdate;this.root.matrix.copy(this.rootMatrix);
     for(const item of this.originalNodes){write(item.node,item.value);item.node.scale.copy(item.scale);}
     const bones=this.topology.build(this.data.boneInsertions??[],this.data.boneRest,this.data.boneDeletions??[],this.data.boneReparents??[],this.data.weightTransfers??[]);this.bones.splice(0,this.bones.length,...bones);
@@ -165,6 +176,7 @@ export class StudioRig {
     this.deform();
   }
   restoreSource() {
+    this.stopSkinPreview();
     enablePoseMorphs(this.root,this.data.poseCorrections!==false);
     this.figureOffset.set(0,0,0);this.figureRotation.identity();this.figureScale=1;this.figureMatrix.identity();this.root.matrixAutoUpdate=this.rootAutoUpdate;this.root.matrix.copy(this.rootMatrix);
     this.topology.restore();
@@ -273,7 +285,7 @@ export class StudioRig {
     }
   }
   get poseCorrectionsCompatible(){return this.correctionsBindCompatible&&!(this.data.boneInsertions?.length||this.data.boneDeletions?.length||this.data.boneReparents?.length||this.data.weightTransfers?.length)&&JSON.stringify(this.data.boneRest)===JSON.stringify(this.initial.boneRest);}
-  get poseCorrectionsActive(){return poseMorphBindings(this.root).length>0&&this.poseCorrectionsCompatible&&this.data.poseCorrections!==false;}
+  get poseCorrectionsActive(){return !this.previewDisablesCorrections&&poseMorphBindings(this.root).length>0&&this.poseCorrectionsCompatible&&this.data.poseCorrections!==false;}
   correctionWeights(values:Record<string,Transform>,enabled=this.poseCorrectionsActive){
     const points=new Map(this.data.points.filter(p=>p.kind==='bone').map(p=>[this.bones[p.bone!],p]));
     return poseMorphWeights(this.root,bone=>{const point=points.get(bone),value=point?values[point.id]:undefined;return value?new T.Quaternion().fromArray(value.rotation):bone.quaternion;},enabled);

@@ -89,3 +89,9 @@ test('32 authored corrections bind and normalize through real skinning; a 33rd i
   mesh.geometry.dispose();f.rig.dispose();
  }
 });
+
+test('temporary skin preview preserves native correction settings and restores live morph weights',()=>{
+ const f=fixture(),live=f.rig.capture(),data=structuredClone(f.rig.data);
+ const original=f.rig.previewSkin(f.values(90),new Map());assert.equal(f.rig.poseCorrectionsActive,true);assert.equal(f.mesh.morphTargetInfluences![1],1);original();assert.deepEqual(f.rig.capture(),live);
+ const corrected=f.rig.previewSkin(f.values(90),new Map([[0,{indices:f.mesh.geometry.getAttribute('skinIndex'),weights:f.mesh.geometry.getAttribute('skinWeight')}]]));assert.equal(f.rig.poseCorrectionsActive,false);assert.equal(f.mesh.morphTargetInfluences![1],0);corrected();assert.equal(f.rig.poseCorrectionsActive,true);assert.deepEqual(f.rig.capture(),live);assert.deepEqual(f.rig.data,data);f.rig.dispose();
+});
