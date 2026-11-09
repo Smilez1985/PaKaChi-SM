@@ -16,11 +16,11 @@ function fixture(){
 test('motion surface check catches an intermediate collapse when both stored poses pass, without mutations',async()=>{
  const f=fixture();for(const p of f.rig.data.poses)assert.equal(checkPoseSurface(f.rig,p).issues,0);
  const before=JSON.stringify(f.rig.data),live=f.rig.capture(),positions=Array.from(f.mesh.geometry.attributes.position.array),weights=Array.from(f.mesh.geometry.attributes.skinWeight.array);
- const report=await checkMoveSurface(f.rig,f.move,new AbortController().signal);assert.equal(report.samples,17);assert.equal(report.continuous,false);const mesh=report.meshes[0];assert.ok(mesh.maximumIssues>0);assert.equal(mesh.worstTime,.5);assert.ok(mesh.firstIssue!>0&&mesh.firstIssue!<1);
+ const report=await checkMoveSurface(f.rig,f.move,new AbortController().signal);assert.ok(report.samples>17&&report.samples<=81);assert.equal(report.adaptiveSamples,report.samples-17);assert.equal(report.continuous,false);const mesh=report.meshes[0];assert.ok(mesh.maximumIssues>0);assert.equal(mesh.worstTime,.5);assert.ok(mesh.firstIssue!>0&&mesh.firstIssue!<1);
  assert.equal(JSON.stringify(f.rig.data),before);assert.deepEqual(f.rig.capture(),live);assert.deepEqual(Array.from(f.mesh.geometry.attributes.position.array),positions);assert.deepEqual(Array.from(f.mesh.geometry.attributes.skinWeight.array),weights);f.rig.dispose();
 });
 test('loop closure is sampled, abort and invalidation stop work, and excessive or empty geometry never passes',async()=>{
- const f=fixture();f.move.loop=true;const report=await checkMoveSurface(f.rig,f.move,new AbortController().signal);assert.equal(report.samples,33);assert.equal(report.duration,2);
+ const f=fixture();f.move.loop=true;const report=await checkMoveSurface(f.rig,f.move,new AbortController().signal);assert.ok(report.samples>33&&report.samples<=97);assert.equal(report.duration,2);
  const abort=new AbortController(),pending=checkMoveSurface(f.rig,f.move,abort.signal);abort.abort();await assert.rejects(()=>pending,{name:'AbortError'});
  let valid=true;const stale=checkMoveSurface(f.rig,f.move,new AbortController().signal,()=>valid);valid=false;await assert.rejects(()=>stale,/geändert/);
  f.move.poses=Array.from({length:100},(_,i)=>f.rig.data.poses[i%2].id);f.rig.surfaces[0].base=new Float32Array(60000);await assert.rejects(()=>checkMoveSurface(f.rig,f.move,new AbortController().signal),/zu groß/);
@@ -33,7 +33,7 @@ function editorFixture(){
 }
 test('agent diagnostic uses the same measured geometry, rejects stale requests and propagates abort',async()=>{
  const f=editorFixture(),state=f.editor.inspect(),args={session:state.session,expectedRevision:state.revision,kind:'move',id:f.move.id},before=f.editor.exportProject();
- const report=await f.editor.analyzeSurface(args);assert.equal(report.samples,17);assert.ok(report.maximumIssues>0);assert.equal(report.truncated,false);assert.equal(report.continuous,false);assert.deepEqual(f.editor.exportProject(),before);
+ const report=await f.editor.analyzeSurface(args);assert.ok(report.samples>17&&report.samples<=81);assert.ok(report.maximumIssues>0);assert.equal(report.truncated,false);assert.equal(report.continuous,false);assert.deepEqual(f.editor.exportProject(),before);
  await assert.rejects(()=>f.editor.analyzeSurface({...args,expectedRevision:state.revision-1}));await assert.rejects(()=>f.editor.analyzeSurface({...args,extra:true}));
  const abort=new AbortController(),pending=f.editor.analyzeSurface(args,abort.signal);abort.abort();await assert.rejects(()=>pending,{name:'AbortError'});assert.deepEqual(f.editor.exportProject(),before);f.editor.dispose();await f.w.happyDOM.abort();
 });
@@ -43,7 +43,7 @@ test('editor surface checks reject concurrent work and cancel after edits, selec
   assert.equal(f.host.querySelector<HTMLButtonElement>('#move-check-surface')!.disabled,true);assert.equal(f.host.querySelector<HTMLButtonElement>('#move-check-limits')!.disabled,true);await assert.rejects(()=>f.editor.checkMoveLimits(f.move.id),/beschäftigt/);
   if(action==='cancel')f.host.querySelector<HTMLButtonElement>('#move-check-cancel')!.click();if(action==='edit')f.host.querySelector<HTMLButtonElement>('#pose-reset')!.click();if(action==='leave')f.editor.leave();
   if(action==='select'){const select=f.host.querySelector<HTMLSelectElement>('#studio-moves')!;select.value='';select.dispatchEvent(new Event('change'));}
-  if(action==='none'){assert.equal((await pending).samples,17);assert.deepEqual(f.editor.exportProject(),before);assert.equal(f.editor.inspect().revision,revision);assert.equal(f.editor.dirty,false);}else await assert.rejects(()=>pending);
+  if(action==='none'){assert.ok((await pending).samples>17);assert.deepEqual(f.editor.exportProject(),before);assert.equal(f.editor.inspect().revision,revision);assert.equal(f.editor.dirty,false);}else await assert.rejects(()=>pending);
   assert.equal(f.host.querySelector<HTMLButtonElement>('#move-check-cancel')!.disabled,true);f.editor.dispose();await f.w.happyDOM.abort();
  }
 });
@@ -51,4 +51,10 @@ test('surface report displays literal names, opens the worst frame paused, and c
  const f=editorFixture();f.mesh.name='<img src=x>';f.host.querySelector<HTMLButtonElement>('#move-check-surface')!.click();
  for(let i=0;i<100&&!f.host.querySelector('#move-surface-result button');i++)await new Promise(r=>setTimeout(r,5));
  const output=f.host.querySelector('#move-surface-result')!;assert.match(output.textContent!,/Oberfläche auffällig/);assert.match(output.textContent!,/<img src=x>/);assert.equal(output.querySelector('img'),null);output.querySelector<HTMLButtonElement>('button')!.click();assert.equal(f.editor.paused,true);assert.equal(f.editor.playing,true);assert.deepEqual(f.rig.capture(),f.rig.sample(f.move,.5));f.editor.stopPreview();f.host.querySelector<HTMLButtonElement>('#pose-reset')!.click();assert.equal(f.host.querySelector('#move-surface-result')!.textContent,'');f.editor.dispose();await f.w.happyDOM.abort();
+});
+
+test('adaptive surface sampling is skipped on a stable safe movement',async()=>{
+ const f=fixture();f.rig.data.poses[1].values[f.joint.id].rotation=[...f.rig.data.poses[0].values[f.joint.id].rotation];
+ const report=await checkMoveSurface(f.rig,f.move,new AbortController().signal);
+ assert.equal(report.samples,17);assert.equal(report.adaptiveSamples,0);assert.equal(report.continuous,false);f.rig.dispose();
 });

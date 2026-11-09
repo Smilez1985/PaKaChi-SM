@@ -12,7 +12,13 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
-Noch keine weiteren Änderungen.
+### Added
+
+- Bewegungs-Oberflächendiagnose ergänzt die 16 Grundschritte je Übergang um höchstens 64 adaptive Zwischenbilder bei Warnungen oder deutlichen Messwertänderungen, maximal zwei Verfeinerungsstufen und weiterhin höchstens 20 Millionen Vertex-Auswertungen. Ergebnisse enthalten die Anzahl zusätzlicher Stichproben. Abbruch, Revision, Schleifenschluss und unveränderte Modelldaten bleiben erhalten. Dies ist keine kontinuierliche Bewegungs- oder Kollisionsfreigabe.
+
+### Tests
+
+- Regressionen für auffällige Zwischenbilder und eine konstante, sichere Bewegung; Chromium-Diagnose prüft das begrenzte Zusatzsampling.
 
 ## [0.93.1] - 2026-11-09
 
