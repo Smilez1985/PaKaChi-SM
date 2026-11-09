@@ -1,6 +1,6 @@
 # Prüfstand und Protokolle
 
-**Softwarestand: 0.90.0 · Dokumentationsabgleich: 2026-11-09T00:32:51+01:00 (Europe/Berlin).**
+**Softwarestand: 0.91.0 · Dokumentationsabgleich: 2026-11-09T01:19:09+01:00 (Europe/Berlin).**
 
 Alle Prüfnachweise stehen in dieser Datei: ein Abschnitt je Softwareversion sowie gesonderte Abschnitte für datierte Zwischenprüfungen. Die Ergebnisse und Grenzen gelten für den jeweils genannten Stand. Spätere Läufe stehen als Nachtrag im selben Abschnitt. Produktänderungen gehören in den [Changelog](CHANGELOG.md), offene Aufgaben in die [Roadmap](ROADMAP.md).
 
@@ -8,10 +8,10 @@ Alle Prüfnachweise stehen in dieser Datei: ein Abschnitt je Softwareversion sow
 
 | Prüfung | Bestätigter Stand | Umfang und Grenze |
 | --- | --- | --- |
-| Node-Tests | [0.90.0](#version-0900): 396 lokal bestanden | Einschließlich echter MCP-/OAuth-/Python-/ACP-Prozesse; keine manuelle Qualitätsabnahme. |
-| TypeScript und Produktionsbuild | [0.90.0](#version-0900): lokal bestanden | Bekannte Bundle-Größenwarnung; keine Aussage über Zielhardware-Leistung. |
-| Chromium-Browserfälle | [0.89.0](#version-0890): 39 im vollständigen CI-Lauf; drei gezielte Originalmodellfälle lokal für 0.90.0 bestanden | Software-WebGL, simulierte KI-Anbieter; keine reale KI-Inferenzabnahme. |
-| Produktionsbrowser-Importmessung | [0.89.0](#version-0890): drei CI-Durchläufe bestanden | Mika mit 256 Gewichtsaufträgen; keine allgemeine Laufzeitgarantie. |
+| Node-Tests | [0.91.0](#version-0910): 403 lokal bestanden; vollständige Originaldatei-Prüfung folgt in CI | Einschließlich echter MCP-/OAuth-/Python-/ACP-Prozesse; keine manuelle Qualitätsabnahme. |
+| TypeScript und Produktionsbuild | [0.91.0](#version-0910): lokal bestanden | Bekannte Bundle-Größenwarnung; keine Aussage über Zielhardware-Leistung. |
+| Chromium-Browserfälle | [0.90.0](#version-0900): 39 im vollständigen CI-Lauf; vier gezielte Fälle lokal für 0.91.0 bestanden | Software-WebGL, simulierte KI-Anbieter; keine reale KI-Inferenzabnahme. |
+| Produktionsbrowser-Importmessung | [0.90.0](#version-0900): drei CI-Durchläufe bestanden | Mika mit 256 Gewichtsaufträgen; keine allgemeine Laufzeitgarantie. |
 | Legacy-Testprogramme | [0.9.0](#version-090): beide bestanden | Steuerung, MQTT-Verhalten und Lebenszyklus des Originalplayers. |
 | Python-MCP-/MQTT-Integration | [0.10.0](#version-0100): bestanden | Echter Python-Prozess und eingebetteter Testbroker; keine allgemeine externe Hostabnahme. |
 | Originaldateien | [0.49.0](#version-0490): bytegenau erhalten | 83 Originaldateien einschließlich 72 Transformationsbildern. |
@@ -59,6 +59,21 @@ Diese Liste beschreibt ausstehende Abnahmen.
 ## Prüfungen nach Version
 
 Die jüngste Version steht zuerst. Für eine bestimmte Version die Dokumentgliederung oder die Browser-Suche verwenden.
+
+## Version 0.91.0
+
+**Prüfzeitpunkt:** 2026-11-09T01:19:09+01:00 (Europe/Berlin).
+
+- Lokal 380 allgemeine Node-Tests und 23 Originalmodelltests bestanden (403 insgesamt). Die einzelne bytegenaue 83-Originaldateien-Prüfung wird in vollständiger CI ausgeführt; lokal sind nur die für Modellarbeit benötigten Quelldateien vorhanden. TypeScript und Produktionsbuild bestanden (bekannte Bundle-Größenwarnung). Alle drei Originalmodell-Browserfälle und der neue Move-Diagnosefall bestanden. Der Tierformfall wurde nach einem durch die Versionsänderung ausgelösten Vite-Seitenneustart auf stabilem Stand wiederholt und bestand in 51,5 Sekunden bei unverändertem 90-Sekunden-Limit.
+- Neue Tests weisen einen Kollaps zwischen zwei einzeln unauffälligen Posen nach. 17 Stichproben ohne Schleife bzw. 33 einschließlich Schleifenschluss; weder Rig, Geometrie, Gewichte, Livepose noch gespeicherte Daten werden verändert. Abbruch, Revision, Bewegungswechsel, Verlassen, zu große und nicht auswertbare Geometrie geprüft.
+- KI-Werkzeug wartet auf asynchrone echte Diagnose, lehnt unbeobachtete/veraltete Revisionen ab und propagiert Abbruch. Integrierter Assistent und lokale Browser-API; keine Behauptung neuer externer MCP-Werkzeuge oder einer vollständigen automatischen Reparatur.
+- Neuer gerenderter Browserfall bestanden: unauffällige Schlüsselposen, auffälliges Zwischenbild, Schleifenschluss, direkter Werkzeugaufruf, pausiertes Prüfbild, unverändertes Speichern und erneute Prüfung nach Import. Bericht und Kollapsaufnahme gesichtet.
+- Frische CPU-Aufbereitung: 48 Kandidaten je Form, Arbeitsform 21 und Tierform 11 akzeptierte Korrekturhaltungen. Fünf neue linke Hüftziele; Schulterkandidaten und andere neue Hüftziele werden abgelehnt. Endgültiger Satz an 562 bzw. 178 Posen gegen ursprüngliche Hautbewegung geprüft. Arbeitsform 14.212.880, Tierform 17.813.052 Byte. [Messbericht, Formatversion 5](benchmarks/pakachi-rigging-2026-11-07.json). Unabhängige ursprüngliche Körper-Digests bleiben bestanden.
+- Echter Animations-GLB-Rundlauf jetzt mit gleichzeitigem Ellenbogen, beiden Knien und linker Hüfte; Wiedergabe mit gewöhnlichem AnimationMixer und Vergleich tatsächlicher Hautvertices bestanden.
+
+**Grenzen:** Messwerte sind Stichproben und keine anatomische Freigabe. Eine neue Warnprüfung repariert noch keine Haut. PaKaChi-Aufbereitung ist weiterhin charakterspezifisch; allgemeines Auto-Rigging, automatische Reparaturschleife, gemeinsame Morph-Oberfläche und Verwandlung bleiben offen.
+
+**CI:** Vollständiger vorheriger [0.90.0-Lauf 42536161638](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/42536161638) für `5af4a91efcdf9c319c41066f2e4219b1f10c8fa1` erfolgreich: 396 Node-Tests, Build, 39 Chromium-Fälle, drei Produktionsimportmessungen und Artefakte. Neuer Lauf wird commitbezogen in PR #1 ausgewertet.
 
 ## Version 0.90.0
 

@@ -14,6 +14,22 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 Noch keine weiteren Änderungen.
 
+## [0.91.0] - 2026-11-09
+
+Zeitstempel: 2026-11-09T01:19:09+01:00 (Europe/Berlin)
+
+### Added
+
+- Allgemeine Oberflächenprüfung gespeicherter Studio-Moves: 16 Schritte je Übergang einschließlich Schlüsselposen und Schleifenschluss, tatsächliche Haut-/Morphberechnung, Bericht je Teilmodell und pausierte Ansicht auffälliger Zeitpunkte. Read-only, abbrechbar, revisionsgebunden und auf 20 Millionen Vertex-Stichproben begrenzt. Änderungen, Bewegungswechsel oder Verlassen verwerfen Ergebnisse. Keine kontinuierliche Bewegungs- oder Anatomiefreigabe.
+- Der integrierte KI-Assistent kann über `analyze_studio_surface` echte Pose-/Move-Messungen anfordern und abwarten. Keine Modellbytes im Werkzeugergebnis; begrenzte Details, Revision und Abbruch werden geprüft. Der allgemeine Messkern setzt keine PaKaChi-Gelenknamen voraus. Automatische Reparaturschleife und externe MCP-Anbindung dieses neuen Werkzeugs bleiben offen.
+- Original-Aufbereitung prüft zusätzlich beide Schultern und Hüften: 48 Kandidaten je Form. Fünf linke Hüftkorrekturen der Arbeitsform akzeptiert (insgesamt 21); Tierform unverändert 11, übrige neue Kandidaten verworfen. Abschließende Vergleiche: 562 bzw. 178 Posen. Beispiel linke Hüfte −90° Z: 258 → 37 auffällige Körperdreiecke, maximale Hauptdehnung 21,136× → 2,945×. Ursprüngliche Körperattribute und 59 Gelenke bleiben erhalten.
+
+### Changed
+
+- Begrenzung auf höchstens 32 Korrekturtreiber pro Teilmodell erweitert; 33 werden abgewiesen. Arbeitsform 14.212.880 Byte, Tierform 17.813.052 Byte; dekodierter RAM-/Grafikspeicherbedarf ist größer. Messbericht Formatversion 5 wird ohne redundante Einrückung gespeichert.
+- CI-Zeitbudget auf 35 Minuten erweitert: Die umfassendere frische CPU-Aufbereitung kommt zur vollständigen Browserprüfung hinzu. Prüfungen bleiben vollständig erhalten. CI 0.90.0 mit 396 Node-Tests, Build, 39 Browserfällen und drei Importmessungen erfolgreich ausgewertet.
+- Roadmap auf das Entwicklungsziel ausgerichtet: Das Studio soll KI-gestützte Diagnose, Korrektursuche und Gegenprüfung selbst koordinieren; PaKaChi bleibt Referenzfall.
+
 ## [0.90.0] - 2026-11-09
 
 Zeitstempel: 2026-11-09T00:32:51+01:00 (Europe/Berlin)
@@ -1889,3 +1905,5 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 [0.89.0]: PRUEFUNG.md#version-0890
 
 [0.90.0]: PRUEFUNG.md#version-0900
+
+[0.91.0]: PRUEFUNG.md#version-0910

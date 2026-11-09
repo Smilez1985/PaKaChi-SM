@@ -1,4 +1,4 @@
-# Avatar-Studio – 0.90.0
+# Avatar-Studio – 0.91.0
 
 Das Studio ist Teil des Players. Mika, Nori und eigene GLB-Modelle können bearbeitet werden. Der Original-Bildplayer mit beiden Formen und 72 Bildern bleibt erhalten. Die bearbeitbaren 3D-Rekonstruktionen beider PaKaChi-Formen sind zusätzlich im Model Zoo verfügbar; Charakterqualität und gemeinsame 3D-Verwandlung bleiben in Arbeit.
 
@@ -457,3 +457,13 @@ Die Korrekturziele sind an die ursprüngliche Hautbindung gebunden. Rig-Umbau, g
 **Projekt speichern/laden** erhält die eingebetteten Ziele und den Schalter. Ein **Animations-GLB** backt die Einblendungen mit 30 Bildern pro Sekunde in gewöhnliche Morph-Kurven; andere glTF-Player brauchen dafür keinen PaKaChi-Treiber. Zwischen den Abtastpunkten interpoliert der fremde Player, daher ist das eine zeitlich abgetastete Wiedergabe. Ein **Rig-GLB** enthält Ziele und aktuelle Einblendung; automatische Reaktion auf spätere Posen erfordert kompatible PaKaChi-Metadaten oder selbst eingerichtete Treiber im Zielprogramm. Bei inkompatibler Bindung entfernt der Export die Treiber-Metadaten.
 
 Die GLBs belegen durch verlustfreie sparse Morph-Speicherung rund 13.8 MB (Arbeitsform) und 17.8 MB (Tierform) und bleiben unter dem 50-MiB-Modelllimit. Beim Laden entstehen weiterhin vollständige Morph-Arrays; die kleinere Datei senkt den Grafik-/Arbeitsspeicherbedarf nicht entsprechend. Das bestehende 64-MiB-Morphbudget begrenzt weiterhin zusätzliche Oberflächenanimationen. Die ursprünglichen Modelle, Bilder, Hautgewichte und unverformten Körperoberflächen bleiben erhalten. Diese Korrekturziele verbessern einzelne Posen; die gemeinsame Oberfläche und die Normalform↔Arbeitsform-Verwandlung bleiben eigenständige offene Aufgaben.
+
+## Oberflächenprüfung eigener Moves (0.91.0)
+
+Unter **Eigene Bewegungen** einen Move auswählen und **Oberfläche der Bewegung prüfen** starten. Die Prüfung wertet die tatsächliche Haut samt aktiven Korrekturformen und freien Oberflächenpunkten an 16 Schritten je Übergang aus, einschließlich aller gespeicherten Posen und des Schleifenschlusses. Sie verändert weder die Figurenstellung noch Posen, Moves oder Hautgewichte. Pro Teilmodell nennt der Bericht die größte Zahl auffälliger Dreiecke. **Auffälliges Bild ansehen** öffnet einen gemessenen Zeitpunkt pausiert; der bestehende Ablauf zum Übernehmen eines Prüfbildes bleibt verfügbar.
+
+Abbrechen, Änderungen, Bewegungswechsel und Verlassen verwerfen laufende Ergebnisse. Ein Auftrag ist auf 20 Millionen Vertex-Stichproben begrenzt; zu große Folgen werden ausdrücklich abgewiesen. Das sind Stichproben, keine lückenlose Verformungs-, Kollisions- oder Volumenprüfung. Ein unauffälliger Bericht ist keine anatomische Freigabe.
+
+Der integrierte KI-Assistent kann denselben allgemeinen Messkern über `analyze_studio_surface` für gespeicherte Posen oder Moves aufrufen. Zuerst `get_studio` lesen; danach `session`, `expectedRevision`, `kind=pose|move` und die tatsächliche `id` übergeben. Ergebnisse enthalten höchstens 32 Teilmodelldetails und melden abgeschnittene Details ausdrücklich. `maximumIssues` summiert die Maxima der Teilmodelle, nicht zwingend einen einzelnen Zeitpunkt. Der Aufruf ist lesend, bleibt an Sitzung/Revision gebunden und wird mit der Assistentenanfrage abgebrochen. Er ist derzeit über den integrierten Assistenten und die lokale Browser-API verfügbar; die externen MCP-Brücken bieten diesen neuen Aufruf noch nicht an.
+
+Das ist der Messbaustein einer späteren KI-gestützten Reparaturschleife. Automatische Kandidatensuche am beliebigen Modell, Prüfung über alle betroffenen Bewegungen, Korrekturvorschau und gemeinsame rückgängig machbare Übernahme sind noch nicht vollständig integriert. Die PaKaChi-Aufbereitung bleibt ein charakterspezifischer Testfall und ersetzt kein allgemeines Auto-Rigging.

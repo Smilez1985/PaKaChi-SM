@@ -11,6 +11,22 @@ const info={session:'test',revision:2};
 const proposal={...info,expectedRevision:2,action:'set_mode',mode:'pose'};delete (proposal as any).revision;
 const response=(message:unknown,ollama=true)=>new Response(JSON.stringify(ollama?{done:true,message}:{choices:[{finish_reason:'tool_calls',message}]}));
 const call=(name:string,args:unknown,ollama=true)=>({role:'assistant',content:'',tool_calls:[{id:'c1',type:'function',function:{name,arguments:ollama?args:JSON.stringify(args)}}]});
+test('assistant awaits real diagnostic tool results before answering, without applying edits',async()=>{
+ for(const profile of [local,cloud]){
+  const ollama=profile.adapter==='ollama',report={session:'test',revision:2,samples:33,maximumIssues:16,meshes:[{name:'Skin',firstIssue:.25}]};let requests=0,analyses=0;
+  const result=await runAssistant({profile,prompt:'Check this move',rpc(method,args,signal){if(method==='get_studio')return info;assert.equal(method,'analyze_studio_surface');assert.equal(args?.id,'wave');assert.ok(signal);analyses++;return new Promise(resolve=>setTimeout(()=>resolve(report),5));},fetcher:async(_url,init)=>{
+   const body=JSON.parse(String(init?.body));if(requests===0){requests++;return response(call('get_studio',{section:'moves'},ollama),ollama);}if(requests===1){requests++;return response(call('analyze_studio_surface',{session:'test',expectedRevision:2,kind:'move',id:'wave'},ollama),ollama);}
+   assert.deepEqual(JSON.parse(body.messages.at(-1).content),report);return response({role:'assistant',content:'Measured intermediate skin issue.'},ollama);
+  }});assert.equal(analyses,1);assert.equal(result.reads,2);assert.equal(result.proposal,undefined);
+ }
+});
+test('diagnostic tool rejects unobserved revisions, stale results and propagates cancellation',async()=>{
+ const args={session:'test',expectedRevision:2,kind:'move',id:'wave'};
+ await assert.rejects(()=>runAssistant({profile:local,prompt:'x',rpc(){throw Error('Must not run');},fetcher:async()=>response(call('analyze_studio_surface',args))}),/unobserved-revision/);
+ let revision=2,requests=0;await assert.rejects(()=>runAssistant({profile:local,prompt:'x',rpc(method){if(method==='get_studio')return {...info,revision};revision=3;return Promise.resolve({samples:17});},fetcher:async()=>response(requests++?call('analyze_studio_surface',args):call('get_studio',{}))}),/stale-studio/);
+ const controller=new AbortController();requests=0;let cancelled=false;
+ const pending=runAssistant({profile:local,prompt:'x',signal:controller.signal,rpc(method,_args,signal){if(method==='get_studio')return info;controller.abort();cancelled=signal!.aborted;return Promise.resolve({samples:17});},fetcher:async()=>response(requests++?call('analyze_studio_surface',args):call('get_studio',{}))});await assert.rejects(()=>pending,/cancelled/);assert.equal(cancelled,true);
+});
 test('assistant endpoint preserves prefixes and rejects unsupported adapters',()=>{
  assert.equal(assistantURL(local),'http://localhost:11434/api/chat');assert.equal(assistantURL(cloud),'https://example.com/v1/chat/completions');
  assert.equal(assistantURL({...local,endpoint:'http://localhost/proxy/api'}),'http://localhost/proxy/api/chat');

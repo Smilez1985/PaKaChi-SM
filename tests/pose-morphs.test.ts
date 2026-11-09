@@ -73,3 +73,19 @@ test('invalid context bones, quaternions, ranges and axis cones are rejected at 
   const f=fixture(),root=clone(f.root),mesh=root.getObjectByName('Arm skin')!;Object.assign(mesh.userData[POSE_MORPHS][0],metadata);assert.throws(()=>poseMorphBindings(root));f.rig.dispose();
  }
 });
+
+test('32 authored corrections bind and normalize through real skinning; a 33rd is refused',()=>{
+ for(const count of [16,32,33]){
+  const f=fixture(),root=clone(f.root),mesh=root.getObjectByName('Arm skin') as T.SkinnedMesh;
+  mesh.geometry=mesh.geometry.clone();const template=mesh.geometry.morphAttributes.position![1];
+  mesh.geometry.morphAttributes.position=Array.from({length:count},(_,i)=>{const attribute=template.clone();attribute.name=`Correction_${i}`;return attribute;});mesh.updateMorphTargets();
+  const shape=mesh.userData[POSE_MORPHS][0];mesh.userData[POSE_MORPHS]=Array.from({length:count},(_,i)=>({...structuredClone(shape),target:`Correction_${i}`}));
+  if(count===33)assert.throws(()=>poseMorphBindings(root));
+  else{
+   const rig=new StudioRig(root),joint=rig.data.points.find(p=>p.name==='Forearm')!,values=rig.capture();values[joint.id].rotation=shape.pose;
+   const weights=rig.correctionWeights(values).get(mesh)!;assert.equal(weights.length,count);assert.ok(Math.abs(weights.reduce((a,b)=>a+b,0)-1)<1e-12);
+   const expected=poseSurfacePositions(rig,values,0);rig.apply(values);for(let v=0;v<expected.length/3;v++){const actual=mesh.getVertexPosition(v,new T.Vector3()).applyMatrix4(mesh.matrixWorld);assert.ok(actual.distanceTo(new T.Vector3().fromArray(expected,v*3))<1e-7);}rig.dispose();
+  }
+  mesh.geometry.dispose();f.rig.dispose();
+ }
+});

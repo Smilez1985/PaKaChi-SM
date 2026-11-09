@@ -4,7 +4,13 @@ Teil der [Blaupause](README.md) · [Roadmap](ROADMAP.md) · [Changelog](CHANGELO
 
 ## Status und Begriffe
 
-Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.85.0: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau, automatische Anatomieerkennung und die Qualitätsabnahme der angeschlossenen lokalen KI-Generierung bleiben offen.
+### KI-gestützter Studio-Auftrag
+
+Das Studio soll die hier entwickelten Diagnose- und Reparaturschritte später selbstständig KI-gestützt koordinieren. Der Nutzer gibt das gewünschte Ergebnis und bei Bedarf einen Korrekturprompt vor. Die KI plant anhand des tatsächlichen Modells; geometrische Werkzeuge lokalisieren Fehler, erzeugen und bewerten Kandidaten. Messungen an Zielposen, gespeicherten Moves und Zwischenbildern entscheiden über die Übernahme. Verschlechterungen werden verworfen; Vorschau, Abbruch und Undo gehören zum Ablauf. Allgemeine Werkzeuge dürfen keine feste PaKaChi-Gelenkliste voraussetzen. PaKaChi ist Referenz- und Qualitätstestfall dieses wiederverwendbaren Verfahrens.
+
+**Stand 0.91.0:** Allgemeine Pose-/Move-Oberflächendiagnose und deren Aufruf durch den integrierten Assistenten sind implementiert. Die bestehende begrenzte lokale Gewichtssuche ist noch nicht mit der KI zu einem automatisierten Gesamtauftrag verbunden. Automatisches Rigging einer ungeriggten Oberfläche, allgemeine Korrekturformen und durchgehende Qualitätsprüfung bleiben offen. Die charakterspezifische CPU-Aufbereitung ist keine bereits vorhandene allgemeine KI-Reparatur.
+
+Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.91.0: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau, automatische Anatomieerkennung und die Qualitätsabnahme der angeschlossenen lokalen KI-Generierung bleiben offen.
 
 - **PaKaChi:** Panda-KI-Chimera, das übergeordnete Projekt.
 - **PaKaChi-SM:** StateMaschine mit Avatar-Player und integriertem Studio.
@@ -20,7 +26,7 @@ Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich gen
 | Studio | Zwei Modi, Mausnavigation, Punkte/Verbindungen, bestehende Skelettketten, Posen/Moves | Skalierte Knochenketten, neue Rigs ohne vorhandenes Skelett, Ganzkörper-IK und visuelle Abnahme |
 | Anbieter | Mehrere Profile gleichzeitig, drei unabhängige Rollen und Fallback-Routen, editierbare Vorgabeadressen | Weitere Fachadapter, OAuth und reale Kontoabnahme |
 | Schlüssel | Optionale verschlüsselte Persistenz, Entsperren nach F5, Passwortwechsel, Sitzungssperre | Betriebssystem-Schlüsselbund und unabhängiges Sicherheitsaudit |
-| Assistent | Ollama, LM Studio, OpenAI-kompatible API und Anthropic; einzeln bestätigte Studio-Vorschläge | Bildkontext und mehrschrittige Änderungsvorschau |
+| Assistent | Ollama, LM Studio, OpenAI-kompatible API und Anthropic; bestätigte Studio-Vorschläge und echte Pose-/Move-Oberflächendiagnose | Bildkontext und mehrschrittige Änderungsvorschau |
 | Generierung | Lokaler TripoSR-Dienst, Bildauswahl, getrennte Vorschau, Vorprüfungs-Fallbacks, expliziter weiterer Auftrag; vier echte CPU-Inferenzläufe beider Originalformen | Echte GPU-/Qualitätsabnahme, Cloud-Generatoren, Korrekturprompts und Rigging |
 | Übernahme | Revisionsschutz, ein Modellwechsel-Rücksprung, vorbereitete 3D-Installation mit Rückabwicklung | Gerenderte Abnahme, Originalplayer-Neustart und GPU-Kontextverlust |
 

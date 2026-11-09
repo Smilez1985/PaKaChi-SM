@@ -1,26 +1,28 @@
 # Roadmap – offene Aufgaben
 
-**Entwicklungsstand: 0.90.0 · Abgleich: 09.11.2026.** Teil der [Blaupause](README.md).
+**Entwicklungsstand: 0.91.0 · Abgleich: 09.11.2026.** Teil der [Blaupause](README.md).
 
 Diese Roadmap enthält offene Umsetzung und ausstehende Abnahme. Erledigte Änderungen stehen nach Version im [Changelog](CHANGELOG.md); Nachweise und Grenzen im [Prüfstand](PRUEFUNG.md). Eine implementierte Funktion ist nicht automatisch manuell oder mit realen Anbietern abgenommen.
 
 ## Übergabe und nächster Schritt
 
-**Übergabe aktualisiert:** 2026-11-09T00:32:51+01:00 (Europe/Berlin). Softwarestand **0.90.0**.
+**Übergabe aktualisiert:** 2026-11-09T01:19:09+01:00 (Europe/Berlin). Softwarestand **0.91.0**.
 
 - **Arbeitsbranch:** `work/local-verification-model-zoo`, [Entwurfs-PR #1](https://github.com/Smilez1985/PaKaChi-SM/pull/1); noch nicht nach `main` zusammengeführt.
-- **Neue Grundlage:** Erweiterte Korrekturformen am Original: 16 Ellenbogen-/Kniehaltungen der Arbeitsform, 11 der Tierform; ungeeignete Bewegungskontexte werden weich ausgeblendet; Zielbewegung und ursprüngliche Hautbindung bleiben erhalten. Renderer, Studio-Prüfung und exportierte Bewegung verwenden dieselbe Korrektur. Die 180°-Stresshaltung und allgemeines Auto-Rigging bleiben ungelöst. [Prüfbericht](PRUEFUNG.md#version-0900).
-- **Nächste Aktion:** Korrekturqualität an Schultern/Hüften und in vollständigen gespeicherten Moves verbessern; konservative Kontext-Ausblendung durch belastbare Korrekturen kombinierter Bewegungen ersetzen; Charakterqualität und besonders Tierform/Schulter/Hüfte weiter verbessern. Danach eine gemeinsame Morph-Topologie erzeugen. Posekorrekturen sind noch keine Form-Verwandlung.
+- **Neue Grundlage:** Allgemeine Pose-/Move-Oberflächendiagnose im Studio, einschließlich Zwischenbildern, Schleifenschluss und Aufruf durch den integrierten KI-Assistenten. Arbeitsform 21 und Tierform 11 akzeptierte Korrekturhaltungen; volle Zielbewegung und ursprüngliche Körperattribute bleiben erhalten. Die Diagnose ist noch keine allgemeine KI-Reparatur. [Prüfbericht](PRUEFUNG.md#version-0910).
+- **Nächste Aktion:** Die vorhandene lokale Korrektursuche und die neue allgemeine Pose-/Move-Oberflächendiagnose zu einem KI-gestützten Studio-Auftrag verbinden: Fehler lokalisieren, Kandidaten erzeugen, betroffene gespeicherte Moves einschließlich Zwischenbildern gegen den Ausgangsstand prüfen und einen gemeinsamen rückgängig machbaren Korrekturvorschlag anzeigen. Keine feste PaKaChi-Gelenkliste als allgemeine Lösung; Rollenprofil für Rigging verwenden. Der Nutzer startet den Auftrag, das Studio soll die einzelnen Prüf-/Suchschritte selbst koordinieren. PaKaChi dient als Referenzmodell.
+- **Charakterstand:** 21 akzeptierte Korrekturhaltungen der Arbeitsform (fünf zusätzliche linke Hüfthaltungen), 11 der Tierform. Schulterkandidaten und weitere Hüftkandidaten bleiben nach den Messungen verworfen; die zugrunde liegenden Fehler bestehen weiter.
 - **Danach:** Eine gespeicherte Standard-Verwandlung auf dieser Oberfläche, vorwärts und rückwärts mit identischen Zwischenformen; Qualität auch zwischen den Endposen prüfen.
 - **Hardware parallel:** Die [fünf Verbindungsschritte](LOKALE-WERKZEUGE.md#verbindung-zu-deinem-rechner) bleiben verfügbar. Windows-/Caddy-/GPU-Abnahme ist offen, blockiert die CPU-basierte Charakter-/Rigarbeit jedoch nicht. Ein tatsächlicher externer Aufruf von `local_get_status` bleibt der erste Verbindungsnachweis.
 
 ## Prioritäten
 
-1. **Charakter und Rig verfeinern:** Beide Formen besitzen seit 0.85.0 dieselbe 59-Gelenk-Hierarchie einschließlich 14 beweglicher Finger/Zehen und echte Hautgewichte. Gesicht, Fell und lokale Pfotenflächen sind überarbeitet; die Körpernetze haben geschlossene, konsistent orientierte Kanten. Finger-/Pfotenproportionen, Anschlüsse bei großen Beugungen, verdeckte Flächen und Hüft-/Schulterübergänge weiter korrigieren und designgetreu abnehmen.
-2. **Gemeinsame Morph-Topologie:** Die umformungsbedingten Hautbrücken der unabhängig rekonstruierten Netze beseitigen. Ein Charakter mit kompatibler Netzstruktur und geprüftem Rig für beide Formen.
-3. **Standard-Verwandlung:** Danach eine gespeicherte Animation Normalform → Arbeitsform implementieren; dieselbe Animation rückwärts, Endform halten und laufende Bewegung ohne Sprung umkehren. Zustandszuordnung wie im Originalplayer.
-4. **Reale Generatorqualität:** TripoSR-CPU-Inferenz bleibt belegt. GPU-Abnahme und qualitativer Verfahrensvergleich auf den beiden tatsächlichen Vorlagen bleiben offen.
-5. **Abnahme am tatsächlichen Ablauf:** Kamera, Haut, Posen und Speichern/Laden an beiden Formen weiter prüfen. [Nachweise und Grenzen](PRUEFUNG.md#version-0850).
+1. **KI-gestützten Studio-Ablauf verallgemeinern:** Allgemeine Diagnose ist implementiert; Korrektursuche, Prüfung mehrerer Bewegungen, Vorschau und gemeinsame Übernahme fehlen als automatisierter Gesamtauftrag.
+2. **Charakter und Rig verfeinern:** Beide Formen besitzen seit 0.85.0 dieselbe 59-Gelenk-Hierarchie einschließlich 14 beweglicher Finger/Zehen und echte Hautgewichte. Gesicht, Fell und lokale Pfotenflächen sind überarbeitet; die Körpernetze haben geschlossene, konsistent orientierte Kanten. Finger-/Pfotenproportionen, Anschlüsse bei großen Beugungen, verdeckte Flächen und Hüft-/Schulterübergänge weiter korrigieren und designgetreu abnehmen.
+3. **Gemeinsame Morph-Topologie:** Die umformungsbedingten Hautbrücken der unabhängig rekonstruierten Netze beseitigen. Ein Charakter mit kompatibler Netzstruktur und geprüftem Rig für beide Formen.
+4. **Standard-Verwandlung:** Danach eine gespeicherte Animation Normalform → Arbeitsform implementieren; dieselbe Animation rückwärts, Endform halten und laufende Bewegung ohne Sprung umkehren. Zustandszuordnung wie im Originalplayer.
+5. **Reale Generatorqualität:** TripoSR-CPU-Inferenz bleibt belegt. GPU-Abnahme und qualitativer Verfahrensvergleich auf den beiden tatsächlichen Vorlagen bleiben offen.
+6. **Abnahme am tatsächlichen Ablauf:** Kamera, Haut, Posen und Speichern/Laden an beiden Formen weiter prüfen. [Nachweise und Grenzen](PRUEFUNG.md#version-0850).
 
 ## Lokale Hardware anbinden
 
@@ -62,7 +64,7 @@ Die Umsetzung des integrierten MCP-Arbeitsplatzes, der Caddy-/DuckDNS-Konfigurat
 - [ ] Anatomische Gelenkketten aus ungeriggter Oberfläche erzeugen; allgemeine Dreh-/Twistgrenzen, fixierte Füße und gekoppelte Ganzkörper-IK ergänzen.
 - [ ] Beugegrenzen, Posen- und Bewegungsprüfung samt Prüfbildübernahme im gerenderten Studio abnehmen; lückenlose Bewegungsprüfung, direkte Drehgrenzen und Korrekturen ergänzen.
 - [ ] Bewegungsfähige Rigs unterschiedlicher Körperformen systematisch prüfen.
-- [ ] Die seit 0.87.0 vorhandene Dreiecks-Dehnungsprüfung einzelner Posen um Zwischenbilder, Selbstüberschneidung, Volumen-/Orientierungsprüfung und Referenzansichten erweitern; die seit 0.88.0 begrenzte Gewichtssuche und die seit 0.90.0 auf Ellenbogen und Knie erweiterten Korrekturformen um weitere Gelenke, durchgehende kombinierte Bewegungen und charakterbezogene Qualitätskriterien ergänzen. Die aktuellen Warnschwellen sind keine anatomische Abnahme.
+- [ ] Die seit 0.87.0 vorhandene Dreiecks-Dehnungsprüfung einzelner Posen um Zwischenbilder, Selbstüberschneidung, Volumen-/Orientierungsprüfung und Referenzansichten erweitern; die seit 0.88.0 begrenzte Gewichtssuche und die seit 0.91.0 auf Ellenbogen und Knie erweiterten Korrekturformen um weitere Gelenke, durchgehende kombinierte Bewegungen und charakterbezogene Qualitätskriterien ergänzen. Die aktuellen Warnschwellen sind keine anatomische Abnahme.
 
 ## 5. Bild zu 3D und KI-Korrektur
 

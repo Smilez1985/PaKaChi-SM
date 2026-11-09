@@ -18,7 +18,7 @@ function correctiveDelta(geometry,matrices,oldBinding,newBinding){
 const metric=r=>({issues:r.issues,maximumStretch:r.maximumStretch,minimumStretch:r.minimumStretch,invalid:r.invalid});
 
 /** Bake checked multi-joint pose corrections; original skin weights stay unchanged. */
-export function preparePoseCorrections(root,body,fur,furBodyVertices,{iterations=480,joints=['LeftElbow','RightElbow','LeftKnee','RightKnee']}={}){
+export function preparePoseCorrections(root,body,fur,furBodyVertices,{iterations=480,joints=['LeftElbow','RightElbow','LeftKnee','RightKnee','LeftShoulder','RightShoulder','LeftHip','RightHip']}={}){
  const skeleton=body.skeleton,rests=new Map(skeleton.bones.map(b=>[b.name,b.quaternion.clone()])),original=attributes(body.geometry),furOriginal=attributes(fur.geometry),cache=new Map(),trials=[],regions=[];
  const poseOf=(joint,axis,degrees)=>{const direction=new T.Vector3();direction[axis]=1;return {joint,rotation:rests.get(joint).clone().multiply(new T.Quaternion().setFromAxisAngle(direction,degrees*Math.PI/180)).toArray()};};
  const scenePose=specs=>{const key=JSON.stringify(specs);if(cache.has(key))return cache.get(key);const rotations=new Map([...rests].map(([name,q])=>[name,q.clone()]));for(const spec of specs)rotations.set(spec.joint,new T.Quaternion().fromArray(spec.rotation));
@@ -65,7 +65,7 @@ export function preparePoseCorrections(root,body,fur,furBodyVertices,{iterations
     for(const constraint of entry.constraints??[])for(const angle of [.25,-.25])specifications.push({kind:'context-transition',poses:[target,poseOf(constraint.joint,'x',angle)]});
     if(entry.axisCone)for(const angle of [3.5,-3.5,5,-5,7.2,-7.2]){const direction=new T.Vector3();direction[otherAxis]=1;specifications.push({kind:'axis-transition',poses:[{joint:jointName,rotation:new T.Quaternion().fromArray(target.rotation).multiply(new T.Quaternion().setFromAxisAngle(direction,angle*Math.PI/180)).toArray()}]});}
     specifications.push(...reciprocalTransitions);const samples=specifications.map(measure);
-    const targetResult=samples.find(s=>s.kind==='single'&&s.degrees===degrees).meshes[0],withinBudget=(body.geometry.morphAttributes.position?.length??0)<16,accepted=withinBudget&&targetResult.after.issues<targetResult.before.issues&&samples.every(s=>s.meshes.every(m=>!m.after.invalid&&m.after.issues<=m.before.issues&&(m.after.maximumStretch??0)<=(m.before.maximumStretch??0)+1e-5));
+    const targetResult=samples.find(s=>s.kind==='single'&&s.degrees===degrees).meshes[0],withinBudget=(body.geometry.morphAttributes.position?.length??0)<32,accepted=withinBudget&&targetResult.after.issues<targetResult.before.issues&&samples.every(s=>s.meshes.every(m=>!m.after.invalid&&m.after.issues<=m.before.issues&&(m.after.maximumStretch??0)<=(m.before.maximumStretch??0)+1e-5));
     trials.push({joint:jointName,axis,degrees,accepted,withinBudget,conditions:structuredClone(entry),initialRegressions:initialSamples.filter(regressed).map(s=>s.kind),samples});if(!accepted){surfaces.forEach((s,i)=>{s.mesh.userData.pakachiPoseMorphs=snapshots[i];});continue;}
     const name=`PaKaChi_${jointName}_${axis}_${sign>0?'positive':'negative'}`;
     surfaces.forEach((s,i)=>{

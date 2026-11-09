@@ -17,7 +17,7 @@ export function poseMorphBindings(root:T.Object3D):Binding[]{
  const bones:T.Bone[]=[];root.traverse(n=>{if(n instanceof T.Bone)bones.push(n);});const bindings:Binding[]=[];
  const quaternion=(v:unknown)=>Array.isArray(v)&&v.length===4&&v.every(n=>typeof n==='number'&&Number.isFinite(n))&&Math.abs(v.reduce((s,n)=>s+n*n,0)-1)<1e-5;
  root.traverse(mesh=>{if(!(mesh instanceof T.Mesh)||mesh.userData[POSE_MORPHS]===undefined)return;
-  const raw=mesh.userData[POSE_MORPHS];if(!Array.isArray(raw)||raw.length>16)throw Error('Ungültige poseabhängige Korrekturformen.');const used=new Set<number>();
+  const raw=mesh.userData[POSE_MORPHS];if(!Array.isArray(raw)||raw.length>32)throw Error('Ungültige poseabhängige Korrekturformen.');const used=new Set<number>();
   const entries=raw.map(item=>{
    if(!item||typeof item.joint!=='string'||item.joint.length>100||typeof item.target!=='string'||item.target.length>100||!quaternion(item.rest)||!quaternion(item.pose))throw Error('Ungültige poseabhängige Korrekturformen.');
    const matches=bones.filter(b=>b.name===item.joint),index=mesh.morphTargetDictionary?.[item.target];if(matches.length!==1||index===undefined||used.has(index)||!mesh.geometry.morphAttributes.position?.[index])throw Error('Korrekturform passt nicht zum Modell.');used.add(index);

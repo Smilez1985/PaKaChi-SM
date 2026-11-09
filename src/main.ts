@@ -142,11 +142,12 @@ let request = 0;
 let fetchController: AbortController | null = null;
 let busy = false;
 const machine = new StateMachine(() => window.dispatchEvent(new Event('pakachi-sm:change')));
-function rpc(method: string, args: Record<string, unknown> = {}): unknown {
+function rpc(method: string, args: Record<string, unknown> = {},signal?:AbortSignal): unknown {
   if (!args || typeof args !== 'object' || Array.isArray(args)) throw new Error('Ungültige Argumente.');
   if (method === 'list_avatars') return choices().map(({id,name,selected})=>({id,name,selected}));
   if (method === 'get_state') return {state:machine.state, capability:machine.capability, ready:!busy && !studio && !!machine.capability};
   if (busy) throw new Error('Avatar wird geladen. Bitte erneut versuchen.');
+  if(method==='analyze_studio_surface'){if(!editor||original)throw new Error('Zuerst einen 3D-Avatar laden.');return editor.analyzeSurface(args,signal);}
   if(method==='get_studio'||method==='edit_studio'){if(!editor||original)throw new Error('Zuerst einen 3D-Avatar laden.');if(method==='get_studio')return editor.inspect(args);if(Object.keys(args).some(k=>k!=='command'))throw new Error('Ungültige Studio-Argumente.');return editor.execute(args.command);}
   if (args.avatar && args.avatar !== machine.capability?.id) throw new Error('Bitte diesen Avatar zuerst im Player auswählen.');
   if (method === 'get_avatar_capabilities') { if(!machine.capability) throw new Error('Kein Avatar bereit.'); return machine.capability; }
