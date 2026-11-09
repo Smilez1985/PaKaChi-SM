@@ -17,8 +17,8 @@ export async function validateGeneration(output:JobOutput,signal:AbortSignal):Pr
   if(vertices<3||bounds.isEmpty()||bounds.getSize(new Vector3()).length()<1e-8)throw new Error('empty-geometry');
  }finally{disposeModel(model.scene);}
 }
-export async function showGenerationPreview(host:HTMLElement,bytes:Uint8Array,signal:AbortSignal):Promise<()=>void>{
+export async function showGenerationPreview(host:HTMLElement,bytes:Uint8Array,signal:AbortSignal,skeleton=false):Promise<()=>void>{
  const model=await parseModel(Uint8Array.from(bytes).buffer);let viewer:Viewer|undefined;
- try{signal.throwIfAborted();viewer=new Viewer(host);viewer.show(model.scene);return ()=>viewer!.dispose();}
+ try{signal.throwIfAborted();viewer=new Viewer(host);viewer.show(model.scene);viewer.showSkeleton(skeleton);return ()=>viewer!.dispose();}
  catch(error){if(viewer)viewer.dispose();else disposeModel(model.scene);throw error;}
 }

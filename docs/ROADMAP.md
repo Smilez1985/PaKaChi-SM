@@ -1,14 +1,15 @@
 # Roadmap – offene Aufgaben
 
-**Entwicklungsstand: 0.94.0 · Abgleich: 09.11.2026.** Teil der [Blaupause](README.md).
+**Entwicklungsstand: 0.95.0 · Abgleich: 09.11.2026.** Teil der [Blaupause](README.md).
 
 Diese Roadmap enthält offene Umsetzung und ausstehende Abnahme. Erledigte Änderungen stehen nach Version im [Changelog](CHANGELOG.md); Nachweise und Grenzen im [Prüfstand](PRUEFUNG.md). Eine implementierte Funktion ist nicht automatisch manuell oder mit realen Anbietern abgenommen.
 
 ## Übergabe und nächster Schritt
 
-**Übergabe aktualisiert:** 2026-11-09T20:52:52+01:00 (Europe/Berlin). Softwarestand **0.94.0**.
+**Übergabe aktualisiert:** 2026-11-09T22:46:22+01:00 (Europe/Berlin). Softwarestand **0.95.0**.
 
 - **Arbeitsbranch:** `work/local-verification-model-zoo`, [Entwurfs-PR #1](https://github.com/Smilez1985/PaKaChi-SM/pull/1); noch nicht nach `main` zusammengeführt.
+- **Bild-zu-3D:** Seit 0.95.0 optionales erstes Zweibeiner-/Vierbeinerskelett mit Hautbindung auf statischer Generatorausgabe, getrennte Vorschau, Beugewarnungen und Übernahme ins Studio. Echte Anatomieerkennung und zuverlässige Charakterqualität bleiben offen. [Ablauf](KI-GENERIERUNG.md#erster-beweglicher-entwurf-seit-0950).
 - **Neue Grundlage:** Automatischer Auftrag vergleicht Gewichtsänderungen mit lokalen poseabhängigen geometrischen Korrekturformen; gemeinsame Pose-/Move-Gegenprüfung, Original-/Korrekturvorschau, KI-Aufruf, Undo und Projekt-/GLB-Export. Zusätzliche adaptive Bewegungsdiagnose und begrenzte separate Schnittdiagnose sind vorhanden. [Prüfbericht](PRUEFUNG.md#version-0940).
 - **Nächste Aktion:** Geometrische Kandidaten an tatsächlichen Schulter-/Hüft-/Kniefehlern weiterentwickeln. Die geprüften neuen PaKaChi-Proben werden bisher verworfen. Lokale Formziele und Fellansätze verbessern, mehrere Korrekturen gemeinsam optimieren; adaptive Zwischenbilder und zuverlässige Selbstüberschneidungsprüfung in den automatischen Auftrag integrieren. Externe MCP-Suche und produktive Fachadapter ergänzen.
 - **Charakterstand:** 21 akzeptierte Korrekturhaltungen der Arbeitsform (fünf zusätzliche linke Hüfthaltungen), 11 der Tierform. Schulterkandidaten und weitere Hüftkandidaten bleiben nach den Messungen verworfen; die zugrunde liegenden Fehler bestehen weiter.
@@ -126,7 +127,7 @@ Die Umsetzung des integrierten MCP-Arbeitsplatzes, der Caddy-/DuckDNS-Konfigurat
 
 ## Freie Knochenabzweigungen
 
-- [ ] Erstes Skelett auf einer ungeriggten Oberfläche erstellen und binden.
+- [ ] Anatomisches erstes Skelett auf beliebiger ungeriggter Oberfläche erkennen und zuverlässig binden. Proportionale Ausgangsvorlagen für neue statische Generatorausgaben sind seit 0.95.0 vorhanden; manuelle Abnahme und KI-Anatomie fehlen.
 
 ## Gewichtspinsel
 

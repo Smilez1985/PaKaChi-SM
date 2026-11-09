@@ -1,6 +1,6 @@
 # Prüfstand und Protokolle
 
-**Softwarestand: 0.94.0 · Dokumentationsabgleich: 2026-11-09T20:52:52+01:00 (Europe/Berlin).**
+**Softwarestand: 0.95.0 · Dokumentationsabgleich: 2026-11-09T22:46:22+01:00 (Europe/Berlin).**
 
 Alle Prüfnachweise stehen in dieser Datei: ein Abschnitt je Softwareversion sowie gesonderte Abschnitte für datierte Zwischenprüfungen. Die Ergebnisse und Grenzen gelten für den jeweils genannten Stand. Spätere Läufe stehen als Nachtrag im selben Abschnitt. Produktänderungen gehören in den [Changelog](CHANGELOG.md), offene Aufgaben in die [Roadmap](ROADMAP.md).
 
@@ -60,7 +60,21 @@ Diese Liste beschreibt ausstehende Abnahmen.
 
 Die jüngste Version steht zuerst. Für eine bestimmte Version die Dokumentgliederung oder die Browser-Suche verwenden.
 
+## Version 0.95.0
+
+Prüfzeit: 2026-11-09T22:46:22+01:00 (Europe/Berlin). Allgemeine erste Skelettvorlagen für den Bild-zu-3D-Ablauf; keine neue Generatorinferenz oder anatomische Freigabe.
+
+- Eigener proportionaler Aufbau für Zweibeiner und Vierbeiner, geometrische Hautbindung mit vier Einflüssen, linke/rechte Übergangszone und normale glTF-Skelette. Quelle bleibt bytegleich; unabhängige Meshgewichte auch bei ursprünglich gemeinsam genutzter Geometrie. Neutrale Weltpositionen, UVs und Materialien bleiben erhalten.
+- Neue Tests prüfen tatsächlich verformte Gliedmaßen ohne Mitziehen der Gegenseite, transformierte Szenen, gültige Gewichte, GLB-/Projekt-Replay und Move-Erfassung; Abbruch und ungeeignete Quellen hinterlassen keinen halben Skelettaufbau. UI-Tests prüfen Originalrückkehr, beide Vorlagen, getrennte Übernahme, Fehler und verspätete Ergebnisse.
+- Drei gezielte Chromium-Fälle bestanden: neue echte Skelett-/Hautberechnung auf synthetischer Geometrie, ursprünglicher Generierungsablauf und Rollback bei fehlgeschlagener Veröffentlichung. Neuer Fall bewegt eine IK-Kette, prüft Undo/Redo, speichert und lädt das Projekt. Bildgenerator ist im Browserfall simuliert; die Skelett-/Exportberechnung ist produktiv. Vorschau-/Posenaufnahmen gesichtet, synthetischer Prüfkörper klar erkennbar.
+- Beide echten PaKaChi-Rohrekonstruktionen lokal mit passender Vorlage gebunden. 50.870 / 81.388 Vertices, maximal 0,0000000267 / 0,0000000269 Grundformabweichung. Vier einzelne 30°-Proben je Modell liefern weiter Oberflächenwarnungen; Tierform-Knie links zusätzlich zwei Volumenwarnungen. Keine automatische Freigabe, keine Änderung an Originaldateien oder veröffentlichten Charaktermodellen. [Messbericht](benchmarks/draft-rigs-2026-11-09.json).
+- Abschließender lokaler Node-Lauf: 448 Tests ohne Fehler, Abbrüche oder übersprungene Fälle. Der Originaldatei-Test bleibt lokal wegen des unvollständigen Frame-Checkouts ausgespart; die vollständige CI prüft ihn. TypeScript und Produktionsbuild bestanden (bekannte Bundle-Größenwarnung). Vollständige CI einschließlich frischer CPU-Aufbereitung, sämtlicher Browserfälle und drei Produktionsimportmessungen wird commitbezogen in [PR #1](https://github.com/Smilez1985/PaKaChi-SM/pull/1) ausgewertet.
+
+Grenzen: geeignete Grundpose und Y-up/+Z-front vorausgesetzt; keine Orientierungs-/Anatomieerkennung, kein Finger-/Gesichtsrig, keine hochwertige automatische Gewichtskorrektur und keine Kollisionsfreigabe. Zusätzliche Vorbereitung läuft lokal ohne Anbieteraufruf; die vorausgehende Bildgenerierung benötigt weiterhin eine separat eingerichtete TripoSR-Laufzeit. GPU-/Caddy-Abnahme und bessere Generatorqualität bleiben offen.
+
 ## Version 0.94.0
+
+Abschlussnachweis: [CI-Lauf 42690314577](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/42690314577), Commit `99950b3576c0c604e6446554e053aa626ebded7e`: 441 Node-Tests, Produktionsbuild, alle 44 Chromium-Fälle und drei Produktionsimportmessungen erfolgreich. Abschlusslogs und Artefakte einschließlich der neuen Korrekturaufnahmen geprüft.
 
 **Prüfzeitpunkt:** 2026-11-09T20:52:52+01:00 (Europe/Berlin).
 

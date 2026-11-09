@@ -8,23 +8,27 @@ import {saveProviderConfig} from '../src/ai-providers.ts';
 import type {ProviderAdapter} from '../src/ai-providers.ts';
 import {setProviderKey,lockProviderSession} from '../src/provider-credentials.ts';
 import {glb} from './generation-fixture.mjs';
+import {draftFigure} from './helpers/draft-rig-fixture.ts';
+import {writeFigureGLB} from '../src/figure-glb.ts';
+import {parseModel,disposeModel} from '../src/viewer.ts';
+import type {prepareDraftRig} from '../src/draft-rig.ts';
 const bytes=Uint8Array.from(glb());
 async function until(check:()=>boolean){for(let i=0;i<100;i++){if(check())return;await new Promise(r=>setTimeout(r,5));}assert.fail('UI did not settle');}
-function fixture(t:TestContext,run?:ProviderAdapter['run'],fallback=false){
+function fixture(t:TestContext,run?:ProviderAdapter['run'],fallback=false,prepareRig?:typeof prepareDraftRig){
  const w=new Window();Object.assign(globalThis,{window:w,document:w.document});
  const host=document.createElement('div');document.body.append(host);
  const profile={id:'gen',name:'Local',adapter:'custom-generation' as const,endpoint:'http://127.0.0.1:8766',model:'triposr'};
  saveProviderConfig({version:1,profiles:fallback?[profile,{...profile,id:'backup',name:'Backup'}]:[profile],fallbacks:{assistant:[],generation:fallback?['backup']:[],rigging:[]},assignments:{assistant:null,generation:'gen',rigging:null}},w.localStorage);setProviderKey(profile,'x'.repeat(48));if(fallback)setProviderKey({...profile,id:'backup'},'y'.repeat(48));
  let beforeAdopt:(()=>Promise<void>)|undefined;
- let target={session:'one',revision:1},calls=0,adoptions=0,cleanups=0,previewCalls=0;
- const panel=mountGenerationPanel(host,{target:()=>target,adopt:async(_bytes,expected,valid)=>{await beforeAdopt?.();if(!valid()||expected.session!==target.session||expected.revision!==target.revision)return false;adoptions++;return true;}},()=> 'de',w.localStorage,{
+ let target={session:'one',revision:1},calls=0,adoptions=0,cleanups=0,previewCalls=0,adopted:Uint8Array|undefined;
+ const panel=mountGenerationPanel(host,{target:()=>target,adopt:async(output,expected,valid)=>{await beforeAdopt?.();if(!valid()||expected.session!==target.session||expected.revision!==target.revision)return false;adopted=output;adoptions++;return true;}},()=> 'de',w.localStorage,{
   adapter:(key,p)=>{assert.equal(key,(p.id==='backup'?'y':'x').repeat(48));return {id:'custom-generation',probe:async()=>({model:'triposr',capabilities:['image-to-3d']}),run:async request=>{calls++;return run?run(request):{kind:'model',bytes};}};
-  },validate:validateGeneration,preview:async()=>{previewCalls++;return ()=>{cleanups++;};},
+  },validate:validateGeneration,prepareRig,preview:async()=>{previewCalls++;return ()=>{cleanups++;};},
  });
  t.after(()=>{panel.dispose();w.happyDOM.abort();});
  const button=(id:string)=>host.querySelector<HTMLButtonElement>('#generation-'+id)!;
  const choose=()=>panel.select(new File([new Uint8Array([137,80,78,71])],'panda.png',{type:'image/png'}));
- return {w,host,panel,button,choose,delayImport(fn:()=>Promise<void>){beforeAdopt=fn;},get calls(){return calls;},get adoptions(){return adoptions;},get cleanups(){return cleanups;},get previewCalls(){return previewCalls;},change(){target={...target,revision:target.revision+1};w.dispatchEvent(new w.Event('pakachi-sm:change'));}};
+ return {w,host,panel,button,choose,delayImport(fn:()=>Promise<void>){beforeAdopt=fn;},get calls(){return calls;},get adopted(){return adopted;},get adoptions(){return adoptions;},get cleanups(){return cleanups;},get previewCalls(){return previewCalls;},change(){target={...target,revision:target.revision+1};w.dispatchEvent(new w.Event('pakachi-sm:change'));}};
 }
 test('image selection does not send; generated preview requires explicit acceptance and releases viewer',async t=>{
  const f=fixture(t);f.choose();assert.equal(f.calls,0);f.button('start').click();await until(()=>!f.button('apply').hidden);
@@ -57,4 +61,23 @@ test('execution failure requires explicit next-provider click with its own crede
 test('stale project disables retry and vault lock removes pending retry',async t=>{
  const f=fixture(t,async()=>{throw Error('offline');},true);f.choose();f.button('start').click();await until(()=>!f.button('retry').hidden&&!f.button('retry').disabled);
  f.change();assert.ok(f.button('retry').disabled);f.button('retry').click();assert.equal(f.calls,1);lockProviderSession();assert.ok(f.button('retry').hidden);
+});
+class Reader{result:ArrayBuffer|null=null;onloadend:(()=>void)|null=null;readAsArrayBuffer(b:Blob){void b.arrayBuffer().then(v=>{this.result=v;this.onloadend?.();});}}
+test('local skeleton preparation preserves the generator original and imports only the explicit preview',async t=>{
+ Object.assign(globalThis,{FileReader:Reader,ProgressEvent:class extends Event{}});const source=new Uint8Array(await writeFigureGLB(draftFigure()));
+ const f=fixture(t,async()=>({kind:'model',bytes:source}));f.choose();f.button('start').click();await until(()=>!f.button('apply').hidden);
+ f.button('rig').click();assert.ok(f.button('apply').disabled);await until(()=>f.host.textContent!.includes('21 Gelenke'));assert.equal(f.calls,1);assert.equal(f.adoptions,0);assert.equal(f.previewCalls,2);
+ f.button('original').click();await until(()=>f.host.textContent!.includes('Unveränderte Generatorausgabe'));assert.equal(f.calls,1);assert.ok(f.button('original').hidden);
+ (f.host.querySelector('#generation-rig-template') as HTMLSelectElement).value='quadruped';f.button('rig').click();await until(()=>f.host.textContent!.includes('23 Gelenke'));
+ f.button('apply').click();await until(()=>f.adoptions===1);const model=await parseModel(Uint8Array.from(f.adopted!).buffer);let bones=0;model.scene.traverse(n=>{if(n.type==='Bone')bones++;});assert.equal(bones,23);disposeModel(model.scene);assert.equal(f.calls,1);
+});
+test('failed skeleton preparation retains the raw preview and its original import bytes',async t=>{
+ const f=fixture(t);f.choose();f.button('start').click();await until(()=>!f.button('apply').hidden);f.button('rig').click();await until(()=>f.host.textContent!.includes('Skelettentwurf nicht vorbereitet'));
+ assert.equal(f.cleanups,0);assert.equal(f.previewCalls,1);assert.equal(f.button('apply').disabled,false);f.button('apply').click();await until(()=>f.adoptions===1);assert.deepEqual(f.adopted,bytes);
+});
+test('cancellation during local skeleton preparation ignores late output and never imports it',async t=>{
+ let complete!:(r:Awaited<ReturnType<typeof prepareDraftRig>>)=>void,observed:AbortSignal|undefined;
+ const f=fixture(t,undefined,false,async(_bytes,template,signal)=>{observed=signal;return new Promise(resolve=>{complete=r=>resolve({...r,report:{...r.report,template}});});});
+ f.choose();f.button('start').click();await until(()=>!f.button('apply').hidden);f.button('rig').click();await until(()=>!!observed);f.button('cancel').click();assert.ok(observed!.aborted);
+ complete({bytes,report:{template:'biped',bones:21,meshes:1,vertices:3,method:'proportional-template',review:'required'}});await new Promise(r=>setTimeout(r,15));assert.equal(f.adoptions,0);assert.equal(f.previewCalls,1);assert.ok(f.button('apply').hidden);
 });

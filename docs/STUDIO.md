@@ -138,7 +138,7 @@ Seit 0.11.1 bestimmt die aktuelle Modellgeometrie den Mittelpunkt für die mittl
 
 ## Bild zu 3D-Entwurf (0.22.0)
 
-Der Abschnitt **Bild → 3D-Entwurf** ist auch bei ausgewähltem Original-PaKaChi im Studio sichtbar. Er benötigt einen separat eingerichteten lokalen TripoSR-Dienst und das passende Generatorprofil. PNG/JPEG auswählen oder hineinziehen, ausdrücklich generieren, dann die getrennte 3D-Vorschau drehen und zoomen. Erst **Als neuen Avatar laden** ersetzt den aktuellen Projektstand. Seit 0.23.0 lässt sich der letzte vollständige Modellwechsel separat rückgängig machen; Projekte zusätzlich speichern. **Ergebnis verwerfen** lässt das bisherige Modell bestehen. Anatomisches Rigging erfolgt noch nicht automatisch. [Einrichtung, Schritte und Prüfgrenzen](KI-GENERIERUNG.md#bedienung-im-studio-seit-0220).
+Der Abschnitt **Bild → 3D-Entwurf** ist auch bei ausgewähltem Original-PaKaChi im Studio sichtbar. Er benötigt einen separat eingerichteten lokalen TripoSR-Dienst und das passende Generatorprofil. PNG/JPEG auswählen oder hineinziehen, ausdrücklich generieren, dann die getrennte 3D-Vorschau drehen und zoomen. Erst **Als neuen Avatar laden** ersetzt den aktuellen Projektstand. Seit 0.23.0 lässt sich der letzte vollständige Modellwechsel separat rückgängig machen; Projekte zusätzlich speichern. **Ergebnis verwerfen** lässt das bisherige Modell bestehen. Seit 0.95.0 lässt sich dort optional ein erstes 21-/23-Gelenk-Skelett mit Hautbindung vorbereiten und getrennt prüfen. Das ist eine Proportionsvorlage für passende Grundposen; anatomisches KI-Rigging bleibt offen. [Einrichtung, Schritte und Prüfgrenzen](KI-GENERIERUNG.md#bedienung-im-studio-seit-0220).
 
 ## Modellwechsel zurück und wiederholen (0.23.0)
 
@@ -508,3 +508,7 @@ Höchstens vier neue Formen und insgesamt 32.768 betroffene Vertices sind speich
 Die automatische Kandidaten-Gegenprüfung verwendet weiterhin 16 Schritte je Übergang. Die separate Bewegungsdiagnose kann bis zu 64 weitere adaptive Zwischenbilder ergänzen. Selbstüberschneidungsdiagnose, lückenlose Bewegungssicherheit und anatomische Qualität sind weiterhin keine automatische Freigabe.
 
 Die Auswahl bewertet die Fehler über sämtliche geprüften Posen und Move-Bilder. Bei gleicher Gesamtbewertung entscheidet die Zielpose. Ein isoliert schöneres Zielbild allein genügt damit nicht, um eine über die Bewegung hinweg bessere Variante zu ersetzen.
+
+## Erstes Skelett auf dem Generierungsentwurf (0.95.0)
+
+Nach erfolgreicher Bildgenerierung **Optionales erstes Skelett → Zweibeiner / Vierbeiner → Skelettentwurf vorbereiten** verwenden. Vorschau und Beugewarnungen prüfen, dann ausdrücklich übernehmen. Die Knochen stehen sofort in beiden Studio-Modi bereit; Gelenkpunkte ändern, IK benutzen, Posen/Moves und Projekt speichern. Der Generator-Originalentwurf bleibt bis zum Verwerfen oder Übernehmen separat verfügbar. Dieser Einstieg gilt für neue statische Generatorausgaben, nicht als Umrigging vorhandener Projekte. [Vollständiger Ablauf und Grenzen](KI-GENERIERUNG.md#erster-beweglicher-entwurf-seit-0950).

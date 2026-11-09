@@ -14,6 +14,20 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 Noch keine weiteren Änderungen.
 
+## [0.95.0] - 2026-11-09
+
+Zeitstempel: 2026-11-09T22:46:22+01:00 (Europe/Berlin)
+
+### Added
+
+- Bild-zu-3D-Vorschau bietet optionale erste Skelettvorlagen für Zweibeiner (21 Gelenke, A-Pose) und Vierbeiner (23 Gelenke, stehend). Die statische Generatorausgabe erhält lokal eine verbundene Knochenhierarchie und glatte Hautgewichte. Nach expliziter Übernahme sind Gelenkbearbeitung, IK, Undo/Redo, Posen/Moves, Projektspeicherung und normaler Rigged-/Animations-GLB-Export verfügbar.
+- Vier 30°-Beugeproben berichten bereits vor der Übernahme Oberflächen-/Volumenwarnungen. Generator-Original bleibt separat erhalten; Rückwechsel und erneute Vorbereitung brauchen keinen weiteren KI-Auftrag. Abbruch, Projektänderung oder Fehler verhindern verspätete Ergebnisse und erhalten den bisherigen Avatar beziehungsweise die Vorschau.
+- Reproduzierbare Messung an beiden realen CPU-Rekonstruktionen ergänzt: Grundformabweichung unter 0,00000003, aber weiterhin Warnungen an allen acht Beugeproben. Die Vorlage ersetzt die bearbeiteten PaKaChi-Rigs nicht und ist keine KI-Anatomieerkennung. Grenzen: 500.000 Vertices, eine Million Dreiecke, 64 statische Meshes und 50 MiB GLB; bestehende Rigs/Clips/Morphs/Instanzen werden nicht umgeriggt.
+
+### Fixed
+
+- Anbieterhinweis unterscheidet eingerichtete lokale Bildgenerierung von der weiterhin fehlenden OAuth-Anmeldung, statt Generierung pauschal als nicht verfügbar zu beschreiben.
+
 ## [0.94.0] - 2026-11-09
 
 Zeitstempel: 2026-11-09T20:52:52+01:00 (Europe/Berlin)
@@ -1983,4 +1997,5 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 
 [0.93.1]: PRUEFUNG.md#version-0931
 
+[0.95.0]: PRUEFUNG.md#version-0950
 [0.94.0]: PRUEFUNG.md#version-0940
