@@ -15,5 +15,5 @@ if not exist node_modules (
     exit /b 1
   )
 )
-call npm run dev -- --open
+call npm run local -- --open
 pause

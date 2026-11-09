@@ -1,7 +1,8 @@
 import type {ControlPoint,Pose,StudioData,StudioMove,Transform} from './studio-data.ts';
-export const REVIEW_REASONS=['skin-weights','bone-rest','surface-rest','surface-radius','point-removed','bend-limit'] as const;
+export const REVIEW_REASONS=['pose-corrections','skin-weights','bone-rest','surface-rest','surface-radius','point-removed','bend-limit'] as const;
 export type ReviewReason=typeof REVIEW_REASONS[number];
 export const reviewLabels:Record<ReviewReason,string>={
+  'pose-corrections':'Poseabhängige Hautkorrekturen geändert. Bewegung prüfen.',
   'skin-weights':'Oberflächen-Einfluss der Knochen geändert. Bewegung prüfen.',
   'bend-limit':'IK-Beugegrenze geändert. Gespeicherte Bewegung prüfen.',
   'bone-rest':'Skelett-Grundstellung oder Drehpunkt geändert.',
@@ -19,6 +20,8 @@ export function flagAffectedPoses(before:StudioData,after:StudioData):void {
   const current=new Map(after.points.map(p=>[p.id,p]));
   for(const pose of after.poses){const previous=before.poses.find(p=>p.id===pose.id);if(!previous)continue;
     const reasons=new Set<ReviewReason>(pose.review??[]);
+    if(JSON.stringify(before.correctiveShapes??[])!==JSON.stringify(after.correctiveShapes??[]))reasons.add('pose-corrections');
+    if((before.poseCorrections!==false)!==(after.poseCorrections!==false))reasons.add('pose-corrections');
     // Skin weights and descendant joints can affect any stored pose; conservatively flag all.
     if(bonesChanged)reasons.add('bone-rest');
     if(JSON.stringify(before.weightTransfers??[])!==JSON.stringify(after.weightTransfers??[]))reasons.add('skin-weights');

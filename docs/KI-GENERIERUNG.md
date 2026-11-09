@@ -1,6 +1,74 @@
-# Lokale Bild-zu-3D-Generierung – 0.22.0
+# Bild-zu-3D-Generierung
 
-**Experimenteller lokaler Generator mit Studio-Oberfläche seit 0.22.0.** Es wurde hier kein KI-Modell erzeugt. Vorprüfung und Ablauf sind getestet; für echte Inferenz fehlt in der Ausführungsumgebung die eingerichtete Python-/CUDA-Pipeline. Anatomisches Rigging, beide 3D-Formen und ihre Transformation bleiben offen.
+**Seit 0.83.0 erstmals mit echter PaKaChi-Inferenz belegt.** Beide Formen wurden mit TripoSR auf CPU rekonstruiert und stehen als statische 3D-Entwürfe im Model Zoo. Die Studio-Oberfläche existiert seit 0.22.0. Seit 0.84.0 sind bearbeitete Formen mit einem gemeinsamen anatomischen Rig verfügbar. GPU-Ausführung, endgültige Charakterqualität und die 3D-Transformation bleiben offen.
+
+## Erster beweglicher Entwurf seit 0.95.0
+
+**Bild rein → drehbarer 3D-Entwurf raus ist belegt.** Ein eingerichteter lokaler TripoSR-Dienst bleibt erforderlich. Der nächste optionale Schritt verbindet diesen Entwurf jetzt direkt mit dem Studio:
+
+1. **Avatar-Studio → Bild → 3D-Entwurf** öffnen, PNG/JPEG auswählen und **3D-Entwurf erzeugen** klicken.
+2. Die Rekonstruktion drehen und aus allen Richtungen prüfen. Unter **Optionales erstes Skelett** entweder **Zweibeiner · A-Pose** oder **Vierbeiner · stehend** wählen. Die Figur muss aufrecht (Y oben), nach +Z ausgerichtet und ungefähr in der gewählten Grundpose rekonstruiert sein.
+3. **Skelettentwurf vorbereiten** erzeugt lokal 21 beziehungsweise 23 verbundene Knochen und glatte Hautgewichte mit bis zu vier Einflüssen je Vertex. Dafür erfolgen weder ein neuer Generatoraufruf noch ein weiterer Bildversand oder Gewichtsdownload. Vier einzelne 30°-Beugeproben an Ellenbogen und Knien zeigen Oberflächen-/Volumenwarnungen vor der Übernahme; sie sind keine Bewegungs-, Anatomie- oder Kollisionsfreigabe.
+4. Skelett in der getrennten 3D-Vorschau prüfen. **Generator-Original zeigen** stellt die unveränderte Ausgabe wieder her; erneutes Vorbereiten beginnt immer von diesen Originalbytes. Das aktuelle Projekt bleibt bis **Als neuen Avatar laden** erhalten. Abbruch oder veränderter Projektstand verhindern eine verspätete Übernahme.
+5. Im Studio unter **Gelenke bearbeiten** die vorgeschlagenen Drehpunkte korrigieren. In **Figur bewegen** Handgelenk oder Knöchel bewegen und die Haut prüfen. Posen/Moves speichern, das Projekt sichern und bei Bedarf als Rigged-GLB oder animierten Move exportieren. **Modellwechsel zurück** erhält den vorherigen Avatar; einzelne Änderungen unterstützen Undo/Redo.
+
+**Was die Vorlage leistet:** proportionaler Ausgangsaufbau aus den Modellgrenzen, geometrische Zuordnung zu Knochenstrecken, glatter Übergang zwischen linker und rechter Körperseite. Die gebundene Grundform behält ihre Positionen, Indizes, Materialien, Farben und UVs. Die Struktur ist ein normales glTF-Skelett und benötigt keinen besonderen Laufzeittreiber. Bis 500.000 Vertices, eine Million Dreiecke, 64 statische Meshes und 50 MiB GLB; vorhandene Rigs, Clips, Morph-Ziele, Instanzen und verschachtelte Mesh-Kinder werden nicht umgeriggt. Planare oder entartete Modelle liefern keinen Skelettentwurf. Fehlgeschlagene Vorbereitung lässt die bisherige Vorschau erhalten.
+
+**Was fehlt:** anatomische Erkennung, freie Korrekturprompts für die Rekonstruktion, automatische Pose-/Ausrichtungsbestimmung, Finger-/Gesichtsrig und eine zuverlässige automatische Reparatur ungeeigneter Hautgewichte. Die Vorlage macht eine beliebige Pose oder zusammengewachsene Gliedmaßen nicht anatomisch korrekt. Die vorhandene Gelenkerkennung liest nach der Übernahme dieses Skelett aus; sie erkennt weiterhin keine Anatomie.
+
+**An echten PaKaChi-Eingaben geprüft:** beide vorhandenen CPU-Rekonstruktionen lassen sich binden, bei weniger als 0,00000003 maximaler Grundformabweichung. Alle acht geprüften 30°-Beugungen haben weiterhin Oberflächenwarnungen, eine Tierform-Knieprobe zusätzlich Volumenwarnungen. Diese Formen werden nicht als neue fertige Maskottchen oder Ersatz für die gezielt bearbeiteten 59-Gelenk-Avatare veröffentlicht. [Messbericht](benchmarks/draft-rigs-2026-11-09.json), reproduzierbar mit `node scripts/benchmark-draft-rigs.mjs`.
+
+## Rigging und Charakteraufbereitung
+
+Im Player **PaKaChi · Normalform · Rig** oder **PaKaChi · Arbeitsform · Rig** auswählen und das integrierte Avatar-Studio öffnen. Beide haben dieselben 59 benannten Gelenke und Verbindungen, jeweils passend zu ihrer Grundform. **Skelett anzeigen** macht sie sichtbar. In **Figur bewegen** beispielsweise das Handgelenk oder den Knöchel greifen: Oberarm/Unterarm beziehungsweise Ober-/Unterschenkel werden als Zweiglied-Kette gebeugt. Hände und Füße bleiben als nachgelagerte Kontrollpunkte separat drehbar. Seit 0.85.0 kommen 28 Gelenke für 14 einzeln bewegliche Finger/Zehen hinzu; je vorderer Pfote drei Finger plus Daumen, je hinterer Pfote drei Zehen. Gelenke lassen sich im zweiten Modus weiter bearbeiten. Projekt speichern, um die Pose und Korrekturen zu behalten.
+
+Die Aufbereitung ergänzt echte 3D-Augen, Pupillen, Lichtpunkte, Nase, eine Oberflächen-Mundlinie und grüne Pfotenakzente. Raue nichtmetallische Materialien, glatte Normalen und kurze skinnbare Fellfasern ersetzen die vollständig metallische flache Standardschattierung der rohen Rekonstruktion. Kleine beziehungsweise nahezu flächenlose Dreiecke und Rekonstruktionsstufen wurden bearbeitet. Seit 0.85.0 sind distale Hand-/Zehenflächen lokal ausgeschnitten und geschlossen; separate mechanische Glieder sitzen an echten Gelenken. Nahe Quellvertices werden mit Toleranz 0,00001 verschweißt und einfache offene Ringe geschlossen. Die automatisierte Prüfung findet an beiden Körpernetzen keine offenen oder mehrfach belegten Kanten; die Fellfasern bleiben absichtlich offene Dreiecke. Das ist keine vollständige Retopologie und bestätigt keine Kollisionsfreiheit. Die unabhängigen Original-GLBs bleiben unverändert.
+
+```sh
+npm run prepare:pakachi
+```
+
+Das Kommando erzeugt `public/model-zoo/pakachi-rigged/humanoid.glb` und `animal.glb` aus den erhaltenen Dateien unter `pakachi-drafts/`. `npm run dev`, `npm test` und `npm run build` führen die Vorbereitung automatisch mit `--if-needed` aus. Benötigt werden die ohnehin vorhandenen Node-/Three-Abhängigkeiten; kein erneuter KI-Gewichtsdownload und keine Python-Laufzeit. Pipeline-, Eingabe- und Ausgabeprüfsummen verhindern das Wiederverwenden veralteter Ergebnisse. Die GLBs sind ignorierte Buildprodukte; der [Aufbereitungsbericht](benchmarks/pakachi-rigging-2026-11-07.json) enthält die reproduzierbaren Parameter und Hashes. CI bietet sie zusammen mit den Browsernachweisen an.
+
+Seit 0.90.0 ergänzen geprüfte Korrekturformen auch Kniehaltungen. Kontextfreigaben blenden ungeeignete Korrekturen bei bestimmten gleichzeitigen Bewegungen aus; Fellbüschel bleiben an ihrem Hautansatz. Details und Grenzen stehen unter [poseabhängige Hautkorrekturen](STUDIO.md#poseabhängige-hautkorrekturen-des-original-pakachi).
+
+**Reihenfolge und Grenze:** Rigging und Charakterqualität kommen vor der Morph-Animation. Eine große Umformungsprobe zog Flächen zwischen Körperteilen auf; dieser Versuch wird nicht als fertige Verwandlung angeboten. Ein gemeinsames sauberes Netz, endgültige Finger-/Pfotenproportionen und Anschlüsse, verdeckte Flächen und anspruchsvolle Posen bleiben zu bearbeiten. Gleich benannte Gelenke machen die zwei unabhängigen Netze noch nicht morph-kompatibel. Dies ist eine charakterspezifische Aufbereitung mit gemessenen Gelenkpunkten, keine automatische Anatomieerkennung für beliebige Bilder.
+
+## Erste echte PaKaChi-Entwürfe
+
+Im Player unter **Avatar auswählen** die Einträge **PaKaChi · Humanoid · 3D-Entwurf** und **PaKaChi · Tierform · 3D-Entwurf** wählen. Beide lassen sich frei drehen und ins integrierte Studio übernehmen. Sie besitzen bewusst keine Moves und kein Skelett. Der beim Start ausgewählte Bildplayer bleibt erhalten.
+
+| Entwurf | Vorlage | Datei |
+| --- | --- | --- |
+| Humanoid | Korrigierter Fell-/Gelenk-Stilanker | [humanoid.glb](../public/model-zoo/pakachi-drafts/humanoid.glb) |
+| Tierform | Unveränderter Originalframe 001 | [animal.glb](../public/model-zoo/pakachi-drafts/animal.glb) |
+
+![Humanoider 3D-Entwurf aus vier Richtungen](references/pakachi-3d/pakachi-humanoid-views.png)
+
+![Tierischer 3D-Entwurf aus vier Richtungen](references/pakachi-3d/pakachi-animal-views.png)
+
+**Sichtbare Mängel:** Gesicht und Augen weichen ab, Finger/Pfoten sind unzureichend getrennt, Fell- und Materialwirkung gehen verloren, seitliches Körpervolumen und verdeckte Flächen sind unzuverlässig. Die Rückseite ist aus einem Einzelbild geschätzt. Mehr Abtastpunkte verfeinern das Mesh, beheben diese Rekonstruktionsfehler aber nicht grundsätzlich. Das sind Arbeitsentwürfe, keine Freigabe als fertiges Maskottchen.
+
+Die unveränderten 256er Meshes wurden zusätzlich auf ihre Flächenstruktur geprüft:
+
+| Entwurf | Getrennte Flächenkomponenten | Offene Randkanten | Kanten mit mehr als zwei Flächen | Dreiecke ohne Fläche |
+| --- | --- | --- | --- | --- |
+| Humanoid | 3 | 336 | 0 | 0 |
+| Tierform | 12 | 506 | 2 | 2 |
+
+Beim Humanoiden verteilen sich die Dreiecke auf 65.892 / 35.584 / 88; bei der Tierform liegen 162.378 von 162.500 Dreiecken in der größten Komponente. Beide Meshes sind nicht wasserdicht. Getrennte Teile oder offene Ränder verhindern Skinning nicht grundsätzlich; die Zahlen dienen der gezielten Sichtprüfung vor dem Rigging. Es wurden keine Teile automatisch verbunden, gelöscht oder repariert. Methode und Modellprüfsummen stehen im Messbericht.
+
+Vier echte CPU-Läufe (beide Formen, jeweils Auflösung 128 und 256), Eingabe-/Ausgabeprüfsummen, Parameter, Abhängigkeiten und Logs sind im [Messbericht](benchmarks/pakachi-generation-2026-11-07.json) dokumentiert; zusammenfassender [Prüfstand](PRUEFUNG.md#version-0830). Die 256er Ergebnisse werden ausgeliefert. Die Abbildungen wurden aus der vom produktiven GLTFLoader geladenen Geometrie mit Software-OpenGL gerendert; sie sind keine generierten 2D-Ansichten und keine vollständige Browser-/Materialabnahme.
+
+Für diese Läufe wurde TripoSR-Revision `107cefdc244c39106fa830359024f6a2f1c78871` mit [einem kleinen Patch](../scripts/patches/triposr-transparent-input.patch) verwendet. Er überspringt die Erzeugung einer Hintergrundentfernungs-Sitzung, wenn alle Eingaben schon transparente RGBA-Bilder sind. Die vorhandene TripoSR-Alphaverarbeitung bleibt aktiv. Ohne den Patch initialisiert das Backend unnötig den Hintergrundentferner samt zusätzlichem Gewichtsdownload. Der Patch wird **nicht automatisch** auf fremde Installationen angewendet.
+
+```sh
+# Im genannten TripoSR-Checkout, Pfad zum PaKaChi-Projekt anpassen:
+git apply --check /pfad/zu/PaKaChi-SM/scripts/patches/triposr-transparent-input.patch
+git apply /pfad/zu/PaKaChi-SM/scripts/patches/triposr-transparent-input.patch
+```
+
+Der Converter richtet TripoSR-Ausgaben seit 0.83.0 von Z-oben/+X-vorn nach glTF Y-oben/+Z-vorn aus. Die native Datei wird zusätzlich als `result/0/mesh-native.glb` erhalten. Ein neuer Wurzelknoten trägt die Rotation; Vertexfarben und Geometriebytes bleiben unverändert. Das fügt weder Skelett noch Animation hinzu. Allgemeine GLB-Importe werden nicht umorientiert.
 
 ## Auswahl des ersten Testkandidaten
 

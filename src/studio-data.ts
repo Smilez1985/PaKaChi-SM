@@ -1,4 +1,5 @@
 import type {WeightView} from './studio-weight-visibility.ts';
+import {validCorrectiveShapes} from './studio-corrective-shapes.ts';
 import {REVIEW_REASONS} from './studio-review.ts';
 import type {ReviewReason} from './studio-review.ts';
 export type Vec3 = [number, number, number];
@@ -22,6 +23,8 @@ export function validWeightRegion(value:unknown):value is WeightRegion {
 }
 export type BoneInsertion = ({child:number;ratio:number;parent?:never}|{parent:number;child?:never;ratio?:never}) & {afterDeletions?:number};
 export interface StudioData {
+  correctiveShapes?: import('./studio-corrective-shapes.ts').StudioCorrectiveShape[];
+  poseCorrections?: boolean;
   weightTransfers?: {from:number;to:number;amount:number;after:number;region?:WeightRegion}[];
   boneReparents?: {bone:number;parent:number;after:number}[];
   boneDeletions?: number[];
@@ -52,6 +55,7 @@ export function parseProject(input: unknown): StudioProject {
   require(a.defaultMove===undefined || moveIds.has(a.defaultMove as string));
   if(a.states!==undefined) {require(obj(a.states));for(const [key,value] of Object.entries(a.states))require(['idle','talking','thinking','working','waiting','review','error','sleeping'].includes(key) && moveIds.has(value as string));}
   const d=input.studio; require(obj(d) && Array.isArray(d.points) && d.points.length<=256 && Array.isArray(d.links) && d.links.length<=2048 && Array.isArray(d.boneRest) && d.boneRest.length<=512 && d.boneRest.every(v=>transform(v)) && Array.isArray(d.poses) && d.poses.length<=100 && Array.isArray(d.moves) && d.moves.length<=100);
+  require(validCorrectiveShapes(d.correctiveShapes),'Ungültige geometrische Hautkorrekturen.');
   if(d.boneInsertions!==undefined){
     require(Array.isArray(d.boneInsertions)&&d.boneInsertions.length<=64&&d.boneRest.length<=256,'Ungültige Knochenänderungen.');
     const count=d.boneRest.length-d.boneInsertions.length;require(count>0);
@@ -64,6 +68,7 @@ export function parseProject(input: unknown): StudioProject {
   if(d.boneDeletions!==undefined)require(Array.isArray(d.boneDeletions)&&d.boneDeletions.length<=256&&new Set(d.boneDeletions).size===d.boneDeletions.length&&d.boneDeletions.every(i=>Number.isInteger(i)&&i>=0&&i<(d.boneRest as unknown[]).length),'Ungültige Knochenlöschungen.');
   let stage=0;
   for(const e of (d.boneInsertions??[]) as {afterDeletions?:number}[]){const next=e.afterDeletions??0;require(Number.isInteger(next)&&next>=stage&&next<=((d.boneDeletions as number[]|undefined)?.length??0),'Ungültige Reihenfolge der Knochenänderungen.');stage=next;}
+  require(d.poseCorrections===undefined||typeof d.poseCorrections==='boolean','Ungültige Einstellung für Hautkorrekturen.');
   if(d.weightTransfers!==undefined){
     require(Array.isArray(d.weightTransfers)&&d.weightTransfers.length<=MAX_WEIGHT_TRANSFERS,'Zu viele Hautgewichtsübertragungen.');let previous=0;
     const total=((d.boneInsertions as unknown[]|undefined)?.length??0)+((d.boneDeletions as unknown[]|undefined)?.length??0);

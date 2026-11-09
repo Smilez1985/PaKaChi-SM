@@ -1,0 +1,217 @@
+{
+  "version": "0.87.0",
+  "createdAt": "2026-11-08T19:31:01.195Z",
+  "purpose": "Warning detection only: neutral rigs versus deliberately unsupported bone-only retarget. No corrected surface or usable transformation is claimed.",
+  "forms": [
+    {
+      "form": "humanoid",
+      "path": "public/model-zoo/pakachi-rigged/humanoid.glb",
+      "sha256": "8ad651f22eac0222144bf9dcd4eb8987cf9701c67093291123a2ccbbdd6a975f",
+      "neutral": {
+        "status": "within",
+        "compared": 170521,
+        "issues": 0,
+        "referenceDegenerate": 672
+      },
+      "unsupportedBoneOnlyRetarget": {
+        "status": "outside",
+        "issues": 6787,
+        "body": {
+          "mesh": 90,
+          "name": "PaKaChi_body",
+          "vertices": 49592,
+          "triangles": 99176,
+          "compared": 99176,
+          "referenceDegenerate": 0,
+          "invalid": 0,
+          "stretched": 4975,
+          "compressed": 2003,
+          "collapsed": 162,
+          "issues": 6787,
+          "minimumStretch": 0.010692245712126852,
+          "maximumStretch": 150.095011211871,
+          "worst": [
+            {
+              "triangle": 98809,
+              "minimumStretch": 0.39480392866265807,
+              "maximumStretch": 150.095011211871,
+              "areaRatio": 59.258100099112376
+            },
+            {
+              "triangle": 84100,
+              "minimumStretch": 0.7743813033546982,
+              "maximumStretch": 140.9889374415167,
+              "areaRatio": 109.17919713455571
+            },
+            {
+              "triangle": 46085,
+              "minimumStretch": 0.47403848789639724,
+              "maximumStretch": 129.14751864912236,
+              "areaRatio": 61.22089445600172
+            },
+            {
+              "triangle": 46050,
+              "minimumStretch": 0.7183147751795512,
+              "maximumStretch": 121.32260471145257,
+              "areaRatio": 87.14781952750461
+            },
+            {
+              "triangle": 86772,
+              "minimumStretch": 0.8623894955305518,
+              "maximumStretch": 116.00603560860252,
+              "areaRatio": 100.04238652700194
+            },
+            {
+              "triangle": 3499,
+              "minimumStretch": 0.5967128098789919,
+              "maximumStretch": 111.20529073304664,
+              "areaRatio": 66.35762150672647
+            },
+            {
+              "triangle": 69687,
+              "minimumStretch": 0.7041850806489086,
+              "maximumStretch": 108.93303823884223,
+              "areaRatio": 76.70902031754976
+            },
+            {
+              "triangle": 71624,
+              "minimumStretch": 0.30840311527802633,
+              "maximumStretch": 106.90395312877827,
+              "areaRatio": 32.969512180451325
+            },
+            {
+              "triangle": 88347,
+              "minimumStretch": 1.5021781293605787,
+              "maximumStretch": 105.76988188485711,
+              "areaRatio": 158.88520331248404
+            },
+            {
+              "triangle": 88349,
+              "minimumStretch": 1.1977268634456106,
+              "maximumStretch": 104.67577508618365,
+              "areaRatio": 125.37298777271293
+            },
+            {
+              "triangle": 90681,
+              "minimumStretch": 0.9458597523227199,
+              "maximumStretch": 102.2281153349018,
+              "areaRatio": 96.69345985108866
+            },
+            {
+              "triangle": 71622,
+              "minimumStretch": 0.031066522862545062,
+              "maximumStretch": 99.90660657083421,
+              "areaRatio": 3.1037508771521156
+            }
+          ],
+          "status": "outside"
+        }
+      }
+    },
+    {
+      "form": "animal",
+      "path": "public/model-zoo/pakachi-rigged/animal.glb",
+      "sha256": "8480a0e6035d8ae7f1f7bd7113ba68de5b7171ce2253dced6f6829c412bb0b0c",
+      "neutral": {
+        "status": "within",
+        "compared": 235713,
+        "issues": 0,
+        "referenceDegenerate": 672
+      },
+      "unsupportedBoneOnlyRetarget": {
+        "status": "outside",
+        "issues": 11914,
+        "body": {
+          "mesh": 88,
+          "name": "PaKaChi_body",
+          "vertices": 80500,
+          "triangles": 160976,
+          "compared": 160976,
+          "referenceDegenerate": 0,
+          "invalid": 0,
+          "stretched": 8141,
+          "compressed": 4080,
+          "collapsed": 434,
+          "issues": 11914,
+          "minimumStretch": 0.002409038706827473,
+          "maximumStretch": 102.98461781858951,
+          "worst": [
+            {
+              "triangle": 108298,
+              "minimumStretch": 0.002409038706827473,
+              "maximumStretch": 1.0982827381568634,
+              "areaRatio": 0.002645805627260346
+            },
+            {
+              "triangle": 31902,
+              "minimumStretch": 0.004691169633641936,
+              "maximumStretch": 1.1714280111370567,
+              "areaRatio": 0.005495367513843728
+            },
+            {
+              "triangle": 35842,
+              "minimumStretch": 0.0049895586982558445,
+              "maximumStretch": 1.0317308523753146,
+              "areaRatio": 0.005147881648728167
+            },
+            {
+              "triangle": 54426,
+              "minimumStretch": 0.005737262663832724,
+              "maximumStretch": 1.1451994564061936,
+              "areaRatio": 0.0065703100838807845
+            },
+            {
+              "triangle": 54027,
+              "minimumStretch": 0.0069223775874097185,
+              "maximumStretch": 1.6791737816132106,
+              "areaRatio": 0.01162387495120531
+            },
+            {
+              "triangle": 59142,
+              "minimumStretch": 0.008510688557910378,
+              "maximumStretch": 1.2370522531480785,
+              "areaRatio": 0.010528166456404604
+            },
+            {
+              "triangle": 54388,
+              "minimumStretch": 0.008538295019399962,
+              "maximumStretch": 1.0890599316895344,
+              "areaRatio": 0.009298714990572814
+            },
+            {
+              "triangle": 51651,
+              "minimumStretch": 0.9810382735882931,
+              "maximumStretch": 102.98461781858951,
+              "areaRatio": 101.03185167089923
+            },
+            {
+              "triangle": 51653,
+              "minimumStretch": 0.9470913805774864,
+              "maximumStretch": 90.9675572495975,
+              "areaRatio": 86.15458938328284
+            },
+            {
+              "triangle": 34321,
+              "minimumStretch": 0.012380745543531059,
+              "maximumStretch": 1.0166803062531629,
+              "areaRatio": 0.012587260170839639
+            },
+            {
+              "triangle": 41152,
+              "minimumStretch": 0.01267054845946899,
+              "maximumStretch": 1.0006479314923842,
+              "areaRatio": 0.012678758106841662
+            },
+            {
+              "triangle": 127728,
+              "minimumStretch": 0.9840659525270602,
+              "maximumStretch": 77.45560613186369,
+              "areaRatio": 76.22142482671325
+            }
+          ],
+          "status": "outside"
+        }
+      }
+    }
+  ]
+}

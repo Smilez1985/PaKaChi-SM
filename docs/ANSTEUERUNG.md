@@ -1,8 +1,8 @@
 # Agentensteuerung
 
-Gültig für Softwarestand 0.12.0.
+Die bisherigen Playeraktionen gelten weiterhin. Ab 0.86.0 bietet der [integrierte MCP-Arbeitsplatz](LOKALE-WERKZEUGE.md) zusätzlich lokale Programme, asynchrone Aufträge, Caddy/OAuth und Secure MCP Tunnel.
 
-**Bevorzugter Weg seit 0.4.0:** [Python-MCP 2.3.0 mit eingebettetem aMQTT-Broker](PYTHON-MCP.md). MCP-Anfragen und Player-Antworten laufen dort über denselben MQTT-Broker. Die folgende Node-Einrichtung bleibt als Kompatibilitätsweg erhalten.
+**Getrennter MQTT-Steuerungsweg seit 0.4.0:** [Python-MCP 2.3.0 mit eingebettetem aMQTT-Broker](PYTHON-MCP.md). MCP-Anfragen und Player-Antworten laufen dort über denselben MQTT-Broker. Die folgende Node-Einrichtung bleibt als Kompatibilitätsweg erhalten.
 
 ## Gemeinsame StateMaschine
 

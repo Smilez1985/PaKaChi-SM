@@ -16,7 +16,7 @@
     "vite": "8.3.4"
   },
   "name": "pakachi-sm",
-  "version": "0.67.0",
+  "version": "0.95.0",
   "private": true,
   "type": "module",
   "description": "PaKaChi StateMaschine \u2013 lokaler Avatar-Player und integriertes Studio",
@@ -43,6 +43,17 @@
     "export:zoo": "node scripts/export-zoo.mjs",
     "merge:zoo": "node scripts/merge-zoo.mjs",
     "export:moves": "node scripts/export-moves.mjs",
-    "merge:moves": "node scripts/merge-moves.mjs"
+    "merge:moves": "node scripts/merge-moves.mjs",
+    "verify": "npm test && npm run build",
+    "verify:full": "npm run verify && npm run test:e2e",
+    "benchmark:import": "node scripts/benchmark-project-import.mjs",
+    "benchmark:transitions": "node scripts/benchmark-playback-transition.mjs",
+    "benchmark:browser-import": "node scripts/benchmark-browser-import.mjs",
+    "prepare:pakachi": "node scripts/prepare-pakachi.mjs",
+    "predev": "npm run prepare:pakachi -- --if-needed",
+    "pretest": "npm run prepare:pakachi -- --if-needed",
+    "prebuild": "npm run prepare:pakachi -- --if-needed",
+    "local": "node scripts/prepare-pakachi.mjs --if-needed && npm run build && node server/local.mjs",
+    "check:pakachi-surface": "node scripts/check-pakachi-surface.mjs"
   }
 }

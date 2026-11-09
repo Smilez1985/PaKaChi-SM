@@ -1,0 +1,114 @@
+{
+  "format": "pakachi-template-rig-evidence",
+  "version": 1,
+  "date": "2026-11-09",
+  "scope": "Existing CPU-generated GLBs; proportional templates, no new inference. No visual/anatomical or collision approval. No source model overwritten.",
+  "runs": [
+    {
+      "form": "humanoid",
+      "source": "public/model-zoo/pakachi-drafts/humanoid.glb",
+      "sha256": "debb9c4793368bff6989f41b2a40eba3e4ef6a6100aaf3858abe51117a174d14",
+      "report": {
+        "template": "biped",
+        "bones": 21,
+        "meshes": 1,
+        "vertices": 50870,
+        "method": "proportional-template",
+        "review": "required"
+      },
+      "seconds": 0.7583484410000001,
+      "neutralMaximumDisplacement": 2.6618550595937584e-8,
+      "baseline": {
+        "surfaceIssues": 0,
+        "volumeIssues": 0
+      },
+      "probes": [
+        {
+          "joint": "Draft_LeftElbow",
+          "axis": "X",
+          "degrees": 30,
+          "surfaceIssues": 1044,
+          "volumeIssues": 0,
+          "unmeasurableVolumeComponents": 2
+        },
+        {
+          "joint": "Draft_LeftKnee",
+          "axis": "X",
+          "degrees": 30,
+          "surfaceIssues": 493,
+          "volumeIssues": 0,
+          "unmeasurableVolumeComponents": 2
+        },
+        {
+          "joint": "Draft_RightElbow",
+          "axis": "X",
+          "degrees": 30,
+          "surfaceIssues": 569,
+          "volumeIssues": 0,
+          "unmeasurableVolumeComponents": 2
+        },
+        {
+          "joint": "Draft_RightKnee",
+          "axis": "X",
+          "degrees": 30,
+          "surfaceIssues": 394,
+          "volumeIssues": 0,
+          "unmeasurableVolumeComponents": 2
+        }
+      ]
+    },
+    {
+      "form": "animal",
+      "source": "public/model-zoo/pakachi-drafts/animal.glb",
+      "sha256": "c87b55c51a9bf1872de421d1052f943de05e53119b3e8c6265d5d0016b8e6d42",
+      "report": {
+        "template": "quadruped",
+        "bones": 23,
+        "meshes": 1,
+        "vertices": 81388,
+        "method": "proportional-template",
+        "review": "required"
+      },
+      "seconds": 1.237030268,
+      "neutralMaximumDisplacement": 2.687961878652665e-8,
+      "baseline": {
+        "surfaceIssues": 0,
+        "volumeIssues": 0
+      },
+      "probes": [
+        {
+          "joint": "Draft_LeftElbow",
+          "axis": "X",
+          "degrees": 30,
+          "surfaceIssues": 711,
+          "volumeIssues": 0,
+          "unmeasurableVolumeComponents": 1
+        },
+        {
+          "joint": "Draft_LeftKnee",
+          "axis": "X",
+          "degrees": 30,
+          "surfaceIssues": 797,
+          "volumeIssues": 2,
+          "unmeasurableVolumeComponents": 1
+        },
+        {
+          "joint": "Draft_RightElbow",
+          "axis": "X",
+          "degrees": 30,
+          "surfaceIssues": 698,
+          "volumeIssues": 0,
+          "unmeasurableVolumeComponents": 1
+        },
+        {
+          "joint": "Draft_RightKnee",
+          "axis": "X",
+          "degrees": 30,
+          "surfaceIssues": 808,
+          "volumeIssues": 0,
+          "unmeasurableVolumeComponents": 1
+        }
+      ]
+    }
+  ]
+}

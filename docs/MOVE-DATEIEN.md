@@ -24,7 +24,7 @@ Während Wiedergabe oder Ziehgesten ist der Import nicht verfügbar. Ändert sic
 
 ## Prüfgrenzen
 
-Automatisiert geprüft sind Dateiformat, echte SHA-256-Berechnung, Kompatibilitätsgrenzen, Kollisionen, Posenreihenfolge, Gesamtspuren, Projektlimits, Editor-Undo/Redo und veraltete asynchrone Importe. Der tatsächliche Browser-Dateidialog und Download sowie eine gerenderte Bewegungsvorschau sind noch nicht abgenommen. [Prüfbericht](PRUEFUNG-0.27.0.md).
+Automatisiert geprüft sind Dateiformat, echte SHA-256-Berechnung, Kompatibilitätsgrenzen, Kollisionen, Posenreihenfolge, Gesamtspuren, Projektlimits, Editor-Undo/Redo und veraltete asynchrone Importe. Der tatsächliche Browser-Dateidialog und Download sowie eine gerenderte Bewegungsvorschau sind noch nicht abgenommen. [Prüfbericht](PRUEFUNG.md#version-0270).
 
 Seit 0.31.0 lassen sich dieselben Move-Dateien über einen gemeinsamen statischen Katalog auswählen und importieren. [Move-Sammlung einrichten](MOVE-SAMMLUNG.md).
 

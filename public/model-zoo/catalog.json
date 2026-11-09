@@ -104,6 +104,40 @@
           "loop": true
         }
       ]
+    },
+    {
+      "id": "pakachi-humanoid-draft",
+      "name": "PaKaChi · Humanoid · 3D-Entwurf",
+      "description": "Echte Bild-zu-3D-Rekonstruktion der korrigierten PaKaChi-Vorlage. Grober statischer Entwurf; Gesicht, Hände und Rückseite brauchen Korrektur. Ohne Skelett, Bewegungen oder Transformation.",
+      "model": "model-zoo/pakachi-drafts/humanoid.glb",
+      "rigVersion": "unrigged-draft-1",
+      "moves": []
+    },
+    {
+      "id": "pakachi-animal-draft",
+      "name": "PaKaChi · Tierform · 3D-Entwurf",
+      "description": "Echte Bild-zu-3D-Rekonstruktion der PaKaChi-Tierform. Grober statischer Entwurf; Gesicht, Pfoten und verdeckte Flächen brauchen Korrektur. Ohne Skelett, Bewegungen oder Transformation.",
+      "model": "model-zoo/pakachi-drafts/animal.glb",
+      "rigVersion": "unrigged-draft-1",
+      "moves": []
+    },
+    {
+      "id": "pakachi-normal",
+      "name": "PaKaChi · Normalform · Rig",
+      "description": "Original-PaKaChi mit Fell, 3D-Gesicht und beweglichen Fingern und Zehen. Im Studio posieren und speichern. Charakterentwurf; Formwechsel folgt nach der Netzkorrektur.",
+      "model": "model-zoo/pakachi-rigged/animal.glb",
+      "rigVersion": "pakachi-anatomical-2",
+      "moves": [],
+      "states": {}
+    },
+    {
+      "id": "pakachi-work",
+      "name": "PaKaChi · Arbeitsform · Rig",
+      "description": "Original-PaKaChi mit Fell, 3D-Gesicht und beweglichen Fingern und Zehen. Im Studio posieren und speichern. Charakterentwurf; Formwechsel folgt nach der Netzkorrektur.",
+      "model": "model-zoo/pakachi-rigged/humanoid.glb",
+      "rigVersion": "pakachi-anatomical-2",
+      "moves": [],
+      "states": {}
     }
   ]
 }

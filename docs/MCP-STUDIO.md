@@ -103,3 +103,21 @@ Beispielwerte durch aktuelle Sitzung, Revision und vorhandene IDs ersetzen. Erla
 Alle Einträge werden vor der ersten Änderung geprüft. Ein Fehler verwirft das gesamte Paket. Eine tatsächliche Änderung erhöht die Revision einmal; `undo`/`redo` betrifft das ganze Paket. Identische Folgen verändern Revision und Verlauf nicht. Namen, Schleifenflag und Posenwerte bleiben erhalten. Studio-Freigabe, aktuelle Revision und Posenmodus sind erforderlich; während Wiedergabe oder Ziehen wird abgewiesen.
 
 Node- und Python-MCP deklarieren das Paket; der Editor prüft zusätzlich Existenz, Gesamtumfang und Zustand. Der integrierte Assistent liefert es als vollständigen Vorschlag zur einmaligen ausdrücklichen Bestätigung. Andere Aktionen lassen sich noch nicht zu Transaktionen kombinieren.
+
+## Gemessenen Hautkorrekturvorschlag übernehmen (0.92.0)
+
+`get_studio` liefert einen im Studio berechneten aktuellen Vorschlag unter `automaticSkinCorrection`. Dessen `command` kann mit `edit_studio` übernommen werden: `action=apply_skin_correction`, `id` des vorhandenen Vorschlags und aktuelle Sitzung/Revision. KI-Schreibfreigabe und Posenmodus sind erforderlich. Eine erfundene, veraltete oder bereits verwendete ID wird abgewiesen; die tatsächliche Änderung ist ein Undo-Schritt. Die Befehlsform ist in Node- und Python-MCP-Schemata enthalten. Der neue Suchaufruf `propose_studio_skin_correction` selbst ist noch nicht als externes MCP-Werkzeug registriert; hierfür den integrierten Assistenten oder die lokale Browser-API verwenden. Keine zusätzliche externe Host-/Caddy-Abnahme behauptet.
+
+
+### Ergänzte Messwerte (0.93.0)
+
+Der lokale Auftrag und `analyze_studio_surface` liefern neben Dreiecksdehnung eine komponentenweise algebraische Volumenschätzung geschlossener Netzteile: Verhältnisgrenzen 0,8–1,2, Warnungen und Messabdeckung. Offene Flächen gelten als nicht messbar. Kandidaten dürfen Grenzüberschreitungen nicht erhöhen oder bisherige Messbarkeit verlieren; auch reine Volumenwarnungen sind Suchziele. Der Übernahmevorschlag enthält kompakte Vorher-/Nachher-Werte je Teilmodell. Höchstens 32 Teilmodelle werden in Werkzeugdetails ausgegeben, priorisiert nach Auffälligkeiten und dann Dreieckszahl; die Gegenprüfung berücksichtigt alle.
+
+Die Schätzung ist kein Nachweis lokaler Volumenerhaltung, natürlicher Anatomie oder fehlender Selbstüberschneidungen. `unchecked` benennt diese Grenzen weiterhin. Eine Verbesserung kann verbleibende Warnungen enthalten. Die externen MCP-Werkzeuge werden hierdurch nicht erweitert; Diagnose und Suche laufen weiterhin im integrierten Assistenten beziehungsweise der lokalen Browser-API.
+
+
+### Geometrische Vorschläge (0.94.0)
+
+Der bestehende lokale Suchauftrag kann zusätzlich eine geometrische Form erzeugen. Das kompakte Ergebnis enthält `kind: "geometry"` oder `kind: "weights"`; Modellbytes und Verschiebungsfelder werden nicht an das Sprachmodell zurückgegeben. Der revisionsgebundene `apply_skin_correction`-Befehl übernimmt genau diesen bereits gemessenen Kandidaten. Vorschau und explizite Übernahme verwenden dieselbe Form, mit einer Undo-Aktion. Keine neue externe MCP-Suche behauptet.
+
+Die geometrische Variante hält Gelenk-/Posekanäle unverändert. Persistenz und gebackener Move-GLB-Export sind eingebunden; Projekte mit neuen Formen benötigen mindestens 0.94.0. Messgrenzen, Abbruch und Gegenprüfung bleiben erhalten. Die neue Erzeugung ist ein begrenzter Dualquaternion-basierter Kandidat, kein vollständiger Volumen-, Kollisions- oder Anatomielöser.

@@ -2,6 +2,10 @@ name: Verify player and studio
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - 'README.md'
+      - 'docs/**/*.md'
+      - 'docs/benchmarks/*.json'
   pull_request:
     branches: [main]
   workflow_dispatch:
@@ -13,11 +17,21 @@ concurrency:
 jobs:
   verify:
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 35
     steps:
       - uses: actions/checkout@v7.0.1
         with:
           persist-credentials: false
+      - name: PaKaChi source assets
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: pakachi-source-assets
+          path: |
+            public/model-zoo/pakachi-drafts/
+            docs/references/
+            public/legacy/pakachi/frames/001.png
+          retention-days: 14
+          if-no-files-found: error
       - uses: actions/setup-node@v7.1.0
         with:
           node-version: '24'
@@ -27,6 +41,8 @@ jobs:
       - run: npm run build
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
+      - name: Production browser import benchmark
+        run: node scripts/benchmark-browser-import.mjs --runs 3 --transfers 256 > test-results/browser-import-benchmark.json
       - name: Browser evidence
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v7.0.2
@@ -35,5 +51,7 @@ jobs:
           path: |
             playwright-report/
             test-results/
+            public/model-zoo/pakachi-rigged/
+            docs/benchmarks/pakachi-rigging-2026-11-07.json
           retention-days: 14
           if-no-files-found: ignore

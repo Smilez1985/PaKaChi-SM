@@ -36,6 +36,7 @@ export function createBridge({ token, port = 8765, timeout = 5000 }) {
   });
   return {
     server,
+    get connected(){return !!player&&player.readyState===1;},
     request(method, args = {}) {
       if (!player || player.readyState !== 1) return Promise.reject(new Error('Kein gekoppelter Player. MCP im geöffneten PaKaChi-Player einschalten.'));
       if (pending.size >= 16) return Promise.reject(new Error('Zu viele gleichzeitige Anfragen.'));

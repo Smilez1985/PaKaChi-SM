@@ -12,6 +12,577 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+Noch keine weiteren Änderungen.
+
+## [0.95.0] - 2026-11-09
+
+Zeitstempel: 2026-11-09T22:46:22+01:00 (Europe/Berlin)
+
+### Added
+
+- Bild-zu-3D-Vorschau bietet optionale erste Skelettvorlagen für Zweibeiner (21 Gelenke, A-Pose) und Vierbeiner (23 Gelenke, stehend). Die statische Generatorausgabe erhält lokal eine verbundene Knochenhierarchie und glatte Hautgewichte. Nach expliziter Übernahme sind Gelenkbearbeitung, IK, Undo/Redo, Posen/Moves, Projektspeicherung und normaler Rigged-/Animations-GLB-Export verfügbar.
+- Vier 30°-Beugeproben berichten bereits vor der Übernahme Oberflächen-/Volumenwarnungen. Generator-Original bleibt separat erhalten; Rückwechsel und erneute Vorbereitung brauchen keinen weiteren KI-Auftrag. Abbruch, Projektänderung oder Fehler verhindern verspätete Ergebnisse und erhalten den bisherigen Avatar beziehungsweise die Vorschau.
+- Reproduzierbare Messung an beiden realen CPU-Rekonstruktionen ergänzt: Grundformabweichung unter 0,00000003, aber weiterhin Warnungen an allen acht Beugeproben. Die Vorlage ersetzt die bearbeiteten PaKaChi-Rigs nicht und ist keine KI-Anatomieerkennung. Grenzen: 500.000 Vertices, eine Million Dreiecke, 64 statische Meshes und 50 MiB GLB; bestehende Rigs/Clips/Morphs/Instanzen werden nicht umgeriggt.
+
+### Fixed
+
+- Anbieterhinweis unterscheidet eingerichtete lokale Bildgenerierung von der weiterhin fehlenden OAuth-Anmeldung, statt Generierung pauschal als nicht verfügbar zu beschreiben.
+
+## [0.94.0] - 2026-11-09
+
+Zeitstempel: 2026-11-09T20:52:52+01:00 (Europe/Berlin)
+
+### Added
+
+- Automatischer Studio-Auftrag erzeugt neben Gewichtsänderungen nun lokale geometrische Korrekturformen. Dualquaternion-basierte Zielpositionen werden durch die bestehende lineare Hautbindung zurückgerechnet und als dünn gespeicherte Morph-Verschiebungen angeboten. Gelenkwinkel, gespeicherte Posekanäle, Move-Folgen und Grundform bleiben erhalten. Singuläre Bindungen und ungeeignete Transformationen liefern keinen geometrischen Kandidaten.
+- Beide Kandidatentypen müssen dieselben Dehnungs-/Volumen-Gegenprüfungen sämtlicher gespeicherter Posen und 16 Stichproben je Übergang der eigenen Moves einschließlich Schleifenschluss bestehen. Geometrische Kandidaten werden zusätzlich entlang der Grundform-Zielpose-Strecke geprüft. Eigenständige Vorschau, explizite Übernahme mit einer Undo-/Redo-Aktion, KI-Aufruf und Speichern/Laden sind eingebunden.
+- Poseabhängige Korrekturen werden in Studio-Projekten und Model-Zoo-Paketen erhalten und in die Move-Kompatibilität einbezogen. Rigged-GLB erhält Morph-Ziele und PaKaChi-Treiber, Move-GLB bäckt die Treiber in gewöhnliche Morph-Animationsspuren. Höchstens vier geometrische Formen und insgesamt 32.768 betroffene Vertices je Projekt; weiterhin höchstens 32 Treiber je Teilmodell.
+- Bewegungs-Oberflächendiagnose ergänzt die 16 Grundschritte je Übergang um höchstens 64 adaptive Zwischenbilder bei Warnungen oder deutlichen Messwertänderungen, maximal zwei Verfeinerungsstufen und weiterhin höchstens 20 Millionen Vertex-Auswertungen. Ergebnisse enthalten die Anzahl zusätzlicher Stichproben. Abbruch, Revision, Schleifenschluss und unveränderte Modelldaten bleiben erhalten. Dies ist keine kontinuierliche Bewegungs- oder Kollisionsfreigabe.
+
+- Eigenständiger, paarbudgetierter Test auf transversale Dreieck-Selbstüberschneidungen ergänzt. Angrenzende Flächen sind ausgenommen, coplanare Fälle und Budgetüberschreitungen werden ausdrücklich als unvollständig markiert. Noch keine automatische Freigabe oder Korrekturentscheidung anhand dieser Diagnose.
+
+
+### Changed
+
+- Kandidatenauswahl berücksichtigt Fehler und Volumen-Grenzüberschreitungen über alle geprüften Pose-/Move-Stichproben; ein besseres Einzelbild verdrängt keine insgesamt bessere Bewegung.
+- Geometrische Formen bleiben bei inkompatiblen Skelettumbauten gespeichert und werden deaktiviert. Gelöschte Korrekturknochen blockieren den Umbau nicht; Wiederherstellung/Undo aktiviert die passende Form erneut. Projekt-Replay und gerenderter Knochenumbau sind geprüft.
+- Pose-Treiber unterstützen getrennte Gruppen, sodass neue geometrische Formen vorhandene charakterspezifische Korrekturen nicht heruntergewichten. Eingelesene ursprüngliche Knochennamen werden nach glTF-Namensnormalisierung eindeutig zugeordnet. Importierte positive statische Modellskalierung wird vor dem starren Blend-Vergleich herausgerechnet.
+- Suche je Gelenk/Radius um zwei geometrische Stärken erweitert; bisherige Begrenzungen auf vier Gelenke, drei Radien, 512 Ausgangsstichproben und 100 Millionen Vertex-Auswertungen bleiben bestehen. Modelle mit geänderter Hautbindung, abgeschalteten Korrekturen, absoluten nativen Morph-Zielen oder ungeeigneter Skalierung werden für diese Kandidaten nicht verwendet.
+
+Die neue Form ist ein begrenzter geometrischer Kandidat, keine allgemeine Anatomie- oder Kollisionsfreigabe. Der geschlossene 90°-Prüfarm verbessert sein Volumenverhältnis von rund 0,634 auf über 0,8 bei gleichen Gelenkwinkeln. Die geprüften neuen PaKaChi-Knie-/Hüftvarianten werden wegen fehlender Verbesserung oder schlechterer Teilmetriken verworfen; die ursprünglichen Charakterformen bleiben erhalten. Projekte mit `correctiveShapes` und deren gruppierten Laufzeittreibern benötigen mindestens 0.94.0; ältere Projektleser führen diese Erweiterung nicht korrekt aus. Gebackene GLB-Animationen benötigen diese Studio-Erweiterung nicht.
+
+## [0.93.1] - 2026-11-09
+
+Zeitstempel: 2026-11-09T14:23:44+01:00 (Europe/Berlin)
+
+### Fixed
+
+- Suche nach einer schonenderen Pose endete bei 1/16 der ursprünglichen Bewegung und fand nach Einführung der Volumenprüfung für kleine geschlossene Flächen keine Variante mehr. Bis zu zwölf begrenzte Suchschritte bis 1/1024 prüfen nun auch kleinere Bewegungen; Dreiecks-, Volumen- und Beugegrenzen bleiben unverändert. Kein Rückfall auf eine ungeprüfte oder unveränderte Grundpose.
+- Reproduzierter vollständiger CI-Fehler: Beim Mika-Oberflächenpunkt bestanden bei 1/16 bereits die Dreiecksgrenzen, das Volumen lag aber bei 1,2315×; 1/32 besteht beide Prüfungen. Zusätzlicher analytischer Regressionstest benötigt 1/512 und bestätigt unveränderte Quelldaten. Bestehender Browserfall prüft jetzt die tatsächlichen Dreiecks- und Volumenwerte nach der Korrektur über die Diagnose-API.
+
+## [0.93.0] - 2026-11-09
+
+Zeitstempel: 2026-11-09T10:52:35+01:00 (Europe/Berlin)
+
+### Added
+
+- Komponentenweise algebraische Volumenschätzung ergänzt die allgemeine Studio-Pose-/Move-Prüfung und KI-Messwerte. Nur geschlossene, konsistent orientierte Netzteile mit gültiger Referenz werden gemessen; offene Flächen und ungeeignete Topologie werden ausdrücklich als nicht messbar ausgewiesen. UV-/Normalennähte werden für die Prüfung exakt zusammengefasst, ohne Geometrie zu verändern; aufreißende Nähte verlieren ihre Messabdeckung.
+- Neue automatische Gegenprüfung verhindert erhöhte Volumen-Grenzüberschreitungen und den Verlust bisheriger Messbarkeit je Netzteil. Verschiedene Komponenten können ihre Abweichungen nicht gegenseitig aufheben. Reine Volumenwarnungen sind ebenfalls Suchziele. Kandidaten und KI-Berichte zeigen verbleibende Volumenwarnungen zusätzlich zu den Dreieckskennzahlen.
+- Analytische Tests für bekannte Volumen, starre Bewegung, kubische Skalierung, Orientierungsumkehr, Kollaps, offene/ungültige/nicht-mannigfaltige Netze, getrennte Schalen und Nahttrennung; geschlossener Haut-Prüffall samt tatsächlicher Gewichtssuche und Move-Gegenprüfung. Gerenderter Ablauf prüft verbleibende Volumenwarnungen nach verschwundener Dreiecksdehnungswarnung.
+
+### Changed
+
+- Automatische Suche prüft höchstens drei statt zwei Radien je Gelenk, einschließlich eines kleineren Einflussbereichs. Die bisherigen Auftragsbudgets und sechs lokalen Transfers je Radius bleiben erhalten. Übernahme überprüft dieselben zusätzlichen Messwerte; Undo und gespeicherte Posen/Moves bleiben erhalten.
+- Begrenzte KI-Diagnose priorisiert auffällige und große Teilmodelle, damit wichtige Körpernetze hinter vielen Anbauteilen sichtbar bleiben. Messabdeckung der tatsächlichen PaKaChi-Grundformen mit Modell-Hashes protokolliert.
+- Vollständige CI 0.92.0 ausgewertet: 414 Node-Tests, Produktionsbuild, alle 42 Chromium-Fälle und drei Importmessungen erfolgreich. Originaldateien sowie frischer Pipeline-/Modellstand bestätigt. [Nachweis](PRUEFUNG.md#version-0920).
+
+Die Volumengrenzen 0,8–1,2× sind technische Warnschwellen. Algebraische Volumen können Selbstüberschneidungen und lokale Einschnürungen verdecken; kein Volumenerhaltungs- oder Kollisionslöser und keine Anatomiefreigabe. PaKaChi-Modelle und charakterspezifische CPU-Aufbereitung bleiben unverändert.
+
+## [0.92.0] - 2026-11-09
+
+Zeitstempel: 2026-11-09T07:15:16+01:00 (Europe/Berlin)
+
+### Added
+
+- Automatischer lokaler Korrekturauftrag verbindet Diagnose, Gelenkauswahl, Kandidatensuche und Gegenprüfung. Wählt die auffälligste gespeicherte Pose oder Move-Stichprobe; bestimmt bis zu vier Gelenke aus den tatsächlichen Hauteinflüssen auffälliger Dreiecke. Keine PaKaChi-Namen oder manuelle Gelenkauswahl erforderlich.
+- Sucht je Gelenk in höchstens zwei aus der Fehlerregion abgeleiteten Radien und sechs Gewichtsübertragungen. Jeder angebotene Kandidat muss die vorhandenen Pose-Gegenprüfungen und alle 16 Stichproben je Übergang sämtlicher eigener Moves einschließlich Schleifenschluss bestehen. Schlechtere Zwischenbilder verwerfen einen Kandidaten auch dann, wenn alle gespeicherten Einzelposen bestehen.
+- Original-/Korrekturvorschau verwendet flüchtige Hautgewichte und stellt Originalgewichte, Livepose und native Korrekturen wieder her. Die Übernahme prüft die tatsächlich angewendete Haut und ist ein einzelner Undo-/Redo-Schritt. Gespeicherte Posewerte und Move-Folgen bleiben erhalten; Prüfmarkierungen werden wie bei anderen Hautänderungen gesetzt.
+- Integrierter KI-Assistent kann `propose_studio_skin_correction` anfordern und danach genau den gemessenen, revisionsgebundenen Vorschlag mit `apply_skin_correction` zur Übernahme anbieten. Assistentenpanel zeigt Original-/Korrekturvergleich; unbekannte, veraltete oder bereits verwendete Vorschlags-IDs werden abgewiesen. KI-Schreibfreigabe bleibt für die KI-Übernahme erforderlich.
+
+### Changed
+
+- Suchauftrag begrenzt: höchstens 512 Pose-/Move-Stichproben und 100 Millionen Vertex-Auswertungen einschließlich Kandidatenprüfung; kein stilles Auslassen großer Bewegungsfolgen. Abbruch, Änderungen und Verlassen verhindern die Veröffentlichung laufender Ergebnisse. Fehlende Verbesserung liefert keinen erfundenen Erfolg.
+- MCP-Befehlsschemata kennen die Übernahme eines bereits im Studio berechneten Vorschlags. Der neue Suchaufruf ist zunächst im integrierten Assistenten und in der lokalen Browser-API verfügbar; keine neue externe MCP-Suche behauptet.
+- Vollständige CI 0.91.0 ausgewertet: 404 Node-Tests, Build, 40 Chromium-Fälle, drei Produktionsimportmessungen; frische Modell-Hashes stimmen mit dem lokal geprüften Stand überein.
+
+Der Auftrag ist eine begrenzte automatische Gewichtskorrektur, kein allgemeines Auto-Rigging, kein Volumen-/Kollisionslöser und keine lückenlose Bewegungsfreigabe. Der synthetische Prüffall zeigt eine gemessene Verbesserung; eine sichtbare Einschnürung bleibt. Die PaKaChi-Modelle werden in dieser Version nicht neu gestaltet.
+
+## [0.91.0] - 2026-11-09
+
+Zeitstempel: 2026-11-09T01:19:09+01:00 (Europe/Berlin)
+
+### Added
+
+- Allgemeine Oberflächenprüfung gespeicherter Studio-Moves: 16 Schritte je Übergang einschließlich Schlüsselposen und Schleifenschluss, tatsächliche Haut-/Morphberechnung, Bericht je Teilmodell und pausierte Ansicht auffälliger Zeitpunkte. Read-only, abbrechbar, revisionsgebunden und auf 20 Millionen Vertex-Stichproben begrenzt. Änderungen, Bewegungswechsel oder Verlassen verwerfen Ergebnisse. Keine kontinuierliche Bewegungs- oder Anatomiefreigabe.
+- Der integrierte KI-Assistent kann über `analyze_studio_surface` echte Pose-/Move-Messungen anfordern und abwarten. Keine Modellbytes im Werkzeugergebnis; begrenzte Details, Revision und Abbruch werden geprüft. Der allgemeine Messkern setzt keine PaKaChi-Gelenknamen voraus. Automatische Reparaturschleife und externe MCP-Anbindung dieses neuen Werkzeugs bleiben offen.
+- Original-Aufbereitung prüft zusätzlich beide Schultern und Hüften: 48 Kandidaten je Form. Fünf linke Hüftkorrekturen der Arbeitsform akzeptiert (insgesamt 21); Tierform unverändert 11, übrige neue Kandidaten verworfen. Abschließende Vergleiche: 562 bzw. 178 Posen. Beispiel linke Hüfte −90° Z: 258 → 37 auffällige Körperdreiecke, maximale Hauptdehnung 21,136× → 2,945×. Ursprüngliche Körperattribute und 59 Gelenke bleiben erhalten.
+
+### Changed
+
+- Begrenzung auf höchstens 32 Korrekturtreiber pro Teilmodell erweitert; 33 werden abgewiesen. Arbeitsform 14.212.880 Byte, Tierform 17.813.052 Byte; dekodierter RAM-/Grafikspeicherbedarf ist größer. Messbericht Formatversion 5 wird ohne redundante Einrückung gespeichert.
+- CI-Zeitbudget auf 35 Minuten erweitert: Die umfassendere frische CPU-Aufbereitung kommt zur vollständigen Browserprüfung hinzu. Prüfungen bleiben vollständig erhalten. CI 0.90.0 mit 396 Node-Tests, Build, 39 Browserfällen und drei Importmessungen erfolgreich ausgewertet.
+- Roadmap auf das Entwicklungsziel ausgerichtet: Das Studio soll KI-gestützte Diagnose, Korrektursuche und Gegenprüfung selbst koordinieren; PaKaChi bleibt Referenzfall.
+
+## [0.90.0] - 2026-11-09
+
+Zeitstempel: 2026-11-09T00:32:51+01:00 (Europe/Berlin)
+
+### Added
+
+- CPU-Aufbereitung prüft beide Ellenbogen und beide Knie. Arbeitsform: 16 akzeptierte Korrekturhaltungen; Tierform: 11. Zielwinkel, Grundgeometrie, 59 Gelenke und ursprüngliche Hautgewichte bleiben erhalten. Körper und Fell werden gemeinsam geprüft, ungeeignete Varianten verworfen. Die linke Tierform-Ellenbogenkorrektur aus 0.89.0 wird wegen schlechterer Mischachsenproben zurückgenommen.
+- Bewegungskontext in Korrektur-Metadaten: benannte Nachbargelenke und optionaler Achsenbereich begrenzen die Freigabe mit weicher Ein-/Ausblendung. Erkannte ungeeignete Kontexte fallen auf die ursprüngliche Hautbewegung zurück. Renderer, reine Studio-Prüfung und gebackener Export verwenden dieselbe Berechnung. Das ist keine allgemeine Reparatur kombinierter Bewegungen.
+- Erweiterte Prüfungen: Achsenwinkel, gleichzeitige Gelenke, Elternbewegungen, Mischachsen und Übergänge der Kontextfreigaben. Nach Aufnahme aller Formen werden 347 bzw. 178 eindeutige Posen einschließlich aller Paare unterschiedlicher korrigierter Gelenke nochmals gegen die unkorrigierte Haut gemessen. [Messdaten, Formatversion 4](benchmarks/pakachi-rigging-2026-11-07.json).
+
+### Fixed
+
+- Unabhängige Gelenkkorrekturen schwächen sich nicht länger gegenseitig ab: Gewichtssumme wird pro Gelenk begrenzt. Gleichzeitige volle Korrekturen verschiedener Gelenke bleiben möglich.
+- Fellkorrekturen verschieben jedes Büschel mit seinem Körperansatz. Die zusätzliche Verformung innerhalb eines Büschels entfällt, seine ursprünglichen Normalen bleiben erhalten. Ungeeignete Eltern-/Gelenkkombinationen dürfen in den geprüften Stichproben keine höhere Fehlerzahl oder maximale Hauptdehnung erzeugen.
+
+### Changed
+
+- Relative Positions-/Normal-Morphs werden beim Modell-/GLB-Export verlustfrei als sparse glTF-Accessors gespeichert, wenn dies Platz spart. Animationen, Basisattribute, Indizes, eingebettete Bilder und Anwendungsmetadaten bleiben erhalten. Reale GLTFLoader-Rundläufe prüfen auch Strides, große Indizes, Nullziele und negative Null. Dateien: Arbeitsform 13.804.988 Byte, Tierform 17.813.052 Byte; das bestehende 50-MiB-Importlimit bleibt erhalten. Dekodierter Speicherbedarf bleibt größer als die Datei.
+- Vollständigen CI-Lauf von 0.89.0 ausgewertet: 388 Node-Tests, Build, 39 Chromium-Fälle und drei Produktionsimportmessungen bestanden. Prüfbericht und Roadmap nachgeführt; gemeinsame Morph-Oberfläche, Standard-Verwandlung und Hardwareabnahme bleiben offen.
+
+## [0.89.0] - 2026-11-08
+
+Zeitstempel: 2026-11-08T22:19:25+01:00 (Europe/Berlin)
+
+### Added
+
+- Echte poseabhängige Korrekturformen an beiden Original-PaKaChi-Rekonstruktionen: sechs geprüfte ±90°-Haltungen des linken Ellenbogens der Arbeitsform und eine −90°-Z-Haltung der Tierform. Körper und Fell werden gemeinsam korrigiert; volle Gelenkdrehung, Grundoberfläche, ursprüngliche Hautgewichte und 59-Gelenk-Aufbau bleiben erhalten.
+- CPU-Aufbereitung passt lokale Einflussfelder anhand unveränderter Gelenkhaltungen an und backt daraus relative Korrekturziele in die ursprüngliche Hautbindung. Nur Varianten mit weniger auffälligen Körperdreiecken und ohne schlechtere Fehlerzahl/maximale Dehnung in den geprüften Körper-/Fellstichproben werden aufgenommen. Ungeeignete Tierform-Varianten bleiben verworfen. [Messdaten](benchmarks/pakachi-rigging-2026-11-07.json).
+- Gemeinsame Laufzeit für Renderer, Studio und reine Oberflächenprüfung. Korrekturen blenden im Winkelabstand bis 45° um ihre Zielhaltung weich ein/aus; Grundpose, reine Handgelenk-/Kopfbewegung und 180°-Stresshaltung bleiben unverändert. Keine Behauptung einer allgemeinen Verformungs-, Volumen- oder Kollisionsreparatur.
+- **Poseabhängige Hautkorrekturen** lässt sich im Studio vergleichen, rückgängig machen und im Projekt speichern. `get_studio` meldet Verfügbarkeit, Aktivität und Bindungskompatibilität. Nach Rig-/Gewichtsänderungen oder inkompatibler Neubindung werden die dafür berechneten Korrekturen ausgeschaltet.
+
+### Changed
+
+- Animations-GLB enthält die Korrekturgewichte als mit 30 Hz abgetastete normale Morph-Kurven und benötigt für die Wiedergabe keinen PaKaChi-Treiber. Rig-GLB erhält Korrekturziele und Momentaufnahme; inkompatible Treiber werden entfernt. Projektdateien erhalten eine optionale boolesche Einstellung, ältere Projekte starten mit eingeschalteten kompatiblen Korrekturen.
+- Modellaufbereitung berücksichtigt beide Korrekturmodule und den Mess-/Treibervertrag im Pipelinehash. Die abgeleiteten GLBs wachsen auf rund 36,4 MB bzw. 20,7 MB und bleiben unter dem 50-MiB-Importlimit. Die erhaltenen Originaldateien werden nicht verändert.
+- Vollständigen CI-Lauf von 0.88.0 ausgewertet: 380 Node-Tests, Build, alle 38 Chromium-Fälle und drei Produktionsimportmessungen bestanden. [Prüfbericht](PRUEFUNG.md#version-0880).
+
+## [0.88.0] - 2026-11-08
+
+Zeitstempel: 2026-11-08T20:56:00+01:00 (Europe/Berlin)
+
+### Added
+
+- **Lokale Hautkorrektur suchen**: sechs begrenzte lokale Gewichtsübertragungen (10 %, 20 %, 35 % in beiden Richtungen) zwischen gewähltem Gelenk und Elternknochen. Die gespeicherte Zielbewegung wird nicht abgeschwächt. Ein Vorschlag erfordert weniger auffällige Dreiecke an der Zielpose und besteht Vergleichsprüfungen aller gespeicherten Posen sowie dreier Zwischenposen von Grundform zu Zielpose.
+- Grundform wird positionsbezogen mit Toleranz geprüft. Pro Teilmodell dürfen die gemessenen Fehlerzahlen und Überschreitungen der Dehnungsgrenzen nicht zunehmen. Die Suche verändert keine Daten; **Hautkorrektur übernehmen** speichert die tatsächliche lokale Gewichtsänderung als eine Undo-Aktion. Posen und Move-Sequenzen bleiben erhalten, erhaltene Posen werden zur visuellen Nachprüfung markiert. Projekt-Rundlauf und bestehender Rig-GLB-Export verwenden dieselbe gespeicherte Gewichtsübertragung.
+- `get_studio` meldet die Messwerte eines verfügbaren Vorschlags einschließlich weiterhin ungeprüfter Kollisionen, Charaktergestaltung und durchgehender Bewegung. Kein pauschales „Rigging fehlerfrei“ und noch kein eigener MCP-Aufruf zum Starten der Suche.
+- Reproduzierbare Prüfung mit `npm run check:pakachi-surface -- --weights`: Beide Originalformen verweigern bei extremer 180°-Ellenbogendrehung noch eine Korrektur durch diese sechs lokalen Varianten. [Messdaten](benchmarks/pakachi-weight-correction-2026-11-08.json). Der gezielte synthetische Armtest zeigt dagegen weniger gemessene Verzerrung bei identischem vollen Gelenkwinkel; das ist keine visuelle Anatomieabnahme.
+
+### Changed
+
+- Bestehende manuelle Gewichtsübertragung, Pinsel und Suchvorschau verwenden denselben reinen Rechenkern für Zusammenführen, höchstens vier Einflüsse und Normalisierung. Bestehende Tests vergleichen den Kern weiterhin mit der unabhängigen Map-Referenz.
+- Vorherigen vollständigen [CI-Lauf für 0.87.0](PRUEFUNG.md#version-0870) ausgewertet: 372 Node-Tests, Build, 37 Chromium-Fälle und Produktionsimportmessungen erfolgreich. Charakterqualität, gemeinsame Morph-Oberfläche und Standard-Verwandlung bleiben offen.
+
+## [0.87.0] - 2026-11-08
+
+Zeitstempel: 2026-11-08T20:33:00+01:00 (Europe/Berlin)
+
+### Added
+
+- Oberflächenprüfung gespeicherter Studio-Posen: rotationsunabhängige Hauptdehnungen und Flächenverhältnisse jedes auswertbaren Dreiecks gegenüber der aktuellen Grundform. Tatsächliche Hautgewichte, freie Oberflächenpunkte, vorhandene Morphziele und an Knochen befestigte Teile werden berücksichtigt. Ganze Figurenbewegung zählt nicht als Hautverzerrung; nicht messbare Ausgangsdreiecke werden ausgewiesen.
+- **Schonendere Pose erstellen** versucht sechs abgeschwächte Varianten zwischen Grundform und Zielpose. Nur bei bestandenen Oberflächen- und vorhandenen Beugegrenzen wird ein eigener Prüfkandidat angelegt. Originalpose und Moves bleiben erhalten; Abbruch, veralteter Studio-Stand und Undo/Redo sind abgesichert. Das ist keine automatische Reparatur von Hautgewichten, Anatomie oder Topologie.
+- Reproduzierbare CPU-Diagnose `npm run check:pakachi-surface` und [Messdaten beider Originalformen](benchmarks/pakachi-surface-2026-11-08.json). Der absichtlich ungeeignete reine Knochenumbau erzeugt 6.787 bzw. 11.914 auffällige Körperdreiecke; die jeweilige Grundpose überschreitet keine Dehnungsgrenze. Gemeinsame Morph-Oberfläche, Kollisionsprüfung und Bildvergleich bleiben offen.
+
+### Added
+
+- Zusammenhängende Fünf-Schritte-Anleitung [„Verbindung zu deinem Rechner“](LOKALE-WERKZEUGE.md#verbindung-zu-deinem-rechner): Arbeitsbranch aktualisieren, Windows-Start, MCP-/Player-Kopplung, Programmprüfung, Caddy/DuckDNS und lokale ChatGPT-Verbindungsfreigabe. Erster externer Verbindungsnachweis ist `local_get_status`.
+
+### Changed
+
+- Roadmap priorisiert Charakterqualität, Rig und gemeinsame Morph-Topologie vor der umfassenden GPU-Abnahme. CPU-basierte Entwicklung läuft unabhängig von der lokalen Anbindung weiter.
+- Roadmap für die Übergabe abgeglichen: Arbeitsbranch und Entwurfs-PR, bestätigter Softwarestand und nächste lokale Schritte festgehalten. Reale Windows-/GPU-/Caddy-Abnahme und optionale Tunnel-/ACP-Abnahmen bleiben getrennt offen; Charakter-/Rigkorrektur, gemeinsame Morph-Topologie und Standard-Verwandlung behalten ihre Reihenfolge.
+- Zusammengefassten [Prüfbericht](PRUEFUNG.md#version-0860) um den vollständigen erfolgreichen GitHub-Lauf für `05cf07ce6d81a0c0de76194470c9c47e642e8322` ergänzt: 359 Node-Tests, TypeScript/Build, alle 36 Chromium-Fälle und drei Produktionsimportmessungen. Keine Behauptung eines bereits verbundenen Benutzerrechners.
+
+## [0.86.0] - 2026-11-08
+
+Zeitstempel: 2026-11-08T14:33:07+01:00 (Europe/Berlin)
+
+### Added
+
+- Integrierter lokaler Arbeitsplatz mit 17 Streamable-HTTP-MCP-Werkzeugen: bisherige Player-/Studioaktionen sowie unveränderliche Dateien, blockweise Übertragung und asynchrone Blender-/Python-/TripoSR-/GLB-Prüfaufträge mit Status, Protokoll, Ergebnissen und Abbruch. Tatsächliche Programm-/PyTorch-/CUDA-Probe und GLB-Übernahme ins Studio.
+- Caddy-/DuckDNS-Abschnitt für den vorhandenen Reverse Proxy, einschließlich Pfadpräfix und OAuth-Metadaten. OAuth-PKCE mit lokaler Verbindungsfreigabe; Verwaltung ausschließlich direkt am Rechner. Keine zusätzliche öffentliche Portfreigabe.
+- Bedienung des offiziellen Secure MCP Tunnel Clients innerhalb PaKaChi: plattformspezifischer Download mit SHA-256-Prüfung, Client samt Cloudflared, Diagnose, Start/Stopp und tatsächliche lokale Bereitschaft. Runtime-Schlüssel nur im Speicher/Prozessumfeld. Konto-/Workspace-Verknüpfung bleibt extern erforderlich.
+- ACP-v1-Client für einen konfigurierten lokalen Agenten, einschließlich tatsächlicher MCP-stdio-Delegation und lokaler Berechtigungsanfragen. Keine Behauptung eines öffentlichen ACP-Servers.
+
+### Changed
+
+- Windows-Start baut und öffnet den integrierten Arbeitsplatz auf Loopback-Port 8787. Entwicklungs-Webserver und getrennte Python-MCP-/MQTT-Steuerung bleiben verfügbar. Playerwerkzeuge werden zwischen bisherigen und integriertem Node-MCP-Server geteilt.
+- MCP-/Skriptfreigaben starten ausgeschaltet. Programme laufen nach ausdrücklicher lokaler Freigabe mit Benutzerrechten, ohne Betriebssystem-Sandbox. Lange Aufgaben werden abgefragt; große Dateien in Blöcken übertragen.
+
+### Fixed
+
+- Abbruch während der Skriptvorbereitung verhindert den anschließenden Prozessstart. ACP-Ausgaben erhalten UTF-8-Zeichen auch bei geteilten Pipeblöcken und redigieren Schlüssel über mehrere Nachrichten hinweg.
+- Der lokale Dienst erlaubt die eigene Einbettung des erhaltenen Originalplayers; fremde Einbettungen bleiben gesperrt. Die Navigation bricht mit dem neuen Werkzeugknopf auf kleinen Bildschirmen passend um.
+
+### Security
+
+- Verwaltungszugriff mit Loopback-/Host-/Proxyprüfung, lokaler Sitzung und CSRF-Schutz; ausführbare Programme und Tunnelschlüssel sind nicht über MCP änderbar. Bereinigte Unterprozessumgebung; Geheimnisse werden auch bei geteilten Ausgabeblöcken redigiert.
+- Dateinamen, Asset-Offsets, Größen/Quoten, Symlinks und offizielle ZIP-Binärdateien werden geprüft; Prozessabbruch beendet die Prozessgruppe.
+
+[Prüfbericht](PRUEFUNG.md#version-0860). Reale Windows-/GPU-/Caddy-/OpenAI-Tunnel-Abnahme bleibt offen. Charakterrig und Standard-Verwandlung werden durch diese Infrastruktur nicht als fertig erklärt.
+
+## [0.85.0] - 2026-11-07
+
+Zeitstempel: 2026-11-07T21:01:23+01:00 (Europe/Berlin)
+
+### Added
+
+- Beide Original-PaKaChi-Formen mit derselben erweiterten Hierarchie aus 59 Gelenken: 28 zusätzliche Gelenke für 14 einzeln bewegliche Finger/Zehen, jeweils zwei Glieder. Vorn drei Finger und ein Daumen, hinten je drei Zehen. Echte getrennte Geometrie mit runden mechanischen Gliedern, dunklen Gelenken und grünen Spitzen folgt den jeweiligen Knochen.
+- Geometrische Prüfungen aller 28 neuen Gelenke sowie Projekt-/Rig-GLB-Rundläufe mit gebeugten Fingern. Die beiden Charakter-Browserfälle prüfen zusätzlich Fingerpose und erneutes Laden.
+
+### Changed
+
+- Humanoide Fäustlinge und vordere Zehenflächen lokal ausgeschnitten und geschlossen, bevor die neuen Teile eingesetzt werden. Fellpfoten außerhalb dieser Bereiche bleiben erhalten. Neue Handdrehpunkte sitzen an der Handgelenksnaht.
+- Ausgangsvertices innerhalb von 0,00001 Modelleinheiten verschweißt, doppelte/degenerierte Flächen entfernt und einfache verbleibende Randringe geschlossen. Beide aufbereiteten Körpernetze besitzen in der automatisierten Kantenprüfung ausschließlich zwei gegensinnig orientierte Flächen je Kante. Die separaten Fellfasern bleiben absichtlich offene Dreiecke. Selbstüberschneidungen und allgemeine Kollisionsfreiheit sind damit nicht bestätigt.
+- Modellaufbereitung berücksichtigt das neue Pfotenmodul im Pipelinehash. Die erhaltenen Rekonstruktionsdateien bleiben bytegleich.
+
+### Fixed
+
+- Browser-Zeitbudget der beiden vollständigen Charakterabläufe an große Modelle, Projekt-Rundlauf und mehrere Software-WebGL-Ansichten angepasst: 90 Sekunden je Fall, 15 Sekunden je Import. Der CI-Trace belegt die vorherigen Abbrüche bei Schlussaufnahmen nach erfolgreichen Funktionsprüfungen.
+- Tiefenpositionen an Handgelenken und Pfoten anhand tatsächlicher Modellquerschnitte korrigiert; überlagerte Rumpf-/Schwanzflächen bei der Zuordnung getrennt betrachtet.
+- Falsche Armgewichte an einer Hinterpfote der Tierform beseitigt: Zuordnung folgt den tatsächlichen Kettenabständen statt einer pauschalen Z-Grenze. Schwanz- und Kopfregion räumlich vom hinteren Rücken abgegrenzt. Neue Anatomieproben verhindern Mitziehen der Hinterpfoten bei Armbewegung und des hinteren Rückens bei Hals-/Kopfdrehung.
+
+[Prüfbericht](PRUEFUNG.md#version-0850). Die gemeinsame Morph-Topologie und die Standard-Verwandlung bleiben offen; diese Version ist weitere Rig-/Charakterarbeit und keine endgültige Designfreigabe.
+
+## [0.84.0] - 2026-11-07
+
+Zeitstempel: 2026-11-07T19:14:08+01:00 (Europe/Berlin)
+
+### Added
+
+- Original-PaKaChi als getrennt auswählbare, bearbeitete Normal- und Arbeitsform mit derselben anatomischen Hierarchie aus 31 Gelenken: Rumpf, Hals/Kopf, Kiefer, Ohren/Augen, Schultern/Ellenbogen/Handgelenke/Hände, Hüften/Knie/Knöchel/Füße und fünfgliedriger Schwanz.
+- Echte Hautgewichte mit höchstens vier Einflüssen je Vertex und Glättung entlang vorhandener Meshkanten; Fellfasern übernehmen dieselben Gewichte. Augen-, Schnauzen- und Pfotendetails hängen am jeweiligen Skelettteil. Beide Modelle lassen sich im integrierten Studio posieren und als Projekt sichern.
+- Reproduzierbare Aufbereitung aus den unveränderten TripoSR-Quellen. `prepare:pakachi` erzeugt die GLBs automatisch vor `dev`, `test` und `build`; unveränderte Eingaben/Ergebnisse werden anhand von Pipeline- und Dateihashes wiederverwendet. Generierte GLBs sind Buildprodukte und werden mit den CI-Browsernachweisen angeboten.
+- Geometrische Rig-Prüfungen sowie Browserfälle für beide tatsächlichen Charakterformen: Beugen, Undo/Redo, Projektdatei, erneutes Laden und Ansichten von vorn, hinten und der Seite.
+
+### Changed
+
+- Gesicht mit grünen 3D-Augen, Pupillen, Lichtpunkten, Nase und oberflächennah geführter Mundlinie ergänzt. Dunklere Fellfarben, raue nichtmetallische Materialien und kurze tatsächliche Fellfasern auf Körper und Schwanz; grüne Pfotenakzente als eigene Geometrie.
+- Nahezu flächenlose Dreiecke entfernt, Rekonstruktionsstufen mit 16 Taubin-Teilschritten geglättet und explizite glatte Normalen exportiert. Maximale Körpervertex-Verschiebung gegenüber der Quelle rund 0,0032 Modelleinheiten. Die ursprünglichen GLBs bleiben erhalten.
+- Die Schwanzkette wird in ihrer Tiefe an tatsächliche lokale Meshquerschnitte angepasst. In der humanoiden Form folgt ihre Gewichtszuordnung der getrennten Schwanzkomponente, damit sie keine Pfoten mitzieht.
+- Blaupause und Roadmap halten die Reihenfolge fest: Rigging und Charakterqualität, danach ein gemeinsamer sauberer Formwechsel als eine vorwärts/rückwärts abspielbare Standardanimation.
+
+### Fixed
+
+- Die Kamera bestimmt nach der Normalisierung neu angehängter SkinnedMeshes den richtigen Figurenmittelpunkt: inverse Bindematrizen werden vor der Mittelpunktberechnung aktualisiert. Die neuen Charaktermodelle werden beim Laden vollständig eingerahmt.
+
+[Prüfbericht](PRUEFUNG.md#version-0840) · [Aufbereitung und Grenzen](KI-GENERIERUNG.md#rigging-und-charakteraufbereitung). Keine fertige Morph-Animation: Die große Umformungsprobe zeigte Hautbrücken der rekonstruierten Netze. Eine dafür geeignete gemeinsame Netzstruktur, Finger-/Pfotenfeinarbeit und die endgültige Charakterfreigabe bleiben offen. Kein KI-Auto-Rigging beliebiger Bilder.
+
+## [0.83.0] - 2026-11-07
+
+Zeitstempel: 2026-11-07T17:13:02+01:00 (Europe/Berlin)
+
+### Added
+
+- Erste echte Bild-zu-3D-Rekonstruktionen des Original-PaKaChi: humanoide und tierische Form als getrennte, statische GLB-Entwürfe im Model Zoo. Aus den unveränderten Einzelvorlagen mit TripoSR auf CPU erzeugt; keine prozeduralen Ersatzpuppen.
+- Vier abgeschlossene Inferenzläufe (beide Formen, jeweils Auflösung 128 und 256), prüfbare Modell-/Eingabehashes, Abhängigkeiten, Parameter, Logs und echte 3D-Rundumansichten. Ausgeliefert werden die 256er Meshes mit 50.870 beziehungsweise 81.388 Vertices; ohne Skelett oder Clips.
+- Zusätzliche Diagnose der tatsächlichen Meshes mit komponentenweiser Dreieckszahl, offenen Randkanten und degenerierten Flächen; Ergebnisse dokumentiert, Modelle unverändert.
+- Nachvollziehbarer Patch für die getestete TripoSR-Revision, der bei bereits transparenten RGBA-Vorlagen die unnötige Initialisierung des Hintergrundentferners vermeidet. Keine automatische Änderung fremder Installationen.
+
+### Fixed
+
+- TripoSR-Ausgaben stehen im Player aufrecht und schauen nach vorn: Ein Szenenwurzelknoten überführt Z-oben/+X-vorn nach glTF Y-oben/+Z-vorn. Native GLB bleibt im Generierungsordner erhalten; Meshbuffer bleiben unverändert. Die Ausrichtung wird nicht auf allgemeine GLB-Importe angewendet.
+
+### Changed
+
+- Katalogprüfungen unterscheiden tatsächlich animierte Testavatare und ungeriggte Entwürfe; Sammlungsexport prüft den Byteerhalt aller mitgelieferten Modelle. Neuer Chromium-Fall lädt beide realen PaKaChi-Entwürfe ohne erfundene Bewegungsfähigkeiten.
+- Dokumentation neu geordnet (2026-11-07T15:22:04+01:00, Europe/Berlin): Versionschroniken aus beiden READMEs entfernt; die Historie wird ausschließlich hier gepflegt.
+- 91 einzelne Versions-Prüfberichte in `PRUEFUNG.md` mit einem Abschnitt je Version zusammengeführt. Datierte Zwischenprüfungen, bisherige Nachweise und Einschränkungen erhalten; alle Verweise auf die neuen Abschnittsanker umgestellt und die Einzeldateien entfernt.
+- Roadmap-Prioritäten auf den Original-PaKaChi und einen tatsächlichen Bild-zu-3D-Lauf ausgerichtet; allgemeine Gelenkerweiterungen dem konkreten Charakterablauf untergeordnet.
+
+[Prüfbericht](PRUEFUNG.md#version-0830). Gesicht/Augen, Hände/Pfoten, Fell-/Materialwirkung, Körpervolumen und verdeckte Flächen brauchen Korrektur. Charakterfreigabe, Rigging, Animationen, 3D-Transformation und GPU-Abnahme bleiben offen.
+
+## [0.82.0] - 2026-11-07
+
+Zeitstempel: 2026-11-07T12:30:50+01:00 (Europe/Berlin)
+
+### Added
+
+- Umhängen zwischen unterschiedlich stark, positiv und gleichmäßig skalierten Knochenästen. Die lokale Skalierung des verschobenen Knochens gleicht das Verhältnis der Äste aus; Grundstellung, gespeicherte Schlüsselposen, Entwurf und starre Anbauteile behalten ihre Welttransformationen. Eigene Spiegelungen und ungleichmäßige Skalierungen bleiben kombinierbar.
+- Regressionen für wiederholten Reset, Rückkehr zur Quelle, gemischte Umbau-/Gewichtsfolgen, Projektladen, Beugeprüfung und tatsächlichen Animations-GLB-Rundlauf. Alle Hautvertices der angepassten Mika-/Nori-Importe werden verglichen; zusätzlicher Chromium-Fall prüft Umhängen, Undo/Redo und Speichern/Laden mit unterschiedlichen Astmaßstäben.
+
+### Changed
+
+- Topologie-Replay rekonstruiert den festen Skalierungsausgleich aus Quelle und Umbaufolge; Quellmodell und Projektstruktur bleiben erhalten. Rückkehr zur Quelle stellt auch die ursprünglichen lokalen Skalierungen wieder her.
+- Prüfung der gespeicherten Beugewinkel berücksichtigt die im Studio rekonstruierten Knochenskalierungen. Nicht verlustfrei darstellbare oder nicht invertierbare Umrechnungen werden abgewiesen.
+
+[Prüfbericht](PRUEFUNG.md#version-0820). Nicht gleichmäßige/negative Elternäste, eigene Skelette an Anbauteilen und manuelle Haut-/Bewegungsabnahme bleiben offen. Projektformat 1; der neue Umhängungsfall benötigt mindestens Software 0.82.0.
+
+## [0.81.0] - 2026-11-07
+
+Zeitstempel: 2026-11-07T11:46:22+01:00 (Europe/Berlin)
+
+### Added
+
+- `npm run benchmark:browser-import` misst den echten Projektdatei-Import im temporär gebauten Produktionsplayer: Dateilesen, JSON-/Modell-/Texturdekodierung, Rig-Replay und UI bis zur ersten WebGL-Zeichnung und nächsten Animationsframe-Grenze. Jeder Durchlauf verwendet einen frischen Browserkontext; eigene Projekte bleiben unverändert.
+- JSON-Bericht mit Einzelzeiten, Median, Dateiprüfsumme, Browser-/CPU-/Rendererangaben und dekodierten ImageBitmaps. Defekte Importe, Browserfehler, Kontextverlust und geänderte Quellen führen zu Fehlerstatus. Keine hardwareunabhängige Laufzeitgrenze.
+- Chromium-Regressionen für ein eingebettetes PNG-Modell, wiederholte Messungen und fehlerhaften Import bei weiterhin vorhandenem Vorgängeravatar. Actions führt zusätzlich drei Messungen mit dem Produktionsbuild und Mika/256 Gewichtsaufträgen aus; der Bericht gehört zu den Browserartefakten.
+
+### Changed
+
+- Roadmap, Designdokument, Dokumentationsindex und Prüfstand auf die bestätigten 0.80.0-/0.81.0-Läufe nachgezogen; abgeschlossene Browser-Automatisierung von offener manueller Qualitätsabnahme getrennt. Referenz-Rohdaten der drei Produktionsimporte und ihre Grenzen dokumentiert.
+- CPU- und Browserbenchmark teilen die Erzeugung der Mika-Testkopie. Projektformat, Player und Editor bleiben unverändert.
+
+[Prüfbericht](PRUEFUNG.md#version-0810) · [Messvertrag und Grenzen](IMPORT-BENCHMARK.md). Kein Nachweis für GPU-Fertigstellung, physische Bildausgabe oder große reale Projekte.
+
+## [0.80.0] - 2026-11-07
+
+Zeitstempel: 2026-11-07T10:12:57+01:00 (Europe/Berlin)
+
+### Added
+
+- Animierte freie Oberflächen-/Gesichtspunkte im GLB-Export als Positions-/Normal-Morph-Ziele. Unterschiedliche Oberflächenposen werden je Mesh dedupliziert und an den ursprünglichen Schlüsselzeiten gewichtet. Mesh-gebundene und globale Punkte bleiben mit Skinning und Figurenbewegung kombinierbar.
+- Animationsausgabe auch für Figuren ohne Skelett. Die Schaltfläche heißt jetzt „Move als GLB (Animation)“; vorhandene Rigs bleiben enthalten. Native relative/absolute Morph-Ziele, Gewichte und Namen werden berücksichtigt.
+- Vorabgrenzen für Morph-Speicher, Zielanzahl, Kanalwerte und Rechenaufwand. Keine stille Verringerung der Qualität.
+
+### Changed
+
+- Editor und Export verwenden dieselbe additive Oberflächenverformung. Unbeteiligte Oberflächen werden anhand ihres unveränderten Bezugsraums übersprungen.
+
+[Prüfbericht](PRUEFUNG.md#version-0800) · [Exportanleitung](GLB-EXPORT.md). Originalclip-Übernahme und Retargeting bleiben offen.
+
+## [0.79.0] - 2026-11-07
+
+Zeitstempel: 2026-11-07T09:26:00+01:00 (Europe/Berlin)
+
+### Added
+
+- Ausgewählten eigenen Studio-Move als eigenständige GLB mit Rig und einem Animationsclip exportieren. Knochenbewegung und Gesamtspur für Verschiebung, Drehung um den Figurenmittelpunkt und Größe bleiben enthalten; wiederholte Posen und Schleifenschluss werden berücksichtigt.
+- Ausgabe mit 30 Stützstellen pro Sekunde und exakten Segmentgrenzen. Bewegte freie Oberflächenpunkte, Matrixscherung und zu umfangreiche Sequenzen werden abgewiesen; keine stillschweigende Teilausgabe.
+- GLB-Rundlauftests für tatsächliche Animation nach dem Laden, Quellschutz, wiederholte Posen, Figurentransformationen und Grenzen; Browserprüfung für Download, erneuten Import und Wiedergabe.
+
+[Prüfbericht](PRUEFUNG.md#version-0790) · [Exportanleitung](GLB-EXPORT.md). Originalclip-Übernahme, animierte freie Punkte und Retargeting bleiben offen.
+
+## [0.78.1] - 2026-11-07
+
+Zeitstempel: 2026-11-07T09:04:13+01:00 (Europe/Berlin)
+
+### Fixed
+
+- Topologie-Replay nach „Zwischengelenk einfügen → Gewichte vom Elternknochen übertragen → Elternknochen löschen“: Die Einfügeachse berücksichtigt den früheren Elternbezug gelöschter Knochen, statt deren lokale Position fälschlich als Weltposition zu verwenden. Hautgewichte bleiben beim Wiederaufbau erhalten.
+- Verschachtelte Löschungen, verschobene/skalierte Figuren, wiederholter Reset, Undo/Redo und Projektladen sind durch einen unabhängigen Gewichtsvergleich abgesichert. Der echte Mika-GLB-Rundlauftest verwendet jetzt die zuvor fehlerhafte Reihenfolge.
+
+### Added
+
+- Chromium-Regression für die Bearbeitungsfolge einschließlich Undo/Redo, Speichern und erneutem Laden.
+
+[Prüfbericht](PRUEFUNG.md#version-0781). Keine Projektformatänderung.
+
+## [0.78.0] - 2026-11-07
+
+Zeitstempel: 2026-11-07T02:12:55+01:00 (Europe/Berlin)
+
+### Added
+
+- GLB-Export mit bearbeitetem Hautskelett: aktuelle Hierarchie, Gewichte, Bindematrizen und Form bleiben beweglich. Keine Animationsclips oder Studio-Moves; Standbildexport bleibt separat verfügbar.
+- Unabhängige Kopien schützen Quelldaten. Nicht unterstützte Rig-/Sichtbarkeitsfälle werden ausdrücklich abgewiesen; bestehende Verwerfungsprüfung bei überholtem Export bleibt erhalten.
+- Tatsächliche GLB-Rundlauftests einschließlich Hautbewegung nach dem Laden, bearbeitetem Mika sowie Browser-Download und erneuter Gelenkbearbeitung.
+
+[Prüfbericht](PRUEFUNG.md#version-0780). Animationsausgabe, Retargeting und das separat reproduzierte Topologie-Replay-Problem bleiben offen.
+
+## [0.77.0] - 2026-11-07
+
+Zeitstempel: 2026-11-07T01:14:27+01:00 (Europe/Berlin)
+
+### Added
+
+- Eigenständiger GLB-Standbildexport im Studio: aktuelle Haut-/Morph-Verformung und Welttransformation werden in statische Geometrie übernommen, einschließlich korrigierter Dreiecksorientierung bei Spiegelungen. Materialien und UVs bleiben erhalten. Kein Rig-/Animations-Export; Studio-Projekt separat speichern.
+- Exporter wird bei Bedarf geladen. Projekt- und Quelldaten bleiben erhalten; während der Erstellung überholte Ergebnisse werden nicht heruntergeladen.
+- Geometrie-Regressionen und Browserprüfung für Download und erneuten Import der Datei. Instanzen und teilweise ausgeblendete Materialgruppen werden ausdrücklich abgewiesen.
+
+[Prüfbericht](PRUEFUNG.md#version-0770). GLB-Export mit Rig/Animationen und Retargeting bleiben offen.
+
+## [0.76.3] - 2026-11-07
+
+Zeitstempel: 2026-11-07T00:47:32+01:00 (Europe/Berlin)
+
+### Added
+
+- Gezielte Chromium-Prüfung der haftenden Studio-Vorschau beim Scrollen in normalen und niedrigen Desktopfenstern sowie nicht überdeckter Eingabefelder auf Mobilgeräten. Echte Mausradereignisse prüfen die Erreichbarkeit der Zeichenfläche; Projektdaten bleiben unverändert.
+- Screenshots des sichtbaren Bereichs statt Ganzseitenaufnahmen zur Bewertung der haftenden Vorschau.
+
+[Prüfbericht](PRUEFUNG.md#version-0763). Das subjektive Mausgefühl und anatomische Bewegungsqualität bleiben getrennte manuelle Abnahmen.
+
+## [0.76.2] - 2026-11-06
+
+Zeitstempel: 2026-11-06T19:13:55+01:00 (Europe/Berlin)
+
+### Fixed
+
+- Optionen-Schaltfläche auf dunkler Navigation: helle Textfarbe und lesbare Hover-/Fokuszustände statt dunkler Schrift auf dunklem Hintergrund.
+- Versionsanzeige der Oberfläche stammt aus package.json statt aus dem veralteten fest eingetragenen Stand 0.67.0.
+
+### Added
+
+- Chromium-Regression für Paketversion, mindestens 4,5:1 Textkontrast im Normal-/Hoverzustand, sichtbaren Tastaturfokus und Öffnen der Optionen per Enter.
+
+[Prüfbericht und Screenshotbefunde](PRUEFUNG.md#version-0762).
+
+## [0.76.1] - 2026-11-05
+
+Zeitstempel: 2026-11-05T09:17:35+01:00 (Europe/Berlin)
+
+### Fixed
+
+- Zwei fehlgeschlagene Chromium-Tests des lokalen Model Zoo: Der Selektor für die Speicherbestätigung traf nach der Trennung von Vorgangsstatus und Listenwarnung zwei Elemente. Beide Felder besitzen jetzt eindeutige IDs; die Tests prüfen gezielt den Vorgangsstatus. Keine Abschwächung der Speicher-, F5- oder Mehrtab-Prüfungen.
+
+### Changed
+
+- Actions-Abnahme nach wieder verfügbarem Kontingent aufgenommen. Der erste Lauf bestätigte 312 Node-Tests, Build und 20 Browserfälle einschließlich Mausnavigation. Korrigierter Stand und vollständige CI-Ergebnisse werden in PR #1 geprüft.
+
+[Prüfbericht](PRUEFUNG.md#version-0761).
+
+## [0.76.0] - 2026-11-04
+
+Zeitstempel: 2026-11-04T14:54:49+01:00 (Europe/Berlin)
+
+### Added
+
+- Umhängen von Knochen mit eigener gleichmäßiger, ungleichmäßiger oder negativer Quellskalierung. Die eigene Skalierung bleibt erhalten; Positions-/Drehungsumrechnung ohne Spiegelungsmehrdeutigkeit.
+- Regressionen für sechs Skalierungsvarianten einschließlich Spiegelungen verschiedener Achsen, Hautgeometrie, starre Anbauteile, Posen/Entwurf, Rekonstruktion und Quellwiederherstellung. Nicht invertierbare eigene Skalierungen werden atomar abgewiesen.
+
+[Prüfbericht](PRUEFUNG.md#version-0760). Elternäste benötigen weiterhin gleiche positive gleichmäßige Gesamtskalierungen; gerenderte Abnahme bleibt offen.
+
+## [0.75.0] - 2026-11-04
+
+Zeitstempel: 2026-11-04T14:51:57+01:00 (Europe/Berlin)
+
+### Added
+
+- Umhängen zwischen Ästen mit gleicher kumulierter positiver gleichmäßiger Skalierung. Die Umrechnung von Grundpose, gespeicherten Posen und Entwurf berücksichtigt die tatsächlichen Quellskalierungen.
+- Regressionen für gleich skalierte sowie unterschiedlich aufgebaute Äste (4 × 0,5 gegenüber 2), Hautgeometrie, starre Anbauteile, Projektrekonstruktion und Quellwiederherstellung. Ungleiche, nicht gleichmäßige und negative Astskalierungen bleiben atomar abgewiesen.
+
+[Prüfbericht](PRUEFUNG.md#version-0750). Gerenderte Haut-/Bewegungsabnahme bleibt offen.
+
+## [0.74.0] - 2026-10-31
+
+Zeitstempel: 2026-10-31T02:45:35+01:00 (Europe/Berlin)
+
+### Added
+
+- Knochen innerhalb eines gemeinsam skalierten Teilbaums umhängen: Die Umrechnung erfolgt relativ zum nächsten gemeinsamen Vorfahren. Gleichmäßige, ungleichmäßige und negative gemeinsame Skalierung bleiben erhalten.
+- Regressionen für Hautgeometrie und starre Anbauteile in Grundpose, gespeicherter Pose, Entwurf, Projektrekonstruktion und Quellwiederherstellung; nicht invertierbare gemeinsame Skalierung wird ohne Datenänderung abgewiesen.
+
+[Prüfbericht](PRUEFUNG.md#version-0740). Unterschiedlich skalierte Äste und gerenderte Qualitätsabnahme bleiben offen.
+
+## [0.73.0] - 2026-10-31
+
+Zeitstempel: 2026-10-31T02:32:53+01:00 (Europe/Berlin)
+
+### Added
+
+- Skalierte Endknochen ohne Kinder oder Anbauteile können gelöscht werden. Hautgewichte werden dem Elternknochen zugeordnet; gespeicherte Posenspuren des entfernten Knochens entfallen.
+- Regressionen für gleichmäßige, ungleichmäßige und negative Skalierung, unveränderte Grundgeometrie, Projektrekonstruktion und Wiederherstellung der Quelle. Skalierte Zwischenknochen bleiben geschützt.
+
+[Prüfbericht](PRUEFUNG.md#version-0730). Gerenderte Haut-/Bewegungsabnahme bleibt offen.
+
+## [0.72.0] - 2026-10-31
+
+Zeitstempel: 2026-10-31T01:51:23+01:00 (Europe/Berlin)
+
+### Added
+
+- Neue Knochenabzweigungen unter skalierten Quellknochen: gleichmäßige, ungleichmäßige und negative Skalierungen werden bei der Welt-/Lokalkoordinaten-Umrechnung berücksichtigt.
+- Regressionen für Platzierung, unveränderte Hautgeometrie, gespeicherte Posen, Rekonstruktion und Wiederherstellung der Quelle. Nicht invertierbare Elternmatrizen und extreme lokale Positionen werden atomar abgewiesen.
+
+[Prüfbericht](PRUEFUNG.md#version-0720). Umhängen/Löschen skalierter Knochen und gerenderte Qualitätsabnahme bleiben offen.
+
+
+## [0.71.1] - 2026-10-30
+
+Zeitstempel: 2026-10-30T19:06:33+01:00 (Europe/Berlin)
+
+### Added
+
+- Überblendungsbenchmark akzeptiert eigene eigenständige GLB-/glTF-Dateien mit `--model` und 1–10 Wiederholungen pro Fall mit `--runs`. `--help` beschreibt die Optionen.
+- Größenlimit von 50 MiB, ausdrückliche Ablehnung von Bildtexturen und Prüfung unveränderter Modelle über alle Messprozesse. Quelldateien bleiben unangetastet.
+- CLI-Regressionen für eigene Geometrie, Prüfsummen, unveränderte Quelldateien, ungültige Argumente und nicht unterstützte Eingaben.
+
+[Prüfbericht](PRUEFUNG.md#version-0711). Große reale Modelle und Browserabnahme bleiben offen.
+
+## [0.71.0] - 2026-10-30
+
+Zeitstempel: 2026-10-30T09:42:50+01:00 (Europe/Berlin)
+
+### Added
+
+- `npm run benchmark:transitions`: reproduzierbare CPU-Messung der Player-Überblendung mit dem mitgelieferten Mika, ohne/einem/allen betroffenen Meshes, jeweils drei eigene Prozesse. JSON-Bericht mit Einzelzeiten, Speicher-Momentaufnahmen und Geometrie-Prüfsummen; kein Rendering- oder FPS-Nachweis.
+
+### Changed
+
+- Oberflächenüberblendungen verwenden Zielpuffer innerhalb eines Übergangs wieder und kopieren zusammenhängende Float32-Attribute direkt. Andere Attributlayouts behalten den allgemeinen Zugriff. Ausgangspose und Zielzustand bleiben getrennt; beim Abschluss oder Abbruch werden die wiederverwendeten Puffer freigegeben.
+- Lokale Messreihe für alle Mika-Meshes: Medianzeiten pro Prozess von 24,94–26,86 ms auf 13,10–16,93 ms reduziert. Positionen-/Normalen-Prüfsummen identisch; festgehaltener ArrayBuffer-Bedarf weiterhin rund 8,34 MiB. Keine allgemeine Laufzeitgarantie.
+
+[Prüfbericht](PRUEFUNG.md#version-0710) · [Messvertrag](TRANSITION-BENCHMARK.md). Gerenderte Abnahme und große reale Importmodelle bleiben offen.
+
+## [0.70.0] - 2026-10-30
+
+Zeitstempel: 2026-10-30T08:51:57+01:00 (Europe/Berlin)
+
+### Added
+
+- Player-Überblendung auch für freie Gesichts-/Oberflächenpunkte: Betroffene Mesh-Positionen werden vorübergehend interpoliert, Normalen und Begrenzungen für die sichtbare Zwischenform neu berechnet.
+- Vor jedem Animationsschritt werden Zielpositionen, Zielnormalen und Begrenzungen wiederhergestellt. Pause, wiederholter Wechsel, Abbruch und Rückkehr zum Originalclip erhalten den Zielzustand; gespeicherte Posen und Hautgewichte werden nicht verändert.
+
+### Changed
+
+- Freie Oberflächenpunkte verhindern die Überblendung nicht mehr. Zusätzliche Geometriekopien sind auf Meshes beschränkt, denen solche Punkte zugeordnet sind; Punkte ohne Mesh-Zuordnung betreffen alle Studio-Meshes.
+
+Bearbeitete Knochen-Grundstellung, Knochenumbau, Gewichtsaufträge, geänderte Geometrieidentität und Schertransformationen bleiben ausgeschlossen. Zusätzlicher CPU-/Speicherbedarf während des Übergangs; große Modelle und gerenderte Hautqualität sind noch nicht abgenommen. [Prüfbericht](PRUEFUNG.md#version-0700).
+
+## [0.69.2] - 2026-10-30
+
+Zeitstempel: 2026-10-30T07:18:04+01:00 (Europe/Berlin)
+
+### Fixed
+
+- Auch bei Überblendungen zwischen Originalclips wird die Mischung vollständig beendet, wenn ein kurzer einmaliger Zielclip bereits seine Endpose erreicht hat. Der beendete Clip bleibt dabei an seinem Ende; manuelle Pause während eines laufenden Clips bleibt wirksam.
+- Ein Sprung auf der Zeitleiste beendet die alte Clip-Überblendung und zeigt die gewählte Zielpose ohne Restgewicht des vorherigen Clips. Der manuelle Pausenstatus bleibt erhalten.
+
+Beide Fehler vor der Korrektur durch Regressionstests reproduziert. Entwicklungsstand auf dem Arbeitsbranch; gerenderte Abnahme bleibt offen. [Prüfbericht](PRUEFUNG.md#version-0692).
+
+## [0.69.1] - 2026-10-29
+
+Zeitstempel: 2026-10-29T21:45:22+01:00 (Europe/Berlin)
+
+### Fixed
+
+- Überblendungen erreichen auch dann die vollständige Zielpose, wenn ein einmaliger Originalclip kürzer als der Übergang ist. Natürliches Clip-Ende wird von manueller Pause unterschieden; manuelle Pause hält die Überblendung weiterhin an.
+- Gemeinsame Berechnung der Übergangszeit berücksichtigt fehlenden Grundclip, Tempo und ungültige Framezeiten. Wiederholen oder Springen auf der Zeitleiste hebt den erkannten Abschlusszustand korrekt auf.
+
+Entwicklungsstand auf dem Arbeitsbranch, keine neue gerenderte Browserabnahme. [Prüfbericht](PRUEFUNG.md#version-0691).
+
+## [0.69.0] - 2026-10-29
+
+Zeitstempel: 2026-10-29T21:13:59+01:00 (Europe/Berlin)
+
+Entwicklungsmeilenstein auf `work/local-verification-model-zoo`; Browserabnahme steht aus.
+
+### Added
+
+- Kurze Überblendung beim Wechsel zwischen Originalclips und Studio-Moves im Player sowie bei der automatischen Rückkehr zur Grundbewegung. Die sichtbare Ausgangspose wird über 0,18 Animationssekunden in die weiterlaufende Zielpose überführt; Position, Rotation, Größe und vorhandene Morph-Gewichte werden berücksichtigt.
+- Pause hält die Überblendung an, Tempo skaliert sie. Erneuter Wechsel startet an der sichtbaren Zwischenpose. Springen auf der Zeitleiste oder Öffnen des Studios beendet die temporäre Überblendung; Projekt, Undo-Verlauf und gespeicherte Posen bleiben unverändert.
+
+Nur unveränderte Grundskelette ohne freie Oberflächenpunkte, Knochenumbau oder Gewichtsaufträge. Geänderte Hierarchien und Schertransformationen werden nicht interpoliert; dort bleibt der direkte Wechsel erhalten. Originalclip-Überblendungen untereinander bleiben bestehen. [Prüfbericht](PRUEFUNG.md#version-0690).
+
+## [0.68.0] - 2026-10-29
+
+Zeitstempel: 2026-10-29T19:35:45+01:00 (Europe/Berlin)
+
+Entwicklungsmeilenstein auf `work/local-verification-model-zoo`; noch nicht in `main`. Chromium-Abnahme steht aus.
+
+### Added
+
+- `npm run benchmark:import` misst Projektdatei, Validierung, Modelldekodierung, Normalisierung und Rig-Aufbau inklusive Gewichtsverlauf getrennt. Wiederholungen in eigenen Prozessen, eigene Projektdateien ohne Änderung, Prüfsummen und JSON-Bericht; Bildtexturen werden ausdrücklich abgewiesen.
+
+- Lokale Sammelbefehle `npm run verify` (Node-Tests und Build) und `npm run verify:full` (zusätzlich Chromium-E2E), jeweils mit Abbruch beim ersten fehlgeschlagenen Schritt. Browserinstallation bleibt ein ausdrücklicher Vorbereitungsschritt.
+
+### Fixed
+
+- Automatische Model-Zoo-Aktualisierungen durch andere Tabs oder Fensterfokus erhalten das Ergebnis des letzten Bedienvorgangs. Listenfehler erscheinen getrennt und verschwinden nach erfolgreicher Aktualisierung.
+
+- Model Zoo unterscheidet Browserkontingent, das 50-Kopien-Limit und Projekte über 80 MiB mit konkreten Hinweisen.
+- Bestätigtes Speichern/Löschen bleibt bei nachfolgendem Listenfehler als erfolgreich sichtbar. Veraltete Auswahlen bleiben bis zur erfolgreichen Aktualisierung für Laden/Löschen gesperrt, auch über die gemeinsame Avatar-Auswahl.
+
+### Changed
+
+- Roadmap auf offene Aufgaben und Abnahmen reduziert; erledigte Versionshistorie im Changelog und in den Prüfberichten belassen.
+
+- Direkte Pushes nach `main`, die ausschließlich README, Markdown-Dokumentation oder Benchmark-Messdaten ändern, lösen künftig keinen vollständigen Prüflauf aus. Pull Requests und manuelle Ausführung bleiben unverändert; Prüfsummen in `docs/references` sind nicht ausgenommen.
+
 ## [0.67.0] - 2026-10-28
 
 Zeitstempel: 2026-10-28T12:48:55+01:00 (Europe/Berlin)
@@ -20,11 +591,7 @@ Zeitstempel: 2026-10-28T12:48:55+01:00 (Europe/Berlin)
 
 - Browserprüfung echter Mausnavigation nach Zoom/Pan: Figurenmitte, Kameraradius, Inversion über Optionen, Loslassen und unveränderte Projektdaten.
 
-### Fixed
-
-- Testmaus auf den tatsächlich sichtbaren Canvas-Ausschnitt begrenzt und Elementtreffer geprüft; zuvor lag sie bei hohem Canvas außerhalb des Browserfensters.
-
-**Prüfung:** Der erste CI-Lauf besteht 286 Node-Tests, Build und die bisherigen 21 Browserfälle. Der neue Mausfall scheiterte an einer Testposition unterhalb des sichtbaren Browserfensters. Der korrigierte Test verwendet den sichtbaren Canvas-Ausschnitt und prüft das getroffene Element; Build lokal bestanden. Sein CI-Bestätigungslauf [40727289984](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/40727289984) endet auch nach Wiederholung vor dem ersten Arbeitsschritt ohne Testlogs. Auch lokal endet Chromium vor dem Teststart mit `socket() failed: Operation not permitted`. Die Bestätigung aller 22 Browserfälle steht aus.
+**Prüfung:** Produktionsbuild lokal bestanden. Neuer Chromium-Nachweis steht aus. Der bisherige bestätigte Stand umfasst 286 Node-Tests und 21 Browserfälle.
 
 Dies ergänzt den automatisierten Navigationsnachweis; tatsächliches Mausgefühl, komplexe Skelett-/Hautqualität und große reale Modelle bleiben manuell zu prüfen. Keine Änderung am Kameraalgorithmus.
 
@@ -1245,17 +1812,17 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 
 - Bestehendes Bedienkonzept ausdrücklich als Designdokument eingeordnet und mit Roadmap und Changelog verknüpft.
 
-[Unreleased]: https://github.com/Smilez1985/PaKaChi-SM/commits/main
-[0.20.0]: ./PRUEFUNG-0.20.0.md
-[0.19.0]: ./PRUEFUNG-0.19.0.md
-[0.18.0]: ./PRUEFUNG-0.18.0.md
-[0.17.1]: ./PRUEFUNG-0.17.1.md
-[0.17.0]: ./PRUEFUNG-0.17.0.md
-[0.16.0]: ./PRUEFUNG-0.16.0.md
-[0.15.0]: ./PRUEFUNG-0.15.0.md
-[0.14.0]: ./PRUEFUNG-0.14.0.md
-[0.13.0]: ./PRUEFUNG-0.13.0.md
-[0.12.0]: ./PRUEFUNG-0.12.0.md
+[Unreleased]: https://github.com/Smilez1985/PaKaChi-SM/commits/work/local-verification-model-zoo
+[0.20.0]: ./PRUEFUNG.md#version-0200
+[0.19.0]: ./PRUEFUNG.md#version-0190
+[0.18.0]: ./PRUEFUNG.md#version-0180
+[0.17.1]: ./PRUEFUNG.md#version-0171
+[0.17.0]: ./PRUEFUNG.md#version-0170
+[0.16.0]: ./PRUEFUNG.md#version-0160
+[0.15.0]: ./PRUEFUNG.md#version-0150
+[0.14.0]: ./PRUEFUNG.md#version-0140
+[0.13.0]: ./PRUEFUNG.md#version-0130
+[0.12.0]: ./PRUEFUNG.md#version-0120
 [0.11.1]: https://github.com/Smilez1985/PaKaChi-SM/compare/3febc7f6a9c7326bdb7295284d2a042e97bd24f3...207faaac1f0c35dbf0bda71d1142792f1e5bab0c
 [0.11.0]: https://github.com/Smilez1985/PaKaChi-SM/compare/fd8fabe5a194d211a4389673f05fc4363b3fa049...3febc7f6a9c7326bdb7295284d2a042e97bd24f3
 [0.10.0]: https://github.com/Smilez1985/PaKaChi-SM/compare/b0c0782b4e54f1c15032f98648d0af59fc61028d...fd8fabe5a194d211a4389673f05fc4363b3fa049
@@ -1270,96 +1837,165 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 [0.1.0]: https://github.com/Smilez1985/PaKaChi-SM/compare/2fd20e09bb518f1e3edde27e060209c57a56f103...4c54448062977dbee105fe553f5ce1617a788f7f
 [0.0.1]: https://github.com/Smilez1985/PaKaChi-SM/tree/2fd20e09bb518f1e3edde27e060209c57a56f103
 
-[0.21.0]: ./PRUEFUNG-0.21.0.md
+[0.21.0]: ./PRUEFUNG.md#version-0210
 
-[0.22.0]: ./PRUEFUNG-0.22.0.md
+[0.22.0]: ./PRUEFUNG.md#version-0220
 
-[0.23.0]: ./PRUEFUNG-0.23.0.md
+[0.23.0]: ./PRUEFUNG.md#version-0230
 
-[0.24.0]: ./PRUEFUNG-0.24.0.md
+[0.24.0]: ./PRUEFUNG.md#version-0240
 
-[0.25.0]: PRUEFUNG-0.25.0.md
+[0.25.0]: PRUEFUNG.md#version-0250
 
-[0.26.0]: PRUEFUNG-0.26.0.md
+[0.26.0]: PRUEFUNG.md#version-0260
 
-[0.27.0]: PRUEFUNG-0.27.0.md
+[0.27.0]: PRUEFUNG.md#version-0270
 
-[0.28.0]: PRUEFUNG-0.28.0.md
+[0.28.0]: PRUEFUNG.md#version-0280
 
-[0.29.0]: PRUEFUNG-0.29.0.md
+[0.29.0]: PRUEFUNG.md#version-0290
 
-[0.30.0]: PRUEFUNG-0.30.0.md
+[0.30.0]: PRUEFUNG.md#version-0300
 
-[0.31.0]: PRUEFUNG-0.31.0.md
+[0.31.0]: PRUEFUNG.md#version-0310
 
-[0.32.0]: PRUEFUNG-0.32.0.md
+[0.32.0]: PRUEFUNG.md#version-0320
 
-[0.33.0]: PRUEFUNG-0.33.0.md
+[0.33.0]: PRUEFUNG.md#version-0330
 
-[0.34.0]: PRUEFUNG-0.34.0.md
+[0.34.0]: PRUEFUNG.md#version-0340
 
-[0.35.0]: PRUEFUNG-0.35.0.md
+[0.35.0]: PRUEFUNG.md#version-0350
 
-[0.36.0]: PRUEFUNG-0.36.0.md
+[0.36.0]: PRUEFUNG.md#version-0360
 
-[0.37.0]: PRUEFUNG-0.37.0.md
+[0.37.0]: PRUEFUNG.md#version-0370
 
-[0.38.0]: PRUEFUNG-0.38.0.md
+[0.38.0]: PRUEFUNG.md#version-0380
 
-[0.39.0]: PRUEFUNG-0.39.0.md
+[0.39.0]: PRUEFUNG.md#version-0390
 
-[0.40.0]: PRUEFUNG-0.40.0.md
+[0.40.0]: PRUEFUNG.md#version-0400
 
-[0.41.0]: PRUEFUNG-0.41.0.md
+[0.41.0]: PRUEFUNG.md#version-0410
 
-[0.42.0]: PRUEFUNG-0.42.0.md
+[0.42.0]: PRUEFUNG.md#version-0420
 
-[0.43.0]: PRUEFUNG-0.43.0.md
+[0.43.0]: PRUEFUNG.md#version-0430
 
-[0.44.0]: PRUEFUNG-0.44.0.md
+[0.44.0]: PRUEFUNG.md#version-0440
 
-[0.45.0]: PRUEFUNG-0.45.0.md
+[0.45.0]: PRUEFUNG.md#version-0450
 
-[0.46.0]: PRUEFUNG-0.46.0.md
+[0.46.0]: PRUEFUNG.md#version-0460
 
-[0.47.0]: PRUEFUNG-0.47.0.md
+[0.47.0]: PRUEFUNG.md#version-0470
 
-[0.48.0]: PRUEFUNG-0.48.0.md
+[0.48.0]: PRUEFUNG.md#version-0480
 
-[0.49.0]: PRUEFUNG-0.49.0.md
+[0.49.0]: PRUEFUNG.md#version-0490
 
-[0.50.0]: PRUEFUNG-0.50.0.md
+[0.50.0]: PRUEFUNG.md#version-0500
 
-[0.51.0]: PRUEFUNG-0.51.0.md
+[0.51.0]: PRUEFUNG.md#version-0510
 
-[0.52.0]: PRUEFUNG-0.52.0.md
+[0.52.0]: PRUEFUNG.md#version-0520
 
-[0.53.0]: PRUEFUNG-0.53.0.md
+[0.53.0]: PRUEFUNG.md#version-0530
 
-[0.54.0]: PRUEFUNG-0.54.0.md
+[0.54.0]: PRUEFUNG.md#version-0540
 
-[0.55.0]: PRUEFUNG-0.55.0.md
+[0.55.0]: PRUEFUNG.md#version-0550
 
-[0.56.0]: PRUEFUNG-0.56.0.md
+[0.56.0]: PRUEFUNG.md#version-0560
 
-[0.57.0]: PRUEFUNG-0.57.0.md
+[0.57.0]: PRUEFUNG.md#version-0570
 
-[0.58.0]: PRUEFUNG-0.58.0.md
+[0.58.0]: PRUEFUNG.md#version-0580
 
-[0.59.0]: PRUEFUNG-0.59.0.md
+[0.59.0]: PRUEFUNG.md#version-0590
 
-[0.60.0]: PRUEFUNG-0.60.0.md
+[0.60.0]: PRUEFUNG.md#version-0600
 
-[0.61.0]: PRUEFUNG-0.61.0.md
+[0.61.0]: PRUEFUNG.md#version-0610
 
-[0.62.0]: PRUEFUNG-0.62.0.md
+[0.62.0]: PRUEFUNG.md#version-0620
 
-[0.63.0]: PRUEFUNG-0.63.0.md
+[0.63.0]: PRUEFUNG.md#version-0630
 
-[0.64.0]: PRUEFUNG-0.64.0.md
+[0.64.0]: PRUEFUNG.md#version-0640
 
-[0.65.0]: PRUEFUNG-0.65.0.md
+[0.65.0]: PRUEFUNG.md#version-0650
 
-[0.66.0]: PRUEFUNG-0.66.0.md
+[0.66.0]: PRUEFUNG.md#version-0660
 
-[0.67.0]: PRUEFUNG-0.67.0.md
+[0.67.0]: PRUEFUNG.md#version-0670
+
+[0.68.0]: PRUEFUNG.md#version-0680
+
+[0.69.0]: PRUEFUNG.md#version-0690
+
+[0.69.1]: PRUEFUNG.md#version-0691
+
+[0.69.2]: PRUEFUNG.md#version-0692
+
+[0.70.0]: PRUEFUNG.md#version-0700
+
+[0.71.0]: PRUEFUNG.md#version-0710
+
+[0.71.1]: PRUEFUNG.md#version-0711
+
+[0.72.0]: PRUEFUNG.md#version-0720
+
+[0.73.0]: PRUEFUNG.md#version-0730
+
+[0.74.0]: PRUEFUNG.md#version-0740
+
+[0.75.0]: PRUEFUNG.md#version-0750
+
+[0.76.0]: PRUEFUNG.md#version-0760
+
+[0.76.1]: PRUEFUNG.md#version-0761
+
+[0.76.2]: PRUEFUNG.md#version-0762
+
+[0.76.3]: PRUEFUNG.md#version-0763
+
+[0.77.0]: PRUEFUNG.md#version-0770
+
+[0.78.0]: PRUEFUNG.md#version-0780
+
+[0.78.1]: PRUEFUNG.md#version-0781
+
+[0.79.0]: PRUEFUNG.md#version-0790
+
+[0.80.0]: PRUEFUNG.md#version-0800
+
+[0.81.0]: PRUEFUNG.md#version-0810
+
+[0.82.0]: PRUEFUNG.md#version-0820
+
+[0.83.0]: PRUEFUNG.md#version-0830
+
+[0.85.0]: PRUEFUNG.md#version-0850
+
+[0.86.0]: PRUEFUNG.md#version-0860
+
+[0.87.0]: PRUEFUNG.md#version-0870
+
+[0.88.0]: PRUEFUNG.md#version-0880
+
+[0.89.0]: PRUEFUNG.md#version-0890
+
+[0.90.0]: PRUEFUNG.md#version-0900
+
+[0.91.0]: PRUEFUNG.md#version-0910
+
+[0.92.0]: PRUEFUNG.md#version-0920
+
+[0.93.0]: PRUEFUNG.md#version-0930
+
+[0.93.1]: PRUEFUNG.md#version-0931
+
+[0.95.0]: PRUEFUNG.md#version-0950
+[0.94.0]: PRUEFUNG.md#version-0940

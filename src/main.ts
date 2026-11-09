@@ -1,3 +1,6 @@
+import {version as appVersion} from '../package.json';
+import {mountLocalRuntimePanel} from './local-runtime-panel.ts';
+import {playbackTransitionDelta} from './playback-transition.ts';
 import {loadCatalogProject} from './catalog-project.ts';
 import type {ZooEntry} from './local-zoo.ts';
 import {mountLocalZoo} from './local-zoo-panel.ts';
@@ -25,11 +28,11 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
   <aside class="rail">
     <a class="brand" href="./" aria-label="PaKaChi-SM Startseite"><span class="brand-mark">P<span>•</span></span><span>PaKaChi<span class="brand-sub">STATE MASCHINE</span></span></a>
     <p class="rail-label">DEIN AVATAR, IN BEWEGUNG</p>
-    <button id="options-open" class="button outline">Optionen</button><nav aria-label="Anwendungsbereiche">
+    <button id="options-open" class="button outline">Optionen</button><button id="runtime-open" class="button outline">Lokale Werkzeuge</button><nav aria-label="Anwendungsbereiche">
       <button id="player-tab" class="nav-button active" aria-pressed="true"><span>◉</span> Player</button>
       <button id="studio-tab" class="nav-button" aria-pressed="false"><span>◇</span> Avatar-Studio</button>
     </nav>
-    <div class="rail-bottom"><span class="online-dot"></span> Lokal auf deinem Gerät<p>Entwicklungsstand 0.67.0<br>KI-Anbieter · Vorbereitung</p></div>
+    <div class="rail-bottom"><span class="online-dot"></span> Lokal auf deinem Gerät<p>Entwicklungsstand ${appVersion}<br>KI-Anbieter · Vorbereitung</p></div>
   </aside>
   <main>
     <header><div><p class="eyebrow">PAKACHI-SM / <span id="section-label">PLAYER</span></p><h1 id="page-title">Dein Model Zoo<span>.</span></h1><p id="page-intro">Eine Figur auswählen. Eine Bewegung starten. Leben einhauchen.</p></div><button id="project-open" class="button outline">Projekt laden</button><input id="project-file" type="file" accept=".json" hidden><button id="import-button" class="button outline">＋ GLB laden</button><input id="file-input" type="file" accept=".glb" hidden></header>
@@ -130,8 +133,8 @@ function refreshCapabilities(): void {
   if (!loaded || !machine.capability) return;
   const capability = machine.capability;
   capability.moves = [...availableMoves(loaded, loaded.moves.map(m=>m.clip)), ...(editor?.data.moves ?? []).map(m=>({id:m.id,name:m.name,loop:m.loop,clip:m.id,...moveReview(editor!.data,m)}))];
-  machine.bind({capability,setState:state=>{editor?.stopMove();editor?.rig.restoreSource();playback!.setBaseMove(loaded!.states![state]);},
-    playMove:id=>{if(editor?.play(id))return;editor?.stopMove();editor?.rig.restoreSource();playback!.play(id);}},machine.state);
+  machine.bind({capability,setState:state=>{if(editor&&(editor.playing||editor.playbackTransition.active))editor.beginPlaybackTransition();editor?.stopMove();editor?.rig.restoreSource();playback!.setBaseMove(loaded!.states![state]);editor?.playbackTransition.afterFrame(0);},
+    playMove:id=>{if(editor?.play(id))return;if(editor&&(editor.playing||editor.playbackTransition.active))editor.beginPlaybackTransition();editor?.stopMove();editor?.rig.restoreSource();playback!.play(id);editor?.playbackTransition.afterFrame(0);}},machine.state);
   renderMoves(capability.moves.map(m=>({...m,clip:m.id})));
   syncPlayback();
 }
@@ -139,11 +142,13 @@ let request = 0;
 let fetchController: AbortController | null = null;
 let busy = false;
 const machine = new StateMachine(() => window.dispatchEvent(new Event('pakachi-sm:change')));
-function rpc(method: string, args: Record<string, unknown> = {}): unknown {
+function rpc(method: string, args: Record<string, unknown> = {},signal?:AbortSignal): unknown {
   if (!args || typeof args !== 'object' || Array.isArray(args)) throw new Error('Ungültige Argumente.');
   if (method === 'list_avatars') return choices().map(({id,name,selected})=>({id,name,selected}));
   if (method === 'get_state') return {state:machine.state, capability:machine.capability, ready:!busy && !studio && !!machine.capability};
   if (busy) throw new Error('Avatar wird geladen. Bitte erneut versuchen.');
+  if(method==='propose_studio_skin_correction'){if(!editor||original)throw new Error('Zuerst einen 3D-Avatar laden.');return editor.proposeSkinCorrection(args,signal);}
+  if(method==='analyze_studio_surface'){if(!editor||original)throw new Error('Zuerst einen 3D-Avatar laden.');return editor.analyzeSurface(args,signal);}
   if(method==='get_studio'||method==='edit_studio'){if(!editor||original)throw new Error('Zuerst einen 3D-Avatar laden.');if(method==='get_studio')return editor.inspect(args);if(Object.keys(args).some(k=>k!=='command'))throw new Error('Ungültige Studio-Argumente.');return editor.execute(args.command);}
   if (args.avatar && args.avatar !== machine.capability?.id) throw new Error('Bitte diesen Avatar zuerst im Player auswählen.');
   if (method === 'get_avatar_capabilities') { if(!machine.capability) throw new Error('Kein Avatar bereit.'); return machine.capability; }
@@ -351,7 +356,8 @@ async function boot(): Promise<void> {
   },()=>options.language);
   window.addEventListener('pakachi-options',renderCatalog);
   const agents = mountAgentPanel(rpc);
-  mountAssistantPanel(document.querySelector('.agent-panel')!,rpc,()=>options.language,localStorage,undefined,(id,poses,session,revision)=>{if(busy||!editor)throw Error('Studio nicht verfügbar.');return editor.previewSequence(id,poses,session,revision);});
+  const runtime=mountLocalRuntimePanel(el<HTMLButtonElement>('runtime-open'),{connectPlayer:agents.connectLocal,importModel:async file=>{if(busy)return false;const loaded=await loadAvatar(undefined,file);if(loaded)changeView(true);return loaded;}},()=>options.language);
+  mountAssistantPanel(document.querySelector('.agent-panel')!,rpc,()=>options.language,localStorage,undefined,(id,poses,session,revision)=>{if(busy||!editor)throw Error('Studio nicht verfügbar.');return editor.previewSequence(id,poses,session,revision);},(id,corrected,session,revision)=>{if(busy||!editor)throw Error('Studio nicht verfügbar.');const current=editor.inspect();if(current.session!==session||current.revision!==revision)throw Error('Studio-Stand hat sich geändert.');return editor.previewAutomaticSkinCorrection(id,corrected);});
   const generation=mountGenerationPanel(el('generation-host'),{
     target:()=>studio&&!busy&&!editor?.interactionActive?generationTarget():null,
     adopt:(bytes,expected,valid)=>{
@@ -363,7 +369,9 @@ async function boot(): Promise<void> {
   try { viewer = new Viewer(el('viewport')); }
   catch { message('3D ist ohne WebGL2 nicht verfügbar. Der Originalplayer kann verwendet werden.', true); }
   if (viewer) viewer.onFrame = delta => {
+    editor?.playbackTransition.beforeFrame();
     if(editor?.playing)editor.update(delta);else if(!studio)playback?.update(delta);
+    const activeTransport=transport();editor?.playbackTransition.afterFrame(studio?0:playbackTransitionDelta(activeTransport,delta));
     if(editor?.playing)syncPlayback();
     const duration = transport()?.duration ?? 0;
     const progress = transport()?.progress ?? 0;
@@ -380,7 +388,7 @@ async function boot(): Promise<void> {
   el('skeleton').onchange = () => viewer?.showSkeleton(el<HTMLInputElement>('skeleton').checked);
   el('pause').onclick = () => {transport()?.togglePause();syncPlayback();};
   el('speed').onchange = () => {const value=Number(el<HTMLSelectElement>('speed').value);playback?.setSpeed(value);editor?.setSpeed(value);};
-  el('timeline').oninput = () => transport()?.seek(Number(el<HTMLInputElement>('timeline').value) / 1000);
+  el('timeline').oninput = () => {editor?.playbackTransition.cancel();transport()?.seek(Number(el<HTMLInputElement>('timeline').value) / 1000);};
   el('avatar-select').onchange=()=>selectAvatar(el<HTMLSelectElement>('avatar-select').value);
   el('project-open').onclick = () => el<HTMLInputElement>('project-file').click();
   el('project-file').onchange = async () => {
@@ -410,6 +418,6 @@ async function boot(): Promise<void> {
     catalog = parseCatalog(await response.json()); renderCatalog();
     showOriginal();
   } catch (error) { message(`Model Zoo: ${error instanceof Error ? error.message : String(error)}`, true); }
-  window.addEventListener('pagehide', () => { zoo.dispose();agents.dispose(); editor?.dispose(); fetchController?.abort(); request++; playback?.dispose(); viewer?.dispose(); }, { once: true });
+  window.addEventListener('pagehide', () => { runtime.dispose();zoo.dispose();agents.dispose(); editor?.dispose(); fetchController?.abort(); request++; playback?.dispose(); viewer?.dispose(); }, { once: true });
 }
 void boot();

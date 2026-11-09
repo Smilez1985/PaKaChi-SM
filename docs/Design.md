@@ -4,7 +4,13 @@ Teil der [Blaupause](README.md) · [Roadmap](ROADMAP.md) · [Changelog](CHANGELO
 
 ## Status und Begriffe
 
-Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.63.0: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau, automatische Anatomieerkennung und die Qualitätsabnahme der angeschlossenen lokalen KI-Generierung bleiben offen.
+### KI-gestützter Studio-Auftrag
+
+Das Studio soll die hier entwickelten Diagnose- und Reparaturschritte später selbstständig KI-gestützt koordinieren. Der Nutzer gibt das gewünschte Ergebnis und bei Bedarf einen Korrekturprompt vor. Die KI plant anhand des tatsächlichen Modells; geometrische Werkzeuge lokalisieren Fehler, erzeugen und bewerten Kandidaten. Messungen an Zielposen, gespeicherten Moves und Zwischenbildern entscheiden über die Übernahme. Verschlechterungen werden verworfen; Vorschau, Abbruch und Undo gehören zum Ablauf. Allgemeine Werkzeuge dürfen keine feste PaKaChi-Gelenkliste voraussetzen. PaKaChi ist Referenz- und Qualitätstestfall dieses wiederverwendbaren Verfahrens.
+
+**Stand 0.95.0:** Ein begrenzter automatischer Gewichts-Korrekturauftrag verbindet allgemeine Diagnose, automatische Gelenkauswahl, Suche, Pose-/Move-Gegenprüfung, flüchtige Original-/Korrekturvorschau und eine Undo-fähige Übernahme. Der integrierte KI-Assistent kann diesen Auftrag starten. Seit 0.94.0 erzeugt die Suche zusätzlich begrenzte, poseabhängige geometrische Korrekturformen aus einem Dualquaternion-Vergleich und prüft sie gegen gespeicherte Posen und Move-Stichproben; Vorschau, Undo und GLB-Export sind eingebunden. Seit 0.95.0 lässt sich eine statische Generatorausgabe mit einer proportionalen Zweibeiner-/Vierbeinervorlage erstmalig binden und als beweglicher Entwurf übernehmen. Anatomisches KI-Rigging, weitergehende Korrekturformen, allgemeine lokale Volumenerhaltung, Selbstüberschneidungs-/Kollisionsprüfung und durchgehende Qualitätsprüfung bleiben offen. Geschlossene, konsistent orientierte Netzteile erhalten seit 0.93.0 eine getrennte algebraische Volumenschätzung als zusätzliche Such-/Gegenprüfmetrik; offene Flächen werden ausdrücklich als nicht messbar ausgewiesen. Die charakterspezifische CPU-Aufbereitung ist weiterhin ein Referenzfall, keine allgemeine KI-Reparatur.
+
+Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich genannten Implementierungsstand sind keine Zusage einer bereits verfügbaren Funktion. Stand 0.95.0: Player, gemeinsame Agentensteuerung, Gelenk-/Gesichtspunktbearbeitung, Posen/Moves und Gesamtspuren für Position, Drehung und gleichmäßige Größe sind implementiert. [STUDIO.md](STUDIO.md) beschreibt die bedienbaren Funktionen und ihre Grenzen; vollständiger Quellknochenumbau, automatische Anatomieerkennung und die Qualitätsabnahme der angeschlossenen lokalen KI-Generierung bleiben offen.
 
 - **PaKaChi:** Panda-KI-Chimera, das übergeordnete Projekt.
 - **PaKaChi-SM:** StateMaschine mit Avatar-Player und integriertem Studio.
@@ -16,15 +22,15 @@ Dieses Dokument hält das Produktziel fest. Anforderungen ohne ausdrücklich gen
 
 | Bereich | Implementiert | Noch offen |
 | --- | --- | --- |
-| Original-PaKaChi | Beide Formen und 72 Transformationsbilder erhalten | Designgetreue 3D-Formen und kompatibler Formwechsel |
-| Studio | Zwei Modi, Mausnavigation, Punkte/Verbindungen, bestehende Skelettketten, Posen/Moves | Quellknochenumbau, Anatomieerkennung, Ganzkörper-IK und visuelle Abnahme |
+| Original-PaKaChi | Beide Formen und 72 Transformationsbilder erhalten; echte statische Rekonstruktionen und bearbeitete geriggte Formen im Model Zoo | Designgetreue 3D-Formen und kompatibler Formwechsel |
+| Studio | Zwei Modi, Mausnavigation, Punkte/Verbindungen, bestehende Skelettketten, Posen/Moves | Skalierte Knochenketten, anatomische Erkennung neuer Rigs, Ganzkörper-IK und visuelle Abnahme |
 | Anbieter | Mehrere Profile gleichzeitig, drei unabhängige Rollen und Fallback-Routen, editierbare Vorgabeadressen | Weitere Fachadapter, OAuth und reale Kontoabnahme |
 | Schlüssel | Optionale verschlüsselte Persistenz, Entsperren nach F5, Passwortwechsel, Sitzungssperre | Betriebssystem-Schlüsselbund und unabhängiges Sicherheitsaudit |
-| Assistent | Ollama, LM Studio, OpenAI-kompatible API und Anthropic; einzeln bestätigte Studio-Vorschläge | Bildkontext und mehrschrittige Änderungsvorschau |
-| Generierung | Lokaler TripoSR-Dienst, Bildauswahl, getrennte Vorschau, Vorprüfungs-Fallbacks, expliziter weiterer Auftrag | Echte GPU-/Qualitätsabnahme, Cloud-Generatoren, Korrekturprompts und Rigging |
+| Assistent | Ollama, LM Studio, OpenAI-kompatible API und Anthropic; bestätigte Studio-Vorschläge und echte Pose-/Move-Oberflächendiagnose | Bildkontext und mehrschrittige Änderungsvorschau |
+| Generierung | Lokaler TripoSR-Dienst, Bildauswahl, getrennte Vorschau, Vorprüfungs-Fallbacks, expliziter weiterer Auftrag; vier echte CPU-Inferenzläufe beider Originalformen; optionale erste Skelettvorlagen mit Hautbindung und Beugewarnungen | Echte GPU-/Qualitätsabnahme, Cloud-Generatoren, Korrekturprompts und anatomisches KI-Rigging |
 | Übernahme | Revisionsschutz, ein Modellwechsel-Rücksprung, vorbereitete 3D-Installation mit Rückabwicklung | Gerenderte Abnahme, Originalplayer-Neustart und GPU-Kontextverlust |
 
-Prüfnachweis für Software 0.66.0: **286 Tests, Build und 21 Chromium-Fälle bestanden**. Separate Chromium-Nachweise stehen im Prüfbericht; echte Anbieter-/GPU-Inferenz und manuelle Mausabnahme bleiben offen. Projektformat bleibt Version 1. Freie Punkte/Posen aus 0.22.0/0.23.0 benötigen wegen der korrigierten Normalisierungsreihenfolge eine visuelle Kontrolle; keine automatische Migration. [Prüfbericht](PRUEFUNG-0.66.0.md).
+Prüfnachweis für 0.81.0, Commit `7c706bb4`: **325 Node-Tests, Build, alle 31 Chromium-Fälle und drei Produktionsbrowser-Importmessungen bestanden** ([Bericht mit Rohdaten und Grenzen](PRUEFUNG.md#version-0810)). Median der Mika-/256-Aufträge-Referenz: 3.374,4 ms bis zur Frame-Grenze mit Software-WebGL. Der abschließende CI-Stand ist am jeweiligen Commit in [PR #1](https://github.com/Smilez1985/PaKaChi-SM/pull/1) verlinkt. Echte Anbieter-/GPU-Inferenz und manuelle Mausabnahme bleiben offen. Projektformat bleibt Version 1. Freie Punkte/Posen aus 0.22.0/0.23.0 benötigen wegen der korrigierten Normalisierungsreihenfolge eine visuelle Kontrolle; keine automatische Migration. [Prüfbericht](PRUEFUNG.md#version-0660).
 
 ## Bestehender PaKaChi-Avatar
 
@@ -33,6 +39,12 @@ Tierform und humanoide Arbeitsform bleiben derselbe bestehende Charakter. Die 72
 Verbindliche Merkmale aus dem erhaltenen Animationsplan: weiches schwarzes künstliches Fell, cremefarbene Schnauze und Brauen, grüne Augen, Wangenflächen und Ohrinnenseiten, buschiger schwarz-grün geringelter Schwanz, dunkle mechanische Gelenke und grüner Brustkern. Kopfgröße, Gesicht und Schwanzmasse sollen konsistent bleiben. Keine neue Panzerung oder zusätzliche Spezies.
 
 [Referenzen und Herkunft](references/README.md) unterscheiden den ursprünglichen, visuell noch fehlerhaften Transformationsstand von der korrigierten Endform als Stilanker. Die 72 Bilder sind ausschließlich die Verwandlung ohne Tablet/Stift; eigene Arbeitsschleifen bleiben eine spätere Ergänzung.
+
+### Verbindlicher Formwechsel und Reihenfolge
+
+PaKaChi besitzt eine Normalform und eine humanoide Arbeitsform. Die Verwandlung ist **eine Standardanimation** von Normal nach Work; die Rückverwandlung spielt **dieselbe Animation rückwärts** ab. Nach dem Ablauf wird die erreichte Form gehalten. Ein Richtungswechsel während des Ablaufs soll von der aktuellen Zwischenform ausgehen. Die Zustandszuordnung des Originalplayers bleibt maßgeblich: idle/talking/error/sleeping → Normalform; thinking/working/waiting/review → Arbeitsform.
+
+Zuerst werden Rigging und Charakterqualität aufgebaut und geprüft, danach die Morph-Animation. Seit 0.84.0 sind beide rekonstruierten Formen mit gleicher 31-Gelenk-Hierarchie, unterschiedlichen gemessenen Grundposen und echten Hautgewichten bearbeitbar. Gesicht, Pfotenakzente, Fellmaterial und Fellfasern sind überarbeitet. Die großen Umformungen zeigen noch Hautbrücken im rekonstruierten Netz; dafür ist eine saubere gemeinsame Netzstruktur erforderlich. Eine gleiche Gelenkliste allein bedeutet noch keine brauchbare Morph-Topologie. Der 0.84.0-Stand veröffentlicht deshalb keine 3D-Verwandlung. Seit 0.85.0 ergänzen 28 Gelenke die gemeinsame Hierarchie auf 59: 14 unabhängig bewegliche Finger/Zehen mit eigener Geometrie. Distale Pfotenflächen sind lokal ersetzt, Handdrehpunkte und Tiefenlagen korrigiert, Randringe der beiden Körpernetze geschlossen. Das behebt lokale Pfotengeometrie; eine gemeinsame Oberflächenkorrespondenz zwischen den Formen, Kollisionsprüfung und endgültige Charakterabnahme fehlen weiterhin.
 
 ## 1. Player und Model Zoo
 
@@ -53,7 +65,7 @@ Es gibt keine Beschränkung auf humanoide Figuren. Zusätzliche Arme, Flügel, S
 
 **Technische Grenze:** Ein einzelnes Bild enthält keine vollständige 3D-Information. Rückseite, Tiefe und verdeckte Teile müssen geschätzt werden. Die Bedienung kann einfach sein, auch wenn die automatische Erzeugung mehrere Versuche benötigt.
 
-Seit 0.12.0 ist ein experimenteller lokaler TripoSR-Testlauf als separates Entwicklerwerkzeug vorhanden. Er erzeugt bei eingerichteter Laufzeit einen zu prüfenden GLB-Entwurf; die produktive Inferenz und Designqualität sind noch nicht nachgewiesen. Tier- und humanoide Form werden einzeln getestet. Ein erfolgreicher Import ersetzt weder anatomisches Rigging noch den abgestimmten Formwechsel. Details: [KI-Testlauf](KI-GENERIERUNG.md).
+Seit 0.12.0 ist ein experimenteller lokaler TripoSR-Testlauf als separates Entwicklerwerkzeug vorhanden. Er erzeugt bei eingerichteter Laufzeit einen zu prüfenden GLB-Entwurf; seit 0.83.0 ist echte CPU-Inferenz für beide Originalformen belegt. Designqualität und GPU-Ausführung bleiben abzunehmen. Tier- und humanoide Form werden einzeln getestet. Ein erfolgreicher Import ersetzt weder anatomisches Rigging noch den abgestimmten Formwechsel. Details: [KI-Testlauf](KI-GENERIERUNG.md).
 
 Die geplante Auswahl unabhängiger Generator- und Rigging-Anbieter beschreibt [Studio als KI-Harness](#11-studio-als-ki-harness-und-freie-anbieterwahl).
 
@@ -251,7 +263,7 @@ Der begrenzte Text-/Werkzeugablauf nutzt die konfigurierte Assistentenroute. Nut
 
 ### Nativer Anthropic-Adapter (0.17.0)
 
-Anthropic ist eine zusätzliche Schnittstellenart für frei zuordenbare Profile. Modelllisten und Messages werden mit `x-api-key` und fester API-Protokollversion angesprochen. Der Assistent übersetzt ausschließlich das Transportformat; Werkzeugfreigabe, Sitzung/Revision, Rundenlimit und explizite Übernahme bleiben identisch. Text-, Werkzeug- und Thinking-Blöcke werden getrennt behandelt; Thinking-Blöcke werden für Folgerunden unverändert weitergereicht, nicht in der Antwort angezeigt. Abgeschnittene oder unbekannte Antwortformate lösen keine Änderung aus. Kein OAuth und keine neue Generator-/Rigging-Ausführung. [Einrichtung und Browsergrenzen](ANBIETER.md#anthropic-seit-0170).
+Anthropic ist eine zusätzliche Schnittstellenart für frei zuordenbare Profile. Modelllisten und Messages werden mit `x-api-key` und fester API-Protokollversion angesprochen. Der Assistent übersetzt ausschließlich das Transportformat; Werkzeugfreigabe, Sitzung/Revision, Rundenlimit und explizite Übernahme bleiben identisch. Text-, Werkzeug- und Thinking-Blöcke werden getrennt behandelt; Thinking-Blöcke werden für Folgerunden unverändert weitergereicht, nicht in der Antwort angezeigt. Abgeschnittene oder unbekannte Antwortformate lösen keine Änderung aus. Kein OAuth und keine neue Generator-/Rigging-Ausführung. [Einrichtung und Browsergrenzen](ANBIETER.md#anthropic-und-verbindungsgrenzen).
 
 Seit 0.17.1: Die Verbindungsauswahl verwendet editierbare Vorgabeadressen für bekannte Schnittstellen (Anthropic, Ollama, LM Studio). Eigene Endpunkte bleiben je Schnittstellenentwurf erhalten; Profilbearbeitung erhält den gespeicherten Endpunkt. Seit 0.18.0 erhält ein Anbieterwechsel Schlüssel und Modell-ID im jeweiligen Profil/Entwurf; lediglich laufende Modelllistenabfragen werden verworfen.
 
@@ -625,6 +637,91 @@ Lokale Einzelmessung bei 80.000 Dreiecken: zurückbehaltener JavaScript-Heap ein
 
 **0.67.0:** Ein zusätzlicher Browserfall prüft echte Mausrad-, Rechts- und Mitteltastenereignisse im Studio. Nach außermittigem Zoom und Verschieben bleiben beim Drehen Abstand und Bildschirmposition der bekannten Figurenmitte konstant. Der Test wählt die normale und invertierte Drehrichtung über den Optionsdialog, prüft gegensinnige Kamerabewegung und funktionierenden Zoom nach Loslassen. Der übrige Studiozustand einschließlich Revision und Figur bleibt unverändert.
 
-Der erste CI-Lauf besteht 286 Node-Tests, Build und die bisherigen 21 Browserfälle. Der neue Mausfall scheiterte an einer Testposition unterhalb des sichtbaren Browserfensters. Der korrigierte Test verwendet den sichtbaren Canvas-Ausschnitt und prüft das getroffene Element; Build lokal bestanden. Sein CI-Bestätigungslauf [40727289984](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/40727289984) endet auch nach Wiederholung vor dem ersten Arbeitsschritt ohne Testlogs. Auch lokal endet Chromium vor dem Teststart mit `socket() failed: Operation not permitted`. Die Bestätigung aller 22 Browserfälle steht aus.
+Produktionsbuild lokal bestanden. Neuer Chromium-Nachweis steht aus. Der bisherige bestätigte Stand umfasst 286 Node-Tests und 21 Browserfälle.
 
 Dies ergänzt den automatisierten Navigationsnachweis; tatsächliches Mausgefühl, komplexe Skelett-/Hautqualität und große reale Modelle bleiben manuell zu prüfen. Keine Änderung am Kameraalgorithmus.
+
+## Lokale Prüfbarkeit (0.68.0)
+
+Node-Tests und Produktionsbuild sind gemeinsam über `npm run verify` ausführbar. `npm run verify:full` ergänzt die bestehenden Chromium-Fälle. Beide Abläufe stoppen bei Fehlern und benötigen kein GitHub-Actions-Kontingent; Browser und Systembibliotheken werden separat eingerichtet. Ein erfolgreicher Lauf ohne Browserprüfung gilt nicht als vollständige Abnahme. Die Produkt- und Projektformate ändern sich dadurch nicht.
+
+## Model-Zoo-Speicherfehler (0.68.0)
+
+Konkrete Hinweise unterscheiden volles Browserkontingent, 50 Kopien und Projekte über 80 MiB. Vorhandene Kopien werden nicht automatisch gelöscht. Scheitert nach bestätigtem Speichern oder Löschen nur die Listenabfrage, bleibt der Erfolg sichtbar. Veraltete Auswahlen können bis zu einer erfolgreichen Aktualisierung weder geladen noch gelöscht werden; „Liste aktualisieren“ bleibt nutzbar. Das aktive Projekt bleibt erhalten.
+
+Automatische Listenaktualisierungen erhalten die Meldung zum letzten Bedienvorgang. Eine getrennte Statusmeldung zeigt einen Listenfehler und wird nach erfolgreicher Aktualisierung entfernt. So bleibt eine bestätigte Speicherung auch bei wartenden Tab-Ereignissen erkennbar.
+
+## Messbarkeit des Projektimports (0.68.0)
+
+Der CPU-Importbenchmark trennt Dateilesen, Projektprüfung, Modelldekodierung, Normalisierung und Rig-Aufbau. Er nutzt produktive Loader und Rig-Rekonstruktion, während die Viewer-Normalisierung ohne Renderer nachgebildet wird. Eigene Quelldateien bleiben unverändert. Bildtexturen werden abgewiesen, statt eine unvollständige Browserdekodierung als erfolgreich zu messen. CPU-Zeiten ersetzen keine vollständigen Browserladezeiten oder Hautqualitätsabnahme. [Messvertrag und Aufruf](IMPORT-BENCHMARK.md).
+
+## Übergänge zwischen Wiedergabearten (0.69.0)
+
+Der Player friert beim Wechsel zur anderen Wiedergabeart die sichtbare Ausgangspose ein und überblendet sie über 0,18 Animationssekunden in die fortlaufend berechnete Zielpose. Position und Skalierung werden linear, Rotationen per Quaternion-Slerp interpoliert; vorhandene Morph-Gewichte ebenfalls linear. Vor jedem Animationsschritt wird der unveränderte Zielzustand wiederhergestellt. So fließt die Zwischenpose nicht in die nächste Animationsberechnung zurück und verändert keine gespeicherten Posen.
+
+Pause hält auch den Übergang an; Tempo skaliert seine Dauer. Wiederholter Wechsel übernimmt die sichtbare Zwischenpose als neue Ausgangspose. Zeitleistensprünge, Studioeintritt und Freigabe des Modells entfernen den Übergang. Studio-Vorschauen und Posenbearbeitung verwenden keine solche Überblendung.
+
+Erste Stufe: unveränderte Knochen-Grundstellung ohne Knochenumbau, Gewichtsaufträge oder freie Oberflächenpunkte. Geänderte Hierarchien und Matrizen mit Scherung werden nicht überblendet. Solche Fälle behalten den bisherigen direkten Wechsel; es werden keine inkompatiblen Hautbindungen oder Geometrien interpoliert. Renderer-, große-Modell- und visuelle Hautabnahme bleiben offen.
+
+Seit 0.69.1 wird das natürliche Ende eines einmaligen Originalclips als gehaltene Zielpose behandelt. Eine noch laufende Überblendung erreicht diese Endpose vollständig. Nur eine manuelle Pause hält ihre Zeit an. Ohne aktiven Grundclip läuft der Übergang zur wiederhergestellten Ruhepose ebenfalls zu Ende; ungültige Zeitwerte werden nicht fortgeschrieben.
+
+Seit 0.69.2 läuft bei einem natürlich beendeten Originalclip eine noch aktive Mixer-Überblendung bis zum vollständigen Zielgewicht weiter. Die Clipzeit bleibt am Ende stehen. Springen auf der Zeitleiste entfernt den alten Mischpartner und dessen Fade-Gewicht, bevor die gewünschte Pose ausgewertet wird; ein manuell pausierter Transport bleibt pausiert.
+
+## Oberflächenpunkte in Wiedergabeübergängen (0.70.0)
+
+Freie Gesichtspunkte und andere Oberflächenpunkte sind für die Player-Überblendung zugelassen, solange Grundskelett und Gewichte unverändert sind. Die Übergangsschicht kopiert Positionen und Normalen nur für betroffene Meshes; ohne ausdrückliche Mesh-Zuordnung betrifft ein Punkt alle Studio-Oberflächen. Zwischenformen entstehen durch lineare Interpolation der lokalen Vertex-Positionen. Normalen, Bounding Box und Bounding Sphere werden für die Darstellung neu berechnet.
+
+Vor dem nächsten Animationsschritt werden die exakten Zielpositionen, Normalen und Begrenzungen wiederhergestellt. Die Zwischengeometrie fließt nicht in die nächste Posenberechnung zurück. Bei Abbruch wird ebenfalls die Zielgeometrie wiederhergestellt; bei erneutem Wechsel ist die sichtbare Zwischenform der neue Ausgangspunkt. Ausgetauschte Geometrie, Positions-/Normalenattribute oder Indexpuffer werden nicht überschrieben. Knochen-/Gewichtsumbauten und Schertransformationen bleiben ausgeschlossen.
+
+Der zusätzliche Speicherbedarf hängt von der Vertexzahl der betroffenen Meshes ab. Geometriekopien, Normalen- und Begrenzungsberechnung fallen nur während solcher Übergänge an. Keine pauschale Echtzeit- oder Speicherzusage für große Modelle; visuelle Hautabnahme bleibt offen.
+
+## Laufzeit der Oberflächenüberblendung (0.71.0)
+
+Zielpuffer für Positionen und Normalen werden pro betroffenem Mesh innerhalb eines Übergangs wiederverwendet. Die eingefrorene Ausgangsgeometrie besitzt weiterhin unabhängige Kopien. Vor erneutem Befüllen wird der bisherige Zielzustand wiederhergestellt; Abschluss, Abbruch und inkompatible Zielgeometrie geben die Puffer frei. Nicht normalisierte zusammenhängende Float32-Attribute mit drei Komponenten verwenden direkte Pufferkopien; andere Layouts behalten den allgemeinen Attributzugriff.
+
+Der CPU-Benchmark trennt diese Darstellungskosten von Modellladen, Animator/IK, Benutzeroberfläche und WebGL. Die lokale Mika-Messung zeigt eine Laufzeitverbesserung bei identischen Positionen-/Normalen-Prüfsummen. Speicher-Momentaufnahmen sind keine Spitzenwerte; die beiden festgehaltenen Geometriezustände werden weiterhin benötigt. [Messvertrag](TRANSITION-BENCHMARK.md).
+
+### Eigene Modelle im CPU-Überblendungsbenchmark (0.71.1)
+
+`benchmark:transitions -- --model datei.glb --runs 3` misst eigene eigenständige Geometrie ohne Bildtexturen. Dateigröße ist auf 50 MiB begrenzt; Modellprüfsummen sichern identische Eingaben über alle getrennten Prozesse. Der Lauf importiert keine Studio-Bearbeitungen und ersetzt keine gerenderte Qualitätsabnahme.
+
+### Skalierte Eltern für neue Knochen (0.72.0)
+
+Seit **0.72.0** können neue Knochen auch unter gleichmäßig, ungleichmäßig oder negativ skalierten Quellknochen platziert werden. Die Weltposition wird über die inverse Elternmatrix in die lokale Grundpose umgerechnet; die Skalierung der Quelle bleibt erhalten. Nicht invertierbare Elternmatrizen und lokale Koordinaten außerhalb ±100 werden ohne Änderung der Studio-Daten abgewiesen. Das gilt für neue Abzweigungen, nicht für das Umhängen oder Löschen skalierter Knochen. Anatomische IK-Qualität bleibt separat zu prüfen.
+
+Seit **0.73.0** können skalierte Endknochen ohne Kinder oder Anbauteile gelöscht werden. Ihre Hautgewichte gehen an den Elternknochen; die Grundgeometrie bleibt erhalten. Gespeicherte Posen verlieren die Spur des entfernten Knochens und müssen auf veränderte Bewegung geprüft werden. Skalierte Zwischenknochen sowie Knochen mit Anbauteilen bleiben gesperrt.
+
+Seit **0.74.0** ist Umhängen innerhalb eines gemeinsam skalierten Teilbaums möglich: Nur die beiden Äste unterhalb ihres nächsten gemeinsamen Vorfahren müssen unskaliert sein. Die gemeinsame Transformation entfällt bei der Umrechnung der Grundpose, gespeicherten Posen und des Entwurfs. Gemeinsame gleichmäßige, ungleichmäßige und negative Skalierungen sind unterstützt; nicht invertierbare gemeinsame Skalierungen werden abgewiesen. Unterschiedliche Skalierungen auf den betroffenen Ästen und Anbauteile mit eigenem Skelett bleiben ausgeschlossen.
+
+Seit **0.75.0** können Knochen zwischen Ästen mit gleicher kumulierter positiver gleichmäßiger Skalierung umgehängt werden, etwa zwischen 4 × 0,5 und 2. Die Umrechnung berücksichtigt die tatsächlichen Quellskalierungen unterhalb des gemeinsamen Vorfahren. Bis 0.75.0 musste der verschobene Knochen selbst unskaliert bleiben; seit 0.76.0 bleibt seine eigene invertierbare Quellskalierung beim Umhängen erhalten. Ungleiche, nicht gleichmäßige oder negative Astskalierungen bleiben ausgeschlossen; die gemeinsame Vorfahrenskalierung darf wie seit 0.74.0 ungleichmäßig oder negativ sein. Vorhandene Posen und Hautqualität weiterhin visuell prüfen.
+
+Seit **0.76.0** darf der umgehängte Knochen selbst gleichmäßig, ungleichmäßig oder negativ skaliert sein. Seine Quellskalierung bleibt unverändert; die Positions-/Drehungsumrechnung erfolgt ohne diese eigene Skalierung, damit Spiegelungen nicht in eine falsche Drehung umgewandelt werden. Nicht invertierbare Knochenskalierungen werden abgewiesen. Die Elternäste müssen weiterhin dieselbe positive gleichmäßige Gesamtskalierung besitzen. Gerenderte Haut- und Bewegungsqualität bleiben separat zu prüfen.
+
+**CI-Abnahme 0.76.1:** Actions wieder verfügbar. Zwei mehrdeutige Model-Zoo-Testselektoren korrigiert; Vorgangsstatus und Listenwarnung besitzen eindeutige IDs. Vollständiger Prüfstatus: [PR #1](https://github.com/Smilez1985/PaKaChi-SM/pull/1).
+
+**0.76.2:** Optionen auf dunkler Navigation mit heller Schrift und sichtbarem Tastaturfokus; die Versionsanzeige wird aus package.json übernommen. Automatisierter Kontrast-/Bediennachweis in der Chromium-Suite.
+
+**Scrollprüfung 0.76.3:** Die Browser-Suite prüft die haftende Studio-Vorschau in normalen/niedrigen Desktopfenstern und freie mobile Eingabefelder. Aufnahmen des sichtbaren Bereichs dienen der Artefaktbewertung; subjektives Mausgefühl bleibt offen.
+
+Seit **0.77.0** exportiert „Figur als GLB (Standbild)“ die aktuelle sichtbare Form als eigenständige GLB-Datei. Haut-/Morph-Verformung, freie Oberflächenpunkte und Welttransformation werden in statische Geometrie übernommen; Materialien und UVs bleiben erhalten. Die Datei enthält kein Rig, keine Studio-Punkte und keine Animationen. Für spätere Bearbeitung zusätzlich das Studio-Projekt speichern. Unsichtbare Zweige werden ausgelassen; Instanzen und teilweise ausgeblendete Materialgruppen werden ausdrücklich abgewiesen. Bei Studio-Änderung, Wiedergabestart oder Schließen vor Abschluss wird das Ergebnis verworfen. Der Export verändert weder Projekt noch Undo-Stand. Texturqualität und Dateigröße hängen vom Modell ab.
+
+Seit **0.78.0** bietet „Figur als GLB (mit Rig)“ zusätzlich eine eigenständige Datei mit aktuellem Hautskelett an. Knochenhierarchie, Hautgewichte, Bindematrizen, Material-/Geometriedaten und aktuelle Form werden unabhängig kopiert; Studio-Hilfen werden nicht übernommen. Die Quelle und der Undo-/Dirty-Stand bleiben erhalten. Die Datei enthält noch keine Animationsclips oder Studio-Moves. Für Studio-Punkte und weitere Bearbeitung das vollständige Projekt zusätzlich speichern. Modelle ohne sichtbares Hautskelett, externe Knochenverweise, ausgeblendete Knochenhierarchien, Instanzen und ausgeblendete Materialgruppen werden mit einer Meldung abgewiesen.
+
+**Korrektur 0.78.1:** Einfügen, Gewichtsübertragung vom Elternknochen und anschließendes Löschen dieses Knochens bleiben beim Replay erhalten. Frühere Elternbezüge dienen ausschließlich der korrekten Berechnung der Einfügeachse. Projektformat unverändert; Undo/Redo und erneutes Laden geprüft.
+
+Seit **0.79.0** exportiert „Move als GLB (mit Rig)“ den ausgewählten eigenen Studio-Move mit Hautskelett als einen Animationsclip. Gelenkbewegung und Figurenverschiebung/-drehung/-größe werden übernommen, einschließlich Drehung um den Figurenmittelpunkt und Schleifenschluss. Ausgabe mit 30 Stützstellen pro Sekunde und allen Schlüsselposen; Wiedergabeschleifen im Zielprogramm einstellen. Bis 0.79.0 waren bewegte freie Oberflächenpunkte ausgeschlossen; seit 0.80.0 werden sie als Morph-Animation ausgegeben. Geschert aufgebaute Modellräume und zu umfangreiche Sequenzen werden weiterhin ausdrücklich abgewiesen. Originalclips und Retargeting gehören nicht zu diesem Export. [Exportanleitung](GLB-EXPORT.md).
+
+Seit **0.80.0** übernimmt „Move als GLB (Animation)“ auch bewegte freie Oberflächen-/Gesichtspunkte als Morph-Animation, mit oder ohne vorhandenes Skelett. Unterschiedliche Oberflächenposen werden je betroffenem Mesh zusammengefasst und an den ursprünglichen Schlüsselzeiten linear gewichtet; Knochen- und Figurenbewegung bleiben kombiniert enthalten. Vorhandene Positions-/Normal-Morphs und deren konstante Gewichte werden berücksichtigt. Normale zwischen Posen werden angenähert interpoliert. Speicher-, Zielanzahl- und Arbeitsbudgets werden vor dem Kopieren und Berechnen geprüft; umfangreiche Sequenzen werden mit Hinweis abgewiesen. Studio-Projekt für die ursprünglichen Kontrollpunkte zusätzlich speichern. [Anleitung](GLB-EXPORT.md).
+
+### Ungleiche positive Astskalierungen (0.82.0)
+
+Seit **0.82.0** können Knochen zwischen unterschiedlich stark, positiv und gleichmäßig skalierten Ästen umgehängt werden. Beispiel: Vom Astmaßstab 2 zu 3 wird die lokale Skalierung des verschobenen Knochens mit 2/3 ausgeglichen. Grundstellung, gespeicherte Schlüsselposen, Entwurf, Hautgewichte und starre Anbauteile behalten ihre bisherigen Welttransformationen. Der Ausgleich wird bei Reset und Projektladen aus der unveränderten Quelle und der Umbaufolge rekonstruiert; Zurück/Wiederholen und Rückkehr zum Original bleiben möglich. Die eigene ungleichmäßige oder negative Skalierung des verschobenen Knochens bleibt mit diesem positiven Faktor kombinierbar. Nicht gleichmäßige/negative Elternäste, Anbauteile mit eigenem Skelett und nicht invertierbare Ausgleiche bleiben gesperrt. Bewegungsverläufe zwischen Schlüsselposen und die Hautqualität weiterhin visuell prüfen. Projekte mit diesem neuen Fall benötigen mindestens 0.82.0; Projektformat bleibt Version 1. [Prüfbericht](PRUEFUNG.md#version-0820).
+
+
+## Integrierter lokaler MCP-Arbeitsplatz
+
+PaKaChi-SM stellt die lokalen Werkzeuge selbst bereit: Blender/Python, vorhandenes TripoSR, Dateien und asynchrone Aufträge. Ein lokaler Node-Dienst verbindet den Player über die bestehende authentifizierte Brücke und bietet dieselben Studiowerkzeuge mit unveränderten Freigaben an. Die Oberfläche enthält Programm-/GPU-Prüfung, Ergebnisse, Abbruch und Verbindungsverwaltung. Keine GPU-Zuweisung an den Chatbrowser erforderlich.
+
+Externer Zugang verwendet den vorhandenen Caddy/DuckDNS-Reverse-Proxy mit HTTPS und OAuth-PKCE oder den ausgehend betriebenen offiziellen Secure MCP Tunnel. Kein zusätzlicher öffentlich geöffneter Port 443. Lokale Verwaltung wird nicht veröffentlicht. Konto-/Workspace-Verknüpfung im externen Client bleibt eine Handlung des Kontoinhabers; ein gestarteter Tunnel ist noch kein bestätigter ChatGPT-Werkzeugaufruf.
+
+ACP ergänzt einen lokalen Client, der einen konfigurierten ACP-v1-Agenten startet und ihm denselben MCP-Arbeitsplatz gibt. Externer Werkzeugzugriff aus ChatGPT bleibt MCP. Skript-/Agentenausführung erfordert eine eigene lokale Freigabe und läuft mit Benutzerrechten; keine Betriebssystem-Sandbox. [Bedienung, Grenzen und Protokolle](LOKALE-WERKZEUGE.md).

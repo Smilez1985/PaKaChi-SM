@@ -1,3 +1,6 @@
+import {enablePoseMorphs,poseMorphBindings,poseMorphBindingCompatible,poseMorphWeights,updatePoseMorphs} from './pose-morphs.ts';
+import {createCorrectiveInstaller} from './studio-corrective-shapes.ts';
+import type {StudioCorrectiveShape} from './studio-corrective-shapes.ts';
 import {StudioTopology,validateReparent} from './studio-topology.ts';
 import {solveLimb} from './studio-ik.ts';
 import {detectConnections,edgeKey} from './studio-detection.ts';
@@ -6,7 +9,7 @@ import { MAX_WEIGHT_TRANSFERS, emptyStudio, FIGURE_TRACK, neutralFigure, validFi
 import type { ControlPoint, StudioData, Transform, Vec3, Pose, StudioMove, WeightRegion } from './studio-data.ts';
 const read = (o:T.Object3D):Transform => ({position:o.position.toArray(),rotation:o.quaternion.toArray()});
 const write = (o:T.Object3D,v:Transform) => {o.position.fromArray(v.position);o.quaternion.fromArray(v.rotation);};
-interface Surface { mesh:T.Mesh; base:Float32Array; world:T.Vector3[]; inverse:T.Matrix3; worldInverse:T.Matrix4 }
+interface Surface { mesh:T.Mesh; base:Float32Array; world:T.Vector3[]; worldBounds:T.Box3; inverse:T.Matrix3; worldInverse:T.Matrix4 }
 
 /** World-space control points on a normalized model; deformation is applied before skinning. */
 export class StudioRig {
@@ -18,6 +21,8 @@ export class StudioRig {
   private figureRotation=new T.Quaternion();
   private figureScale=1;
   get scale(){return this.figureScale;}
+  /** Original normalized model frame, independent of the current whole-figure pose. */
+  get modelWorldMatrix(){return this.rootWorld.clone();}
   setFigureScale(value:number){this.setFigureTransform(this.figureOffset,this.figureRotation,value);}
   private figureMatrix=new T.Matrix4();
   private rootMatrix:T.Matrix4;
@@ -30,7 +35,29 @@ export class StudioRig {
   private bindings:{mesh:T.SkinnedMesh;inverses:T.Matrix4[];bind:T.Matrix4}[]=[];
   private topology:StudioTopology;
   private surfaceValues:Record<string,Transform>={};
+  private correctionsBindCompatible=true;
+  private skinPreviewRestore:(()=>void)|null=null;
+  private previewDisablesCorrections=false;
+  private installCorrectives:(shapes:readonly StudioCorrectiveShape[])=>void;
+  get skinPreviewActive(){return this.skinPreviewRestore!==null;}
+  stopSkinPreview(){this.skinPreviewRestore?.();}
+  previewCorrective(values:Record<string,Transform>,shape:StudioCorrectiveShape){
+    this.stopSkinPreview();const origin=this.capture();let active=true;
+    const restore=()=>{if(!active)return;active=false;this.skinPreviewRestore=null;this.installCorrectives(this.data.correctiveShapes??[]);this.apply(origin);};
+    this.skinPreviewRestore=restore;try{this.installCorrectives([...(this.data.correctiveShapes??[]),shape]);this.apply(values);}catch(error){restore();throw error;}return restore;
+  }
+  addCorrective(shape:StudioCorrectiveShape){
+    if(!this.poseCorrectionsCompatible)throw Error('Hautbindung passt nicht zu geometrischen Korrekturen.');
+    const before=this.data.correctiveShapes;try{this.data.correctiveShapes=[...(before??[]),structuredClone(shape)];this.installCorrectives(this.data.correctiveShapes);poseMorphBindings(this.root);}catch(error){this.data.correctiveShapes=before;this.installCorrectives(before??[]);throw error;}
+  }
+  /** Ephemeral weights for a measured preview. Project data and source binding stay unchanged. */
+  previewSkin(values:Record<string,Transform>,overrides:import('./pose-surface-check.ts').SkinOverrides){
+    this.stopSkinPreview();const origin=this.capture(),bindings=[...overrides].map(([i,binding])=>{const mesh=this.surfaces[i]?.mesh;if(!(mesh instanceof T.SkinnedMesh))throw Error('Vorschau passt nicht zur Haut.');return {mesh,binding,indices:mesh.geometry.getAttribute('skinIndex'),weights:mesh.geometry.getAttribute('skinWeight')};});
+    let active=true;const restore=()=>{if(!active)return;active=false;this.skinPreviewRestore=null;this.previewDisablesCorrections=false;for(const b of bindings){b.mesh.geometry.setAttribute('skinIndex',b.indices);b.mesh.geometry.setAttribute('skinWeight',b.weights);}this.apply(origin);};
+    this.skinPreviewRestore=restore;this.previewDisablesCorrections=overrides.size>0;try{for(const b of bindings){b.mesh.geometry.setAttribute('skinIndex',b.binding.indices);b.mesh.geometry.setAttribute('skinWeight',b.binding.weights);}this.apply(values);}catch(error){restore();throw error;}return restore;
+  }
   constructor(root:T.Object3D, saved?:StudioData) {
+    poseMorphBindings(root);
     this.root=root;root.updateWorldMatrix(true,true);this.rootMatrix=root.matrix.clone();this.rootWorld=root.matrixWorld.clone();this.rootAutoUpdate=root.matrixAutoUpdate;
     const bounds=new T.Box3().setFromObject(root);if(!bounds.isEmpty())this.figure.rest=bounds.getCenter(new T.Vector3()).toArray();
     root.traverse(node=>{this.originalNodes.push({node,value:read(node),scale:node.scale.clone()});if(node instanceof T.Bone)this.bones.push(node);});
@@ -45,9 +72,10 @@ export class StudioRig {
       const base=new Float32Array(attr.count*3);for(let i=0;i<attr.count;i++){base[i*3]=attr.getX(i);base[i*3+1]=attr.getY(i);base[i*3+2]=attr.getZ(i);}
       node.geometry.setAttribute('position',new T.Float32BufferAttribute(base.slice(),3));
       const world=Array.from({length:attr.count},(_,i)=>new T.Vector3().fromBufferAttribute(attr,i).applyMatrix4(node.matrixWorld));
-      this.surfaces.push({mesh:node,base,world,worldInverse:node.matrixWorld.clone().invert(),inverse:new T.Matrix3().setFromMatrix4(node.matrixWorld.clone().invert())});
+      this.surfaces.push({mesh:node,base,world,worldBounds:new T.Box3().setFromPoints(world),worldInverse:node.matrixWorld.clone().invert(),inverse:new T.Matrix3().setFromMatrix4(node.matrixWorld.clone().invert())});
     }});
     sourceGeometries.forEach(g=>g.dispose());
+    this.installCorrectives=createCorrectiveInstaller(root,this.surfaces);
     this.topology=new StudioTopology([...this.bones],root);
     this.initial={...emptyStudio(),boneRest:this.bones.map(read),points:this.bones.map((bone,i)=>({id:`bone-${i}`,kind:'bone',bone:i,name:(bone.name || `Gelenk ${i+1}`).slice(0,100),rest:bone.getWorldPosition(new T.Vector3()).toArray(),size:.025,radius:.18}))};
     this.data=saved ? structuredClone(saved) : structuredClone(this.initial);
@@ -78,11 +106,12 @@ export class StudioRig {
   }
   addBone(parentPoint:ControlPoint,position:T.Vector3){
     if(parentPoint.kind!=='bone'||!this.data.points.includes(parentPoint)||!position.toArray().every(v=>Number.isFinite(v)&&Math.abs(v)<=100)||this.data.points.length>=256||this.data.boneRest.length>=256||(this.data.boneInsertions?.length??0)>=64||this.data.links.length>=2048)throw Error('Elternknochen und gültige Position wählen; höchstens 64 neue Knochen und 256 Gelenke.');
-    const parent=this.bones[parentPoint.bone!];
-    for(let n:T.Object3D|null=parent;n instanceof T.Bone;n=n.parent)if(n.scale.distanceTo(new T.Vector3(1,1,1))>1e-8)throw Error('Skalierte Knochenketten werden nicht unterstützt.');
     const before=structuredClone(this.data),values=this.capture(),original=structuredClone(values);
     try{
-      this.reset();const restParent=this.bones[parentPoint.bone!];restParent.updateWorldMatrix(true,false);const local=restParent.worldToLocal(position.clone());
+      this.reset();const restParent=this.bones[parentPoint.bone!];restParent.updateWorldMatrix(true,false);
+      const determinant=restParent.matrixWorld.determinant();if(!Number.isFinite(determinant)||Math.abs(determinant)<1e-12)throw Error('Elterntransformation ist nicht invertierbar. Skalierung prüfen.');
+      const local=restParent.worldToLocal(position.clone());
+      if(!local.toArray().every(v=>Number.isFinite(v)&&Math.abs(v)<=100))throw Error('Lokale Knochenposition liegt außerhalb des unterstützten Bereichs.');
       if(local.length()<1e-5)throw Error('Neuen Knochen mit Abstand zum Elternknochen setzen.');
       const rest:Transform={position:local.toArray(),rotation:[0,0,0,1]},index=this.data.boneRest.length,id='joint-'+crypto.randomUUID();
       this.data.boneInsertions=[...(this.data.boneInsertions??[]),{parent:parentPoint.bone!,...(this.data.boneDeletions?.length?{afterDeletions:this.data.boneDeletions.length}:{})}];
@@ -103,15 +132,22 @@ export class StudioRig {
 
   reparentBone(point:ControlPoint,target:ControlPoint){
     if(point.kind!=='bone'||target.kind!=='bone'||!this.data.points.includes(point)||!this.data.points.includes(target)||(this.data.boneReparents?.length??0)>=256)throw Error('Zwei vorhandene Knochen auswählen (höchstens 256 Umhängungen).');
-    const bone=this.bones[point.bone!],parent=this.bones[target.bone!];validateReparent(bone,parent);
+    const bone=this.bones[point.bone!],parent=this.bones[target.bone!],{common,ratio}=validateReparent(bone,parent);
     const oldParent=this.data.points.find(p=>p.kind==='bone'&&this.bones[p.bone!]===bone.parent);
     if(!oldParent)throw Error('Zuerst die vorhandenen Gelenke erkennen.');
     const before=structuredClone(this.data),values=this.capture(),original=structuredClone(values);
+    // Solve without the bone's own scale; topology replay applies the fixed branch ratio.
+    // This avoids reflection sign ambiguity when decomposing a negatively scaled matrix.
     const world=(node:T.Bone,v:Record<string,Transform>):T.Matrix4=>{
-      const chain:T.Bone[]=[];for(let n:T.Object3D|null=node;n instanceof T.Bone;n=n.parent)chain.unshift(n);
-      const matrix=new T.Matrix4();for(const n of chain){const i=this.bones.indexOf(n),p=this.data.points.find(p=>p.kind==='bone'&&p.bone===i),t=p&&v[p.id]||before.boneRest[i];matrix.multiply(new T.Matrix4().compose(new T.Vector3().fromArray(t.position),new T.Quaternion().fromArray(t.rotation),new T.Vector3(1,1,1)));}return matrix;
+      const chain:T.Bone[]=[];for(let n:T.Object3D|null=node;n instanceof T.Bone&&n!==common;n=n.parent)chain.unshift(n);
+      const matrix=new T.Matrix4();for(const n of chain){const i=this.bones.indexOf(n),p=this.data.points.find(p=>p.kind==='bone'&&p.bone===i),t=p&&v[p.id]||before.boneRest[i];matrix.multiply(new T.Matrix4().compose(new T.Vector3().fromArray(t.position),new T.Quaternion().fromArray(t.rotation),n===bone?new T.Vector3(1,1,1):n.scale));}return matrix;
     };
-    const convert=(v:Record<string,Transform>):Transform=>{const matrix=world(parent,v).invert().multiply(world(bone,v)),position=new T.Vector3(),rotation=new T.Quaternion(),scale=new T.Vector3();matrix.decompose(position,rotation,scale);return {position:position.toArray(),rotation:rotation.normalize().toArray()};};
+    const convert=(v:Record<string,Transform>):Transform=>{
+      const matrix=world(parent,v).invert().multiply(world(bone,v)),position=new T.Vector3(),rotation=new T.Quaternion(),scale=new T.Vector3();matrix.decompose(position,rotation,scale);rotation.normalize();
+      const rebuilt=new T.Matrix4().compose(position,rotation,new T.Vector3(ratio,ratio,ratio));
+      if(!position.toArray().every(n=>Number.isFinite(n)&&Math.abs(n)<=10000)||matrix.elements.some((n,i)=>!Number.isFinite(n)||Math.abs(n-rebuilt.elements[i])>1e-8*Math.max(1,Math.abs(n))))throw Error('Knochenrahmen kann nicht verlustfrei umgerechnet werden.');
+      return {position:position.toArray(),rotation:rotation.toArray()};
+    };
     try{
       const rest=convert({}),poses=this.data.poses.map(p=>convert(p.values)),draft=this.data.draft?convert(this.data.draft):undefined,current=convert(values);
       this.data.boneRest[point.bone!]=rest;this.data.poses.forEach((p,i)=>p.values[point.id]=poses[i]);if(this.data.draft&&draft)this.data.draft[point.id]=draft;values[point.id]=current;
@@ -125,7 +161,7 @@ export class StudioRig {
   deleteBone(point:ControlPoint){
     if(point.kind!=='bone'||this.data.boneDeletions?.includes(point.bone!))throw Error('Einen vorhandenen Knochen auswählen.');
     const bone=this.bones[point.bone!],parent=bone.parent;
-    if(!(parent instanceof T.Bone)||bone.children.some(n=>!(n instanceof T.Bone))||bone.scale.distanceTo(new T.Vector3(1,1,1))>1e-8)throw Error('Wurzelknochen, skalierte Knochen und Knochen mit Anbauteilen können nicht gelöscht werden.');
+    if(!(parent instanceof T.Bone)||bone.children.some(n=>!(n instanceof T.Bone))||(bone.children.length>0&&bone.scale.distanceTo(new T.Vector3(1,1,1))>1e-8))throw Error('Wurzelknochen, skalierte Zwischenknochen und Knochen mit Anbauteilen können nicht gelöscht werden.');
     const parentPoint=this.data.points.find(p=>p.kind==='bone'&&this.bones[p.bone!]===parent);
     const children=bone.children.map(child=>this.data.points.find(p=>p.kind==='bone'&&this.bones[p.bone!]===child));
     if(!parentPoint||children.some(p=>!p))throw Error('Zuerst die vorhandenen Gelenke erkennen.');
@@ -140,28 +176,35 @@ export class StudioRig {
       this.reset();this.apply(values);return parentPoint.id;
     }catch(error){this.data=before;this.reset();this.apply(original);throw error;}
   }
-  dispose(){this.topology.restore();}
+  dispose(){this.stopSkinPreview();this.topology.restore();}
   reset() {
+    this.stopSkinPreview();
+    this.installCorrectives([]);
     this.figureOffset.set(0,0,0);this.figureRotation.identity();this.figureScale=1;this.figureMatrix.identity();this.root.matrixAutoUpdate=this.rootAutoUpdate;this.root.matrix.copy(this.rootMatrix);
     for(const item of this.originalNodes){write(item.node,item.value);item.node.scale.copy(item.scale);}
     const bones=this.topology.build(this.data.boneInsertions??[],this.data.boneRest,this.data.boneDeletions??[],this.data.boneReparents??[],this.data.weightTransfers??[]);this.bones.splice(0,this.bones.length,...bones);
     this.bones.forEach((b,i)=>write(b,this.data.boneRest[i]));
     this.root.updateWorldMatrix(true,true);
     this.rebind();
+    if(this.poseCorrectionsCompatible)this.installCorrectives(this.data.correctiveShapes??[]);
+    this.correctionsBindCompatible=poseMorphBindingCompatible(this.root);
     this.surfaceValues=Object.fromEntries(this.data.points.filter(p=>p.kind==='surface').map(p=>[p.id,{position:[...p.rest] as Vec3,rotation:[0,0,0,1]}]));
     this.deform();
   }
   restoreSource() {
+    this.stopSkinPreview();
+    this.installCorrectives([]);
+    enablePoseMorphs(this.root,this.data.poseCorrections!==false);
     this.figureOffset.set(0,0,0);this.figureRotation.identity();this.figureScale=1;this.figureMatrix.identity();this.root.matrixAutoUpdate=this.rootAutoUpdate;this.root.matrix.copy(this.rootMatrix);
     this.topology.restore();
     this.bones.slice(0,this.originalBoneRest.length).forEach((b,i)=>write(b,this.originalBoneRest[i]));
     for(const item of this.originalNodes){write(item.node,item.value);item.node.scale.copy(item.scale);}
     this.root.updateWorldMatrix(true,true);
     for(const b of this.bindings){b.mesh.skeleton.boneInverses=b.inverses.map(m=>m.clone());b.mesh.bind(b.mesh.skeleton,b.bind);}
-    this.root.updateMatrixWorld(true);
+    this.root.updateMatrixWorld(true);updatePoseMorphs(this.root);
     for(const s of this.surfaces){(s.mesh.geometry.getAttribute('position') as T.BufferAttribute).copyArray(s.base);s.mesh.geometry.getAttribute('position').needsUpdate=true;s.mesh.geometry.computeVertexNormals();s.mesh.geometry.computeBoundingSphere();s.mesh.geometry.computeBoundingBox();}
   }
-  private rebind(){for(const b of this.bindings){b.mesh.skeleton.calculateInverses();b.mesh.bind(b.mesh.skeleton,b.mesh.matrixWorld);}}
+  private rebind(){for(const b of this.bindings){b.mesh.skeleton.calculateInverses();b.mesh.bind(b.mesh.skeleton,b.mesh.matrixWorld);}this.correctionsBindCompatible=poseMorphBindingCompatible(this.root);}
   private anchors=new Map<string,{key:string;index:number}>();
   private surfaceMatrix(p:ControlPoint):T.Matrix4 {
     const surface=p.mesh===undefined?undefined:this.surfaces[p.mesh];if(!surface)return this.figureMatrix.clone();
@@ -245,14 +288,29 @@ export class StudioRig {
     } else {const local=position.clone().applyMatrix4(this.surfaceMatrix(p).invert());this.surfaceValues[p.id]={position:local.toArray(),rotation:[0,0,0,1]};if(edit)p.rest=local.toArray();}
     this.root.updateWorldMatrix(true,true);this.deform();
   }
+  /** Same additive pre-skin deformation as the editor, without modifying live geometry. */
+  surfacePositions(values:Record<string,Transform>,mesh:number):Float32Array {
+    const surface=this.surfaces[mesh];if(!surface)throw Error('Oberfläche fehlt.');
+    const attr=new T.BufferAttribute(new Float32Array(surface.base.length),3);this.deformSurface(attr,mesh,values);return attr.array as Float32Array;
+  }
+  private deformSurface(attr:T.BufferAttribute,mesh:number,values:Record<string,Transform>){
+    const s=this.surfaces[mesh];attr.copyArray(s.base);
+    for(const p of this.data.points){if(p.kind!=='surface'||p.mesh!==undefined&&p.mesh!==mesh)continue;
+      const delta=new T.Vector3().fromArray(values[p.id]?.position??p.rest).sub(new T.Vector3().fromArray(p.rest));if(!(delta.lengthSq()>1e-12))continue;
+      const center=new T.Vector3().fromArray(p.rest);if(!s.worldBounds.intersectsSphere(new T.Sphere(center,p.radius)))continue;const offset=delta.applyMatrix3(s.inverse);
+      for(let i=0;i<s.world.length;i++){const t=1-s.world[i].distanceTo(center)/p.radius;if(t<=0)continue;const w=t*t*(3-2*t);attr.setXYZ(i,attr.getX(i)+offset.x*w,attr.getY(i)+offset.y*w,attr.getZ(i)+offset.z*w);}
+    }
+  }
+  get poseCorrectionsCompatible(){return this.correctionsBindCompatible&&!(this.data.boneInsertions?.length||this.data.boneDeletions?.length||this.data.boneReparents?.length||this.data.weightTransfers?.length)&&JSON.stringify(this.data.boneRest)===JSON.stringify(this.initial.boneRest);}
+  get poseCorrectionsActive(){return !this.previewDisablesCorrections&&poseMorphBindings(this.root).length>0&&this.poseCorrectionsCompatible&&this.data.poseCorrections!==false;}
+  correctionWeights(values:Record<string,Transform>,enabled=this.poseCorrectionsActive){
+    const points=new Map(this.data.points.filter(p=>p.kind==='bone').map(p=>[this.bones[p.bone!],p]));
+    return poseMorphWeights(this.root,bone=>{const point=points.get(bone),value=point?values[point.id]:undefined;return value?new T.Quaternion().fromArray(value.rotation):bone.quaternion;},enabled);
+  }
   private deform() {
-    const active=this.data.points.filter(p=>p.kind==='surface').map(p=>({p,delta:new T.Vector3().fromArray(this.surfaceValues[p.id]?.position ?? p.rest).sub(new T.Vector3().fromArray(p.rest))})).filter(x=>x.delta.lengthSq()>1e-12);
+    enablePoseMorphs(this.root,this.poseCorrectionsActive);updatePoseMorphs(this.root);
     for(let m=0;m<this.surfaces.length;m++){
-      const s=this.surfaces[m], attr=s.mesh.geometry.getAttribute('position') as T.BufferAttribute;
-      attr.copyArray(s.base);
-      for(const {p,delta} of active){if(p.mesh!==undefined && p.mesh!==m)continue;const offset=delta.clone().applyMatrix3(s.inverse),center=new T.Vector3().fromArray(p.rest);
-        for(let i=0;i<s.world.length;i++){const t=1-s.world[i].distanceTo(center)/p.radius;if(t<=0)continue;const w=t*t*(3-2*t);attr.setXYZ(i,attr.getX(i)+offset.x*w,attr.getY(i)+offset.y*w,attr.getZ(i)+offset.z*w);}
-      }
+      const s=this.surfaces[m],attr=s.mesh.geometry.getAttribute('position') as T.BufferAttribute;this.deformSurface(attr,m,this.surfaceValues);
       attr.needsUpdate=true;s.mesh.geometry.computeVertexNormals();s.mesh.geometry.computeBoundingSphere();s.mesh.geometry.computeBoundingBox();
     }
   }
@@ -273,7 +331,7 @@ export class StudioRig {
   checkPoseBends(pose:Pose){
     const results:{jointId:string;name:string;endpointId:string;angle:number|null;min:number;max:number;status:'within'|'outside'|'unmeasurable'}[]=[];
     const evaluated=new Set<string>();
-    const scale=new Map(this.originalNodes.map(item=>[item.node,item.scale]));
+    const scale=new Map(this.bones.map(bone=>[bone,bone.scale.clone()]));
     const local=(point:ControlPoint)=>{const v=pose.values[point.id];if(!v)throw Error('Pose enthält nicht alle Gelenkspuren.');return new T.Matrix4().compose(new T.Vector3().fromArray(v.position),new T.Quaternion().fromArray(v.rotation),scale.get(this.bones[point.bone!])??new T.Vector3(1,1,1));};
     const points=new Map(this.data.points.filter(p=>p.kind==='bone').map(p=>[this.bones[p.bone!],p]));
     const index={byBone:points,edges:new Set(this.data.links.map(edgeKey))};

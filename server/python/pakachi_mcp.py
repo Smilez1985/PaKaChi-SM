@@ -43,7 +43,7 @@ class StudioCommand(BaseModel):
     model_config = ConfigDict(extra='forbid', strict=True)
     session: str = Field(max_length=100)
     expectedRevision: int = Field(ge=0)
-    action: Literal['set_mode', 'add_point', 'update_point', 'delete_point','add_bone','insert_bone','delete_bone','reparent_bone','transfer_weights', 'connect_points', 'disconnect_points', 'save_pose', 'apply_pose', 'replace_pose', 'create_move', 'update_move', 'update_moves', 'undo', 'redo']
+    action: Literal['set_mode', 'add_point', 'update_point', 'delete_point','add_bone','insert_bone','delete_bone','reparent_bone','transfer_weights', 'connect_points', 'disconnect_points', 'save_pose', 'apply_pose', 'replace_pose', 'create_move', 'update_move', 'update_moves', 'apply_skin_correction', 'undo', 'redo']
     mode: Literal['pose', 'rig'] | None = None
     id: str | None = Field(default=None, max_length=100)
     target: str | None = Field(default=None, max_length=100)
@@ -241,6 +241,7 @@ def build_server(uri=None, embedded=True, tcp_port=1883, ws_port=8083):
         delete_point: id, entfernt nur den Griff. connect_points/disconnect_points: id,target.
         save_pose: optional name,seconds. apply_pose/replace_pose: id.
         create_move: id,name,poses,optional loop.
+        apply_skin_correction: id eines bereits im Studio gemessenen Korrekturvorschlags; Posenmodus und KI-Freigabe, ein Undo-Schritt.
         update_moves: updates=[{id,poses}], 1–8 verschiedene Moves, insgesamt maximal 200 Posenverweise; atomar, ein Undo-Schritt.
         update_move: id,poses (vollständige Folge, 2–100 vorhandene Posen; Wiederholungen erlaubt; nur Posenmodus). Vorher get_studio section=moves lesen. undo/redo ohne weitere Felder.
         Keine Dateizugriffe; Konflikte oder Timeouts zuerst mit get_studio aufklären.

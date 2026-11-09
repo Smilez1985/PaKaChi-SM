@@ -1,389 +1,148 @@
-# Roadmap – was kommt
+# Roadmap – offene Aufgaben
 
-**Softwarestand: 0.67.0 · Abgleich: 28.10.2026.** Teil der [Blaupause](README.md).
+**Entwicklungsstand: 0.95.0 · Abgleich: 09.11.2026.** Teil der [Blaupause](README.md).
 
-Ein Häkchen bedeutet implementiert; es ersetzt keine visuelle oder externe Live-Abnahme. Die Nachweise und Prüfgrenzen stehen im [Prüfstand](PRUEFUNG.md). Die Versionshistorie gehört ins [Changelog](CHANGELOG.md).
+Diese Roadmap enthält offene Umsetzung und ausstehende Abnahme. Erledigte Änderungen stehen nach Version im [Changelog](CHANGELOG.md); Nachweise und Grenzen im [Prüfstand](PRUEFUNG.md). Eine implementierte Funktion ist nicht automatisch manuell oder mit realen Anbietern abgenommen.
+
+## Übergabe und nächster Schritt
+
+**Übergabe aktualisiert:** 2026-11-09T22:46:22+01:00 (Europe/Berlin). Softwarestand **0.95.0**.
+
+- **Arbeitsbranch:** `work/local-verification-model-zoo`, [Entwurfs-PR #1](https://github.com/Smilez1985/PaKaChi-SM/pull/1); noch nicht nach `main` zusammengeführt.
+- **Bild-zu-3D:** Seit 0.95.0 optionales erstes Zweibeiner-/Vierbeinerskelett mit Hautbindung auf statischer Generatorausgabe, getrennte Vorschau, Beugewarnungen und Übernahme ins Studio. Echte Anatomieerkennung und zuverlässige Charakterqualität bleiben offen. [Ablauf](KI-GENERIERUNG.md#erster-beweglicher-entwurf-seit-0950).
+- **Neue Grundlage:** Automatischer Auftrag vergleicht Gewichtsänderungen mit lokalen poseabhängigen geometrischen Korrekturformen; gemeinsame Pose-/Move-Gegenprüfung, Original-/Korrekturvorschau, KI-Aufruf, Undo und Projekt-/GLB-Export. Zusätzliche adaptive Bewegungsdiagnose und begrenzte separate Schnittdiagnose sind vorhanden. [Prüfbericht](PRUEFUNG.md#version-0940).
+- **Nächste Aktion:** Geometrische Kandidaten an tatsächlichen Schulter-/Hüft-/Kniefehlern weiterentwickeln. Die geprüften neuen PaKaChi-Proben werden bisher verworfen. Lokale Formziele und Fellansätze verbessern, mehrere Korrekturen gemeinsam optimieren; adaptive Zwischenbilder und zuverlässige Selbstüberschneidungsprüfung in den automatischen Auftrag integrieren. Externe MCP-Suche und produktive Fachadapter ergänzen.
+- **Charakterstand:** 21 akzeptierte Korrekturhaltungen der Arbeitsform (fünf zusätzliche linke Hüfthaltungen), 11 der Tierform. Schulterkandidaten und weitere Hüftkandidaten bleiben nach den Messungen verworfen; die zugrunde liegenden Fehler bestehen weiter.
+- **Danach:** Eine gespeicherte Standard-Verwandlung auf dieser Oberfläche, vorwärts und rückwärts mit identischen Zwischenformen; Qualität auch zwischen den Endposen prüfen.
+- **Hardware parallel:** Die [fünf Verbindungsschritte](LOKALE-WERKZEUGE.md#verbindung-zu-deinem-rechner) bleiben verfügbar. Windows-/Caddy-/GPU-Abnahme ist offen, blockiert die CPU-basierte Charakter-/Rigarbeit jedoch nicht. Ein tatsächlicher externer Aufruf von `local_get_status` bleibt der erste Verbindungsnachweis.
+
+## Prioritäten
+
+1. **Automatische Korrekturqualität erweitern:** Gewichts- und geometrische Kandidaten sowie separate adaptive Move-Diagnose sind implementiert. Bessere geometrische Kandidaten am Originalcharakter, mehrere abgestimmte Änderungen, adaptive Gegenprüfung im Auftrag und echte Fachmodell-Abnahme fehlen.
+2. **Charakter und Rig verfeinern:** Beide Formen besitzen seit 0.85.0 dieselbe 59-Gelenk-Hierarchie einschließlich 14 beweglicher Finger/Zehen und echte Hautgewichte. Gesicht, Fell und lokale Pfotenflächen sind überarbeitet; die Körpernetze haben geschlossene, konsistent orientierte Kanten. Finger-/Pfotenproportionen, Anschlüsse bei großen Beugungen, verdeckte Flächen und Hüft-/Schulterübergänge weiter korrigieren und designgetreu abnehmen.
+3. **Gemeinsame Morph-Topologie:** Die umformungsbedingten Hautbrücken der unabhängig rekonstruierten Netze beseitigen. Ein Charakter mit kompatibler Netzstruktur und geprüftem Rig für beide Formen.
+4. **Standard-Verwandlung:** Danach eine gespeicherte Animation Normalform → Arbeitsform implementieren; dieselbe Animation rückwärts, Endform halten und laufende Bewegung ohne Sprung umkehren. Zustandszuordnung wie im Originalplayer.
+5. **Reale Generatorqualität:** TripoSR-CPU-Inferenz bleibt belegt. GPU-Abnahme und qualitativer Verfahrensvergleich auf den beiden tatsächlichen Vorlagen bleiben offen.
+6. **Abnahme am tatsächlichen Ablauf:** Kamera, Haut, Posen und Speichern/Laden an beiden Formen weiter prüfen. [Nachweise und Grenzen](PRUEFUNG.md#version-0850).
+
+## Lokale Hardware anbinden
+
+Die Umsetzung des integrierten MCP-Arbeitsplatzes, der Caddy-/DuckDNS-Konfiguration, der OAuth-Freigaben, des offiziellen Tunnel-Clients und des ACP-v1-Clients ist in [0.86.0 dokumentiert](CHANGELOG.md). Offen ist die reale Abnahme:
+
+- [ ] Auf Steffens Windows-Rechner `Start-Windows.cmd` ausführen, MCP einschalten, Player koppeln und die tatsächlichen Blender-/Python-Pfade sowie GPU/PyTorch prüfen.
+- [ ] Den vorhandenen Caddy/DuckDNS-Zugang mit dem erzeugten Abschnitt verbinden, den MCP-Server in ChatGPT hinzufügen und die OAuth-Verbindungsanfrage lokal freigeben. Keine zusätzliche öffentliche Portfreigabe.
+- [ ] `local_get_status` über diese externe MCP-Verbindung erfolgreich aufrufen und die tatsächlichen Werkzeugfreigaben, Player-Kopplung und Programm-/GPU-Prüfergebnisse prüfen.
+- [ ] Einen tatsächlichen Python-/Blender-Auftrag über MCP starten, Ergebnisdateien abrufen und einen GLB-Import ins Studio prüfen.
+- [ ] Den alternativen Secure MCP Tunnel auf Windows/macOS mit einem berechtigten OpenAI-Konto sowie einen produktiven authentifizierten ACP-Agenten live abnehmen. Diese Alternativen sind keine Voraussetzung für den Caddy-Weg.
 
 ## Automatisierte Browserprüfung
 
-- [x] GitHub-Actions-Workflow für Node-Tests, Build und Chromium-E2E mit HTML-Bericht, Fehler-Screenshots und Traces ergänzen (0.43.0).
-- [x] E2E-Szenario für Assistentenvorschlag → Vorher/Nachher → Wiederherstellung → Übernahme → Undo vorbereiten (0.43.0).
-- [x] Ersten echten Chromium-Lauf auf GitHub durchführen: Original-Transformation und KI-Sequenzvorschau bestehen; fünf weitere Fälle melden Fehler (0.43.0, Auswertung in 0.44.0).
-- [x] Erkannte Ursachen korrigieren: Original-Metadaten beim Wechsel aktualisieren und Animationszeit unabhängig von langsamer Renderbildrate fortschreiben (0.44.0).
-- [x] Korrigierten Stand 0.44.0 erneut auf GitHub ausführen: alle sieben Chromium-E2E-Fälle bestanden ([Nachweis](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/39826526209)).
-- [ ] Screenshots und tatsächliches Mausgefühl manuell auswerten; gerenderte Automatisierung ersetzt diese Gesamtabnahme nicht. Lokales Chromium bleibt beim Socket-Aufbau blockiert.
-
-## Nächste Arbeitspakete
-
-1. **Korrekturen 0.11.0/0.11.1 visuell nachprüfen:** Drehung um die Figurenmitte auch nach Zoom/Pan sowie vollständige Körperverbindungen, Hand-/Fußziele, Rumpfbewegung und direktes Drehen. Nutzertest 0.10.0 meldete auseinanderziehbare Knochen und unbrauchbare Ausrichtung; diese Fehler sind technisch korrigiert, die erneute Nutzerabnahme steht aus. Ein gezielter Browserfall für Mitteltasten-Drehung nach Zoom/Pan samt Inversion ist in 0.67.0 ergänzt; der abschließende CI-Nachweis steht noch aus. Anschließend Mausnavigation, kleine Gesichtspunkte, Gesamtverschiebung, Speichern/Laden und Agentensteuerung in einer lauffähigen Browserumgebung prüfen.
-2. **Gelenkbearbeitung vervollständigen:** Zwischengelenke in vorhandenen Knochenstrecken samt Gewichtsverteilung und Undo/Redo sind seit 0.47.0 vorhanden. Löschen und gemischte Umbaufolgen sind seit 0.48.0/0.49.0 vorhanden, Assistent/MCP seit 0.50.0. Umhängen vorhandener Knochen ist seit 0.53.0 vorhanden. Anteiliges Übertragen von Hautgewichten ist seit 0.55.0 vorhanden. Räumlich begrenzte Übertragung ist seit 0.56.0 vorhanden. Die Bereichsvorschau ist seit 0.57.0 vorhanden. Freie Knochenabzweigungen sind seit 0.58.0 vorhanden. Ein erster kontinuierlicher Gewichtspinsel ist seit 0.59.0 vorhanden. Gewichtsfärbung ist seit 0.60.0 vorhanden. Das Pinselbudget beträgt seit 0.61.0 1024 Aufträge. Geometrische Sichtprüfung ist seit 0.63.0 optional vorhanden. Ausgeblendete Materialgruppen und Opazität 0 sind seit 0.64.0 berücksichtigt. Alpha-Ausschnitte auf Texturbasisebene sind seit 0.65.0 berücksichtigt. Synthetische Größenmessungen und reduzierte UV-Kopien sind seit 0.66.0 vorhanden. Als Nächstes gerenderte Alpha-Kanten, Teiltransparenz und große reale Modelle prüfen; bestehende Moves und Gewichtsqualität prüfen. Ein fehlendes Knie lässt sich nun in eine vorhandene Strecke einfügen und beugen, jedoch noch kein vollständiges Rig aus einer ungeriggten Oberfläche erzeugen.
-3. **Studio-Harness anbinden:** auf den Profilen und der Rollen-/Fähigkeitsprüfung aus 0.13.0 aufbauen; Modellauflistung ist seit 0.15.0 vorhanden. Assistenten-Inferenz für Ollama/OpenAI-kompatible APIs ist seit 0.16.0 vorhanden. Als Nächstes reale Modell-/Werkzeugqualität prüfen sowie weitere Fachadapter und offiziell unterstützte OAuth-Verfahren ergänzen. Anthropic und der optionale verschlüsselte Schlüsseltresor sind bereits angebunden. Details und Abnahme in Abschnitt 7.
-4. **Aufträge und KI-Verfahren integrieren:** den seit 0.22.0 sichtbaren lokalen Generierungsablauf live prüfen, den Modellwechsel-Rücksprung und die abgesicherte 3D-Übernahme aus 0.24.0 visuell prüfen, weitere Generator-/Rigging-Adapter ergänzen, echte Inferenz und Qualität prüfen, die Generator-Fallbacks aus 0.25.0 live prüfen und anschließend gezielte Skelettkorrekturen mit Vorschau integrieren. Vorhandene Skelettdaten auszulesen ist bereits möglich, aber keine KI-Anatomieerkennung.
-
-Diese Reihenfolge ist ein Umsetzungsvorschlag, kein Terminversprechen. Lokale und externe Dienste sowie getrennte Anbieter je Rolle sind als Architektur festgelegt. Die konkreten zuerst unterstützten Verfahren, Hardwareanforderungen und Lizenzen sind noch zu prüfen.
+- [ ] Weitere Screenshots und tatsächliches Mausgefühl manuell auswerten; haftende Vorschau und mobile Posenfelder wurden in 0.76.3 automatisiert und anhand dreier sichtbarer Bereichsaufnahmen geprüft; vier Artefaktbilder wurden in 0.76.2 stichprobenartig bewertet, Optionen-Kontrast und Versionsanzeige korrigiert; gerenderte Automatisierung ersetzt diese Gesamtabnahme nicht. Die automatisierten Charakter- und Arbeitsplatzabläufe sind im vollständigen Chromium-CI-Lauf von 0.86.0 belegt; die manuelle Gesamtabnahme bleibt offen.
 
 ## 1. Player und Model Zoo
 
-- [x] Gemeinsame Anwendung mit Player, integriertem Studio und Avatar-Auswahl.
-- [x] Geriggte 3D-Testmodelle laden und tatsächliche Animationsclips anbieten.
-- [x] Original-PaKaChi mit beiden Formen und 72 Bildern bewahren.
-- [x] Eigenständige GLB-Dateien lokal importieren; glTF/GLB und JSON-Katalog als aktuelle Formate festlegen.
-- [x] Vollständige 3D-Projektkopien in einer lokalen Browsersammlung speichern, auswählen, laden und bestätigt löschen (0.26.0; separate Auswahl neben dem mitgelieferten Katalog).
-- [x] Lokale Sammlungslisten nach bestätigten Speicher-/Löschvorgängen zwischen Tabs aktualisieren; beim Fensterfokus nachladen, wartende Meldungen bündeln (0.45.0).
-- [x] Zwei Browserfälle für F5-Persistenz einschließlich Posen/Moves und mehrere Tabs mit bestätigtem Löschen vorbereiten (0.45.0).
-- [x] IndexedDB-Browserfälle erfolgreich ausführen: F5 erhält Posen, Moves und gespeicherte Identität; zwei Tabs übernehmen bestätigte Listenänderungen (0.45.0, [Nachweis](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/39902736987)).
-- [ ] Tatsächliche Speichergrenzen und Quotenfehler prüfen.
-- [x] Lokal gespeicherte Avatare in gemeinsame Auswahl, Zähler und `list_avatars` aufnehmen; gespeicherte ID beim Laden und in der Steuerung erhalten (0.28.0).
-- [x] Gemeinsame Auswahl inklusive gespeicherter IDs im echten Browser über die integrierte Steuerung prüfen (0.45.0).
+- [ ] Tatsächliche Speichergrenzen und Quotenfehler in realen Browsern prüfen.
 - [ ] Gespeicherte Auswahl zusätzlich mit externem MCP-Host abnehmen.
-- [x] Bearbeitete Projekte als statisches Katalogprojektpaket exportieren und im Player laden (0.29.0; CLI erstellt neuen Ordner, kein automatisches Deployment).
-- [x] Kataloge mit Konflikt-, Quellen- und Größenprüfung in einem neuen Ordner zusammenführen; Quellen unverändert lassen und SHA-256-Bericht erzeugen (0.30.0).
 - [ ] Veröffentlichungsablauf ergänzen und zusammengeführte Exportpakete im gerenderten Player abnehmen.
-- [x] Eigene Studio-Moves als separate Dateien exportieren/importieren, nur bei identischem Modell und gleicher Bewegungsstruktur; Konflikte ohne Überschreiben lösen und gesamten Import rückgängig machen (0.27.0).
-- [x] Browserfall für Dateidialog, Download, Importkonflikte, wiederholte Posen, Wiedergabe, Undo/Redo und unpassende Modellbindung ergänzen (0.46.0).
-- [x] Move-Dateiaustausch-Fall im gerenderten Browser erfolgreich ausführen (0.46.0; [CI-Nachweis](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/39913313594)).
-- [x] Gemeinsame statische moves/-Sammlung mit Katalog, Export eigener Projekt-Moves und revisionsgeschütztem Studio-Import ergänzen (0.31.0).
-- [x] Zwei Move-Sammlungen per CLI mit Struktur-, Konflikt- und Größenprüfung zusammenführen, Quellen bytegenau erhalten und SHA-256-Bericht erzeugen (0.32.0).
-- [ ] Sammlung im Browser bearbeiten und visuell abnehmen; GLB-Clip-Export und Retargeting auf andere Rigs ergänzen.
-
-**Abnahme:** Avatar auswählen und vorhandene Bewegungen abspielen. Code und automatisierte Prüfungen vorhanden; visuelle Abnahme offen.
+- [ ] Sammlung im Browser bearbeiten und visuell abnehmen; Sichere Originalclip-Übernahme und Retargeting auf andere Rigs ergänzen. Freie Oberflächenpunkte sind seit 0.80.0 als Morph-Animation exportierbar. Eigene Studio-Moves mit Knochen-/Figurenbewegung sind seit 0.79.0 als GLB exportierbar.
 
 ## 2. StateMaschine und externe Steuerung
 
-- [x] Zustände und einmalige beziehungsweise wiederholte Moves unterscheiden; ungültige Befehle abweisen.
-- [x] Manuelle Auswahl, MQTT und MCP über denselben Router führen.
-- [x] MQTT opt-in mit Broker-Adresse, Topic und optionaler Anmeldung.
-- [x] Acht MCP-Tools für Player-Fähigkeiten, Zustände, Moves und freigegebene Studio-Bearbeitung bereitstellen.
-- [x] Python-MCP mit optional eingebettetem aMQTT und bestätigten Player-Antworten verbinden.
 - [ ] Konkreten externen MCP-Host und externen NanoMQ-Broker live abnehmen.
-- [x] Studio über `get_studio`/`edit_studio` abfragen und freigegeben bearbeiten; Sitzungs-/Revisionsprüfung und Undo (0.9.0).
-
-**Abnahme:** Ein externer Agent fragt tatsächliche Fähigkeiten ab und löst einen unterstützten Zustand/Move aus. Reale Python-/MQTT-Prozessintegration einschließlich Studio in 0.9.0 geprüft; konkrete Host-Abnahme offen.
 
 ## 3. Posen und Bewegungen
 
-- [x] Genau zwei Modi: „Figur bewegen“ und „Gelenke bearbeiten“.
-- [x] Skelettgriffe und freie Gesichtspunkte posieren; Zeitabstände und Zwischenposen berechnen.
-- [x] Gesamtposition als eigene Spur bearbeiten, auch ohne Skelett (0.6.0).
-- [x] Eigene Moves mit Schlagwort, Vorschau und Wiedergabe im Player.
-- [x] Bestehende Move-Posenfolgen per Maus bearbeiten: Einfügen, Ersetzen, Umordnen und Entfernen einzelner Vorkommen mit Undo/Redo (0.37.0).
-- [x] Bestehende Sequenzen über MCP und Assistent auslesen und mit `update_move` ändern, einschließlich Freigabe, Revisionsprüfung und Undo (0.38.0).
 - [ ] Sequenzbearbeitung im gerenderten Studio und mit externem KI-/MCP-Host abnehmen.
-- [x] Neu/Laden/Speichern für vollständige `.pakachi.json`-Projekte; Undo/Redo.
-- [x] Gesamtrotation als interpolierte Bewegungsspur ergänzen (0.8.0).
-- [x] Gleichmäßige Skalierung als Bewegungsspur mit Mausregler, Posen, Undo/Redo und MCP ergänzen (0.10.0).
-- [ ] Überblendung zwischen Originalclips und Studio-Moves ergänzen; bisher nur Originalclips untereinander.
-
-**Abnahme:** Aus Posen eine Bewegung erstellen, speichern, erneut laden und abspielen. Geometrie-/Daten-/DOM-Prüfungen vorhanden; visueller Gesamtablauf offen.
+- [ ] Überblendung Originalclip ↔ Studio-Move im gerenderten Player abnehmen, einschließlich kurzer einmaliger Clips, Originalclip-Überblendungen, Zeitleistensprüngen und manueller Pause; Unterstützung für bearbeitete Grundskelette und geänderte Hautgewichte ergänzen. Freie Oberflächenpunkte sind seit 0.70.0 implementiert; deren gerenderte Qualität und CPU-/Speicherbedarf auf großen Importmodellen prüfen. Mika-CPU-Messung und erste Optimierung sind seit 0.71.0 vorhanden ([Messvertrag](TRANSITION-BENCHMARK.md)); seit 0.71.1 können eigene eigenständige GLB-/glTF-Modelle ohne Bildtexturen gemessen werden.
 
 ## 4. Gelenke korrigieren
 
-- [x] Freie Oberflächenpunkte hinzufügen, verschieben, löschen und unabhängig verbinden.
-- [x] Skelett-Drehpunkte verschieben; vorhandene Oberfläche in der Grundpose erhalten.
-- [x] Vorhandene Skelettgriffe und Eltern-Kind-Verbindungen per Button erkennen.
-- [x] Automatische und manuelle Verbindungen einzeln entfernen.
-- [x] Punktgröße, Auswahlfläche und Einflussradius getrennt behandeln.
-- [x] Freie Punktgruppen bewegen und lokale Oberflächenverformung mit Hautbindung nutzen.
-- [x] Echten Knochen zwischen vorhandenen Eltern-/Kindknochen einfügen; Hautgewichte anteilig umverteilen, Posen erweitern und markieren, Projektpersistenz und Undo/Redo (0.47.0).
-- [x] Zwischengelenk-Bedienung, Undo/Redo und Projektdateiaustausch im Browser erfolgreich prüfen (0.47.0; [Nachweis](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/39957177749)).
 - [ ] Gewichtsqualität der eingefügten Gelenke manuell prüfen.
-- [x] Nicht skalierte Knochen mit Knochen-Eltern entfernen, Kindposen umrechnen und Gewichte zusammenführen; Projektpersistenz, Undo/Redo und Schutzfälle (0.48.0).
-- [x] Knochenlöschen mit Undo/Redo und Projektdateiaustausch im Browser prüfen (0.49.0; [Nachweis](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/40096800795)).
 - [ ] Hautverformung nach Knochenlöschen manuell prüfen.
-- [x] Gemischte Einfüge-/Löschfolgen mit gespeicherter Reihenfolge, Rekonstruktion der Gewichte und einzelnen Undo-/Redo-Schritten ermöglichen (0.49.0).
-- [x] Löschen, Ersatzgelenk einfügen und erneutes Laden im echten Browser prüfen (0.49.0; [Nachweis](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/40096800795)).
 - [ ] Hautqualität nach gemischten Umbaufolgen manuell prüfen.
-- [x] Vorhandene Knochen innerhalb desselben Skelettbaums umhängen; Einzelposen erhalten, Undo/Redo, Persistenz und MCP (0.53.0).
-- [x] Umhängen mit starren Anbauteilen einschließlich verschachtelter Objektgruppen ermöglichen (0.54.0).
-- [x] Freie Kindknochen hinzufügen (0.58.0) und erste kontinuierliche Gewichtspinsel-Stufe ergänzen (0.59.0).
-- [ ] Skalierte Knochenketten und Anbauteile mit eigenem Skelett unterstützen; Löschen mit Anbauteilen ergänzen.
+- [ ] Umhängen zwischen Ästen mit nicht gleichmäßiger oder negativer Skalierung, weitere Umbauten skalierter Knochenketten und Anbauteile mit eigenem Skelett unterstützen; Löschen mit Anbauteilen ergänzen. Neue Abzweigungen unter skalierten Eltern sind seit 0.72.0, das Löschen skalierter Endknochen ohne Kinder/Anbauteile seit 0.73.0 implementiert; Umhängen unter gemeinsam skalierten Vorfahren ist seit 0.74.0 und zwischen positiv gleichmäßig skalierten Ästen mit gleicher Gesamtskalierung seit 0.75.0 möglich; seit 0.76.0 bleibt auch die eigene invertierbare Skalierung des verschobenen Knochens erhalten. Seit 0.82.0 werden unterschiedliche positive gleichmäßige Astmaßstäbe durch eine rekonstruierte lokale Skalierung ausgeglichen; gerenderte Haut-/IK-Abnahme bleibt offen.
 - [ ] Haut- und Bewegungsqualität nach Umhängen manuell prüfen.
-- [x] Vorhandenes Gesamtskelett automatisch verbinden; beim Posieren Ein-/Zweiglied-Ketten mit erhaltenen Knochenlängen lösen (0.11.0).
-- [x] Manuell einstellbare Beugegrenzen am mittleren Knochen einer Zweiglied-IK-Kette berücksichtigen; Grenzen speichern, über MCP bearbeiten und betroffene Posen markieren (0.33.0).
 - [ ] Anatomische Gelenkketten aus ungeriggter Oberfläche erzeugen; allgemeine Dreh-/Twistgrenzen, fixierte Füße und gekoppelte Ganzkörper-IK ergänzen.
-- [x] Gespeicherte Einzelposen lesend gegen konfigurierte IK-Beugegrenzen prüfen; Winkel, Verletzungen und nicht auswertbare Ketten anzeigen (0.34.0).
-- [x] Eigene Studio-Moves einschließlich Zwischenbildern und Schleifenrückweg stichprobenartig gegen Beugegrenzen prüfen; Abbruch und Schutz vor veralteten Ergebnissen (0.35.0).
-- [x] Auffällige Stichproben direkt pausiert ansehen, vorherige Bearbeitungspose bei Stopp wiederherstellen und Prüfbilder ausdrücklich als neue Pose übernehmen (0.36.0; ein Undo-Schritt).
 - [ ] Beugegrenzen, Posen- und Bewegungsprüfung samt Prüfbildübernahme im gerenderten Studio abnehmen; lückenlose Bewegungsprüfung, direkte Drehgrenzen und Korrekturen ergänzen.
 - [ ] Bewegungsfähige Rigs unterschiedlicher Körperformen systematisch prüfen.
-- [x] Betroffene Posen/Moves nach Änderungen an Skelett-Grundstellung, freien Punktpositionen und Einflussbereichen zur Prüfung markieren (0.7.0).
-- [ ] Bewegungen geometrisch auf Fehlstellungen, Gelenkgrenzen und Kollisionen prüfen und automatisch korrigieren.
-
-**Abnahme:** Ein fehlendes Knie ergänzen und anschließend sinnvoll beugen; ebenso eine Figur mit abweichender Gliedmaßenanzahl bearbeiten. Diese vollständige Abnahme ist noch nicht erreicht.
+- [ ] Die seit 0.87.0 vorhandene Dreiecks-Dehnungsprüfung einzelner Posen nach der Move-Stichprobenprüfung und komponentenweisen Volumenschätzung nach den adaptiven Diagnose-Zwischenbildern um Selbstüberschneidung, lokale Volumenerhaltung und Referenzansichten erweitern; die seit 0.88.0 begrenzte Gewichtssuche und die seit 0.91.0 auf Ellenbogen und Knie erweiterten Korrekturformen um weitere Gelenke, durchgehende kombinierte Bewegungen und charakterbezogene Qualitätskriterien ergänzen. Die aktuellen Warnschwellen sind keine anatomische Abnahme.
 
 ## 5. Bild zu 3D und KI-Korrektur
 
 - [ ] Bestehenden PaKaChi anhand seiner erhaltenen Tierform und korrigierten humanoiden Stilreferenz in 3D nachbilden; beide Formen und die Transformation erhalten.
-- [x] Lokalen TripoSR-HTTP-Dienst und Fachadapter mit Auftragskern verbinden (0.21.0; Transporttest mit synthetischem Backend, keine GPU-Abnahme).
-- [x] Technische Vorauswahl und lokales TripoSR-Testwerkzeug mit Vorprüfung/GLB-Berichten vorbereiten (0.12.0).
-- [ ] Geeignete Generierungs-/Rigging-Verfahren an echten Testfiguren bewerten. **Echte Inferenz und Qualitätsvergleich stehen weiterhin aus.** [Testlauf](KI-GENERIERUNG.md).
-- [x] Bildimport per Drag & Drop, lokalen Generatoraufruf, Phasenstatus und Fehlermeldungen anschließen (0.22.0; Inferenz-/Browserabnahme offen).
+- [ ] Geeignete Generierungs-/Rigging-Verfahren qualitativ vergleichen. Echte TripoSR-CPU-Inferenz beider Originalformen ist seit 0.83.0 belegt; GPU-Abnahme und der Vergleich mit einem weiteren Verfahren bleiben offen. [Testlauf](KI-GENERIERUNG.md).
 - [ ] Freien Korrekturprompt und „Skelett neu versuchen“ integrieren.
-- [x] Getrennte Vorschau übernehmen/verwerfen und bisheriges Modell bis dahin erhalten (0.22.0; Übernahme als revisionsgeschützter Import).
-- [x] Separaten Rücksprung/Wiederholen für den letzten vollständigen Modellwechsel mit Projektinhalten bereitstellen (0.23.0; ein Sitzungs-Snapshot).
-- [x] 3D-Kandidat separat vorbereiten und bei synchronen Übergabefehlern Viewer, Editor, DOM und StateMachine-Bindung wiederherstellen (0.24.0; Fehler-Injektion in DOM-/Komponententests).
 - [ ] Diesen Ablauf im gerenderten Browser prüfen; Fehler beim separaten Neustart des Original-Bildplayers und GPU-Kontextverlust gesondert absichern.
-
-**Abnahme:** Ein Bild wird tatsächlich zu einem überprüfbaren, beweglichen Modell. Platzhalter oder nur geladene Skelettdaten erfüllen dieses Ziel nicht.
 
 ## 6. Bedienung, Qualität und Export
 
-- [x] Freie Ansichtsdrehung mit gedrücktem Mausrad, Zoomen und Rechtsziehen ohne Tastaturmodifikatoren; Drehpunkt an der aktuellen Figurenmitte statt am verschobenen Zoom-Ziel (0.11.1).
-- [x] Rück-/Unterseite zugänglich machen; direkte Punktbewegung und optionale Achsgriffe.
-- [x] Deutsch/English für Studio-Bedienelemente sowie invertierbare Drehrichtung lokal speichern.
-- [x] Ursprüngliches Modell und bearbeitbare Studio-Daten in der Projektdatei erhalten.
 - [ ] Lokalisierung von Originalplayer, Modellbeschreibungen und technischen Meldungen vervollständigen.
 - [ ] Modellqualität und Dateigröße skalieren; Quelle neben optimierten Ableitungen bewahren.
-- [ ] Animationen nach Optimierungen prüfen; eigenständigen GLB-Export ergänzen.
+- [ ] Animationen nach Optimierungen prüfen; Originalclip-Übernahme in Animations-GLB ergänzen. Statischer GLB-Export ist seit 0.77.0, GLB mit bearbeitetem Hautskelett seit 0.78.0 und mit ausgewähltem Studio-Move (Knochen/Figur) seit 0.79.0 und mit freien Oberflächenpunkten als Morph-Animation seit 0.80.0 implementiert.
 - [ ] Gesamten Ablauf ohne Fachwissen erproben.
-
-**Abnahme:** Bild hineinziehen, Avatar korrigieren, Bewegung erstellen, speichern und per Agent auslösen – in einer Anwendung.
 
 ## 7. Studio-Harness und Anbieteranbindung
 
-Beschlossenes Design: [Anbieter, Rollen und Auftragsablauf](Design.md#11-studio-als-ki-harness-und-freie-anbieterwahl). Die Konfigurationsgrundlage ist seit 0.13.0 umgesetzt; die verbleibenden Schritte bauen darauf auf. Ein gespeichertes Profil ist noch keine geprüfte Verbindung.
-
-- [x] Profilformat, Adaptervertrag für Probe/Modellliste und interne Prüfung von Modellidentität und Rollenfähigkeit definieren (0.13.0; mit Testadaptern geprüft).
-- [x] Internen Ausführungsvertrag mit Fortschrittsmeldungen, Abbruchsignal und Ergebnis sowie einen Auftragskern ergänzen (0.14.0; Testadapter).
 - [ ] Produktive Adapter implementieren; Fähigkeiten und Auftragsabläufe gegen echte Dienste prüfen.
-- [x] Mehrere benannte Profile mit Schnittstelle, Serveradresse und Modell-ID lokal speichern, bearbeiten, entfernen und unabhängig den Rollen zuordnen (0.13.0).
-- [x] Optionalen passwortverschlüsselten Browsertresor ergänzen (0.19.0), einschließlich Passwortwechsel und Sitzungssperre (0.20.0); Schlüssel bleiben von Profilen und Projekten getrennt.
-- [x] Modelllisten und Verbindungsprüfung für Ollama, LM Studio und OpenAI-kompatible APIs mit optionalem Sitzungsschlüssel; manuelle Modell-ID weiterhin möglich (0.15.0).
 - [ ] Weitere native Cloud-Adapter und offiziell unterstützte OAuth-Verfahren ergänzen; Tresor und nativer Anthropic-Adapter sind implementiert.
-- [x] Assistententransporte für Ollama, LM Studio, OpenAI-kompatible APIs und Anthropic implementieren (0.16.0/0.17.0; Protokolltests).
 - [ ] Unterstützte Fähigkeiten und Modellqualität an realen lokalen Diensten und Cloud-Konten abnehmen.
-- [x] Internen Auftragskern mit festem Anbieter/Modell, Fortschritt, Fehlern, Zeitlimit und Abbruch umsetzen; späte Antworten verwerfen und höchstens einmal ausführen (0.14.0); optionale Vorprüfungs-Fallbacks seit 0.25.0.
-- [x] Generatoroberfläche mit sichtbarer Route, Phasenstatus, Abbruchhinweis, getrennter Vorschau und ausdrücklichem Versuch beim nächsten Anbieter anbinden (0.22.0/0.25.0).
 - [ ] Geeignete lokale und externe 3D- sowie Rigging-Adapter mit echten Eingaben prüfen. Geometrie, vollständige Körperhierarchie und Hautgewichte getrennt bewerten; Original-PaKaChi in beiden Formen und die Transformation zusätzlich prüfen.
-- [x] Optionalen integrierten Assistenten an validierte Studio-Werkzeuge anschließen (0.16.0); externe MCP-Clients bleiben unabhängig. Direkte lokale Generierung benötigt keinen zusätzlichen LLM-Aufruf (0.22.0).
-- [x] Interne Ergebnisprüfung und Übernehmen/Verwerfen mit Sitzungs-/Revisionsabgleich bereitstellen (0.14.0; noch keine Studio-Transaktion).
-- [x] Formatspezifische Geometrieprüfung und sichtbare Vorschau mit revisionsgeschütztem Import anschließen (0.22.0; DOM-/Geometrietests).
 - [ ] Korrekturprompt ergänzen und abgesicherte 3D-Übernahme samt Modellwechsel-Rücksprung im gesamten Ablauf visuell prüfen.
-
-**Abnahme:** Ein Nutzer kann drei unterschiedliche geeignete Dienste konfigurieren, Modelle je Rolle wählen und einen vollständigen Bild-zu-Avatar-Auftrag ausführen. Ein lokaler Ablauf benötigt keinen Cloud-Zugang. Fehler, Abbruch oder ein veraltetes Ergebnis überschreiben keine manuellen Änderungen; Neuversuche wechseln nicht unbemerkt Anbieter oder Kostenquelle. Exporte enthalten keine Zugangsdaten. Die Vorschau zeigt ein tatsächlich bewegliches Modell und wird erst nach Übernahme zum Projektstand.
-
-## Noch zu entscheiden
-
-- Desktop-Verpackung und tatsächlich geprüfte Betriebssysteme.
-- Priorität und geprüfter Funktionsumfang konkreter lokaler und externer Anbieteradapter, Modelle, Hardwarebedarf und Lizenzen.
-- Betriebssystem-Schlüsselbund für eine mögliche Desktop-Fassung und anbieterspezifisch verfügbare OAuth-Verfahren; der optionale Browsertresor ist implementiert.
-- Lizenz.
-- Erweiterungen der Exportformate und der sicheren Remote-Anbindung.
-
-Three.js, glTF/GLB, JSON-Katalog und Studio-Projektformat 1 sind bereits die Implementierungsbasis; diese Entscheidungen sind nicht mehr pauschal offen.
 
 ## 8. Freie Modellwahl und lokale Einrichtung
 
-- [x] Unabhängige Profile für ALLE Rollen; keine feste Bindung zwischen Rolle und lokalem/Cloud-Anbieter.
-- [x] Optionaler Ollama-Helfer mit Hardwaremessung, Speicherbudget, exakten Tags, ausdrücklicher Downloadbestätigung und eigenen Tags (0.15.0).
-- [x] Nach Download Modellidentität, 4096 Kontext, vollständige GPU-Belegung beziehungsweise ausdrücklichen CPU-Betrieb und zwei einfache Werkzeugaufrufe prüfen; Bericht und eigener Alias.
 - [ ] Reale Hardwareabnahme und komplexe deutsche/englische Studio-Aufgaben einschließlich Bilder pro Quantisierung prüfen.
 - [ ] AMD/Intel/Apple und mehrere GPUs zuverlässig messen; LM-Studio-Modellinstallation prüfen.
 - [ ] Für jede Rolle lokale und Cloud-Ausführung integrieren: direkte Fachmodelle sowie LLM-gesteuerte Werkzeugketten, soweit nachweislich geeignet.
-- [x] Native Anthropic-Modelllisten und Messages mit API-Schlüssel anbinden (0.17.0; Protokolltests).
 - [ ] Reale Kontoabnahme für Anthropic, OpenAI, DeepInfra und OpenRouter; weitere Authentifizierungswege nur nach offizieller Unterstützung.
 - [ ] Fachverfahren für Geometrie und Rigging live validieren und über austauschbare Adapter zugänglich machen. Recherche nur nach diesen Aufgaben, kein Gesamtkatalogscan.
 
-Details: [Modellauswahl](LOKALE-MODELLE.md). Die aktuelle Ollama-Kuration ist eine Einstiegshilfe für die lokale Assistentenrolle und keine Einschränkung der anderen Rollen.
-
 ## 9. Integrierter Assistent
 
-- [x] Aufgaben an das unabhängig gewählte Assistentenprofil senden (Ollama, LM Studio, OpenAI-kompatible Chat-API; 0.16.0).
-- [x] Begrenzte lesende Werkzeugschleife und konkrete, einzeln bestätigte Studio-Vorschläge mit bestehender Freigabe, Sitzung/Revision und Undo.
-- [x] Ziel/Datenumfang anzeigen; keine gespeicherten Chatverläufe; Schlüssel optional im getrennten verschlüsselten Tresor, Abbruch und späte Antworten absichern.
 - [ ] Reale Anbieter- und Modellabnahme einschließlich deutscher/englischer Studio-Aufgaben und Browser-CORS.
-- [x] Mehrere bestehende Move-Sequenzen gemeinsam ändern: vollständig vorprüfen, einmal bestätigen und als einen Undo-/Redo-Schritt übernehmen (0.40.0).
-- [x] Lokale Vorher-/Nachher-Tabellen für einzelne Sequenzvorschläge und Pakete mit Namen, IDs, wiederholten Schritten und Revisionsprüfung anzeigen (0.41.0).
-- [x] Vorgeschlagene und bisherige Posenfolgen vor Übernahme einzeln am Studio-Modell abspielen; Bearbeitungspose danach wiederherstellen, ohne Projekt-/Undo-Änderung (0.42.0).
 - [ ] Vorschau und Sequenzpakete im gerenderten Browser sowie mit externem Anbieter abnehmen; Bildkontext und Transaktionen für weitere Studio-Aktionen ergänzen.
 - [ ] Weitere Cloud-Fachadapter und Rigging-Ausführung unabhängig von der Assistentenrolle integrieren; Anthropic, Tresor und lokaler Generator sind vorhanden.
 
 ## 10. Anthropic-Abnahme
 
-- [x] Frei zuordenbare Anthropic-Profile, native Modellliste und Assistenten-Werkzeugablauf (0.17.0).
-- [x] API-Schlüssel nur in Headern, unbekannte/abgeschnittene Antworten abweisen, bestehende Studio-Prüfungen erhalten.
 - [ ] Echter API-/Browserlauf mit Workspace-gebundenem Schlüssel und passendem Modell.
-- [x] Paginierte Anthropic-Modelllisten vollständig innerhalb fester Grenzen laden; Abbruch, gemeinsamer Timeout und Cursorprüfung (0.39.0).
 - [ ] Zusätzliche Workspace-Auswahl bei Bedarf ergänzen; paginierte Listen mit echtem Konto/Browser abnehmen.
 - [ ] Offiziell unterstütztes OAuth implementieren; API-Schlüssel können bereits optional im Browsertresor gespeichert werden.
 
-- [x] Editierbare Standardadressen und schnittstellenbezogene Adressentwürfe ergänzen (0.17.1).
+## 11. Mehranbieter-Routen
 
-- [x] Sechs Einrichtungsvorlagen für Anthropic, OpenAI, OpenRouter, DeepInfra, Ollama und LM Studio (0.17.1); echte Konto-/Modellabnahme bleibt offen.
-
-## 11. Mehranbieter-Routen (0.18.0)
-
-- [x] Gleichzeitig gespeicherte Anbieter-/Modellprofile mit unabhängigem Hauptprofil und sortierbaren Fallbacks für alle drei Rollen.
-- [x] Profilbezogene Sitzungsschlüssel und Modellwahl beim Umschalten erhalten.
-- [x] Assistent führt konfigurierte Route mit passendem Schlüssel je Profil aus; Abbruch und Studio-Konflikte stoppen sie.
-- [x] Optionaler passwortverschlüsselter lokaler Schlüsseltresor über Seitenneustarts hinweg (0.19.0).
-- [x] Generatorroute: automatische Fallbacks während der Fähigkeitsprüfung, begrenzte Probezeit, Revisionsschutz vor Ausführung und ausdrücklicher Versuch beim nächsten Anbieter nach Auftragsfehler (0.25.0; lokaler TripoSR-Adapter).
 - [ ] Weitere Cloud-Generator-/Rigging-Fachadapter und Rigging-Fallback-Ausführung anschließen.
 - [ ] Echte Anbieter-/Kontoabnahme der Fallbacks.
 
 ## 12. Schlüsseltresor
 
-- [x] Explizites verschlüsseltes Speichern und Entsperren passend zu mehreren Profilen und deren tatsächlichen Zieladressen (0.19.0).
-- [x] Falsches Passwort, manipulierte Daten, Speicherfehler und veraltete Operationen abweisen; bestehende Ablage erhalten.
 - [ ] Visuelle Browserabnahme sowie unabhängige Sicherheitsprüfung.
-- [x] Passwortwechsel mit Prüfung des bisherigen Passworts und Erhalt des gespeicherten Schlüsselbestands (0.20.0).
-- [x] Ausdrückliche Sitzungssperre mit Löschen der Sitzungsschlüssel/Schlüsselentwürfe und Verwerfen laufender Ergebnisse (0.20.0).
 - [ ] Optional Betriebssystem-Schlüsselbund für spätere Desktop-Verpackung prüfen.
 
-- [x] Zwischengelenk einfügen und echten Knochen löschen über MCP und integrierten Assistenten anbieten; Freigabe, Revision, Rig-Modus und Undo/Redo (0.50.0).
+## Knochenbearbeitung durch Agenten
+
 - [ ] Neue Topologieaktionen mit echtem externem MCP-Host und Anbieter abnehmen.
 
-
-## Knochenbearbeitung durch Agenten (0.50.0)
-
-Seit **0.50.0** unterstützen `edit_studio` und der integrierte Assistent zwei weitere Aktionen: `insert_bone` mit der ID des Kindknochens fügt ein echtes Zwischengelenk mittig ein; `delete_bone` entfernt den angegebenen Knochen und überträgt Kinder und Gewichte an seinen Elternknochen. `delete_point` entfernt weiterhin nur den Griff. Zuerst `get_studio` mit `section: points` lesen, dann im Rig-Modus mit aktueller Sitzung/Revision und erteilter Bearbeitungsfreigabe arbeiten. Der integrierte Assistent legt Änderungen weiterhin zur ausdrücklichen Übernahme vor. Jeder Eingriff ist über Undo/Redo rückgängig machbar; vorhandene Posen danach prüfen. Die Schutzregeln für Wurzeln, skalierte Knochen und Anbauteile bleiben bestehen.
-
-249 Tests und Build bestanden; Node-MCP-Transport mit beiden Aktionen geprüft. Python-Modell und Werkzeugbeschreibung erweitert, Syntax geprüft. Keine neue reale Python-MCP-/Anbieterabnahme; der [CI-Lauf für 0.50.0](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/40112365771) ist erfolgreich.
-
-
-**0.51.0:** Zwei Chromium-Fälle für Assistenten-Vorschlag → ausdrückliche Übernahme → Undo bei `insert_bone` und `delete_bone`. Sie prüfen unveränderte Revision/Geometrie vor Zustimmung und Wiederherstellung der Gelenkdaten nach Undo. Antworten des Anbieters sind simuliert. 249 Tests, Build und alle 14 Chromium-Fälle bestanden ([CI-Nachweis](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/40113222944)). Der vorherige Stand 0.50.0 besteht seine [CI-Prüfung](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/40112365771).
-
-- [x] Browserfälle für bestätigte Knochenaktionen des Assistenten mit Undo ergänzen (0.51.0).
-- [x] Neue Assistenten-Knochenfälle erfolgreich im Chromium-Lauf ausführen (0.51.0; Zustimmung und Undo für beide Aktionen bestätigt).
-
-
-**0.52.0:** Zwischengelenke lassen sich über einen Mausregler bei 10–90 % der vorhandenen Knochenstrecke einfügen (vom Elternknochen zum ausgewählten Kind; Standard 50 %). Assistent und beide MCP-Server unterstützen dafür optional `ratio`. Vorhandene Posen, Gewichtsverteilung, Projektpersistenz und Undo/Redo bleiben berücksichtigt. 251 Node-Tests, Build und alle 14 Chromium-Fälle bestanden ([CI-Nachweis](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/40134452209)). Keine neue manuelle Hautqualitäts- oder reale Anbieterabnahme.
-
-- [x] Position neuer Zwischengelenke per Mausregler und optionalem Agentenparameter wählen (0.52.0).
-
-
-**0.53.0:** Vorhandene Knochen lassen sich im Modus „Gelenke bearbeiten“ einem anderen Elternknochen zuordnen. Grundstellung, gespeicherte Einzelposen und aktuelle Pose werden umgerechnet; Hautgewichte bleiben beim jeweiligen Knochen. Undo/Redo, gemischte Umbaufolgen, Projekt-/Katalogexport und die Aktion `reparent_bone` für Assistent/MCP sind enthalten. `get_studio` liefert `parentBone` und `parentId`. 256 Node-Tests, Build und alle 16 Chromium-Fälle bestanden ([CI-Nachweis](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/40138951275)).
-
-Nur innerhalb desselben Skelettbaums; Wurzeln, Kreise, skalierte Knochenketten und Knochen mit direkten Nicht-Knochen-Anbauteilen werden abgewiesen. Gespeicherte Einzelposen bleiben erhalten, interpolierte Bewegungswege können sich ändern und werden zur Prüfung markiert. Keine automatische anatomische Bewertung oder neue reale Anbieter-/Python-Host-Abnahme.
-
-- [x] Umhängen im Chromium-Browser über Oberfläche/Dateiaustausch und Assistent/Zustimmung/Undo prüfen (0.53.0).
-
-
-**0.54.0:** Knochen mit starren Anbauteilen können umgehängt werden. Auch verschachtelte starre Objektgruppen mit eigener Drehung und Skalierung bleiben am Knochen befestigt; Grundstellung und gespeicherte Einzelposen behalten ihre Welttransformationen. Anbauteile mit eigenen Knochen oder SkinnedMesh bleiben ausgeschlossen. Löschen eines Knochens mit Anbauteilen ist weiterhin gesperrt. 258 Node-Tests, Build und alle 16 Chromium-Fälle bestanden ([CI-Nachweis](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/40184399914)).
-
-
-**0.55.0:** Oberflächen-Einfluss eines Knochens lässt sich anteilig auf einen anderen übertragen. Mengenregler, Undo/Redo, Projekt-/Katalogpersistenz, gemischte Knochenänderungen und `transfer_weights` für Assistent/MCP sind vorhanden. Die Grundgeometrie bleibt erhalten; Posen werden mit `skin-weights` zur Prüfung markiert. 264 Node-Tests, Build und alle 17 Chromium-Fälle bestanden ([CI-Nachweis](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/40217823978)).
-
-Die Übertragung betrifft alle Vertices mit Quellgewicht, ohne räumlichen Malpinsel. Bei mehr als vier Einflüssen bleiben die vier stärksten, anschließend auf Summe 1 normalisiert; dadurch kann der effektive Anteil vom Reglerwert abweichen. Fehlende Zielpaletten, leere Quellen und ungültige Werte werden ohne bleibende Änderung abgewiesen. Manuelle Haut-/Bewegungsqualität und reale Anbieterabnahme bleiben offen.
-
-- [x] Hautgewichte zwischen vorhandenen Knochen anteilig übertragen, normalisieren, speichern und rückgängig machen (0.55.0).
-- [x] Räumlichen Gewichtspinsel ergänzen (0.59.0).
-- [x] Farbige Einflussanzeige ergänzen (0.60.0).
 - [ ] Vertex-Auswahl ergänzen; Hautqualität manuell prüfen.
-
-- [x] Hautgewichtsübertragung im Chromium-Browser mit Mengenregler, Undo/Redo und Projektdateiaustausch prüfen (0.55.0).
-
-
-**0.56.0:** Hautgewichtsübertragungen können auf einen kugelförmigen Bereich um das Quellgelenk begrenzt werden. Radius per Mausregler; Stärke nimmt zum Rand weich auf null ab. Außerhalb bleiben Gewichte unverändert. Assistent/MCP unterstützen optional `region: {center, radius}`; Projekt-/Katalogexport erhalten den Bereich. 266 Node-Tests, Build und alle 17 Chromium-Fälle bestanden ([CI-Nachweis](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/40219939990)).
-
-Der Bereich bezieht sich auf normalisierte Weltkoordinaten der ursprünglichen Grundpose, unabhängig von der aktuellen Figurpose. Die Oberfläche nutzt den gespeicherten Gelenkpunkt als Mittelpunkt; API-Aufrufe können einen eigenen Mittelpunkt setzen. Noch kein kontinuierlicher Malpinsel oder sichtbare Bereichsvorschau. Höchstens vier normalisierte Einflüsse pro Vertex; manuelle Hautqualität und echte Anbieterabnahme bleiben offen.
-
-- [x] Hautgewichtsübertragung räumlich auf eine Kugel mit weichem Randabfall begrenzen, speichern und über MCP verfügbar machen (0.56.0).
-- [x] Sichtbare Bereichsvorschau mit Radiusgrenze und halber Stärke ergänzen (0.57.0).
-- [x] Kontinuierliches Malen auf der Oberfläche ergänzen (erste begrenzte Stufe, 0.59.0).
-- [x] Farbige Anzeige tatsächlicher Hautgewichte ergänzen (0.60.0).
-
-- [x] Räumlich begrenzte Übertragung im Chromium-Browser mit Checkbox, Radiusregler, Undo/Redo und Wiederladen prüfen (0.56.0).
-
-
-**0.57.0:** Die räumlich begrenzte Gewichtsübertragung zeigt eine Vorschau im Studio: grüne Außenringe markieren den Radius, orange Innenringe die halbe Stärke. Sie folgt Auswahl, Radius und bearbeitetem Gelenkpunkt und wird im Posenmodus sowie außerhalb des Studios ausgeblendet. Die Vorschau verändert weder Projekt noch Undo-Verlauf. 268 Node-Tests, Build und alle 17 Chromium-Fälle bestanden ([CI-Nachweis](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/40253220224)).
-
-Die Ringe zeigen den räumlichen Bereich in der ursprünglichen Grundpose, nicht die tatsächlich gewichteten Vertices. Kontinuierlicher Gewichtspinsel und farbige Darstellung der Hautgewichte bleiben offen. Keine neue manuelle Hautqualitäts- oder reale Anbieterabnahme.
 
 ## Freie Knochenabzweigungen
 
-**0.58.0:** Neue Knochen lassen sich als freie Abzweigung an einem ausgewählten Elternknochen platzieren. Verbindung und Skinning-Palette entstehen automatisch; bestehende Hautgewichte bleiben unverändert. Einfluss lässt sich danach gezielt übertragen. Undo/Redo, gespeicherte Posen, Projekt-/Katalogexport und `add_bone` über Assistent/MCP sind berücksichtigt.
-
-271 Node-Tests, Build und alle 18 Chromium-Fälle bestanden ([CI-Nachweis](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/40277434553)); Python-Syntax lokal geprüft.
-
-Benötigt einen vorhandenen Elternknochen; kein neues Skelett auf einer ungeriggten Oberfläche. Neue Knochen wirken erst nach Gewichtsübertragung auf die Haut. Skalierte Knochenketten sind ausgeschlossen. Kontinuierlicher Gewichtspinsel, Gewichtsfärbung und manuelle Hautabnahme bleiben offen. Projekte mit freien Knochen benötigen mindestens 0.58.0; ältere Leser lehnen diese Einträge ab.
-
-- [x] Freie Kindknochen in einem vorhandenen Skelett setzen, speichern und per MCP bearbeiten (0.58.0).
-- [ ] Erstes Skelett auf einer ungeriggten Oberfläche erstellen und binden.
+- [ ] Anatomisches erstes Skelett auf beliebiger ungeriggter Oberfläche erkennen und zuverlässig binden. Proportionale Ausgangsvorlagen für neue statische Generatorausgaben sind seit 0.95.0 vorhanden; manuelle Abnahme und KI-Anatomie fehlen.
 
 ## Gewichtspinsel
 
-**0.59.0:** Hautgewichte lassen sich mit gedrückter linker Maustaste zwischen zwei ausgewählten Knochen übertragen. Der Pinsel verwendet Radius und Anteil, zeigt den räumlichen Einfluss am aktuellen Treffer und setzt Aufträge mit festem räumlichem Abstand. Ein kompletter Strich ist ein Undo-Schritt; Abbruch und Überschreitung des Übertragungslimits nehmen den ganzen Strich zurück. Währenddessen sind Editor-Eingaben und Agentenänderungen gesperrt.
-
-275 Node-Tests, Build und alle 19 Chromium-Fälle bestanden ([CI-Nachweis](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/40280964660)).
-
-Erste Pinselstufe: kugelförmiger Einfluss, auch durch dünne Oberflächen hindurch; keine Beschränkung auf sichtbare Vertices, keine Gewichtsfärbung. Überlappende Aufträge verstärken den Effekt. Höchstens 128 gespeicherte Übertragungen pro Projekt einschließlich Einzelaufträgen; lange Striche können das Limit erreichen. Große Sprünge und fehlende Oberflächentreffer unterbrechen die Verbindung zwischen Aufträgen. Manuelle Hautqualitäts- und Performance-Abnahme bleibt offen.
-
-- [x] Hautgewichte per Mausstrich mit festem Auftragsabstand und gemeinsamem Undo übertragen (0.59.0).
-- [x] Pinselbudget auf 1024 Aufträge erhöhen und fortlaufende Übertragung ohne vollständigen Wiederaufbau ermöglichen (0.61.0).
-- [x] Optionale geometrische Sichtprüfung mit gespeicherter Kamera ergänzen (0.63.0).
-- [x] Materialgruppen/Opazität 0 (0.64.0) und deterministische Alpha-Ausschnitte auf Texturbasisebene (0.65.0) berücksichtigen.
 - [ ] Gerenderte Alpha-Kanten/Mipmaps, Teiltransparenz sowie große Modelle und Ladezeiten manuell prüfen.
-
-## Farbige Hautgewichte
-
-**0.60.0:** Die tatsächlichen Hautgewichte des ausgewählten Knochens können farbig angezeigt werden: Blau = 0 %, Grün = 50 %, Rot = 100 %, mit Zwischenfarben. Die Anzeige folgt Auswahl, Gewichtsübertragung, Pinsel und Undo/Redo. Ausschalten, Posenmodus und Verlassen des Studios stellen ursprüngliche Materialien und Vertex-Farben wieder her. Die Ansicht verändert weder Projekt, Revision noch Undo-Verlauf.
-
-277 Node-Tests, Build und alle 20 Chromium-Fälle bestanden ([CI-Nachweis](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/40313636231)).
-
-Nur geriggte Oberflächen mit Skinning-Gewichten. Farben werden zwischen Vertices über Dreiecke interpoliert; die Anzeige ist keine Anatomie- oder Qualitätsbewertung. Der bestehende Pinsel bleibt kugelförmig und auf 128 gespeicherte Übertragungen begrenzt. Beschränkung auf sichtbare Vertices, größere Pinselbudgets und manuelle Hautqualitäts-/Performance-Abnahme bleiben offen.
-
-## Größeres Pinselbudget
-
-**0.61.0:** Das gemeinsame Budget für Pinsel- und Einzelübertragungen steigt von 128 auf 1024 Aufträge pro Projekt. Neue Übertragungen werden auf den aktuellen Gewichten berechnet, ohne den bisherigen Verlauf und das Skelett bei jedem Auftrag erneut aufzubauen. Alle betroffenen Oberflächen werden vor der Übernahme geprüft; Fehler hinterlassen keine teilweise geänderten Gewichte. Posen, Skinning-Paletten und bestehende Attribute bleiben während der Übertragung erhalten.
-
-278 Node-Tests, Build und alle 20 Chromium-Fälle bestanden ([CI-Nachweis](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/40362549729)). Der Import mit 256 Aufträgen dauerte auf diesem CI-Runner 19,181 Sekunden; weitere Ladezeitoptimierung bleibt offen.
-
-Projekte mit mehr als 128 Gewichtsaufträgen benötigen mindestens 0.61.0. Das Projektformat bleibt Version 1; ältere Leser lehnen das größere Budget ab. Laden und Undo/Redo rekonstruieren weiterhin den gespeicherten Verlauf. Die manuelle Performance-Abnahme großer Modelle bleibt offen; keine pauschale Echtzeit-Zusage. Sichtbare Oberflächen begrenzen den kugelförmigen Pinsel weiterhin nicht.
-
-- [x] Erste Beschleunigung langer Gewichtsverläufe beim Import (0.62.0): gemessene CI-Importzeit für 256 Aufträge von 19,181 auf 6,822 Sekunden reduziert. Weitere Messungen und Optimierung bleiben offen.
 
 ## Gewichtsverläufe schneller berechnen
 
-**0.62.0:** Die Berechnung langer Gewichtsverläufe verwendet vorberechnete Weltpositionen, wiederverwendete kleine Zahlenfelder und direkte Pufferkopien. Vertices ohne Quellgewicht oder außerhalb des Bereichs werden früh übersprungen. Der Gewichtsvergleich bestätigt dieselben Ergebnisse einschließlich Zusammenführen doppelter Indizes, Sortierung, Normalisierung und Vier-Einfluss-Grenze.
+- [ ] Mit dem [CPU- und Browser-Importbenchmark](IMPORT-BENCHMARK.md) große reale Projekte einschließlich Texturen auf Zielhardware messen und anschließend gezielt optimieren. Das Browser-Messwerkzeug ist seit 0.81.0 implementiert; repräsentative Großmodelle, GPU-Fertigstellung und manuelle Performance-Abnahme bleiben offen.
 
-279 Node-Tests, Build und alle 20 Chromium-Fälle bestanden ([CI-Nachweis](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/40407457621)). Der Browserimport mit 256 Aufträgen dauerte in diesem Lauf 6822 ms (vorheriger 0.61.0-Lauf: 19181 ms). Einzelmessungen auf CI-Runnern, keine allgemeine Laufzeitgarantie.
+## Noch zu entscheiden
 
-Das Budget bleibt bei 1024 Aufträgen. Lokale Messung mit 256 Aufträgen: 1626/1471/1551 ms für den reinen Rig-Reset (Median 1551 ms); vorherige Vergleichsmessung 6375/5903/5718 ms. Dies ist kein vollständiger Browserimport und keine allgemeine Echtzeit-Zusage. Vorberechnete Weltpositionen benötigen 24 Byte pro Vertex statt zuvor 12 Byte für die Positionskopie. Beschränkung des Pinsels auf sichtbare Oberflächen und manuelle Prüfung großer Modelle bleiben offen.
+- Desktop-Verpackung und geprüfte Betriebssysteme.
+- Priorität, Hardwarebedarf und Lizenzen konkreter Generierungs-/Rigging-Verfahren.
+- Projektlizenz.
+- Erweiterungen der Exportformate und sichere Remote-Anbindung.
 
-- [x] Gewichtsberechnung ohne neue Map-/Vektorobjekte pro Vertex und Auftrag beschleunigen (0.62.0).
-- [ ] Vollständige Importzeiten großer Projekte weiter messen und optimieren; manuelle Performance-Abnahme bleibt offen.
+Three.js, glTF/GLB, JSON-Katalog, Studio-Projektformat 1 und unabhängige Anbieterprofile pro Rolle sind festgelegt.
 
-## Pinsel mit Sichtprüfung
-
-**0.63.0:** Die optionale Checkbox „Pinsel nur auf sichtbare Oberfläche“ begrenzt Gewichtsaufträge auf geometrisch sichtbare Vertices im Blickfeld. Eine räumliche Suchstruktur prüft Verdeckung durch andere Dreiecke. Die Kamera wird pro Strich festgehalten und mit den Aufträgen gespeichert; Projekt-/Katalogexport und Undo/Redo reproduzieren die Auswahl. Assistent/MCP können `region.view` aus `get_studio.view` übernehmen.
-
-281 Node-Tests, Build und alle 20 Chromium-Fälle bestanden ([CI-Nachweis](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/40529588502)); Python-Syntax lokal geprüft. Der Browserimport mit 256 sichtgefilterten Aufträgen dauerte in diesem Lauf 8909 ms; Einzelmessung, keine allgemeine Laufzeitgarantie.
-
-Sichtprüfung bezieht sich auf die ursprüngliche Grundpose. Dreiecke gelten beidseitig als undurchsichtige Hindernisse; Transparenz, Alpha-Ausschnitte und Materialgruppen-Sichtbarkeit werden nicht ausgewertet. Die erste Sichtprüfung baut eine Suchstruktur auf und benötigt zusätzlichen Speicher; große Modelle sind noch nicht manuell abgenommen. Ohne Checkbox gilt weiterhin der kugelförmige Pinsel. Projekte mit `region.view` benötigen mindestens 0.63.0.
-
-
-## Material-Sichtbarkeit des Gewichtspinsels
-
-**0.64.0:** Neue sichtgefilterte Pinselstriche berücksichtigen ausgeblendete Materialien und Materialgruppen sowie transparente Materialien mit Opazität 0. Die ursprünglichen Materialeigenschaften werden beim Laden festgehalten; eine temporäre Gewichtsfärbung verändert die Auswahl nicht. `region.view.materials: true` speichert diese Regel. Ohne das Feld gilt weiterhin die geometrische Sichtprüfung aus 0.63.0, damit alte Verläufe unverändert bleiben.
-
-282 Node-Tests, Produktionsbuild und alle 20 Chromium-Fälle bestanden ([CI-Nachweis](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/40542963343)); Python-Syntax lokal geprüft. Der Browserimport von 256 Aufträgen dauerte in diesem Lauf 6254 ms; Einzelmessung, keine allgemeine Laufzeitgarantie.
-
-Teiltransparente Materialien und Alpha-Texturen gelten weiterhin als undurchsichtige Hindernisse; Dreiecke bleiben beidseitig. Große Modelle und Materialdarstellung sind noch nicht manuell abgenommen. Dateien mit dem neuen Feld benötigen mindestens 0.64.0.
-
-
-## Alpha-Ausschnitte im Gewichtspinsel
-
-**0.65.0:** Neue sichtgefilterte Pinselstriche berücksichtigen Alpha-Ausschnitte über `alphaTest`, Bildalpha und den Grünkanal einer `alphaMap`. Die Prüfung interpoliert UVs am Strahltreffer und berücksichtigt Texturtransformation, UV-Kanal, Wiederholung, Spiegelung, Flip und Nearest-/Linear-Vergrößerungsfilter. Pixel und Materialdaten werden beim Laden festgehalten. `region.view.alpha: true` zusammen mit `materials: true` speichert die neue Regel; ältere Aufträge behalten ihre bisherige Sichtprüfung.
-
-285 Node-Tests, Produktionsbuild und alle 21 Chromium-Fälle bestanden ([CI-Nachweis](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/40545759919)); Python-Syntax lokal geprüft. Der Browserimport von 256 Aufträgen dauerte in diesem Lauf 8998 ms; Einzelmessung, keine allgemeine Laufzeitgarantie.
-
-Die Alpha-Prüfung verwendet deterministisch die Basisebene der Textur, keine Mipmaps oder anisotrope Filterung. Dadurch sind Abweichungen zur gerenderten Kante bei Verkleinerung möglich. Unterstützt sind lesbare RGBA-8-Bit-Bilder bis 16.777.216 Pixel pro Textur. Nicht lesbare/komprimierte Texturen, fehlende UVs, Shader-Materialien und Alpha-to-Coverage bleiben verdeckend. Teiltransparenz wird nicht simuliert; Dreiecke bleiben beidseitig. GPU-/Materialqualität und große Modelle sind nicht manuell abgenommen. Neue Alpha-Aufträge benötigen mindestens 0.65.0; kein automatischer Umbau alter Verläufe.
-
-
-## Speicherbedarf der Sichtprüfung
-
-**0.66.0:** Der Sichtfilter kopiert nur UV-Kanäle, die tatsächlich von unterstützten Alpha-Materialien benötigt werden. Undurchsichtige Dreiecke erhalten keine eigenen UV-Vektoren. Die Sichtregeln und gespeicherten Projekte bleiben unverändert. `npm run benchmark:visibility` misst synthetische Flächen mit 5.000/20.000/80.000 Dreiecken, jeweils undurchsichtig und mit Alpha-Ausschnitt; jeder Fall läuft in einem eigenen Prozess.
-
-286 Node-Tests, Produktionsbuild und alle 21 Chromium-Fälle bestanden ([CI-Nachweis](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/40665412491)). Der Browserimport von 256 Aufträgen dauerte in diesem Lauf 4758 ms; Einzelmessung, keine allgemeine Laufzeitgarantie.
-
-Lokale Einzelmessung bei 80.000 Dreiecken: zurückbehaltener JavaScript-Heap einschließlich Testmodell von 166,10 auf 64,85 MiB (undurchsichtig) und 166,12 auf 100,20 MiB (Alpha). Die 1.000 Strahlproben lieferten jeweils dieselben Ergebnisse. Keine Messung des vollständigen Browserimports, Renderings oder Skinning; keine allgemeine Laufzeit-/Speicherzusage. Mipmaps, Teiltransparenz und manuelle Abnahme großer realer Modelle bleiben offen.
-
-
-## Browserprüfung der Mausnavigation
-
-**0.67.0:** Ein zusätzlicher Browserfall prüft echte Mausrad-, Rechts- und Mitteltastenereignisse im Studio. Nach außermittigem Zoom und Verschieben bleiben beim Drehen Abstand und Bildschirmposition der bekannten Figurenmitte konstant. Der Test wählt die normale und invertierte Drehrichtung über den Optionsdialog, prüft gegensinnige Kamerabewegung und funktionierenden Zoom nach Loslassen. Der übrige Studiozustand einschließlich Revision und Figur bleibt unverändert.
-
-Der erste CI-Lauf besteht 286 Node-Tests, Build und die bisherigen 21 Browserfälle. Der neue Mausfall scheiterte an einer Testposition unterhalb des sichtbaren Browserfensters. Der korrigierte Test verwendet den sichtbaren Canvas-Ausschnitt und prüft das getroffene Element; Build lokal bestanden. Sein CI-Bestätigungslauf [40727289984](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/40727289984) endet auch nach Wiederholung vor dem ersten Arbeitsschritt ohne Testlogs. Auch lokal endet Chromium vor dem Teststart mit `socket() failed: Operation not permitted`. Die Bestätigung aller 22 Browserfälle steht aus.
-
-Dies ergänzt den automatisierten Navigationsnachweis; tatsächliches Mausgefühl, komplexe Skelett-/Hautqualität und große reale Modelle bleiben manuell zu prüfen. Keine Änderung am Kameraalgorithmus.

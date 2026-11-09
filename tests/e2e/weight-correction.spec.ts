@@ -1,0 +1,19 @@
+import {test,expect} from '@playwright/test';
+import {readFile} from 'node:fs/promises';
+import {twistFixture} from '../helpers/twist-fixture.ts';
+import {exportRiggedFigureGLB} from '../../src/figure-glb.ts';
+
+test('local skin correction preserves a full twist through preview, explicit apply, undo, save and reload',async({page})=>{
+ class BinaryReader {result:ArrayBuffer|null=null;onloadend:(()=>void)|null=null;readAsArrayBuffer(blob:Blob){void blob.arrayBuffer().then(value=>{this.result=value;this.onloadend?.();});}}
+ const originalReader=globalThis.FileReader;Object.assign(globalThis,{FileReader:BinaryReader});const f=twistFixture(true);let glb:ArrayBuffer;
+ try{glb=await exportRiggedFigureGLB(f.root);}finally{Object.assign(globalThis,{FileReader:originalReader});}
+ const original=structuredClone(f.rig.data),project={format:'pakachi-studio',version:1,model:Buffer.from(glb).toString('base64'),avatar:{id:'correction-fixture',name:'Correction fixture',description:'Test fixture',moves:[]},studio:original};f.rig.dispose();
+ const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');await page.locator('#project-file').setInputFiles({name:'twist.pakachi.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(project))});await expect(page.locator('#message')).toContainText('Correction fixture bereit');await page.locator('#studio-tab').click();
+ await page.locator('#studio-points').selectOption(f.joint.id);await page.locator('#pose-list').selectOption('twist');await page.locator('#pose-weight-radius').fill('1.2');await page.locator('#pose-weight-radius').dispatchEvent('change');
+ await page.locator('#pose-show').click();await page.locator('#pose-check-surface').click();await expect(page.locator('#pose-surface-result')).toContainText('Auffällige');await page.locator('#viewport canvas').screenshot({path:'test-results/weight-correction-before.png'});
+ const info=()=>page.evaluate(()=>window.PaKaChiSM.call('get_studio') as any),before=await info();await page.locator('#pose-weight-search').click();await expect(page.locator('#pose-weight-apply')).toBeEnabled();const report=(await info()).weightCorrection;expect(report.afterIssues).toBeLessThan(report.beforeIssues);expect(report.requiresVisualReview).toBe(true);expect((await info()).revision).toBe(before.revision);await page.locator('#pose-weight-result').screenshot({path:'test-results/weight-correction-proposal.png'});
+ await page.locator('#pose-weight-apply').click();await expect(page.locator('#message')).toContainText('Zielpose bleibt erhalten');await page.locator('#pose-check-surface').click();await expect(page.locator('#pose-surface-result')).toContainText('Keine Überschreitung');await page.locator('#viewport canvas').screenshot({path:'test-results/weight-correction-after.png'});
+ await page.locator('#studio-undo').click();await page.locator('#pose-check-surface').click();await expect(page.locator('#pose-surface-result')).toContainText('Auffällige');await page.locator('#studio-redo').click();
+ const pending=page.waitForEvent('download');await page.locator('#studio-save').click();const file=(await(await pending).path())!,saved=JSON.parse(await readFile(file,'utf8'));expect(saved.studio.weightTransfers).toHaveLength(1);expect(saved.studio.poses.map((p:any)=>p.values)).toEqual(original.poses.map(p=>p.values));expect(saved.studio.moves).toEqual(original.moves);
+ await page.locator('#project-file').setInputFiles(file);await expect(page.locator('#message')).toContainText('Correction fixture bereit');await page.locator('#studio-tab').click();await page.locator('#pose-list').selectOption('twist');await page.locator('#pose-check-surface').click();await expect(page.locator('#pose-surface-result')).toContainText('Keine Überschreitung');expect(errors).toEqual([]);
+});

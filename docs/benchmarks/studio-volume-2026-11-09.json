@@ -1,0 +1,97 @@
+{
+  "version": 1,
+  "software": "0.93.0",
+  "scope": "Rest-pose measurement coverage only. No deformed-pose, local-volume or anatomical acceptance.",
+  "forms": [
+    {
+      "form": "humanoid",
+      "bytes": 14212880,
+      "sha256": "2ffd6401a1484ea8ad279ed314c5944c0f01034743f0df9795c30a8121f65abd",
+      "meshes": [
+        {
+          "name": "PaKaChi_body",
+          "triangles": 99176,
+          "volume": {
+            "status": "within",
+            "measuredComponents": 3,
+            "unmeasurableComponents": 0,
+            "issues": 0,
+            "minimumRatio": 1,
+            "maximumRatio": 1,
+            "reasons": {},
+            "limits": {
+              "minimumRatio": 0.8,
+              "maximumRatio": 1.2
+            },
+            "selfIntersectionsChecked": false
+          }
+        },
+        {
+          "name": "PaKaChi_fur",
+          "triangles": 40425,
+          "volume": {
+            "status": "unmeasurable",
+            "measuredComponents": 0,
+            "unmeasurableComponents": 25378,
+            "issues": 0,
+            "minimumRatio": null,
+            "maximumRatio": null,
+            "reasons": {
+              "open": 25378
+            },
+            "limits": {
+              "minimumRatio": 0.8,
+              "maximumRatio": 1.2
+            },
+            "selfIntersectionsChecked": false
+          }
+        }
+      ]
+    },
+    {
+      "form": "animal",
+      "bytes": 17813052,
+      "sha256": "25226f09bbdd02f4ec4e20f013f5585a3816df54dafc447ce308225a68202703",
+      "meshes": [
+        {
+          "name": "PaKaChi_body",
+          "triangles": 160976,
+          "volume": {
+            "status": "within",
+            "measuredComponents": 11,
+            "unmeasurableComponents": 0,
+            "issues": 0,
+            "minimumRatio": 1,
+            "maximumRatio": 1,
+            "reasons": {},
+            "limits": {
+              "minimumRatio": 0.8,
+              "maximumRatio": 1.2
+            },
+            "selfIntersectionsChecked": false
+          }
+        },
+        {
+          "name": "PaKaChi_fur",
+          "triangles": 44009,
+          "volume": {
+            "status": "unmeasurable",
+            "measuredComponents": 0,
+            "unmeasurableComponents": 32815,
+            "issues": 0,
+            "minimumRatio": null,
+            "maximumRatio": null,
+            "reasons": {
+              "open": 32815
+            },
+            "limits": {
+              "minimumRatio": 0.8,
+              "maximumRatio": 1.2
+            },
+            "selfIntersectionsChecked": false
+          }
+        }
+      ]
+    }
+  ]
+}

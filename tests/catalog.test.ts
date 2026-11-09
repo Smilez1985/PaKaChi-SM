@@ -2,14 +2,21 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { availableMoves, importedAvatar, parseCatalog, catalogChoices } from '../src/catalog.ts';
+import {parseModel,disposeModel} from '../src/viewer.ts';
+import {SkinnedMesh} from 'three';
 
 const data = JSON.parse(readFileSync(new URL('../public/model-zoo/catalog.json', import.meta.url), 'utf8'));
-test('each catalog capability has a real clip and a skinned model', () => {
+test('catalog advertises real clips and keeps unrigged PaKaChi drafts static', async () => {
+  if(typeof globalThis.ProgressEvent==='undefined')Object.defineProperty(globalThis,'ProgressEvent',{value:class extends Event {}});
   for (const avatar of parseCatalog(data)) {
-    const gltf = JSON.parse(readFileSync(new URL(`../public/${avatar.model}`, import.meta.url), 'utf8'));
-    assert.ok(gltf.skins.length > 0);
-    assert.equal(availableMoves(avatar, gltf.animations.map((a: { name: string }) => a.name)).length, avatar.moves.length);
-    assert.ok(gltf.buffers.every((b: { uri: string }) => b.uri.startsWith('data:')));
+    const bytes=readFileSync(new URL(`../public/${avatar.model}`, import.meta.url)),gltf=await parseModel(Uint8Array.from(bytes).buffer);
+    try{
+      let skins=0,bones=0;gltf.scene.traverse(node=>{if(node instanceof SkinnedMesh)skins++;if((node as any).isBone)bones++;});
+      assert.equal(availableMoves(avatar,gltf.animations.map(a=>a.name)).length,avatar.moves.length);
+      if(avatar.rigVersion==='unrigged-draft-1'){
+        assert.equal(skins,0);assert.equal(bones,0);assert.equal(gltf.animations.length,0);assert.equal(avatar.moves.length,0);assert.equal(avatar.defaultMove,undefined);assert.deepEqual(avatar.states,{});
+      }else assert.ok(skins>0);
+    }finally{disposeModel(gltf.scene);}
   }
 });
 test('catalog rejects duplicate IDs, external paths and unknown schema', () => {

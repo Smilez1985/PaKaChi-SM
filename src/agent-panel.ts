@@ -62,5 +62,5 @@ export function mountAgentPanel(rpc: Rpc) {
     feedback('state-readout',current.state ?? 'Kein aktiver Zustand');
   }
   window.addEventListener('pakachi-sm:change',refresh); refresh();
-  return { dispose() { mqtt.disconnect(); disconnect(); window.removeEventListener('pakachi-sm:change',refresh); } };
+  return { connectLocal(connection:{url:string;token:string}) {input('mcp-url').value=connection.url;input('mcp-token').value=connection.token;input('mcp-active').checked=true;input('mcp-active').dispatchEvent(new Event('change'));}, dispose() { mqtt.disconnect(); disconnect(); window.removeEventListener('pakachi-sm:change',refresh); } };
 }
