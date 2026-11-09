@@ -14,6 +14,15 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 Noch keine weiteren Änderungen.
 
+## [0.93.1] - 2026-11-09
+
+Zeitstempel: 2026-11-09T14:23:44+01:00 (Europe/Berlin)
+
+### Fixed
+
+- Suche nach einer schonenderen Pose endete bei 1/16 der ursprünglichen Bewegung und fand nach Einführung der Volumenprüfung für kleine geschlossene Flächen keine Variante mehr. Bis zu zwölf begrenzte Suchschritte bis 1/1024 prüfen nun auch kleinere Bewegungen; Dreiecks-, Volumen- und Beugegrenzen bleiben unverändert. Kein Rückfall auf eine ungeprüfte oder unveränderte Grundpose.
+- Reproduzierter vollständiger CI-Fehler: Beim Mika-Oberflächenpunkt bestanden bei 1/16 bereits die Dreiecksgrenzen, das Volumen lag aber bei 1,2315×; 1/32 besteht beide Prüfungen. Zusätzlicher analytischer Regressionstest benötigt 1/512 und bestätigt unveränderte Quelldaten. Bestehender Browserfall prüft jetzt die tatsächlichen Dreiecks- und Volumenwerte nach der Korrektur über die Diagnose-API.
+
 ## [0.93.0] - 2026-11-09
 
 Zeitstempel: 2026-11-09T10:52:35+01:00 (Europe/Berlin)
@@ -1948,3 +1957,5 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 [0.92.0]: PRUEFUNG.md#version-0920
 
 [0.93.0]: PRUEFUNG.md#version-0930
+
+[0.93.1]: PRUEFUNG.md#version-0931

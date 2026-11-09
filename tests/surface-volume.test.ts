@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import * as T from 'three';
 import {createSurfaceVolumeChecker,noVolumeRegression} from '../src/surface-volume.ts';
 import {checkSurfaceShape} from '../src/surface-check.ts';
-import {createPoseSurfaceChecker} from '../src/pose-surface-check.ts';
+import {createPoseSurfaceChecker,suggestGentlerPose,neutralPoseValues} from '../src/pose-surface-check.ts';
+import {StudioRig} from '../src/studio-rig.ts';
 import {noMeasuredRegression,betterSurfaceReport,searchWeightCorrection} from '../src/pose-weight-correction.ts';
 import {findAutomaticSkinCorrection,skinCorrectionOverrides} from '../src/automatic-skin-correction.ts';
 import {checkMoveSurface} from '../src/move-surface-check.ts';
@@ -60,4 +61,11 @@ test('actual weight candidate improves all triangle warnings but is rejected for
  const f=twistFixture(false,true),parent=f.rig.data.points.find(p=>p.bone===0)!,inspect=createPoseSurfaceChecker(f.rig),before=inspect(f.pose);
  const overrides=skinCorrectionOverrides(f.rig,{from:f.joint.id,to:parent.id,amount:.35,region:{center:f.joint.rest,radius:2}} as Parameters<typeof skinCorrectionOverrides>[1]),after=inspect(f.pose,overrides);
  assert.equal(after.issues,0);assert.ok(before.issues>0);assert.ok(after.meshes[0].volume.minimumRatio!<before.meshes[0].volume.minimumRatio!);assert.equal(noMeasuredRegression(before,after),false);assert.equal(await searchWeightCorrection(f.rig,f.pose,f.joint,2,new AbortController().signal),null);f.rig.dispose();
+});
+test('gentler pose searches below the former floor while retaining strain and volume limits',async()=>{
+ const geometry=new T.BufferGeometry();geometry.setAttribute('position',new T.Float32BufferAttribute(tetra.map(v=>v*.01),3));geometry.setIndex(faces);const mesh=new T.Mesh(geometry,new T.MeshBasicMaterial()),rig=new StudioRig(mesh);
+ rig.data.points.push({id:'surface',name:'Surface',kind:'surface',mesh:0,rest:[0,0,0],radius:.02,size:.005});const values=neutralPoseValues(rig);values.surface.position[0]=2;const pose={id:'exaggerated',name:'Exaggerated',seconds:1,values};rig.data.poses=[pose];const inspect=createPoseSurfaceChecker(rig),before=JSON.stringify(rig.data),live=rig.capture(),original=Array.from(geometry.attributes.position.array);
+ const oldFloor=structuredClone(pose);oldFloor.values.surface.position[0]=2/16;assert.equal(inspect(oldFloor).status,'outside');assert.ok(inspect(oldFloor).volumeIssues>0);
+ const p=await suggestGentlerPose(rig,pose,new AbortController().signal);assert.ok(p);assert.equal(p.fraction,1/512);assert.equal(p.report.status,'within');assert.equal(p.report.issues,0);assert.equal(p.report.volumeIssues,0);assert.ok(p.report.meshes[0].volume.minimumRatio!>=.8);assert.ok(p.report.meshes[0].volume.maximumRatio!<=1.2);assert.ok(p.values.surface.position[0]>0);
+ assert.equal(JSON.stringify(rig.data),before);assert.deepEqual(rig.capture(),live);assert.deepEqual(Array.from(geometry.attributes.position.array),original);rig.dispose();geometry.dispose();
 });

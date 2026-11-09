@@ -64,7 +64,9 @@ export async function suggestGentlerPose(rig:StudioRig,pose:Pose,signal:AbortSig
   const ensure=()=>{signal.throwIfAborted();if(!valid())throw Error('Studio-Stand hat sich geändert. Prüfung erneut starten.');};ensure();
   const inspect=createPoseSurfaceChecker(rig),before=inspect(pose);if(before.status!=='outside')return null;
   const rest=neutralPoseValues(rig);
-  for(const fraction of [.875,.75,.5,.25,.125,.0625]){
+  // Small closed details can satisfy strain limits before their volume is safe.
+  // Twelve bounded probes retain a nonzero move, down to 1/1024 of the request.
+  for(const fraction of [.875,.75,...Array.from({length:10},(_,i)=>2**(-i-1))]){
     await new Promise<void>(resolve=>setTimeout(resolve,0));ensure();
     const values:Record<string,Transform>={[FIGURE_TRACK]:structuredClone(pose.values[FIGURE_TRACK]??neutralFigure())};
     for(const point of rig.data.points){const a=rest[point.id],b=pose.values[point.id];values[point.id]={position:new T.Vector3().fromArray(a.position).lerp(new T.Vector3().fromArray(b.position),fraction).toArray(),rotation:new T.Quaternion().fromArray(a.rotation).slerp(new T.Quaternion().fromArray(b.rotation),fraction).toArray()};}

@@ -1,6 +1,6 @@
 # Prüfstand und Protokolle
 
-**Softwarestand: 0.93.0 · Dokumentationsabgleich: 2026-11-09T10:52:35+01:00 (Europe/Berlin).**
+**Softwarestand: 0.93.1 · Dokumentationsabgleich: 2026-11-09T14:23:44+01:00 (Europe/Berlin).**
 
 Alle Prüfnachweise stehen in dieser Datei: ein Abschnitt je Softwareversion sowie gesonderte Abschnitte für datierte Zwischenprüfungen. Die Ergebnisse und Grenzen gelten für den jeweils genannten Stand. Spätere Läufe stehen als Nachtrag im selben Abschnitt. Produktänderungen gehören in den [Changelog](CHANGELOG.md), offene Aufgaben in die [Roadmap](ROADMAP.md).
 
@@ -8,8 +8,8 @@ Alle Prüfnachweise stehen in dieser Datei: ein Abschnitt je Softwareversion sow
 
 | Prüfung | Bestätigter Stand | Umfang und Grenze |
 | --- | --- | --- |
-| Node-Tests | [0.92.0](#version-0920): 414 in vollständiger CI bestanden | Einschließlich echter MCP-/OAuth-/Python-/ACP-Prozesse; keine manuelle Qualitätsabnahme. |
-| TypeScript und Produktionsbuild | [0.92.0](#version-0920): vollständige CI bestanden | Bekannte Bundle-Größenwarnung; keine Aussage über Zielhardware-Leistung. |
+| Node-Tests | [0.93.0](#version-0930): 423 in vollständiger CI bestanden | Einschließlich echter MCP-/OAuth-/Python-/ACP-Prozesse; keine manuelle Qualitätsabnahme. |
+| TypeScript und Produktionsbuild | [0.93.0](#version-0930): vollständige CI bestanden | Bekannte Bundle-Größenwarnung; keine Aussage über Zielhardware-Leistung. |
 | Chromium-Browserfälle | [0.92.0](#version-0920): alle 42 im vollständigen CI-Lauf bestanden | Software-WebGL, simulierte KI-Anbieter; keine reale KI-Inferenzabnahme. |
 | Produktionsbrowser-Importmessung | [0.92.0](#version-0920): drei CI-Durchläufe bestanden | Mika mit 256 Gewichtsaufträgen; keine allgemeine Laufzeitgarantie. |
 | Legacy-Testprogramme | [0.9.0](#version-090): beide bestanden | Steuerung, MQTT-Verhalten und Lebenszyklus des Originalplayers. |
@@ -60,6 +60,16 @@ Diese Liste beschreibt ausstehende Abnahmen.
 
 Die jüngste Version steht zuerst. Für eine bestimmte Version die Dokumentgliederung oder die Browser-Suche verwenden.
 
+## Version 0.93.1
+
+**Prüfzeitpunkt:** 2026-11-09T14:23:44+01:00 (Europe/Berlin).
+
+- Vollständigen 0.93.0-CI-Fehler lokal reproduziert: Die alte Pose-Suche endete bei 1/16, obwohl ein kleinerer Anteil die neue Volumenprüfung besteht. Tatsächlicher Mika-Projektstand: 450 auffällige Dreiecke und Volumenverhältnis 4,7040× in der Ausgangspose; bei 1/16 null Dreieckswarnungen, aber weiterhin 1,2315× Volumen; bei 1/32 beide Prüfungen bestanden.
+- Suchbereich auf zwölf begrenzte Proben bis 1/1024 erweitert. Grenzwerte und Pflichtprüfungen bleiben unverändert. Eine neutrale Nullbewegung wird nicht als Korrektur ausgegeben; keine Änderung der Hautgewichte oder Quelldaten.
+- Neuer unabhängiger Regressionstest mit kleinem geschlossenem Tetraedernetz scheitert vor der Korrektur und besteht danach bei 1/512. Prüft Oberflächen-/Volumengrenzen und Erhalt von Livepose, gespeicherter Pose und Geometrie. 19 betroffene Node-Fälle bestanden. Produktionsbuild und vier gezielte Chromium-Fälle bestanden: der zuvor fehlgeschlagene Mika-Ablauf einschließlich tatsächlicher Volumenmessung sowie die drei automatischen Studio-/KI-Korrekturfälle. Vollständiger neuer Lauf wird in PR #1 ausgewertet.
+
+**Grenzen:** Schonendere Pose erhält einen kleineren Bewegungsumfang und repariert kein Rig. Die Grenzen der algebraischen Volumenschätzung aus 0.93.0 bleiben bestehen.
+
 ## Version 0.93.0
 
 **Prüfzeitpunkt:** 2026-11-09T10:52:35+01:00 (Europe/Berlin).
@@ -74,6 +84,8 @@ Die jüngste Version steht zuerst. Für eine bestimmte Version die Dokumentglied
 - Reale Gegenprobe mit weitreichendem Gewichtstransfer: 32 → 0 Dreieckswarnungen, aber Volumenverhältnis 0,3333 → 0,2972. Gemeinsame Gegenprüfung und lokale Suche verwerfen diese Variante. KI-Details priorisieren auffällige/große Netze vor der Begrenzung auf 32 Teilmodelle.
 
 **Verfahren und Grenzen:** Geschlossene Komponenten werden getrennt geschätzt; 0,8–1,2× ist eine feste technische Warnschwelle. Kein Selbstüberschneidungstest, keine Erkennung jeder lokalen Einschnürung, kein physikalischer Volumen- oder Anatomienachweis. Offene Fellflächen bleiben nicht messbar. Drei Radien, vier Gelenke und sechs lokale Transfers je Radius; unveränderte Stichproben-/Vertexbudgets. Keine Änderung der PaKaChi-GLBs oder ihrer CPU-Aufbereitung. [Fachlicher Bezug: CGAL, Volumen geschlossener Dreiecksnetze](https://doc.cgal.org/latest/Polygon_mesh_processing/group__PMP__measure__grp.html); eigene Implementierung ohne CGAL-Abhängigkeit.
+
+**CI-Nachtrag 0.93.0:** [Lauf 42599717976](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/42599717976), Commit `a0a5f2a9d6d0d0e70a9e2758b52a703c4e742fd4`: 423 Node-Tests ohne Fehler/Abbrüche/übersprungene Fälle und Produktionsbuild bestanden. 42 von 43 Browserfällen bestanden; „surface warning and gentler pose“ scheitert wegen der zu früh endenden Suche, nicht durch Timeout oder fehlenden Browser. Produktionsimportmessungen wurden deshalb nicht ausgeführt. Fehler ist mit 0.93.1 gezielt korrigiert; keine vollständige CI-Freigabe für 0.93.0 behauptet.
 
 ## Version 0.92.0
 
