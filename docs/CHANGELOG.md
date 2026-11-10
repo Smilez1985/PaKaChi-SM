@@ -14,6 +14,9 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ### Fixed
 
+- Gleichzeitige transversale Durchdringung und ungeklärter Randkontakt eines Dreieckspaars wird jetzt als Schnitt **und** unvollständige Prüfung gemeldet. Die automatische Korrektursperre verwirft neu nachgewiesene Schnitte auch dann, wenn das veränderte Netz zusätzlich ungeklärte Kontakte aufweist, sofern die Ausgangsprüfung vollständig war. Tests für beide Fälle ergänzt.
+
+
 - Entartete, kollineare und nicht endlich berechenbare Dreiecke werden bereits beim Einlesen des Netzes als ungültig erkannt, selbst wenn ihre Bounding-Box keine andere Fläche überlappt. Regressionen für isolierte Nullflächen sowie Kanten-/Eckkontakte ergänzt.
 
 

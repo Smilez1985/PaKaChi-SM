@@ -3,6 +3,7 @@ import type {StudioRig} from './studio-rig.ts';
 import type {Pose,ControlPoint} from './studio-data.ts';
 import {createPoseSurfaceChecker,poseSurfacePositions} from './pose-surface-check.ts';
 import {checkSurfaceIntersections} from './surface-intersections.ts';
+import type {SurfaceIntersectionReport} from './surface-intersections.ts';
 import type {SkinOverrides} from './pose-surface-check.ts';
 import {moveCheckTimes} from './move-limit-check.ts';
 import {transferSkinInfluences} from './studio-weight-transfer.ts';
@@ -11,6 +12,11 @@ import {buildGeometricCorrection,buildEdgeFitCorrection} from './geometric-skin-
 import type {StudioCorrectiveShape} from './studio-corrective-shapes.ts';
 import {searchWeightCorrection,noMeasuredRegression,betterSurfaceReport,correctionSamples} from './pose-weight-correction.ts';
 import type {SurfaceReport,WeightCorrectionProposal} from './pose-weight-correction.ts';
+/** Only a complete baseline permits a proven increase comparison.
+ * An incomplete after-report still supplies a safe lower bound of detected crossings. */
+export function newProvenIntersectionCount(before:SurfaceIntersectionReport,after:SurfaceIntersectionReport){
+ return before.checked?Math.max(0,after.intersections-before.intersections):0;
+}
 /** Extra target-frame gate: reject newly measured transverse self-intersections.
  * Unmeasurable meshes are explicitly reported and NEVER certified as collision-free.
  * The routine does not check contacts, other meshes, or motion between samples. */
@@ -21,9 +27,9 @@ export function checkCandidateIntersectionRegression(rig:StudioRig,pose:Pose,aff
   const index=rig.surfaces[i].mesh.geometry.index?.array??null;
   const before=checkSurfaceIntersections(poseSurfacePositions(rig,pose.values,i),index);
   const after=checkSurfaceIntersections(poseSurfacePositions(rig,pose.values,i,overrides,shape),index);
+  newIntersections+=newProvenIntersectionCount(before,after);
   if(!before.checked||!after.checked){unmeasurableMeshes++;continue;}
   checkedMeshes++;
-  newIntersections+=Math.max(0,after.intersections-before.intersections);
  }
  return {accepted:newIntersections===0,checkedMeshes,unmeasurableMeshes,newIntersections,complete:unmeasurableMeshes===0&&checkedMeshes===new Set(affected).size};
 }

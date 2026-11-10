@@ -2,7 +2,7 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import * as T from 'three';
 import {twistFixture} from './helpers/twist-fixture.ts';
-import {findAutomaticSkinCorrection,skinCorrectionOverrides,checkCandidateIntersectionRegression,checkCandidateIntersectionFrames,selectCollisionMotionFrames} from '../src/automatic-skin-correction.ts';
+import {findAutomaticSkinCorrection,skinCorrectionOverrides,checkCandidateIntersectionRegression,checkCandidateIntersectionFrames,selectCollisionMotionFrames,newProvenIntersectionCount} from '../src/automatic-skin-correction.ts';
 import {createPoseSurfaceChecker,poseSurfacePositions} from '../src/pose-surface-check.ts';
 import {moveCheckTimes} from '../src/move-limit-check.ts';
 import {noMeasuredRegression,searchWeightCorrection} from '../src/pose-weight-correction.ts';
@@ -101,4 +101,12 @@ test('real skinned 180-degree twist selects a measured high-risk motion frame, n
  assert.equal(risk(selected[1].before),maxRisk);
  assert.deepEqual(selected,selectCollisionMotionFrames(frames));
  f.rig.dispose();
+});
+
+test('collision regression rejects a proven new cut even when the modified mesh has unresolved contacts',()=>{
+ const complete={checked:true,triangles:2,candidatePairs:1,testedPairs:1,broadphasePairs:1,intersections:0,examples:[] as [number,number][]};
+ const partial={...complete,checked:false,reason:'coplanar-or-touching' as const,intersections:1};
+ assert.equal(newProvenIntersectionCount(complete,partial),1);
+ assert.equal(newProvenIntersectionCount(partial,complete),0,'an incomplete baseline cannot prove an increase');
+ assert.equal(newProvenIntersectionCount(complete,{...complete,intersections:0}),0);
 });

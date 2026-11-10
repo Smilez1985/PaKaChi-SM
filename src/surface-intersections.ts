@@ -79,7 +79,8 @@ export function checkSurfaceIntersections(positions:Numbers,index:Numbers|null=n
    const contacts=(p:[V,V,V],q:[V,V,V])=>[0,1,2].map(k=>segmentPierces(p[k],p[(k+1)%3],q,1e-9));
    const hits=[...contacts(one,two),...contacts(two,one)];
    if(hits.includes(1)){report.intersections++;if(report.examples.length<12)report.examples.push([Math.min(a,b),Math.max(a,b)]);}
-   else if(hits.includes(2)){report.checked=false;report.reason=report.reason??'coplanar-or-touching';}
+   // A strict piercing does not resolve a separate boundary contact in the same pair.
+   if(hits.includes(2)){report.checked=false;report.reason=report.reason??'coplanar-or-touching';}
   }
   active.push(b);
  }
