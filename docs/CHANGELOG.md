@@ -12,6 +12,18 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.99.0] - 2026-11-10
+
+Zeitstempel: 2026-11-10T22:24:42+01:00 (Europe/Berlin)
+
+Entwicklungsstand auf `develop`; vollständige GitHub- und Browserprüfung ausstehend. [Prüfbericht](PRUEFUNG.md#version-0990).
+
+### Added
+
+- Allgemeiner Schnitt-Gegenschritt für positionelle Studio-/KI-Hautkorrekturen: neue transversale Dreieckspaare im veränderten Bereich werden gegenüber der Ausgangshaltung identifiziert; betroffene Verschiebungen und ihre ausgewählten Nahtkopien werden eingefroren. Acht begrenzte Durchläufe, vollständige Messabdeckung im Prüfbereich, gemeinsames Arbeitsbudget, Abbruch- und Revisionsprüfung. Danach gelten erneut sämtliche bisherigen Dehnungs-, Volumen-, Posen-/Move- und vollständigen Teilnetz-Schnittgegenprüfungen.
+- Die echte Tierform liefert im automatischen Auftrag bei 22,5° linker Hüfte und explizitem Radius 0,15 einen Vorschlag mit 760 → 752 Dehnungswarnungen. Zwei Posen, 33 Move-Stichproben und 65 unabhängige Zwischenhaltungen geprüft; an vier Winkeln keine zusätzlichen Körper-Schnittpaare. Bestehende Schnitte bleiben. Keine allgemeine Anatomie- oder kontinuierliche Kollisionsfreigabe.
+- Kernprüfungen für neue und bestehende Schnittpaare, Nahtkopien, unvollständige Kontakte, Budget, Abbruch und Revisionswechsel; Tierform ergänzt den Browserfall für Vorschau, Übernahme, Undo/Redo und Projekt-Replay.
+
 ## [0.98.0] - 2026-11-10
 
 Zeitstempel: 2026-11-10T19:31:32+01:00 (Europe/Berlin)
@@ -1901,7 +1913,8 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 
 - Bestehendes Bedienkonzept ausdrücklich als Designdokument eingeordnet und mit Roadmap und Changelog verknüpft.
 
-[Unreleased]: https://github.com/Smilez1985/PaKaChi-SM/commits/work/local-verification-model-zoo
+[0.99.0]: PRUEFUNG.md#version-0990
+[Unreleased]: https://github.com/Smilez1985/PaKaChi-SM/commits/develop
 [0.20.0]: ./PRUEFUNG.md#version-0200
 [0.19.0]: ./PRUEFUNG.md#version-0190
 [0.18.0]: ./PRUEFUNG.md#version-0180

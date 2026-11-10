@@ -1,8 +1,18 @@
 # Prüfstand und Protokolle
 
-**Softwarestand: 0.98.0 · Dokumentationsabgleich: 2026-11-10T20:26:38+01:00 (Europe/Berlin).**
+**Softwarestand: 0.99.0 · Dokumentationsabgleich: 2026-11-10T22:25:33+01:00 (Europe/Berlin).**
 
 Alle Prüfnachweise stehen in dieser Datei: ein Abschnitt je Softwareversion sowie gesonderte Abschnitte für datierte Zwischenprüfungen. Die Ergebnisse und Grenzen gelten für den jeweils genannten Stand. Spätere Läufe stehen als Nachtrag im selben Abschnitt. Produktänderungen gehören in den [Changelog](CHANGELOG.md), offene Aufgaben in die [Roadmap](ROADMAP.md).
+
+## Version 0.99.0
+
+Stand: 2026-11-10T22:24:42+01:00 (Europe/Berlin). Entwicklung auf `develop`; noch keine Übernahme dieses Programmstands nach `main`.
+
+Allgemeiner Schnitt-Gegenschritt für sparse positionelle Korrekturformen. Eine räumlich begrenzte Abfrage umfasst jedes Paar mit mindestens einer an einem veränderten Vertex liegenden Fläche, auch gegen unveränderte Flächen außerhalb der Region. Paaridentitäten unterscheiden neue von bestehenden Schnitten. Unvollständige Kontakt-/Geometrie-/Budgetberichte liefern keinen verfeinerten Vorschlag. Der Gegenlauf verändert ausschließlich eine Kopie des Kandidaten; gewöhnliche Vollnetz- und Bewegungsprüfungen bleiben nachgeschaltet. Keine Prüfung zwischen getrennten Teilnetzen oder kontinuierlicher Bewegungen.
+
+[Echte Tierform-Messung](benchmarks/pakachi-collision-refinement-2026-11-10.json): automatischer Auftrag bei 22,5° linker Hüfte, expliziter Radius 0,15, 14 Kandidaten, 5.798.364 Kanten-/Schnittoperationen. Dehnungswarnungen **760 → 752**, 937 Korrekturvertices, keine Volumenwarnung. Zwei gespeicherte Posen und 33 Move-Stichproben im Auftrag; weitere 65 unabhängige Haltungen ohne gemessene Dehnungs-/Volumenverschlechterung. Körper-Schnittpaare unverändert: 74 / 256 / 398 / 551 bei 5,625° / 11,25° / 16,875° / 22,5°; alle vier Körperberichte vollständig. Der Radius ist eine explizite Auftragsvorgabe; dies belegt keine automatische Wahl dieses Radius oder finale Charakterqualität.
+
+Lokal: 30 Schnitt-/Gegenlauf-/Auftrags-Kerntests sowie beide echten Charakterprüfungen (72,8 s) erfolgreich. TypeScript und Produktionsbuild erfolgreich. Ein erster paralleler Gesamtlauf: 492 Tests bestanden, zwei Fehler; die Charakterdatei wurde im speicherbegrenzten Lauf beendet, der Archiv-Erhaltungstest findet im wiederhergestellten Arbeitsstand nur Bild 001 von 72. Der einzelne vollständige automatische Tierformauftrag wurde anschließend mit begrenztem Node-Heap erfolgreich abgeschlossen. Lokales Chromium beendet sich vor Teststart mit SIGSEGV; der neue Browserfall muss auf GitHub ausgeführt werden. Die ausstehenden Ergebnisse werden nach Abschluss hier ergänzt.
 
 ## Räumliche Körper-Schnittdiagnose – Entwicklung nach 0.97.0
 

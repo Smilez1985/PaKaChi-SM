@@ -134,3 +134,17 @@ test('empty and singleton trees finish but oversized inputs remain explicitly un
  const report=checkSurfaceIntersections(new Float32Array(200001*9));
  assert.equal(report.checked,false);assert.equal(report.reason,'budget');assert.equal(report.testedPairs,0);
 });
+
+test('pair enumeration is exhaustive beyond examples, and sparse scope agrees with exhaustive pairs',()=>{
+ let seed=87654;const random=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/2**32;};
+ const faces=Array.from({length:28},()=>Array.from({length:9},()=>random()*4-2)),all:number[][]=[];
+ const whole=checkSurfaceIntersections(faces.flat(),null,100000,{onIntersection:(a,b)=>all.push([a,b])});
+ assert.ok(all.length>12);assert.equal(all.length,whole.intersections);assert.equal(whole.examples.length,12);assert.equal(new Set(all.map(p=>p.join(':'))).size,all.length);
+ const vertices=new Set([1,10,40,78]),filtered:number[][]=[];
+ const sparse=checkSurfaceIntersections(faces.flat(),null,100000,{affectedVertices:vertices,onIntersection:(a,b)=>filtered.push([a,b])});
+ const selected=new Set([...vertices].map(v=>Math.floor(v/3))),expected=all.filter(([a,b])=>selected.has(a)||selected.has(b));
+ assert.equal(sparse.scope,'affected-vertices');assert.equal(sparse.affectedTriangles,4);assert.equal(sparse.checked,whole.checked);assert.deepEqual(filtered.map(p=>p.join(':')).sort(),expected.map(p=>p.join(':')).sort());
+ let count=0,complete=true;for(let a=0;a<faces.length;a++)for(let b=a+1;b<faces.length;b++)if(selected.has(a)||selected.has(b)){const pair=checkSurfaceIntersections([...faces[a],...faces[b]]);count+=pair.intersections;complete&&=pair.checked;}
+ assert.equal(sparse.intersections,count);assert.equal(sparse.checked,complete);
+ assert.throws(()=>checkSurfaceIntersections(faces.flat(),null,100000,{affectedVertices:new Set([-1])}),/Schnittbereich/);
+});

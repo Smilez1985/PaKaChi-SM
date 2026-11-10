@@ -4,9 +4,7 @@ import {createHash} from 'node:crypto';
 import * as T from 'three';
 import {parseModel,disposeModel} from '../src/viewer.ts';
 import {StudioRig} from '../src/studio-rig.ts';
-import {findAutomaticSkinCorrection,correctionJoints,checkCandidateIntersectionFrames} from '../src/automatic-skin-correction.ts';
-import {buildEdgeRelaxationCorrection} from '../src/geometric-skin-correction.ts';
-import {limitCorrectiveStrain} from '../src/corrective-strain-guard.ts';
+import {findAutomaticSkinCorrection,checkCandidateIntersectionFrames} from '../src/automatic-skin-correction.ts';
 import {correctionSamples,noMeasuredRegression} from '../src/pose-weight-correction.ts';
 import {createPoseSurfaceChecker,poseSurfacePositions} from '../src/pose-surface-check.ts';
 import {checkSurfaceIntersections} from '../src/surface-intersections.ts';
@@ -16,13 +14,9 @@ for(const form of ['humanoid','animal']){
  const source=`public/model-zoo/pakachi-rigged/${form}.glb`,bytes=await readFile(source),model=await parseModel(Uint8Array.from(bytes).buffer),rig=new StudioRig(model.scene);
  try{
   const neutral=rig.capture(),values=structuredClone(neutral),joint=rig.data.points.find(p=>p.name==='LeftHip'),degrees=form==='humanoid'?90:22.5;values[joint.id].rotation=new T.Quaternion().setFromAxisAngle(new T.Vector3(1,0,0),degrees*Math.PI/180).toArray();const pose={id:'hip',name:'Hip',seconds:1,values};rig.data.poses=[{id:'rest',name:'Rest',seconds:1,values:neutral},pose];rig.data.moves=[{id:'loop',name:'Hip loop',loop:true,poses:['rest','hip']}];
-  const original=JSON.stringify(rig.data),inspect=createPoseSurfaceChecker(rig),before=inspect(pose);let shape,proposal=null,work={used:0,limit:12000000,exhausted:false};
-  if(form==='humanoid'){
-   proposal=await findAutomaticSkinCorrection(rig,signal,()=>true,{poseId:'hip'});shape=proposal?.shape;
-  }else{
-   const center=correctionJoints(rig,before,pose)[0].center,raw=await buildEdgeRelaxationCorrection(rig,pose,joint,.15,signal,work,()=>true,center);shape=raw?await limitCorrectiveStrain(rig,raw,[...correctionSamples(rig,pose,8),pose],signal,work):null;
-  }
-  const entry={form,source,sha256:createHash('sha256').update(bytes).digest('hex'),joint:'LeftHip',axis:'X',degrees,mode:form==='humanoid'?'full-automatic-job':'one-explicit-candidate',beforeIssues:before.issues,status:'no-candidate'};
+  const original=JSON.stringify(rig.data),inspect=createPoseSurfaceChecker(rig),before=inspect(pose);let shape,proposal=null;
+  proposal=await findAutomaticSkinCorrection(rig,signal,()=>true,{poseId:'hip',...(form==='animal'?{radius:.15}:{})});shape=proposal?.shape;
+  const entry={form,source,sha256:createHash('sha256').update(bytes).digest('hex'),joint:'LeftHip',axis:'X',degrees,mode:'full-automatic-job',beforeIssues:before.issues,status:'no-candidate'};
   if(shape){
    const after=inspect(pose,undefined,shape),failures=[];
    for(let i=0;i<=64;i++){const v=structuredClone(neutral);v[joint.id].rotation=new T.Quaternion().setFromAxisAngle(new T.Vector3(1,0,0),degrees*i/64*Math.PI/180).toArray();const p={...pose,values:v},b=inspect(p),a=inspect(p,undefined,shape);if(!noMeasuredRegression(b,a))failures.push({step:i,before:b.issues,after:a.issues});}
