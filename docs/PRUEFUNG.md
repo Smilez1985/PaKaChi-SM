@@ -1,8 +1,22 @@
 # Prüfstand und Protokolle
 
-**Softwarestand: 0.99.0 · Dokumentationsabgleich: 2026-11-10T23:59:31+01:00 (Europe/Berlin).**
+**Softwarestand: 0.100.0 · Dokumentationsabgleich: 2026-11-11T00:43:16+01:00 (Europe/Berlin).**
 
 Alle Prüfnachweise stehen in dieser Datei: ein Abschnitt je Softwareversion sowie gesonderte Abschnitte für datierte Zwischenprüfungen. Die Ergebnisse und Grenzen gelten für den jeweils genannten Stand. Spätere Läufe stehen als Nachtrag im selben Abschnitt. Produktänderungen gehören in den [Changelog](CHANGELOG.md), offene Aufgaben in die [Roadmap](ROADMAP.md).
+
+## Version 0.100.0
+
+Stand: 2026-11-11T00:43:16+01:00 (Europe/Berlin). Entwicklung auf `develop`; vollständige GitHub-Prüfung und Meilensteinübernahme nach `main` ausstehend. Letzter vollständig geprüfter main-Programmstand bleibt 0.99.0 (`78be49d`).
+
+Der neue allgemeine Abschwächungsschritt sucht für neue Schnittpaare kleine getestete Skalierungen einzelner Verschiebungen, Nahtgruppen oder betroffener Flächen. Lokale Zwei-Flächen-Proben bestimmen Vorschläge; vollständige räumliche Bereichsabfragen über alle übergebenen Haltungen bestätigen sie. Unvollständige Kontakte/Geometrie-/Budgetberichte liefern keine Korrektur. Der Transformationscache wird verweigert, falls der zusätzliche Formtreiber bestehende Treibergewichte verändern würde. Alle Datenänderungen bleiben auf der Kandidatenkopie; Arbeitsbudget, Abbruch und Revisionskontrolle gelten weiter. Nachgeschaltet werden erneut sämtliche gewöhnlichen Pose-/Move-, Dehnungs-, Volumen- und Vollnetz-Schnittprüfungen.
+
+Die abschließende Schnittsperre vergleicht Paaridentitäten statt nur Gesamtzahlen. Die zusätzliche Gegenhaltung enthält jetzt die tatsächlich gewählte auffällige Bewegungsstichprobe; exakte Duplikate und Haltungen ohne Beitrag des zusätzlichen Treibers brauchen keinen gesonderten Nachkorrekturlauf. Die Radiusreihenfolge berücksichtigt geschätzte incident-Kantenkosten und die vorhandenen Solvergrenzen. Diese Schätzung sortiert Varianten, schließt sie aber nicht aus; die globalen Grenzen bleiben 100.000.000 Vertex-Stichproben und 12.000.000 gemeinsame Kantenoperationen.
+
+[Explizit vorbereitete Tierform-Referenz](benchmarks/pakachi-attenuation-2026-11-11.json), reproduzierbar mit `node --test tests/corrective-attenuation-character.test.ts`: Ausgehend vom gespeicherten 0.99.0-Vorschlag reduziert die unverfeinerte Trennprobe 551 → 543 Ziel-Schnitte, erzeugt aber in neun der 65 Zwischenhaltungen neue Paare. Zwei begrenzte Abschwächungs-/Dehnungsdurchläufe erhalten **551 → 545** Ziel-Schnitte und **747 → 746** Dehnungswarnungen. An allen 65 unabhängigen Körpernetzproben sind die Paarberichte vollständig, kein neues Paar bleibt und keine gemessene Dehnungs-/Volumenverschlechterung tritt auf. Das bisherige vollständige Einfrieren verlor diese Schnittverbesserung. **Der allgemeine Gegenschritt ist in der automatischen Suche integriert; die explizit vorbereitete Trennung ist noch kein automatischer Trennungsgenerator.**
+
+Lokale Kernprüfungen, beide Originalcharakterprüfungen, die dichte Tierform-Referenz, TypeScript und Produktionsbuild sind erfolgreich. Der abschließende Radiusauftrag und die vollständige GitHub-Gesamtsuite werden separat nachgetragen. Der lokale Snapshot enthält nur Archivbild 001 von 72; der vollständige Erhaltungstest ist hier nicht ausführbar. Lokales Chromium scheitert vor Teststart; Browserabnahme erfolgt über GitHub.
+
+Grenzen: Stichproben belegen keine kontinuierliche Kollisionsfreiheit. Bestehende Selbstschnitte, Kontakte, angrenzende Dreiecke, getrennte Teilnetze und allgemeine Anatomiequalität bleiben offen. Keine abgeschlossene Charakterfreigabe oder zuverlässige 2D-zu-fertigem-Charakter-Zusage.
 
 ## Version 0.99.0
 

@@ -12,6 +12,23 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.100.0] - 2026-11-11
+
+Zeitstempel: 2026-11-11T00:43:16+01:00 (Europe/Berlin)
+
+Entwicklung auf `develop`; die vollständige GitHub-Prüfung und die Meilensteinübernahme nach `main` stehen aus. [Prüfbericht](PRUEFUNG.md#version-01000).
+
+### Added
+
+- Allgemeiner Abschwächungsschritt für positionelle Hautkorrekturen: an neuen Schnittpaaren werden kleine, tatsächlich gegengeprüfte Teilverschiebungen gesucht. Ausgewählte Nahtkopien bleiben gekoppelt; vollständige Bereichsabfragen aller übergebenen Haltungen und die bestehenden Dehnungs-, Volumen-, Posen-/Move- und Vollnetz-Schnittprüfungen bleiben erforderlich. Acht begrenzte Durchläufe und die unveränderten Arbeitsbudgets verhindern unvollständig geprüfte Ergebnisse.
+- Reproduzierbare Tierform-Referenz mit 65 unabhängigen vollständigen Körper-Paarprüfungen: Nach zwei Abschwächungs-/Dehnungsdurchläufen bleiben 551 → 545 Schnittpaare in der Zielhaltung und 747 → 746 Dehnungswarnungen, ohne neue Paaridentitäten oder gemessene Dehnungs-/Volumenregression in diesen Stichproben. Die explizit vorbereitete Trennung ist eine Referenz, noch kein automatischer Trennungsgenerator im Studio.
+
+### Fixed
+
+- Die automatische Schnittsperre vergleicht konkrete Dreieckspaare. Entfernte alte Schnitte dürfen neue Schnitte an anderer Stelle auch bei gleicher oder kleinerer Gesamtzahl nicht kompensieren. Ein vollständiger Ausgangsbericht erlaubt den Nachweis neuer Paare auch aus einem unvollständigen Nachbericht.
+- Die Nachkorrektur berücksichtigt nun auch die ausgewählte auffällige Haltung der tatsächlichen Bewegung. Exakt identische Haltungen und Haltungen ohne zusätzlichen Formbeitrag werden für die Nachkorrektur zusammengefasst; nahe, unterschiedliche Drehungen bleiben getrennt.
+- Die automatische Radiusreihenfolge berücksichtigt den geschätzten Kantenaufwand und reserviert Suchraum für weitere Radien. Die Rechenbudgets werden nicht erhöht; eine beendete Suche bleibt als begrenzt gekennzeichnet.
+
 ## [0.99.0] - 2026-11-10
 
 Zeitstempel: 2026-11-10T23:27:04+01:00 (Europe/Berlin)
@@ -1917,6 +1934,7 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 
 - Bestehendes Bedienkonzept ausdrücklich als Designdokument eingeordnet und mit Roadmap und Changelog verknüpft.
 
+[0.100.0]: PRUEFUNG.md#version-01000
 [0.99.0]: PRUEFUNG.md#version-0990
 [Unreleased]: https://github.com/Smilez1985/PaKaChi-SM/commits/develop
 [0.20.0]: ./PRUEFUNG.md#version-0200

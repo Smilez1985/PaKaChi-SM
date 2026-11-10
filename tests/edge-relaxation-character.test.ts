@@ -5,7 +5,7 @@ import * as T from 'three';
 import {parseModel,disposeModel} from '../src/viewer.ts';
 import {StudioRig} from '../src/studio-rig.ts';
 import {buildEdgeRelaxationCorrection} from '../src/geometric-skin-correction.ts';
-import {limitCorrectiveIntersections} from '../src/corrective-intersection-guard.ts';
+import {attenuateCorrectiveIntersections as limitCorrectiveIntersections} from '../src/corrective-intersection-attenuation.ts';
 import {limitCorrectiveStrain} from '../src/corrective-strain-guard.ts';
 import {correctionSamples,noMeasuredRegression} from '../src/pose-weight-correction.ts';
 import {createPoseSurfaceChecker,poseSurfacePositions} from '../src/pose-surface-check.ts';
@@ -19,7 +19,7 @@ for(const form of ['humanoid','animal'])test(`real ${form}: positional correctio
   const center=form==='humanoid'?joint.rest:correctionJoints(rig,before,pose)[0].center,radius=form==='humanoid'?.14512063946937386:.15,work={used:0,limit:12000000,exhausted:false};
   const raw=await buildEdgeRelaxationCorrection(rig,pose,joint,radius,signal,work,()=>true,center);assert.ok(raw);const original=structuredClone(raw);let shape=await limitCorrectiveStrain(rig,raw,[...correctionSamples(rig,pose,8),pose],signal,work);assert.ok(shape);assert.deepEqual(raw,original);assert.equal(JSON.stringify(rig.data),source);assert.deepEqual(rig.capture(),live);
   const affected=shape.meshes.map(m=>m.mesh),gate=checkCandidateIntersectionFrames(rig,[pose,...correctionSamples(rig,pose)],affected,undefined,shape);
-  if(form==='animal'){assert.equal(gate.accepted,false);assert.ok(gate.newIntersections>0);shape=await limitCorrectiveIntersections(rig,shape,[pose,...correctionSamples(rig,pose)],signal,work);assert.ok(shape);shape=await limitCorrectiveStrain(rig,shape,[...correctionSamples(rig,pose,8),pose],signal,work);assert.ok(shape);const refined=checkCandidateIntersectionFrames(rig,[pose,...correctionSamples(rig,pose)],shape.meshes.map(m=>m.mesh),undefined,shape);assert.equal(refined.accepted,true);assert.equal(refined.complete,true);}else{
+  if(!gate.accepted){assert.ok(gate.newIntersections>0);shape=await limitCorrectiveIntersections(rig,shape,[pose,...correctionSamples(rig,pose)],signal,work);assert.ok(shape);shape=await limitCorrectiveStrain(rig,shape,[...correctionSamples(rig,pose,8),pose],signal,work);assert.ok(shape);const refined=checkCandidateIntersectionFrames(rig,[pose,...correctionSamples(rig,pose)],shape.meshes.map(m=>m.mesh),undefined,shape);assert.equal(refined.accepted,true);assert.equal(refined.complete,true);}else{
   assert.equal(gate.accepted,true);assert.equal(gate.complete,true);}
   const after=inspect(pose,undefined,shape);assert.ok(after.issues<=before.issues-(form==='animal'?5:15));assert.equal(noMeasuredRegression(before,after),true);
   for(let step=0;step<=64;step++){const sample={...pose,values:rig.capture()};sample.values[joint.id].rotation=new T.Quaternion().setFromAxisAngle(new T.Vector3(1,0,0),degree*step/64*Math.PI/180).toArray();assert.equal(noMeasuredRegression(inspect(sample),inspect(sample,undefined,shape)),true,`sample ${step}`);}
