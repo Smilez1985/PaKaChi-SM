@@ -14,6 +14,9 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ### Fixed
 
+- GitHub Actions Browserfall für geschlossene Haut (`automatic-skin-correction.spec.ts`) an die aktuelle KI-Schnittdiagnose angepasst: statt des veralteten `unchecked: self-intersections` wird der tatsächlich gemessene Teilmodell-Schnittbericht geprüft; ungemessene Teilmodell-übergreifende Kollisionen und angrenzende Kontakte bleiben ausdrücklich als ungeprüft markiert. Ursache von Actions-Run #105: 473 Node-Tests und Build erfolgreich, 45/46 Browserfälle erfolgreich; nur die veraltete Browsererwartung schlug fehl.
+
+
 - Gleichzeitige transversale Durchdringung und ungeklärter Randkontakt eines Dreieckspaars wird jetzt als Schnitt **und** unvollständige Prüfung gemeldet. Die automatische Korrektursperre verwirft neu nachgewiesene Schnitte auch dann, wenn das veränderte Netz zusätzlich ungeklärte Kontakte aufweist, sofern die Ausgangsprüfung vollständig war. Tests für beide Fälle ergänzt.
 
 
