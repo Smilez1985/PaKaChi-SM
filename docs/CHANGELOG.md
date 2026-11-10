@@ -12,6 +12,10 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+### Added
+
+- Eigener GitHub-Actions-Workflow für den bereits vorhandenen lesenden Schnittbenchmark auf den beiden echten PaKaChi-Rigged-GLBs. Er validiert die 16 Hüft-/Knie-Posen und sichert die vollständige JSON-Ausgabe als Artefakt, auch wenn die Ergebnisprüfung fehlschlägt. Ein erfolgreicher Lauf bedeutet nicht, dass keine Kollisionen vorhanden sind. Die normale vollständige CI bleibt separat.
+
 ### Fixed
 
 - GitHub Actions Browserfall für geschlossene Haut (`automatic-skin-correction.spec.ts`) an die aktuelle KI-Schnittdiagnose angepasst: statt des veralteten `unchecked: self-intersections` wird der tatsächlich gemessene Teilmodell-Schnittbericht geprüft; ungemessene Teilmodell-übergreifende Kollisionen und angrenzende Kontakte bleiben ausdrücklich als ungeprüft markiert. Ursache von Actions-Run #105: 473 Node-Tests und Build erfolgreich, 45/46 Browserfälle erfolgreich; nur die veraltete Browsererwartung schlug fehl.

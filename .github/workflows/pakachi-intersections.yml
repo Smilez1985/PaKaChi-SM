@@ -1,0 +1,57 @@
+name: PaKaChi real-form intersection evidence
+on:
+  push:
+    branches: [develop]
+    paths:
+      - '.github/workflows/pakachi-intersections.yml'
+      - 'scripts/benchmark-pakachi-intersections.mjs'
+      - 'src/surface-intersections.ts'
+      - 'src/pose-surface-check.ts'
+      - 'src/studio-rig.ts'
+      - 'src/viewer.ts'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: Prepare original PaKaChi rigged forms
+        run: npm run prepare:pakachi -- --if-needed
+      - name: Measure static hip and knee intersection probes
+        run: |
+          mkdir -p test-results
+          node scripts/benchmark-pakachi-intersections.mjs > test-results/pakachi-intersections.json
+      - name: Verify the report contains both forms and every requested joint angle
+        run: |
+          node --input-type=module -e '
+            import {readFileSync} from "node:fs";
+            const report=JSON.parse(readFileSync("test-results/pakachi-intersections.json","utf8"));
+            if(report.format!=="pakachi-intersection-probes"||report.forms?.length!==2)throw Error("Missing collision evidence");
+            for(const form of ["humanoid","animal"]){
+              const entry=report.forms.find(x=>x.form===form);
+              if(!entry||!entry.sha256||entry.probes?.length!==8)throw Error("Missing form/joint probes: "+form);
+              for(const joint of ["LeftHip","LeftKnee"])for(const degrees of [0,22.5,45,90]){
+                const pose=entry.probes.find(x=>x.joint===joint&&x.degrees===degrees);
+                if(!pose||pose.checkedMeshes+pose.unmeasurableMeshes!==entry.meshes)throw Error("Incomplete mesh accounting: "+form+" "+joint+" "+degrees);
+              }
+            }
+            console.log("Both original forms and all 16 bounded joint poses documented; incomplete collision coverage is retained.");
+          '
+      - name: Preserve measured evidence even on validation failure
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: pakachi-intersection-evidence
+          path: test-results/pakachi-intersections.json
+          retention-days: 30
+          if-no-files-found: warn
