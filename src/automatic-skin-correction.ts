@@ -62,8 +62,9 @@ export function selectCollisionMotionFrames<T extends {before:SurfaceReport}>(fr
 }
 export const AUTOMATIC_SKIN_VERTEX_BUDGET=100_000_000;
 export const AUTOMATIC_SKIN_SAMPLE_LIMIT=512;
+class AutomaticSkinBudgetError extends Error {}
 export type SkinProgress={phase:'diagnosis'|'search'|'validation';samples:number;joints:number;candidates:number;vertexSamples:number;edgeOperations:number};
-export interface AutomaticSkinProposal extends WeightCorrectionProposal {kind?:'geometry';geometryMethod?:'dual-quaternion'|'edge-fit'|'edge-relaxation';shape?:StudioCorrectiveShape;edgeOperations?:number;edgeBudgetExhausted?:boolean;sampledIssues:number;sampledVolumeExcess:number;target:Pose;targetOrigin:{kind:'pose'|'move';id:string;time?:number};jointId:string;motionSamples:number;checkedMoves:number;checkedJoints:number;checkedCandidates:number}
+export interface AutomaticSkinProposal extends WeightCorrectionProposal {kind?:'geometry';geometryMethod?:'dual-quaternion'|'edge-fit'|'edge-relaxation';shape?:StudioCorrectiveShape;edgeOperations?:number;edgeBudgetExhausted?:boolean;vertexSamples?:number;vertexBudgetExhausted?:boolean;sampledIssues:number;sampledVolumeExcess:number;target:Pose;targetOrigin:{kind:'pose'|'move';id:string;time?:number};jointId:string;motionSamples:number;checkedMoves:number;checkedJoints:number;checkedCandidates:number}
 export function skinCorrectionOverrides(rig:StudioRig,proposal:WeightCorrectionProposal):SkinOverrides{
  // Use the same transfer kernel as committed topology replay.
  const from=rig.data.points.find(p=>p.id===proposal.from),to=rig.data.points.find(p=>p.id===proposal.to);if(!from||!to)throw Error('Korrekturgelenke fehlen.');
@@ -99,16 +100,19 @@ export function correctionJoints(rig:StudioRig,report:SurfaceReport,pose:Pose){
  return [...scores].sort((a,b)=>b[1].score-a[1].score||a[0].id.localeCompare(b[0].id)).slice(0,4).map(([joint,score])=>{const parent=byBone.get(rig.bones[joint.bone!].parent as T.Bone)!,length=new T.Vector3().fromArray(parent.rest).distanceTo(new T.Vector3().fromArray(joint.rest)),center=score.center&&length>1e-5&&new T.Vector3().fromArray(score.center).distanceTo(new T.Vector3().fromArray(joint.rest))>length*.75?score.center:[...joint.rest];return {joint,center,radius:T.MathUtils.clamp(length>1e-5?Math.max(length*.9,score.spread*4,.05):Math.max(score.distance*2,.05),.005,2)};});
 }
 /** One bounded local repair job. It only returns a fully sampled proposal; live data stay intact. */
-export async function findAutomaticSkinCorrection(rig:StudioRig,signal:AbortSignal,valid:()=>boolean=()=>true,options:{poseId?:string;radius?:number;progress?:(value:SkinProgress)=>void}={}){
+export async function findAutomaticSkinCorrection(rig:StudioRig,signal:AbortSignal,valid:()=>boolean=()=>true,options:{poseId?:string;radius?:number;vertexBudget?:number;progress?:(value:SkinProgress)=>void}={}){
  const ensure=()=>{signal.throwIfAborted();if(!valid())throw Error('Studio-Stand hat sich geändert. Prüfung erneut starten.');};ensure();
+ const vertexBudget=options.vertexBudget??AUTOMATIC_SKIN_VERTEX_BUDGET;
+ if(!Number.isSafeInteger(vertexBudget)||vertexBudget<1||vertexBudget>AUTOMATIC_SKIN_VERTEX_BUDGET)throw Error('Ungültiges Korrekturbudget.');
+ let vertexBudgetExhausted=false;
  if(options.radius!==undefined&&(!Number.isFinite(options.radius)||options.radius<.005||options.radius>2))throw Error('Ungültiger Korrekturradius.');
  if(options.poseId!==undefined&&!rig.data.poses.some(p=>p.id===options.poseId))throw Error('Pose nicht gefunden.');
  if(!rig.data.poses.length)throw Error('Zuerst mindestens eine Pose speichern.');
  const state:SkinProgress={phase:'diagnosis',samples:0,joints:0,candidates:0,vertexSamples:0,edgeOperations:0},vertices=rig.surfaces.reduce((n,s)=>n+s.base.length/3,0),edgeBudget={used:0,limit:12_000_000,exhausted:false};
  if(!vertices)throw Error('Keine auswertbare Oberfläche.');
  const motions=rig.data.moves.map(move=>({move,times:moveCheckTimes(rig,move)})),sampleCount=rig.data.poses.length+motions.reduce((n,m)=>n+m.times.length,0);
- if(sampleCount>AUTOMATIC_SKIN_SAMPLE_LIMIT||vertices*(sampleCount+1)>AUTOMATIC_SKIN_VERTEX_BUDGET)throw Error('Korrekturauftrag zu groß. Kürzere Bewegungen oder kleineres Modell prüfen.');
- const measure=()=>{ensure();state.vertexSamples+=vertices;if(state.vertexSamples>AUTOMATIC_SKIN_VERTEX_BUDGET)throw Error('Korrekturauftrag zu groß. Kürzere Bewegungen oder kleineres Modell prüfen.');};
+ if(sampleCount>AUTOMATIC_SKIN_SAMPLE_LIMIT||vertices*(sampleCount+1)>vertexBudget)throw Error('Korrekturauftrag zu groß. Kürzere Bewegungen oder kleineres Modell prüfen.');
+ const measure=()=>{ensure();if(state.vertexSamples+vertices>vertexBudget){vertexBudgetExhausted=true;throw new AutomaticSkinBudgetError('Korrekturauftrag zu groß. Kürzere Bewegungen oder kleineres Modell prüfen.');}state.vertexSamples+=vertices;};
  const tick=async()=>{await new Promise<void>(resolve=>setTimeout(resolve,0));ensure();options.progress?.({...state});};
  measure();const inspect=createPoseSurfaceChecker(rig),frames:{pose:Pose;origin:AutomaticSkinProposal['targetOrigin'];before:SurfaceReport}[]=[];
  const add=async(pose:Pose,origin:AutomaticSkinProposal['targetOrigin'])=>{await tick();measure();const before=inspect(pose);if(before.meshes.some(m=>m.invalid||!m.compared))throw Error('Oberfläche ist nicht vollständig auswertbar.');frames.push({pose,origin,before});state.samples++;};
@@ -121,7 +125,7 @@ export async function findAutomaticSkinCorrection(rig:StudioRig,signal:AbortSign
  const intersectionPoses=[target.pose,...selectedMotion.map(f=>f.pose)];
  const joints=correctionJoints(rig,target.before,target.pose);let best:AutomaticSkinProposal|null=null;
  const emptyScore=()=>({sampledIssues:0,sampledVolumeExcess:0}),scoreReport=(score:ReturnType<typeof emptyScore>,report:SurfaceReport)=>{score.sampledIssues+=report.issues;score.sampledVolumeExcess+=report.meshes.reduce((n,m)=>n+volumeSeverity(m.volume),0);},beats=(score:ReturnType<typeof emptyScore>,report:SurfaceReport)=>!best||score.sampledIssues<best.sampledIssues||score.sampledIssues===best.sampledIssues&&(score.sampledVolumeExcess<best.sampledVolumeExcess-1e-6||Math.abs(score.sampledVolumeExcess-best.sampledVolumeExcess)<=1e-6&&betterSurfaceReport(report,best.after));
- for(const {joint,radius,center}of joints){
+ try{for(const {joint,radius,center}of joints){
   state.phase='search';state.joints++;await tick();
   for(const chosenRadius of [...new Set(options.radius===undefined?[Math.max(.005,radius/2),radius,Math.min(2,radius*2)]:[options.radius])]){
   const scores=new Map<string,ReturnType<typeof emptyScore>>(),key=(p:WeightCorrectionProposal)=>[p.from,p.to,p.amount,p.region.radius].join(':');
@@ -169,5 +173,10 @@ export async function findAutomaticSkinCorrection(rig:StudioRig,signal:AbortSign
 
   }
  }
- await tick();ensure();if(best){best.checkedJoints=state.joints;best.checkedCandidates=state.candidates;best.edgeOperations=edgeBudget.used;best.edgeBudgetExhausted=edgeBudget.exhausted;}return best;
+ }catch(error){
+  // Keep only an earlier fully validated proposal. A candidate interrupted in any
+  // gate is discarded; aborts, stale revisions and other errors still propagate.
+  if(!(error instanceof AutomaticSkinBudgetError)||!best)throw error;
+ }
+ await tick();ensure();if(best){best.vertexSamples=state.vertexSamples;best.vertexBudgetExhausted=vertexBudgetExhausted;best.checkedJoints=state.joints;best.checkedCandidates=state.candidates;best.edgeOperations=edgeBudget.used;best.edgeBudgetExhausted=edgeBudget.exhausted;}return best;
 }

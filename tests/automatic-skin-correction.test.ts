@@ -110,3 +110,25 @@ test('collision regression rejects a proven new cut even when the modified mesh 
  assert.equal(newProvenIntersectionCount(partial,complete),0,'an incomplete baseline cannot prove an increase');
  assert.equal(newProvenIntersectionCount(complete,{...complete,intersections:0}),0);
 });
+
+test('search exhaustion retains only an earlier fully validated proposal and never changes the source',async()=>{
+ const f=twistFixture(),data=structuredClone(f.rig.data),live=f.rig.capture();
+ try{
+  const full=await findAutomaticSkinCorrection(f.rig,new AbortController().signal);assert.ok(full);assert.equal(full.vertexBudgetExhausted,false);
+  const vertices=f.rig.surfaces.reduce((n,s)=>n+s.base.length/3,0),limit=full.vertexSamples!-vertices;
+  const limited=await findAutomaticSkinCorrection(f.rig,new AbortController().signal,()=>true,{vertexBudget:limit});assert.ok(limited);assert.equal(limited.vertexBudgetExhausted,true);assert.ok(limited.vertexSamples!<=limit);assert.ok(limited.after.issues<limited.before.issues);
+  const inspect=createPoseSurfaceChecker(f.rig),overrides=skinCorrectionOverrides(f.rig,limited);
+  for(const pose of [...f.rig.data.poses,...moveCheckTimes(f.rig,f.rig.data.moves[0]).map(time=>({id:'independent',name:'Independent',seconds:1,values:f.rig.sample(f.rig.data.moves[0],time)}))])assert.equal(noMeasuredRegression(inspect(pose),inspect(pose,overrides)),true);
+  const abort=new AbortController();await assert.rejects(()=>findAutomaticSkinCorrection(f.rig,abort.signal,()=>true,{vertexBudget:limit,progress:s=>{if(s.vertexSamples>=limit)abort.abort();}}),{name:'AbortError'});
+  let valid=true;await assert.rejects(()=>findAutomaticSkinCorrection(f.rig,new AbortController().signal,()=>valid,{vertexBudget:limit,progress:s=>{if(s.vertexSamples>=limit)valid=false;}}),/geändert/);
+  assert.deepEqual(f.rig.data,data);assert.deepEqual(f.rig.capture(),live);
+ }finally{f.rig.dispose();}
+});
+test('a budget without a completely checked proposal rejects, and custom budgets cannot exceed the global cap',async()=>{
+ const f=twistFixture(),before=structuredClone(f.rig.data);
+ try{
+  for(const vertexBudget of [0,-1,1.5,NaN,100000001])await assert.rejects(()=>findAutomaticSkinCorrection(f.rig,new AbortController().signal,()=>true,{vertexBudget}),/Korrekturbudget/);
+  await assert.rejects(()=>findAutomaticSkinCorrection(f.rig,new AbortController().signal,()=>true,{vertexBudget:1104}),/zu groß/);
+  assert.deepEqual(f.rig.data,before);
+ }finally{f.rig.dispose();}
+});

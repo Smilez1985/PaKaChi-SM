@@ -21,8 +21,12 @@ Entwicklungsstand auf `develop`; vollständige GitHub- und Browserprüfung ausst
 ### Added
 
 - Allgemeiner Schnitt-Gegenschritt für positionelle Studio-/KI-Hautkorrekturen: neue transversale Dreieckspaare im veränderten Bereich werden gegenüber der Ausgangshaltung identifiziert; betroffene Verschiebungen und ihre ausgewählten Nahtkopien werden eingefroren. Acht begrenzte Durchläufe, vollständige Messabdeckung im Prüfbereich, gemeinsames Arbeitsbudget, Abbruch- und Revisionsprüfung. Danach gelten erneut sämtliche bisherigen Dehnungs-, Volumen-, Posen-/Move- und vollständigen Teilnetz-Schnittgegenprüfungen.
-- Die echte Tierform liefert im automatischen Auftrag bei 22,5° linker Hüfte und explizitem Radius 0,15 einen Vorschlag mit 760 → 752 Dehnungswarnungen. Zwei Posen, 33 Move-Stichproben und 65 unabhängige Zwischenhaltungen geprüft; an vier Winkeln keine zusätzlichen Körper-Schnittpaare. Bestehende Schnitte bleiben. Keine allgemeine Anatomie- oder kontinuierliche Kollisionsfreigabe.
+- Die echte Tierform liefert im Standardauftrag bei 22,5° linker Hüfte mit selbst gewähltem Radius einen Vorschlag mit 760 → 747 Dehnungswarnungen. Zwei Posen, 33 Move-Stichproben und 65 unabhängige Zwischenhaltungen geprüft; an vier Winkeln keine zusätzlichen Körper-Schnittpaare. Bestehende Schnitte bleiben. Keine allgemeine Anatomie- oder kontinuierliche Kollisionsfreigabe.
 - Kernprüfungen für neue und bestehende Schnittpaare, Nahtkopien, unvollständige Kontakte, Budget, Abbruch und Revisionswechsel; Tierform ergänzt den Browserfall für Vorschau, Übernahme, Undo/Redo und Projekt-Replay.
+
+### Fixed
+
+- Erreicht die automatische Suche ihr Vertex-Arbeitsbudget, bleibt ein zuvor vollständig gegengeprüfter Vorschlag verfügbar. Die gerade unterbrochene Variante wird verworfen. Ohne vollständig geprüften Vorschlag bleibt der Auftrag abgelehnt; Abbruch und Revisionsfehler werden weitergegeben. Studio und KI-Ausgabe kennzeichnen die begrenzte Suche. Das maximale Arbeitsbudget bleibt unverändert.
 
 ## [0.98.0] - 2026-11-10
 

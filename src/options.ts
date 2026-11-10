@@ -94,6 +94,7 @@ const translations:Record<string,string>={
   "Vergleich beenden":"End comparison",
   "Geprüfte Korrektur übernehmen":"Apply checked correction",
   "Wählt auffällige Hautbereiche und Gelenke selbst. Prüft gespeicherte Posen sowie Zwischenbilder aller eigenen Moves. Vorschau verändert das Projekt nicht. Eine übernommene Korrektur ist rückgängig machbar. Kollisionen, Volumen und Charakterdesign sind nicht geprüft.":"Selects faulty skin regions and joints automatically. Checks saved poses and intermediate frames of all own moves. Preview does not change the project. An applied correction can be undone. Collisions, volume and character design are not checked.",
+  "Suchbudget erreicht. Der letzte vollständig gegengeprüfte Vorschlag bleibt verfügbar.":"Search budget reached. The last fully validated proposal remains available.",
   "Gemessene Zielpose: vorher → nachher. P: gespeicherte Posen, M: eigene Moves, F: Move-Stichproben, V: Suchvarianten. Noch nicht übernommen.":"Measured target pose: before → after. P: saved poses, M: own moves, F: move samples, V: search variants. Not applied yet.",
   "Keine Korrektur mit bestandener Gegenprüfung gefunden.":"No correction passed the comparison checks.",
   "Oberfläche untersuchen":"Inspect surface",
