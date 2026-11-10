@@ -14,6 +14,9 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ### Added
 
+- Zusätzliche, auf höchstens drei Move-Stichproben begrenzte Schnittsperre für automatische Gewichts- und Geometriekandidaten. Ein nachgewiesener neuer Schnitt verwirft den Kandidaten. Abbruch, Revisionskontrolle und Vertexbudget bleiben aktiv. Ungeprüfte oder unmessbare Bewegungsbilder sind keine Kollisionsfreigabe.
+
+
 - Zielposen-Gegenprüfung für automatische Gewichts- und geometrische Hautkorrekturen verwirft Kandidaten mit mehr nachgewiesenen transversalen Selbstschnitten auf betroffenen Teilmodellen. Die Prüfung meldet ihre messbare Abdeckung separat; große, coplanare und andere ungeeignete Flächen sind **nicht freigegeben**. Andere Posen, Zwischenbilder und Teilmodell-Kollisionen sind weiterhin nicht von dieser zusätzlichen Schnittsperre abgedeckt. Bestehende Dehnungs-/Volumen-Gegenprüfungen bleiben maßgeblich.
 
 

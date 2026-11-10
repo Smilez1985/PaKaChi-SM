@@ -27,6 +27,20 @@ export function checkCandidateIntersectionRegression(rig:StudioRig,pose:Pose,aff
  }
  return {accepted:newIntersections===0,checkedMeshes,unmeasurableMeshes,newIntersections,complete:unmeasurableMeshes===0&&checkedMeshes===new Set(affected).size};
 }
+/** Additional bounded target and motion frame screening, not continuous collision clearance. */
+export function checkCandidateIntersectionFrames(rig:StudioRig,poses:readonly Pose[],affected:readonly number[],overrides?:SkinOverrides,shape?:StudioCorrectiveShape,ensure:()=>void=()=>{}){
+ if(!poses.length||poses.length>4)throw Error('Ungültige Anzahl Schnitt-Stichproben.');
+ let checkedFrames=0,unmeasurableFrames=0,checkedMeshes=0,unmeasurableMeshes=0,newIntersections=0;
+ for(const pose of poses){
+  ensure();
+  const result=checkCandidateIntersectionRegression(rig,pose,affected,overrides,shape);
+  checkedFrames++;checkedMeshes+=result.checkedMeshes;unmeasurableMeshes+=result.unmeasurableMeshes;
+  if(!result.complete)unmeasurableFrames++;
+  newIntersections+=result.newIntersections;
+  if(newIntersections)break;
+ }
+ return {accepted:newIntersections===0,checkedFrames,unmeasurableFrames,checkedMeshes,unmeasurableMeshes,newIntersections,complete:unmeasurableFrames===0&&checkedFrames===poses.length};
+}
 export const AUTOMATIC_SKIN_VERTEX_BUDGET=100_000_000;
 export const AUTOMATIC_SKIN_SAMPLE_LIMIT=512;
 export type SkinProgress={phase:'diagnosis'|'search'|'validation';samples:number;joints:number;candidates:number;vertexSamples:number;edgeOperations:number};
@@ -83,6 +97,9 @@ export async function findAutomaticSkinCorrection(rig:StudioRig,signal:AbortSign
  let motionSamples=0;for(const {move,times}of motions)for(const time of times){await add({id:'motion-sample',name:move.name,seconds:1,values:rig.sample(move,time)},{kind:'move',id:move.id,time});motionSamples++;}
  const target=frames.filter(f=>options.poseId===undefined||f.origin.kind==='pose'&&f.origin.id===options.poseId).sort((a,b)=>betterSurfaceReport(a.before,b.before)?1:betterSurfaceReport(b.before,a.before)?-1:0)[0];
  if(!target||target.before.status!=='outside'){ensure();return null;}
+ const motionFrames=frames.filter(f=>f.origin.kind==='move');
+ const selectedMotion=motionFrames.length<=3?motionFrames:[0,Math.floor((motionFrames.length-1)/2),motionFrames.length-1].map(i=>motionFrames[i]);
+ const intersectionPoses=[target.pose,...selectedMotion.map(f=>f.pose)];
  const joints=correctionJoints(rig,target.before,target.pose);let best:AutomaticSkinProposal|null=null;
  const emptyScore=()=>({sampledIssues:0,sampledVolumeExcess:0}),scoreReport=(score:ReturnType<typeof emptyScore>,report:SurfaceReport)=>{score.sampledIssues+=report.issues;score.sampledVolumeExcess+=report.meshes.reduce((n,m)=>n+volumeSeverity(m.volume),0);},beats=(score:ReturnType<typeof emptyScore>,report:SurfaceReport)=>!best||score.sampledIssues<best.sampledIssues||score.sampledIssues===best.sampledIssues&&(score.sampledVolumeExcess<best.sampledVolumeExcess-1e-6||Math.abs(score.sampledVolumeExcess-best.sampledVolumeExcess)<=1e-6&&betterSurfaceReport(report,best.after));
  for(const {joint,radius,center}of joints){
@@ -92,7 +109,7 @@ export async function findAutomaticSkinCorrection(rig:StudioRig,signal:AbortSign
   const proposal=await searchWeightCorrection(rig,target.pose,joint,chosenRadius,signal,valid,{center,measure,candidate:()=>{state.candidates++;},accept:async(_candidate,overrides)=>{
    state.phase='validation';const score=emptyScore();
    for(const frame of frames){await tick();measure();const report=inspect(frame.pose,overrides);if(!noMeasuredRegression(frame.before,report)){state.phase='search';return false;}scoreReport(score,report);}
-   const intersection=checkCandidateIntersectionRegression(rig,target.pose,[...overrides.keys()],overrides);
+   const intersection=checkCandidateIntersectionFrames(rig,intersectionPoses,[...overrides.keys()],overrides,undefined,()=>{ensure();measure();});
    if(!intersection.accepted){state.phase='search';return false;}
    scores.set(key(_candidate),score);state.phase='search';return true;
   }});
@@ -107,7 +124,7 @@ export async function findAutomaticSkinCorrection(rig:StudioRig,signal:AbortSign
    for(const frame of frames){await tick();measure();const report=inspect(frame.pose,undefined,shape);if(!noMeasuredRegression(frame.before,report)){safe=false;break;}scoreReport(score,report);}
    if(safe)for(const pose of correctionSamples(rig,target.pose)){await tick();measure();const before=inspect(pose);measure();if(!noMeasuredRegression(before,inspect(pose,undefined,shape))){safe=false;break;}}
    state.phase='search';if(!safe||!beats(score,after))continue;
-   const intersection=checkCandidateIntersectionRegression(rig,target.pose,shape.meshes.map(m=>m.mesh),undefined,shape);
+   const intersection=checkCandidateIntersectionFrames(rig,intersectionPoses,shape.meshes.map(m=>m.mesh),undefined,shape,()=>{ensure();measure();});
    if(!intersection.accepted)continue;
    const parent=rig.data.points.find(p=>p.kind==='bone'&&rig.bones[p.bone!]===rig.bones[joint.bone!].parent)!;
    best={kind:'geometry',geometryMethod:method,shape,...score,from:joint.id,to:parent.id,amount:strength,region:{center:[...center] as [number,number,number],radius:chosenRadius},poseId:target.pose.id,before:target.before,after,affectedVertices:shape.meshes.reduce((n,m)=>n+m.indices.length,0),checkedPoses:rig.data.poses.length,intermediateSamples:3,target:structuredClone(target.pose),targetOrigin:{...target.origin},jointId:joint.id,motionSamples,checkedMoves:rig.data.moves.length,checkedJoints:state.joints,checkedCandidates:state.candidates};

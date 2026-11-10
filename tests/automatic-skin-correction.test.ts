@@ -2,7 +2,7 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import * as T from 'three';
 import {twistFixture} from './helpers/twist-fixture.ts';
-import {findAutomaticSkinCorrection,skinCorrectionOverrides,checkCandidateIntersectionRegression} from '../src/automatic-skin-correction.ts';
+import {findAutomaticSkinCorrection,skinCorrectionOverrides,checkCandidateIntersectionRegression,checkCandidateIntersectionFrames} from '../src/automatic-skin-correction.ts';
 import {createPoseSurfaceChecker,poseSurfacePositions} from '../src/pose-surface-check.ts';
 import {moveCheckTimes} from '../src/move-limit-check.ts';
 import {noMeasuredRegression,searchWeightCorrection} from '../src/pose-weight-correction.ts';
@@ -65,5 +65,17 @@ test('automatic intersection guard reports coverage and leaves source state inta
  assert.deepEqual(f.rig.capture(),live);
  assert.equal(JSON.stringify(f.rig.data),before);
  assert.throws(()=>checkCandidateIntersectionRegression(f.rig,f.pose,[999]),/Teilmodell/);
+ f.rig.dispose();
+});
+
+test('bounded intersection screening checks target and three move frames without changing sources',()=>{
+ const f=twistFixture(),before=JSON.stringify(f.rig.data),live=f.rig.capture();
+ const poses=[f.pose,...[0,.5,1].map(time=>({id:'motion',name:'Motion',seconds:1,values:f.rig.sample(f.rig.data.moves[0],time)}))];
+ const result=checkCandidateIntersectionFrames(f.rig,poses,[0]);
+ assert.equal(result.checkedFrames,4);assert.equal(result.checkedMeshes+result.unmeasurableMeshes,4);
+ assert.equal(result.complete,result.unmeasurableFrames===0);
+ assert.deepEqual(f.rig.capture(),live);assert.equal(JSON.stringify(f.rig.data),before);
+ assert.throws(()=>checkCandidateIntersectionFrames(f.rig,[...poses,f.pose],[0]),/Schnitt-Stichproben/);
+ const abort=new AbortController();abort.abort();assert.throws(()=>checkCandidateIntersectionFrames(f.rig,poses,[0],undefined,undefined,()=>abort.signal.throwIfAborted()),{name:'AbortError'});
  f.rig.dispose();
 });
