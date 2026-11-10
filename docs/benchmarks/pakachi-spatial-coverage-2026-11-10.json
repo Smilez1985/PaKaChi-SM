@@ -585,5 +585,166 @@
         }
       ]
     }
-  ]
+  ],
+  "independentCiEvidence": {
+    "commit": "3ca3e78cbdbb6f893eb2c2b6e570b0241dd72fef",
+    "run": 42857939781,
+    "artifact": 13783897677,
+    "archiveSha256": "d4f24cd8341d38370501733939d5e119a88f217d99a7fbd2323b6ab5c3c8bf6d",
+    "localAndCiFullJsonIdentical": true
+  },
+  "supplementalRejectedWeightProbe": {
+    "form": "animal",
+    "mesh": "PaKaChi_body",
+    "joint": "LeftHip",
+    "axis": "X",
+    "method": "Sequential transferSkinInfluences from LeftHip then LeftKnee to TailBase, using amount * smoothstep(original TailBase weight, 0.5, 0.95) per vertex; original attributes and rig unchanged. This is a character-specific evaluation hypothesis, not an anatomy detector or published correction.",
+    "probes": [
+      {
+        "amount": 0,
+        "angle": 22.5,
+        "affected": 0,
+        "strain": 760,
+        "bodyStrain": 760,
+        "bodyCollapsed": 4,
+        "volumeIssues": 0,
+        "bodyIntersections": 551,
+        "checked": true
+      },
+      {
+        "amount": 0,
+        "angle": 45,
+        "affected": 0,
+        "strain": 1258,
+        "bodyStrain": 1258,
+        "bodyCollapsed": 3,
+        "volumeIssues": 0,
+        "bodyIntersections": 936,
+        "checked": true
+      },
+      {
+        "amount": 0,
+        "angle": 90,
+        "affected": 0,
+        "strain": 1566,
+        "bodyStrain": 1566,
+        "bodyCollapsed": 3,
+        "volumeIssues": 0,
+        "bodyIntersections": 2229,
+        "checked": true
+      },
+      {
+        "amount": 0.5,
+        "angle": 22.5,
+        "affected": 326,
+        "strain": 737,
+        "bodyStrain": 737,
+        "bodyCollapsed": 5,
+        "volumeIssues": 0,
+        "bodyIntersections": 560,
+        "checked": true
+      },
+      {
+        "amount": 0.5,
+        "angle": 45,
+        "affected": 326,
+        "strain": 1220,
+        "bodyStrain": 1220,
+        "bodyCollapsed": 2,
+        "volumeIssues": 0,
+        "bodyIntersections": 956,
+        "checked": true
+      },
+      {
+        "amount": 0.5,
+        "angle": 90,
+        "affected": 326,
+        "strain": 1532,
+        "bodyStrain": 1532,
+        "bodyCollapsed": 3,
+        "volumeIssues": 0,
+        "bodyIntersections": 2295,
+        "checked": true
+      },
+      {
+        "amount": 1,
+        "angle": 22.5,
+        "affected": 326,
+        "strain": 733,
+        "bodyStrain": 733,
+        "bodyCollapsed": 4,
+        "volumeIssues": 0,
+        "bodyIntersections": 567,
+        "checked": true
+      },
+      {
+        "amount": 1,
+        "angle": 45,
+        "affected": 326,
+        "strain": 1180,
+        "bodyStrain": 1180,
+        "bodyCollapsed": 2,
+        "volumeIssues": 0,
+        "bodyIntersections": 947,
+        "checked": true
+      },
+      {
+        "amount": 1,
+        "angle": 90,
+        "affected": 326,
+        "strain": 1477,
+        "bodyStrain": 1477,
+        "bodyCollapsed": 3,
+        "volumeIssues": 0,
+        "bodyIntersections": 2374,
+        "checked": true
+      }
+    ],
+    "actualAutomaticGate": {
+      "amount": 1,
+      "angle": 22.5,
+      "affected": 326,
+      "strain": 733,
+      "bodyStrain": 733,
+      "bodyCollapsed": 4,
+      "volumeIssues": 0,
+      "bodyIntersections": 567,
+      "checked": true,
+      "gate": {
+        "accepted": false,
+        "checkedMeshes": 1,
+        "unmeasurableMeshes": 0,
+        "newIntersections": 16,
+        "complete": true
+      }
+    },
+    "result": "Rejected: lower strain is accompanied by 16 additional proven independent-face body crossings at 22.5 degrees. No candidate applied or exported."
+  },
+  "fullCiVerification": {
+    "commit": "3ca3e78cbdbb6f893eb2c2b6e570b0241dd72fef",
+    "run": 42857939759,
+    "tests": 479,
+    "passedTests": 479,
+    "failedTests": 0,
+    "cancelledTests": 0,
+    "skippedTests": 0,
+    "browserPassed": 46,
+    "browserFlaky": 0,
+    "browserMinutes": 16,
+    "build": "success",
+    "importRuns": 3,
+    "browserEvidenceArtifact": 13785741902,
+    "browserEvidenceArchiveSha256": "5a08cbf03720c26c3530259a5a2a915ec3e807155e3156bd47db47c8dbf2a230",
+    "verifiedAt": "2026-11-10T18:18:18+01:00",
+    "browserEvidenceArchiveVerified": true,
+    "preparedCharacterHashesMatch": true,
+    "importReportVerified": true,
+    "importFrameBoundaryMs": [
+      4275,
+      4312.9,
+      4276.2
+    ],
+    "importMedianFrameBoundaryMs": 4276.2,
+    "importRendererMode": "software"
+  }
 }
