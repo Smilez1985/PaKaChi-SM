@@ -76,7 +76,9 @@
           "radius": 0.14512063946937387
         },
         "strength": 1,
-        "edgeOperations": 2883984
+        "edgeOperations": 2883984,
+        "vertexSamples": 97091250,
+        "vertexBudgetExhausted": false
       }
     },
     {
@@ -86,7 +88,7 @@
       "joint": "LeftHip",
       "axis": "X",
       "degrees": 22.5,
-      "mode": "default-automatic-job",
+      "mode": "full-automatic-job",
       "beforeIssues": 760,
       "status": "accepted-automatic-proposal",
       "afterIssues": 747,
@@ -152,8 +154,88 @@
           "radius": 0.1437889077780341
         },
         "strength": 1,
-        "edgeOperations": 5939032
+        "edgeOperations": 5939032,
+        "vertexSamples": 99879509,
+        "vertexBudgetExhausted": true
       }
     }
-  ]
+  ],
+  "normalizedReference": {
+    "form": "animal",
+    "source": "public/model-zoo/pakachi-rigged/animal.glb",
+    "sha256": "25226f09bbdd02f4ec4e20f013f5585a3816df54dafc447ce308225a68202703",
+    "joint": "LeftHip",
+    "axis": "X",
+    "degrees": 22.5,
+    "mode": "normalized-full-automatic-job",
+    "beforeIssues": 760,
+    "status": "accepted-automatic-proposal",
+    "afterIssues": 747,
+    "afterVolumeIssues": 0,
+    "method": "edge-relaxation",
+    "affectedVertices": 878,
+    "independentSamples": 65,
+    "regressions": [],
+    "bodyCuts": [
+      {
+        "fraction": 0.25,
+        "degrees": 5.625,
+        "before": 74,
+        "after": 74,
+        "beforeComplete": true,
+        "afterComplete": true
+      },
+      {
+        "fraction": 0.5,
+        "degrees": 11.25,
+        "before": 256,
+        "after": 256,
+        "beforeComplete": true,
+        "afterComplete": true
+      },
+      {
+        "fraction": 0.75,
+        "degrees": 16.875,
+        "before": 398,
+        "after": 398,
+        "beforeComplete": true,
+        "afterComplete": true
+      },
+      {
+        "fraction": 1,
+        "degrees": 22.5,
+        "before": 551,
+        "after": 551,
+        "beforeComplete": true,
+        "afterComplete": true
+      }
+    ],
+    "collisionGate": {
+      "accepted": true,
+      "checkedFrames": 4,
+      "unmeasurableFrames": 0,
+      "checkedMeshes": 4,
+      "unmeasurableMeshes": 0,
+      "newIntersections": 0,
+      "complete": true
+    },
+    "automatic": {
+      "checkedPoses": 2,
+      "motionSamples": 33,
+      "checkedMoves": 1,
+      "checkedCandidates": 27,
+      "region": {
+        "center": [
+          0.03776440734085309,
+          0.7355548683273005,
+          -0.7595782658036638
+        ],
+        "radius": 0.3383341797245892
+      },
+      "strength": 1,
+      "edgeOperations": 5939032,
+      "vertexSamples": 99879509,
+      "vertexBudgetExhausted": true
+    }
+  }
 }

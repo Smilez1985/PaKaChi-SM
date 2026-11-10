@@ -14,9 +14,9 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [0.99.0] - 2026-11-10
 
-Zeitstempel: 2026-11-10T22:24:42+01:00 (Europe/Berlin)
+Zeitstempel: 2026-11-10T23:27:04+01:00 (Europe/Berlin)
 
-Entwicklungsstand auf `develop`; vollständige GitHub- und Browserprüfung ausstehend. [Prüfbericht](PRUEFUNG.md#version-0990).
+Geprüfter Meilenstein auf `main`: 497 Tests, 48 Browserfälle, Build und drei Importmessungen auf `develop` erfolgreich; zusätzlicher main-Lauf beim Abschluss noch aktiv. [Prüfbericht](PRUEFUNG.md#version-0990).
 
 ### Added
 
