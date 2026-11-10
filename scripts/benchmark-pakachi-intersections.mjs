@@ -32,12 +32,17 @@ for(const form of ['humanoid','animal']){
      const result=checkSurfaceIntersections(positions,index);
      meshes.push({mesh:i,name:surface.mesh.name,...result});
     }
+    const flagged=meshes.filter(m=>m.intersections||!m.checked);
+    // Prioritize actionable body/fur diagnostics and actual detected crossings over decorative meshes.
+    const priority=m=>(/body|fur|hip|knee|leg/i.test(m.name)?2:0)+(m.intersections?1:0);
+    const ordered=[...flagged].sort((a,b)=>priority(b)-priority(a)||b.intersections-a.intersections||a.mesh-b.mesh);
     probes.push({joint:name,axis:'X',degrees:angle,surfaceIssues:shape.issues,volumeIssues:shape.volumeIssues,
      checkedMeshes:meshes.filter(m=>m.checked).length,unmeasurableMeshes:meshes.filter(m=>!m.checked).length,
      detectedTransverseIntersections:meshes.reduce((sum,m)=>sum+m.intersections,0),
      unmeasurableReasons:meshes.reduce((acc,m)=>{if(!m.checked)acc[m.reason]=(acc[m.reason]??0)+1;return acc;},{}),
-     meshes:meshes.filter(m=>m.intersections||!m.checked).slice(0,32),
-     meshesTruncated:meshes.filter(m=>m.intersections||!m.checked).length>32,
+     meshDiagnostics:meshes.map(m=>({mesh:m.mesh,name:m.name,triangles:m.triangles,checked:m.checked,reason:m.reason??null,intersections:m.intersections,testedPairs:m.testedPairs??0})),
+     meshes:ordered.slice(0,32),
+     meshesTruncated:ordered.length>32,
      scope:'Only independent triangles within each mesh; contacts, neighboring faces, other meshes and intermediate motion untested'});
    }
   }

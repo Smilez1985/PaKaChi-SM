@@ -4,6 +4,35 @@
 
 Alle Prüfnachweise stehen in dieser Datei: ein Abschnitt je Softwareversion sowie gesonderte Abschnitte für datierte Zwischenprüfungen. Die Ergebnisse und Grenzen gelten für den jeweils genannten Stand. Spätere Läufe stehen als Nachtrag im selben Abschnitt. Produktänderungen gehören in den [Changelog](CHANGELOG.md), offene Aufgaben in die [Roadmap](ROADMAP.md).
 
+## Gemessene Originalformen – statische Schnittproben (10. November 2026)
+
+**Quelle:** [GitHub Actions, eigenständiger Messlauf #1](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/42826070965), Commit `a7ed2122bfca7b101d898139e06d75abded744cd`, [JSON-Artefakt](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/42826070965/artifacts/13769627616). Sowohl dieser Messlauf als auch [die vollständige CI #107](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/42826070904) sind erfolgreich abgeschlossen. Das bedeutet ausschließlich, dass Messung, Bericht und übrige automatisierte Tests funktioniert haben; **keine der Originalformen ist auf Kollisionsfreiheit geprüft**.
+
+| Statische Messung | Arbeitsform | Tierform |
+| --- | ---: | ---: |
+| Vertices | 190.375 | 231.739 |
+| Teilmodelle | 92 | 90 |
+| Vollständig geprüfte Teilmodelle je Haltung | 0 | 0 |
+| Kontakt-/Coplanar-Unklarheiten je Haltung | 62 | 60 |
+| Ungültige Geometrien je Haltung | 28 | 28 |
+| Budgetbedingte Abbrüche je Haltung | 2 | 2 |
+| Nachgewiesene transversale Schnitte (Untergrenze) je Haltung | 36 | 38 |
+
+| Gelenk/Winkel | Arbeitsform: Dehnungswarnungen | Tierform: Dehnungswarnungen |
+| --- | ---: | ---: |
+| Hüfte 0° | 0 | 0 |
+| Hüfte 22,5° | 134 | 760 |
+| Hüfte 45° | 239 | 1.258 |
+| Hüfte 90° | 367 | 1.566 |
+| Knie 0° | 0 | 0 |
+| Knie 22,5° | 6 | 11 |
+| Knie 45° | 62 | 47 |
+| Knie 90° | 1 | 86 |
+
+Beim Tierform-Knie bei 90° wurde außerdem **eine** Volumenwarnung gemessen, sonst keine. Die 36 bzw. 38 gefundenen Schnittpaare sind eine *Untergrenze in unvollständigen Teilmodellprüfungen*, keine verifizierte Gesamtzahl. Sie bleiben in dieser Stichprobe über die acht Gelenkhaltungen konstant. Das kann aus statischen/dekorativen Teilnetzen stammen und belegt **keine** gute oder schlechte Kollisionsentwicklung in den betroffenen Beugeflächen. Der ursprüngliche JSON-Bericht trunciert die Darstellung der Teilnetze auf die ersten 32; die nächste Berichtsversion priorisiert Körper-/Fellnetze und erfasst je Pose alle Teilnetze kompakt für die Ursachenanalyse.
+
+Die Ausgangs-GLBs wurden nur gelesen, nicht überschrieben. Echte Gliedmaßen- und Anatomiequalität sowie Kontakte zwischen getrennten Meshes, angrenzende Dreiecke und kontinuierliche Bewegungen sind offen.
+
 ## Aktueller Entwicklungsnachweis – 10. November 2026
 
 Der unveränderte Programmstand auf `develop`, Commit `37c730e219a0e6d0c482c45c659ef1f879227053`, ist durch [GitHub Actions #106](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/42820898880) **vollständig erfolgreich** geprüft: **473/473 Node-Tests**, TypeScript-/Produktionsbuild, **46/46 Chromium-Browserfälle** und Produktionsbrowser-Importbenchmark. Das Ergebnis wurde aus Jobstatus und Joblogs geprüft. Der Lauf bestätigt diese konkrete Commit-Version, nicht spätere Programmänderungen. Die reale anatomische Qualität sowie der neue lesende Schnittbenchmark an den beiden echten rigged GLBs sind weiterhin **nicht** separat abgenommen.

@@ -12,6 +12,10 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+### Changed
+
+- Der reproduzierbare Originalformen-Schnittbenchmark erfasst nun kompakte Einzelresultate aller Teilmodelle und priorisiert Körper-/Fellnetze sowie tatsächlich erkannte Schnitte im sichtbaren Kurzbericht. Der erste erfolgreiche Messlauf #1 wurde mit 16 Gelenkproben, tatsächlichen Verformungswerten und den Grenzen der unvollständigen Kollisionsdiagnose im Prüfprotokoll dokumentiert.
+
 ### Added
 
 - Eigener GitHub-Actions-Workflow für den bereits vorhandenen lesenden Schnittbenchmark auf den beiden echten PaKaChi-Rigged-GLBs. Er validiert die 16 Hüft-/Knie-Posen und sichert die vollständige JSON-Ausgabe als Artefakt, auch wenn die Ergebnisprüfung fehlschlägt. Ein erfolgreicher Lauf bedeutet nicht, dass keine Kollisionen vorhanden sind. Die normale vollständige CI bleibt separat.
