@@ -14,6 +14,9 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ### Fixed
 
+- Entartete, kollineare und nicht endlich berechenbare Dreiecke werden bereits beim Einlesen des Netzes als ungültig erkannt, selbst wenn ihre Bounding-Box keine andere Fläche überlappt. Regressionen für isolierte Nullflächen sowie Kanten-/Eckkontakte ergänzt.
+
+
 - Nicht-coplanare Kanten- und Eckkontakte unabhängiger Dreiecke werden nicht länger stillschweigend als frei bewertet: Der Schnittprüfer markiert solche Kontakte als unvollständig; echte transversale Durchdringungen bleiben zählbar. Zwei Regressionen für Endpunkt- und Randkontakte ergänzt. Die Diagnose bleibt keine allgemeine Kollisionsfreigabe.
 
 ### Added

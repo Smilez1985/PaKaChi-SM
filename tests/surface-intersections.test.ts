@@ -54,3 +54,24 @@ test('unwelded seam vertices are treated as ambiguous contacts, unlike indexed a
  assert.equal(result.intersections,0);assert.equal(result.checked,false);
  assert.equal(result.reason,'coplanar-or-touching');
 });
+
+test('isolated degenerate triangles cannot yield a complete collision report',()=>{
+ const healthy=tri([0,0,0],[1,0,0],[0,1,0]);
+ const collinear=tri([100,0,0],[101,0,0],[102,0,0]);
+ const duplicate=tri([200,0,0],[200,0,0],[200,0,0]);
+ for(const invalid of [collinear,duplicate]){
+  const result=checkSurfaceIntersections([...healthy,...invalid]);
+  assert.equal(result.checked,false);assert.equal(result.reason,'invalid');
+  assert.equal(result.testedPairs,0);
+ }
+});
+test('non-coplanar endpoint and boundary contacts remain unresolved rather than cleared',()=>{
+ const floor=tri([-1,-1,0],[1,-1,0],[0,1,0]);
+ const endpoint=[...floor,...tri([0,0,0],[0,0,1],[.25,.25,1])];
+ const boundary=[...floor,...tri([0,1,-1],[0,1,1],[0,2,0])];
+ for(const positions of [endpoint,boundary]){
+  const result=checkSurfaceIntersections(positions);
+  assert.equal(result.checked,false);assert.equal(result.reason,'coplanar-or-touching');
+  assert.equal(result.intersections,0);
+ }
+});

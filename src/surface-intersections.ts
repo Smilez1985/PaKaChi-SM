@@ -42,7 +42,14 @@ export function checkSurfaceIntersections(positions:Numbers,index:Numbers|null=n
   if(ids.some(i=>!Number.isInteger(i)||i<0||i>=vertices)||ids.some(i=>[0,1,2].some(k=>!Number.isFinite(positions[i*3+k])))){
    report.checked=false;report.reason='invalid';return report;
   }
-  const pts=ids.map(i=>point(positions,i)) as [V,V,V];refs.push(ids);faces.push(pts);
+  const pts=ids.map(i=>point(positions,i)) as [V,V,V];
+  // Every triangle must be valid, including isolated or nonoverlapping faces.
+  const edge1=sub(pts[1],pts[0]),edge2=sub(pts[2],pts[0]),area2=Math.hypot(...cross(edge1,edge2));
+  const scale=Math.max(Math.hypot(...edge1),Math.hypot(...edge2),Math.hypot(...sub(pts[2],pts[1])));
+  if(!Number.isFinite(area2)||!Number.isFinite(scale)||scale===0||area2<=1e-12*scale*scale){
+   report.checked=false;report.reason='invalid';return report;
+  }
+  refs.push(ids);faces.push(pts);
   bounds.push({lo:[0,1,2].map(k=>Math.min(...pts.map(p=>p[k]))) as V,hi:[0,1,2].map(k=>Math.max(...pts.map(p=>p[k]))) as V});
  }
  // Sweep X-sorted triangle boxes. Cross-chunk pairs are naturally included:
