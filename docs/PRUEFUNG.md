@@ -4,6 +4,12 @@
 
 Alle Prüfnachweise stehen in dieser Datei: ein Abschnitt je Softwareversion sowie gesonderte Abschnitte für datierte Zwischenprüfungen. Die Ergebnisse und Grenzen gelten für den jeweils genannten Stand. Spätere Läufe stehen als Nachtrag im selben Abschnitt. Produktänderungen gehören in den [Changelog](CHANGELOG.md), offene Aufgaben in die [Roadmap](ROADMAP.md).
 
+## Aktueller Entwicklungsnachweis – 10. November 2026
+
+Der unveränderte Programmstand auf `develop`, Commit `37c730e219a0e6d0c482c45c659ef1f879227053`, ist durch [GitHub Actions #106](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/42820898880) **vollständig erfolgreich** geprüft: **473/473 Node-Tests**, TypeScript-/Produktionsbuild, **46/46 Chromium-Browserfälle** und Produktionsbrowser-Importbenchmark. Das Ergebnis wurde aus Jobstatus und Joblogs geprüft. Der Lauf bestätigt diese konkrete Commit-Version, nicht spätere Programmänderungen. Die reale anatomische Qualität sowie der neue lesende Schnittbenchmark an den beiden echten rigged GLBs sind weiterhin **nicht** separat abgenommen.
+
+Der vorangehende [Lauf #105](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/42811738719) für `5e44e6d` war **rot**, obwohl 473 Node-Tests und der Build bestanden: Der Browserfall `closed skin keeps volume warnings visible ...` prüfte fälschlich den inzwischen ersetzten KI-Eintrag `unchecked: self-intersections`; nur 45 von 46 Browserfällen bestanden. Die Browsererwartung wurde in `37c730e` auf den vorhandenen Teilmodell-Schnittbericht sowie die noch ungeprüften Kollisionen umgestellt. Frühere fehlgeschlagene oder wegen Push-Konkurrrenz abgebrochene Läufe dürfen nicht als erfolgreich gezählt werden.
+
 ## Nachgewiesen
 
 | Prüfung | Bestätigter Stand | Umfang und Grenze |
