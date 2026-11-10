@@ -21,3 +21,13 @@ test('budget, malformed positions and coplanar candidates never silently pass',(
  assert.equal(checkSurfaceIntersections(coplanar).reason,'coplanar-or-touching');
  assert.throws(()=>checkSurfaceIntersections([0,0,0,1]));
 });
+
+test('measured intersection regression distinguishes a clean frame from a newly crossing frame',()=>{
+ const fixed=tri([-1,-1,0],[1,-1,0],[0,1,0]);
+ const safe=[...fixed,...tri([0,-.5,2],[0,-.5,3],[0,.5,2])];
+ const crossing=[...fixed,...tri([0,-.5,-1],[0,-.5,1],[0,.5,0])];
+ const before=checkSurfaceIntersections(safe),after=checkSurfaceIntersections(crossing);
+ assert.equal(before.checked,true);assert.equal(before.intersections,0);
+ assert.equal(after.checked,true);assert.equal(after.intersections,1);
+ assert.ok(after.intersections>before.intersections);
+});

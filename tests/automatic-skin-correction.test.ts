@@ -91,3 +91,14 @@ test('collision motion selector preserves bounds and prioritizes the measured de
  assert.deepEqual(severity,[0,1,9,2,4,0]);
  f.rig.dispose();
 });
+
+test('real skinned 180-degree twist selects a measured high-risk motion frame, not arbitrary midpoint',()=>{
+ const f=twistFixture(),inspect=createPoseSurfaceChecker(f.rig),move=f.rig.data.moves[0];
+ const frames=Array.from({length:17},(_,i)=>{const time=i/16,pose={id:'measured',name:'Measured',seconds:1,values:f.rig.sample(move,time)};return {time,before:inspect(pose)};});
+ const risk=(r:typeof frames[number]['before'])=>r.issues+r.volumeIssues*2+r.meshes.reduce((n,m)=>n+m.volume.components.reduce((s,c)=>s+(c.ratio===null?1:Math.max(0,.8-c.ratio)+Math.max(0,c.ratio-1.2)),0),0);
+ const selected=selectCollisionMotionFrames(frames),maxRisk=Math.max(...frames.slice(1,-1).map(f=>risk(f.before)));
+ assert.equal(selected.length,3);assert.equal(selected[0].time,0);assert.equal(selected[2].time,1);
+ assert.equal(risk(selected[1].before),maxRisk);
+ assert.deepEqual(selected,selectCollisionMotionFrames(frames));
+ f.rig.dispose();
+});
