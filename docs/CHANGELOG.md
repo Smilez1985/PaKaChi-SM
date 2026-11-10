@@ -14,6 +14,9 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ### Added
 
+- Neuer reproduzierbarer, ausschließlich lesender Prüfbericht für transversale Selbstüberschneidungen auf den beiden echten PaKaChi-Rigged-GLBs. Der CLI-Auftrag misst linke Hüfte und linkes Knie bei 0°, 22,5°, 45° und 90°, protokolliert Eingabe-Hashes, Dehnungs-/Volumenwarnungen, gefundene Schnitte sowie unmessbare oder budgetbegrenzte Teilmodelle. Keine Kollisions- oder anatomische Freigabe; der Lauf muss auf Entwicklungs- oder CI-Hardware separat ausgeführt werden.
+
+
 - Ein reproduzierbarer 180°-Hautverdrehungstest prüft die Auswahl des geometrisch auffälligsten inneren Bewegungsbilds an real berechneten Skinned-Mesh-Posen. Ein zusätzlicher Schnittfall prüft den Übergang von zwei getrennten Dreiecken zu einer transversalen Durchdringung.
 - Die maximal drei zusätzlichen Schnitt-Stichproben behalten Anfang und Ende der gespeicherten Bewegungsbilder; statt eines festen mittleren Bildes wählen sie die durch Dehnung und Volumenwarnungen auffälligste innere Stichprobe. Regressionstest prüft Priorisierung, Randfälle und unveränderte Eingaben. Kein vollständiger Kollisionsnachweis.
 
