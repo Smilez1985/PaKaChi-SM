@@ -14,6 +14,9 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ### Added
 
+- Räumlicher X-AABB-Sweep ersetzt die bisherige harte 2.048-Dreiecks-Grenze der Selbstschnittdiagnose. Bis zu 200.000 Dreiecke pro Teilmodell sind als Eingabe möglich; jeder mögliche Paarvergleich über beliebige Verarbeitungsteilmengen hinweg wird räumlich vorausgefiltert. Unverändert harte Budgets für Kandidatenpaare und breite Überlappungen liefern statt einer scheinbaren Freigabe den Status unvollständig. Regressionen mit mehr als 2.048 Dreiecken und einem Schnitt zwischen weit getrennten Eingabeblöcken ergänzt.
+
+
 - Neuer reproduzierbarer, ausschließlich lesender Prüfbericht für transversale Selbstüberschneidungen auf den beiden echten PaKaChi-Rigged-GLBs. Der CLI-Auftrag misst linke Hüfte und linkes Knie bei 0°, 22,5°, 45° und 90°, protokolliert Eingabe-Hashes, Dehnungs-/Volumenwarnungen, gefundene Schnitte sowie unmessbare oder budgetbegrenzte Teilmodelle. Keine Kollisions- oder anatomische Freigabe; der Lauf muss auf Entwicklungs- oder CI-Hardware separat ausgeführt werden.
 
 

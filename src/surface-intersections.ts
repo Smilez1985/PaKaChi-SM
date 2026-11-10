@@ -2,6 +2,7 @@
  * Adjacent faces are skipped, coplanar overlaps remain explicitly unresolved.
  * This is not a continuous collision or anatomical clearance certificate. */
 export const SURFACE_INTERSECTION_PAIR_BUDGET=100_000;
+export const SURFACE_INTERSECTION_TRIANGLE_LIMIT=200_000;
 type Numbers=ArrayLike<number>;
 type V=[number,number,number];
 const sub=(a:V,b:V):V=>[a[0]-b[0],a[1]-b[1],a[2]-b[2]];
@@ -22,15 +23,15 @@ function segmentPierces(a:V,b:V,tri:[V,V,V],tolerance:number){
 }
 export interface SurfaceIntersectionReport {
  checked:boolean; reason?:'budget'|'invalid'|'coplanar-or-touching';
- triangles:number; candidatePairs:number; testedPairs:number; intersections:number; examples:[number,number][];
+ triangles:number; candidatePairs:number; testedPairs:number; broadphasePairs:number; intersections:number; examples:[number,number][];
 }
 /** Detect transverse internal triangle crossings, never silently claim exhaustive coverage. */
 export function checkSurfaceIntersections(positions:Numbers,index:Numbers|null=null,budget= SURFACE_INTERSECTION_PAIR_BUDGET):SurfaceIntersectionReport {
  const count=index?.length??positions.length/3,vertices=positions.length/3,triangles=count/3;
  if(!Number.isInteger(triangles)||!Number.isInteger(vertices)||!Number.isInteger(budget)||budget<0)throw Error('Ungültige Schnittprüfung.');
- const report:SurfaceIntersectionReport={checked:true,triangles,candidatePairs:0,testedPairs:0,intersections:0,examples:[]};
- // Bound the quadratic broad-phase too, including meshes with no overlapping boxes.
- if(triangles>2048){report.checked=false;report.reason='budget';return report;}
+ const report:SurfaceIntersectionReport={checked:true,triangles,candidatePairs:0,testedPairs:0,broadphasePairs:0,intersections:0,examples:[]};
+ // The spatial sweep can process larger meshes, with bounded memory and candidate work.
+ if(triangles>SURFACE_INTERSECTION_TRIANGLE_LIMIT){report.checked=false;report.reason='budget';return report;}
  const at=(i:number)=>index?index[i]:i;
  const refs:number[][]=[],faces:[V,V,V][]=[],bounds:{lo:V;hi:V}[]=[];
  for(let t=0;t<triangles;t++){
@@ -41,24 +42,34 @@ export function checkSurfaceIntersections(positions:Numbers,index:Numbers|null=n
   const pts=ids.map(i=>point(positions,i)) as [V,V,V];refs.push(ids);faces.push(pts);
   bounds.push({lo:[0,1,2].map(k=>Math.min(...pts.map(p=>p[k]))) as V,hi:[0,1,2].map(k=>Math.max(...pts.map(p=>p[k]))) as V});
  }
- for(let a=0;a<triangles;a++)for(let b=a+1;b<triangles;b++){
-  // Explicitly exclude vertex-connected triangles; topology-adjacent collisions need a separate test.
-  if(refs[a].some(i=>refs[b].includes(i)))continue;
-  if([0,1,2].some(k=>bounds[a].hi[k]<bounds[b].lo[k]||bounds[b].hi[k]<bounds[a].lo[k]))continue;
-  report.candidatePairs++;
-  if(report.testedPairs>=budget){report.checked=false;report.reason='budget';return report;}
-  report.testedPairs++;
-  const one=faces[a],two=faces[b],n1=cross(sub(one[1],one[0]),sub(one[2],one[0])),n2=cross(sub(two[1],two[0]),sub(two[2],two[0]));
-  const norm1=Math.hypot(...n1),norm2=Math.hypot(...n2);
-  if(norm1<=1e-12||norm2<=1e-12){report.checked=false;report.reason='invalid';continue;}
-  const parallel=Math.hypot(...cross(n1,n2))<=1e-10*norm1*norm2;
-  if(parallel){
-   // Overlapping coplanar faces cannot be cleared by this transverse-only test.
-   if(Math.abs(dot(n1,sub(two[0],one[0])))<=1e-10*norm1){report.checked=false;report.reason=report.reason??'coplanar-or-touching';}
-   continue;
+ // Sweep X-sorted triangle boxes. Cross-chunk pairs are naturally included:
+ // each candidate is visited when the triangle with later X-start enters the sweep.
+ // A separate broad-phase budget prevents densely overlapping boxes from exploding.
+ const order=Array.from({length:triangles},(_,i)=>i).sort((a,b)=>bounds[a].lo[0]-bounds[b].lo[0]||a-b);
+ const active:number[]=[],broadphaseLimit=Math.max(1,budget*4);
+ for(const b of order){
+  const x=bounds[b].lo[0];
+  for(let i=active.length-1;i>=0;i--)if(bounds[active[i]].hi[0]<x)active.splice(i,1);
+  for(const a of active){
+   if(report.broadphasePairs>=broadphaseLimit){report.checked=false;report.reason='budget';return report;}
+   report.broadphasePairs++;
+   if([1,2].some(k=>bounds[a].hi[k]<bounds[b].lo[k]||bounds[b].hi[k]<bounds[a].lo[k]))continue;
+   if(refs[a].some(i=>refs[b].includes(i)))continue;
+   report.candidatePairs++;
+   if(report.testedPairs>=budget){report.checked=false;report.reason='budget';return report;}
+   report.testedPairs++;
+   const one=faces[a],two=faces[b],n1=cross(sub(one[1],one[0]),sub(one[2],one[0])),n2=cross(sub(two[1],two[0]),sub(two[2],two[0]));
+   const norm1=Math.hypot(...n1),norm2=Math.hypot(...n2);
+   if(norm1<=1e-12||norm2<=1e-12){report.checked=false;report.reason='invalid';continue;}
+   const parallel=Math.hypot(...cross(n1,n2))<=1e-10*norm1*norm2;
+   if(parallel){
+    if(Math.abs(dot(n1,sub(two[0],one[0])))<=1e-10*norm1){report.checked=false;report.reason=report.reason??'coplanar-or-touching';}
+    continue;
+   }
+   const crosses=(p:[V,V,V],q:[V,V,V])=>[0,1,2].some(k=>segmentPierces(p[k],p[(k+1)%3],q,1e-9));
+   if(crosses(one,two)||crosses(two,one)){report.intersections++;if(report.examples.length<12)report.examples.push([Math.min(a,b),Math.max(a,b)]);}
   }
-  const crosses=(x:[V,V,V],y:[V,V,V])=>[0,1,2].some(k=>segmentPierces(x[k],x[(k+1)%3],y,1e-9));
-  if(crosses(one,two)||crosses(two,one)){report.intersections++;if(report.examples.length<12)report.examples.push([a,b]);}
+  active.push(b);
  }
  return report;
 }

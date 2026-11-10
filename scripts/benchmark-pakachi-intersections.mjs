@@ -7,7 +7,7 @@ import * as T from 'three';
 import {parseModel,disposeModel} from '../src/viewer.ts';
 import {StudioRig} from '../src/studio-rig.ts';
 import {createPoseSurfaceChecker,poseSurfacePositions} from '../src/pose-surface-check.ts';
-import {checkSurfaceIntersections} from '../src/surface-intersections.ts';
+import {checkSurfaceIntersections,SURFACE_INTERSECTION_TRIANGLE_LIMIT} from '../src/surface-intersections.ts';
 if(typeof globalThis.ProgressEvent==='undefined')globalThis.ProgressEvent=class extends Event{};
 const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
 const forms=[],jointNames=['LeftHip','LeftKnee'],degrees=[0,22.5,45,90];
@@ -26,8 +26,8 @@ for(const form of ['humanoid','animal']){
     for(let i=0;i<rig.surfaces.length;i++){
      const surface=rig.surfaces[i],index=surface.mesh.geometry.index?.array??null;
      const triangleCount=(index?.length??surface.base.length/3)/3;
-     // Explicitly record the implementation's 2,048-triangle broad-phase limit.
-     if(triangleCount>2048){meshes.push({mesh:i,name:surface.mesh.name,triangles:triangleCount,checked:false,reason:'budget',intersections:0});continue;}
+     // Record only the remaining hard memory/candidate budget as incomplete.
+     if(triangleCount>SURFACE_INTERSECTION_TRIANGLE_LIMIT){meshes.push({mesh:i,name:surface.mesh.name,triangles:triangleCount,checked:false,reason:'budget',intersections:0});continue;}
      const positions=poseSurfacePositions(rig,values,i);
      const result=checkSurfaceIntersections(positions,index);
      meshes.push({mesh:i,name:surface.mesh.name,...result});
@@ -46,5 +46,5 @@ for(const form of ['humanoid','animal']){
 }
 console.log(JSON.stringify({format:'pakachi-intersection-probes',version:1,
  scope:'Read-only bounded diagnostics on existing rigged GLBs; no inferred collision or anatomy approval. Every probe is a static X-axis joint pose; not a continuous motion test.',
- parameters:{joints:jointNames,degrees,maxTrianglesPerMesh:2048,maxCandidatePairsPerMesh:100000},
+ parameters:{joints:jointNames,degrees,maxTrianglesPerMesh:SURFACE_INTERSECTION_TRIANGLE_LIMIT,maxCandidatePairsPerMesh:100000},
  forms},null,2));

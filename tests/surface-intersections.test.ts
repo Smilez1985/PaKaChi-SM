@@ -31,3 +31,19 @@ test('measured intersection regression distinguishes a clean frame from a newly 
  assert.equal(after.checked,true);assert.equal(after.intersections,1);
  assert.ok(after.intersections>before.intersections);
 });
+
+test('spatial sweep checks more than 2048 triangles and finds crossings across distant batches',()=>{
+ const base=tri([-1,-1,0],[1,-1,0],[0,1,0]),vertices=[...base];
+ for(let i=0;i<2100;i++){const x=10*(i+1);vertices.push(...tri([x,0,0],[x+1,0,0],[x,1,0]));}
+ vertices.push(...tri([0,-.5,-1],[0,-.5,1],[0,.5,0]));
+ const before=[...vertices],report=checkSurfaceIntersections(vertices);
+ assert.equal(report.triangles,2102);assert.equal(report.checked,true);
+ assert.equal(report.intersections,1);assert.deepEqual(report.examples,[[0,2101]]);
+ assert.ok(report.broadphasePairs<100);assert.deepEqual(vertices,before);
+});
+test('dense spatial broad-phase is bounded and reports incomplete coverage',()=>{
+ const positions:number[]=[];
+ for(let i=0;i<20;i++)positions.push(...tri([-1,-1,i*.001],[1,-1,i*.001],[0,1,i*.001]));
+ const report=checkSurfaceIntersections(positions,null,1);
+ assert.equal(report.checked,false);assert.equal(report.reason,'budget');
+});
