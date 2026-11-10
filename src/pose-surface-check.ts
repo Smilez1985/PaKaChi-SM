@@ -32,6 +32,12 @@ export function correctiveMorphBlend(rig:StudioRig,values:Record<string,Transfor
  entries.forEach((e,i)=>weights[e.index]=valuesFor[i]/divisor);return {weights,amount:raw/divisor};
 }
 
+/** Read-only pre-skin positions, including the actual ordinary/pose-driven morph blend. */
+export function poseSurfaceInputs(rig:StudioRig,values:Record<string,Transform>,meshIndex:number){
+ const surface=rig.surfaces[meshIndex];if(!surface)throw Error('Oberfläche fehlt.');const mesh=surface.mesh,g=mesh.geometry,out=Float64Array.from(rig.surfacePositions(values,meshIndex)),weights=rig.correctionWeights(values,rig.poseCorrectionsActive).get(mesh)??mesh.morphTargetInfluences??[];
+ for(let v=0;v<out.length/3;v++)for(let m=0;m<weights.length;m++){const target=g.morphAttributes.position?.[m],weight=weights[m];if(!target||!weight)continue;for(let axis=0;axis<3;axis++)out[v*3+axis]+=weight*(target.getComponent(v,axis)-(g.morphTargetsRelative?0:surface.base[v*3+axis]));}
+ return out;
+}
 /** Evaluate the actual skinning equation without applying a pose to the live model. */
 export function poseSurfacePositions(rig:StudioRig,values:Record<string,Transform>,meshIndex:number,overrides?:SkinOverrides,corrective?:StudioCorrectiveShape):Float64Array {
   const surface=rig.surfaces[meshIndex];if(!surface)throw Error('Oberfläche fehlt.');

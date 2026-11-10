@@ -1,0 +1,185 @@
+{
+  "format": "pakachi-automatic-draft-correction",
+  "version": 1,
+  "date": "2026-11-10",
+  "withMove": true,
+  "scope": "Existing CPU reconstructions with generic initial rigs. Four saved 30-degree bends; optional rest-to-worst loop. No new inference or anatomy/collision approval.",
+  "runs": [
+    {
+      "form": "humanoid",
+      "source": "public/model-zoo/pakachi-drafts/humanoid.glb",
+      "sha256": "debb9c4793368bff6989f41b2a40eba3e4ef6a6100aaf3858abe51117a174d14",
+      "seconds": 9.319088635,
+      "sourceUnchanged": true,
+      "proposal": {
+        "kind": "geometry",
+        "geometryMethod": "edge-fit",
+        "joint": "Draft_RightElbow",
+        "center": [
+          0.10810685157775879,
+          -0.0858010450998942,
+          0.23543353875478107
+        ],
+        "radius": 0.1358362706822724,
+        "before": 784,
+        "after": 765,
+        "beforeVolume": 0,
+        "afterVolume": 0,
+        "affectedVertices": 1952,
+        "checkedCandidates": 30,
+        "checkedMoves": 1,
+        "motionSamples": 33,
+        "edgeOperations": 2056870,
+        "edgeBudgetExhausted": false
+      },
+      "checks": [
+        {
+          "pose": "leftelbow",
+          "before": {
+            "issues": 302,
+            "volumeIssues": 0
+          },
+          "after": {
+            "issues": 302,
+            "volumeIssues": 0
+          },
+          "noRegression": true
+        },
+        {
+          "pose": "leftknee",
+          "before": {
+            "issues": 115,
+            "volumeIssues": 0
+          },
+          "after": {
+            "issues": 115,
+            "volumeIssues": 0
+          },
+          "noRegression": true
+        },
+        {
+          "pose": "rightelbow",
+          "before": {
+            "issues": 784,
+            "volumeIssues": 0
+          },
+          "after": {
+            "issues": 765,
+            "volumeIssues": 0
+          },
+          "noRegression": true
+        },
+        {
+          "pose": "rightknee",
+          "before": {
+            "issues": 469,
+            "volumeIssues": 0
+          },
+          "after": {
+            "issues": 469,
+            "volumeIssues": 0
+          },
+          "noRegression": true
+        },
+        {
+          "pose": "rest",
+          "before": {
+            "issues": 0,
+            "volumeIssues": 0
+          },
+          "after": {
+            "issues": 0,
+            "volumeIssues": 0
+          },
+          "noRegression": true
+        }
+      ],
+      "progress": {
+        "phase": "search",
+        "samples": 38,
+        "joints": 1,
+        "candidates": 30,
+        "vertexSamples": 12564890,
+        "edgeOperations": 2056870
+      }
+    },
+    {
+      "form": "animal",
+      "source": "public/model-zoo/pakachi-drafts/animal.glb",
+      "sha256": "c87b55c51a9bf1872de421d1052f943de05e53119b3e8c6265d5d0016b8e6d42",
+      "seconds": 10.594432099,
+      "sourceUnchanged": true,
+      "proposal": null,
+      "checks": [
+        {
+          "pose": "leftelbow",
+          "before": {
+            "issues": 34,
+            "volumeIssues": 1
+          },
+          "after": {
+            "issues": 34,
+            "volumeIssues": 1
+          },
+          "noRegression": true
+        },
+        {
+          "pose": "leftknee",
+          "before": {
+            "issues": 147,
+            "volumeIssues": 0
+          },
+          "after": {
+            "issues": 147,
+            "volumeIssues": 0
+          },
+          "noRegression": true
+        },
+        {
+          "pose": "rightelbow",
+          "before": {
+            "issues": 112,
+            "volumeIssues": 0
+          },
+          "after": {
+            "issues": 112,
+            "volumeIssues": 0
+          },
+          "noRegression": true
+        },
+        {
+          "pose": "rightknee",
+          "before": {
+            "issues": 147,
+            "volumeIssues": 0
+          },
+          "after": {
+            "issues": 147,
+            "volumeIssues": 0
+          },
+          "noRegression": true
+        },
+        {
+          "pose": "rest",
+          "before": {
+            "issues": 0,
+            "volumeIssues": 0
+          },
+          "after": {
+            "issues": 0,
+            "volumeIssues": 0
+          },
+          "noRegression": true
+        }
+      ],
+      "progress": {
+        "phase": "search",
+        "samples": 38,
+        "joints": 1,
+        "candidates": 30,
+        "vertexSamples": 12289588,
+        "edgeOperations": 1322450
+      }
+    }
+  ]
+}

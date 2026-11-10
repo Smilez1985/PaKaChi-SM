@@ -14,6 +14,21 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 Noch keine weiteren Änderungen.
 
+## [0.97.0] - 2026-11-10
+
+Zeitstempel: 2026-11-10T07:14:26+01:00 (Europe/Berlin)
+
+### Added
+
+- Automatischer Hautauftrag vergleicht zusätzlich lokal aus Kantenlängen abgeleitete Korrekturformen. Virtuelle Hautgewichte suchen eine weniger verzerrte Zieloberfläche; anschließend entsteht eine gewöhnliche sparse, poseabhängige Form. Originalgewichte, Gelenk-/Posekanäle und Moves bleiben dabei unverändert. Dieselbe Berechnung ist über den integrierten KI-Assistenten verfügbar; Ergebnis meldet Verfahren und begrenzten Kantenaufwand.
+- Reproduzierbarer Auftrag an beiden echten Bildrekonstruktionen mit je vier Beugeposen und einer Schleife. Arbeitsform: 784 → 765 auffällige Dreiecke, übrige gespeicherte Posen und 33 Move-Stichproben ohne gemessene Verschlechterung. Tierform: kein akzeptierter Vorschlag. Zusätzliche unabhängige Prüfung mit 65 Schleifenbildern; Browserfall prüft Vorschau, Übernahme, Undo/Redo, Projekt-Replay und gebackenen Animations-GLB.
+
+### Fixed
+
+- Fehlerregionen werden dem tatsächlich bewegten Gelenk beziehungsweise aktiven Vorfahren zugeordnet. Die lokale Suche kann die auffällige Grundformfläche statt nur einer Kugel am Gelenk verwenden; unbewegte Griff-/Nachfolgerknochen verdrängen den bewegten Vorfahren nicht mehr automatisch.
+
+Grenzen: begrenzte, nicht konvexe Suche, keine Anatomie-/Charakterfreigabe, lokale Volumengarantie oder Selbstüberschneidungsprüfung. Die meisten Fehler der Rohrekonstruktionen bleiben bestehen. Der automatische Auftrag prüft weiterhin feste Zwischenbilder; adaptive Diagnose ist separat.
+
 ## [0.96.0] - 2026-11-10
 
 Zeitstempel: 2026-11-10T00:00:33+01:00 (Europe/Berlin)
@@ -2011,6 +2026,7 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 
 [0.93.1]: PRUEFUNG.md#version-0931
 
+[0.97.0]: PRUEFUNG.md#version-0970
 [0.96.0]: PRUEFUNG.md#version-0960
 [0.95.0]: PRUEFUNG.md#version-0950
 [0.94.0]: PRUEFUNG.md#version-0940

@@ -516,3 +516,14 @@ Nach erfolgreicher Bildgenerierung **Optionales erstes Skelett → Zweibeiner / 
 ## Körperausrichtung des ersten Skeletts (0.96.0)
 
 Nach der Generierung **Körperausrichtung → An Standflächen ausrichten** wählen. Zwei getrennte Füße beziehungsweise vier Pfoten bestimmen den Ausgangsrahmen; ein großer seitlicher Schwanz geht damit nicht in die Körperbreite ein. Nicht eindeutige Standflächen werden ausdrücklich gemeldet. **Nach Gesamtmaßen · bisherige Vorlage** und **Generator-Original zeigen** ermöglichen den Vergleich. Für gesenkte Arme gibt es **Zweibeiner · Arme unten**. Erst nach Prüfung übernehmen; Gelenke, Haut und gespeicherte Bewegungen weiter korrigieren. [Methode, Messungen und Grenzen](KI-GENERIERUNG.md#körperausrichtung-anhand-der-standflächen-seit-0960).
+
+
+## Hautform aus Netzverbindungen (0.97.0)
+
+**Hautkorrektur automatisch suchen** berücksichtigt nun auch die Netzverbindungen in einer auffälligen Fläche. Der Auftrag ordnet die Fehler dem bewegten Gelenk oder aktiven Vorfahren zu. Neben Gewichtsänderungen und Dualquaternion-Kandidaten probiert er eine lokal angepasste Kantenform. Bei Erfolg erscheint **Hautform aus Netzverbindungen**. Original-/Korrekturvorschau, explizite Übernahme, Undo/Redo, Projektspeicherung und Animations-GLB verwenden den normalen Korrekturformen-Ablauf.
+
+Während der Berechnung werden Gewichte nur virtuell angepasst. Das daraus abgeleitete Oberflächenziel wird in eine sparse Korrekturform umgerechnet; die tatsächlichen Hautgewichte und gespeicherten Posen/Moves bleiben erhalten. Relative importierte Morphformen und vorhandene Korrekturformen werden berücksichtigt. Absolute Morphformen und andere Morphattribute als Position/Normale sind für den neuen Fit ausgeschlossen. Bestehende Gewichts- und Dualquaternion-Versuche bleiben verfügbar.
+
+Je indiziertem Hautnetz: höchstens 200.000 Vertices, 600.000 Indizes, 256 Knochen, 8.192 aktive Vertices und 30.000 relevante Kanten; maximal 128 Durchläufe und eine Million Kanteniterationen pro Fit. Ein Auftrag reserviert insgesamt höchstens zwölf Millionen Kanteniterationen. Abbruch oder Projektänderung verwirft laufende Ergebnisse. Insgesamt gelten weiter vier gespeicherte Formen und 32.768 betroffene Vertices. Das Arbeitsbudget ist keine Zeitgarantie. Die Suche kann in einem lokalen oder symmetrischen Stillstand enden und keinen Vorschlag liefern.
+
+Alle gespeicherten Posen, die 16 Stichprobenschritte pro Move-Übergang und drei zusätzliche Neutral-/Zielzwischenposen bleiben Gegenprüfungen. Ein Angebot ist keine Freigabe zwischen diesen Zeitpunkten oder für Selbstüberschneidungen, lokale Volumenerhaltung und natürliche Anatomie. Die kleine gemessene Verbesserung an der echten Arbeitsform ist im [Prüfbericht](PRUEFUNG.md#version-0970) mit den verbleibenden Fehlern dokumentiert.

@@ -55,3 +55,8 @@ Die Schätzung ist kein Nachweis lokaler Volumenerhaltung, natürlicher Anatomie
 Der bestehende lokale Suchauftrag kann zusätzlich eine geometrische Form erzeugen. Das kompakte Ergebnis enthält `kind: "geometry"` oder `kind: "weights"`; Modellbytes und Verschiebungsfelder werden nicht an das Sprachmodell zurückgegeben. Der revisionsgebundene `apply_skin_correction`-Befehl übernimmt genau diesen bereits gemessenen Kandidaten. Vorschau und explizite Übernahme verwenden dieselbe Form, mit einer Undo-Aktion. Keine neue externe MCP-Suche behauptet.
 
 Die geometrische Variante hält Gelenk-/Posekanäle unverändert. Persistenz und gebackener Move-GLB-Export sind eingebunden; Projekte mit neuen Formen benötigen mindestens 0.94.0. Messgrenzen, Abbruch und Gegenprüfung bleiben erhalten. Die neue Erzeugung ist ein begrenzter Dualquaternion-basierter Kandidat, kein vollständiger Volumen-, Kollisions- oder Anatomielöser.
+
+
+### Lokale Kantenform (0.97.0)
+
+Der vorhandene Auftrag `propose_studio_skin_correction` lokalisiert eine auffällige Grundformfläche und berücksichtigt bewegte Vorfahren der Hautknochen. Zusätzlich sind aus virtuellen Gewichts-/Kantenlängenfits abgeleitete Formen möglich. Das kompakte Ergebnis nennt `geometryMethod` (`edge-fit` oder `dual-quaternion`), `center`, `edgeOperations` und `edgeBudgetExhausted`. Die Zählung reserviert ausgeführte Kanteniterationen; sie ist keine vollständige CPU-Zeitmessung. Kein Modell- oder Verschiebungsfeld wird dadurch an den Anbieter gesendet. Übernahme, Freigabe, Revision, Undo und Messgrenzen bleiben gleich. [Methode und Budgets](STUDIO.md#hautform-aus-netzverbindungen-0970).

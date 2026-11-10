@@ -24,7 +24,7 @@ export function correctionSamples(rig:StudioRig,target:Pose){
  return samples;
 }
 /** Six bounded local transfers between a joint and its parent; live data is never modified. */
-export async function searchWeightCorrection(rig:StudioRig,target:Pose,joint:ControlPoint,radius:number,signal:AbortSignal,valid:()=>boolean=()=>true,options:{measure?:()=>void;candidate?:()=>void;accept?:(proposal:WeightCorrectionProposal,overrides:import('./pose-surface-check.ts').SkinOverrides)=>Promise<boolean>}={}){
+export async function searchWeightCorrection(rig:StudioRig,target:Pose,joint:ControlPoint,radius:number,signal:AbortSignal,valid:()=>boolean=()=>true,options:{center?:readonly number[];measure?:()=>void;candidate?:()=>void;accept?:(proposal:WeightCorrectionProposal,overrides:import('./pose-surface-check.ts').SkinOverrides)=>Promise<boolean>}={}){
  const ensure=()=>{signal.throwIfAborted();if(!valid())throw Error('Studio-Stand hat sich geändert. Prüfung erneut starten.');};ensure();
  if(joint.kind!=='bone'||!rig.data.points.includes(joint)||!Number.isFinite(radius)||radius<.005||radius>2||(rig.data.weightTransfers?.length??0)>=MAX_WEIGHT_TRANSFERS)throw Error('Gelenk und gültigen Korrekturradius wählen.');
  const parent=rig.data.points.find(p=>p.kind==='bone'&&rig.bones[p.bone!]===rig.bones[joint.bone!].parent);if(!parent)throw Error('Einen Gelenkübergang mit vorhandenem Elternknochen wählen.');
@@ -33,7 +33,8 @@ export async function searchWeightCorrection(rig:StudioRig,target:Pose,joint:Con
  options.measure?.();const rest=neutralPoseValues(rig),reference=rig.surfaces.map((_,i)=>poseSurfacePositions(rig,rest,i));
  const poses=[...rig.data.poses.filter(p=>p.id!==target.id),...correctionSamples(rig,target)],baselines:Report[]=[];
  for(const pose of poses){await new Promise<void>(resolve=>setTimeout(resolve,0));ensure();baselines.push(inspect(pose));}
- const region:WeightRegion={center:[...joint.rest],radius},center=new T.Vector3().fromArray(region.center);
+ if(options.center&&(options.center.length!==3||options.center.some(n=>!Number.isFinite(n)||Math.abs(n)>100)))throw Error('Ungültiger Korrekturbereich.');
+ const region:WeightRegion={center:options.center?[...options.center] as [number,number,number]:[...joint.rest],radius},center=new T.Vector3().fromArray(region.center);
  let best:WeightCorrectionProposal|null=null;
  for(const amount of [.1,.2,.35])for(const [from,to] of [[joint,parent],[parent,joint]]){
   await new Promise<void>(resolve=>setTimeout(resolve,0));ensure();

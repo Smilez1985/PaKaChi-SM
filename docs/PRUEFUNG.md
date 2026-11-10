@@ -1,6 +1,6 @@
 # Prüfstand und Protokolle
 
-**Softwarestand: 0.96.0 · Dokumentationsabgleich: 2026-11-10T00:00:33+01:00 (Europe/Berlin).**
+**Softwarestand: 0.97.0 · Dokumentationsabgleich: 2026-11-10T07:14:26+01:00 (Europe/Berlin).**
 
 Alle Prüfnachweise stehen in dieser Datei: ein Abschnitt je Softwareversion sowie gesonderte Abschnitte für datierte Zwischenprüfungen. Die Ergebnisse und Grenzen gelten für den jeweils genannten Stand. Spätere Läufe stehen als Nachtrag im selben Abschnitt. Produktänderungen gehören in den [Changelog](CHANGELOG.md), offene Aufgaben in die [Roadmap](ROADMAP.md).
 
@@ -60,11 +60,23 @@ Diese Liste beschreibt ausstehende Abnahmen.
 
 Die jüngste Version steht zuerst. Für eine bestimmte Version die Dokumentgliederung oder die Browser-Suche verwenden.
 
+## Version 0.97.0
+
+Prüfzeit: 2026-11-10T07:14:26+01:00 (Europe/Berlin). Neue allgemeine lokale Kantenform im automatischen Studio-/KI-Auftrag, keine neue Inferenz und keine Änderung der bisherigen 59-Gelenk-Charakterdateien. Lokal **459 Node-Tests ohne Fehler/Abbrüche/übersprungene Fälle** sowie TypeScript/Produktionsbuild und **alle fünf gezielten Chromium-Fälle** erfolgreich (bekannte Bundle-Größenwarnung). Originaldateitest wegen des unvollständigen lokalen Frame-Checkouts ausschließlich in vollständiger CI; deren Abschlussnachweis folgt nach Veröffentlichung auf `develop`.
+
+- Fehlerdiagnose ordnet Hautfehler aktiven Knochen/Vorfahren zu und schätzt die betroffene Grundformfläche. Virtueller begrenzter Kantenlängenfit wird in das vorhandene sparse Korrekturformat zurückgerechnet. Originalgewichte, Posewerte, Moves und Quelldateien bleiben erhalten. Relative freie/importierte/poseabhängige Morphbeiträge sind in der Fit-Ausgangsposition enthalten.
+- Sieben neue Kernprüfungen: verbesserte Kantenmetrik, unveränderte Randpunkte/Eingaben, identische Nahtpunkte, Aufwandgrenze, Abbruch und Revisionswechsel, Morph-/Skinmatrix-Parität, Live-/Pure-Vorschau, Replay, aktive Vorfahren und echte Rohrekonstruktion. Unabhängige 65-Bild-Schleife und alle gespeicherten Posen bestehen dieselben komponentenweisen Dehnungs-/Volumengegenprüfungen.
+- [Reproduzierbare Messung](benchmarks/automatic-draft-correction-2026-11-10.json): `node scripts/benchmark-automatic-draft-correction.mjs --moves`. Je Form erstes generisches Skelett, vier einzelne 30°-X-Beugen, neutrale Pose und Rest↔schlechteste-Pose-Schleife. Arbeitsform: **784 → 765** auffällige Dreiecke am rechten Ellenbogen; übrige Proben **302 / 115 / 469** unverändert. 1.952 betroffene Vertices, 30 Varianten, 2.056.870 reservierte Kanteniterationen, 33 Move-Stichproben und keine neue gemessene Volumenwarnung. Tierform: **kein akzeptierter Vorschlag**; Dreiecksfehler **34 / 147 / 112 / 147**, linke Ellenbogenprobe weiter mit einer Volumenwarnung. Quelldaten bleiben identisch. Das ist ein kleiner Fortschritt, keine reparierte Figur.
+- Neuer Browserfall verwendet die echte Rohrekonstruktion, berechnet ihr erstes Skelett und den Korrekturauftrag produktiv. Er prüft Original-/Korrekturvorschau, unveränderte Revision während der Suche, gesperrtes Speichern im Vergleich, explizite Übernahme, Undo/Redo, Projekt-Replay mit erhaltenen Posen/Moves und Standard-Morphspur im Animations-GLB. Bilder `edge-fit-draft-original.png` / `edge-fit-draft-candidate.png`. Keine simulierte Geometrie in diesem Fall; Anbieter-/GPU-Abnahme wird dadurch nicht behauptet.
+
+Grenzen: nicht konvexe, begrenzte Suche auf vorhandenen Einflusspaletten; symmetrische oder ungünstige Regionen können ohne Kandidat bleiben. Kein generalisierter Anatomiedetektor. Automatische Gegenprüfung bleibt bei 16 Schritten je Übergang; die zusätzlichen 65 Bilder sind Testabdeckung dieses einen Beispiels. Keine kontinuierliche Kollisions-/Bewegungsfreigabe, keine lokale Volumengarantie. Absolute Morphs und nicht unterstützte Morphattribute werden für den neuen Fit ausgelassen. Budgets und Formatgrenzen im [Studio-Ablauf](STUDIO.md#hautform-aus-netzverbindungen-0970).
+
 ## Version 0.96.0
 
 Abschlussnachweis: [CI-Lauf 42717633143](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/42717633143), Quellcommit `8a74be06746bcb084814ccfef5c49527152e9ef6` auf `develop`: **453 Node-Tests ohne Fehler, Abbrüche oder übersprungene Fälle**, TypeScript/Produktionsbuild, **alle 45 Chromium-Fälle (11,2 Minuten)** und drei Produktionsbrowser-Importmessungen erfolgreich. Bytegenaue Originalprüfung einschließlich aller 72 Frames bestanden. Abschlusslogs und Artefakte geprüft; aktuelle Vorher-/Nachher-Aufnahmen zeigen auf dem ausdrücklich synthetischen Prüfkörper die vom großen seitlichen Anbauteil unabhängige Skelettplatzierung. Kein neuer Nachweis anatomischer oder visueller Charakterqualität.
 
 Artefakt-ZIP SHA256 `c633ac175b06468c3f2127f280c638977bae57976946f72364bb8b47fabef9be` verifiziert. Beide bisherigen 59-Gelenk-Charakter-GLBs entsprechen bytegenau dem validierten 0.95.0-Stand. Mika/256 Gewichtsaufträge unter Software-WebGL: Frame-Grenzen 3.713,1 / 3.341,0 / 3.508,7 ms, Median 3.508,7 ms. Keine kontrollierte Leistungsvergleichsmessung oder Leistungszusage für Zielhardware. Nach erfolgreicher Prüfung zur Integration nach main freigegeben; dieser Nachtrag verändert ausschließlich Dokumentation.
+
 
 Prüfzeit: 2026-11-10T00:00:33+01:00 (Europe/Berlin). Generischer Standflächenrahmen für neue Skelettentwürfe, keine neue Inferenz oder Anatomiefreigabe.
 
