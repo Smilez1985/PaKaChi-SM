@@ -181,5 +181,86 @@
         "edgeOperations": 1322450
       }
     }
-  ]
+  ],
+  "supplementalRejectedCandidateProbe": {
+    "source": "public/model-zoo/pakachi-drafts/animal.glb",
+    "template": "quadruped",
+    "method": "Direct buildEdgeFitCorrection at diagnosed left-knee region with full radius/strength; correctionSamples and a 33-frame neutral/bent loop. Supplemental diagnosis, not an accepted project change.",
+    "joint": "Draft_LeftKnee",
+    "center": [
+      0.1649019718170166,
+      -0.20692614714304605,
+      -0.0785037080446879
+    ],
+    "radius": 0.19550950082505245,
+    "targetRotationDegreesX": 30,
+    "strength": 1,
+    "target": {
+      "before": {
+        "issues": 147,
+        "volumeIssues": 0,
+        "meshes": [
+          {
+            "issues": 147,
+            "stretched": 129,
+            "compressed": 21,
+            "collapsed": 2,
+            "minimumStretch": 0.054361602728795096,
+            "maximumStretch": 24.98953183333627
+          }
+        ]
+      },
+      "after": {
+        "issues": 77,
+        "volumeIssues": 0,
+        "meshes": [
+          {
+            "issues": 77,
+            "stretched": 60,
+            "compressed": 18,
+            "collapsed": 1,
+            "minimumStretch": 0.07564857485220383,
+            "maximumStretch": 17.411209063771757
+          }
+        ]
+      }
+    },
+    "storedFourBendsSafe": true,
+    "rejectedChecks": 11,
+    "intermediateExample": {
+      "fraction": 0.75,
+      "rotationDegreesX": 22.5,
+      "pose": "sample-0.75",
+      "safe": false,
+      "before": {
+        "issues": 94,
+        "volumeIssues": 0,
+        "meshes": [
+          {
+            "issues": 94,
+            "stretched": 74,
+            "compressed": 23,
+            "collapsed": 1,
+            "minimumStretch": 0.03935781298882218,
+            "maximumStretch": 19.000129039171927
+          }
+        ]
+      },
+      "after": {
+        "issues": 50,
+        "volumeIssues": 0,
+        "meshes": [
+          {
+            "issues": 50,
+            "stretched": 39,
+            "compressed": 12,
+            "collapsed": 2,
+            "minimumStretch": 0.058311436007656245,
+            "maximumStretch": 13.050474098381276
+          }
+        ]
+      }
+    },
+    "reason": "At the intermediate pose collapsed triangles increase 1 to 2, despite the total issue count falling 94 to 50. Other rejected samples can also increase a threshold excess."
+  }
 }

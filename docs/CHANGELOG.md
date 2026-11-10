@@ -29,6 +29,8 @@ Zeitstempel: 2026-11-10T07:14:26+01:00 (Europe/Berlin)
 
 Grenzen: begrenzte, nicht konvexe Suche, keine Anatomie-/Charakterfreigabe, lokale Volumengarantie oder Selbstüberschneidungsprüfung. Die meisten Fehler der Rohrekonstruktionen bleiben bestehen. Der automatische Auftrag prüft weiterhin feste Zwischenbilder; adaptive Diagnose ist separat.
 
+**Prüfung:** [vollständige CI](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/42767317803) mit 460 Tests, Build, 46 Browserfällen und drei Produktionsimportmessungen bestanden. Abschlusslogs und Artefakte geprüft; Quellstand `4e85604`.
+
 ## [0.96.0] - 2026-11-10
 
 Zeitstempel: 2026-11-10T00:00:33+01:00 (Europe/Berlin)

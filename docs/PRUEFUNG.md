@@ -1,6 +1,6 @@
 # Prüfstand und Protokolle
 
-**Softwarestand: 0.97.0 · Dokumentationsabgleich: 2026-11-10T07:14:26+01:00 (Europe/Berlin).**
+**Softwarestand: 0.97.0 · Dokumentationsabgleich: 2026-11-10T07:45:02+01:00 (Europe/Berlin).**
 
 Alle Prüfnachweise stehen in dieser Datei: ein Abschnitt je Softwareversion sowie gesonderte Abschnitte für datierte Zwischenprüfungen. Die Ergebnisse und Grenzen gelten für den jeweils genannten Stand. Spätere Läufe stehen als Nachtrag im selben Abschnitt. Produktänderungen gehören in den [Changelog](CHANGELOG.md), offene Aufgaben in die [Roadmap](ROADMAP.md).
 
@@ -8,10 +8,10 @@ Alle Prüfnachweise stehen in dieser Datei: ein Abschnitt je Softwareversion sow
 
 | Prüfung | Bestätigter Stand | Umfang und Grenze |
 | --- | --- | --- |
-| Node-Tests | [0.96.0](#version-0960): 453 in vollständiger CI bestanden | Einschließlich echter MCP-/OAuth-/Python-/ACP-Prozesse; keine manuelle Qualitätsabnahme. |
-| TypeScript und Produktionsbuild | [0.96.0](#version-0960): vollständige CI bestanden | Bekannte Bundle-Größenwarnung; keine Aussage über Zielhardware-Leistung. |
-| Chromium-Browserfälle | [0.96.0](#version-0960): alle 45 im vollständigen CI-Lauf bestanden | Software-WebGL, simulierte KI-Anbieter; keine reale KI-Inferenzabnahme. |
-| Produktionsbrowser-Importmessung | [0.96.0](#version-0960): drei CI-Durchläufe bestanden | Mika mit 256 Gewichtsaufträgen; keine allgemeine Laufzeitgarantie. |
+| Node-Tests | [0.97.0](#version-0970): 460 in vollständiger CI bestanden | Einschließlich echter MCP-/OAuth-/Python-/ACP-Prozesse; keine manuelle Qualitätsabnahme. |
+| TypeScript und Produktionsbuild | [0.97.0](#version-0970): vollständige CI bestanden | Bekannte Bundle-Größenwarnung; keine Aussage über Zielhardware-Leistung. |
+| Chromium-Browserfälle | [0.97.0](#version-0970): alle 46 im vollständigen CI-Lauf bestanden | Software-WebGL, simulierte KI-Anbieter; keine reale KI-Inferenzabnahme. |
+| Produktionsbrowser-Importmessung | [0.97.0](#version-0970): drei CI-Durchläufe bestanden | Mika mit 256 Gewichtsaufträgen; keine allgemeine Laufzeitgarantie. |
 | Legacy-Testprogramme | [0.9.0](#version-090): beide bestanden | Steuerung, MQTT-Verhalten und Lebenszyklus des Originalplayers. |
 | Python-MCP-/MQTT-Integration | [0.10.0](#version-0100): bestanden | Echter Python-Prozess und eingebetteter Testbroker; keine allgemeine externe Hostabnahme. |
 | Originaldateien | [0.49.0](#version-0490): bytegenau erhalten | 83 Originaldateien einschließlich 72 Transformationsbildern. |
@@ -62,12 +62,18 @@ Die jüngste Version steht zuerst. Für eine bestimmte Version die Dokumentglied
 
 ## Version 0.97.0
 
-Prüfzeit: 2026-11-10T07:14:26+01:00 (Europe/Berlin). Neue allgemeine lokale Kantenform im automatischen Studio-/KI-Auftrag, keine neue Inferenz und keine Änderung der bisherigen 59-Gelenk-Charakterdateien. Lokal **459 Node-Tests ohne Fehler/Abbrüche/übersprungene Fälle** sowie TypeScript/Produktionsbuild und **alle fünf gezielten Chromium-Fälle** erfolgreich (bekannte Bundle-Größenwarnung). Originaldateitest wegen des unvollständigen lokalen Frame-Checkouts ausschließlich in vollständiger CI; deren Abschlussnachweis folgt nach Veröffentlichung auf `develop`.
+Abschlussnachweis: [vollständiger CI-Lauf 42767317803](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/42767317803), Quellcommit `4e85604bcb9f562fb43eda2784f286a457a729f9` auf `develop`: **460 Node-Tests ohne Fehler, Abbrüche oder übersprungene Fälle**, TypeScript/Produktionsbuild, **alle 46 Chromium-Fälle (14,9 Minuten)** und **drei Produktionsbrowser-Importmessungen** erfolgreich. Bytegenaue Prüfung aller erhaltenen Originaldateien einschließlich 72 Frames bestanden. Abschlusslogs und Browseraufnahmen geprüft; die kleine Hautänderung ersetzt keine visuelle/anatomische Charakterabnahme.
+
+Artefakte verifiziert: Browser-ZIP SHA256 `2f987dca41553394c6f9a0220a36f1eff6f377d67b2eb5471569c39d62b9a976`; Quellen-ZIP SHA256 `6c24b178a1f32abff47fdba6141137b9a8e61937c31f452941e81148658ea0fa`. Beide Rohrekonstruktionen stimmen bytegenau mit den lokalen Eingaben überein. Frisch vorbereitete 59-Gelenk-Charakterdateien entsprechen weiterhin dem validierten vorherigen Stand. Mika/256 Gewichtsaufträge unter Software-WebGL: Frame-Grenzen **4.188,5 / 4.447,4 / 4.310,0 ms**, Median **4.310,0 ms**. Keine kontrollierte Leistungsgegenüberstellung oder Zusage für Zielhardware. Nach dieser vollständigen Prüfung von `develop` nach `main` integriert. Der Abschlussnachtrag ändert nur Dokumentation/Messdaten; derselbe geprüfte Quellstand wird ohne zweiten identischen CI-Lauf integriert.
+
+Prüfzeit: 2026-11-10T07:14:26+01:00 (Europe/Berlin). Neue allgemeine lokale Kantenform im automatischen Studio-/KI-Auftrag, keine neue Inferenz und keine Änderung der bisherigen 59-Gelenk-Charakterdateien. Lokal **459 Node-Tests ohne Fehler/Abbrüche/übersprungene Fälle** sowie TypeScript/Produktionsbuild und **alle fünf gezielten Chromium-Fälle** erfolgreich (bekannte Bundle-Größenwarnung). Der wegen des unvollständigen lokalen Frame-Checkouts dort ausgesparte Originaldateitest ist in der vollständigen CI ebenfalls bestanden.
 
 - Fehlerdiagnose ordnet Hautfehler aktiven Knochen/Vorfahren zu und schätzt die betroffene Grundformfläche. Virtueller begrenzter Kantenlängenfit wird in das vorhandene sparse Korrekturformat zurückgerechnet. Originalgewichte, Posewerte, Moves und Quelldateien bleiben erhalten. Relative freie/importierte/poseabhängige Morphbeiträge sind in der Fit-Ausgangsposition enthalten.
 - Sieben neue Kernprüfungen: verbesserte Kantenmetrik, unveränderte Randpunkte/Eingaben, identische Nahtpunkte, Aufwandgrenze, Abbruch und Revisionswechsel, Morph-/Skinmatrix-Parität, Live-/Pure-Vorschau, Replay, aktive Vorfahren und echte Rohrekonstruktion. Unabhängige 65-Bild-Schleife und alle gespeicherten Posen bestehen dieselben komponentenweisen Dehnungs-/Volumengegenprüfungen.
 - [Reproduzierbare Messung](benchmarks/automatic-draft-correction-2026-11-10.json): `node scripts/benchmark-automatic-draft-correction.mjs --moves`. Je Form erstes generisches Skelett, vier einzelne 30°-X-Beugen, neutrale Pose und Rest↔schlechteste-Pose-Schleife. Arbeitsform: **784 → 765** auffällige Dreiecke am rechten Ellenbogen; übrige Proben **302 / 115 / 469** unverändert. 1.952 betroffene Vertices, 30 Varianten, 2.056.870 reservierte Kanteniterationen, 33 Move-Stichproben und keine neue gemessene Volumenwarnung. Tierform: **kein akzeptierter Vorschlag**; Dreiecksfehler **34 / 147 / 112 / 147**, linke Ellenbogenprobe weiter mit einer Volumenwarnung. Quelldaten bleiben identisch. Das ist ein kleiner Fortschritt, keine reparierte Figur.
 - Neuer Browserfall verwendet die echte Rohrekonstruktion, berechnet ihr erstes Skelett und den Korrekturauftrag produktiv. Er prüft Original-/Korrekturvorschau, unveränderte Revision während der Suche, gesperrtes Speichern im Vergleich, explizite Übernahme, Undo/Redo, Projekt-Replay mit erhaltenen Posen/Moves und Standard-Morphspur im Animations-GLB. Bilder `edge-fit-draft-original.png` / `edge-fit-draft-candidate.png`. Keine simulierte Geometrie in diesem Fall; Anbieter-/GPU-Abnahme wird dadurch nicht behauptet.
+
+Zusätzliche Tierform-Gegenprobe: Die volle lokale Kantenform am linken Knie senkt in der 30°-Zielpose die Dreiecksfehler von **147 auf 77** und besteht dort alle vier gespeicherten Beugeposen. Bei 22,5° sinkt zwar die Gesamtzahl **94 → 50**, aber stark kollabierte Dreiecke steigen **1 → 2**. Dieser Kandidat wird deshalb verworfen; weitere Move-Bilder erhöhen einzelne Grenzüberschreitungen. Die Messkategorien werden nicht zugunsten einer besseren Gesamtsumme übergangen. Details im bestehenden Messbericht unter `supplementalRejectedCandidateProbe`; separate direkte Diagnose mit `buildEdgeFitCorrection`, `correctionSamples` und derselben 33-Bild-Schleife, keine übernommene Projektänderung.
 
 Grenzen: nicht konvexe, begrenzte Suche auf vorhandenen Einflusspaletten; symmetrische oder ungünstige Regionen können ohne Kandidat bleiben. Kein generalisierter Anatomiedetektor. Automatische Gegenprüfung bleibt bei 16 Schritten je Übergang; die zusätzlichen 65 Bilder sind Testabdeckung dieses einen Beispiels. Keine kontinuierliche Kollisions-/Bewegungsfreigabe, keine lokale Volumengarantie. Absolute Morphs und nicht unterstützte Morphattribute werden für den neuen Fit ausgelassen. Budgets und Formatgrenzen im [Studio-Ablauf](STUDIO.md#hautform-aus-netzverbindungen-0970).
 
