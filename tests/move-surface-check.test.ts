@@ -16,7 +16,7 @@ function fixture(){
 test('motion surface check catches an intermediate collapse when both stored poses pass, without mutations',async()=>{
  const f=fixture();for(const p of f.rig.data.poses)assert.equal(checkPoseSurface(f.rig,p).issues,0);
  const before=JSON.stringify(f.rig.data),live=f.rig.capture(),positions=Array.from(f.mesh.geometry.attributes.position.array),weights=Array.from(f.mesh.geometry.attributes.skinWeight.array);
- const report=await checkMoveSurface(f.rig,f.move,new AbortController().signal);assert.ok(report.samples>17&&report.samples<=81);assert.equal(report.adaptiveSamples,report.samples-17);assert.equal(report.continuous,false);const mesh=report.meshes[0];assert.ok(mesh.maximumIssues>0);assert.equal(mesh.worstTime,.5);assert.ok(mesh.firstIssue!>0&&mesh.firstIssue!<1);
+ const report=await checkMoveSurface(f.rig,f.move,new AbortController().signal);assert.ok(report.samples>17&&report.samples<=81);assert.equal(report.adaptiveSamples,report.samples-17);assert.equal(report.continuous,false);const mesh=report.meshes[0];assert.equal(mesh.intersections.checkedFrames,1);assert.equal(mesh.intersections.totalFrames,report.samples);assert.ok(mesh.maximumIssues>0);assert.equal(mesh.worstTime,.5);assert.ok(mesh.firstIssue!>0&&mesh.firstIssue!<1);
  assert.equal(JSON.stringify(f.rig.data),before);assert.deepEqual(f.rig.capture(),live);assert.deepEqual(Array.from(f.mesh.geometry.attributes.position.array),positions);assert.deepEqual(Array.from(f.mesh.geometry.attributes.skinWeight.array),weights);f.rig.dispose();
 });
 test('loop closure is sampled, abort and invalidation stop work, and excessive or empty geometry never passes',async()=>{

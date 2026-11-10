@@ -37,7 +37,7 @@ test('pure pose evaluation agrees with actual skinned and bone-attached geometry
   f.rig.apply(live);f.rig.dispose();
 });
 test('figure motion is excluded, surface controls are included, and real skin defects produce warnings',()=>{
-  const f=fixture(),report=checkPoseSurface(f.rig,f.pose);assert.equal(report.status,'outside');assert.equal(report.meshes[f.bodyIndex].stretched,2);assert.equal(report.meshes[f.bodyIndex].maximumStretch,8);assert.equal(report.meshes.find(m=>m.name==='Attached prop')!.issues,0);
+  const f=fixture(),report=checkPoseSurface(f.rig,f.pose);assert.equal(report.status,'outside');assert.ok(report.meshes.every(m=>typeof m.intersections.checked==='boolean'&&m.intersections.triangles>=0));assert.equal(report.meshes[f.bodyIndex].stretched,2);assert.equal(report.meshes[f.bodyIndex].maximumStretch,8);assert.equal(report.meshes.find(m=>m.name==='Attached prop')!.issues,0);
   const rest=neutralPoseValues(f.rig);rest.$figure={position:[10,20,30],rotation:[0,0,Math.sin(.5),Math.cos(.5)],scale:4};assert.equal(checkPoseSurface(f.rig,{...f.pose,values:rest}).status,'within');
   const point={id:'face',name:'Face',kind:'surface' as const,mesh:f.bodyIndex,rest:[-1,0,0] as [number,number,number],radius:.2,size:.02};f.rig.data.points.push(point);const values=neutralPoseValues(f.rig);values.face.position=[-10,0,0];assert.equal(checkPoseSurface(f.rig,{...f.pose,values}).status,'outside');f.rig.dispose();
 });

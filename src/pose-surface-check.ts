@@ -6,6 +6,7 @@ import {checkSurfaceShape,SURFACE_LIMITS} from './surface-check.ts';
 import {poseMorphAmount,poseMorphBindings} from './pose-morphs.ts';
 import type {StudioCorrectiveShape} from './studio-corrective-shapes.ts';
 import {createSurfaceVolumeChecker} from './surface-volume.ts';
+import {checkSurfaceIntersections} from './surface-intersections.ts';
 export type SkinOverrides=ReadonlyMap<number,{indices:T.BufferAttribute|T.InterleavedBufferAttribute;weights:T.BufferAttribute|T.InterleavedBufferAttribute}>;
 
 function createPoseWorld(rig:StudioRig,values:Record<string,Transform>){
@@ -77,7 +78,13 @@ export function createPoseSurfaceChecker(rig:StudioRig){
     return {poseId:pose.id,status:issues||volumeIssues?'outside' as const:compared?'within' as const:'unmeasurable' as const,issues,volumeIssues,compared,referenceDegenerate,limits:{...SURFACE_LIMITS},meshes};
   };
 }
-export function checkPoseSurface(rig:StudioRig,pose:Pose){return createPoseSurfaceChecker(rig)(pose);}
+/** Explicit pose diagnosis includes bounded self-intersection checks, unlike high-volume repair search. */
+export function checkPoseSurface(rig:StudioRig,pose:Pose){
+ const report=createPoseSurfaceChecker(rig)(pose);
+ return {...report,meshes:report.meshes.map((m,i)=>({
+  ...m,intersections:checkSurfaceIntersections(poseSurfacePositions(rig,pose.values,i),rig.surfaces[i].mesh.geometry.index?.array??null)
+ }))};
+}
 
 /** Bounded pose backoff, not automatic re-rigging or an ARAP solver. Never changes the rig. */
 export async function suggestGentlerPose(rig:StudioRig,pose:Pose,signal:AbortSignal,valid:()=>boolean=()=>true){

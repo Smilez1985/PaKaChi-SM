@@ -3,6 +3,8 @@ import type {StudioMove} from './studio-data.ts';
 import {moveCheckTimes,MOVE_CHECK_STEPS} from './move-limit-check.ts';
 import {createPoseSurfaceChecker} from './pose-surface-check.ts';
 import {VOLUME_LIMITS} from './surface-volume.ts';
+import {checkSurfaceIntersections} from './surface-intersections.ts';
+import {poseSurfacePositions} from './pose-surface-check.ts';
 export const MOVE_SURFACE_VERTEX_BUDGET=20_000_000;
 export const MOVE_SURFACE_ADAPTIVE_LIMIT=64;
 const MOVE_SURFACE_ADAPTIVE_DEPTH=2;
@@ -52,5 +54,16 @@ export async function checkMoveSurface(rig:StudioRig,move:StudioMove,signal:Abor
    if(r.issues&&v.firstIssue===null)v.firstIssue=time;
   }
  }
- ensure();return {moveId:move.id,samples:sampled.size,adaptiveSamples,stepsPerSegment:MOVE_CHECK_STEPS,duration:times.at(-1)!,meshes:[...meshes.values()],continuous:false as const};
+ // Only the highest-priority measured frame per mesh is checked for transverse intersections.
+ // These checks are NOT a clearance for the other sampled frames or the continuous motion.
+ const intersectionMeshes=[];
+ for(const item of meshes.values()){
+  await new Promise<void>(resolve=>setTimeout(resolve,0));ensure();
+  const time=item.worstTime??item.volume.worstTime??item.firstIssue??item.volume.firstIssue??0;
+  const pose={id:'intersection-sample',name:'Intersection sample',seconds:1,values:rig.sample(move,time)};
+  const positions=poseSurfacePositions(rig,pose.values,item.mesh);
+  const index=rig.surfaces[item.mesh].mesh.geometry.index?.array??null;
+  intersectionMeshes.push({...item,intersections:{...checkSurfaceIntersections(positions,index),sampleTime:time,checkedFrames:1,totalFrames:sampled.size}});
+ }
+ ensure();return {moveId:move.id,samples:sampled.size,adaptiveSamples,stepsPerSegment:MOVE_CHECK_STEPS,duration:times.at(-1)!,meshes:intersectionMeshes,continuous:false as const};
 }

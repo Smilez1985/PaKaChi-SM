@@ -12,7 +12,10 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
-Noch keine weiteren Änderungen.
+### Added
+
+- Explizite Pose-Diagnose enthält jetzt begrenzte transversale Selbstschnittmessungen je Teilmodell. Die Move-Diagnose prüft pro Teilmodell genau ein ausgewähltes Stichprobenbild; Messzeit und tatsächliche Abdeckung werden ausgewiesen. Editor und KI-Diagnose zeigen die Ergebnisse, ohne automatische Korrekturentscheidungen zu verändern. Nicht geprüft bleiben weitere Bewegungsbilder, Nachbarflächen/Kontakte, Teilmodell-übergreifende Kollisionen und lokale Einschnürungen.
+
 
 ## [0.95.0] - 2026-11-09
 
