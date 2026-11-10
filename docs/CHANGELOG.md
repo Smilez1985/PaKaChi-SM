@@ -12,7 +12,10 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
-Noch keine weiteren Änderungen.
+### Added
+
+- Begrenzte transversale Selbstschnittdiagnose wird jetzt in der ausdrücklichen Studio-Poseprüfung pro Teilmodell und in der Moveprüfung für ein ausgewähltes Bild je Teilmodell angezeigt. KI-Diagnose meldet Schnittzahl und Messabdeckung. Keine Änderung der automatischen Korrekturfrei­gabe; Kontakte, benachbarte Dreiecke, Teilmodell-übergreifende Kollisionen und weitere Move-Bilder bleiben ungeprüft.
+
 
 ## [0.97.0] - 2026-11-10
 
