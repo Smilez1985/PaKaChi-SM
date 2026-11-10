@@ -1,12 +1,12 @@
 # Prüfstand und Protokolle
 
-**Softwarestand: 0.99.0 · Dokumentationsabgleich: 2026-11-10T23:26:35+01:00 (Europe/Berlin).**
+**Softwarestand: 0.99.0 · Dokumentationsabgleich: 2026-11-10T23:59:31+01:00 (Europe/Berlin).**
 
 Alle Prüfnachweise stehen in dieser Datei: ein Abschnitt je Softwareversion sowie gesonderte Abschnitte für datierte Zwischenprüfungen. Die Ergebnisse und Grenzen gelten für den jeweils genannten Stand. Spätere Läufe stehen als Nachtrag im selben Abschnitt. Produktänderungen gehören in den [Changelog](CHANGELOG.md), offene Aufgaben in die [Roadmap](ROADMAP.md).
 
 ## Version 0.99.0
 
-Stand: 2026-11-10T23:26:35+01:00 (Europe/Berlin). Programmcommit `78be49d069c03cfa0fd50e22a661ccfc867e9144`, auf `develop` vollständig geprüft und unverändert nach `main` integriert. [Vollständige Entwicklungsprüfung #113](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/42910426008): **497/497 Node-Tests**, keine Fehler, Abbrüche oder übersprungenen Fälle; TypeScript-/Produktionsbuild; **48/48 Browserfälle** ohne Flaky-/Skip-Fälle; drei Produktionsimportmessungen. Der zusätzliche [main-Lauf](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/42914511447) ist beim Abschlussnachtrag noch aktiv; dessen Erfolg wird hier nicht vorweggenommen.
+Stand: 2026-11-10T23:26:35+01:00 (Europe/Berlin). Programmcommit `78be49d069c03cfa0fd50e22a661ccfc867e9144`, auf `develop` vollständig geprüft und unverändert nach `main` integriert. [Vollständige Entwicklungsprüfung #113](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/42910426008): **497/497 Node-Tests**, keine Fehler, Abbrüche oder übersprungenen Fälle; TypeScript-/Produktionsbuild; **48/48 Browserfälle** ohne Flaky-/Skip-Fälle; drei Produktionsimportmessungen. Auch der zusätzliche [main-Lauf #114](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/42914511447) ist vollständig erfolgreich: 497/497 Node-Tests ohne Fehler, Abbrüche oder übersprungene Fälle, TypeScript-/Produktionsbuild, 48/48 Browserfälle (19,1 Minuten) und drei Importmessungen.
 
 Allgemeiner Schnitt-Gegenschritt für sparse positionelle Korrekturformen: Eine räumlich begrenzte Abfrage umfasst jedes Paar mit mindestens einer an einem veränderten Vertex liegenden Fläche, auch gegen unveränderte Flächen außerhalb der Region. Paaridentitäten unterscheiden neue von bestehenden Schnitten. Betroffene Verschiebungen einschließlich ihrer ausgewählten Nahtkopien werden eingefroren. Unvollständige Kontakt-/Geometrie-/Budgetberichte liefern keinen verfeinerten Vorschlag. Acht begrenzte Durchläufe; ausschließlich Kandidatenkopien werden geändert. Sämtliche gewöhnlichen Vollnetz-, Dehnungs-, Volumen- und Bewegungsprüfungen bleiben nachgeschaltet.
 
@@ -33,6 +33,25 @@ Der unabhängige [Schnittlauf #4](https://github.com/Smilez1985/PaKaChi-SM/actio
 Lokal: 32 Schnitt-/Gegenlauf-/Auftrags-Kerntests, beide echten Charakterprüfungen, TypeScript und Produktionsbuild erfolgreich. Der wiederhergestellte lokale Quellstand enthält nur Archivbild 001 von 72; der vollständige Erhaltungstest ist durch die erfolgreiche GitHub-Gesamtsuite abgedeckt. Lokales Chromium beendet sich vor Teststart mit SIGSEGV; die Browserabnahme stammt deshalb ausdrücklich aus GitHub.
 
 Grenzen: vorhandene Selbstschnitte werden durch diesen Gegenschritt nicht allgemein repariert. Kontakte, ungültige dekorative Dreiecke, Kollisionen zwischen getrennten Teilnetzen, angrenzende Flächen und kontinuierliche Bewegungen bleiben offen. Keine anatomische oder abschließende Charakterfreigabe.
+
+
+### Main-Abschluss und Geometrie-Gegenprobe nach 0.99.0
+
+Abschlussnachtrag: 2026-11-10T23:59:31+01:00 (Europe/Berlin). [main-Abschlussartefakt](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/42914511447/artifacts/13809548896) geprüft: ZIP-SHA256 `08429d7d34db979093facc3e1ef2ba903352f006fea279c8478e684b737833fc`. HTML-Bericht: genau 48 erwartete Erfolge, keine Fehler, Flaky- oder Skip-Fälle; vier Original-/Korrekturansichten vorhanden. Beide frisch erzeugten Charakterdateien stimmen bytegenau mit den unabhängig geprüften Quellen überein. Drei vollständige Importmessungen: 3532,5 / 3653 / 3412,7 ms; Median 3532,5 ms unter Software-WebGL. Entwicklung und main sind damit für denselben Programmstand vollständig geprüft.
+
+Anschließend wurde eine **nicht integrierte** Flächentrennung an der echten Tierform untersucht. Ausgangspunkt war der vorhandene 0.99.0-Vorschlag mit 747 Dehnungswarnungen und 551 Körper-Schnittpaaren bei 22,5° linker Hüfte. Die Probe wählt die ursprüngliche Dreiecksseite aus der Grundform als Trennungsrichtung, glättet Verschiebungen und passt sie als gewöhnliche sparse Korrekturform an. Referenzradius 0,22 und Stärke 0,3 sind explizite Versuchsvorgaben; sie belegen keine allgemeine automatische Regions- oder Anatomieerkennung. Quell-GLB und laufende Benutzerprojekte wurden nicht geändert.
+
+| Lesender Versuch | Dehnungswarnungen in der Zielpose | Körper-Schnittpaare in der Zielpose | Haltungen mit neuen Paaren unter 65 Proben |
+| --- | ---: | ---: | ---: |
+| Vorhandene 0.99.0-Korrektur | 747 | 551 | Vergleichsbasis |
+| Neue Trennungsform nach grober Gegenprüfung | 746 | 543 | 9 |
+| Nach gezieltem Entfernen der problematischen Verschiebungen | 746 | 551 | 0 |
+
+Die zunächst günstigere Zielpose und vier Schnittstichproben reichen hier nicht. Auch alle 65 zusätzlichen Dehnungs-/Volumenproben bestehen, während die dichtere Schnittprüfung neue transversale Dreieckspaare findet. Beispiel bei 20,390625°: insgesamt weiterhin 491 Schnittpaare, aber zwei neue und zwei entfernte Paare. Bei 20,7421875° sinkt die Summe 500 → 496, trotzdem kommt ein neues Paar hinzu. Die Gegenprobe vergleicht deshalb vollständige Paaridentitäten in allen 65 Körperberichten; sämtliche Berichte sind vollständig.
+
+Der vorhandene Gegenschritt wurde danach an den drei Haltungen mit den meisten neuen Paaren und der Zielpose erneut ausgeführt, gefolgt von der Dehnungsprüfung. Die erneute 65-Haltungen-Gegenprobe meldet keine neuen Paare und keine Dehnungs-/Volumenverschlechterung. Der Gegenschritt verwendet 2.650.886 von 12.000.000 reservierten Kanten-/Schnittoperationen; die zusätzlichen lesenden Diagnoseproben sind separat. Allerdings verschwindet damit die angestrebte Schnittreduktion in der Zielpose. **Keine Übernahme als neue Reparaturfunktion oder Charakteränderung.** Weitere Arbeit muss die Trennungsrichtung, Erhaltung lokaler Form und Bewegung gemeinsam lösen, statt nur die Zielpose oder Schnittsumme zu verbessern.
+
+[Messdaten und virtuelle Eingaben zum Wiederholen der Gegenprobe](benchmarks/pakachi-separation-prototype-2026-11-10.json) enthalten Quell-Hash, Pose, vorhandene Korrektur, verworfene Trennungsform, bereinigte Form und beide vollständigen 65-Haltungen-Ergebnisse. Der Dateistatus ist ausdrücklich `not-integrated`. Der Produktcode bleibt unverändert; weiter offen sind die allgemeine Studio-/KI-Integration einer tatsächlich wirksamen Trennung, andere Gelenke, die weitere Aktivierungskurve und kontinuierliche Bewegungen.
 
 ## Räumliche Körper-Schnittdiagnose – Entwicklung nach 0.97.0
 
