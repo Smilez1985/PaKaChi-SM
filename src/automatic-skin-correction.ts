@@ -1,7 +1,8 @@
 import * as T from 'three';
 import type {StudioRig} from './studio-rig.ts';
 import type {Pose,ControlPoint} from './studio-data.ts';
-import {createPoseSurfaceChecker} from './pose-surface-check.ts';
+import {createPoseSurfaceChecker,poseSurfacePositions} from './pose-surface-check.ts';
+import {checkSurfaceIntersections} from './surface-intersections.ts';
 import type {SkinOverrides} from './pose-surface-check.ts';
 import {moveCheckTimes} from './move-limit-check.ts';
 import {transferSkinInfluences} from './studio-weight-transfer.ts';
@@ -10,6 +11,22 @@ import {buildGeometricCorrection,buildEdgeFitCorrection} from './geometric-skin-
 import type {StudioCorrectiveShape} from './studio-corrective-shapes.ts';
 import {searchWeightCorrection,noMeasuredRegression,betterSurfaceReport,correctionSamples} from './pose-weight-correction.ts';
 import type {SurfaceReport,WeightCorrectionProposal} from './pose-weight-correction.ts';
+/** Extra target-frame gate: reject newly measured transverse self-intersections.
+ * Unmeasurable meshes are explicitly reported and NEVER certified as collision-free.
+ * The routine does not check contacts, other meshes, or motion between samples. */
+export function checkCandidateIntersectionRegression(rig:StudioRig,pose:Pose,affected:readonly number[],overrides?:SkinOverrides,shape?:StudioCorrectiveShape){
+ let checkedMeshes=0,unmeasurableMeshes=0,newIntersections=0;
+ for(const i of [...new Set(affected)]){
+  if(!Number.isInteger(i)||i<0||i>=rig.surfaces.length)throw Error('Ungültiges Teilmodell in der Schnittprüfung.');
+  const index=rig.surfaces[i].mesh.geometry.index?.array??null;
+  const before=checkSurfaceIntersections(poseSurfacePositions(rig,pose.values,i),index);
+  const after=checkSurfaceIntersections(poseSurfacePositions(rig,pose.values,i,overrides,shape),index);
+  if(!before.checked||!after.checked){unmeasurableMeshes++;continue;}
+  checkedMeshes++;
+  newIntersections+=Math.max(0,after.intersections-before.intersections);
+ }
+ return {accepted:newIntersections===0,checkedMeshes,unmeasurableMeshes,newIntersections,complete:unmeasurableMeshes===0&&checkedMeshes===new Set(affected).size};
+}
 export const AUTOMATIC_SKIN_VERTEX_BUDGET=100_000_000;
 export const AUTOMATIC_SKIN_SAMPLE_LIMIT=512;
 export type SkinProgress={phase:'diagnosis'|'search'|'validation';samples:number;joints:number;candidates:number;vertexSamples:number;edgeOperations:number};
@@ -75,6 +92,8 @@ export async function findAutomaticSkinCorrection(rig:StudioRig,signal:AbortSign
   const proposal=await searchWeightCorrection(rig,target.pose,joint,chosenRadius,signal,valid,{center,measure,candidate:()=>{state.candidates++;},accept:async(_candidate,overrides)=>{
    state.phase='validation';const score=emptyScore();
    for(const frame of frames){await tick();measure();const report=inspect(frame.pose,overrides);if(!noMeasuredRegression(frame.before,report)){state.phase='search';return false;}scoreReport(score,report);}
+   const intersection=checkCandidateIntersectionRegression(rig,target.pose,[...overrides.keys()],overrides);
+   if(!intersection.accepted){state.phase='search';return false;}
    scores.set(key(_candidate),score);state.phase='search';return true;
   }});
   if(proposal&&beats(scores.get(key(proposal))!,proposal.after))best={...proposal,...scores.get(key(proposal))!,target:structuredClone(target.pose),targetOrigin:{...target.origin},jointId:joint.id,motionSamples,checkedMoves:rig.data.moves.length,checkedJoints:state.joints,checkedCandidates:state.candidates};
@@ -88,6 +107,8 @@ export async function findAutomaticSkinCorrection(rig:StudioRig,signal:AbortSign
    for(const frame of frames){await tick();measure();const report=inspect(frame.pose,undefined,shape);if(!noMeasuredRegression(frame.before,report)){safe=false;break;}scoreReport(score,report);}
    if(safe)for(const pose of correctionSamples(rig,target.pose)){await tick();measure();const before=inspect(pose);measure();if(!noMeasuredRegression(before,inspect(pose,undefined,shape))){safe=false;break;}}
    state.phase='search';if(!safe||!beats(score,after))continue;
+   const intersection=checkCandidateIntersectionRegression(rig,target.pose,shape.meshes.map(m=>m.mesh),undefined,shape);
+   if(!intersection.accepted)continue;
    const parent=rig.data.points.find(p=>p.kind==='bone'&&rig.bones[p.bone!]===rig.bones[joint.bone!].parent)!;
    best={kind:'geometry',geometryMethod:method,shape,...score,from:joint.id,to:parent.id,amount:strength,region:{center:[...center] as [number,number,number],radius:chosenRadius},poseId:target.pose.id,before:target.before,after,affectedVertices:shape.meshes.reduce((n,m)=>n+m.indices.length,0),checkedPoses:rig.data.poses.length,intermediateSamples:3,target:structuredClone(target.pose),targetOrigin:{...target.origin},jointId:joint.id,motionSamples,checkedMoves:rig.data.moves.length,checkedJoints:state.joints,checkedCandidates:state.candidates};
   }

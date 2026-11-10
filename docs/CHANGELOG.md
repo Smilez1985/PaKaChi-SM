@@ -14,6 +14,11 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ### Added
 
+- Zielposen-Gegenprüfung für automatische Gewichts- und geometrische Hautkorrekturen verwirft Kandidaten mit mehr nachgewiesenen transversalen Selbstschnitten auf betroffenen Teilmodellen. Die Prüfung meldet ihre messbare Abdeckung separat; große, coplanare und andere ungeeignete Flächen sind **nicht freigegeben**. Andere Posen, Zwischenbilder und Teilmodell-Kollisionen sind weiterhin nicht von dieser zusätzlichen Schnittsperre abgedeckt. Bestehende Dehnungs-/Volumen-Gegenprüfungen bleiben maßgeblich.
+
+
+### Added
+
 - Begrenzte transversale Selbstschnittdiagnose wird jetzt in der ausdrücklichen Studio-Poseprüfung pro Teilmodell und in der Moveprüfung für ein ausgewähltes Bild je Teilmodell angezeigt. KI-Diagnose meldet Schnittzahl und Messabdeckung. Keine Änderung der automatischen Korrekturfrei­gabe; Kontakte, benachbarte Dreiecke, Teilmodell-übergreifende Kollisionen und weitere Move-Bilder bleiben ungeprüft.
 
 

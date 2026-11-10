@@ -2,7 +2,7 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import * as T from 'three';
 import {twistFixture} from './helpers/twist-fixture.ts';
-import {findAutomaticSkinCorrection,skinCorrectionOverrides} from '../src/automatic-skin-correction.ts';
+import {findAutomaticSkinCorrection,skinCorrectionOverrides,checkCandidateIntersectionRegression} from '../src/automatic-skin-correction.ts';
 import {createPoseSurfaceChecker,poseSurfacePositions} from '../src/pose-surface-check.ts';
 import {moveCheckTimes} from '../src/move-limit-check.ts';
 import {noMeasuredRegression,searchWeightCorrection} from '../src/pose-weight-correction.ts';
@@ -54,4 +54,16 @@ test('automatic proposal requires the actual current token and KI permission; ca
  }
  const f=editorFixture();const unapproved=await f.editor.startAutomaticSkinCorrection();assert.ok(unapproved);assert.throws(()=>f.editor.execute(unapproved.command),/nicht freigegeben/);const permission=f.host.querySelector<HTMLInputElement>('#studio-agent-edit')!;permission.checked=true;permission.dispatchEvent(new Event('change'));const state=f.editor.inspect(),p=await f.editor.proposeSkinCorrection({session:state.session,expectedRevision:state.revision});assert.ok(p);const command=p.command;
  assert.throws(()=>f.editor.execute({...command,id:'skin-invented'}));assert.throws(()=>f.editor.execute({...command,expectedRevision:state.revision-1}));assert.equal(f.rig.data.weightTransfers?.length??0,0);f.editor.execute(command);assert.equal(f.rig.data.weightTransfers!.length,1);assert.throws(()=>f.editor.execute(command));f.editor.dispose();await f.w.happyDOM.abort();
+});
+
+test('automatic intersection guard reports coverage and leaves source state intact',()=>{
+ const f=twistFixture(),before=JSON.stringify(f.rig.data),live=f.rig.capture();
+ const result=checkCandidateIntersectionRegression(f.rig,f.pose,[0]);
+ assert.equal(result.newIntersections,0);
+ assert.equal(result.checkedMeshes+result.unmeasurableMeshes,1);
+ assert.equal(result.complete,result.unmeasurableMeshes===0);
+ assert.deepEqual(f.rig.capture(),live);
+ assert.equal(JSON.stringify(f.rig.data),before);
+ assert.throws(()=>checkCandidateIntersectionRegression(f.rig,f.pose,[999]),/Teilmodell/);
+ f.rig.dispose();
 });
