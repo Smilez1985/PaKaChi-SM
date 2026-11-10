@@ -14,6 +14,8 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ### Added
 
+- Die maximal drei zusätzlichen Schnitt-Stichproben behalten Anfang und Ende der gespeicherten Bewegungsbilder; statt eines festen mittleren Bildes wählen sie die durch Dehnung und Volumenwarnungen auffälligste innere Stichprobe. Regressionstest prüft Priorisierung, Randfälle und unveränderte Eingaben. Kein vollständiger Kollisionsnachweis.
+
 - Zusätzliche, auf höchstens drei Move-Stichproben begrenzte Schnittsperre für automatische Gewichts- und Geometriekandidaten. Ein nachgewiesener neuer Schnitt verwirft den Kandidaten. Abbruch, Revisionskontrolle und Vertexbudget bleiben aktiv. Ungeprüfte oder unmessbare Bewegungsbilder sind keine Kollisionsfreigabe.
 
 

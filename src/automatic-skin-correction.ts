@@ -41,6 +41,17 @@ export function checkCandidateIntersectionFrames(rig:StudioRig,poses:readonly Po
  }
  return {accepted:newIntersections===0,checkedFrames,unmeasurableFrames,checkedMeshes,unmeasurableMeshes,newIntersections,complete:unmeasurableFrames===0&&checkedFrames===poses.length};
 }
+/** Retain motion boundaries and spend the remaining collision probe at the worst measured frame.
+ * Input is ordered by move and sample time. This is not a replacement for full sampling. */
+export function selectCollisionMotionFrames<T extends {before:SurfaceReport}>(frames:readonly T[]):T[]{
+ if(frames.length<=3)return [...frames];
+ const chosen=new Set<number>([0,frames.length-1]);
+ const risk=(r:SurfaceReport)=>r.issues+r.volumeIssues*2+r.meshes.reduce((sum,m)=>sum+volumeSeverity(m.volume),0);
+ const interior=Array.from({length:frames.length-2},(_,k)=>k+1);
+ interior.sort((a,b)=>risk(frames[b].before)-risk(frames[a].before)||a-b);
+ chosen.add(interior[0]);
+ return [...chosen].sort((a,b)=>a-b).map(i=>frames[i]);
+}
 export const AUTOMATIC_SKIN_VERTEX_BUDGET=100_000_000;
 export const AUTOMATIC_SKIN_SAMPLE_LIMIT=512;
 export type SkinProgress={phase:'diagnosis'|'search'|'validation';samples:number;joints:number;candidates:number;vertexSamples:number;edgeOperations:number};
@@ -98,7 +109,7 @@ export async function findAutomaticSkinCorrection(rig:StudioRig,signal:AbortSign
  const target=frames.filter(f=>options.poseId===undefined||f.origin.kind==='pose'&&f.origin.id===options.poseId).sort((a,b)=>betterSurfaceReport(a.before,b.before)?1:betterSurfaceReport(b.before,a.before)?-1:0)[0];
  if(!target||target.before.status!=='outside'){ensure();return null;}
  const motionFrames=frames.filter(f=>f.origin.kind==='move');
- const selectedMotion=motionFrames.length<=3?motionFrames:[0,Math.floor((motionFrames.length-1)/2),motionFrames.length-1].map(i=>motionFrames[i]);
+ const selectedMotion=selectCollisionMotionFrames(motionFrames);
  const intersectionPoses=[target.pose,...selectedMotion.map(f=>f.pose)];
  const joints=correctionJoints(rig,target.before,target.pose);let best:AutomaticSkinProposal|null=null;
  const emptyScore=()=>({sampledIssues:0,sampledVolumeExcess:0}),scoreReport=(score:ReturnType<typeof emptyScore>,report:SurfaceReport)=>{score.sampledIssues+=report.issues;score.sampledVolumeExcess+=report.meshes.reduce((n,m)=>n+volumeSeverity(m.volume),0);},beats=(score:ReturnType<typeof emptyScore>,report:SurfaceReport)=>!best||score.sampledIssues<best.sampledIssues||score.sampledIssues===best.sampledIssues&&(score.sampledVolumeExcess<best.sampledVolumeExcess-1e-6||Math.abs(score.sampledVolumeExcess-best.sampledVolumeExcess)<=1e-6&&betterSurfaceReport(report,best.after));

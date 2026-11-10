@@ -2,7 +2,7 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import * as T from 'three';
 import {twistFixture} from './helpers/twist-fixture.ts';
-import {findAutomaticSkinCorrection,skinCorrectionOverrides,checkCandidateIntersectionRegression,checkCandidateIntersectionFrames} from '../src/automatic-skin-correction.ts';
+import {findAutomaticSkinCorrection,skinCorrectionOverrides,checkCandidateIntersectionRegression,checkCandidateIntersectionFrames,selectCollisionMotionFrames} from '../src/automatic-skin-correction.ts';
 import {createPoseSurfaceChecker,poseSurfacePositions} from '../src/pose-surface-check.ts';
 import {moveCheckTimes} from '../src/move-limit-check.ts';
 import {noMeasuredRegression,searchWeightCorrection} from '../src/pose-weight-correction.ts';
@@ -77,5 +77,17 @@ test('bounded intersection screening checks target and three move frames without
  assert.deepEqual(f.rig.capture(),live);assert.equal(JSON.stringify(f.rig.data),before);
  assert.throws(()=>checkCandidateIntersectionFrames(f.rig,[...poses,f.pose],[0]),/Schnitt-Stichproben/);
  const abort=new AbortController();abort.abort();assert.throws(()=>checkCandidateIntersectionFrames(f.rig,poses,[0],undefined,undefined,()=>abort.signal.throwIfAborted()),{name:'AbortError'});
+ f.rig.dispose();
+});
+
+test('collision motion selector preserves bounds and prioritizes the measured deformation peak',()=>{
+ const f=twistFixture(),report=createPoseSurfaceChecker(f.rig)(f.pose);
+ const severity=[0,1,9,2,4,0];
+ const frames=severity.map((issues,i)=>({time:i,before:{...report,issues}}));
+ assert.deepEqual(selectCollisionMotionFrames(frames).map(f=>f.time),[0,2,5]);
+ assert.deepEqual(selectCollisionMotionFrames(frames.slice(0,2)).map(f=>f.time),[0,1]);
+ assert.deepEqual(selectCollisionMotionFrames(frames.slice(0,3)).map(f=>f.time),[0,1,2]);
+ assert.deepEqual(selectCollisionMotionFrames([]),[]);
+ assert.deepEqual(severity,[0,1,9,2,4,0]);
  f.rig.dispose();
 });
