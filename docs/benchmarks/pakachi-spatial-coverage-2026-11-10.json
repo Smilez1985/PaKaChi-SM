@@ -1,0 +1,589 @@
+{
+  "format": "pakachi-intersection-probes",
+  "version": 1,
+  "scope": "Read-only bounded diagnostics on existing rigged GLBs; no inferred collision or anatomy approval. Every probe is a static X-axis joint pose; not a continuous motion test.",
+  "parameters": {
+    "joints": [
+      "LeftHip",
+      "LeftKnee"
+    ],
+    "degrees": [
+      0,
+      22.5,
+      45,
+      90
+    ],
+    "maxTrianglesPerMesh": 200000,
+    "maxCandidatePairsPerMesh": 100000,
+    "maxSpatialBoxPairsPerMesh": 6400000,
+    "spatialIndex": "balanced-3d-bounds-tree"
+  },
+  "measuredAt": "2026-11-10T17:45:23+01:00",
+  "baseCommit": "f07db670ea9fff8049275a371cc8f6c484879a46",
+  "checkerSha256": "c949088c2269c72ba00eed29dee74c972cc902f7f648a67aed2fd243574c863e",
+  "note": "Unreleased 3D bounds tree. Full original-form report is produced by the existing benchmark; this file retains body/fur data and complete mesh accounting. Counts are static independent-face crossings, not character collision clearance.",
+  "forms": [
+    {
+      "form": "humanoid",
+      "source": "public/model-zoo/pakachi-rigged/humanoid.glb",
+      "sha256": "2ffd6401a1484ea8ad279ed314c5944c0f01034743f0df9795c30a8121f65abd",
+      "vertices": 190375,
+      "meshes": 92,
+      "probes": [
+        {
+          "joint": "LeftHip",
+          "axis": "X",
+          "degrees": 0,
+          "surfaceIssues": 0,
+          "volumeIssues": 0,
+          "checkedMeshes": 1,
+          "unmeasurableMeshes": 91,
+          "unmeasurableReasons": {
+            "coplanar-or-touching": 63,
+            "invalid": 28
+          },
+          "detectedTransverseIntersections": 177,
+          "bodyAndFur": [
+            {
+              "mesh": 90,
+              "name": "PaKaChi_body",
+              "triangles": 99176,
+              "checked": true,
+              "reason": null,
+              "intersections": 1,
+              "testedPairs": 13485
+            },
+            {
+              "mesh": 91,
+              "name": "PaKaChi_fur",
+              "triangles": 40425,
+              "checked": false,
+              "reason": "coplanar-or-touching",
+              "intersections": 176,
+              "testedPairs": 27839
+            }
+          ]
+        },
+        {
+          "joint": "LeftHip",
+          "axis": "X",
+          "degrees": 22.5,
+          "surfaceIssues": 134,
+          "volumeIssues": 0,
+          "checkedMeshes": 1,
+          "unmeasurableMeshes": 91,
+          "unmeasurableReasons": {
+            "coplanar-or-touching": 63,
+            "invalid": 28
+          },
+          "detectedTransverseIntersections": 175,
+          "bodyAndFur": [
+            {
+              "mesh": 90,
+              "name": "PaKaChi_body",
+              "triangles": 99176,
+              "checked": true,
+              "reason": null,
+              "intersections": 1,
+              "testedPairs": 14101
+            },
+            {
+              "mesh": 91,
+              "name": "PaKaChi_fur",
+              "triangles": 40425,
+              "checked": false,
+              "reason": "coplanar-or-touching",
+              "intersections": 174,
+              "testedPairs": 27707
+            }
+          ]
+        },
+        {
+          "joint": "LeftHip",
+          "axis": "X",
+          "degrees": 45,
+          "surfaceIssues": 239,
+          "volumeIssues": 0,
+          "checkedMeshes": 1,
+          "unmeasurableMeshes": 91,
+          "unmeasurableReasons": {
+            "coplanar-or-touching": 63,
+            "invalid": 28
+          },
+          "detectedTransverseIntersections": 177,
+          "bodyAndFur": [
+            {
+              "mesh": 90,
+              "name": "PaKaChi_body",
+              "triangles": 99176,
+              "checked": true,
+              "reason": null,
+              "intersections": 1,
+              "testedPairs": 14314
+            },
+            {
+              "mesh": 91,
+              "name": "PaKaChi_fur",
+              "triangles": 40425,
+              "checked": false,
+              "reason": "coplanar-or-touching",
+              "intersections": 176,
+              "testedPairs": 27564
+            }
+          ]
+        },
+        {
+          "joint": "LeftHip",
+          "axis": "X",
+          "degrees": 90,
+          "surfaceIssues": 367,
+          "volumeIssues": 0,
+          "checkedMeshes": 1,
+          "unmeasurableMeshes": 91,
+          "unmeasurableReasons": {
+            "coplanar-or-touching": 63,
+            "invalid": 28
+          },
+          "detectedTransverseIntersections": 201,
+          "bodyAndFur": [
+            {
+              "mesh": 90,
+              "name": "PaKaChi_body",
+              "triangles": 99176,
+              "checked": true,
+              "reason": null,
+              "intersections": 21,
+              "testedPairs": 14884
+            },
+            {
+              "mesh": 91,
+              "name": "PaKaChi_fur",
+              "triangles": 40425,
+              "checked": false,
+              "reason": "coplanar-or-touching",
+              "intersections": 180,
+              "testedPairs": 27755
+            }
+          ]
+        },
+        {
+          "joint": "LeftKnee",
+          "axis": "X",
+          "degrees": 0,
+          "surfaceIssues": 0,
+          "volumeIssues": 0,
+          "checkedMeshes": 1,
+          "unmeasurableMeshes": 91,
+          "unmeasurableReasons": {
+            "coplanar-or-touching": 63,
+            "invalid": 28
+          },
+          "detectedTransverseIntersections": 177,
+          "bodyAndFur": [
+            {
+              "mesh": 90,
+              "name": "PaKaChi_body",
+              "triangles": 99176,
+              "checked": true,
+              "reason": null,
+              "intersections": 1,
+              "testedPairs": 13485
+            },
+            {
+              "mesh": 91,
+              "name": "PaKaChi_fur",
+              "triangles": 40425,
+              "checked": false,
+              "reason": "coplanar-or-touching",
+              "intersections": 176,
+              "testedPairs": 27839
+            }
+          ]
+        },
+        {
+          "joint": "LeftKnee",
+          "axis": "X",
+          "degrees": 22.5,
+          "surfaceIssues": 6,
+          "volumeIssues": 0,
+          "checkedMeshes": 1,
+          "unmeasurableMeshes": 91,
+          "unmeasurableReasons": {
+            "coplanar-or-touching": 63,
+            "invalid": 28
+          },
+          "detectedTransverseIntersections": 177,
+          "bodyAndFur": [
+            {
+              "mesh": 90,
+              "name": "PaKaChi_body",
+              "triangles": 99176,
+              "checked": true,
+              "reason": null,
+              "intersections": 1,
+              "testedPairs": 13782
+            },
+            {
+              "mesh": 91,
+              "name": "PaKaChi_fur",
+              "triangles": 40425,
+              "checked": false,
+              "reason": "coplanar-or-touching",
+              "intersections": 176,
+              "testedPairs": 27730
+            }
+          ]
+        },
+        {
+          "joint": "LeftKnee",
+          "axis": "X",
+          "degrees": 45,
+          "surfaceIssues": 62,
+          "volumeIssues": 0,
+          "checkedMeshes": 1,
+          "unmeasurableMeshes": 91,
+          "unmeasurableReasons": {
+            "coplanar-or-touching": 63,
+            "invalid": 28
+          },
+          "detectedTransverseIntersections": 175,
+          "bodyAndFur": [
+            {
+              "mesh": 90,
+              "name": "PaKaChi_body",
+              "triangles": 99176,
+              "checked": true,
+              "reason": null,
+              "intersections": 1,
+              "testedPairs": 13829
+            },
+            {
+              "mesh": 91,
+              "name": "PaKaChi_fur",
+              "triangles": 40425,
+              "checked": false,
+              "reason": "coplanar-or-touching",
+              "intersections": 174,
+              "testedPairs": 27633
+            }
+          ]
+        },
+        {
+          "joint": "LeftKnee",
+          "axis": "X",
+          "degrees": 90,
+          "surfaceIssues": 1,
+          "volumeIssues": 0,
+          "checkedMeshes": 1,
+          "unmeasurableMeshes": 91,
+          "unmeasurableReasons": {
+            "coplanar-or-touching": 63,
+            "invalid": 28
+          },
+          "detectedTransverseIntersections": 170,
+          "bodyAndFur": [
+            {
+              "mesh": 90,
+              "name": "PaKaChi_body",
+              "triangles": 99176,
+              "checked": true,
+              "reason": null,
+              "intersections": 1,
+              "testedPairs": 13718
+            },
+            {
+              "mesh": 91,
+              "name": "PaKaChi_fur",
+              "triangles": 40425,
+              "checked": false,
+              "reason": "coplanar-or-touching",
+              "intersections": 169,
+              "testedPairs": 27682
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "form": "animal",
+      "source": "public/model-zoo/pakachi-rigged/animal.glb",
+      "sha256": "25226f09bbdd02f4ec4e20f013f5585a3816df54dafc447ce308225a68202703",
+      "vertices": 231739,
+      "meshes": 90,
+      "probes": [
+        {
+          "joint": "LeftHip",
+          "axis": "X",
+          "degrees": 0,
+          "surfaceIssues": 0,
+          "volumeIssues": 0,
+          "checkedMeshes": 1,
+          "unmeasurableMeshes": 89,
+          "unmeasurableReasons": {
+            "coplanar-or-touching": 61,
+            "invalid": 28
+          },
+          "detectedTransverseIntersections": 243,
+          "bodyAndFur": [
+            {
+              "mesh": 88,
+              "name": "PaKaChi_body",
+              "triangles": 160976,
+              "checked": true,
+              "reason": null,
+              "intersections": 0,
+              "testedPairs": 21152
+            },
+            {
+              "mesh": 89,
+              "name": "PaKaChi_fur",
+              "triangles": 44009,
+              "checked": false,
+              "reason": "coplanar-or-touching",
+              "intersections": 243,
+              "testedPairs": 18616
+            }
+          ]
+        },
+        {
+          "joint": "LeftHip",
+          "axis": "X",
+          "degrees": 22.5,
+          "surfaceIssues": 760,
+          "volumeIssues": 0,
+          "checkedMeshes": 1,
+          "unmeasurableMeshes": 89,
+          "unmeasurableReasons": {
+            "coplanar-or-touching": 61,
+            "invalid": 28
+          },
+          "detectedTransverseIntersections": 802,
+          "bodyAndFur": [
+            {
+              "mesh": 88,
+              "name": "PaKaChi_body",
+              "triangles": 160976,
+              "checked": true,
+              "reason": null,
+              "intersections": 551,
+              "testedPairs": 32208
+            },
+            {
+              "mesh": 89,
+              "name": "PaKaChi_fur",
+              "triangles": 44009,
+              "checked": false,
+              "reason": "coplanar-or-touching",
+              "intersections": 251,
+              "testedPairs": 18522
+            }
+          ]
+        },
+        {
+          "joint": "LeftHip",
+          "axis": "X",
+          "degrees": 45,
+          "surfaceIssues": 1258,
+          "volumeIssues": 0,
+          "checkedMeshes": 1,
+          "unmeasurableMeshes": 89,
+          "unmeasurableReasons": {
+            "coplanar-or-touching": 61,
+            "invalid": 28
+          },
+          "detectedTransverseIntersections": 1181,
+          "bodyAndFur": [
+            {
+              "mesh": 88,
+              "name": "PaKaChi_body",
+              "triangles": 160976,
+              "checked": true,
+              "reason": null,
+              "intersections": 936,
+              "testedPairs": 44087
+            },
+            {
+              "mesh": 89,
+              "name": "PaKaChi_fur",
+              "triangles": 44009,
+              "checked": false,
+              "reason": "coplanar-or-touching",
+              "intersections": 245,
+              "testedPairs": 18465
+            }
+          ]
+        },
+        {
+          "joint": "LeftHip",
+          "axis": "X",
+          "degrees": 90,
+          "surfaceIssues": 1566,
+          "volumeIssues": 0,
+          "checkedMeshes": 1,
+          "unmeasurableMeshes": 89,
+          "unmeasurableReasons": {
+            "coplanar-or-touching": 61,
+            "invalid": 28
+          },
+          "detectedTransverseIntersections": 2472,
+          "bodyAndFur": [
+            {
+              "mesh": 88,
+              "name": "PaKaChi_body",
+              "triangles": 160976,
+              "checked": true,
+              "reason": null,
+              "intersections": 2229,
+              "testedPairs": 62800
+            },
+            {
+              "mesh": 89,
+              "name": "PaKaChi_fur",
+              "triangles": 44009,
+              "checked": false,
+              "reason": "coplanar-or-touching",
+              "intersections": 243,
+              "testedPairs": 18596
+            }
+          ]
+        },
+        {
+          "joint": "LeftKnee",
+          "axis": "X",
+          "degrees": 0,
+          "surfaceIssues": 0,
+          "volumeIssues": 0,
+          "checkedMeshes": 1,
+          "unmeasurableMeshes": 89,
+          "unmeasurableReasons": {
+            "coplanar-or-touching": 61,
+            "invalid": 28
+          },
+          "detectedTransverseIntersections": 243,
+          "bodyAndFur": [
+            {
+              "mesh": 88,
+              "name": "PaKaChi_body",
+              "triangles": 160976,
+              "checked": true,
+              "reason": null,
+              "intersections": 0,
+              "testedPairs": 21152
+            },
+            {
+              "mesh": 89,
+              "name": "PaKaChi_fur",
+              "triangles": 44009,
+              "checked": false,
+              "reason": "coplanar-or-touching",
+              "intersections": 243,
+              "testedPairs": 18616
+            }
+          ]
+        },
+        {
+          "joint": "LeftKnee",
+          "axis": "X",
+          "degrees": 22.5,
+          "surfaceIssues": 11,
+          "volumeIssues": 0,
+          "checkedMeshes": 1,
+          "unmeasurableMeshes": 89,
+          "unmeasurableReasons": {
+            "coplanar-or-touching": 61,
+            "invalid": 28
+          },
+          "detectedTransverseIntersections": 241,
+          "bodyAndFur": [
+            {
+              "mesh": 88,
+              "name": "PaKaChi_body",
+              "triangles": 160976,
+              "checked": true,
+              "reason": null,
+              "intersections": 0,
+              "testedPairs": 21456
+            },
+            {
+              "mesh": 89,
+              "name": "PaKaChi_fur",
+              "triangles": 44009,
+              "checked": false,
+              "reason": "coplanar-or-touching",
+              "intersections": 241,
+              "testedPairs": 18610
+            }
+          ]
+        },
+        {
+          "joint": "LeftKnee",
+          "axis": "X",
+          "degrees": 45,
+          "surfaceIssues": 47,
+          "volumeIssues": 0,
+          "checkedMeshes": 1,
+          "unmeasurableMeshes": 89,
+          "unmeasurableReasons": {
+            "coplanar-or-touching": 61,
+            "invalid": 28
+          },
+          "detectedTransverseIntersections": 323,
+          "bodyAndFur": [
+            {
+              "mesh": 88,
+              "name": "PaKaChi_body",
+              "triangles": 160976,
+              "checked": true,
+              "reason": null,
+              "intersections": 77,
+              "testedPairs": 22638
+            },
+            {
+              "mesh": 89,
+              "name": "PaKaChi_fur",
+              "triangles": 44009,
+              "checked": false,
+              "reason": "coplanar-or-touching",
+              "intersections": 246,
+              "testedPairs": 18634
+            }
+          ]
+        },
+        {
+          "joint": "LeftKnee",
+          "axis": "X",
+          "degrees": 90,
+          "surfaceIssues": 86,
+          "volumeIssues": 1,
+          "checkedMeshes": 1,
+          "unmeasurableMeshes": 89,
+          "unmeasurableReasons": {
+            "coplanar-or-touching": 61,
+            "invalid": 28
+          },
+          "detectedTransverseIntersections": 864,
+          "bodyAndFur": [
+            {
+              "mesh": 88,
+              "name": "PaKaChi_body",
+              "triangles": 160976,
+              "checked": true,
+              "reason": null,
+              "intersections": 613,
+              "testedPairs": 25923
+            },
+            {
+              "mesh": 89,
+              "name": "PaKaChi_fur",
+              "triangles": 44009,
+              "checked": false,
+              "reason": "coplanar-or-touching",
+              "intersections": 251,
+              "testedPairs": 18681
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

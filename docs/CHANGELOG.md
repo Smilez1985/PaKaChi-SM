@@ -12,6 +12,13 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+### Fixed
+
+- Die Selbstschnittdiagnose verwendet einen balancierten räumlichen 3D-Baum statt des X-Achsen-Sweeps. Dessen breite Vorfilterung brach an den Original-Körpernetzen bereits nach 220 bzw. 228 Dreieckstests ab. Jetzt werden beide Körpernetze in allen 16 statischen Hüft-/Knieproben innerhalb der dokumentierten Grenzen vollständig auf unabhängige transversale Dreiecksschnitte geprüft. Die bereits vorhandene automatische Korrektursperre kann diese Körpermessungen damit tatsächlich vergleichen. Originalgeometrie und Korrekturregeln bleiben unverändert.
+- Separate Grenzen für 200.000 Dreiecke, 100.000 exakte Kandidatentests und 6.400.000 räumliche Boxpaarprüfungen; der Bericht nennt Verfahren und Arbeitsgrenzen. `broadphasePairs` zählt jetzt Baum-Boxpaare statt X-überlappender Dreieckspaare und ist daher mit alten Zählern nicht unmittelbar vergleichbar. Überlappungen über Baumgrenzen hinweg werden einbezogen, ohne alle Paare zu speichern.
+- Vier zusätzliche Kernregressionen vergleichen die Suche mit vollständiger Paarprüfung, vertauschten Eingabereihenfolgen und Achsen, getrennten Flächen mit gleichem X-Bereich, Indexnachbarschaft sowie leeren/zu großen Eingaben. Zwei echte Körpernetz-Regressionen verlangen vollständige Baseline-/90°-Hüftmessung und eine nachgewiesene Verschlechterung für die bestehende Korrektursperre.
+
+
 ### Changed
 
 - Der reproduzierbare Originalformen-Schnittbenchmark erfasst nun kompakte Einzelresultate aller Teilmodelle und priorisiert Körper-/Fellnetze sowie tatsächlich erkannte Schnitte im sichtbaren Kurzbericht. Der erste erfolgreiche Messlauf #1 wurde mit 16 Gelenkproben, tatsächlichen Verformungswerten und den Grenzen der unvollständigen Kollisionsdiagnose im Prüfprotokoll dokumentiert.

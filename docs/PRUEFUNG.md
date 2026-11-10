@@ -4,6 +4,28 @@
 
 Alle Prüfnachweise stehen in dieser Datei: ein Abschnitt je Softwareversion sowie gesonderte Abschnitte für datierte Zwischenprüfungen. Die Ergebnisse und Grenzen gelten für den jeweils genannten Stand. Spätere Läufe stehen als Nachtrag im selben Abschnitt. Produktänderungen gehören in den [Changelog](CHANGELOG.md), offene Aufgaben in die [Roadmap](ROADMAP.md).
 
+## Räumliche Körper-Schnittdiagnose – Entwicklung nach 0.97.0
+
+Die neue 3D-Baumsuche wurde lokal mit den unveränderten, vorbereiteten GLBs aus [CI #108](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/42842240601) gemessen. Die vollständige CI dieses Ausgangscommits `f07db67` besteht 473 Node-Tests, Build, 46 Browserfälle und drei Importmessungen; der bisherige [Schnittmesslauf #2](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/42842240844) ist ebenfalls erfolgreich. Diese früheren grünen Läufe gelten nicht als Prüfung der neuen Baumsuche. Deren vollständiger neuer CI-Lauf ist noch ausstehend.
+
+[Messdaten mit Quell-Hashes, Grenzen und Körper-/Fellresultaten aller 16 Proben](benchmarks/pakachi-spatial-coverage-2026-11-10.json). Reproduzieren: `node scripts/benchmark-pakachi-intersections.mjs`. Beide Körpernetze erreichen jetzt in allen acht Haltungen je Form `checked: true`; kein Teilnetz der 16 Gesamtproben bricht am Arbeitsbudget ab. `checked: true` bedeutet vollständige Prüfung der **unabhängigen Dreieckspaare innerhalb dieses Teilnetzes**, auch wenn dabei Schnitte gefunden werden.
+
+| Körpernetz: transversale Schnittpaare | Arbeitsform, 99.176 Dreiecke | Tierform, 160.976 Dreiecke |
+| --- | ---: | ---: |
+| Neutral | 1 | 0 |
+| Linke Hüfte 22,5° | 1 | 551 |
+| Linke Hüfte 45° | 1 | 936 |
+| Linke Hüfte 90° | 21 | 2.229 |
+| Linkes Knie 22,5° | 1 | 0 |
+| Linkes Knie 45° | 1 | 77 |
+| Linkes Knie 90° | 1 | 613 |
+
+Vorher endete der X-Sweep bei allen Körperproben nach 228 (Arbeitsform) bzw. 220 (Tierform) exakten Dreieckstests am räumlichen Budget. Jetzt sind je Körperprobe 13.485–14.884 bzw. 21.152–62.800 exakte Tests erforderlich; die räumlichen Teilbaumprüfungen bleiben unter 6,4 Millionen. Das ist mehr Messabdeckung und **keine Geometriereparatur oder beschleunigte Laufzeitgarantie**. Die zusätzlich gefundenen Schnitte waren vorher nicht messbar. Bei vollständiger Baseline kann die bestehende Korrektursperre nun auch an diesen großen Netzen neu nachgewiesene Schnitte verwerfen.
+
+Grenzen bleiben sichtbar: pro Haltung sind weiterhin 63/61 Teilnetze wegen Kontakt-/Coplanar-Unklarheiten und je 28 wegen ungültiger Dreiecke unvollständig. Das Fell meldet in neutraler Pose 176/243 Schnitte, bleibt wegen Kontakten unvollständig. Keine Freigabe angrenzender Dreiecke, getrennter Teilnetz-Kollisionen oder kontinuierlicher Bewegungen. Insbesondere die Tierform-Hüfte ist weiterhin deutlich fehlerhaft.
+
+Lokal: 14 Schnitt-Kernprüfungen einschließlich vollständiger Paarvergleichsreferenz bestanden; 57 gemeinsame Schnitt-/Korrektur-/Volumen-/Move-Prüfungen, TypeScript und Produktionsbuild bestanden. Die vorhandenen neun echten Charakterprüfungen bestehen ebenfalls. Beide zusätzlichen Körpernetz-Regressionen sind erfolgreich (acht Tests in der vollständigen Körper-Testdatei); der neue GitHub-Gesamtlauf steht noch aus.
+
 ## Gemessene Originalformen – statische Schnittproben (10. November 2026)
 
 **Quelle:** [GitHub Actions, eigenständiger Messlauf #1](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/42826070965), Commit `a7ed2122bfca7b101d898139e06d75abded744cd`, [JSON-Artefakt](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/42826070965/artifacts/13769627616). Sowohl dieser Messlauf als auch [die vollständige CI #107](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/42826070904) sind erfolgreich abgeschlossen. Das bedeutet ausschließlich, dass Messung, Bericht und übrige automatisierte Tests funktioniert haben; **keine der Originalformen ist auf Kollisionsfreiheit geprüft**.

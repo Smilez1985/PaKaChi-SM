@@ -7,7 +7,7 @@ import * as T from 'three';
 import {parseModel,disposeModel} from '../src/viewer.ts';
 import {StudioRig} from '../src/studio-rig.ts';
 import {createPoseSurfaceChecker,poseSurfacePositions} from '../src/pose-surface-check.ts';
-import {checkSurfaceIntersections,SURFACE_INTERSECTION_TRIANGLE_LIMIT} from '../src/surface-intersections.ts';
+import {checkSurfaceIntersections,SURFACE_INTERSECTION_TRIANGLE_LIMIT,SURFACE_INTERSECTION_PAIR_BUDGET,SURFACE_INTERSECTION_SPATIAL_MULTIPLIER} from '../src/surface-intersections.ts';
 if(typeof globalThis.ProgressEvent==='undefined')globalThis.ProgressEvent=class extends Event{};
 const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
 const forms=[],jointNames=['LeftHip','LeftKnee'],degrees=[0,22.5,45,90];
@@ -51,5 +51,5 @@ for(const form of ['humanoid','animal']){
 }
 console.log(JSON.stringify({format:'pakachi-intersection-probes',version:1,
  scope:'Read-only bounded diagnostics on existing rigged GLBs; no inferred collision or anatomy approval. Every probe is a static X-axis joint pose; not a continuous motion test.',
- parameters:{joints:jointNames,degrees,maxTrianglesPerMesh:SURFACE_INTERSECTION_TRIANGLE_LIMIT,maxCandidatePairsPerMesh:100000},
+ parameters:{joints:jointNames,degrees,maxTrianglesPerMesh:SURFACE_INTERSECTION_TRIANGLE_LIMIT,maxCandidatePairsPerMesh:SURFACE_INTERSECTION_PAIR_BUDGET,maxSpatialBoxPairsPerMesh:SURFACE_INTERSECTION_PAIR_BUDGET*SURFACE_INTERSECTION_SPATIAL_MULTIPLIER,spatialIndex:'balanced-3d-bounds-tree'},
  forms},null,2));

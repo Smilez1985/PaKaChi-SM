@@ -34,3 +34,22 @@ for(const form of ['humanoid','animal']){
     }finally{rig.dispose();disposeModel(gltf.scene);}
   });
 }
+
+
+// Real meshes must reach the complete independent-face test before the correction
+// gate can compare counts. This checks the previously budget-truncated body nets.
+for(const form of ['humanoid','animal'])test(`PaKaChi ${form}: body collision coverage detects a full hip bend regression without applying the pose`,async()=>{
+ const {checkSurfaceIntersections}=await import('../src/surface-intersections.ts');
+ const {newProvenIntersectionCount}=await import('../src/automatic-skin-correction.ts');
+ const bytes=await readFile(new URL(`../public/model-zoo/pakachi-rigged/${form}.glb`,import.meta.url)),gltf=await parseModel(Uint8Array.from(bytes).buffer),rig=new StudioRig(gltf.scene);
+ try{
+  const live=rig.capture(),beforeData=JSON.stringify(rig.data),values=structuredClone(live),joint=rig.data.points.find(p=>p.name==='LeftHip')!;
+  const mesh=rig.surfaces.findIndex(s=>s.mesh.name==='PaKaChi_body'),index=rig.surfaces[mesh].mesh.geometry.index!.array;
+  const before=checkSurfaceIntersections(poseSurfacePositions(rig,values,mesh),index);
+  values[joint.id].rotation=new T.Quaternion().setFromAxisAngle(new T.Vector3(1,0,0),Math.PI/2).toArray();
+  const after=checkSurfaceIntersections(poseSurfacePositions(rig,values,mesh),index);
+  assert.equal(before.checked,true);assert.equal(after.checked,true);
+  assert.ok(newProvenIntersectionCount(before,after)>0);
+  assert.deepEqual(rig.capture(),live);assert.equal(JSON.stringify(rig.data),beforeData);
+ }finally{rig.dispose();disposeModel(gltf.scene);}
+});

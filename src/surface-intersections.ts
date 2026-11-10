@@ -3,6 +3,8 @@
  * This is not a continuous collision or anatomical clearance certificate. */
 export const SURFACE_INTERSECTION_PAIR_BUDGET=100_000;
 export const SURFACE_INTERSECTION_TRIANGLE_LIMIT=200_000;
+/** Includes rejected node-box pairs; separate from exact triangle-test work. */
+export const SURFACE_INTERSECTION_SPATIAL_MULTIPLIER=64;
 type Numbers=ArrayLike<number>;
 type V=[number,number,number];
 const sub=(a:V,b:V):V=>[a[0]-b[0],a[1]-b[1],a[2]-b[2]];
@@ -33,7 +35,7 @@ export function checkSurfaceIntersections(positions:Numbers,index:Numbers|null=n
  const count=index?.length??positions.length/3,vertices=positions.length/3,triangles=count/3;
  if(!Number.isInteger(triangles)||!Number.isInteger(vertices)||!Number.isInteger(budget)||budget<0)throw Error('Ungültige Schnittprüfung.');
  const report:SurfaceIntersectionReport={checked:true,triangles,candidatePairs:0,testedPairs:0,broadphasePairs:0,intersections:0,examples:[]};
- // The spatial sweep can process larger meshes, with bounded memory and candidate work.
+ // Memory is bounded independently of both spatial and exact-test work.
  if(triangles>SURFACE_INTERSECTION_TRIANGLE_LIMIT){report.checked=false;report.reason='budget';return report;}
  const at=(i:number)=>index?index[i]:i;
  const refs:number[][]=[],faces:[V,V,V][]=[],bounds:{lo:V;hi:V}[]=[];
@@ -52,37 +54,62 @@ export function checkSurfaceIntersections(positions:Numbers,index:Numbers|null=n
   refs.push(ids);faces.push(pts);
   bounds.push({lo:[0,1,2].map(k=>Math.min(...pts.map(p=>p[k]))) as V,hi:[0,1,2].map(k=>Math.max(...pts.map(p=>p[k]))) as V});
  }
- // Sweep X-sorted triangle boxes. Cross-chunk pairs are naturally included:
- // each candidate is visited when the triangle with later X-start enters the sweep.
- // A separate broad-phase budget prevents densely overlapping boxes from exploding.
- const order=Array.from({length:triangles},(_,i)=>i).sort((a,b)=>bounds[a].lo[0]-bounds[b].lo[0]||a-b);
- const active:number[]=[],broadphaseLimit=Math.max(1,budget*4);
- for(const b of order){
-  const x=bounds[b].lo[0];
-  for(let i=active.length-1;i>=0;i--)if(bounds[active[i]].hi[0]<x)active.splice(i,1);
-  for(const a of active){
-   if(report.broadphasePairs>=broadphaseLimit){report.checked=false;report.reason='budget';return report;}
-   report.broadphasePairs++;
-   if([1,2].some(k=>bounds[a].hi[k]<bounds[b].lo[k]||bounds[b].hi[k]<bounds[a].lo[k]))continue;
-   if(refs[a].some(i=>refs[b].includes(i)))continue;
-   report.candidatePairs++;
-   if(report.testedPairs>=budget){report.checked=false;report.reason='budget';return report;}
-   report.testedPairs++;
-   const one=faces[a],two=faces[b],n1=cross(sub(one[1],one[0]),sub(one[2],one[0])),n2=cross(sub(two[1],two[0]),sub(two[2],two[0]));
-   const norm1=Math.hypot(...n1),norm2=Math.hypot(...n2);
-   if(norm1<=1e-12||norm2<=1e-12){report.checked=false;report.reason='invalid';continue;}
-   const parallel=Math.hypot(...cross(n1,n2))<=1e-10*norm1*norm2;
-   if(parallel){
-    if(Math.abs(dot(n1,sub(two[0],one[0])))<=1e-10*norm1){report.checked=false;report.reason=report.reason??'coplanar-or-touching';}
-    continue;
-   }
-   const contacts=(p:[V,V,V],q:[V,V,V])=>[0,1,2].map(k=>segmentPierces(p[k],p[(k+1)%3],q,1e-9));
-   const hits=[...contacts(one,two),...contacts(two,one)];
-   if(hits.includes(1)){report.intersections++;if(report.examples.length<12)report.examples.push([Math.min(a,b),Math.max(a,b)]);}
-   // A strict piercing does not resolve a separate boundary contact in the same pair.
-   if(hits.includes(2)){report.checked=false;report.reason=report.reason??'coplanar-or-touching';}
+ // A balanced 3D bounds tree retains cross-partition pairs without materializing
+ // all candidates. A one-axis sweep can exhaust its budget on X-overlapping faces
+ // that are far apart in Y/Z. Every tree pair is unique, including split boundaries.
+ type Node={lo:V;hi:V;start:number;end:number;left:number;right:number};
+ const order=Array.from({length:triangles},(_,i)=>i),nodes:Node[]=[];
+ const build=(start:number,end:number):number=>{
+  const lo:V=[Infinity,Infinity,Infinity],hi:V=[-Infinity,-Infinity,-Infinity];
+  const centerLo:V=[Infinity,Infinity,Infinity],centerHi:V=[-Infinity,-Infinity,-Infinity];
+  for(let i=start;i<end;i++)for(let k=0;k<3;k++){
+   const box=bounds[order[i]],center=box.lo[k]/2+box.hi[k]/2;
+   lo[k]=Math.min(lo[k],box.lo[k]);hi[k]=Math.max(hi[k],box.hi[k]);
+   centerLo[k]=Math.min(centerLo[k],center);centerHi[k]=Math.max(centerHi[k],center);
   }
-  active.push(b);
+  const id=nodes.length,node:Node={lo,hi,start,end,left:-1,right:-1};nodes.push(node);
+  if(end-start>1){
+   let axis=0;for(let k=1;k<3;k++)if(centerHi[k]-centerLo[k]>centerHi[axis]-centerLo[axis])axis=k;
+   const sorted=order.slice(start,end).sort((a,b)=>(bounds[a].lo[axis]/2+bounds[a].hi[axis]/2)-(bounds[b].lo[axis]/2+bounds[b].hi[axis]/2)||a-b);
+   for(let i=0;i<sorted.length;i++)order[start+i]=sorted[i];
+   const middle=start+Math.floor((end-start)/2);node.left=build(start,middle);node.right=build(middle,end);
+  }
+  return id;
+ };
+ if(!triangles)return report;
+ const root=build(0,triangles),pending:[number,number][]=[[root,root]];
+ const broadphaseLimit=Math.max(1,budget*SURFACE_INTERSECTION_SPATIAL_MULTIPLIER);
+ while(pending.length){
+  const [first,second]=pending.pop()!,oneNode=nodes[first],twoNode=nodes[second];
+  if(first===second){
+   if(oneNode.left>=0)pending.push([oneNode.right,oneNode.right],[oneNode.left,oneNode.right],[oneNode.left,oneNode.left]);
+   continue;
+  }
+  if(report.broadphasePairs>=broadphaseLimit){report.checked=false;report.reason='budget';return report;}
+  report.broadphasePairs++;
+  if([0,1,2].some(k=>oneNode.hi[k]<twoNode.lo[k]||twoNode.hi[k]<oneNode.lo[k]))continue;
+  if(oneNode.left>=0&&(twoNode.left<0||oneNode.end-oneNode.start>=twoNode.end-twoNode.start)){
+   pending.push([oneNode.right,second],[oneNode.left,second]);continue;
+  }
+  if(twoNode.left>=0){pending.push([first,twoNode.right],[first,twoNode.left]);continue;}
+  const a=order[oneNode.start],b=order[twoNode.start];
+  if(refs[a].some(i=>refs[b].includes(i)))continue;
+  report.candidatePairs++;
+  if(report.testedPairs>=budget){report.checked=false;report.reason='budget';return report;}
+  report.testedPairs++;
+  const one=faces[a],two=faces[b],n1=cross(sub(one[1],one[0]),sub(one[2],one[0])),n2=cross(sub(two[1],two[0]),sub(two[2],two[0]));
+  const norm1=Math.hypot(...n1),norm2=Math.hypot(...n2);
+  if(norm1<=1e-12||norm2<=1e-12){report.checked=false;report.reason='invalid';continue;}
+  const parallel=Math.hypot(...cross(n1,n2))<=1e-10*norm1*norm2;
+  if(parallel){
+   if(Math.abs(dot(n1,sub(two[0],one[0])))<=1e-10*norm1){report.checked=false;report.reason=report.reason??'coplanar-or-touching';}
+   continue;
+  }
+  const contacts=(p:[V,V,V],q:[V,V,V])=>[0,1,2].map(k=>segmentPierces(p[k],p[(k+1)%3],q,1e-9));
+  const hits=[...contacts(one,two),...contacts(two,one)];
+  if(hits.includes(1)){report.intersections++;if(report.examples.length<12)report.examples.push([Math.min(a,b),Math.max(a,b)]);}
+  // A strict piercing does not resolve a separate boundary contact in the same pair.
+  if(hits.includes(2)){report.checked=false;report.reason=report.reason??'coplanar-or-touching';}
  }
  return report;
 }
