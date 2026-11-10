@@ -149,5 +149,51 @@
   ],
   "measuredAt": "2026-11-10T19:31:32+01:00",
   "softwareVersion": "0.98.0",
-  "baseCommit": "f38b2c3db08cf42cfa3d34fe2fd9fdd0ed98d4c5"
+  "baseCommit": "f38b2c3db08cf42cfa3d34fe2fd9fdd0ed98d4c5",
+  "releaseVerification": {
+    "codeCommit": "0c950b2c1f4d1ab11a056457d082af5db2231fa4",
+    "verifiedAt": "2026-11-10T20:26:38+01:00",
+    "develop": {
+      "run": 42876664696,
+      "conclusion": "success",
+      "tests": 491,
+      "browserCases": 47,
+      "browserMinutes": 12.9,
+      "artifact": 13792064875,
+      "artifactSha256": "1198bd5075ac0da1a62ee87383caf5ba70746191f4484bb3ee1c9e3253bb42d8",
+      "artifactVerification": {
+        "verified": true,
+        "archiveSha256": "1198bd5075ac0da1a62ee87383caf5ba70746191f4484bb3ee1c9e3253bb42d8",
+        "samples": 3,
+        "frameBoundaryMs": [
+          2576.1,
+          2775.6,
+          2810.5
+        ],
+        "medianFrameBoundaryMs": 2775.6,
+        "characterHashesMatch": true
+      }
+    },
+    "main": {
+      "run": 42880474033,
+      "conclusion": "success",
+      "tests": 491,
+      "browserCases": 47,
+      "browserMinutes": 16.0,
+      "artifact": 13795881613,
+      "artifactSha256": "e98f70ee5e1d198afa0d7dc8c2f4bb6ca52dfa3b271b5d3b52cb9c1bdce875b2",
+      "artifactVerification": {
+        "verified": true,
+        "archiveSha256": "e98f70ee5e1d198afa0d7dc8c2f4bb6ca52dfa3b271b5d3b52cb9c1bdce875b2",
+        "samples": 3,
+        "frameBoundaryMs": [
+          3643.4,
+          3371.8,
+          3484.9
+        ],
+        "medianFrameBoundaryMs": 3484.9,
+        "characterHashesMatch": true
+      }
+    }
+  }
 }

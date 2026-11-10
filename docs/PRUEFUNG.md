@@ -1,6 +1,6 @@
 # Prüfstand und Protokolle
 
-**Softwarestand: 0.98.0 · Dokumentationsabgleich: 2026-11-10T19:31:32+01:00 (Europe/Berlin).**
+**Softwarestand: 0.98.0 · Dokumentationsabgleich: 2026-11-10T20:26:38+01:00 (Europe/Berlin).**
 
 Alle Prüfnachweise stehen in dieser Datei: ein Abschnitt je Softwareversion sowie gesonderte Abschnitte für datierte Zwischenprüfungen. Die Ergebnisse und Grenzen gelten für den jeweils genannten Stand. Spätere Läufe stehen als Nachtrag im selben Abschnitt. Produktänderungen gehören in den [Changelog](CHANGELOG.md), offene Aufgaben in die [Roadmap](ROADMAP.md).
 
@@ -123,7 +123,11 @@ Die jüngste Version steht zuerst. Für eine bestimmte Version die Dokumentglied
 
 ## Version 0.98.0
 
-Prüfzeit: 2026-11-10T19:31:32+01:00 (Europe/Berlin). Die lokale Prüfung ist abgeschlossen; der neue GitHub-Gesamtlauf steht noch aus. Die vorige erfolgreiche CI #109 gilt für den Ausgangscommit, nicht für diese Änderungen.
+Abschlussnachweis: Programmcommit `0c950b2c1f4d1ab11a056457d082af5db2231fa4` auf `develop` vollständig geprüft und als Meilenstein nach `main` integriert. Sowohl [Entwicklungsprüfung](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/42876664696) als auch [erneute main-Prüfung](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/42880474033) sind **erfolgreich abgeschlossen**: je **491/491 Node-Tests**, keine Fehler, Abbrüche oder übersprungenen Fälle; TypeScript-/Produktionsbuild; **47/47 Browserfälle** ohne als flaky gemeldete Fälle und jeweils **drei Produktionsimportmessungen**. Der neue Browserfall führt die echte Arbeitsformkorrektur über den Studio-Auftrag aus und prüft Vorschau, Übernahme, Undo/Redo und Projekt-Replay. Prüfzeit: 2026-11-10T20:26:38+01:00 (Europe/Berlin).
+
+Beide Browser-ZIPs sind vollständig heruntergeladen, anhand der von GitHub gemeldeten SHA256 geprüft und inhaltlich ausgewertet. Die frischen Arbeits-/Tierform-GLBs stimmen bytegenau mit den dokumentierten Eingaben überein. Importmessung unter Software-WebGL, Frame-Grenzen: develop **2576.1 / 2775.6 / 2810.5 ms**, main **3643.4 / 3371.8 / 3484.9 ms**; Median **2775.6 / 3484.9 ms**. Keine kontrollierte Leistungsgegenüberstellung und keine GPU-/Zielhardware-Zusage.
+
+Artefakt-SHA256: develop `1198bd5075ac0da1a62ee87383caf5ba70746191f4484bb3ee1c9e3253bb42d8`, main `e98f70ee5e1d198afa0d7dc8c2f4bb6ca52dfa3b271b5d3b52cb9c1bdce875b2`. Dieser Abschlussnachtrag ändert ausschließlich Dokumentation und Messdaten; der geprüfte Programmstand bleibt identisch.
 
 Neue allgemeine Kantenentspannung mit virtuellen Positionsprojektionen, festen Randpunkten und gebundenen exakten UV-Nahtduplikaten. Die erzeugte Form wird auf die bestehende lineare Haut zurückgerechnet. Der Gegenhaltungs-Schritt friert sparse Vertices ein, die in acht gleichmäßig verteilten Beugehaltungen neue lokale Dehnungs-/Kompressions-/Flächenverstöße erzeugen. Die endgültige Form muss anschließend die bisherigen Ganznetz-Dehnungs-/Volumenprüfungen sämtlicher gespeicherter Posen und Move-Stichproben bestehen. Zusätzlich werden Zielpose, drei direkte Zwischenhaltungen und die ausgewählten Move-Schnittbilder gegengeprüft. Kein anatomischer Erkenner, keine kontinuierliche Kollisionsfreigabe.
 
@@ -138,7 +142,7 @@ Neue allgemeine Kantenentspannung mit virtuellen Positionsprojektionen, festen R
 
 Die Arbeitsformkorrektur betrifft 882 Vertices. Die Suche vergleicht weiterhin vorhandene Gewichts- und geometrische Verfahren und nutzt dieselben Revisions-, Vorschau- und Übernahme-Mechanismen im Studio und integrierten Assistenten. Die konkrete Arbeitsformprobe mit Move-Gegenprüfung wählt die neue Form; ohne Move kann eine andere bereits verfügbare Gewichtsvariante die Zielpose stärker verbessern. Die isolierte Zielpose ist daher kein Ersatz für die gesamte Bewegung.
 
-Lokal: neue Kernel-/Gegenhaltungs-Prüfungen sowie die vorhandenen automatischen/geometrischen und Bildrekonstruktionsfälle erfolgreich; beide Originalformen wurden mit realer Geometrie geprüft. Der neue Browserfall führt den echten Auftrag aus, vergleicht Original/Korrektur und prüft ausdrückliche Übernahme, Undo/Redo und Projekt-Replay. Importierte namenlose Morphattribute behalten ihre ursprünglichen Wörterbuchnamen; der neue Regressionstest und die Live-/Pure-Vorschau am Originalcharakter bestehen. Vollständige CI-Ergebnisse werden vor Meilensteinübernahme ergänzt.
+Lokal: neue Kernel-/Gegenhaltungs-Prüfungen sowie die vorhandenen automatischen/geometrischen und Bildrekonstruktionsfälle erfolgreich; beide Originalformen wurden mit realer Geometrie geprüft. Der neue Browserfall führt den echten Auftrag aus, vergleicht Original/Korrektur und prüft ausdrückliche Übernahme, Undo/Redo und Projekt-Replay. Importierte namenlose Morphattribute behalten ihre ursprünglichen Wörterbuchnamen; der neue Regressionstest und die Live-/Pure-Vorschau am Originalcharakter bestehen. Der vollständige CI-/Artefaktnachweis steht am Anfang dieses Abschnitts.
 
 Grenzen: Der Positionsfit ist ein lokales iteratives Verfahren und kann in einem unbrauchbaren Minimum enden. Höchstens 200.000 Vertices, 600.000 Indizes, 8.192 aktive Vertices, 30.000 relevante Kanten und 128 Projektionen je Kante pro Fit; höchstens vier gespeicherte Formen/32.768 sparse Vertices. Der Gegenhaltungs-Schritt ist auf acht Posen, acht Beschneidungsschritte und 12.000 betroffene Dreiecke je Teilnetz begrenzt. Aufwandsreserve bleibt gemeinsam bei zwölf Millionen Kanten-/Dreiecksoperationen; der Auftrag hat weiter 100 Millionen reservierte Vertex-Stichproben. Komplexe Aufträge können diese Grenzen erreichen. Nicht messbare Volumen-/Kontaktfälle werden nicht als behoben ausgegeben. Teilmodell-Kollisionen, weitere Winkel, kombinierte Gelenkbewegungen und sichtbare Charakterqualität bleiben offen.
 

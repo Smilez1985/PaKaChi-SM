@@ -16,6 +16,8 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 Zeitstempel: 2026-11-10T19:31:32+01:00 (Europe/Berlin)
 
+Geprüfter Meilenstein auf `main`; [vollständige Prüfungen und Artefaktnachweise](PRUEFUNG.md#version-0980).
+
 ### Added
 
 - Lokale positionelle Kantenentspannung als drittes geometrisches Verfahren im automatischen Studio-/KI-Auftrag. Sie erzeugt gewöhnliche sparse Korrekturformen bei unveränderten Gelenkspuren und Hautgewichten. Ein begrenzter Gegenhaltungs-Schritt entfernt lokale Verschlechterungen an acht Prüfhaltungen; anschließend gelten weiter die vollständigen gespeicherten Posen-/Move-, Volumen- und Schnittgegenprüfungen.
@@ -53,7 +55,6 @@ Zeitstempel: 2026-11-10T19:31:32+01:00 (Europe/Berlin)
 
 - Zusätzliche Korrekturformen erhalten importierte Morph-Zielnamen auch dann, wenn die ursprünglichen BufferAttribute-Namen leer sind. Das beseitigt den am Originalcharakter gefundenen Vorschau-/Übernahmefehler und erhält vorhandene Gesichtsmorphs und poseabhängige Treiber. Eigenständiger Regressionstest.
 
-- Abschlussnachweis für den räumlichen Schnittprüfer, 2026-11-10T18:18:18+01:00 (Europe/Berlin): vollständige CI #109 mit 479 Node-Tests, Build, 46 Browserfällen und drei Importmessungen erfolgreich; separater Schnittlauf #3 stimmt vollständig mit dem lokalen Bericht überein. Reale Gegenprobe verworfen: 760 → 733 Dehnungsfehler, aber 551 → 567 Schnitte.
 - Die Selbstschnittdiagnose verwendet einen balancierten räumlichen 3D-Baum statt des X-Achsen-Sweeps. Dessen breite Vorfilterung brach an den Original-Körpernetzen bereits nach 220 bzw. 228 Dreieckstests ab. Jetzt werden beide Körpernetze in allen 16 statischen Hüft-/Knieproben innerhalb der dokumentierten Grenzen vollständig auf unabhängige transversale Dreiecksschnitte geprüft. Die bereits vorhandene automatische Korrektursperre kann diese Körpermessungen damit tatsächlich vergleichen. Originalgeometrie und Korrekturregeln bleiben unverändert.
 - Separate Grenzen für 200.000 Dreiecke, 100.000 exakte Kandidatentests und 6.400.000 räumliche Boxpaarprüfungen; der Bericht nennt Verfahren und Arbeitsgrenzen. `broadphasePairs` zählt jetzt Baum-Boxpaare statt X-überlappender Dreieckspaare und ist daher mit alten Zählern nicht unmittelbar vergleichbar. Überlappungen über Baumgrenzen hinweg werden einbezogen, ohne alle Paare zu speichern.
 - Vier zusätzliche Kernregressionen vergleichen die Suche mit vollständiger Paarprüfung, vertauschten Eingabereihenfolgen und Achsen, getrennten Flächen mit gleichem X-Bereich, Indexnachbarschaft sowie leeren/zu großen Eingaben. Zwei echte Körpernetz-Regressionen verlangen vollständige Baseline-/90°-Hüftmessung und eine nachgewiesene Verschlechterung für die bestehende Korrektursperre.
