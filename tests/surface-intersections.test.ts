@@ -9,8 +9,8 @@ test('reports transverse non-neighboring triangle piercing without editing verti
 test('separated faces are cleared and vertex-adjacent faces are excluded',()=>{
  const separate=[...tri([0,0,0],[1,0,0],[0,1,0]),...tri([0,0,2],[1,0,2],[0,1,2])];
  assert.deepEqual(checkSurfaceIntersections(separate).examples,[]);
- const connected=[...tri([0,0,0],[1,0,0],[0,1,0]),...tri([0,0,0],[0,0,1],[0,1,0])];
- assert.equal(checkSurfaceIntersections(connected).checked,true);
+ const connected=[0,0,0, 1,0,0, 0,1,0, 0,0,1];
+ assert.equal(checkSurfaceIntersections(connected,[0,1,2,0,3,2]).checked,true);
 });
 test('budget, malformed positions and coplanar candidates never silently pass',()=>{
  const crossing=[...tri([-1,-1,0],[1,-1,0],[0,1,0]),...tri([0,-.5,-1],[0,-.5,1],[0,.5,0])];
@@ -46,4 +46,11 @@ test('dense spatial broad-phase is bounded and reports incomplete coverage',()=>
  for(let i=0;i<20;i++)positions.push(...tri([-1,-1,i*.001],[1,-1,i*.001],[0,1,i*.001]));
  const report=checkSurfaceIntersections(positions,null,1);
  assert.equal(report.checked,false);assert.equal(report.reason,'budget');
+});
+
+test('unwelded seam vertices are treated as ambiguous contacts, unlike indexed adjacency',()=>{
+ const unwelded=[...tri([0,0,0],[1,0,0],[0,1,0]),...tri([0,0,0],[0,0,1],[0,1,0])];
+ const result=checkSurfaceIntersections(unwelded);
+ assert.equal(result.intersections,0);assert.equal(result.checked,false);
+ assert.equal(result.reason,'coplanar-or-touching');
 });

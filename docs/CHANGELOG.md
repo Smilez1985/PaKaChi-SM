@@ -12,6 +12,10 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+### Fixed
+
+- Nicht-coplanare Kanten- und Eckkontakte unabhängiger Dreiecke werden nicht länger stillschweigend als frei bewertet: Der Schnittprüfer markiert solche Kontakte als unvollständig; echte transversale Durchdringungen bleiben zählbar. Zwei Regressionen für Endpunkt- und Randkontakte ergänzt. Die Diagnose bleibt keine allgemeine Kollisionsfreigabe.
+
 ### Added
 
 - Räumlicher X-AABB-Sweep ersetzt die bisherige harte 2.048-Dreiecks-Grenze der Selbstschnittdiagnose. Bis zu 200.000 Dreiecke pro Teilmodell sind als Eingabe möglich; jeder mögliche Paarvergleich über beliebige Verarbeitungsteilmengen hinweg wird räumlich vorausgefiltert. Unverändert harte Budgets für Kandidatenpaare und breite Überlappungen liefern statt einer scheinbaren Freigabe den Status unvollständig. Regressionen mit mehr als 2.048 Dreiecken und einem Schnitt zwischen weit getrennten Eingabeblöcken ergänzt.

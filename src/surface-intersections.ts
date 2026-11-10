@@ -9,17 +9,20 @@ const sub=(a:V,b:V):V=>[a[0]-b[0],a[1]-b[1],a[2]-b[2]];
 const dot=(a:V,b:V)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
 const cross=(a:V,b:V):V=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];
 const point=(p:Numbers,i:number):V=>[p[i*3],p[i*3+1],p[i*3+2]];
-function segmentPierces(a:V,b:V,tri:[V,V,V],tolerance:number){
+/** 0 = none, 1 = strict transverse piercing, 2 = edge/vertex contact.
+ * Coplanar ambiguity is handled by the caller. */
+function segmentPierces(a:V,b:V,tri:[V,V,V],tolerance:number):0|1|2{
  const [p,q,r]=tri,d=sub(b,a),e1=sub(q,p),e2=sub(r,p),normal=cross(e1,e2);
  const denom=dot(normal,d),scale=Math.hypot(...normal)*Math.hypot(...d);
- if(Math.abs(denom)<=1e-12*scale)return false;
+ if(Math.abs(denom)<=1e-12*scale)return 0;
  const t=dot(normal,sub(p,a))/denom;
- if(t<=tolerance||t>=1-tolerance)return false;
+ if(t< -tolerance||t>1+tolerance)return 0;
  const v:[number,number,number]=[a[0]+t*d[0],a[1]+t*d[1],a[2]+t*d[2]];
  const u=sub(v,p),uu=dot(e1,e1),uv=dot(e1,e2),vv=dot(e2,e2),wu=dot(u,e1),wv=dot(u,e2),det=uu*vv-uv*uv;
- if(det<=1e-24)return false;
+ if(det<=1e-24)return 0;
  const s=(wu*vv-wv*uv)/det,w=(wv*uu-wu*uv)/det;
- return s>tolerance&&w>tolerance&&s+w<1-tolerance;
+ if(s< -tolerance||w< -tolerance||s+w>1+tolerance)return 0;
+ return t>tolerance&&t<1-tolerance&&s>tolerance&&w>tolerance&&s+w<1-tolerance?1:2;
 }
 export interface SurfaceIntersectionReport {
  checked:boolean; reason?:'budget'|'invalid'|'coplanar-or-touching';
@@ -66,8 +69,10 @@ export function checkSurfaceIntersections(positions:Numbers,index:Numbers|null=n
     if(Math.abs(dot(n1,sub(two[0],one[0])))<=1e-10*norm1){report.checked=false;report.reason=report.reason??'coplanar-or-touching';}
     continue;
    }
-   const crosses=(p:[V,V,V],q:[V,V,V])=>[0,1,2].some(k=>segmentPierces(p[k],p[(k+1)%3],q,1e-9));
-   if(crosses(one,two)||crosses(two,one)){report.intersections++;if(report.examples.length<12)report.examples.push([Math.min(a,b),Math.max(a,b)]);}
+   const contacts=(p:[V,V,V],q:[V,V,V])=>[0,1,2].map(k=>segmentPierces(p[k],p[(k+1)%3],q,1e-9));
+   const hits=[...contacts(one,two),...contacts(two,one)];
+   if(hits.includes(1)){report.intersections++;if(report.examples.length<12)report.examples.push([Math.min(a,b),Math.max(a,b)]);}
+   else if(hits.includes(2)){report.checked=false;report.reason=report.reason??'coplanar-or-touching';}
   }
   active.push(b);
  }
