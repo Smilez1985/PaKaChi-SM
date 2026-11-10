@@ -12,36 +12,18 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
-### Fixed
+## [0.98.0] - 2026-11-10
 
-- Abschlussnachweis für den räumlichen Schnittprüfer, 2026-11-10T18:18:18+01:00 (Europe/Berlin): vollständige CI #109 mit 479 Node-Tests, Build, 46 Browserfällen und drei Importmessungen erfolgreich; separater Schnittlauf #3 stimmt vollständig mit dem lokalen Bericht überein. Reale Gegenprobe verworfen: 760 → 733 Dehnungsfehler, aber 551 → 567 Schnitte.
-- Die Selbstschnittdiagnose verwendet einen balancierten räumlichen 3D-Baum statt des X-Achsen-Sweeps. Dessen breite Vorfilterung brach an den Original-Körpernetzen bereits nach 220 bzw. 228 Dreieckstests ab. Jetzt werden beide Körpernetze in allen 16 statischen Hüft-/Knieproben innerhalb der dokumentierten Grenzen vollständig auf unabhängige transversale Dreiecksschnitte geprüft. Die bereits vorhandene automatische Korrektursperre kann diese Körpermessungen damit tatsächlich vergleichen. Originalgeometrie und Korrekturregeln bleiben unverändert.
-- Separate Grenzen für 200.000 Dreiecke, 100.000 exakte Kandidatentests und 6.400.000 räumliche Boxpaarprüfungen; der Bericht nennt Verfahren und Arbeitsgrenzen. `broadphasePairs` zählt jetzt Baum-Boxpaare statt X-überlappender Dreieckspaare und ist daher mit alten Zählern nicht unmittelbar vergleichbar. Überlappungen über Baumgrenzen hinweg werden einbezogen, ohne alle Paare zu speichern.
-- Vier zusätzliche Kernregressionen vergleichen die Suche mit vollständiger Paarprüfung, vertauschten Eingabereihenfolgen und Achsen, getrennten Flächen mit gleichem X-Bereich, Indexnachbarschaft sowie leeren/zu großen Eingaben. Zwei echte Körpernetz-Regressionen verlangen vollständige Baseline-/90°-Hüftmessung und eine nachgewiesene Verschlechterung für die bestehende Korrektursperre.
-
-
-### Changed
-
-- Der reproduzierbare Originalformen-Schnittbenchmark erfasst nun kompakte Einzelresultate aller Teilmodelle und priorisiert Körper-/Fellnetze sowie tatsächlich erkannte Schnitte im sichtbaren Kurzbericht. Der erste erfolgreiche Messlauf #1 wurde mit 16 Gelenkproben, tatsächlichen Verformungswerten und den Grenzen der unvollständigen Kollisionsdiagnose im Prüfprotokoll dokumentiert.
+Zeitstempel: 2026-11-10T19:31:32+01:00 (Europe/Berlin)
 
 ### Added
+
+- Lokale positionelle Kantenentspannung als drittes geometrisches Verfahren im automatischen Studio-/KI-Auftrag. Sie erzeugt gewöhnliche sparse Korrekturformen bei unveränderten Gelenkspuren und Hautgewichten. Ein begrenzter Gegenhaltungs-Schritt entfernt lokale Verschlechterungen an acht Prüfhaltungen; anschließend gelten weiter die vollständigen gespeicherten Posen-/Move-, Volumen- und Schnittgegenprüfungen.
+- Reproduzierbarer Auftrag an der echten Arbeitsform: 367 → 347 Dehnungswarnungen, 21 → 11 unabhängige Körper-Schnittpaare bei 90° Hüfte; zwei gespeicherte Posen, 33 Move-Stichproben und zusätzliche unabhängige 65-Bild-Gegenprobe. Ein expliziter Tierform-Kandidat wird wegen zusätzlicher Schnitte verworfen. Kein Nachweis kontinuierlicher Kollisionsfreiheit oder abgeschlossener Anatomie.
+- Elf neue Kern-/Charakterprüfungen sowie ein Browserfall am Originalcharakter decken feste Grenzen, UV-Nähte, Aufwandsgrenzen, Abbruch/Revisionswechsel, Vorschauparität, Auswahl im automatischen Auftrag, Undo und Projekt-Replay ab.
 
 - Eigener GitHub-Actions-Workflow für den bereits vorhandenen lesenden Schnittbenchmark auf den beiden echten PaKaChi-Rigged-GLBs. Er validiert die 16 Hüft-/Knie-Posen und sichert die vollständige JSON-Ausgabe als Artefakt, auch wenn die Ergebnisprüfung fehlschlägt. Ein erfolgreicher Lauf bedeutet nicht, dass keine Kollisionen vorhanden sind. Die normale vollständige CI bleibt separat.
 
-### Fixed
-
-- GitHub Actions Browserfall für geschlossene Haut (`automatic-skin-correction.spec.ts`) an die aktuelle KI-Schnittdiagnose angepasst: statt des veralteten `unchecked: self-intersections` wird der tatsächlich gemessene Teilmodell-Schnittbericht geprüft; ungemessene Teilmodell-übergreifende Kollisionen und angrenzende Kontakte bleiben ausdrücklich als ungeprüft markiert. Ursache von Actions-Run #105: 473 Node-Tests und Build erfolgreich, 45/46 Browserfälle erfolgreich; nur die veraltete Browsererwartung schlug fehl.
-
-
-- Gleichzeitige transversale Durchdringung und ungeklärter Randkontakt eines Dreieckspaars wird jetzt als Schnitt **und** unvollständige Prüfung gemeldet. Die automatische Korrektursperre verwirft neu nachgewiesene Schnitte auch dann, wenn das veränderte Netz zusätzlich ungeklärte Kontakte aufweist, sofern die Ausgangsprüfung vollständig war. Tests für beide Fälle ergänzt.
-
-
-- Entartete, kollineare und nicht endlich berechenbare Dreiecke werden bereits beim Einlesen des Netzes als ungültig erkannt, selbst wenn ihre Bounding-Box keine andere Fläche überlappt. Regressionen für isolierte Nullflächen sowie Kanten-/Eckkontakte ergänzt.
-
-
-- Nicht-coplanare Kanten- und Eckkontakte unabhängiger Dreiecke werden nicht länger stillschweigend als frei bewertet: Der Schnittprüfer markiert solche Kontakte als unvollständig; echte transversale Durchdringungen bleiben zählbar. Zwei Regressionen für Endpunkt- und Randkontakte ergänzt. Die Diagnose bleibt keine allgemeine Kollisionsfreigabe.
-
-### Added
 
 - Räumlicher X-AABB-Sweep ersetzt die bisherige harte 2.048-Dreiecks-Grenze der Selbstschnittdiagnose. Bis zu 200.000 Dreiecke pro Teilmodell sind als Eingabe möglich; jeder mögliche Paarvergleich über beliebige Verarbeitungsteilmengen hinweg wird räumlich vorausgefiltert. Unverändert harte Budgets für Kandidatenpaare und breite Überlappungen liefern statt einer scheinbaren Freigabe den Status unvollständig. Regressionen mit mehr als 2.048 Dreiecken und einem Schnitt zwischen weit getrennten Eingabeblöcken ergänzt.
 
@@ -58,10 +40,36 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 - Zielposen-Gegenprüfung für automatische Gewichts- und geometrische Hautkorrekturen verwirft Kandidaten mit mehr nachgewiesenen transversalen Selbstschnitten auf betroffenen Teilmodellen. Die Prüfung meldet ihre messbare Abdeckung separat; große, coplanare und andere ungeeignete Flächen sind **nicht freigegeben**. Andere Posen, Zwischenbilder und Teilmodell-Kollisionen sind weiterhin nicht von dieser zusätzlichen Schnittsperre abgedeckt. Bestehende Dehnungs-/Volumen-Gegenprüfungen bleiben maßgeblich.
 
 
-### Added
 
 - Begrenzte transversale Selbstschnittdiagnose wird jetzt in der ausdrücklichen Studio-Poseprüfung pro Teilmodell und in der Moveprüfung für ein ausgewähltes Bild je Teilmodell angezeigt. KI-Diagnose meldet Schnittzahl und Messabdeckung. Keine Änderung der automatischen Korrekturfrei­gabe; Kontakte, benachbarte Dreiecke, Teilmodell-übergreifende Kollisionen und weitere Move-Bilder bleiben ungeprüft.
 
+### Changed
+
+- Der CI-Gesamtlauf erhält 45 statt 35 Minuten, da er frische Charakteraufbereitung und zusätzliche echte Körper-/Browsergegenproben ausführt. Einzelprüfungen und Fehlerstatus bleiben verpflichtend; ein Zeitbudget ist keine Qualitätsfreigabe.
+
+- Der reproduzierbare Originalformen-Schnittbenchmark erfasst nun kompakte Einzelresultate aller Teilmodelle und priorisiert Körper-/Fellnetze sowie tatsächlich erkannte Schnitte im sichtbaren Kurzbericht. Der erste erfolgreiche Messlauf #1 wurde mit 16 Gelenkproben, tatsächlichen Verformungswerten und den Grenzen der unvollständigen Kollisionsdiagnose im Prüfprotokoll dokumentiert.
+
+### Fixed
+
+- Zusätzliche Korrekturformen erhalten importierte Morph-Zielnamen auch dann, wenn die ursprünglichen BufferAttribute-Namen leer sind. Das beseitigt den am Originalcharakter gefundenen Vorschau-/Übernahmefehler und erhält vorhandene Gesichtsmorphs und poseabhängige Treiber. Eigenständiger Regressionstest.
+
+- Abschlussnachweis für den räumlichen Schnittprüfer, 2026-11-10T18:18:18+01:00 (Europe/Berlin): vollständige CI #109 mit 479 Node-Tests, Build, 46 Browserfällen und drei Importmessungen erfolgreich; separater Schnittlauf #3 stimmt vollständig mit dem lokalen Bericht überein. Reale Gegenprobe verworfen: 760 → 733 Dehnungsfehler, aber 551 → 567 Schnitte.
+- Die Selbstschnittdiagnose verwendet einen balancierten räumlichen 3D-Baum statt des X-Achsen-Sweeps. Dessen breite Vorfilterung brach an den Original-Körpernetzen bereits nach 220 bzw. 228 Dreieckstests ab. Jetzt werden beide Körpernetze in allen 16 statischen Hüft-/Knieproben innerhalb der dokumentierten Grenzen vollständig auf unabhängige transversale Dreiecksschnitte geprüft. Die bereits vorhandene automatische Korrektursperre kann diese Körpermessungen damit tatsächlich vergleichen. Originalgeometrie und Korrekturregeln bleiben unverändert.
+- Separate Grenzen für 200.000 Dreiecke, 100.000 exakte Kandidatentests und 6.400.000 räumliche Boxpaarprüfungen; der Bericht nennt Verfahren und Arbeitsgrenzen. `broadphasePairs` zählt jetzt Baum-Boxpaare statt X-überlappender Dreieckspaare und ist daher mit alten Zählern nicht unmittelbar vergleichbar. Überlappungen über Baumgrenzen hinweg werden einbezogen, ohne alle Paare zu speichern.
+- Vier zusätzliche Kernregressionen vergleichen die Suche mit vollständiger Paarprüfung, vertauschten Eingabereihenfolgen und Achsen, getrennten Flächen mit gleichem X-Bereich, Indexnachbarschaft sowie leeren/zu großen Eingaben. Zwei echte Körpernetz-Regressionen verlangen vollständige Baseline-/90°-Hüftmessung und eine nachgewiesene Verschlechterung für die bestehende Korrektursperre.
+
+
+
+- GitHub Actions Browserfall für geschlossene Haut (`automatic-skin-correction.spec.ts`) an die aktuelle KI-Schnittdiagnose angepasst: statt des veralteten `unchecked: self-intersections` wird der tatsächlich gemessene Teilmodell-Schnittbericht geprüft; ungemessene Teilmodell-übergreifende Kollisionen und angrenzende Kontakte bleiben ausdrücklich als ungeprüft markiert. Ursache von Actions-Run #105: 473 Node-Tests und Build erfolgreich, 45/46 Browserfälle erfolgreich; nur die veraltete Browsererwartung schlug fehl.
+
+
+- Gleichzeitige transversale Durchdringung und ungeklärter Randkontakt eines Dreieckspaars wird jetzt als Schnitt **und** unvollständige Prüfung gemeldet. Die automatische Korrektursperre verwirft neu nachgewiesene Schnitte auch dann, wenn das veränderte Netz zusätzlich ungeklärte Kontakte aufweist, sofern die Ausgangsprüfung vollständig war. Tests für beide Fälle ergänzt.
+
+
+- Entartete, kollineare und nicht endlich berechenbare Dreiecke werden bereits beim Einlesen des Netzes als ungültig erkannt, selbst wenn ihre Bounding-Box keine andere Fläche überlappt. Regressionen für isolierte Nullflächen sowie Kanten-/Eckkontakte ergänzt.
+
+
+- Nicht-coplanare Kanten- und Eckkontakte unabhängiger Dreiecke werden nicht länger stillschweigend als frei bewertet: Der Schnittprüfer markiert solche Kontakte als unvollständig; echte transversale Durchdringungen bleiben zählbar. Zwei Regressionen für Endpunkt- und Randkontakte ergänzt. Die Diagnose bleibt keine allgemeine Kollisionsfreigabe.
 
 ## [0.97.0] - 2026-11-10
 
@@ -2081,3 +2089,5 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 [0.96.0]: PRUEFUNG.md#version-0960
 [0.95.0]: PRUEFUNG.md#version-0950
 [0.94.0]: PRUEFUNG.md#version-0940
+
+[0.98.0]: PRUEFUNG.md#version-0980

@@ -12,7 +12,7 @@ import {StudioRig} from '../src/studio-rig.ts';
 import {StudioEditor} from '../src/studio-editor.ts';
 import type {StudioView} from '../src/studio-view.ts';
 import {parseProject} from '../src/studio-data.ts';
-import {poseMorphBindings} from '../src/pose-morphs.ts';
+import {poseMorphBindings,POSE_MORPHS,POSE_MORPH_BIND} from '../src/pose-morphs.ts';
 import {captureMoveGLB} from '../src/move-glb.ts';
 import {disposeStaticFigure,exportRiggedFigureGLB} from '../src/figure-glb.ts';
 import {parseModel,disposeModel} from '../src/viewer.ts';
@@ -72,4 +72,13 @@ test('a second geometric shape preserves existing drivers and matches pure and l
 test('rigged GLB round-trip retains shape metadata and independent target attributes',async()=>{
  class Reader{result:ArrayBuffer|null=null;onloadend:(()=>void)|null=null;readAsArrayBuffer(b:Blob){void b.arrayBuffer().then(v=>{this.result=v;this.onloadend?.();});}}Object.assign(globalThis,{FileReader:Reader,ProgressEvent:class extends Event{}});
  const f=fixture(),s=buildGeometricCorrection(f.rig,f.pose,f.joint,2)!;f.rig.addCorrective(s);const bytes=await exportRiggedFigureGLB(f.root),loaded=await parseModel(bytes),rig=new StudioRig(loaded.scene);assert.equal(poseMorphBindings(rig.root)[0].entries.length,1);const values=rig.capture(),joint=rig.data.points.find(p=>p.name==='Forearm')!;values[joint.id].rotation=[...s.pose] as [number,number,number,number];assert.ok(createPoseSurfaceChecker(rig)({...f.pose,values}).meshes[0].volume.minimumRatio!>.8);rig.dispose();disposeModel(loaded.scene);f.rig.dispose();
+});
+
+
+test('adding a corrective preserves imported morph names even when source attributes have no names',()=>{
+ const f=fixture();f.rig.dispose();const g=f.mesh.geometry;
+ g.morphAttributes.position=[new T.Float32BufferAttribute(new Float32Array(g.attributes.position.count*3),3)];g.morphTargetsRelative=true;f.mesh.updateMorphTargets();f.mesh.morphTargetDictionary={importedSmile:0};f.mesh.morphTargetInfluences=[0];
+ f.mesh.userData[POSE_MORPHS]=[{joint:'Forearm',rest:[0,0,0,1],pose:f.pose.values[f.joint.id].rotation,radius:Math.PI/2,target:'importedSmile'}];f.mesh.userData[POSE_MORPH_BIND]=f.mesh.skeleton.boneInverses.map(m=>m.clone().multiply(f.mesh.bindMatrix).toArray());
+ const rig=new StudioRig(f.root),joint=rig.data.points.find(p=>p.name==='Forearm')!,shape=buildGeometricCorrection(rig,f.pose,joint,2)!;assert.ok(shape);
+ try{const original=f.mesh.geometry.morphAttributes.position![0],stop=rig.previewCorrective(f.pose.values,shape);assert.equal(f.mesh.morphTargetDictionary!.importedSmile,0);assert.equal(poseMorphBindings(f.root)[0].entries[0].index,0);assert.equal(f.mesh.morphTargetInfluences![0],1);assert.equal(f.mesh.geometry.morphAttributes.position![0],original);stop();assert.deepEqual(f.mesh.morphTargetDictionary,{importedSmile:0});rig.addCorrective(shape);rig.apply(f.pose.values);assert.equal(f.mesh.morphTargetDictionary!.importedSmile,0);assert.equal(f.mesh.morphTargetInfluences![0],1);}finally{rig.dispose();}
 });

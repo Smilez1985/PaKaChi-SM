@@ -14,9 +14,10 @@ export function noMeasuredRegression(before:Report,after:Report){
 }
 /** Strain count first, then measured volume excess; unmeasurable volumes never count as fixed. */
 export function betterSurfaceReport(after:Report,before:Report){return after.issues<before.issues||after.issues===before.issues&&after.meshes.reduce((n,m)=>n+volumeSeverity(m.volume),0)<before.meshes.reduce((n,m)=>n+volumeSeverity(m.volume),0)-1e-6;}
-export function correctionSamples(rig:StudioRig,target:Pose){
+export function correctionSamples(rig:StudioRig,target:Pose,steps=4){
+ if(!Number.isInteger(steps)||steps<2||steps>16)throw Error('Ungültige Anzahl Korrektur-Stichproben.');
  const rest=neutralPoseValues(rig),samples:Pose[]=[];
- for(const fraction of [.25,.5,.75]){
+ for(const fraction of Array.from({length:steps-1},(_,i)=>(i+1)/steps)){
   const values:Record<string,Transform>={[FIGURE_TRACK]:structuredClone(target.values[FIGURE_TRACK]??neutralFigure())};
   for(const point of rig.data.points){const a=rest[point.id],b=target.values[point.id];values[point.id]={position:new T.Vector3().fromArray(a.position).lerp(new T.Vector3().fromArray(b.position),fraction).toArray(),rotation:new T.Quaternion().fromArray(a.rotation).slerp(new T.Quaternion().fromArray(b.rotation),fraction).toArray()};}
   samples.push({id:`sample-${fraction}`,name:'Sample',seconds:1,values});

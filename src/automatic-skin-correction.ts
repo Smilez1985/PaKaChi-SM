@@ -8,7 +8,8 @@ import type {SkinOverrides} from './pose-surface-check.ts';
 import {moveCheckTimes} from './move-limit-check.ts';
 import {transferSkinInfluences} from './studio-weight-transfer.ts';
 import {volumeSeverity} from './surface-volume.ts';
-import {buildGeometricCorrection,buildEdgeFitCorrection} from './geometric-skin-correction.ts';
+import {buildGeometricCorrection,buildEdgeFitCorrection,buildEdgeRelaxationCorrection} from './geometric-skin-correction.ts';
+import {limitCorrectiveStrain} from './corrective-strain-guard.ts';
 import type {StudioCorrectiveShape} from './studio-corrective-shapes.ts';
 import {searchWeightCorrection,noMeasuredRegression,betterSurfaceReport,correctionSamples} from './pose-weight-correction.ts';
 import type {SurfaceReport,WeightCorrectionProposal} from './pose-weight-correction.ts';
@@ -61,7 +62,7 @@ export function selectCollisionMotionFrames<T extends {before:SurfaceReport}>(fr
 export const AUTOMATIC_SKIN_VERTEX_BUDGET=100_000_000;
 export const AUTOMATIC_SKIN_SAMPLE_LIMIT=512;
 export type SkinProgress={phase:'diagnosis'|'search'|'validation';samples:number;joints:number;candidates:number;vertexSamples:number;edgeOperations:number};
-export interface AutomaticSkinProposal extends WeightCorrectionProposal {kind?:'geometry';geometryMethod?:'dual-quaternion'|'edge-fit';shape?:StudioCorrectiveShape;edgeOperations?:number;edgeBudgetExhausted?:boolean;sampledIssues:number;sampledVolumeExcess:number;target:Pose;targetOrigin:{kind:'pose'|'move';id:string;time?:number};jointId:string;motionSamples:number;checkedMoves:number;checkedJoints:number;checkedCandidates:number}
+export interface AutomaticSkinProposal extends WeightCorrectionProposal {kind?:'geometry';geometryMethod?:'dual-quaternion'|'edge-fit'|'edge-relaxation';shape?:StudioCorrectiveShape;edgeOperations?:number;edgeBudgetExhausted?:boolean;sampledIssues:number;sampledVolumeExcess:number;target:Pose;targetOrigin:{kind:'pose'|'move';id:string;time?:number};jointId:string;motionSamples:number;checkedMoves:number;checkedJoints:number;checkedCandidates:number}
 export function skinCorrectionOverrides(rig:StudioRig,proposal:WeightCorrectionProposal):SkinOverrides{
  // Use the same transfer kernel as committed topology replay.
  const from=rig.data.points.find(p=>p.id===proposal.from),to=rig.data.points.find(p=>p.id===proposal.to);if(!from||!to)throw Error('Korrekturgelenke fehlen.');
@@ -131,20 +132,25 @@ export async function findAutomaticSkinCorrection(rig:StudioRig,signal:AbortSign
    scores.set(key(_candidate),score);state.phase='search';return true;
   }});
   if(proposal&&beats(scores.get(key(proposal))!,proposal.after))best={...proposal,...scores.get(key(proposal))!,target:structuredClone(target.pose),targetOrigin:{...target.origin},jointId:joint.id,motionSamples,checkedMoves:rig.data.moves.length,checkedJoints:state.joints,checkedCandidates:state.candidates};
-  for(const method of ['dual-quaternion','edge-fit'] as const){
+  for(const method of ['dual-quaternion','edge-fit','edge-relaxation'] as const){
+  const centers=method==='edge-relaxation'&&new T.Vector3().fromArray(center).distanceToSquared(new T.Vector3().fromArray(joint.rest))>1e-12?[center,joint.rest]:[center];
+  for(const fitCenter of centers){
   let edgeShape:StudioCorrectiveShape|null=null;
-  if(method==='edge-fit'){for(let k=0;k<4;k++)measure();edgeShape=await buildEdgeFitCorrection(rig,target.pose,joint,chosenRadius,signal,edgeBudget,valid,center);state.edgeOperations=edgeBudget.used;}
+  if(method==='edge-fit'){for(let k=0;k<4;k++)measure();edgeShape=await buildEdgeFitCorrection(rig,target.pose,joint,chosenRadius,signal,edgeBudget,valid,fitCenter);state.edgeOperations=edgeBudget.used;}
+  if(method==='edge-relaxation'){for(let k=0;k<4;k++)measure();edgeShape=await buildEdgeRelaxationCorrection(rig,target.pose,joint,chosenRadius,signal,edgeBudget,valid,fitCenter);if(edgeShape)edgeShape=await limitCorrectiveStrain(rig,edgeShape,[...correctionSamples(rig,target.pose,8),target.pose],signal,edgeBudget,valid,measure);state.edgeOperations=edgeBudget.used;}
   for(const strength of [.5,1]){
-   await tick();measure();state.candidates++;const shape=method==='dual-quaternion'?buildGeometricCorrection(rig,target.pose,joint,chosenRadius,strength,undefined,center):edgeShape?{...structuredClone(edgeShape),meshes:edgeShape.meshes.map(m=>({...m,indices:[...m.indices],deltas:m.deltas.map(n=>n*strength)}))}:null;if(!shape)continue;
+   await tick();measure();state.candidates++;const shape=method==='dual-quaternion'?buildGeometricCorrection(rig,target.pose,joint,chosenRadius,strength,undefined,fitCenter):edgeShape?{...structuredClone(edgeShape),meshes:edgeShape.meshes.map(m=>({...m,indices:[...m.indices],deltas:m.deltas.map(n=>n*strength)}))}:null;if(!shape)continue;
    measure();const after=inspect(target.pose,undefined,shape);if(!betterSurfaceReport(after,target.before)||!noMeasuredRegression(target.before,after))continue;
    state.phase='validation';let safe=true;const score=emptyScore();
    for(const frame of frames){await tick();measure();const report=inspect(frame.pose,undefined,shape);if(!noMeasuredRegression(frame.before,report)){safe=false;break;}scoreReport(score,report);}
-   if(safe)for(const pose of correctionSamples(rig,target.pose)){await tick();measure();const before=inspect(pose);measure();if(!noMeasuredRegression(before,inspect(pose,undefined,shape))){safe=false;break;}}
+   if(safe)for(const pose of correctionSamples(rig,target.pose,method==='edge-relaxation'?8:4)){await tick();measure();const before=inspect(pose);measure();if(!noMeasuredRegression(before,inspect(pose,undefined,shape))){safe=false;break;}}
    state.phase='search';if(!safe||!beats(score,after))continue;
    const intersection=checkCandidateIntersectionFrames(rig,intersectionPoses,shape.meshes.map(m=>m.mesh),undefined,shape,()=>{ensure();measure();});
    if(!intersection.accepted)continue;
+   if(method==='edge-relaxation'&&!checkCandidateIntersectionFrames(rig,correctionSamples(rig,target.pose),shape.meshes.map(m=>m.mesh),undefined,shape,()=>{ensure();measure();}).accepted)continue;
    const parent=rig.data.points.find(p=>p.kind==='bone'&&rig.bones[p.bone!]===rig.bones[joint.bone!].parent)!;
-   best={kind:'geometry',geometryMethod:method,shape,...score,from:joint.id,to:parent.id,amount:strength,region:{center:[...center] as [number,number,number],radius:chosenRadius},poseId:target.pose.id,before:target.before,after,affectedVertices:shape.meshes.reduce((n,m)=>n+m.indices.length,0),checkedPoses:rig.data.poses.length,intermediateSamples:3,target:structuredClone(target.pose),targetOrigin:{...target.origin},jointId:joint.id,motionSamples,checkedMoves:rig.data.moves.length,checkedJoints:state.joints,checkedCandidates:state.candidates};
+   best={kind:'geometry',geometryMethod:method,shape,...score,from:joint.id,to:parent.id,amount:strength,region:{center:[...fitCenter] as [number,number,number],radius:chosenRadius},poseId:target.pose.id,before:target.before,after,affectedVertices:shape.meshes.reduce((n,m)=>n+m.indices.length,0),checkedPoses:rig.data.poses.length,intermediateSamples:method==='edge-relaxation'?7:3,target:structuredClone(target.pose),targetOrigin:{...target.origin},jointId:joint.id,motionSamples,checkedMoves:rig.data.moves.length,checkedJoints:state.joints,checkedCandidates:state.candidates};
+  }
   }
   }
 

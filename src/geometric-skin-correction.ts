@@ -5,6 +5,8 @@ import type {StudioCorrectiveShape} from './studio-corrective-shapes.ts';
 import {MAX_STUDIO_SHAPES,MAX_CORRECTIVE_VERTICES} from './studio-corrective-shapes.ts';
 import {poseSkinMatrices,poseSurfaceInputs,poseSurfacePositions,correctiveMorphBlend,neutralPoseValues} from './pose-surface-check.ts';
 import {fitSkinEdges} from './skin-edge-fit.ts';
+import {relaxSurfaceEdges} from './surface-edge-relaxation.ts';
+import {checkSurfaceShape} from './surface-check.ts';
 import type {EdgeWorkBudget} from './skin-edge-fit.ts';
 /** Rigid dual-quaternion blend. Scaling, shear and reflections are deliberately unsupported. */
 export function dualQuaternionPoint(point:T.Vector3,matrices:T.Matrix4[],weights:number[]){
@@ -65,6 +67,25 @@ export async function buildEdgeFitCorrection(rig:StudioRig,target:Pose,joint:Con
   if(!(mesh instanceof T.SkinnedMesh)||!g.index||g.morphAttributes.position?.length&&!g.morphTargetsRelative||Object.keys(g.morphAttributes).some(k=>!['position','normal'].includes(k)))continue;
   const region=Uint8Array.from(surface.world,p=>p.distanceToSquared(center)<radius*radius?1:0);
   const result=await fitSkinEdges({base:poseSurfaceInputs(rig,target.values,m),rest:poseSurfacePositions(rig,rest,m),index:g.index.array,indices:g.getAttribute('skinIndex'),weights:g.getAttribute('skinWeight'),matrices:poseSkinMatrices(rig,target.values,m)!,region},signal,budget,valid);
+  if(!result)continue;active+=result.activeVertices;if(active>MAX_CORRECTIVE_VERTICES)return null;desired.set(m,result.positions);
+ }
+ signal.throwIfAborted();if(!valid())throw Error('Studio-Stand hat sich geändert.');return desired.size?buildGeometricCorrection(rig,target,joint,radius,1,desired,centerOverride):null;
+}
+
+
+/** Positional edge projections fitted back to the original skin as an ordinary shape. */
+export async function buildEdgeRelaxationCorrection(rig:StudioRig,target:Pose,joint:ControlPoint,radius:number,signal:AbortSignal,budget:EdgeWorkBudget,valid:()=>boolean=()=>true,centerOverride?:readonly number[]){
+ signal.throwIfAborted();if(!rig.poseCorrectionsCompatible||rig.data.poseCorrections===false||joint.kind!=='bone'||!Number.isFinite(radius)||radius<.005||radius>2||(rig.data.correctiveShapes?.length??0)>=MAX_STUDIO_SHAPES)return null;
+ if(centerOverride&&(centerOverride.length!==3||centerOverride.some(n=>!Number.isFinite(n)||Math.abs(n)>100)))return null;
+ const bone=rig.bones[joint.bone!],center=new T.Vector3().fromArray(centerOverride??joint.rest),rest=neutralPoseValues(rig),desired=new Map<number,Float64Array>();let active=0;
+ for(let m=0;m<rig.surfaces.length;m++){
+  const surface=rig.surfaces[m],mesh=surface.mesh,g=mesh.geometry;
+  if(!(mesh instanceof T.SkinnedMesh)||!g.index||g.morphAttributes.position?.length&&!g.morphTargetsRelative||Object.keys(g.morphAttributes).some(k=>!['position','normal'].includes(k)))continue;
+  const driven=new Set<number>();mesh.skeleton.bones.forEach((b,i)=>{for(let n:T.Object3D|null=b;n;n=n.parent)if(n===bone){driven.add(i);break;}});if(!driven.size)continue;
+  const si=g.getAttribute('skinIndex'),sw=g.getAttribute('skinWeight');
+  const mobility=Float64Array.from(surface.world,(p,v)=>{let influence=0,slots=0;for(let k=0;k<4;k++){const w=sw.getComponent(v,k);if(w){slots++;if(driven.has(si.getComponent(v,k)))influence+=w;}}return slots>1&&influence>=.01?Math.max(0,1-p.distanceTo(center)/radius):0;});
+  const reference=poseSurfacePositions(rig,rest,m),posed=poseSurfacePositions(rig,target.values,m);if(!checkSurfaceShape(reference,posed,g.index.array).issues)continue;
+  const result=await relaxSurfaceEdges({rest:reference,positions:posed,index:g.index.array,mobility},signal,budget,valid);
   if(!result)continue;active+=result.activeVertices;if(active>MAX_CORRECTIVE_VERTICES)return null;desired.set(m,result.positions);
  }
  signal.throwIfAborted();if(!valid())throw Error('Studio-Stand hat sich geändert.');return desired.size?buildGeometricCorrection(rig,target,joint,radius,1,desired,centerOverride):null;

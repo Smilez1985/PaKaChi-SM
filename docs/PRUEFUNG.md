@@ -1,6 +1,6 @@
 # Prüfstand und Protokolle
 
-**Softwarestand: 0.97.0 · Dokumentationsabgleich: 2026-11-10T18:18:18+01:00 (Europe/Berlin).**
+**Softwarestand: 0.98.0 · Dokumentationsabgleich: 2026-11-10T19:31:32+01:00 (Europe/Berlin).**
 
 Alle Prüfnachweise stehen in dieser Datei: ein Abschnitt je Softwareversion sowie gesonderte Abschnitte für datierte Zwischenprüfungen. Die Ergebnisse und Grenzen gelten für den jeweils genannten Stand. Spätere Läufe stehen als Nachtrag im selben Abschnitt. Produktänderungen gehören in den [Changelog](CHANGELOG.md), offene Aufgaben in die [Roadmap](ROADMAP.md).
 
@@ -120,6 +120,27 @@ Diese Liste beschreibt ausstehende Abnahmen.
 ## Prüfungen nach Version
 
 Die jüngste Version steht zuerst. Für eine bestimmte Version die Dokumentgliederung oder die Browser-Suche verwenden.
+
+## Version 0.98.0
+
+Prüfzeit: 2026-11-10T19:31:32+01:00 (Europe/Berlin). Die lokale Prüfung ist abgeschlossen; der neue GitHub-Gesamtlauf steht noch aus. Die vorige erfolgreiche CI #109 gilt für den Ausgangscommit, nicht für diese Änderungen.
+
+Neue allgemeine Kantenentspannung mit virtuellen Positionsprojektionen, festen Randpunkten und gebundenen exakten UV-Nahtduplikaten. Die erzeugte Form wird auf die bestehende lineare Haut zurückgerechnet. Der Gegenhaltungs-Schritt friert sparse Vertices ein, die in acht gleichmäßig verteilten Beugehaltungen neue lokale Dehnungs-/Kompressions-/Flächenverstöße erzeugen. Die endgültige Form muss anschließend die bisherigen Ganznetz-Dehnungs-/Volumenprüfungen sämtlicher gespeicherter Posen und Move-Stichproben bestehen. Zusätzlich werden Zielpose, drei direkte Zwischenhaltungen und die ausgewählten Move-Schnittbilder gegengeprüft. Kein anatomischer Erkenner, keine kontinuierliche Kollisionsfreigabe.
+
+[Reproduzierbare Messdaten](benchmarks/edge-relaxation-2026-11-10.json), erzeugt durch `node scripts/benchmark-edge-relaxation.mjs` mit unveränderten Original-GLBs:
+
+| Referenzauftrag | Ergebnis |
+| --- | --- |
+| Arbeitsform, linke Hüfte, 90° X | Vollständiger automatischer Auftrag wählt `edge-relaxation`; 367 → 347 Dehnungswarnungen, 21 → 11 unabhängige Körper-Schnittpaare. |
+| Gespeicherte Daten | Zwei Posen und eine eigene Schleife mit 33 geprüften Move-Stichproben; Quellzustand bleibt unverändert. |
+| Unabhängige Gegenprobe | 65 Beugehaltungen ohne gemessene Dehnungs-/Volumenregression. Bei 22,5° / 45° / 67,5° bleiben Körper-Schnitte 1 → 1 / 1 → 1 / 2 → 1. |
+| Tierform, 22,5° X | Ein explizit erzeugter und lokal beschnittener Kandidat bleibt wegen zusätzlicher Schnitte verworfen; keine übernommene Tierformkorrektur. |
+
+Die Arbeitsformkorrektur betrifft 882 Vertices. Die Suche vergleicht weiterhin vorhandene Gewichts- und geometrische Verfahren und nutzt dieselben Revisions-, Vorschau- und Übernahme-Mechanismen im Studio und integrierten Assistenten. Die konkrete Arbeitsformprobe mit Move-Gegenprüfung wählt die neue Form; ohne Move kann eine andere bereits verfügbare Gewichtsvariante die Zielpose stärker verbessern. Die isolierte Zielpose ist daher kein Ersatz für die gesamte Bewegung.
+
+Lokal: neue Kernel-/Gegenhaltungs-Prüfungen sowie die vorhandenen automatischen/geometrischen und Bildrekonstruktionsfälle erfolgreich; beide Originalformen wurden mit realer Geometrie geprüft. Der neue Browserfall führt den echten Auftrag aus, vergleicht Original/Korrektur und prüft ausdrückliche Übernahme, Undo/Redo und Projekt-Replay. Importierte namenlose Morphattribute behalten ihre ursprünglichen Wörterbuchnamen; der neue Regressionstest und die Live-/Pure-Vorschau am Originalcharakter bestehen. Vollständige CI-Ergebnisse werden vor Meilensteinübernahme ergänzt.
+
+Grenzen: Der Positionsfit ist ein lokales iteratives Verfahren und kann in einem unbrauchbaren Minimum enden. Höchstens 200.000 Vertices, 600.000 Indizes, 8.192 aktive Vertices, 30.000 relevante Kanten und 128 Projektionen je Kante pro Fit; höchstens vier gespeicherte Formen/32.768 sparse Vertices. Der Gegenhaltungs-Schritt ist auf acht Posen, acht Beschneidungsschritte und 12.000 betroffene Dreiecke je Teilnetz begrenzt. Aufwandsreserve bleibt gemeinsam bei zwölf Millionen Kanten-/Dreiecksoperationen; der Auftrag hat weiter 100 Millionen reservierte Vertex-Stichproben. Komplexe Aufträge können diese Grenzen erreichen. Nicht messbare Volumen-/Kontaktfälle werden nicht als behoben ausgegeben. Teilmodell-Kollisionen, weitere Winkel, kombinierte Gelenkbewegungen und sichtbare Charakterqualität bleiben offen.
 
 ## Version 0.97.0
 

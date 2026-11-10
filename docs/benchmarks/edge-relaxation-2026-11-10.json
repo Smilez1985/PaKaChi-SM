@@ -1,0 +1,153 @@
+{
+  "format": "pakachi-edge-relaxation-evidence",
+  "version": 1,
+  "scope": "Static independent-face collision samples and bounded pose/move checks; no anatomical, cross-mesh or continuous-motion clearance.",
+  "forms": [
+    {
+      "form": "humanoid",
+      "source": "public/model-zoo/pakachi-rigged/humanoid.glb",
+      "sha256": "2ffd6401a1484ea8ad279ed314c5944c0f01034743f0df9795c30a8121f65abd",
+      "joint": "LeftHip",
+      "axis": "X",
+      "degrees": 90,
+      "mode": "full-automatic-job",
+      "beforeIssues": 367,
+      "status": "accepted-automatic-proposal",
+      "afterIssues": 347,
+      "afterVolumeIssues": 0,
+      "method": "edge-relaxation",
+      "affectedVertices": 882,
+      "independentSamples": 65,
+      "regressions": [],
+      "bodyCuts": [
+        {
+          "fraction": 0.25,
+          "degrees": 22.5,
+          "before": 1,
+          "after": 1,
+          "beforeComplete": true,
+          "afterComplete": true
+        },
+        {
+          "fraction": 0.5,
+          "degrees": 45,
+          "before": 1,
+          "after": 1,
+          "beforeComplete": true,
+          "afterComplete": true
+        },
+        {
+          "fraction": 0.75,
+          "degrees": 67.5,
+          "before": 2,
+          "after": 1,
+          "beforeComplete": true,
+          "afterComplete": true
+        },
+        {
+          "fraction": 1,
+          "degrees": 90,
+          "before": 21,
+          "after": 11,
+          "beforeComplete": true,
+          "afterComplete": true
+        }
+      ],
+      "collisionGate": {
+        "accepted": true,
+        "checkedFrames": 4,
+        "unmeasurableFrames": 0,
+        "checkedMeshes": 4,
+        "unmeasurableMeshes": 0,
+        "newIntersections": 0,
+        "complete": true
+      },
+      "automatic": {
+        "checkedPoses": 2,
+        "motionSamples": 33,
+        "checkedMoves": 1,
+        "checkedCandidates": 42,
+        "region": {
+          "center": [
+            0.3,
+            -0.115,
+            0.065
+          ],
+          "radius": 0.14512063946937387
+        },
+        "strength": 1,
+        "edgeOperations": 2883984
+      }
+    },
+    {
+      "form": "animal",
+      "source": "public/model-zoo/pakachi-rigged/animal.glb",
+      "sha256": "25226f09bbdd02f4ec4e20f013f5585a3816df54dafc447ce308225a68202703",
+      "joint": "LeftHip",
+      "axis": "X",
+      "degrees": 22.5,
+      "mode": "one-explicit-candidate",
+      "beforeIssues": 760,
+      "status": "rejected-candidate",
+      "afterIssues": 745,
+      "afterVolumeIssues": 0,
+      "method": "edge-relaxation",
+      "affectedVertices": 958,
+      "independentSamples": 65,
+      "regressions": [
+        {
+          "step": 25,
+          "before": 126,
+          "after": 124
+        }
+      ],
+      "bodyCuts": [
+        {
+          "fraction": 0.25,
+          "degrees": 5.625,
+          "before": 74,
+          "after": 74,
+          "beforeComplete": true,
+          "afterComplete": true
+        },
+        {
+          "fraction": 0.5,
+          "degrees": 11.25,
+          "before": 256,
+          "after": 254,
+          "beforeComplete": true,
+          "afterComplete": true
+        },
+        {
+          "fraction": 0.75,
+          "degrees": 16.875,
+          "before": 398,
+          "after": 406,
+          "beforeComplete": true,
+          "afterComplete": true
+        },
+        {
+          "fraction": 1,
+          "degrees": 22.5,
+          "before": 551,
+          "after": 582,
+          "beforeComplete": true,
+          "afterComplete": true
+        }
+      ],
+      "collisionGate": {
+        "accepted": false,
+        "checkedFrames": 1,
+        "unmeasurableFrames": 0,
+        "checkedMeshes": 1,
+        "unmeasurableMeshes": 0,
+        "newIntersections": 31,
+        "complete": false
+      },
+      "automatic": null
+    }
+  ],
+  "measuredAt": "2026-11-10T19:31:32+01:00",
+  "softwareVersion": "0.98.0",
+  "baseCommit": "f38b2c3db08cf42cfa3d34fe2fd9fdd0ed98d4c5"
+}

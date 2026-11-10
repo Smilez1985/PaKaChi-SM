@@ -35,7 +35,7 @@ export function createCorrectiveInstaller(root:T.Object3D,surfaces:readonly {mes
    const target=new T.BufferAttribute(delta,3);target.name=name;const normal=new T.BufferAttribute(normals,3);normal.name=name;const native=g.morphAttributes.position?.length??0;
    if(!g.morphAttributes.normal?.length)g.morphAttributes.normal=Array.from({length:native},()=>new T.Float32BufferAttribute(new Float32Array(base.length),3));
    (g.morphAttributes.position??=[]).push(target);g.morphAttributes.normal.push(normal);g.morphTargetsRelative=true;
-   const previousWeights=[...(mesh.morphTargetInfluences??[])];mesh.updateMorphTargets();mesh.morphTargetInfluences=[...previousWeights,0];
+   const previousWeights=[...(mesh.morphTargetInfluences??[])],previousNames={...mesh.morphTargetDictionary};mesh.updateMorphTargets();mesh.morphTargetDictionary={...previousNames,[name]:native};mesh.morphTargetInfluences=[...previousWeights,0];
    const {meshes:_meshes,id:_id,...driver}=shape;mesh.userData[POSE_MORPHS]=[...(mesh.userData[POSE_MORPHS]??[]),{...driver,target:name}];
    mesh.userData[POSE_MORPH_BIND]??=mesh.skeleton.boneInverses.map(m=>m.clone().multiply(mesh.bindMatrix).toArray());
   }
