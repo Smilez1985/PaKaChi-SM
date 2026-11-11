@@ -12,6 +12,10 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+### Added
+
+- Lesende, nicht angewendete Nullflächen-Reparaturvorschau auf Basis des Topologie-Audits. Sie gibt ursprüngliche Face-IDs und neue Indexfolge an, erhält Originalpuffer, belässt doppelte Renderflächen und verweigert Vorschläge bei ungültigen Indizes oder nicht endlichen Positionen. Vier Regressionstests ergänzen die Sicherheitsgrenzen. Keine automatische Änderung der Modell-, UV-, Skin- oder Morph-Daten.
+
 ### Changed
 
 - Sichere lokale Trennkorrektur anhand von Blender-, CGAL- und PositionBasedDynamics-Primärquellen abgegrenzt: Erhalt von Hautgewichten/Morph-Zielen, kombinierte Abstands-/Formbedingungen und tatsächliche Originalform-Abnahme als nächste Umsetzung festgehalten. Noch kein implementierter Trennungsgenerator.

@@ -3,6 +3,12 @@
 ## Diagnose vor Korrektur
 Der lesende `auditMeshTopology` prüft unabhängig vom Schnittbudget: ungültige Indizes und NaN/Inf, Nullflächen, doppelte Dreiecke (nach Index), offene und nicht-manifold Kanten, fehlerhafte gemeinsame Kantenorientierung sowie exakt zusammenfallende Eckpunktkoordinaten. Seine Ergebnisse bedeuten **nicht**, dass die Oberfläche geschlossen, kollisionsfrei oder anatomisch korrekt ist. Im Originalformen-Benchmark wird die Topologie einmal pro Ausgangsmodell erfasst, die Schnittprüfung dagegen pro Pose.
 
+## Erste sichere Vorschau: Nullflächen
+
+`proposeDegenerateFaceRemoval(positions,index)` erstellt jetzt einen **nicht angewendeten** Index-Vorschlag und listet die originalen Dreiecksnummern der Nullflächen auf. Positionsdaten, Originalindizes, UVs, Skinning, Morph-Ziele, Knochen und Projektdateien bleiben unberührt. Bei kaputten Indizes oder nicht endlichen Koordinaten gibt die Funktion **keinen** Reparaturvorschlag zurück. Doppelte, aber gültige Flächen bleiben erhalten, weil sie absichtliche Renderlagen sein können.
+
+Der Vorschlag ist nur zur Sichtung. Bei nicht indizierten Netzen bildet er die originalen Corner-IDs ab; zum echten Anwenden müssen alle übrigen Vertexattribute und die Materialgruppen explizit abgeglichen werden. Eine automatische Anwendung wäre derzeit nicht sicher und ist nicht aktiviert.
+
 ## Manuelle Vorlage und automatisierbarer Ablauf
 1. **Blender 3D Print Toolbox:** Check All, Non-Manifold, Degenerate und Intersections prüfen; problematische Flächen selektieren. Vorher Kopie speichern.
 2. **Ursache trennen:** Unverbundene UV-Nähte/Felllagen sind nicht automatisch Fehler. Fehlende Dreiecke und offene Flächen können beabsichtigt sein.

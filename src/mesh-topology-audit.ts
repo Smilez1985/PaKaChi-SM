@@ -64,3 +64,39 @@ export function auditMeshTopology(positions:N,index:N|null=null):MeshTopologyAud
  if(a.coincidentVertexGroups)a.advice.push('Gleiche Koordinaten können UV-Nähte oder verschiedene Gewichte sein: NICHT blind verschweißen.');
  return a;
 }
+
+/** Non-mutating proposal: remove only provably degenerate triangle references.
+ * This does not apply a repair, remap vertex attributes, weld seams or change a rig.
+ * All original vertex indices are retained; proposals are for explicit preview/review. */
+export interface DegenerateFaceRemovalProposal {
+ safeToPreview:boolean;
+ reason?:'invalid-indices'|'nonfinite-positions';
+ removedFaces:number[];
+ keptTriangles:number;
+ proposedIndices:number[];
+ before:MeshTopologyAudit;
+ after:MeshTopologyAudit|null;
+}
+export function proposeDegenerateFaceRemoval(positions:N,index:N|null=null):DegenerateFaceRemovalProposal {
+ const before=auditMeshTopology(positions,index);
+ const reject=before.invalidIndices?'invalid-indices':before.nonFiniteTriangles?'nonfinite-positions':undefined;
+ if(reject)return {safeToPreview:false,reason:reject,removedFaces:[],keptTriangles:before.triangles,
+  proposedIndices:[],before,after:null};
+ const removedFaces:number[]=[],proposedIndices:number[]=[];
+ const loc=(i:number)=>index?index[i]:i;
+ for(let face=0;face<before.triangles;face++){
+  const ids=[loc(face*3),loc(face*3+1),loc(face*3+2)];
+  const pts=ids.map(i=>[positions[i*3],positions[i*3+1],positions[i*3+2]]);
+  const sub=(a:number[],b:number[])=>a.map((v,k)=>v-b[k]);
+  const a=sub(pts[1],pts[0]),b=sub(pts[2],pts[0]),c=sub(pts[2],pts[1]);
+  const len=(v:number[])=>Math.hypot(...v);
+  const scale=Math.max(len(a),len(b),len(c));
+  const area=len([a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]]);
+  if(!Number.isFinite(scale)||!Number.isFinite(area)||!scale||area<=1e-12*scale*scale)
+   removedFaces.push(face);
+  else proposedIndices.push(...ids);
+ }
+ const after=auditMeshTopology(positions,proposedIndices);
+ return {safeToPreview:true,removedFaces,keptTriangles:after.triangles,
+  proposedIndices,before,after};
+}
