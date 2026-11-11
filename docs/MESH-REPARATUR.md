@@ -11,6 +11,10 @@ Der Audit unterscheidet nun echte **Doppelverwendung derselben Vertex-Indizes** 
 
 Der Workflow `PaKaChi real-form intersection evidence` läuft auf `develop` nur bei Änderungen an Audit/Benchmark/Test beziehungsweise manuell. Er speichert ein JSON-Artefakt mit den tatsächlichen Originalform-Messungen, validiert nun aber zusätzlich für **jedes** Teilmodell die Zuordnung von Topologie und Reparaturvorschau sowie die vollständige Aufteilung der Kandidaten in `removable` und `withheld`. Ein grüner Workflow bescheinigt nur einen vollständigen lesenden Bericht, nicht, dass ein Mesh sicher automatisch reparierbar ist.
 
+## Ursache der 672 Nullflächen je Originalform
+
+Die gemessenen 672 Nullflächen je Form lagen ausschließlich in 28 starren `_shell`-Finger-/Zehen-Kapseln (je 24 Pol-Dreiecke). Der Generator `scripts/pakachi-paws.mjs` entfernt diese Dreiecke nun direkt aus dem Indexbuffer der **neu generierten** Kapseln; alle Vertexattribute bleiben unverändert. Importierte Modelle werden dadurch nicht verändert. Die erfolgreiche Erzeugung muss anhand des separaten Originalformen-Workflows und der regenerierten GLBs bestätigt werden; ein sauberer Pol beseitigt keine anderen Durchdringungen oder Topologieprobleme.
+
 ## Markierung im integrierten Avatar-Studio
 
 Im Bereich **Figur bewegen** bei den Oberflächenprüfungen ist der Schalter **Nullflächen markieren** hinzugefügt. Er zählt die auffälligen Flächen und zeigt höchstens 128 rote Punkte an den ursprünglichen Weltpositionen der Grundform. **Markierungen ausblenden** entfernt die Grafik und gibt die GPU-Ressourcen frei. Die Anzeige ist rein diagnostisch; sie ändert weder Modell, Posen noch Skinning. Die Marker folgen bei einer aktiven Pose **nicht** den Knochen und sind kein Ersatz für eine animierte Kollisionsprüfung. Weitere Reparaturprüfungen bleiben davon getrennt.

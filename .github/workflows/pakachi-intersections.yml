@@ -8,6 +8,8 @@ on:
       - 'scripts/benchmark-pakachi-intersections.mjs'
       - 'src/mesh-topology-audit.ts'
       - 'tests/mesh-topology-audit.test.ts'
+      - 'scripts/pakachi-paws.mjs'
+      - 'tests/pakachi-paws-cleanup.test.mjs'
 permissions:
   contents: read
 concurrency:
@@ -27,7 +29,7 @@ jobs:
           cache: npm
       - run: npm ci
       - name: Focused mesh audit and benchmark tests
-        run: node --test tests/mesh-topology-audit.test.ts tests/benchmark-pakachi-intersections.test.ts
+        run: node --test tests/mesh-topology-audit.test.ts tests/benchmark-pakachi-intersections.test.ts tests/pakachi-paws-cleanup.test.mjs
       - name: Prepare original PaKaChi rigged forms
         run: npm run prepare:pakachi -- --if-needed
       - name: Measure static hip and knee intersection probes
@@ -43,6 +45,9 @@ jobs:
             for(const form of ["humanoid","animal"]){
               const entry=report.forms.find(x=>x.form===form);
               if(!entry||!entry.sha256||entry.probes?.length!==8)throw Error("Missing form/joint probes: "+form);
+              const shellMeshes=entry.topology.filter(x=>x.name.endsWith("_shell"));
+              if(shellMeshes.length!==28||shellMeshes.some(x=>x.zeroAreaTriangles!==0))
+                throw Error("Generated paw shell topology still contains zero-area faces: "+form);
               if(entry.repairPreview?.length!==entry.meshes||entry.topology?.length!==entry.meshes)
                 throw Error("Missing per-mesh topology/repair audit: "+form);
               for(const [i,mesh] of entry.repairPreview.entries()){

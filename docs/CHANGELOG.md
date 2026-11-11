@@ -12,6 +12,10 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+### Fixed
+
+- Beim Erzeugen der zwei originalen Charakterformen werden flächenlose Pol-Dreiecke ausschließlich aus den neu erzeugten starren Finger-/Zehen-Kapseln entfernt; Vertexpositionen, UVs, Normals und Rig-Knochen bleiben unverändert. Der Originalformen-Workflow prüft die 28 betroffenen `_shell`-Teilmodelle auf Nullflächen und führt gezielte Generator-Tests aus. Keine nachträgliche Änderung importierter Fremdmodelle.
+
 ### Added
 
 - Das integrierte Avatar-Studio kann jetzt auf Knopfdruck Nullflächen der Grundform als begrenzte rote Punktmarker direkt in der 3D-Ansicht anzeigen und ausblenden. Zähler für ungültige/Index-Doppel-/Nahtflächen und offene Indexkanten unterstützen die Sichtung. Keine Modelländerung, explizit keine Live-Kollisionsmessung.
