@@ -20,7 +20,7 @@ for(let i=0;i<args.length;i++){
 if(options.form&&!['humanoid','animal'].includes(options.form))throw Error('Unknown form.');
 const replay=options.replay?JSON.parse(await readFile(options.replay,'utf8')):null;
 const pkg=JSON.parse(await readFile(new URL('../package.json',import.meta.url),'utf8'));
-const evidence={format:'pakachi-correction-motion-audit',version:1,softwareVersion:pkg.version,complete:false,
+const evidence={format:'pakachi-correction-motion-audit',version:1,softwareVersion:pkg.version,sourceCommit:process.env.PAKACHI_EVIDENCE_COMMIT??null,complete:false,
  scope:'65 independent body self-intersection pair/strain/volume samples; no continuous, inter-mesh, adjacent-contact or anatomy clearance.',forms:[]};
 const save=async()=>{if(options.output){await writeFile(options.output+'.partial',JSON.stringify(evidence,null,2)+'\n');await rename(options.output+'.partial',options.output);}};
 for(const form of options.form?[options.form]:['humanoid','animal']){
