@@ -1,6 +1,6 @@
 # Prüfstand und Protokolle
 
-**Softwarestand: 0.101.0 · Dokumentationsabgleich: 2026-11-11T00:43:16+01:00 (Europe/Berlin).**
+**Softwarestand: 0.101.0 · Dokumentationsabgleich: 2026-11-11T09:09:33.097Z (UTC).**
 
 Alle Prüfnachweise stehen in dieser Datei: ein Abschnitt je Softwareversion sowie gesonderte Abschnitte für datierte Zwischenprüfungen. Die Ergebnisse und Grenzen gelten für den jeweils genannten Stand. Spätere Läufe stehen als Nachtrag im selben Abschnitt. Produktänderungen gehören in den [Changelog](CHANGELOG.md), offene Aufgaben in die [Roadmap](ROADMAP.md).
 
@@ -44,6 +44,8 @@ Der normale [CI-Lauf #119](https://github.com/Smilez1985/PaKaChi-SM/actions/runs
 Freigabelauf #120 für den eingefrorenen Kandidaten: 511/512 Tests bestanden, ein Fehler im parallel ergänzten Topologie-Test. Die Audit-Funktion zählt bei einer doppelten Fläche die zwei zusätzlich gleichgerichteten Kanten korrekt; die Erwartung `0` war falsch und wurde auf `2` korrigiert. Alle vier unveränderten Audit-Funktionen/Fixtures wurden mit den korrekten Erwartungen unabhängig geprüft; die reine Funktionsimplementierung blieb dabei unverändert. Der vollständige Node-/Browser-Freigabelauf ist erneut erforderlich; #120 enthält keinen Browser-/Importnachweis.
 
 Freigabelauf [#121](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/42984914930) für `db6c047b`: **512/512 Node-Tests**, keine Fehler oder Skips; Produktionsbuild erfolgreich; **47/49 Browserfälle bestanden**. Beide Originalform-Fälle bestanden die automatische Suche, Qualitätswerte, Vorschau, Übernahme, Undo/Redo und Prüfung der heruntergeladenen Projektdaten. Erst beim erneuten Dateiimport lief die bisherige Fünf-Sekunden-Erwartung auf die Fertigmeldung ab. Der Import setzt die Dateiauswahl zurück und lädt asynchron; die Prüfungen warten nun auf den tatsächlichen Abschluss (initial 30, beim größeren Korrekturprojekt 60 Sekunden) und verlangen zusätzlich eine neue Studio-Sitzung. Das Ergebnis darf nicht aus dem alten Studio stammen. Importmessungen und Abschlussvalidierung wurden nach dem Browserfehler nicht ausgeführt; #121 ist keine vollständige Freigabe.
+
+Offener Folgeauftrag: [CI #122](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/42992027559) für `39eee8854a44f64e2e16d1d146726506998ccbd4` läuft. Keine vollständige Freigabe vor Abschluss und ausgewerteter Browser-/Import-Zusammenfassung. Die unabhängige erfolgreiche 65er-Geometrieabnahme wird wegen des unveränderten Programmstands nicht erneut gestartet.
 
 Grenzen: 65 diskrete Körpernetzproben sind keine kontinuierliche Kollisionsfreiheit. Bestehende Schnitte, Kontakte, angrenzende Dreiecke, getrennte Teilmodelle und allgemeine Anatomiequalität bleiben offen.
 
