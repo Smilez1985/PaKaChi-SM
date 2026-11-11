@@ -12,6 +12,10 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+### Fixed
+
+- Originalformen-Workflow für gezielte Audit-/Benchmark-Änderungen wieder automatisch aktiviert (öffentliche Standard-Runner) und um eine vollständige Integritätsprüfung aller Teilmodell-Reparaturvorschauen ergänzt; er darf nur vollständige, widerspruchsfreie JSON-Messberichte als erfolgreichen Nachweis kennzeichnen.
+
 ### Added
 
 - Der vorhandene Originalformen-Schnittbenchmark führt die posenbewusste, lesende Nullflächen-Vorschau jetzt bei beiden Formen für die acht statischen Hüft-/Kniehaltungen aus. Ergebnisfelder unterscheiden dauerhaft auffällige, bei Bewegung wieder geöffnete und nicht sicher prüfbare Dreiecke je Teilmodell; Modell- und Skinning-Dateien bleiben unverändert.

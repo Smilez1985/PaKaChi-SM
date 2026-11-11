@@ -1,8 +1,18 @@
 name: PaKaChi real-form intersection evidence
 on:
   workflow_dispatch:
+  push:
+    branches: [develop]
+    paths:
+      - '.github/workflows/pakachi-intersections.yml'
+      - 'scripts/benchmark-pakachi-intersections.mjs'
+      - 'src/mesh-topology-audit.ts'
+      - 'tests/mesh-topology-audit.test.ts'
 permissions:
   contents: read
+concurrency:
+  group: pakachi-intersections-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   inspect:
     runs-on: ubuntu-24.04
@@ -16,6 +26,8 @@ jobs:
           node-version: '24'
           cache: npm
       - run: npm ci
+      - name: Focused mesh audit and benchmark tests
+        run: node --test tests/mesh-topology-audit.test.ts tests/benchmark-pakachi-intersections.test.ts
       - name: Prepare original PaKaChi rigged forms
         run: npm run prepare:pakachi -- --if-needed
       - name: Measure static hip and knee intersection probes
@@ -31,6 +43,24 @@ jobs:
             for(const form of ["humanoid","animal"]){
               const entry=report.forms.find(x=>x.form===form);
               if(!entry||!entry.sha256||entry.probes?.length!==8)throw Error("Missing form/joint probes: "+form);
+              if(entry.repairPreview?.length!==entry.meshes||entry.topology?.length!==entry.meshes)
+                throw Error("Missing per-mesh topology/repair audit: "+form);
+              for(const [i,mesh] of entry.repairPreview.entries()){
+                const topology=entry.topology[i];
+                if(mesh.mesh!==i||topology.mesh!==i||mesh.samples!==8||mesh.sourceDegenerate!==topology.zeroAreaTriangles)
+                  throw Error("Inconsistent mesh repair identity: "+form+" "+i);
+                if(mesh.status==="sampled"){
+                  if(mesh.removable+mesh.withheld!==mesh.sourceDegenerate)
+                    throw Error("Lost candidate faces: "+form+" "+i);
+                }else if(mesh.status==="no-rest-degeneracy"){
+                  if(mesh.sourceDegenerate||mesh.sourceInvalidIndices||mesh.sourceNonFiniteTriangles||mesh.removable||mesh.withheld)
+                    throw Error("Invalid clear-mesh classification: "+form+" "+i);
+                }else if(mesh.status==="blocked"){
+                  if(!mesh.reason||mesh.removable!==0)
+                    throw Error("Unsafe proposed removal: "+form+" "+i);
+                }else throw Error("Unknown mesh repair state: "+form+" "+i);
+              }
+              console.log("Repair preview:",form,entry.repairPreview.reduce((r,m)=>({removable:r.removable+m.removable,withheld:r.withheld+m.withheld,blocked:r.blocked+Number(m.status==="blocked")}),{removable:0,withheld:0,blocked:0}));
               for(const joint of ["LeftHip","LeftKnee"])for(const degrees of [0,22.5,45,90]){
                 const pose=entry.probes.find(x=>x.joint===joint&&x.degrees===degrees);
                 if(!pose||pose.checkedMeshes+pose.unmeasurableMeshes!==entry.meshes)throw Error("Incomplete mesh accounting: "+form+" "+joint+" "+degrees);

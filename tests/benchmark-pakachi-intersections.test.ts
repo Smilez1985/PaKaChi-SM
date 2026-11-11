@@ -10,3 +10,11 @@ test('real-form collision benchmark remains read-only and discloses incomplete g
  assert.match(source,/withheldExamples/);
  assert.doesNotMatch(source,/writeFile|unlink|rename|\.apply\(/);
 });
+
+test('real-form benchmark validates every mesh repair preview before archiving evidence',async()=>{
+ const source=await readFile(new URL('../.github/workflows/pakachi-intersections.yml',import.meta.url),'utf8');
+ assert.match(source,/entry\.repairPreview\?\.length!==entry\.meshes/);
+ assert.match(source,/mesh\.removable\+mesh\.withheld!==mesh\.sourceDegenerate/);
+ assert.match(source,/mesh\.status==="blocked"/);
+ assert.match(source,/paths:\s*\n\s*- '\.github\/workflows\/pakachi-intersections\.yml'/);
+});
