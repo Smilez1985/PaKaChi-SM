@@ -12,6 +12,15 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+### Added
+
+- Synthetisches Studio-View-Regressionstest-Fixture für Nullflächenmarker: prüft den roten Marker am korrekten Restflächen-Schwerpunkt, das Zurücksetzen und unveränderte Quell-Positions-/Indexpuffer. Der Test ist committed; Ausführung steht noch aus.
+
+### Changed
+
+- Originalformen-Lauf #6 bestätigt die regenerierten Tier- und Arbeitsform-GLBs ohne Nullflächen in allen 28 starren Finger-/Zehen-`_shell`-Teilmodellen je Form. Die Messberichte weisen zugleich aus, dass bei den acht statischen Hüft-/Knieproben je Form nur `PaKaChi_body` messbar war; 91 bzw. 89 Teilmodelle bleiben coplanar/touching-bedingt unmessbar. Keine vollständige Kollisionsfreigabe.
+
+
 ### Fixed
 
 - Beim Erzeugen der zwei originalen Charakterformen werden flächenlose Pol-Dreiecke ausschließlich aus den neu erzeugten starren Finger-/Zehen-Kapseln entfernt; Vertexpositionen, UVs, Normals und Rig-Knochen bleiben unverändert. Der Originalformen-Workflow prüft die 28 betroffenen `_shell`-Teilmodelle auf Nullflächen und führt gezielte Generator-Tests aus. Keine nachträgliche Änderung importierter Fremdmodelle.
