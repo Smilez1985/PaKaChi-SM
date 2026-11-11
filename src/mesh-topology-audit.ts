@@ -4,10 +4,10 @@ type N=ArrayLike<number>;
 type Vec=[number,number,number];
 export interface MeshTopologyAudit {
  triangles:number; vertices:number; invalidIndices:number; nonFiniteTriangles:number;
- zeroAreaTriangles:number; duplicateFaces:number; boundaryEdges:number;
+ zeroAreaTriangles:number; duplicateFaces:number; coincidentFaces:number; boundaryEdges:number;
  nonManifoldEdges:number; inconsistentWindingEdges:number;
  coincidentVertexGroups:number; coincidentVertices:number;
- examples:{degenerate:number[];duplicate:number[];nonManifoldEdges:[number,number][]};
+ examples:{degenerate:number[];duplicate:number[];coincident:number[];nonManifoldEdges:[number,number][]};
  advice:string[];
 }
 export function auditMeshTopology(positions:N,index:N|null=null):MeshTopologyAudit {
@@ -15,10 +15,10 @@ export function auditMeshTopology(positions:N,index:N|null=null):MeshTopologyAud
   throw Error('Ungültiges Dreiecksformat.');
  const vertices=positions.length/3,triangles=(index?.length??vertices)/3;
  const a:MeshTopologyAudit={triangles,vertices,invalidIndices:0,nonFiniteTriangles:0,zeroAreaTriangles:0,duplicateFaces:0,
- boundaryEdges:0,nonManifoldEdges:0,inconsistentWindingEdges:0,coincidentVertexGroups:0,coincidentVertices:0,
- examples:{degenerate:[],duplicate:[],nonManifoldEdges:[]},advice:[]};
+ boundaryEdges:0,nonManifoldEdges:0,inconsistentWindingEdges:0,coincidentVertexGroups:0,coincidentVertices:0,coincidentFaces:0,
+ examples:{degenerate:[],duplicate:[],coincident:[],nonManifoldEdges:[]},advice:[]};
  const loc=(i:number)=>index?index[i]:i;
- const faces=new Set<string>(),edges=new Map<string,{count:number,forward:number,first:number,second:number}>();
+ const faces=new Set<string>(),geometricFaces=new Map<string,string>(),edges=new Map<string,{count:number,forward:number,first:number,second:number}>();
  const sub=(p:Vec,q:Vec):Vec=>[p[0]-q[0],p[1]-q[1],p[2]-q[2]];
  const length=(p:Vec)=>Math.hypot(p[0],p[1],p[2]);
  const cross=(p:Vec,q:Vec):Vec=>[p[1]*q[2]-p[2]*q[1],p[2]*q[0]-p[0]*q[2],p[0]*q[1]-p[1]*q[0]];
@@ -36,6 +36,13 @@ export function auditMeshTopology(positions:N,index:N|null=null):MeshTopologyAud
   const face=ids.slice().sort((x,y)=>x-y).join(',');
   if(faces.has(face)){a.duplicateFaces++;if(a.examples.duplicate.length<12)a.examples.duplicate.push(i);}
   else faces.add(face);
+  // A geometrically identical triangle may use different indices at a UV/material/skin seam.
+  // Report it separately from duplicate index faces; never infer that welding is safe.
+  const geometric=points.map(p=>p.map(x=>Object.is(x,-0)?0:x).join(',')).sort().join('|');
+  const firstIndexed=geometricFaces.get(geometric);
+  if(firstIndexed!==undefined&&firstIndexed!==face){
+   a.coincidentFaces++;if(a.examples.coincident.length<12)a.examples.coincident.push(i);
+  }else if(firstIndexed===undefined)geometricFaces.set(geometric,face);
   for(let k=0;k<3;k++){
    const s=ids[k],t=ids[(k+1)%3],first=Math.min(s,t),second=Math.max(s,t),key=first+','+second;
    const edge=edges.get(key);
@@ -60,6 +67,7 @@ export function auditMeshTopology(positions:N,index:N|null=null):MeshTopologyAud
  if(a.invalidIndices||a.nonFiniteTriangles)a.advice.push('Ungültige Index-/Koordinatendaten an der Quelle korrigieren; nicht automatisch umschreiben.');
  if(a.zeroAreaTriangles)a.advice.push('Nullflächen einzeln lokalisieren; erst auf einer Kopie entfernen und Skinning/UV prüfen.');
  if(a.duplicateFaces)a.advice.push('Doppelflächen auf absichtlich getrennte Material-/Renderlagen prüfen.');
+ if(a.coincidentFaces)a.advice.push('Deckungsgleiche Flächen mit getrennten Vertex-Indizes: UV-/Material-/Skinning-Nähte prüfen, nicht blind entfernen oder verschweißen.');
  if(a.nonManifoldEdges||a.boundaryEdges||a.inconsistentWindingEdges)a.advice.push('Kanten-Inzidenz und Orientierung visuell prüfen; offene Fellflächen können beabsichtigt sein.');
  if(a.coincidentVertexGroups)a.advice.push('Gleiche Koordinaten können UV-Nähte oder verschiedene Gewichte sein: NICHT blind verschweißen.');
  return a;

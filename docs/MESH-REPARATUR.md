@@ -3,6 +3,10 @@
 ## Diagnose vor Korrektur
 Der lesende `auditMeshTopology` prüft unabhängig vom Schnittbudget: ungültige Indizes und NaN/Inf, Nullflächen, doppelte Dreiecke (nach Index), offene und nicht-manifold Kanten, fehlerhafte gemeinsame Kantenorientierung sowie exakt zusammenfallende Eckpunktkoordinaten. Seine Ergebnisse bedeuten **nicht**, dass die Oberfläche geschlossen, kollisionsfrei oder anatomisch korrekt ist. Im Originalformen-Benchmark wird die Topologie einmal pro Ausgangsmodell erfasst, die Schnittprüfung dagegen pro Pose.
 
+## Geometrisch deckungsgleiche Flächen mit getrennten Indizes
+
+Der Audit unterscheidet nun echte **Doppelverwendung derselben Vertex-Indizes** (`duplicateFaces`) von **deckungsgleichen Flächen mit verschiedenen Indizes** (`coincidentFaces`). Letztere entstehen beispielsweise durch getrennte UV-/Material- oder Skinning-Nähte. Die Abbildung nutzt exakte endliche Koordinaten und meldet nur identische Dreiecke unabhängig von der Eckpunktereihenfolge. Nahe, aber nicht exakt identische Flächen sind weiterhin ein gesondertes geometrisches Problem. Beide Kategorien bleiben bei Reparaturvorschlägen unberührt; die Ergebnisse sind **keine** Löschfreigabe.
+
 ## Erste sichere Vorschau: Nullflächen
 
 `proposeDegenerateFaceRemoval(positions,index)` erstellt jetzt einen **nicht angewendeten** Index-Vorschlag und listet die originalen Dreiecksnummern der Nullflächen auf. Positionsdaten, Originalindizes, UVs, Skinning, Morph-Ziele, Knochen und Projektdateien bleiben unberührt. Bei kaputten Indizes oder nicht endlichen Koordinaten gibt die Funktion **keinen** Reparaturvorschlag zurück. Doppelte, aber gültige Flächen bleiben erhalten, weil sie absichtliche Renderlagen sein können.

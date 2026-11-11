@@ -12,6 +12,10 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+### Fixed
+
+- Mesh-Topologie-Audit unterscheidet geometrisch deckungsgleiche Dreiecke mit getrennten Eckpunkt-Indizes (etwa UV-/Fell-Nähte) von echten Index-Doppelflächen und meldet beide separat. Kein automatisches Verschweißen oder Löschen; zwei zusätzliche Regressionstests.
+
 ### Added
 
 - Lesende, nicht angewendete Nullflächen-Reparaturvorschau auf Basis des Topologie-Audits. Sie gibt ursprüngliche Face-IDs und neue Indexfolge an, erhält Originalpuffer, belässt doppelte Renderflächen und verweigert Vorschläge bei ungültigen Indizes oder nicht endlichen Positionen. Vier Regressionstests ergänzen die Sicherheitsgrenzen. Keine automatische Änderung der Modell-, UV-, Skin- oder Morph-Daten.

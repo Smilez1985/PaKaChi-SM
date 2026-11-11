@@ -61,3 +61,21 @@ test('duplicate valid faces remain unchanged: never auto-remove material layers'
  assert.deepEqual(r.removedFaces,[]);
  assert.deepEqual(r.proposedIndices,[0,1,2,0,1,2]);
 });
+
+test('recognizes coincident triangles across unwelded UV vertices as ambiguous, not removable',()=>{
+ const positions=[...tri([0,0,0],[1,0,0],[0,1,0]),...tri([0,1,0],[0,0,0],[1,0,0])];
+ const audit=auditMeshTopology(positions);
+ assert.equal(audit.duplicateFaces,0);
+ assert.equal(audit.coincidentFaces,1);
+ assert.deepEqual(audit.examples.coincident,[1]);
+ const proposal=proposeDegenerateFaceRemoval(positions);
+ assert.equal(proposal.safeToPreview,true);
+ assert.deepEqual(proposal.removedFaces,[]);
+ assert.equal(proposal.keptTriangles,2);
+});
+test('a repeated indexed face is not mislabeled as an unwelded seam',()=>{
+ const p=tri([0,0,0],[1,0,0],[0,1,0]);
+ const audit=auditMeshTopology(p,[0,1,2,2,1,0]);
+ assert.equal(audit.duplicateFaces,1);
+ assert.equal(audit.coincidentFaces,0);
+});
