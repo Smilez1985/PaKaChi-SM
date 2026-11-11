@@ -16,6 +16,7 @@ export class StudioView {
   setWeightRegion(region:WeightRegion|null){this.weightPreview.setRegion(region);}
   private readonly handles=new T.Group();
   private readonly lines=new T.Group();
+  private readonly topologyMarkers=new T.Group();
   private readonly proxy=new T.Object3D();
   private readonly gizmo:TransformControls;
   private readonly ray=new T.Raycaster();
@@ -44,7 +45,7 @@ export class StudioView {
   private orbit:NavigationControls;
   constructor(rig:StudioRig,camera:T.PerspectiveCamera,canvas:HTMLCanvasElement,orbit:NavigationControls,scene:T.Scene) {
     this.rig=rig;this.camera=camera;this.canvas=canvas;this.orbit=orbit;
-    this.group.add(this.handles,this.lines,this.proxy,this.weightPreview.group);scene.add(this.group);
+    this.group.add(this.handles,this.lines,this.topologyMarkers,this.proxy,this.weightPreview.group);scene.add(this.group);
     this.gizmo=new TransformControls(camera,canvas);this.gizmo.setSpace('world');this.gizmo.setSize(.75);this.group.add(this.gizmo.getHelper());
     this.gizmo.addEventListener('mouseDown',()=>{this.dragging=true;orbit.enabled=false;this.onStart();});
     this.gizmo.addEventListener('objectChange',()=>{if(this.dragging)this.onMove(this.proxy.position.clone(),this.proxy.quaternion.clone(),this.rotation?'rotate':'translate');});
@@ -102,6 +103,40 @@ export class StudioView {
     const point=this.points.find(p=>p.id===this.selected);
     if(this.enabled && point && this.action==='select') {if(!this.dragging){this.proxy.position.copy(this.rig.position(point));this.proxy.quaternion.copy(this.rig.rotation(point));}this.gizmo.setMode(this.rotation && (point.kind==='bone'||point.id===FIGURE_TRACK)?'rotate':'translate');this.gizmo.attach(this.proxy);}else this.gizmo.detach();
   }
+  /** Show a bounded read-only diagnostic of rest-space zero-area triangles.
+   * Original world positions are fixed even if the user is currently posing the rig. */
+  markRestTopology(faces:readonly {mesh:number;triangles:readonly number[]}[]){
+    this.clearTopologyMarkers();
+    const points:number[]=[];
+    for(const entry of faces){
+      const surface=this.rig.surfaces[entry.mesh];
+      if(!surface)continue;
+      const index=surface.mesh.geometry.index;
+      const count=(index?.count??surface.world.length)/3;
+      for(const triangle of entry.triangles){
+        if(points.length>=128*3)break;
+        if(!Number.isInteger(triangle)||triangle<0||triangle>=count)continue;
+        const ids=[0,1,2].map(k=>index?.getX(triangle*3+k)??triangle*3+k);
+        if(ids.some(id=>!surface.world[id]))continue;
+        const center=surface.world[ids[0]].clone().add(surface.world[ids[1]]).add(surface.world[ids[2]]).multiplyScalar(1/3);
+        points.push(center.x,center.y,center.z);
+      }
+    }
+    if(points.length){
+      const geometry=new T.BufferGeometry();
+      geometry.setAttribute('position',new T.Float32BufferAttribute(points,3));
+      const markers=new T.Points(geometry,new T.PointsMaterial({color:0xff3f3f,size:.035,depthTest:false,transparent:true,opacity:.95}));
+      markers.renderOrder=30;
+      this.topologyMarkers.add(markers);
+    }
+    return points.length/3;
+  }
+  clearTopologyMarkers(){
+    for(const item of [...this.topologyMarkers.children]){
+      item.removeFromParent();
+      if(item instanceof T.Points){item.geometry.dispose();(item.material as T.Material).dispose();}
+    }
+  }
   private clearGroup(group:T.Group){for(const child of [...group.children]){group.remove(child);if(child instanceof T.Mesh||child instanceof T.Line){child.geometry.dispose();(child.material as T.Material).dispose();}}}
-  dispose(){this.brush.dispose();this.weightColors.dispose();this.canvas.removeEventListener('pointermove',this.move,true);this.canvas.removeEventListener('pointercancel',this.cancel,true);this.canvas.removeEventListener('lostpointercapture',this.cancel,true);this.canvas.removeEventListener('pointerdown',this.down,true);this.canvas.removeEventListener('pointerup',this.up,true);this.canvas.style.cursor='';this.orbit.enabled=true;this.gizmo.dispose();this.weightPreview.dispose();this.clearGroup(this.handles);this.clearGroup(this.lines);this.group.removeFromParent();}
+  dispose(){this.brush.dispose();this.weightColors.dispose();this.canvas.removeEventListener('pointermove',this.move,true);this.canvas.removeEventListener('pointercancel',this.cancel,true);this.canvas.removeEventListener('lostpointercapture',this.cancel,true);this.canvas.removeEventListener('pointerdown',this.down,true);this.canvas.removeEventListener('pointerup',this.up,true);this.canvas.style.cursor='';this.orbit.enabled=true;this.gizmo.dispose();this.weightPreview.dispose();this.clearGroup(this.handles);this.clearGroup(this.lines);this.clearTopologyMarkers();this.group.removeFromParent();}
 }

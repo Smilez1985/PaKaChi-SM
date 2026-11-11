@@ -3,6 +3,7 @@ import {exportFigureGLB,exportRiggedFigureGLB} from './figure-glb.ts';
 import {PlaybackTransition} from './playback-transition.ts';
 import {StudioWeightStroke} from './studio-weight-stroke.ts';
 import {checkMoveBends} from './move-limit-check.ts';
+import {auditMeshTopology} from './mesh-topology-audit.ts';
 import {checkMoveSurface as inspectMoveSurface} from './move-surface-check.ts';
 import {checkPoseSurface as inspectPoseSurface,suggestGentlerPose} from './pose-surface-check.ts';
 import {poseMorphBindings} from './pose-morphs.ts';
@@ -176,6 +177,7 @@ export class StudioEditor {
     <label for="pose-list">Gespeicherte Posen</label><select id="pose-list"></select><div class="studio-actions"><button id="pose-show">Anzeigen</button><button id="pose-replace">Ersetzen</button><button id="pose-delete">Löschen</button></div>
     <button id="pose-check-limits">Beugegrenzen der Pose prüfen</button><div id="pose-limit-result" role="status"></div>
     <div class="studio-actions"><button id="pose-check-surface">Oberfläche der Pose prüfen</button><button id="pose-gentler">Schonendere Pose erstellen</button><button id="pose-surface-cancel">Vorschlag abbrechen</button></div><div id="pose-surface-result" role="status"></div><p class="subtle">Vergleicht die gespeicherte Pose mit der Grundform. Eine schonendere Variante wird als neue Pose gespeichert. Anatomie, Kollisionen und Charakterdesign bleiben visuell zu prüfen.</p>
+    <h3>Mesh-Topologie der Grundform</h3><div class="studio-actions"><button id="mesh-topology-mark">Nullflächen markieren</button><button id="mesh-topology-clear">Markierungen ausblenden</button></div><div id="mesh-topology-result" role="status"></div><p class="subtle">Rote Punkte zeigen höchstens 128 Nullflächen-Beispiele an ihren ursprünglichen Positionen. Bei einer bewegten Pose sind diese Grundform-Marker keine Live-Kollisionsmessung. Nur Anzeige, keine Änderung am Avatar.</p>
     <h3>Automatischer Korrekturauftrag</h3><div class="studio-actions"><button id="skin-auto-start">Hautkorrektur automatisch suchen</button><button id="skin-auto-cancel">Auftrag abbrechen</button></div><div id="skin-auto-progress" role="status"></div><div id="skin-auto-result" role="status"></div><div class="studio-actions"><button id="skin-auto-original">Original ansehen</button><button id="skin-auto-preview">Korrektur ansehen</button><button id="skin-auto-stop">Vergleich beenden</button><button id="skin-auto-apply">Geprüfte Korrektur übernehmen</button></div><p class="subtle">Wählt auffällige Hautbereiche und Gelenke selbst. Vergleicht Gewichtsänderungen mit poseabhängigen geometrischen Korrekturformen. Prüft gespeicherte Posen sowie Zwischenbilder aller eigenen Moves. Vorschau verändert das Projekt nicht. Eine übernommene Korrektur ist rückgängig machbar. Geschlossene Netzteile erhalten eine Volumenschätzung. Offene Flächen sind dafür nicht messbar. Selbstüberschneidungen, lokale Einschnürungen und Charakterdesign bleiben visuell zu prüfen.</p>
     <label>Korrekturradius<input id="pose-weight-radius" type="number" min="0.005" max="2" step="0.005" value="${this.weightRadius}"></label><div class="studio-actions"><button id="pose-weight-search">Lokale Hautkorrektur suchen</button><button id="pose-weight-apply">Hautkorrektur übernehmen</button></div><div id="pose-weight-result" role="status"></div><p class="subtle">Gespeicherte Pose und Gelenk auswählen. Prüft kleine Gewichtsänderungen zwischen Gelenk und Elternknochen. Zielbewegung bleibt erhalten; Übernahme ändert die Hautbindung für alle Bewegungen. Visuell prüfen.</p>
     <div id="pose-review" class="studio-review" hidden><strong>Pose prüfen</strong><ul id="pose-review-reasons"></ul><p>Pose anzeigen und bei Bedarf korrigieren. „Ersetzen“ speichert die Korrektur.</p><button id="pose-reviewed">Pose als geprüft markieren</button></div>
@@ -289,6 +291,20 @@ export class StudioEditor {
     else if(this.automaticOutcome==='none')q('skin-auto-result').textContent='Keine Korrektur mit bestandener Gegenprüfung gefunden.';
     if(this.automaticProgress)this.showAutomaticProgress(this.automaticProgress);
 
+    on('mesh-topology-mark',()=>{
+      const markings:{mesh:number;triangles:number[]}[]=[],counts={invalid:0,zero:0,duplicate:0,coincident:0,open:0};
+      for(let i=0;i<this.rig.surfaces.length;i++){
+        const surface=this.rig.surfaces[i];
+        const report=auditMeshTopology(surface.base,surface.mesh.geometry.index?.array??null);
+        counts.invalid+=report.invalidIndices+report.nonFiniteTriangles;
+        counts.zero+=report.zeroAreaTriangles;
+        counts.duplicate+=report.duplicateFaces;counts.coincident+=report.coincidentFaces;counts.open+=report.boundaryEdges;
+        if(report.examples.degenerate.length)markings.push({mesh:i,triangles:report.examples.degenerate});
+      }
+      const shown=this.view.markRestTopology(markings);
+      q('mesh-topology-result').textContent=`Grundform: ${counts.zero} Nullflächen · ${counts.invalid} ungültige Dreiecke · ${counts.duplicate} doppelte Indexflächen · ${counts.coincident} deckungsgleiche Nahtflächen · ${counts.open} offene Indexkanten. ${shown} rote Marker (max. 128) in der Grundform. Keine automatische Reparatur.`;
+    });
+    on('mesh-topology-clear',()=>{this.view.clearTopologyMarkers();q('mesh-topology-result').textContent='Markierungen ausgeblendet.';});
     on('pose-surface-cancel',()=>this.surfaceCheck?.abort());
     on('pose-delete',()=>{const p=pose();if(p){if(this.data.moves.some(m=>m.poses.includes(p.id)))throw new Error('Diese Pose wird noch von einer Bewegung verwendet. Zuerst die Bewegung löschen.');this.mutate(()=>this.data.poses=this.data.poses.filter(x=>x!==p));}});
     input('pose-seconds').onchange=()=>{const p=pose(),v=Number(input('pose-seconds').value);if(p && v>=.1&&v<=30)this.mutate(()=>p.seconds=v);};

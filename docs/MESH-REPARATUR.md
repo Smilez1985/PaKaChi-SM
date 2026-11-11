@@ -11,6 +11,10 @@ Der Audit unterscheidet nun echte **Doppelverwendung derselben Vertex-Indizes** 
 
 Der Workflow `PaKaChi real-form intersection evidence` läuft auf `develop` nur bei Änderungen an Audit/Benchmark/Test beziehungsweise manuell. Er speichert ein JSON-Artefakt mit den tatsächlichen Originalform-Messungen, validiert nun aber zusätzlich für **jedes** Teilmodell die Zuordnung von Topologie und Reparaturvorschau sowie die vollständige Aufteilung der Kandidaten in `removable` und `withheld`. Ein grüner Workflow bescheinigt nur einen vollständigen lesenden Bericht, nicht, dass ein Mesh sicher automatisch reparierbar ist.
 
+## Markierung im integrierten Avatar-Studio
+
+Im Bereich **Figur bewegen** bei den Oberflächenprüfungen ist der Schalter **Nullflächen markieren** hinzugefügt. Er zählt die auffälligen Flächen und zeigt höchstens 128 rote Punkte an den ursprünglichen Weltpositionen der Grundform. **Markierungen ausblenden** entfernt die Grafik und gibt die GPU-Ressourcen frei. Die Anzeige ist rein diagnostisch; sie ändert weder Modell, Posen noch Skinning. Die Marker folgen bei einer aktiven Pose **nicht** den Knochen und sind kein Ersatz für eine animierte Kollisionsprüfung. Weitere Reparaturprüfungen bleiben davon getrennt.
+
 ## Prüfen der Originalformen ohne Umbau
 
 `node scripts/benchmark-pakachi-intersections.mjs` ergänzt für jedes Teilmodell den Abschnitt `repairPreview`. Die Vorschau nutzt die acht tatsächlich gemessenen statischen Hüft-/Kniehaltungen (0°, 22,5°, 45°, 90° je Gelenk). `removable` bezeichnet Nullflächen, die auch in diesen Stichproben keine Fläche haben; `withheld` enthält im Ausgangsnetz auffällige Dreiecke, die in mindestens einer Stichprobe gültig werden. `blocked` bezeichnet ungültige Ausgangsdaten oder ungültige Samples. Es wird **keine** Indexliste im Ergebnis ausgegeben, keine GLB-Datei verändert und nur ein Teilmodell gleichzeitig im Speicher gehalten.

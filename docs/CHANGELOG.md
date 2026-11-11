@@ -12,6 +12,10 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+### Added
+
+- Das integrierte Avatar-Studio kann jetzt auf Knopfdruck Nullflächen der Grundform als begrenzte rote Punktmarker direkt in der 3D-Ansicht anzeigen und ausblenden. Zähler für ungültige/Index-Doppel-/Nahtflächen und offene Indexkanten unterstützen die Sichtung. Keine Modelländerung, explizit keine Live-Kollisionsmessung.
+
 ### Fixed
 
 - Originalformen-Workflow für gezielte Audit-/Benchmark-Änderungen wieder automatisch aktiviert (öffentliche Standard-Runner) und um eine vollständige Integritätsprüfung aller Teilmodell-Reparaturvorschauen ergänzt; er darf nur vollständige, widerspruchsfreie JSON-Messberichte als erfolgreichen Nachweis kennzeichnen.
