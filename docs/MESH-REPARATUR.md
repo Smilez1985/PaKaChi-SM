@@ -7,6 +7,12 @@ Der lesende `auditMeshTopology` prüft unabhängig vom Schnittbudget: ungültige
 
 Der Audit unterscheidet nun echte **Doppelverwendung derselben Vertex-Indizes** (`duplicateFaces`) von **deckungsgleichen Flächen mit verschiedenen Indizes** (`coincidentFaces`). Letztere entstehen beispielsweise durch getrennte UV-/Material- oder Skinning-Nähte. Die Abbildung nutzt exakte endliche Koordinaten und meldet nur identische Dreiecke unabhängig von der Eckpunktereihenfolge. Nahe, aber nicht exakt identische Flächen sind weiterhin ein gesondertes geometrisches Problem. Beide Kategorien bleiben bei Reparaturvorschlägen unberührt; die Ergebnisse sind **keine** Löschfreigabe.
 
+## Posenbewusste Nullflächen-Vorschau
+
+`proposeStableDegenerateFaceRemoval(restPositions,posePositions,index)` ist eine zusätzliche, rein lesende Vorsichtsprüfung. Sie schlägt nur Dreiecke zur Entfernung vor, die **im Ausgangsnetz und in jeder übergebenen Pose/Morph-Stichprobe** entartet bleiben. Wenn ein Dreieck bei einer Deformation wieder Fläche erhält, wird seine Face-ID in `withheldFaces` ausgewiesen und nicht entfernt. Geometrie mit falscher Frame-Länge oder ungültigen Koordinaten führt zu einem gesperrten Vorschlag. Es werden weder Originalindexfolge noch UVs, Gewichte oder Morph-Ziele geändert.
+
+**Grenze:** Endliche Stichproben ersetzen keine kontinuierliche Prüfung. Vor einer tatsächlichen automatischen Anwendung müssten die gespeicherten Posen, Move-Bilder, Skinning-/Morph-Attribute und Materialgruppen vollständig berücksichtigt und danach die Bewegungen neu vermessen werden.
+
 ## Erste sichere Vorschau: Nullflächen
 
 `proposeDegenerateFaceRemoval(positions,index)` erstellt jetzt einen **nicht angewendeten** Index-Vorschlag und listet die originalen Dreiecksnummern der Nullflächen auf. Positionsdaten, Originalindizes, UVs, Skinning, Morph-Ziele, Knochen und Projektdateien bleiben unberührt. Bei kaputten Indizes oder nicht endlichen Koordinaten gibt die Funktion **keinen** Reparaturvorschlag zurück. Doppelte, aber gültige Flächen bleiben erhalten, weil sie absichtliche Renderlagen sein können.

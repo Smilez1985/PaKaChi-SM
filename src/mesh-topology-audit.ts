@@ -78,7 +78,7 @@ export function auditMeshTopology(positions:N,index:N|null=null):MeshTopologyAud
  * All original vertex indices are retained; proposals are for explicit preview/review. */
 export interface DegenerateFaceRemovalProposal {
  safeToPreview:boolean;
- reason?:'invalid-indices'|'nonfinite-positions';
+ reason?:'invalid-indices'|'nonfinite-positions'|'frame-layout';
  removedFaces:number[];
  keptTriangles:number;
  proposedIndices:number[];
@@ -107,4 +107,37 @@ export function proposeDegenerateFaceRemoval(positions:N,index:N|null=null):Dege
  const after=auditMeshTopology(positions,proposedIndices);
  return {safeToPreview:true,removedFaces,keptTriangles:after.triangles,
   proposedIndices,before,after};
+}
+
+/** Preview removal only where the face is degenerate in the rest mesh AND every
+ * supplied pose/morph sample. A sampled check does not prove continuous safety.
+ * No input positions/indices or vertex attributes are edited. */
+export function proposeStableDegenerateFaceRemoval(
+ positions:N,posePositions:readonly N[],index:N|null=null
+):DegenerateFaceRemovalProposal & {withheldFaces:number[];sampledFrames:number}{
+ if(!posePositions.length||posePositions.length>64)throw Error('Ungültige Anzahl Mesh-Stichproben.');
+ const original=proposeDegenerateFaceRemoval(positions,index);
+ const refused=(reason:'frame-layout'|'nonfinite-positions')=>({
+  ...original,safeToPreview:false,reason,proposedIndices:[],after:null,
+  keptTriangles:original.before.triangles,removedFaces:[],withheldFaces:original.removedFaces,
+  sampledFrames:posePositions.length
+ });
+ if(!original.safeToPreview)return {...original,withheldFaces:[],sampledFrames:posePositions.length};
+ const eligible=new Set(original.removedFaces);
+ for(const frame of posePositions){
+  if(frame.length!==positions.length)return refused('frame-layout');
+  const p=proposeDegenerateFaceRemoval(frame,index);
+  if(!p.safeToPreview)return refused('nonfinite-positions');
+  const degenerate=new Set(p.removedFaces);
+  for(const face of eligible)if(!degenerate.has(face))eligible.delete(face);
+ }
+ const removedFaces=original.removedFaces.filter(face=>eligible.has(face));
+ const withheldFaces=original.removedFaces.filter(face=>!eligible.has(face));
+ const proposedIndices:number[]=[];
+ const loc=(i:number)=>index?index[i]:i;
+ for(let face=0;face<original.before.triangles;face++)
+  if(!eligible.has(face))proposedIndices.push(loc(face*3),loc(face*3+1),loc(face*3+2));
+ const after=auditMeshTopology(positions,proposedIndices);
+ return {safeToPreview:true,removedFaces,withheldFaces,sampledFrames:posePositions.length,
+  keptTriangles:after.triangles,proposedIndices,before:original.before,after};
 }

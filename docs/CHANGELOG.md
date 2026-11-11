@@ -12,6 +12,10 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+### Added
+
+- Eine zusätzlich posenbewusste, rein lesende Nullflächen-Reparaturvorschau hält Dreiecke zurück, die in einer Pose/Morph-Stichprobe wieder gültige Fläche entwickeln; ungültige Pose-Daten sperren den Vorschlag. Drei Regressionstests ergänzen die Sicherung. Eine automatische Anwendung bleibt ausdrücklich deaktiviert.
+
 ### Fixed
 
 - Mesh-Topologie-Audit unterscheidet geometrisch deckungsgleiche Dreiecke mit getrennten Eckpunkt-Indizes (etwa UV-/Fell-Nähte) von echten Index-Doppelflächen und meldet beide separat. Kein automatisches Verschweißen oder Löschen; zwei zusätzliche Regressionstests.

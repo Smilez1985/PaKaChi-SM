@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {auditMeshTopology,proposeDegenerateFaceRemoval} from '../src/mesh-topology-audit.ts';
+import {auditMeshTopology,proposeDegenerateFaceRemoval,proposeStableDegenerateFaceRemoval} from '../src/mesh-topology-audit.ts';
 const tri=(a:number[],b:number[],c:number[])=>[...a,...b,...c];
 test('classifies isolated zero-area triangles without modifying geometry',()=>{
  const data=[...tri([0,0,0],[1,0,0],[0,1,0]),...tri([10,0,0],[11,0,0],[12,0,0])],copy=[...data];
@@ -78,4 +78,39 @@ test('a repeated indexed face is not mislabeled as an unwelded seam',()=>{
  const audit=auditMeshTopology(p,[0,1,2,2,1,0]);
  assert.equal(audit.duplicateFaces,1);
  assert.equal(audit.coincidentFaces,0);
+});
+
+test('sampled repair leaves a rest-degenerate face that opens during a pose untouched',()=>{
+ const rest=[0,0,0,1,0,0,0,1,0,2,0,0];
+ const posed=[0,0,0,1,0,0,0,1,0,2,1,0];
+ const faces=[0,1,2,0,1,3];
+ const original=[...rest],originalFaces=[...faces];
+ const proposal=proposeStableDegenerateFaceRemoval(rest,[posed],faces);
+ assert.equal(proposal.safeToPreview,true);
+ assert.deepEqual(proposal.removedFaces,[]);
+ assert.deepEqual(proposal.withheldFaces,[1]);
+ assert.deepEqual(proposal.proposedIndices,faces);
+ assert.equal(proposal.sampledFrames,1);
+ assert.deepEqual(rest,original);assert.deepEqual(faces,originalFaces);
+});
+test('sampled repair proposes only faces degenerate in every supplied pose',()=>{
+ const rest=[0,0,0,1,0,0,0,1,0,2,0,0,3,0,0];
+ const pose=[0,0,0,1,0,0,0,1,0,2,1,0,3,0,0];
+ const idx=[0,1,2,0,1,3,0,1,4];
+ const proposal=proposeStableDegenerateFaceRemoval(rest,[pose,rest],idx);
+ assert.equal(proposal.safeToPreview,true);
+ assert.deepEqual(proposal.removedFaces,[2]);
+ assert.deepEqual(proposal.withheldFaces,[1]);
+ assert.deepEqual(proposal.proposedIndices,[0,1,2,0,1,3]);
+ assert.equal(proposal.after?.zeroAreaTriangles,1);
+});
+test('sampled repair refuses malformed frame layouts and invalid coordinates',()=>{
+ const rest=[0,0,0,1,0,0,0,1,0,2,0,0],idx=[0,1,2,0,1,3];
+ const badLength=proposeStableDegenerateFaceRemoval(rest,[[0,0,0]],idx);
+ assert.equal(badLength.safeToPreview,false);assert.equal(badLength.reason,'frame-layout');
+ assert.deepEqual(badLength.proposedIndices,[]);
+ const badCoordinate=proposeStableDegenerateFaceRemoval(rest,[[0,0,0,1,0,0,0,1,0,Infinity,0,0]],idx);
+ assert.equal(badCoordinate.safeToPreview,false);assert.equal(badCoordinate.reason,'nonfinite-positions');
+ assert.deepEqual(badCoordinate.removedFaces,[]);
+ assert.throws(()=>proposeStableDegenerateFaceRemoval(rest,[],idx));
 });
