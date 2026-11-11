@@ -1,0 +1,48 @@
+{
+  "format": "pakachi-motion-verification-summary",
+  "version": 1,
+  "sourceCommit": "397ebd2a19f4a94fc35c5e2724b5902287f61b82",
+  "softwareVersion": "0.101.0",
+  "forms": [
+    {
+      "form": "humanoid",
+      "sha256": "2ffd6401a1484ea8ad279ed314c5944c0f01034743f0df9795c30a8121f65abd",
+      "beforeIssues": 367,
+      "afterIssues": 345,
+      "targetCuts": {
+        "before": 21,
+        "after": 8
+      },
+      "samples": 65,
+      "regressions": 0,
+      "edgeOperations": 4067066,
+      "vertexSamples": 99946875,
+      "vertexBudgetExhausted": true
+    },
+    {
+      "form": "animal",
+      "sha256": "25226f09bbdd02f4ec4e20f013f5585a3816df54dafc447ce308225a68202703",
+      "beforeIssues": 760,
+      "afterIssues": 756,
+      "targetCuts": {
+        "before": 551,
+        "after": 551
+      },
+      "samples": 65,
+      "regressions": 0,
+      "edgeOperations": 3533661,
+      "vertexSamples": 99879509,
+      "vertexBudgetExhausted": true
+    }
+  ],
+  "scope": "Two actual automatic original-form jobs; 65 complete independent body pair/strain/volume samples each. No continuous or inter-mesh clearance.",
+  "workflow": {
+    "runId": 42976768820,
+    "url": "https://github.com/Smilez1985/PaKaChi-SM/actions/runs/42976768820",
+    "status": "success",
+    "artifactId": 13836975489,
+    "artifactSha256": "865e9a0d066c50587b36837e64c4e9ee1a865283681afdbca24a133216d5c4a4",
+    "artifactUrl": "https://github.com/Smilez1985/PaKaChi-SM/actions/runs/42976768820/artifacts/13836975489",
+    "validatedBeforeUpload": true
+  }
+}
