@@ -49,7 +49,7 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 Zeitstempel: 2026-11-11T07:15:32+01:00 (Europe/Berlin)
 
-Entwicklung auf `develop`; vollständige CI und main-Abnahme ausstehend. [Prüfbericht](PRUEFUNG.md#version-01010).
+Geprüfter Meilenstein auf `main`: [PR #2](https://github.com/Smilez1985/PaKaChi-SM/pull/2) am 2026-11-11T13:25:26Z gemerged (Commit `5d2733c1b9ed8aeabb9b73024d591f82b76e91a9`). PR-CI #122 vollständig erfolgreich: 512 Node-Tests, 49 Browserfälle ohne Flaky-/Skip-Fälle und drei Importmessungen. [Prüfbericht](PRUEFUNG.md#version-01010). [Prüfbericht](PRUEFUNG.md#version-01010).
 
 ### Fixed
 
