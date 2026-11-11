@@ -9,7 +9,7 @@ import {moveCheckTimes} from './move-limit-check.ts';
 import {transferSkinInfluences} from './studio-weight-transfer.ts';
 import {volumeSeverity} from './surface-volume.ts';
 import {buildGeometricCorrection,buildEdgeFitCorrection,buildEdgeRelaxationCorrection} from './geometric-skin-correction.ts';
-import {activeCorrectiveIntersectionPoses,attenuateCorrectiveIntersections} from './corrective-intersection-attenuation.ts';
+import {distinctIntersectionPoses,activeCorrectiveIntersectionPoses,attenuateCorrectiveIntersections} from './corrective-intersection-attenuation.ts';
 import {limitCorrectiveStrain} from './corrective-strain-guard.ts';
 import {MAX_CORRECTIVE_VERTICES} from './studio-corrective-shapes.ts';
 import type {StudioCorrectiveShape} from './studio-corrective-shapes.ts';
@@ -65,6 +65,14 @@ export function selectCollisionMotionFrames<T extends {before:SurfaceReport}>(fr
  interior.sort((a,b)=>risk(frames[b].before)-risk(frames[a].before)||a-b);
  chosen.add(interior[0]);
  return [...chosen].sort((a,b)=>a-b).map(i=>frames[i]);
+}
+/** At most twelve quarter-interval probes around the measured interior risk peak.
+ * Resolve four adjacent intervals, including a peak equal to the saved target. No promise
+ * of continuous clearance; never interpolate across different saved moves. */
+export function collisionMotionRefinementTimes<T extends {before:SurfaceReport;origin:{kind:string;id:string;time?:number}}>(frames:readonly T[]){
+ const selected=selectCollisionMotionFrames(frames),peak=selected.find(f=>f!==frames[0]&&f!==frames.at(-1));if(!peak)return [];
+ const i=frames.indexOf(peak),result:{id:string;time:number}[]=[];
+ for(const offset of [-2,-1,0,1]){const a=frames[i+offset]?.origin,b=frames[i+offset+1]?.origin;if(!a||!b||a.kind!=='move'||b.kind!=='move'||a.id!==b.id||a.time===undefined||b.time===undefined||a.time>=b.time)continue;for(const fraction of [.25,.5,.75])result.push({id:a.id,time:a.time+(b.time-a.time)*fraction});}return result;
 }
 export const AUTOMATIC_SKIN_VERTEX_BUDGET=100_000_000;
 export const AUTOMATIC_SKIN_SAMPLE_LIMIT=512;
@@ -128,7 +136,9 @@ export async function findAutomaticSkinCorrection(rig:StudioRig,signal:AbortSign
  if(!target||target.before.status!=='outside'){ensure();return null;}
  const motionFrames=frames.filter(f=>f.origin.kind==='move');
  const selectedMotion=selectCollisionMotionFrames(motionFrames);
- const intersectionPoses=[target.pose,...selectedMotion.map(f=>f.pose)];
+ const neighboringMotion=collisionMotionRefinementTimes(motionFrames).map(({id,time})=>{const move=rig.data.moves.find(m=>m.id===id)!;return {id:'collision-midpoint',name:move.name,seconds:1,values:rig.sample(move,time)};});
+ const intersectionPoses=distinctIntersectionPoses([target.pose,...selectedMotion.map(f=>f.pose),...neighboringMotion]);
+ const intersectionGate=(poses:readonly Pose[],affected:readonly number[],overrides?:SkinOverrides,shape?:StudioCorrectiveShape)=>{for(let i=0;i<poses.length;i+=4)if(!checkCandidateIntersectionFrames(rig,poses.slice(i,i+4),affected,overrides,shape,()=>{ensure();measure();}).accepted)return false;return true;};
  const joints=correctionJoints(rig,target.before,target.pose);let best:AutomaticSkinProposal|null=null;
  const emptyScore=()=>({sampledIssues:0,sampledVolumeExcess:0}),scoreReport=(score:ReturnType<typeof emptyScore>,report:SurfaceReport)=>{score.sampledIssues+=report.issues;score.sampledVolumeExcess+=report.meshes.reduce((n,m)=>n+volumeSeverity(m.volume),0);},beats=(score:ReturnType<typeof emptyScore>,report:SurfaceReport)=>!best||score.sampledIssues<best.sampledIssues||score.sampledIssues===best.sampledIssues&&(score.sampledVolumeExcess<best.sampledVolumeExcess-1e-6||Math.abs(score.sampledVolumeExcess-best.sampledVolumeExcess)<=1e-6&&betterSurfaceReport(report,best.after));
  try{for(const {joint,radius,center}of joints){
@@ -152,8 +162,8 @@ export async function findAutomaticSkinCorrection(rig:StudioRig,signal:AbortSign
   const proposal=await searchWeightCorrection(rig,target.pose,joint,chosenRadius,signal,valid,{center,measure,candidate:()=>{state.candidates++;},accept:async(_candidate,overrides)=>{
    state.phase='validation';const score=emptyScore();
    for(const frame of frames){await tick();measure();const report=inspect(frame.pose,overrides);if(!noMeasuredRegression(frame.before,report)){state.phase='search';return false;}scoreReport(score,report);}
-   const intersection=checkCandidateIntersectionFrames(rig,intersectionPoses,[...overrides.keys()],overrides,undefined,()=>{ensure();measure();});
-   if(!intersection.accepted){state.phase='search';return false;}
+   const accepted=intersectionGate(intersectionPoses,[...overrides.keys()],overrides);
+   if(!accepted){state.phase='search';return false;}
    scores.set(key(_candidate),score);state.phase='search';return true;
   }});
   if(proposal&&beats(scores.get(key(proposal))!,proposal.after))best={...proposal,...scores.get(key(proposal))!,target:structuredClone(target.pose),targetOrigin:{...target.origin},jointId:joint.id,motionSamples,checkedMoves:rig.data.moves.length,checkedJoints:state.joints,checkedCandidates:state.candidates};
@@ -173,7 +183,7 @@ export async function findAutomaticSkinCorrection(rig:StudioRig,signal:AbortSign
     state.phase='search';return beats(score,after)?{after,score}:null;
    };
    let evaluation=await evaluate(shape);if(!evaluation)continue;
-   const collisionGate=(candidate:StudioCorrectiveShape)=>checkCandidateIntersectionFrames(rig,intersectionPoses,candidate.meshes.map(m=>m.mesh),undefined,candidate,()=>{ensure();measure();}).accepted&&(method!=='edge-relaxation'||checkCandidateIntersectionFrames(rig,correctionSamples(rig,target.pose),candidate.meshes.map(m=>m.mesh),undefined,candidate,()=>{ensure();measure();}).accepted);
+   const collisionGate=(candidate:StudioCorrectiveShape)=>intersectionGate(intersectionPoses,candidate.meshes.map(m=>m.mesh),undefined,candidate)&&(method!=='edge-relaxation'||intersectionGate(correctionSamples(rig,target.pose),candidate.meshes.map(m=>m.mesh),undefined,candidate));
    if(!collisionGate(shape)){
     // Refine only the full-strength positional candidate. Every yielded diagnostic
     // shares the existing work/revision reserve; the half-strength variant remains

@@ -12,6 +12,26 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.101.0] - 2026-11-11
+
+Zeitstempel: 2026-11-11T07:15:32+01:00 (Europe/Berlin)
+
+Entwicklung auf `develop`; vollständige CI und main-Abnahme ausstehend. [Prüfbericht](PRUEFUNG.md#version-01010).
+
+### Fixed
+
+- Automatische Gewichts- und Geometrievorschläge erhalten bis zu zwölf zusätzliche zeitliche Viertelschritt-Proben in vier Intervallen um die gemessene innere Risikohaltung. Auch wenn diese Haltung exakt einer gespeicherten Zielpose entspricht, bleiben ihre Nachbarintervalle prüfbar. Unterschiedliche Moves werden nicht miteinander interpoliert; exakte Posenwerte werden nur einmal geprüft.
+- Die vollständige Paaridentitäts-Sperre und die positionelle Nachkorrektur berücksichtigen dieselben zusätzlichen Haltungen. Größere Probenmengen werden in Gruppen von höchstens vier bearbeitet. Die Grenzen von 100.000.000 Vertex-Stichproben und 12.000.000 Kantenoperationen, Abbruch- und Revisionskontrolle bleiben bestehen.
+- Eine bislang akzeptierte 180°-Gewichtsvariante erzeugt bei 174,375° 432 neue transversale Schnittpaare und wird nun verworfen. Die Bedien-/Gewichtsprüfungen verwenden für erfolgreiche Aufträge eine korrigierbare 160°-Vorlage; ein eigener Geometrie- und Browserfall hält die Ablehnung des unsicheren 180°-Falls fest. Unbehobene Warnungen eines sicheren Teilvorschlags bleiben sichtbar. Keine Zusage kontinuierlicher Kollisionsfreiheit.
+
+### Added
+
+- Lesender Originalform-Benchmark `scripts/benchmark-correction-motion.mjs`: speichert den tatsächlich gefundenen Vorschlag und prüft 65 unabhängige Körper-Paaridentitäten samt Dehnung/Volumen. Mit `--output` entstehen atomare Zwischenstände je Form; `--replay` prüft einen gespeicherten Vorschlag ohne erneute automatische Suche.
+
+### Changed
+
+- Der vollständige CI-Auftrag erhält maximal 60 statt 45 Minuten für die zusätzlichen Bewegungsgegenprüfungen. Tests, Build, Browserfälle und Importmessungen bleiben verpflichtend.
+
 ## [0.100.0] - 2026-11-11
 
 Zeitstempel: 2026-11-11T00:43:16+01:00 (Europe/Berlin)

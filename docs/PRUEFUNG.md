@@ -1,8 +1,22 @@
 # Prüfstand und Protokolle
 
-**Softwarestand: 0.100.0 · Dokumentationsabgleich: 2026-11-11T00:43:16+01:00 (Europe/Berlin).**
+**Softwarestand: 0.101.0 · Dokumentationsabgleich: 2026-11-11T00:43:16+01:00 (Europe/Berlin).**
 
 Alle Prüfnachweise stehen in dieser Datei: ein Abschnitt je Softwareversion sowie gesonderte Abschnitte für datierte Zwischenprüfungen. Die Ergebnisse und Grenzen gelten für den jeweils genannten Stand. Spätere Läufe stehen als Nachtrag im selben Abschnitt. Produktänderungen gehören in den [Changelog](CHANGELOG.md), offene Aufgaben in die [Roadmap](ROADMAP.md).
+
+## Version 0.101.0
+
+Stand: 2026-11-11T07:15:32+01:00. Entwicklung auf `develop`, main-Abnahme ausstehend.
+
+Die zusätzliche Diagnose zeigt eine reale Lücke des alten Rasters: Ein am Ziel verbesserter 180°-Gewichtsvorschlag erzeugt bei 31/32 der Bewegung (174,375°) 432 neue unabhängige Dreieckspaare. Die neue Kernregression weist nach, dass das bisherige Raster den Kandidaten akzeptiert und die zusätzliche Probe ihn verwirft. Erfolgreiche Vorschau-/Übernahme-/Undo-/Berechtigungs-/Budgetprüfungen verwenden eine nichtsinguläre 160°-Verdrehung. Der ursprüngliche 180°-Fehlerfall bleibt als ausdrückliche Ablehnung erhalten.
+
+Ein erster Vier-Mittelpunkt-Versuch erfasst an der echten Arbeitsform noch nicht alle Auffälligkeiten: Bei 57/64 der 90°-Hüftbewegung sinkt die Schnittzahl 13 → 6, ein konkretes Schnittpaar ist jedoch neu. Deshalb wurde das Raster um die Risikohaltung auf Viertelschritte verfeinert; die neue Variante wird erneut unabhängig gegengeprüft.
+
+Lokal: 504 verfügbare allgemeine Tests ohne Fehler oder übersprungene Fälle bestanden; die abschließenden 31 gezielten Automatik-/Geometrieprüfungen für das Viertelschritt-Raster sind erfolgreich. Produktionsbuild erfolgreich. Die drei aufwendigen Originalcharakterfälle und die dichte unabhängige Originalformen-Gegenprüfung laufen separat. Der vollständige Archiv-Erhaltungstest kann lokal mangels der 71 übrigen Originalbilder nicht ausgeführt werden und bleibt in GitHub verpflichtend. Lokales Chromium scheitert vor Teststart an `socket(): Operation not permitted`; Browserabnahme erfolgt in GitHub.
+
+Reproduktion des tatsächlichen automatischen Vorschlags und der dichten Körpergegenprüfung: `node scripts/benchmark-correction-motion.mjs --output docs/benchmarks/pakachi-motion-correction-2026-11-11.json`. Das JSON speichert den tatsächlichen Vorschlag; mit `--replay <JSON>` lässt sich dessen Gegenprüfung ohne erneute Suche wiederholen. Ein laufender oder unvollständiger Bericht ist keine Freigabe.
+
+Grenzen: 65 diskrete Körpernetzproben sind keine kontinuierliche Kollisionsfreiheit. Bestehende Schnitte, Kontakte, angrenzende Dreiecke, getrennte Teilmodelle und allgemeine Anatomiequalität bleiben offen.
 
 ## Version 0.100.0
 

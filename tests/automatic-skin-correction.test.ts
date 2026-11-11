@@ -2,7 +2,7 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import * as T from 'three';
 import {twistFixture} from './helpers/twist-fixture.ts';
-import {findAutomaticSkinCorrection,skinCorrectionOverrides,checkCandidateIntersectionRegression,checkCandidateIntersectionFrames,selectCollisionMotionFrames,newProvenIntersectionCount} from '../src/automatic-skin-correction.ts';
+import {findAutomaticSkinCorrection,skinCorrectionOverrides,checkCandidateIntersectionRegression,checkCandidateIntersectionFrames,selectCollisionMotionFrames,collisionMotionRefinementTimes,newProvenIntersectionCount} from '../src/automatic-skin-correction.ts';
 import {createPoseSurfaceChecker,poseSurfacePositions} from '../src/pose-surface-check.ts';
 import {moveCheckTimes} from '../src/move-limit-check.ts';
 import {noMeasuredRegression,searchWeightCorrection} from '../src/pose-weight-correction.ts';
@@ -11,13 +11,13 @@ import {StudioEditor} from '../src/studio-editor.ts';
 import type {StudioView} from '../src/studio-view.ts';
 
 test('automatic job finds a joint from faulty skin, validates every move sample and stays read-only',async()=>{
- const f=twistFixture(),data=structuredClone(f.rig.data),live=f.rig.capture(),weights=Array.from(f.mesh.geometry.attributes.skinWeight.array),progress:string[]=[];
+ const f=twistFixture(false,false,160),data=structuredClone(f.rig.data),live=f.rig.capture(),weights=Array.from(f.mesh.geometry.attributes.skinWeight.array),progress:string[]=[];
  const p=await findAutomaticSkinCorrection(f.rig,new AbortController().signal,()=>true,{progress:s=>progress.push(s.phase)});assert.ok(p);assert.equal(p.jointId,f.joint.id);assert.equal(p.checkedMoves,1);assert.equal(p.motionSamples,17);assert.ok(p.after.issues<p.before.issues);assert.ok(progress.includes('diagnosis')&&progress.includes('search')&&progress.includes('validation'));
  const inspect=createPoseSurfaceChecker(f.rig),overrides=skinCorrectionOverrides(f.rig,p);for(const time of moveCheckTimes(f.rig,f.rig.data.moves[0])){const pose={id:'sample',name:'sample',seconds:1,values:f.rig.sample(f.rig.data.moves[0],time)};assert.ok(noMeasuredRegression(inspect(pose),inspect(pose,overrides)));}
  assert.deepEqual(f.rig.data,data);assert.deepEqual(f.rig.capture(),live);assert.deepEqual(Array.from(f.mesh.geometry.attributes.skinWeight.array),weights);f.rig.dispose();
 });
 test('preview matches pure candidate vertices and restores original weights and pose without persistence',async()=>{
- const f=twistFixture(),p=await findAutomaticSkinCorrection(f.rig,new AbortController().signal);assert.ok(p);const data=structuredClone(f.rig.data),live=f.rig.capture(),indices=f.mesh.geometry.getAttribute('skinIndex'),weights=f.mesh.geometry.getAttribute('skinWeight'),overrides=skinCorrectionOverrides(f.rig,p),expected=poseSurfacePositions(f.rig,p.target.values,0,overrides);
+ const f=twistFixture(false,false,160),p=await findAutomaticSkinCorrection(f.rig,new AbortController().signal);assert.ok(p);const data=structuredClone(f.rig.data),live=f.rig.capture(),indices=f.mesh.geometry.getAttribute('skinIndex'),weights=f.mesh.geometry.getAttribute('skinWeight'),overrides=skinCorrectionOverrides(f.rig,p),expected=poseSurfacePositions(f.rig,p.target.values,0,overrides);
  const restore=f.rig.previewSkin(p.target.values,overrides);assert.equal(f.rig.skinPreviewActive,true);for(let v=0;v<expected.length/3;v++){const actual=f.mesh.getVertexPosition(v,new T.Vector3()).applyMatrix4(f.mesh.matrixWorld);assert.ok(actual.distanceTo(new T.Vector3().fromArray(expected,v*3))<1e-7);}
  restore();restore();assert.equal(f.rig.skinPreviewActive,false);assert.deepEqual(f.rig.capture(),live);assert.deepEqual(f.rig.data,data);assert.equal(f.mesh.geometry.getAttribute('skinIndex'),indices);assert.equal(f.mesh.geometry.getAttribute('skinWeight'),weights);f.rig.dispose();
 });
@@ -39,7 +39,7 @@ test('job refuses excessive sampling before starting and does not invent a corre
 
 function editorFixture(){
  const w=new Window();Object.assign(globalThis,{document:w.document,Event:w.Event,Option:function(text='',value=''){const el=w.document.createElement('option');el.textContent=text;el.value=value;return el;}});
- const f=twistFixture(),host=document.createElement('div'),view={setEnabled(){},setFigureEnabled(){},setAction(){},setRotation(){},select(){},refresh(){},dispose(){}};
+ const f=twistFixture(false,false,160),host=document.createElement('div'),view={setEnabled(){},setFigureEnabled(){},setAction(){},setRotation(){},select(){},refresh(){},dispose(){}};
  const editor=new StudioEditor(f.rig,view as unknown as StudioView,host,{format:'pakachi-studio',version:1,model:'AAAA',avatar:{id:'test',name:'Test',description:'',moves:[]}},{suspend(){},resume(){},changed(){},feedback(){}});editor.enter();return {...f,w,host,editor};
 }
 test('one automatic editor job previews both alternatives, applies once, and undoes without changing moves',async()=>{
@@ -112,7 +112,7 @@ test('collision regression rejects a proven new cut even when the modified mesh 
 });
 
 test('search exhaustion retains only an earlier fully validated proposal and never changes the source',async()=>{
- const f=twistFixture(),data=structuredClone(f.rig.data),live=f.rig.capture();
+ const f=twistFixture(false,false,160),data=structuredClone(f.rig.data),live=f.rig.capture();
  try{
   const full=await findAutomaticSkinCorrection(f.rig,new AbortController().signal);assert.ok(full);assert.equal(full.vertexBudgetExhausted,false);
   const vertices=f.rig.surfaces.reduce((n,s)=>n+s.base.length/3,0),limit=full.vertexSamples!-vertices;
@@ -130,5 +130,35 @@ test('a budget without a completely checked proposal rejects, and custom budgets
   for(const vertexBudget of [0,-1,1.5,NaN,100000001])await assert.rejects(()=>findAutomaticSkinCorrection(f.rig,new AbortController().signal,()=>true,{vertexBudget}),/Korrekturbudget/);
   await assert.rejects(()=>findAutomaticSkinCorrection(f.rig,new AbortController().signal,()=>true,{vertexBudget:1104}),/zu groß/);
   assert.deepEqual(f.rig.data,before);
+ }finally{f.rig.dispose();}
+});
+
+
+test('quarter-interval collision probes surround a risk peak even when the peak equals the saved target',()=>{
+ const f=twistFixture();try{const report=createPoseSurfaceChecker(f.rig)(f.rig.data.poses[0]),frames=Array.from({length:33},(_,i)=>({origin:{kind:'move',id:'loop',time:i/16},before:{...report,issues:16-Math.abs(i-16)}})),source=structuredClone(frames);
+  assert.deepEqual(collisionMotionRefinementTimes(frames),[.875,.9375,1,1.0625].flatMap(start=>[.25,.5,.75].map(f=>({id:'loop',time:start+f/16}))));
+  assert.deepEqual(frames,source);assert.deepEqual(collisionMotionRefinementTimes(frames.slice(0,1)),[]);
+ }finally{f.rig.dispose();}
+});
+test('collision midpoint probes never bridge moves or nonincreasing timeline samples',()=>{
+ const f=twistFixture();try{const report=createPoseSurfaceChecker(f.rig)(f.rig.data.poses[0]),frames=[0,1,9,1,0].map((issues,i)=>({origin:{kind:'move',id:i<2?'first':'second',time:i<2?i:i-2},before:{...report,issues}}));
+  assert.deepEqual(collisionMotionRefinementTimes(frames),[{id:'first',time:.25},{id:'first',time:.5},{id:'first',time:.75},{id:'second',time:.25},{id:'second',time:.5},{id:'second',time:.75},{id:'second',time:1.25},{id:'second',time:1.5},{id:'second',time:1.75}]);
+  frames[3].origin.time=0;assert.deepEqual(collisionMotionRefinementTimes(frames),[{id:'first',time:.25},{id:'first',time:.5},{id:'first',time:.75},{id:'second',time:.5},{id:'second',time:1},{id:'second',time:1.5}]);
+ }finally{f.rig.dispose();}
+});
+
+
+test('a weight candidate accepted at old collision times is rejected for new cuts near the singular endpoint',async()=>{
+ const f=twistFixture(),source=structuredClone(f.rig.data),live=f.rig.capture();
+ try{
+  const candidate=await searchWeightCorrection(f.rig,f.pose,f.joint,.8,new AbortController().signal);assert.ok(candidate);
+  const overrides=skinCorrectionOverrides(f.rig,candidate),move=f.rig.data.moves[0],inspect=createPoseSurfaceChecker(f.rig);
+  const frames=moveCheckTimes(f.rig,move).map(time=>{const pose={id:'probe',name:'Probe',seconds:1,values:f.rig.sample(move,time)};return {pose,before:inspect(pose),origin:{kind:'move',id:move.id,time}};});
+  assert.equal(checkCandidateIntersectionFrames(f.rig,[f.pose,...selectCollisionMotionFrames(frames).map(f=>f.pose)],[0],overrides).accepted,true,'the previous sparse gate misses the new pair');
+  const nearEnd={...f.pose,values:f.rig.sample(move,31/32)},report=checkCandidateIntersectionRegression(f.rig,nearEnd,[0],overrides);
+  assert.equal(report.complete,true);assert.ok(report.newIntersections>0);assert.equal(report.accepted,false);
+  assert.ok(collisionMotionRefinementTimes(frames).some(f=>f.time===31/32));
+  assert.equal(await findAutomaticSkinCorrection(f.rig,new AbortController().signal),null);
+  assert.deepEqual(f.rig.data,source);assert.deepEqual(f.rig.capture(),live);
  }finally{f.rig.dispose();}
 });

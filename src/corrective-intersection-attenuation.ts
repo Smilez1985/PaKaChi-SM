@@ -6,13 +6,13 @@ import type {EdgeWorkBudget} from './skin-edge-fit.ts';
 import {correctiveMorphBlend,poseSkinMatrices,poseSurfacePositions} from './pose-surface-check.ts';
 import {checkSurfaceIntersections,SURFACE_INTERSECTION_PAIR_BUDGET,SURFACE_INTERSECTION_SPATIAL_MULTIPLIER} from './surface-intersections.ts';
 
-/** Keep exact distinct poses where the extra driver actually contributes.
- * Zero contribution is exact; nearby rotations are never rounded into one sample. */
+/** Exact canonical values; nearby rotations are never rounded into one sample. */
+export function distinctIntersectionPoses(poses:readonly Pose[]){
+ const seen=new Set<string>();return poses.filter(pose=>{const key=JSON.stringify(Object.keys(pose.values).sort().map(id=>{const v=pose.values[id];return [id,v.position,v.rotation,v.scale??1];}));if(seen.has(key))return false;seen.add(key);return true;});
+}
+/** Keep distinct poses where the extra driver contributes; zero is exact. */
 export function activeCorrectiveIntersectionPoses(rig:StudioRig,poses:readonly Pose[],shape:StudioCorrectiveShape){
- const seen=new Set<string>();return poses.filter(pose=>{
-  if(!shape.meshes.some(part=>correctiveMorphBlend(rig,pose.values,part.mesh,shape).amount!==0))return false;
-  const key=JSON.stringify(Object.keys(pose.values).sort().map(id=>{const v=pose.values[id];return [id,v.position,v.rotation,v.scale??1];}));if(seen.has(key))return false;seen.add(key);return true;
- });
+ return distinctIntersectionPoses(poses.filter(pose=>shape.meshes.some(part=>correctiveMorphBlend(rig,pose.values,part.mesh,shape).amount!==0)));
 }
 
 /** Attenuate only tested sparse shifts implicated in new triangle pairs.
