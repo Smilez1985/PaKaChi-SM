@@ -14,6 +14,33 @@ Alle Prüfnachweise stehen in dieser Datei: ein Abschnitt je Softwareversion sow
 
 **Studio-Browserfall:** `tests/e2e/mesh-topology-markers.spec.ts` ist vorhanden und prüft das read-only Anzeigen/Zurücksetzen, unveränderte Projekt-Revision und fehlende Browserfehler. Der Fall lädt Mika und verlangt noch keine nichtleere Markeranzahl an einer gezielt eingebrachten Nullfläche. Eine echte visuelle Markerabnahme bleibt offen.
 
+
+## Originalformen-Lauf #6 – Regenerierung und statische Gelenkproben
+
+**Workflow:** [Run #6](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/43034033027), Commit `c1f9ac0490fa16782551c09270487d2bf7d08455`, abgeschlossen am 2026-11-11T14:03:25Z. Alle neun Workflow-Schritte erfolgreich. Das Artefakt [`pakachi-intersection-evidence`](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/43034033027) (ID `13862826873`, SHA-256 `4d2b7489532da511ed44baf5943a2a40b4267e54159e85e792fbcdf3c11af39c`) wurde heruntergeladen und die JSON-Datei vollständig ausgewertet.
+
+| Form | GLB | Meshes | Vertices | starre `_shell` | Nullflächen | ungültig / nicht-endlich | doppelte Indexflächen |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Arbeitsform (humanoid) | `humanoid.glb` | 92 | 190.375 | 28 | 0 | 0 | 0 |
+| Tierform (animal) | `animal.glb` | 90 | 231.739 | 28 | 0 | 0 | 0 |
+
+Die lesende Reparaturvorschau umfasst je Form alle Meshes und jeweils 8 statische Haltungsstichproben. Beide Formen melden für alle Meshes den Status `no-rest-degeneracy`, 0 entfernbare und 0 zurückgehaltene Dreiecke. Damit ist die Generator-Korrektur in den beiden regenerierten GLBs angekommen; die ursprünglichen 28 Kapseln je Form sind weiterhin vorhanden.
+
+**Acht statische Proben je Form** (linke Hüfte und linkes Knie, jeweils 0°, 22,5°, 45° und 90°):
+
+| Form / Gelenk | 0° | 22,5° | 45° | 90° |
+| --- | ---: | ---: | ---: | ---: |
+| Arbeitsform · Hüfte – `surfaceIssues` | 0 | 134 | 239 | 367 |
+| Arbeitsform · Knie – `surfaceIssues` | 0 | 6 | 62 | 1 |
+| Tierform · Hüfte – `surfaceIssues` | 0 | 760 | 1.258 | 1.566 |
+| Tierform · Knie – `surfaceIssues` | 0 | 11 | 47 | 86 |
+
+Alle `volumeIssues` sind 0, außer Tierform/Knie bei 90° mit 1. Diese Zahlen sind Diagnosewerte, keine anatomische Freigabe. Besonders wichtig: Pro Probe war nur das Mesh `PaKaChi_body` messbar. Weitere 91 Meshes der Arbeitsform bzw. 89 der Tierform wurden mit `coplanar-or-touching` als unmessbar gemeldet. Die Artefakte zählen zwar transversale Schnittkandidaten am Körper (Arbeitsform 170–201, Tierform 241–2.472 je Probe), aber die übrigen Teilmodelle sind dadurch nicht abgedeckt. Eine vollständige Teilmodell-Kollisionsprüfung ist ausdrücklich **nicht** bestanden oder nachgewiesen.
+
+## Studio-Nullflächenmarker – synthetischer Test committed, Ausführung offen
+
+Commit `2b4623791f7875cb0c2330c01249dc29593724b0` ergänzt `tests/studio-view-topology.test.ts`. Das Fixture enthält ein absichtlich kollineares Dreieck und ein gültiges Kontroll-Dreieck. Der Test prüft eine Markerwolke mit genau einem Punkt am erwarteten Schwerpunkt `[1,0,0]`, das Entfernen der Marker und unveränderte ursprüngliche Positions-/Indexpuffer. Der Test ist auf `develop` committed; ein Ausführungsergebnis liegt noch nicht vor. Die bestehende Browserprüfung bleibt ergänzend, ersetzt diesen gezielten Test aber nicht.
+
 ## Version 0.101.0
 
 Stand: 2026-11-11T13:25:26Z. Freigabekandidat `39eee8854a44f64e2e16d1d146726506998ccbd4`; [PR #2](https://github.com/Smilez1985/PaKaChi-SM/pull/2) nach erfolgreicher CI #122 nach `main` gemerged (Main-Commit `5d2733c1b9ed8aeabb9b73024d591f82b76e91a9`).
