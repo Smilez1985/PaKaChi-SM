@@ -16,7 +16,7 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 Zeitstempel: 2026-11-11T00:43:16+01:00 (Europe/Berlin)
 
-Entwicklung auf `develop`; die vollständige GitHub-Prüfung und die Meilensteinübernahme nach `main` stehen aus. [Prüfbericht](PRUEFUNG.md#version-01000).
+Entwicklung auf `develop`; CI #115 für Programmcommit `b89c730a` ist mit 505 Tests, 48 Browserfällen, Build und drei Importmessungen vollständig erfolgreich, Abschlussartefakt geprüft. Die Meilensteinübernahme nach `main` steht aus. [Prüfbericht](PRUEFUNG.md#version-01000).
 
 ### Added
 
