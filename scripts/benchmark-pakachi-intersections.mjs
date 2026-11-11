@@ -7,7 +7,7 @@ import * as T from 'three';
 import {parseModel,disposeModel} from '../src/viewer.ts';
 import {StudioRig} from '../src/studio-rig.ts';
 import {createPoseSurfaceChecker,poseSurfacePositions} from '../src/pose-surface-check.ts';
-import {auditMeshTopology} from '../src/mesh-topology-audit.ts';
+import {auditMeshTopology,proposeStableDegenerateFaceRemoval} from '../src/mesh-topology-audit.ts';
 import {checkSurfaceIntersections,SURFACE_INTERSECTION_TRIANGLE_LIMIT,SURFACE_INTERSECTION_PAIR_BUDGET,SURFACE_INTERSECTION_SPATIAL_MULTIPLIER} from '../src/surface-intersections.ts';
 if(typeof globalThis.ProgressEvent==='undefined')globalThis.ProgressEvent=class extends Event{};
 const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
@@ -18,6 +18,34 @@ for(const form of ['humanoid','animal']){
  try{
   const inspector=createPoseSurfaceChecker(rig),base=rig.capture();
   const topology=rig.surfaces.map((surface,i)=>({mesh:i,name:surface.mesh.name,...auditMeshTopology(surface.base,surface.mesh.geometry.index?.array??null)}));
+  // The same eight actual static joint poses used below; no extra inference.
+  const repairPoseValues=[];
+  for(const name of jointNames){
+   const joint=rig.data.points.find(p=>p.name===name);
+   if(!joint)continue;
+   for(const angle of degrees){
+    const values=structuredClone(base);
+    values[joint.id].rotation=new T.Quaternion().setFromAxisAngle(new T.Vector3(1,0,0),angle*Math.PI/180).toArray();
+    repairPoseValues.push({joint:name,degrees:angle,values});
+   }
+  }
+  const repairPreview=topology.map(entry=>{
+   const common={mesh:entry.mesh,name:entry.name,sourceDegenerate:entry.zeroAreaTriangles,
+    samples:repairPoseValues.length,sourceInvalidIndices:entry.invalidIndices,
+    sourceNonFiniteTriangles:entry.nonFiniteTriangles};
+   if(!entry.zeroAreaTriangles&&!entry.invalidIndices&&!entry.nonFiniteTriangles)
+    return {...common,status:'no-rest-degeneracy',removable:0,withheld:0};
+   const surface=rig.surfaces[entry.mesh],index=surface.mesh.geometry.index?.array??null;
+   // Only one mesh's pose buffers are resident at a time. Never edit GLB or geometry.
+   const samples=repairPoseValues.map(p=>poseSurfacePositions(rig,p.values,entry.mesh));
+   const result=proposeStableDegenerateFaceRemoval(surface.base,samples,index);
+   return {...common,status:result.safeToPreview?'sampled':'blocked',
+    reason:result.reason??null,removable:result.removedFaces.length,
+    withheld:result.withheldFaces.length,
+    removableExamples:result.removedFaces.slice(0,12),
+    withheldExamples:result.withheldFaces.slice(0,12)};
+  });
+
   for(const name of jointNames){
    const joint=rig.data.points.find(p=>p.name===name);
    if(!joint){probes.push({joint:name,status:'joint-not-found'});continue;}
@@ -48,10 +76,10 @@ for(const form of ['humanoid','animal']){
      scope:'Only independent triangles within each mesh; contacts, neighboring faces, other meshes and intermediate motion untested'});
    }
   }
-  forms.push({form,source:path,sha256:hash(bytes),vertices:rig.surfaces.reduce((n,s)=>n+s.base.length/3,0),meshes:rig.surfaces.length,topology,probes});
+  forms.push({form,source:path,sha256:hash(bytes),vertices:rig.surfaces.reduce((n,s)=>n+s.base.length/3,0),meshes:rig.surfaces.length,topology,repairPreview,probes});
  }finally{rig.dispose();disposeModel(gltf.scene);}
 }
 console.log(JSON.stringify({format:'pakachi-intersection-probes',version:1,
- scope:'Read-only bounded diagnostics on existing rigged GLBs; no inferred collision or anatomy approval. Every probe is a static X-axis joint pose; not a continuous motion test.',
+ scope:'Read-only bounded diagnostics on existing rigged GLBs; repairPreview only compares rest degeneracies at eight static hip/knee samples. No GLB edits, inferred continuous collision clearance or anatomy approval.',
  parameters:{joints:jointNames,degrees,maxTrianglesPerMesh:SURFACE_INTERSECTION_TRIANGLE_LIMIT,maxCandidatePairsPerMesh:SURFACE_INTERSECTION_PAIR_BUDGET,maxSpatialBoxPairsPerMesh:SURFACE_INTERSECTION_PAIR_BUDGET*SURFACE_INTERSECTION_SPATIAL_MULTIPLIER,spatialIndex:'balanced-3d-bounds-tree'},
  forms},null,2));

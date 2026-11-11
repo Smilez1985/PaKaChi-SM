@@ -7,6 +7,12 @@ Der lesende `auditMeshTopology` prüft unabhängig vom Schnittbudget: ungültige
 
 Der Audit unterscheidet nun echte **Doppelverwendung derselben Vertex-Indizes** (`duplicateFaces`) von **deckungsgleichen Flächen mit verschiedenen Indizes** (`coincidentFaces`). Letztere entstehen beispielsweise durch getrennte UV-/Material- oder Skinning-Nähte. Die Abbildung nutzt exakte endliche Koordinaten und meldet nur identische Dreiecke unabhängig von der Eckpunktereihenfolge. Nahe, aber nicht exakt identische Flächen sind weiterhin ein gesondertes geometrisches Problem. Beide Kategorien bleiben bei Reparaturvorschlägen unberührt; die Ergebnisse sind **keine** Löschfreigabe.
 
+## Prüfen der Originalformen ohne Umbau
+
+`node scripts/benchmark-pakachi-intersections.mjs` ergänzt für jedes Teilmodell den Abschnitt `repairPreview`. Die Vorschau nutzt die acht tatsächlich gemessenen statischen Hüft-/Kniehaltungen (0°, 22,5°, 45°, 90° je Gelenk). `removable` bezeichnet Nullflächen, die auch in diesen Stichproben keine Fläche haben; `withheld` enthält im Ausgangsnetz auffällige Dreiecke, die in mindestens einer Stichprobe gültig werden. `blocked` bezeichnet ungültige Ausgangsdaten oder ungültige Samples. Es wird **keine** Indexliste im Ergebnis ausgegeben, keine GLB-Datei verändert und nur ein Teilmodell gleichzeitig im Speicher gehalten.
+
+Der Bericht ist eine **Kandidatenliste**, keine automatische Löschfreigabe. Die acht Stichproben decken weder sämtliche gespeicherten Moves noch die kontinuierlichen Zwischenzustände ab.
+
 ## Posenbewusste Nullflächen-Vorschau
 
 `proposeStableDegenerateFaceRemoval(restPositions,posePositions,index)` ist eine zusätzliche, rein lesende Vorsichtsprüfung. Sie schlägt nur Dreiecke zur Entfernung vor, die **im Ausgangsnetz und in jeder übergebenen Pose/Morph-Stichprobe** entartet bleiben. Wenn ein Dreieck bei einer Deformation wieder Fläche erhält, wird seine Face-ID in `withheldFaces` ausgewiesen und nicht entfernt. Geometrie mit falscher Frame-Länge oder ungültigen Koordinaten führt zu einem gesperrten Vorschlag. Es werden weder Originalindexfolge noch UVs, Gewichte oder Morph-Ziele geändert.

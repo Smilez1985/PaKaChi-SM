@@ -14,6 +14,10 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ### Added
 
+- Der vorhandene Originalformen-Schnittbenchmark führt die posenbewusste, lesende Nullflächen-Vorschau jetzt bei beiden Formen für die acht statischen Hüft-/Kniehaltungen aus. Ergebnisfelder unterscheiden dauerhaft auffällige, bei Bewegung wieder geöffnete und nicht sicher prüfbare Dreiecke je Teilmodell; Modell- und Skinning-Dateien bleiben unverändert.
+
+### Added
+
 - Eine zusätzlich posenbewusste, rein lesende Nullflächen-Reparaturvorschau hält Dreiecke zurück, die in einer Pose/Morph-Stichprobe wieder gültige Fläche entwickeln; ungültige Pose-Daten sperren den Vorschlag. Drei Regressionstests ergänzen die Sicherung. Eine automatische Anwendung bleibt ausdrücklich deaktiviert.
 
 ### Fixed
