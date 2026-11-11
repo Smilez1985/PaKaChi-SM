@@ -35,6 +35,7 @@ Entwicklung auf `develop`; vollständige CI und main-Abnahme ausstehend. [Prüfb
 
 ### Changed
 
+- Drei Browser-Bedienfälle warten bis zu 30 Sekunden auf das tatsächlich abgeschlossene automatische Ergebnis statt nach fünf Sekunden vorzeitig abzubrechen; Ergebnis-, Vorschau-, Übernahme-, Undo- und Speicherprüfungen bleiben erhalten. Der Tierform-Vergleich verlangt die unabhängig belegte Reduktion um vier Warnungen unter den strengeren Paar-Sperren; die 65 vollständigen Paar-/Dehnungs-/Volumenproben bleiben separat verpflichtend.
 - Der vollständige CI-Auftrag erhält maximal 60 statt 45 Minuten für die zusätzlichen Bewegungsgegenprüfungen. Tests, Build, Browserfälle und Importmessungen bleiben verpflichtend.
 
 ## [0.100.0] - 2026-11-11
