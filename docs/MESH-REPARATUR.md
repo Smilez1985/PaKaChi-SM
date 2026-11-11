@@ -10,6 +10,29 @@ Der lesende `auditMeshTopology` prüft unabhängig vom Schnittbudget: ungültige
 4. **Wirklich beschädigte Oberflächen:** Saubere lokale Retopologie, Kanten neu verbinden, Normals ausrichten; bei echten Selbstschnitten robustere CGAL-Prädikate und ggf. Triangle-Soup-Autorefinement verwenden.
 5. **Vorher/Nachher:** Ausgangs-GLB-Hash, Vertex-/Flächenzahl, Grenzen, Gewichte und Morphziele prüfen; 16 Gelenkposen und alle relevanten Moves vergleichen. Nur nach Regressionstest akzeptieren.
 
+## Nächster Trennungsschritt: Daten erhalten
+
+Rechercheabgleich: 11.11.2026. Dieser Abschnitt beschreibt die nächste Umsetzung; ein allgemeiner Trennungsgenerator ist noch nicht implementiert.
+
+Die [CGAL-API für Autorefinement](https://doc.cgal.org/latest/PMP_Boolean_operations/group__PMP__corefinement__grp.html) unterteilt Schnittflächen, entfernt degenerierte Dreiecke und verwendet zusammenfallende Punkte gemeinsam. Iteratives Snap Rounding kann weitere Änderungen erzeugen; bei erfolgloser begrenzter Suche ist das Ergebnis ausdrücklich nur teilweise gültig. Daraus folgt für PaKaChi: kein direkter Ersatz des geriggten Netzes. Zuerst sind Herkunftsabbildung und Übertragung aller Vertex-/Corner-Attribute einschließlich UVs, Hautgewichten und sämtlicher Morph-Ziele nötig. Eine aufgeteilte Schnittlinie stellt außerdem noch keinen gewünschten Abstand zweier Körperflächen her.
+
+Für die zuerst geplante positionsbasierte Variante bleiben Vertex-/Indexreihenfolge, Gewichte und vorhandene Morph-Ziele erhalten. Die [PositionBasedDynamics-Referenz](https://github.com/InteractiveComputerGraphics/PositionBasedDynamics/blob/master/PositionBasedDynamics/PositionBasedDynamics.h) liefert getrennte Punkt–Dreieck- und Kante–Kante-Abstandsbedingungen. Die folgende Kombination ist unser Umsetzungsvorschlag; sie ist noch kein geprüfter PaKaChi-Solver:
+
+1. Nachgewiesene Schnittpaare mitsamt betroffenen Nachbarflächen erfassen. Ungültige Geometrie und unvollständige Paarberichte zuerst beheben oder den Auftrag ablehnen.
+2. Einen kleinen veränderbaren Bereich und feste Randpunkte bestimmen. Zusammenfallende UV-Vertizes nur dann räumlich koppeln, wenn ihre Ausgangslage und tatsächliche verformte Lage kompatibel sind; Indizes und Attribute bleiben getrennt.
+3. Trennrichtung aus geometrischer Lage und benachbarten Flächen bestimmen, mehrere begrenzte Richtungsvarianten gegentesten. Eine mehrdeutige Lage darf keine frei erfundene Innen-/Außenseite erhalten.
+4. Abstandsbedingungen mit Kantenlängen-/Form- und Volumengegenprüfung kombinieren. Punkt–Dreieck-Abstand allein deckt nicht jeden Kante–Kante-Schnitt ab; reine Kantenentspannung beseitigt keine Durchdringung zuverlässig.
+5. Positionsvorschlag in eine gewöhnliche sparse Korrekturform zurückführen. Nicht invertierbare oder schlecht konditionierte Hauttransformationen ablehnen; keine Änderung des Original-Rigs.
+6. Alle gespeicherten Posen, Move-Stichproben und zusätzlichen Risikobilder mit den bestehenden Paaridentitäts-, Dehnungs- und Volumensperren prüfen. Erst vollständige Gegenprüfungen erlauben die Vorschau. Weniger Gesamtschnitte dürfen kein neues Paar ausgleichen.
+
+Der [Blender-Diagnoseablauf](https://projects.blender.org/extensions/print3d_toolbox/wiki/Analyze) dient als manuelle Vorlage: Problemflächen gezielt auswählen und betrachten. Drucktauglichkeit und geschlossene Kanten sind keine Belege für animierbare Charakterqualität.
+
+### Abnahme des geplanten Solvers
+
+- Synthetische Punkt–Fläche- und Kante–Kante-Durchdringungen einschließlich unbeweglicher Ränder, Nahtkopien, Mehrdeutigkeiten und Budget-/Abbruchfällen.
+- Echte Originalform: tatsächliche automatische Suche statt einer manuell vorbereiteten Trennreferenz. Gespeicherter Vorschlag mit Quell-Hashes und mindestens 65 unabhängigen vollständigen Körper-Paar-/Dehnungs-/Volumenproben je Form.
+- Bestehende Schnitte und nicht erfasste Kontakte ausdrücklich ausweisen. Für kontinuierliche Bewegungsfreiheit ist eine gesonderte kontinuierliche Kollisionsprüfung erforderlich; Stichproben ersetzen sie nicht.
+
 ## Referenzen
 - Blender: https://projects.blender.org/extensions/print3d_toolbox/wiki/Analyze
 - PyMesh Cleanup: https://github.com/PyMesh/PyMesh/blob/main/docs/api_local_mesh_cleanup.rst

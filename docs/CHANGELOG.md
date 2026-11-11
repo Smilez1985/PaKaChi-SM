@@ -14,6 +14,7 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ### Changed
 
+- Sichere lokale Trennkorrektur anhand von Blender-, CGAL- und PositionBasedDynamics-Primärquellen abgegrenzt: Erhalt von Hautgewichten/Morph-Zielen, kombinierte Abstands-/Formbedingungen und tatsächliche Originalform-Abnahme als nächste Umsetzung festgehalten. Noch kein implementierter Trennungsgenerator.
 - Actions-Verbrauch begrenzt: vollständige CI nur bei PR/main und manueller Auslösung; Originalformen-/Bewegungsbenchmarks nur manuell. Lesender Topologie-Audit zählt Null-/Doppelflächen, kaputte Indizes, nicht-manifold/offene Kanten und identische Koordinaten ohne UV-/Skinning-Daten automatisch zu verändern.
 
 ## [0.101.0] - 2026-11-11
