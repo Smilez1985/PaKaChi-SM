@@ -1,21 +1,6 @@
 name: PaKaChi automatic motion evidence
 on:
   workflow_dispatch:
-  push:
-    branches: [develop]
-    paths:
-      - '.github/workflows/correction-motion.yml'
-      - 'scripts/benchmark-correction-motion.mjs'
-      - 'scripts/*pakachi*'
-      - 'src/automatic-skin-correction.ts'
-      - 'src/corrective-intersection-attenuation.ts'
-      - 'src/corrective-strain-guard.ts'
-      - 'src/geometric-skin-correction.ts'
-      - 'src/pose-surface-check.ts'
-      - 'src/pose-weight-correction.ts'
-      - 'src/surface-intersections.ts'
-      - 'src/surface-edge-relaxation.ts'
-      - 'package-lock.json'
 permissions:
   contents: read
 concurrency:

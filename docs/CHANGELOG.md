@@ -12,6 +12,10 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+### Changed
+
+- Actions-Verbrauch begrenzt: vollständige CI nur bei PR/main und manueller Auslösung; Originalformen-/Bewegungsbenchmarks nur manuell. Lesender Topologie-Audit zählt Null-/Doppelflächen, kaputte Indizes, nicht-manifold/offene Kanten und identische Koordinaten ohne UV-/Skinning-Daten automatisch zu verändern.
+
 ## [0.101.0] - 2026-11-11
 
 Zeitstempel: 2026-11-11T07:15:32+01:00 (Europe/Berlin)
