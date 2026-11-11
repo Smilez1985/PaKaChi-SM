@@ -1,5 +1,7 @@
 import type {EdgeWorkBudget} from './skin-edge-fit.ts';
 type Numbers=ArrayLike<number>;
+export const MAX_SURFACE_RELAXATION_ACTIVE_VERTICES=8192;
+export const SURFACE_RELAXATION_ITERATIONS=128;
 /** Bounded positional edge-length projections with fixed boundaries and tied UV seams.
  * Returns virtual posed coordinates, never edits geometry or certifies collision freedom. */
 export async function relaxSurfaceEdges(input:{rest:Numbers;positions:Numbers;index:Numbers;mobility:Numbers},signal:AbortSignal,budget:EdgeWorkBudget,valid:()=>boolean=()=>true){
@@ -16,7 +18,7 @@ export async function relaxSurfaceEdges(input:{rest:Numbers;positions:Numbers;in
   else{canonical[v]=v;groups.set(key,[v]);mass[v]=mobility[v];}
  }
  const active=[...groups.values()].filter(g=>mass[g[0]]>0),activeVertices=active.reduce((n,g)=>n+g.length,0);
- if(!activeVertices||activeVertices>8192)return null;
+ if(!activeVertices||activeVertices>MAX_SURFACE_RELAXATION_ACTIVE_VERTICES)return null;
  const edges:{a:number;b:number;length:number}[]=[],seen=new Set<number>();let energy=0;
  for(let i=0;i<index.length;i++)if(!Number.isInteger(index[i])||index[i]<0||index[i]>=count)return null;
  for(let i=0;i<index.length;i+=3)for(let k=0;k<3;k++){
@@ -27,7 +29,7 @@ export async function relaxSurfaceEdges(input:{rest:Numbers;positions:Numbers;in
   edges.push({a,b,length});if(edges.length>30000)return null;
  }
  if(!edges.length||energy<1e-16)return null;
- const iterations=128,operations=edges.length*iterations;
+ const iterations=SURFACE_RELAXATION_ITERATIONS,operations=edges.length*iterations;
  if(budget.used+operations>budget.limit){budget.exhausted=true;return null;}budget.used+=operations;
  for(let iteration=0;iteration<iterations;iteration++){
   if(iteration%4===0){await new Promise<void>(resolve=>setTimeout(resolve,0));ensure();}

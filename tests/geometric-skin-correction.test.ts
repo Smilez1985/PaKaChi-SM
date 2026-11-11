@@ -7,6 +7,7 @@ import {buildGeometricCorrection,dualQuaternionPoint} from '../src/geometric-ski
 import {validCorrectiveShapes,MAX_CORRECTIVE_VERTICES} from '../src/studio-corrective-shapes.ts';
 import {createPoseSurfaceChecker,neutralPoseValues,poseSurfacePositions} from '../src/pose-surface-check.ts';
 import {findAutomaticSkinCorrection} from '../src/automatic-skin-correction.ts';
+import {moveCheckTimes} from '../src/move-limit-check.ts';
 import {noMeasuredRegression} from '../src/pose-weight-correction.ts';
 import {StudioRig} from '../src/studio-rig.ts';
 import {StudioEditor} from '../src/studio-editor.ts';
@@ -41,9 +42,9 @@ test('reset and geometric previews preserve unrelated ordinary morph influences'
 test('automatic job selects a geometric candidate and checks all stored pose/move samples',async()=>{
  const f=fixture(),before=project(f.rig),p=await findAutomaticSkinCorrection(f.rig,new AbortController().signal);assert.ok(p);assert.equal(p.kind,'geometry');assert.ok(p.shape);assert.equal(p.after.volumeIssues,0);assert.deepEqual(project(f.rig),before);const inspect=createPoseSurfaceChecker(f.rig);for(let k=0;k<=16;k++){const pose={...f.pose,values:f.rig.sample(f.rig.data.moves[0],k/16)};assert.equal(noMeasuredRegression(inspect(pose),inspect(pose,undefined,p.shape)),true);}f.rig.dispose();
 });
-test('ranking prefers the sampled whole movement over a better isolated target frame',async()=>{
+test('a safe partial geometric proposal retains whole-movement warnings when unsafe weight transfers are excluded',async()=>{
  const f=twistFixture(true,true);f.rig.data.moves[0].loop=true;const target={...f.pose,values:f.rig.sample(f.rig.data.moves[0],15/16)},shape=buildGeometricCorrection(f.rig,target,f.joint,2)!,inspect=createPoseSurfaceChecker(f.rig);assert.ok(shape);assert.equal(inspect(target,undefined,shape).issues,0);assert.ok(inspect(f.pose,undefined,shape).issues>0);
- const p=await findAutomaticSkinCorrection(f.rig,new AbortController().signal);assert.ok(p);assert.notEqual(p.kind,'geometry');assert.equal(p.sampledIssues,0);f.rig.dispose();
+ const p=await findAutomaticSkinCorrection(f.rig,new AbortController().signal);assert.ok(p);assert.equal(p.kind,'geometry');assert.ok(p.shape);const samples=[...f.rig.data.poses,...moveCheckTimes(f.rig,f.rig.data.moves[0]).map(time=>({...f.pose,values:f.rig.sample(f.rig.data.moves[0],time)}))];const measured=samples.reduce((n,pose)=>n+inspect(pose,undefined,p.shape).issues,0);assert.equal(p.sampledIssues,measured);assert.ok(measured>0,'unrepaired extreme frames remain visible');for(const pose of samples)assert.equal(noMeasuredRegression(inspect(pose),inspect(pose,undefined,p.shape)),true);f.rig.dispose();
 });
 test('editor previews and commits one geometric shape with unchanged pose/move values and one undo step',async()=>{
  const w=new Window();Object.assign(globalThis,{document:w.document,Event:w.Event,Option:function(text='',value=''){const o=w.document.createElement('option');o.textContent=text;o.value=value;return o;}});const f=fixture(),host=document.createElement('div'),view={setEnabled(){},setFigureEnabled(){},setAction(){},setRotation(){},select(){},refresh(){},dispose(){}};

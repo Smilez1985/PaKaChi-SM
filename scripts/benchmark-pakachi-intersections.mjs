@@ -7,6 +7,7 @@ import * as T from 'three';
 import {parseModel,disposeModel} from '../src/viewer.ts';
 import {StudioRig} from '../src/studio-rig.ts';
 import {createPoseSurfaceChecker,poseSurfacePositions} from '../src/pose-surface-check.ts';
+import {auditMeshTopology} from '../src/mesh-topology-audit.ts';
 import {checkSurfaceIntersections,SURFACE_INTERSECTION_TRIANGLE_LIMIT,SURFACE_INTERSECTION_PAIR_BUDGET,SURFACE_INTERSECTION_SPATIAL_MULTIPLIER} from '../src/surface-intersections.ts';
 if(typeof globalThis.ProgressEvent==='undefined')globalThis.ProgressEvent=class extends Event{};
 const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
@@ -16,6 +17,7 @@ for(const form of ['humanoid','animal']){
  const gltf=await parseModel(Uint8Array.from(bytes).buffer),rig=new StudioRig(gltf.scene),probes=[];
  try{
   const inspector=createPoseSurfaceChecker(rig),base=rig.capture();
+  const topology=rig.surfaces.map((surface,i)=>({mesh:i,name:surface.mesh.name,...auditMeshTopology(surface.base,surface.mesh.geometry.index?.array??null)}));
   for(const name of jointNames){
    const joint=rig.data.points.find(p=>p.name===name);
    if(!joint){probes.push({joint:name,status:'joint-not-found'});continue;}
@@ -46,7 +48,7 @@ for(const form of ['humanoid','animal']){
      scope:'Only independent triangles within each mesh; contacts, neighboring faces, other meshes and intermediate motion untested'});
    }
   }
-  forms.push({form,source:path,sha256:hash(bytes),vertices:rig.surfaces.reduce((n,s)=>n+s.base.length/3,0),meshes:rig.surfaces.length,probes});
+  forms.push({form,source:path,sha256:hash(bytes),vertices:rig.surfaces.reduce((n,s)=>n+s.base.length/3,0),meshes:rig.surfaces.length,topology,probes});
  }finally{rig.dispose();disposeModel(gltf.scene);}
 }
 console.log(JSON.stringify({format:'pakachi-intersection-probes',version:1,

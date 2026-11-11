@@ -1,0 +1,167 @@
+{
+  "format": "pakachi-edge-relaxation-evidence",
+  "version": 1,
+  "scope": "Static independent-face collision samples and bounded pose/move checks; no anatomical, cross-mesh or continuous-motion clearance.",
+  "forms": [
+    {
+      "form": "humanoid",
+      "source": "public/model-zoo/pakachi-rigged/humanoid.glb",
+      "sha256": "2ffd6401a1484ea8ad279ed314c5944c0f01034743f0df9795c30a8121f65abd",
+      "joint": "LeftHip",
+      "axis": "X",
+      "degrees": 90,
+      "mode": "full-automatic-job",
+      "beforeIssues": 367,
+      "status": "accepted-automatic-proposal",
+      "afterIssues": 345,
+      "afterVolumeIssues": 0,
+      "method": "edge-relaxation",
+      "affectedVertices": 877,
+      "independentSamples": 65,
+      "regressions": [],
+      "bodyCuts": [
+        {
+          "fraction": 0.25,
+          "degrees": 22.5,
+          "before": 1,
+          "after": 1,
+          "beforeComplete": true,
+          "afterComplete": true
+        },
+        {
+          "fraction": 0.5,
+          "degrees": 45,
+          "before": 1,
+          "after": 1,
+          "beforeComplete": true,
+          "afterComplete": true
+        },
+        {
+          "fraction": 0.75,
+          "degrees": 67.5,
+          "before": 2,
+          "after": 1,
+          "beforeComplete": true,
+          "afterComplete": true
+        },
+        {
+          "fraction": 1,
+          "degrees": 90,
+          "before": 21,
+          "after": 8,
+          "beforeComplete": true,
+          "afterComplete": true
+        }
+      ],
+      "collisionGate": {
+        "accepted": true,
+        "checkedFrames": 4,
+        "unmeasurableFrames": 0,
+        "checkedMeshes": 4,
+        "unmeasurableMeshes": 0,
+        "newIntersections": 0,
+        "complete": true
+      },
+      "automatic": {
+        "checkedPoses": 2,
+        "motionSamples": 33,
+        "checkedMoves": 1,
+        "checkedCandidates": 30,
+        "region": {
+          "center": [
+            0.3,
+            -0.115,
+            0.065
+          ],
+          "radius": 0.14512063946937387
+        },
+        "strength": 1,
+        "edgeOperations": 4629135,
+        "vertexSamples": 99946875,
+        "vertexBudgetExhausted": true
+      }
+    },
+    {
+      "form": "animal",
+      "source": "public/model-zoo/pakachi-rigged/animal.glb",
+      "sha256": "25226f09bbdd02f4ec4e20f013f5585a3816df54dafc447ce308225a68202703",
+      "joint": "LeftHip",
+      "axis": "X",
+      "degrees": 22.5,
+      "mode": "full-automatic-job",
+      "beforeIssues": 760,
+      "status": "accepted-automatic-proposal",
+      "afterIssues": 745,
+      "afterVolumeIssues": 0,
+      "method": "edge-relaxation",
+      "affectedVertices": 897,
+      "independentSamples": 65,
+      "regressions": [],
+      "bodyCuts": [
+        {
+          "fraction": 0.25,
+          "degrees": 5.625,
+          "before": 74,
+          "after": 74,
+          "beforeComplete": true,
+          "afterComplete": true
+        },
+        {
+          "fraction": 0.5,
+          "degrees": 11.25,
+          "before": 256,
+          "after": 252,
+          "beforeComplete": true,
+          "afterComplete": true
+        },
+        {
+          "fraction": 0.75,
+          "degrees": 16.875,
+          "before": 398,
+          "after": 396,
+          "beforeComplete": true,
+          "afterComplete": true
+        },
+        {
+          "fraction": 1,
+          "degrees": 22.5,
+          "before": 551,
+          "after": 551,
+          "beforeComplete": true,
+          "afterComplete": true
+        }
+      ],
+      "collisionGate": {
+        "accepted": true,
+        "checkedFrames": 4,
+        "unmeasurableFrames": 0,
+        "checkedMeshes": 4,
+        "unmeasurableMeshes": 0,
+        "newIntersections": 0,
+        "complete": true
+      },
+      "automatic": {
+        "checkedPoses": 2,
+        "motionSamples": 33,
+        "checkedMoves": 1,
+        "checkedCandidates": 24,
+        "region": {
+          "center": [
+            -0.0036985462065786123,
+            -0.1316959609587987,
+            -0.28291594982147217
+          ],
+          "radius": 0.1437889077780341
+        },
+        "strength": 1,
+        "edgeOperations": 7214399,
+        "vertexSamples": 99879509,
+        "vertexBudgetExhausted": true
+      }
+    }
+  ],
+  "softwareVersion": "0.100.0",
+  "softwareCommit": "b89c730a7592600b7750f3dbdb6bb58c904d055a",
+  "measuredAt": "2026-11-11T00:47:08+01:00",
+  "reproduction": "node scripts/benchmark-edge-relaxation.mjs"
+}

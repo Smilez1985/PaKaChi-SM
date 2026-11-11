@@ -12,6 +12,49 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+### Changed
+
+- Actions-Verbrauch begrenzt: vollständige CI nur bei PR/main und manueller Auslösung; Originalformen-/Bewegungsbenchmarks nur manuell. Lesender Topologie-Audit zählt Null-/Doppelflächen, kaputte Indizes, nicht-manifold/offene Kanten und identische Koordinaten ohne UV-/Skinning-Daten automatisch zu verändern.
+
+## [0.101.0] - 2026-11-11
+
+Zeitstempel: 2026-11-11T07:15:32+01:00 (Europe/Berlin)
+
+Entwicklung auf `develop`; vollständige CI und main-Abnahme ausstehend. [Prüfbericht](PRUEFUNG.md#version-01010).
+
+### Fixed
+
+- Automatische Gewichts- und Geometrievorschläge prüfen konkrete Schnittpaare jetzt in allen gespeicherten Posen und allen bereits vorhandenen Move-Stichproben. Zwischen den Einzelabfragen wird die Steuerung abgegeben; Abbruch-/Revisionsprüfung und Budget gelten für jede Pose. Außerdem erhalten sie bis zu zwölf zusätzliche zeitliche Viertelschritt-Proben in vier Intervallen um die gemessene innere Risikohaltung. Auch wenn diese Haltung exakt einer gespeicherten Zielpose entspricht, bleiben ihre Nachbarintervalle prüfbar. Unterschiedliche Moves werden nicht miteinander interpoliert; exakte Posenwerte werden nur einmal geprüft.
+- Die vollständige Paaridentitäts-Sperre berücksichtigt dieselben zusätzlichen Haltungen. Die positionelle Nachkorrektur bearbeitet gezielt eine Haltung mit neu nachgewiesenem Paar; nach jedem Gegenschritt gelten erneut alle Pose-/Move-, Dehnungs-, Volumen- und Schnittprüfungen. Höchstens vier solche Gegenläufe teilen das bestehende Budget. Der geometrische Kantenentspanner prüft zuerst den Bereich am tatsächlichen Gelenk, danach einen abweichenden Hotspot; so kann ein vollständig geprüfter gelenknaher Vorschlag erhalten bleiben, bevor weitere Bereiche das Budget verbrauchen. Größere Probenmengen werden in Gruppen von höchstens vier bearbeitet. Die Grenzen von 100.000.000 Vertex-Stichproben und 12.000.000 Kantenoperationen, Abbruch- und Revisionskontrolle bleiben bestehen.
+- Eine bislang akzeptierte 180°-Gewichtsvariante erzeugt bei 174,375° 432 neue transversale Schnittpaare und wird nun verworfen. Die Bedien-/Gewichtsprüfungen verwenden für erfolgreiche Aufträge eine korrigierbare 160°-Vorlage; ein eigener Geometrie- und Browserfall hält die Ablehnung des unsicheren 180°-Falls fest. Unbehobene Warnungen eines sicheren Teilvorschlags bleiben sichtbar. Keine Zusage kontinuierlicher Kollisionsfreiheit.
+
+### Added
+
+- Separater GitHub-Runner für die tatsächlichen automatischen Originalform-Aufträge und je 65 unabhängige vollständige Körper-Paarprüfungen. Ein erfolgreicher Lauf verlangt zwei vollständige Berichte ohne neue Paare oder gemessene Dehnungs-/Volumenregressionen. Vorschläge und Zwischenstände werden auch bei Fehlern als Artefakt gesichert. Der normale CI-Auftrag validiert Browserbericht, fehlende Flaky-/Skip-Fälle, drei Importmessungen und Quell-Hashes vor der Veröffentlichung und schreibt eine maschinenlesbare Zusammenfassung.
+- Lesender Originalform-Benchmark `scripts/benchmark-correction-motion.mjs`: speichert den tatsächlich gefundenen Vorschlag und prüft 65 unabhängige Körper-Paaridentitäten samt Dehnung/Volumen. Mit `--output` entstehen atomare Zwischenstände je Form; `--replay` prüft einen gespeicherten Vorschlag ohne erneute automatische Suche.
+
+### Changed
+
+- Drei Browser-Bedienfälle warten bis zu 30 Sekunden auf das tatsächlich abgeschlossene automatische Ergebnis statt nach fünf Sekunden vorzeitig abzubrechen; Ergebnis-, Vorschau-, Übernahme-, Undo- und Speicherprüfungen bleiben erhalten. Der Tierform-Vergleich verlangt die unabhängig belegte Reduktion um vier Warnungen unter den strengeren Paar-Sperren; die 65 vollständigen Paar-/Dehnungs-/Volumenproben bleiben separat verpflichtend.
+- Der vollständige CI-Auftrag erhält maximal 60 statt 45 Minuten für die zusätzlichen Bewegungsgegenprüfungen. Tests, Build, Browserfälle und Importmessungen bleiben verpflichtend.
+
+## [0.100.0] - 2026-11-11
+
+Zeitstempel: 2026-11-11T00:43:16+01:00 (Europe/Berlin)
+
+Entwicklung auf `develop`; CI #115 für Programmcommit `b89c730a` ist mit 505 Tests, 48 Browserfällen, Build und drei Importmessungen vollständig erfolgreich, Abschlussartefakt geprüft. Die Meilensteinübernahme nach `main` steht aus. [Prüfbericht](PRUEFUNG.md#version-01000).
+
+### Added
+
+- Allgemeiner Abschwächungsschritt für positionelle Hautkorrekturen: an neuen Schnittpaaren werden kleine, tatsächlich gegengeprüfte Teilverschiebungen gesucht. Ausgewählte Nahtkopien bleiben gekoppelt; vollständige Bereichsabfragen aller übergebenen Haltungen und die bestehenden Dehnungs-, Volumen-, Posen-/Move- und Vollnetz-Schnittprüfungen bleiben erforderlich. Acht begrenzte Durchläufe und die unveränderten Arbeitsbudgets verhindern unvollständig geprüfte Ergebnisse.
+- Reproduzierbare Tierform-Referenz mit 65 unabhängigen vollständigen Körper-Paarprüfungen: Nach zwei Abschwächungs-/Dehnungsdurchläufen bleiben 551 → 545 Schnittpaare in der Zielhaltung und 747 → 746 Dehnungswarnungen, ohne neue Paaridentitäten oder gemessene Dehnungs-/Volumenregression in diesen Stichproben. Die explizit vorbereitete Trennung ist eine Referenz, noch kein automatischer Trennungsgenerator im Studio.
+
+### Fixed
+
+- Die automatische Schnittsperre vergleicht konkrete Dreieckspaare. Entfernte alte Schnitte dürfen neue Schnitte an anderer Stelle auch bei gleicher oder kleinerer Gesamtzahl nicht kompensieren. Ein vollständiger Ausgangsbericht erlaubt den Nachweis neuer Paare auch aus einem unvollständigen Nachbericht.
+- Die Nachkorrektur berücksichtigt nun auch die ausgewählte auffällige Haltung der tatsächlichen Bewegung. Exakt identische Haltungen und Haltungen ohne zusätzlichen Formbeitrag werden für die Nachkorrektur zusammengefasst; nahe, unterschiedliche Drehungen bleiben getrennt.
+- Die automatische Radiusreihenfolge berücksichtigt den geschätzten Kantenaufwand und reserviert Suchraum für weitere Radien. Die Rechenbudgets werden nicht erhöht; eine beendete Suche bleibt als begrenzt gekennzeichnet.
+
 ## [0.99.0] - 2026-11-10
 
 Zeitstempel: 2026-11-10T23:27:04+01:00 (Europe/Berlin)
@@ -1917,6 +1960,7 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 
 - Bestehendes Bedienkonzept ausdrücklich als Designdokument eingeordnet und mit Roadmap und Changelog verknüpft.
 
+[0.100.0]: PRUEFUNG.md#version-01000
 [0.99.0]: PRUEFUNG.md#version-0990
 [Unreleased]: https://github.com/Smilez1985/PaKaChi-SM/commits/develop
 [0.20.0]: ./PRUEFUNG.md#version-0200

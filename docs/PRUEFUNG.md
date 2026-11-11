@@ -1,8 +1,84 @@
 # Prüfstand und Protokolle
 
-**Softwarestand: 0.99.0 · Dokumentationsabgleich: 2026-11-10T23:59:31+01:00 (Europe/Berlin).**
+**Softwarestand: 0.101.0 · Dokumentationsabgleich: 2026-11-11T00:43:16+01:00 (Europe/Berlin).**
 
 Alle Prüfnachweise stehen in dieser Datei: ein Abschnitt je Softwareversion sowie gesonderte Abschnitte für datierte Zwischenprüfungen. Die Ergebnisse und Grenzen gelten für den jeweils genannten Stand. Spätere Läufe stehen als Nachtrag im selben Abschnitt. Produktänderungen gehören in den [Changelog](CHANGELOG.md), offene Aufgaben in die [Roadmap](ROADMAP.md).
+
+## Version 0.101.0
+
+Stand: 2026-11-11T08:33:14+01:00. Code auf `develop`; main-Abnahme ausstehend.
+
+Die automatische Paar-Sperre vergleicht alle gespeicherten Posen und alle vorhandenen Move-Stichproben. Bis zu zwölf Viertelschritt-Proben ergänzen vier Intervalle um die gemessene innere Risikohaltung. Exakte Duplikate werden einmal geprüft; unterschiedliche nahe Drehungen bleiben getrennt. Vor jeder vollständigen Einzelabfrage werden Steuerung, Abbruch- und Revisionsprüfung bedient. Eine vorzeitig abgelehnte Sequenz wird nicht als vollständig geprüft gemeldet.
+
+Die positionelle Nachkorrektur bearbeitet nur eine Haltung mit neu bewiesenem Paar; nach jeder Änderung gelten erneut alle Dehnungs-, Volumen-, Pose-/Move- und Paar-Sperren. Höchstens vier Gegenläufe teilen das bestehende Budget. Die Kantenentspannung prüft zuerst den Bereich am tatsächlichen Gelenk und danach einen abweichenden Hotspot. Die Grenzen bleiben 100.000.000 Vertex-Stichproben und 12.000.000 Kantenoperationen.
+
+### Tatsächliche automatische Originalformen-Aufträge
+
+Der separate [GitHub-Lauf #1](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/42976768820) für `397ebd2a19f4a94fc35c5e2724b5902287f61b82` ist vollständig erfolgreich. Er bereitet beide Formen frisch vor, führt die tatsächliche automatische Suche aus und prüft deren tatsächlich zurückgegebenen Vorschlag an je 65 unabhängigen Körpernetz-Haltungen. Der Runner verlangt vollständig erfasste Paaridentitäten, keine neuen Paare, keine gemessene Dehnungs-/Volumenverschlechterung und unveränderte Quelldaten.
+
+| Auftrag | Arbeitsform | Tierform |
+| --- | ---: | ---: |
+| Linke Hüfte / Achse | 90° / X | 22,5° / X |
+| Dehnungswarnungen vorher → nachher | 367 → 345 | 760 → 756 |
+| Körper-Schnittpaare in der Zielhaltung | 21 → 8 | 551 → 551 |
+| Vollständige unabhängige Paar-/Dehnungs-/Volumenproben | 65 | 65 |
+| Neue Paaridentitäten / gemessene Regressionen | 0 / 0 | 0 / 0 |
+| Kantenoperationen | 4.067.066 | 3.533.661 |
+| Vertex-Stichproben | 99.946.875 | 99.879.509 |
+| Suche an Vertex-Grenze beendet | ja | ja |
+
+Die Tierform behält ihre bestehenden Körperschnitte; ihre Reduktion ist damit weiterhin offen. Ein zuvor stärkerer Tierform-Hotspot-Vorschlag (760 → 746 Warnungen) erzeugte neue Paare in 19 der 65 Haltungen und wurde verworfen. Bei 7/16 der Bewegung war die Gesamtzahl sogar unverändert 221 → 221, ein altes Paar wurde aber durch ein neues ersetzt. Reine Gesamtzahlen sind daher keine Freigabe.
+
+[Maschinenlesbare Zusammenfassung](benchmarks/pakachi-motion-correction-2026-11-11-summary.json). Das [Abschlussartefakt](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/42976768820/artifacts/13836975489) enthält die tatsächlich gefundenen Vorschläge, alle Einzelproben und die überprüften Original-GLBs. SHA-256 des Archivs: `865e9a0d066c50587b36837e64c4e9ee1a865283681afdbca24a133216d5c4a4`.
+
+Reproduktion: `node scripts/benchmark-correction-motion.mjs --output test-results/pakachi-motion-correction.json`. Mit `--replay <JSON>` lässt sich ein gespeicherter tatsächlicher Vorschlag ohne erneute Suche prüfen. Atomare Zwischenstände verhindern den Verlust abgeschlossener Teilproben.
+
+### Kern- und Browserprüfung
+
+Die Kernregression weist nach, dass eine zuvor akzeptierte 180°-Gewichtsvariante bei 174,375° 432 neue Paare erzeugt und jetzt abgelehnt wird. Erfolgreiche Bedien-/Berechtigungs-/Budgetprüfungen verwenden eine korrigierbare 160°-Vorlage; der ursprüngliche 180°-Fehlerfall bleibt als ausdrückliche Ablehnung erhalten. Eine weitere Sequenzregression erfasst eine von End-/Mittelproben übersehene achte Haltung, bewahrt Quelldaten und prüft Abbruch vor der nächsten Abfrage.
+
+Lokal bestanden 504 verfügbare allgemeine Tests, drei aufwendige Charakterfälle und zuletzt 32 gezielte Automatik-/Geometrie-/Sequenzprüfungen; TypeScript und Build erfolgreich. Der Arbeitscontainer fiel danach mit `exec-server transport disconnected` aus. Unfertige lokale Messungen sind keine Nachweise. Die vollständige Abnahme wurde auf GitHub fortgesetzt.
+
+Der normale [CI-Lauf #119](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/42976768681) ist mit Fehler beendet: **508/508 Node-Tests**, keine Fehler oder Skips; Build erfolgreich; **45/49 Browserfälle bestanden**. Drei Browserprüfungen gaben nach der bisherigen Fünf-Sekunden-Erwartung auf, während die erweiterte automatische Gegenprüfung noch lief. Sie warten nun bis zu 30 Sekunden auf das tatsächliche Abschluss-/Übernahmeelement; die drei vollständigen Bedienfälle haben maximal 60 Sekunden. Ergebnis-, Vorschau-, Übernahme-, Undo-, Speicher- und Fehlertests bleiben aktiv. Der vierte Fehler verlangte mindestens fünf behobene Tierform-Warnungen, während der unabhängig an 65 Haltungen geprüfte Vorschlag 760 → 756 liefert; der Browser-Mindestwert wird auf diese belegten vier Verbesserungen abgeglichen. Die vollständige normale CI wird mit diesen Testanpassungen neu ausgeführt. Importmessungen und Abschlussvalidierung waren in #119 nach dem Browserfehler nicht ausgeführt und werden nicht als bestanden gewertet. Frühere Läufe #116 bis #118 wurden durch Folgecommits abgelöst und abgebrochen; sie gelten nicht als erfolgreiche vollständige Nachweise.
+
+Freigabelauf #120 für den eingefrorenen Kandidaten: 511/512 Tests bestanden, ein Fehler im parallel ergänzten Topologie-Test. Die Audit-Funktion zählt bei einer doppelten Fläche die zwei zusätzlich gleichgerichteten Kanten korrekt; die Erwartung `0` war falsch und wurde auf `2` korrigiert. Alle vier unveränderten Audit-Funktionen/Fixtures wurden mit den korrekten Erwartungen unabhängig geprüft; die reine Funktionsimplementierung blieb dabei unverändert. Der vollständige Node-/Browser-Freigabelauf ist erneut erforderlich; #120 enthält keinen Browser-/Importnachweis.
+
+Freigabelauf [#121](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/42984914930) für `db6c047b`: **512/512 Node-Tests**, keine Fehler oder Skips; Produktionsbuild erfolgreich; **47/49 Browserfälle bestanden**. Beide Originalform-Fälle bestanden die automatische Suche, Qualitätswerte, Vorschau, Übernahme, Undo/Redo und Prüfung der heruntergeladenen Projektdaten. Erst beim erneuten Dateiimport lief die bisherige Fünf-Sekunden-Erwartung auf die Fertigmeldung ab. Der Import setzt die Dateiauswahl zurück und lädt asynchron; die Prüfungen warten nun auf den tatsächlichen Abschluss (initial 30, beim größeren Korrekturprojekt 60 Sekunden) und verlangen zusätzlich eine neue Studio-Sitzung. Das Ergebnis darf nicht aus dem alten Studio stammen. Importmessungen und Abschlussvalidierung wurden nach dem Browserfehler nicht ausgeführt; #121 ist keine vollständige Freigabe.
+
+Grenzen: 65 diskrete Körpernetzproben sind keine kontinuierliche Kollisionsfreiheit. Bestehende Schnitte, Kontakte, angrenzende Dreiecke, getrennte Teilmodelle und allgemeine Anatomiequalität bleiben offen.
+
+
+## Version 0.100.0
+
+Stand: 2026-11-11T00:43:16+01:00 (Europe/Berlin). Entwicklung auf `develop`; vollständige GitHub-Prüfung einschließlich Artefaktprüfung erfolgreich, Meilensteinübernahme nach `main` ausstehend. Letzter vollständig geprüfter main-Programmstand bleibt 0.99.0 (`78be49d`).
+
+Der neue allgemeine Abschwächungsschritt sucht für neue Schnittpaare kleine getestete Skalierungen einzelner Verschiebungen, Nahtgruppen oder betroffener Flächen. Lokale Zwei-Flächen-Proben bestimmen Vorschläge; vollständige räumliche Bereichsabfragen über alle übergebenen Haltungen bestätigen sie. Unvollständige Kontakte/Geometrie-/Budgetberichte liefern keine Korrektur. Der Transformationscache wird verweigert, falls der zusätzliche Formtreiber bestehende Treibergewichte verändern würde. Alle Datenänderungen bleiben auf der Kandidatenkopie; Arbeitsbudget, Abbruch und Revisionskontrolle gelten weiter. Nachgeschaltet werden erneut sämtliche gewöhnlichen Pose-/Move-, Dehnungs-, Volumen- und Vollnetz-Schnittprüfungen.
+
+Die abschließende Schnittsperre vergleicht Paaridentitäten statt nur Gesamtzahlen. Die zusätzliche Gegenhaltung enthält jetzt die tatsächlich gewählte auffällige Bewegungsstichprobe; exakte Duplikate und Haltungen ohne Beitrag des zusätzlichen Treibers brauchen keinen gesonderten Nachkorrekturlauf. Die Radiusreihenfolge berücksichtigt geschätzte incident-Kantenkosten und die vorhandenen Solvergrenzen. Diese Schätzung sortiert Varianten, schließt sie aber nicht aus; die globalen Grenzen bleiben 100.000.000 Vertex-Stichproben und 12.000.000 gemeinsame Kantenoperationen.
+
+[Explizit vorbereitete Tierform-Referenz](benchmarks/pakachi-attenuation-2026-11-11.json), reproduzierbar mit `node --test tests/corrective-attenuation-character.test.ts`: Ausgehend vom gespeicherten 0.99.0-Vorschlag reduziert die unverfeinerte Trennprobe 551 → 543 Ziel-Schnitte, erzeugt aber in neun der 65 Zwischenhaltungen neue Paare. Zwei begrenzte Abschwächungs-/Dehnungsdurchläufe erhalten **551 → 545** Ziel-Schnitte und **747 → 746** Dehnungswarnungen. An allen 65 unabhängigen Körpernetzproben sind die Paarberichte vollständig, kein neues Paar bleibt und keine gemessene Dehnungs-/Volumenverschlechterung tritt auf. Das bisherige vollständige Einfrieren verlor diese Schnittverbesserung. **Der allgemeine Gegenschritt ist in der automatischen Suche integriert; die explizit vorbereitete Trennung ist noch kein automatischer Trennungsgenerator.**
+
+[Vollständige automatische Originalform-Aufträge](benchmarks/pakachi-attenuation-automatic-2026-11-11.json), mit `node scripts/benchmark-edge-relaxation.mjs` reproduzierbar:
+
+| Standardauftrag | Arbeitsform | Tierform |
+| --- | ---: | ---: |
+| Linke Hüfte | 90° | 22,5° |
+| Dehnungswarnungen vorher → nachher | 367 → 345 | 760 → 745 |
+| Körper-Schnittpaare in der Zielhaltung | 21 → 8 | 551 → 551 |
+| Gespeicherte Posen / Move-Stichproben | 2 / 33 | 2 / 33 |
+| Zusätzliche unabhängige Dehnungs-/Volumenhaltungen | 65 | 65 |
+| Vollständig gemessene Körper-Schnitthaltungen | 4 | 4 |
+| Vertex-Stichproben | 99.946.875 | 99.879.509 |
+| Gemeinsame Kantenoperationen | 4.629.135 | 7.214.399 |
+| Suche an Vertex-Grenze beendet | ja | ja |
+
+Die automatische Arbeitsform-Körpermessung lautet 1 / 1 / 2 / 21 → 1 / 1 / 1 / 8 an 22,5° / 45° / 67,5° / 90°. Die Tierform misst 74 / 256 / 398 / 551 → 74 / 252 / 396 / 551 an 5,625° / 11,25° / 16,875° / 22,5°. Alle vier Paaridentitäts-Sperren akzeptieren die jeweiligen Vorschläge vollständig. Die zusätzliche 65er-Gegenprobe dieser automatischen Vorschläge deckt Dehnung/Volumen ab; sie ist von den 65 vollständigen Paarproben der gesonderten expliziten Trennreferenz zu unterscheiden. Die gespeicherten Gelenk-/Move-Daten bleiben unverändert. Beide Suchen enden am unveränderten Vertexbudget und liefern nur den zuvor vollständig geprüften besten Vorschlag.
+
+Lokal vor dem Commit: **48/48 Kernprüfungen**, beide Originalcharakterprüfungen und die dichte Tierform-Referenz erfolgreich; TypeScript und Produktionsbuild erfolgreich. Die vollständige [GitHub-Prüfung #115](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/42926070961) für `b89c730a7592600b7750f3dbdb6bb58c904d055a` ist abgeschlossen: **505/505 Node-Tests**, keine Fehler, Abbrüche oder übersprungenen Fälle; Produktionsbuild, **48/48 Browserfälle** und drei Importmessungen erfolgreich. Abschlussartefakt `13816326902` heruntergeladen und geprüft: SHA-256 `5117d5c7c1950eac5fc22a9d7abc1cdfcbccbb96cd0d110929726b1621bad917`; Browserbericht ohne unerwartete, instabile oder übersprungene Fälle; Originalform-Hashes stimmen mit der Referenz überein. Import-Framegrenzen: 3.313 / 3.804,9 / 3.486,3 ms, Median 3.486,3 ms.
+
+Wiederaufnahme 2026-11-11T06:49:19+01:00: Nach diesem Commit liegen zusätzliche zeitliche Mittelpunktproben als **nicht integrierter Versuch** vor. Erneute lokale Gegenprüfung: 18/23 Kernprüfungen bestanden, fünf bestehende automatische Aufträge liefern keinen Vorschlag; Build erfolgreich. Das ist ausdrücklich kein Fehlerstatus des grünen Programmcommits. Vor weiterer Freigabe müssen die neu erfassten Paarbefunde untersucht werden. [Wiederherstellungspunkt mit Patch, Skripten, Referenz und nächsten Schritten](benchmarks/pakachi-recovery-2026-11-11.json).
+
+Grenzen: Stichproben belegen keine kontinuierliche Kollisionsfreiheit. Bestehende Selbstschnitte, Kontakte, angrenzende Dreiecke, getrennte Teilnetze und allgemeine Anatomiequalität bleiben offen. Keine abgeschlossene Charakterfreigabe oder zuverlässige 2D-zu-fertigem-Charakter-Zusage.
 
 ## Version 0.99.0
 

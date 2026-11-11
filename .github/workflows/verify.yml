@@ -1,7 +1,7 @@
 name: Verify player and studio
 on:
   push:
-    branches: [main, develop]
+    branches: [main]
     paths-ignore:
       - 'README.md'
       - 'docs/**/*.md'
@@ -17,7 +17,7 @@ concurrency:
 jobs:
   verify:
     runs-on: ubuntu-24.04
-    timeout-minutes: 45
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v7.0.1
         with:
@@ -43,6 +43,29 @@ jobs:
       - run: npm run test:e2e
       - name: Production browser import benchmark
         run: node scripts/benchmark-browser-import.mjs --runs 3 --transfers 256 > test-results/browser-import-benchmark.json
+      - name: Validate browser evidence before publication
+        run: |
+          python3 - <<'PY'
+          import base64, hashlib, io, json, math, os, re, zipfile
+          from pathlib import Path
+          html=Path('playwright-report/index.html').read_text()
+          encoded=re.search(r'<script id="playwrightReportBase64"[^>]*>data:application/zip;base64,([^<]+)',html).group(1)
+          with zipfile.ZipFile(io.BytesIO(base64.b64decode(encoded))) as archive:
+              report=json.loads(archive.read('report.json'))
+          stats=report['stats']
+          assert stats['total']>0 and stats['expected']==stats['total'] and stats['ok'],stats
+          assert all(stats[k]==0 for k in ['unexpected','flaky','skipped']),stats
+          assert not report['errors'],report['errors']
+          imports=json.loads(Path('test-results/browser-import-benchmark.json').read_text())
+          assert imports['runs']==3 and len(imports['samples'])==3
+          assert all(math.isfinite(s['frameBoundaryMs']) and s['frameBoundaryMs']>=0 for s in imports['samples'])
+          reference=json.loads(Path('docs/benchmarks/pakachi-attenuation-automatic-2026-11-11.json').read_text())
+          hashes={e['form']:hashlib.sha256(Path(e['source']).read_bytes()).hexdigest() for e in reference['forms']}
+          assert all(hashes[e['form']]==e['sha256'] for e in reference['forms'])
+          summary={'sourceCommit':os.environ['GITHUB_SHA'],'browserStats':stats,'browserDurationMs':report['duration'],'importRuns':3,'frameBoundaryMs':[s['frameBoundaryMs'] for s in imports['samples']],'medianFrameBoundaryMs':imports['medianFrameBoundaryMs'],'sourceHashes':hashes}
+          Path('test-results/verification-summary.json').write_text(json.dumps(summary,indent=2)+'\n')
+          print('PAKACHI_VERIFICATION_SUMMARY='+json.dumps(summary))
+          PY
       - name: Browser evidence
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v7.0.2
@@ -51,7 +74,6 @@ jobs:
           path: |
             playwright-report/
             test-results/
-            public/model-zoo/pakachi-rigged/
-            docs/benchmarks/pakachi-rigging-2026-11-07.json
-          retention-days: 14
+            test-results/verification-summary.json
+          retention-days: 5
           if-no-files-found: ignore

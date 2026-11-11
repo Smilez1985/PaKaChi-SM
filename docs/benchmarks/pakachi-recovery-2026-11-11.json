@@ -1,0 +1,231 @@
+{
+  "format": "pakachi-interrupted-work-checkpoint",
+  "version": 1,
+  "capturedAt": "2026-11-11T06:49:19+01:00",
+  "repository": "Smilez1985/PaKaChi-SM",
+  "baseCommit": "b89c730a7592600b7750f3dbdb6bb58c904d055a",
+  "mainCommit": "a18ca4145975e8e666bc95ffcf9a6c545e2c6d60",
+  "verifiedCI": {
+    "run": 42926070961,
+    "job": 130212741002,
+    "tests": 505,
+    "failures": 0,
+    "skipped": 0,
+    "browserCases": 48,
+    "importRuns": 3,
+    "artifact": 13816326902,
+    "verification": {
+      "verified": true,
+      "archiveSha256": "5117d5c7c1950eac5fc22a9d7abc1cdfcbccbb96cd0d110929726b1621bad917",
+      "browserStats": {
+        "total": 48,
+        "expected": 48,
+        "unexpected": 0,
+        "flaky": 0,
+        "skipped": 0,
+        "ok": true
+      },
+      "browserDurationMs": 1155064.12,
+      "samples": 3,
+      "frameBoundaryMs": [
+        3313,
+        3804.9,
+        3486.3
+      ],
+      "medianFrameBoundaryMs": 3486.3,
+      "characterHashesMatch": true,
+      "screenshots": 4
+    }
+  },
+  "pendingExperiment": {
+    "status": "not-integrated",
+    "purpose": "Extra temporal collision probes around measured motion risk peak",
+    "coreTests": {
+      "total": 23,
+      "passed": 18,
+      "failed": 5
+    },
+    "productionBuild": "passed",
+    "failure": "Five existing automatic repair tests return no proposal under the additional midpoint collision gate. Diagnose pair evidence before modifying acceptance rules or test expectations.",
+    "patch": "diff --git a/src/automatic-skin-correction.ts b/src/automatic-skin-correction.ts\nindex cd08d31..3572693 100644\n--- a/src/automatic-skin-correction.ts\n+++ b/src/automatic-skin-correction.ts\n@@ -9,7 +9,7 @@ import {moveCheckTimes} from './move-limit-check.ts';\n import {transferSkinInfluences} from './studio-weight-transfer.ts';\n import {volumeSeverity} from './surface-volume.ts';\n import {buildGeometricCorrection,buildEdgeFitCorrection,buildEdgeRelaxationCorrection} from './geometric-skin-correction.ts';\n-import {activeCorrectiveIntersectionPoses,attenuateCorrectiveIntersections} from './corrective-intersection-attenuation.ts';\n+import {distinctIntersectionPoses,activeCorrectiveIntersectionPoses,attenuateCorrectiveIntersections} from './corrective-intersection-attenuation.ts';\n import {limitCorrectiveStrain} from './corrective-strain-guard.ts';\n import {MAX_CORRECTIVE_VERTICES} from './studio-corrective-shapes.ts';\n import type {StudioCorrectiveShape} from './studio-corrective-shapes.ts';\n@@ -66,6 +66,14 @@ export function selectCollisionMotionFrames<T extends {before:SurfaceReport}>(fr\n  chosen.add(interior[0]);\n  return [...chosen].sort((a,b)=>a-b).map(i=>frames[i]);\n }\n+/** Four temporal midpoints around the measured interior risk peak. They resolve\n+ * the adjacent intervals, including a peak equal to the saved target. No promise\n+ * of continuous clearance; never interpolate across different saved moves. */\n+export function collisionMotionRefinementTimes<T extends {before:SurfaceReport;origin:{kind:string;id:string;time?:number}}>(frames:readonly T[]){\n+ const selected=selectCollisionMotionFrames(frames),peak=selected.find(f=>f!==frames[0]&&f!==frames.at(-1));if(!peak)return [];\n+ const i=frames.indexOf(peak),result:{id:string;time:number}[]=[];\n+ for(const offset of [-2,-1,0,1]){const a=frames[i+offset]?.origin,b=frames[i+offset+1]?.origin;if(!a||!b||a.kind!=='move'||b.kind!=='move'||a.id!==b.id||a.time===undefined||b.time===undefined||a.time>=b.time)continue;result.push({id:a.id,time:(a.time+b.time)/2});}return result;\n+}\n export const AUTOMATIC_SKIN_VERTEX_BUDGET=100_000_000;\n export const AUTOMATIC_SKIN_SAMPLE_LIMIT=512;\n class AutomaticSkinBudgetError extends Error {}\n@@ -128,7 +136,9 @@ export async function findAutomaticSkinCorrection(rig:StudioRig,signal:AbortSign\n  if(!target||target.before.status!=='outside'){ensure();return null;}\n  const motionFrames=frames.filter(f=>f.origin.kind==='move');\n  const selectedMotion=selectCollisionMotionFrames(motionFrames);\n- const intersectionPoses=[target.pose,...selectedMotion.map(f=>f.pose)];\n+ const neighboringMotion=collisionMotionRefinementTimes(motionFrames).map(({id,time})=>{const move=rig.data.moves.find(m=>m.id===id)!;return {id:'collision-midpoint',name:move.name,seconds:1,values:rig.sample(move,time)};});\n+ const intersectionPoses=distinctIntersectionPoses([target.pose,...selectedMotion.map(f=>f.pose),...neighboringMotion]);\n+ const intersectionGate=(poses:readonly Pose[],affected:readonly number[],overrides?:SkinOverrides,shape?:StudioCorrectiveShape)=>{for(let i=0;i<poses.length;i+=4)if(!checkCandidateIntersectionFrames(rig,poses.slice(i,i+4),affected,overrides,shape,()=>{ensure();measure();}).accepted)return false;return true;};\n  const joints=correctionJoints(rig,target.before,target.pose);let best:AutomaticSkinProposal|null=null;\n  const emptyScore=()=>({sampledIssues:0,sampledVolumeExcess:0}),scoreReport=(score:ReturnType<typeof emptyScore>,report:SurfaceReport)=>{score.sampledIssues+=report.issues;score.sampledVolumeExcess+=report.meshes.reduce((n,m)=>n+volumeSeverity(m.volume),0);},beats=(score:ReturnType<typeof emptyScore>,report:SurfaceReport)=>!best||score.sampledIssues<best.sampledIssues||score.sampledIssues===best.sampledIssues&&(score.sampledVolumeExcess<best.sampledVolumeExcess-1e-6||Math.abs(score.sampledVolumeExcess-best.sampledVolumeExcess)<=1e-6&&betterSurfaceReport(report,best.after));\n  try{for(const {joint,radius,center}of joints){\n@@ -152,8 +162,8 @@ export async function findAutomaticSkinCorrection(rig:StudioRig,signal:AbortSign\n   const proposal=await searchWeightCorrection(rig,target.pose,joint,chosenRadius,signal,valid,{center,measure,candidate:()=>{state.candidates++;},accept:async(_candidate,overrides)=>{\n    state.phase='validation';const score=emptyScore();\n    for(const frame of frames){await tick();measure();const report=inspect(frame.pose,overrides);if(!noMeasuredRegression(frame.before,report)){state.phase='search';return false;}scoreReport(score,report);}\n-   const intersection=checkCandidateIntersectionFrames(rig,intersectionPoses,[...overrides.keys()],overrides,undefined,()=>{ensure();measure();});\n-   if(!intersection.accepted){state.phase='search';return false;}\n+   const accepted=intersectionGate(intersectionPoses,[...overrides.keys()],overrides);\n+   if(!accepted){state.phase='search';return false;}\n    scores.set(key(_candidate),score);state.phase='search';return true;\n   }});\n   if(proposal&&beats(scores.get(key(proposal))!,proposal.after))best={...proposal,...scores.get(key(proposal))!,target:structuredClone(target.pose),targetOrigin:{...target.origin},jointId:joint.id,motionSamples,checkedMoves:rig.data.moves.length,checkedJoints:state.joints,checkedCandidates:state.candidates};\n@@ -173,7 +183,7 @@ export async function findAutomaticSkinCorrection(rig:StudioRig,signal:AbortSign\n     state.phase='search';return beats(score,after)?{after,score}:null;\n    };\n    let evaluation=await evaluate(shape);if(!evaluation)continue;\n-   const collisionGate=(candidate:StudioCorrectiveShape)=>checkCandidateIntersectionFrames(rig,intersectionPoses,candidate.meshes.map(m=>m.mesh),undefined,candidate,()=>{ensure();measure();}).accepted&&(method!=='edge-relaxation'||checkCandidateIntersectionFrames(rig,correctionSamples(rig,target.pose),candidate.meshes.map(m=>m.mesh),undefined,candidate,()=>{ensure();measure();}).accepted);\n+   const collisionGate=(candidate:StudioCorrectiveShape)=>intersectionGate(intersectionPoses,candidate.meshes.map(m=>m.mesh),undefined,candidate)&&(method!=='edge-relaxation'||intersectionGate(correctionSamples(rig,target.pose),candidate.meshes.map(m=>m.mesh),undefined,candidate));\n    if(!collisionGate(shape)){\n     // Refine only the full-strength positional candidate. Every yielded diagnostic\n     // shares the existing work/revision reserve; the half-strength variant remains\ndiff --git a/src/corrective-intersection-attenuation.ts b/src/corrective-intersection-attenuation.ts\nindex f52ffb9..2c32ead 100644\n--- a/src/corrective-intersection-attenuation.ts\n+++ b/src/corrective-intersection-attenuation.ts\n@@ -6,13 +6,13 @@ import type {EdgeWorkBudget} from './skin-edge-fit.ts';\n import {correctiveMorphBlend,poseSkinMatrices,poseSurfacePositions} from './pose-surface-check.ts';\n import {checkSurfaceIntersections,SURFACE_INTERSECTION_PAIR_BUDGET,SURFACE_INTERSECTION_SPATIAL_MULTIPLIER} from './surface-intersections.ts';\n \n-/** Keep exact distinct poses where the extra driver actually contributes.\n- * Zero contribution is exact; nearby rotations are never rounded into one sample. */\n+/** Exact canonical values; nearby rotations are never rounded into one sample. */\n+export function distinctIntersectionPoses(poses:readonly Pose[]){\n+ const seen=new Set<string>();return poses.filter(pose=>{const key=JSON.stringify(Object.keys(pose.values).sort().map(id=>{const v=pose.values[id];return [id,v.position,v.rotation,v.scale??1];}));if(seen.has(key))return false;seen.add(key);return true;});\n+}\n+/** Keep distinct poses where the extra driver contributes; zero is exact. */\n export function activeCorrectiveIntersectionPoses(rig:StudioRig,poses:readonly Pose[],shape:StudioCorrectiveShape){\n- const seen=new Set<string>();return poses.filter(pose=>{\n-  if(!shape.meshes.some(part=>correctiveMorphBlend(rig,pose.values,part.mesh,shape).amount!==0))return false;\n-  const key=JSON.stringify(Object.keys(pose.values).sort().map(id=>{const v=pose.values[id];return [id,v.position,v.rotation,v.scale??1];}));if(seen.has(key))return false;seen.add(key);return true;\n- });\n+ return distinctIntersectionPoses(poses.filter(pose=>shape.meshes.some(part=>correctiveMorphBlend(rig,pose.values,part.mesh,shape).amount!==0)));\n }\n \n /** Attenuate only tested sparse shifts implicated in new triangle pairs.\ndiff --git a/tests/automatic-skin-correction.test.ts b/tests/automatic-skin-correction.test.ts\nindex 8256a2c..777f66d 100644\n--- a/tests/automatic-skin-correction.test.ts\n+++ b/tests/automatic-skin-correction.test.ts\n@@ -2,7 +2,7 @@ import {test} from 'node:test';\n import assert from 'node:assert/strict';\n import * as T from 'three';\n import {twistFixture} from './helpers/twist-fixture.ts';\n-import {findAutomaticSkinCorrection,skinCorrectionOverrides,checkCandidateIntersectionRegression,checkCandidateIntersectionFrames,selectCollisionMotionFrames,newProvenIntersectionCount} from '../src/automatic-skin-correction.ts';\n+import {findAutomaticSkinCorrection,skinCorrectionOverrides,checkCandidateIntersectionRegression,checkCandidateIntersectionFrames,selectCollisionMotionFrames,collisionMotionRefinementTimes,newProvenIntersectionCount} from '../src/automatic-skin-correction.ts';\n import {createPoseSurfaceChecker,poseSurfacePositions} from '../src/pose-surface-check.ts';\n import {moveCheckTimes} from '../src/move-limit-check.ts';\n import {noMeasuredRegression,searchWeightCorrection} from '../src/pose-weight-correction.ts';\n@@ -132,3 +132,17 @@ test('a budget without a completely checked proposal rejects, and custom budgets\n   assert.deepEqual(f.rig.data,before);\n  }finally{f.rig.dispose();}\n });\n+\n+\n+test('collision midpoint probes surround a risk peak even when the peak equals the saved target',()=>{\n+ const f=twistFixture();try{const report=createPoseSurfaceChecker(f.rig)(f.rig.data.poses[0]),frames=Array.from({length:33},(_,i)=>({origin:{kind:'move',id:'loop',time:i/16},before:{...report,issues:16-Math.abs(i-16)}})),source=structuredClone(frames);\n+  assert.deepEqual(collisionMotionRefinementTimes(frames),[.90625,.96875,1.03125,1.09375].map(time=>({id:'loop',time})));\n+  assert.deepEqual(frames,source);assert.deepEqual(collisionMotionRefinementTimes(frames.slice(0,1)),[]);\n+ }finally{f.rig.dispose();}\n+});\n+test('collision midpoint probes never bridge moves or nonincreasing timeline samples',()=>{\n+ const f=twistFixture();try{const report=createPoseSurfaceChecker(f.rig)(f.rig.data.poses[0]),frames=[0,1,9,1,0].map((issues,i)=>({origin:{kind:'move',id:i<2?'first':'second',time:i<2?i:i-2},before:{...report,issues}}));\n+  assert.deepEqual(collisionMotionRefinementTimes(frames),[{id:'first',time:.5},{id:'second',time:.5},{id:'second',time:1.5}]);\n+  frames[3].origin.time=0;assert.deepEqual(collisionMotionRefinementTimes(frames),[{id:'first',time:.5},{id:'second',time:1}]);\n+ }finally{f.rig.dispose();}\n+});\n",
+    "scripts": {
+      "scripts/probe-100-auto-motion.mjs": "/** Read-only reference evaluation; emits JSON, never rewrites a GLB or applies a proposal. */\nimport {readFile} from 'node:fs/promises';\nimport {createHash} from 'node:crypto';\nimport * as T from 'three';\nimport {parseModel,disposeModel} from '../src/viewer.ts';\nimport {StudioRig} from '../src/studio-rig.ts';\nimport {findAutomaticSkinCorrection,checkCandidateIntersectionFrames} from '../src/automatic-skin-correction.ts';\nimport {correctionSamples,noMeasuredRegression} from '../src/pose-weight-correction.ts';\nimport {createPoseSurfaceChecker,poseSurfacePositions} from '../src/pose-surface-check.ts';\nimport {checkSurfaceIntersections} from '../src/surface-intersections.ts';\nglobalThis.ProgressEvent??=class extends Event{};\nconst forms=[],signal=new AbortController().signal;\nfor(const form of ['humanoid','animal']){\n const source=`public/model-zoo/pakachi-rigged/${form}.glb`,bytes=await readFile(source),model=await parseModel(Uint8Array.from(bytes).buffer),rig=new StudioRig(model.scene);\n try{\n  const neutral=rig.capture(),values=structuredClone(neutral),joint=rig.data.points.find(p=>p.name==='LeftHip'),degrees=form==='humanoid'?90:22.5;values[joint.id].rotation=new T.Quaternion().setFromAxisAngle(new T.Vector3(1,0,0),degrees*Math.PI/180).toArray();const pose={id:'hip',name:'Hip',seconds:1,values};rig.data.poses=[{id:'rest',name:'Rest',seconds:1,values:neutral},pose];rig.data.moves=[{id:'loop',name:'Hip loop',loop:true,poses:['rest','hip']}];\n  const original=JSON.stringify(rig.data),inspect=createPoseSurfaceChecker(rig),before=inspect(pose);let shape,proposal=null;\n  proposal=await findAutomaticSkinCorrection(rig,signal,()=>true,{poseId:'hip'});shape=proposal?.shape;console.error(JSON.stringify({form,jobFinished:true,kind:proposal?.kind??'weights',method:proposal?.geometryMethod,afterIssues:proposal?.after.issues,candidates:proposal?.checkedCandidates,vertexSamples:proposal?.vertexSamples}));\n  const entry={form,source,sha256:createHash('sha256').update(bytes).digest('hex'),joint:'LeftHip',axis:'X',degrees,mode:'full-automatic-job',beforeIssues:before.issues,status:'no-candidate'};\n  if(shape){\n   const after=inspect(pose,undefined,shape),failures=[];\n   for(let i=0;i<=64;i++){const v=structuredClone(neutral);v[joint.id].rotation=new T.Quaternion().setFromAxisAngle(new T.Vector3(1,0,0),degrees*i/64*Math.PI/180).toArray();const p={...pose,values:v},b=inspect(p),a=inspect(p,undefined,shape);if(!noMeasuredRegression(b,a))failures.push({step:i,before:b.issues,after:a.issues});}\n   const m=rig.surfaces.findIndex(s=>s.mesh.name==='PaKaChi_body'),index=rig.surfaces[m].mesh.geometry.index.array,cuts=[];\n   for(const fraction of [.25,.5,.75,1]){const v=structuredClone(neutral);v[joint.id].rotation=new T.Quaternion().setFromAxisAngle(new T.Vector3(1,0,0),degrees*fraction*Math.PI/180).toArray();const b=checkSurfaceIntersections(poseSurfacePositions(rig,v,m),index),a=checkSurfaceIntersections(poseSurfacePositions(rig,v,m,undefined,shape),index);cuts.push({fraction,degrees:degrees*fraction,before:b.intersections,after:a.intersections,beforeComplete:b.checked,afterComplete:a.checked});}\n   const gate=checkCandidateIntersectionFrames(rig,[pose,...correctionSamples(rig,pose)],shape.meshes.map(m=>m.mesh),undefined,shape);\n   Object.assign(entry,{status:proposal&&gate.accepted&&!failures.length?'accepted-automatic-proposal':'rejected-candidate',afterIssues:after.issues,afterVolumeIssues:after.volumeIssues,method:proposal?.geometryMethod??'edge-relaxation',affectedVertices:shape.meshes.reduce((n,m)=>n+m.indices.length,0),independentSamples:65,regressions:failures,bodyCuts:cuts,collisionGate:gate,automatic:proposal?{checkedPoses:proposal.checkedPoses,motionSamples:proposal.motionSamples,checkedMoves:proposal.checkedMoves,checkedCandidates:proposal.checkedCandidates,region:proposal.region,strength:proposal.amount,edgeOperations:proposal.edgeOperations,vertexSamples:proposal.vertexSamples,vertexBudgetExhausted:proposal.vertexBudgetExhausted}:null});\n  }\n  if(original!==JSON.stringify(rig.data))throw Error('Reference evaluation changed the source');forms.push(entry);\n }finally{rig.dispose();disposeModel(model.scene);}\n}\nconsole.log(JSON.stringify({format:'pakachi-edge-relaxation-evidence',version:1,scope:'Static independent-face collision samples and bounded pose/move checks; no anatomical, cross-mesh or continuous-motion clearance.',forms},null,2));\n",
+      "scripts/probe-100-dense-pairs.mjs": "/** Read-only independent dense pair audit of the recorded 0.100.0 winning regions. */\nimport {readFile,writeFile} from 'node:fs/promises';import assert from 'node:assert/strict';import * as T from 'three';import {parseModel,disposeModel} from '../src/viewer.ts';import {StudioRig} from '../src/studio-rig.ts';import {buildEdgeRelaxationCorrection} from '../src/geometric-skin-correction.ts';import {limitCorrectiveStrain} from '../src/corrective-strain-guard.ts';import {attenuateCorrectiveIntersections,activeCorrectiveIntersectionPoses} from '../src/corrective-intersection-attenuation.ts';import {checkCandidateIntersectionFrames,selectCollisionMotionFrames} from '../src/automatic-skin-correction.ts';import {createPoseSurfaceChecker,poseSurfacePositions} from '../src/pose-surface-check.ts';import {correctionSamples,noMeasuredRegression} from '../src/pose-weight-correction.ts';import {moveCheckTimes} from '../src/move-limit-check.ts';import {checkSurfaceIntersections} from '../src/surface-intersections.ts';globalThis.ProgressEvent??=class extends Event{};\nconst reference=JSON.parse(await readFile('/tmp/pakachi-100-cost-reference.json','utf8')),results=[];\nfor(const e of reference.forms){\n const b=await readFile(e.source),model=await parseModel(Uint8Array.from(b).buffer),rig=new StudioRig(model.scene);try{\n const signal=new AbortController().signal,joint=rig.data.points.find(p=>p.name==='LeftHip'),rest=rig.capture(),v=structuredClone(rest);v[joint.id].rotation=new T.Quaternion().setFromAxisAngle(new T.Vector3(1,0,0),e.degrees*Math.PI/180).toArray();const pose={id:'hip',name:'Hip',seconds:1,values:v};rig.data.poses=[{id:'rest',name:'Rest',seconds:1,values:rest},pose];rig.data.moves=[{id:'loop',name:'Loop',loop:true,poses:['rest','hip']}];const source=JSON.stringify(rig.data),inspect=createPoseSurfaceChecker(rig),frames=moveCheckTimes(rig,rig.data.moves[0]).map(time=>{const p={id:'move-'+time,name:'Move',seconds:1,values:rig.sample(rig.data.moves[0],time)};return {pose:p,before:inspect(p)};}),motion=selectCollisionMotionFrames(frames),work={used:0,limit:12000000,exhausted:false};let shape=await buildEdgeRelaxationCorrection(rig,pose,joint,e.automatic.region.radius,signal,work,()=>true,e.automatic.region.center);assert.ok(shape);shape=await limitCorrectiveStrain(rig,shape,[...correctionSamples(rig,pose,8),pose],signal,work);assert.ok(shape);\n const gate=s=>checkCandidateIntersectionFrames(rig,[pose,...motion.map(f=>f.pose)],s.meshes.map(m=>m.mesh),undefined,s).accepted&&checkCandidateIntersectionFrames(rig,correctionSamples(rig,pose),s.meshes.map(m=>m.mesh),undefined,s).accepted;\n if(!gate(shape)){const poses=activeCorrectiveIntersectionPoses(rig,[pose,...motion.map(f=>f.pose),...correctionSamples(rig,pose)],shape);for(let i=0;shape&&i<poses.length;i+=4)shape=await attenuateCorrectiveIntersections(rig,shape,poses.slice(i,i+4),signal,work);assert.ok(shape);shape=await limitCorrectiveStrain(rig,shape,[...correctionSamples(rig,pose,8),pose],signal,work);}\n assert.ok(shape);assert.equal(gate(shape),true);assert.equal(inspect(pose,undefined,shape).issues,e.afterIssues);assert.equal(shape.meshes.reduce((n,m)=>n+m.indices.length,0),e.affectedVertices);await writeFile(`/tmp/pakachi-100-${e.form}-shape.json`,JSON.stringify(shape));\n const m=rig.surfaces.findIndex(s=>s.mesh.name==='PaKaChi_body'),idx=rig.surfaces[m].mesh.geometry.index.array,samples=[];\n for(let step=0;step<=64;step++){const values=structuredClone(rest);values[joint.id].rotation=new T.Quaternion().setFromAxisAngle(new T.Vector3(1,0,0),e.degrees*step/64*Math.PI/180).toArray();const p={...pose,values},bp=new Set(),ap=new Set(),before=checkSurfaceIntersections(poseSurfacePositions(rig,values,m),idx,100000,{onIntersection:(a,b)=>bp.add(a+':'+b)}),after=checkSurfaceIntersections(poseSurfacePositions(rig,values,m,undefined,shape),idx,100000,{onIntersection:(a,b)=>ap.add(a+':'+b)});samples.push({step,fraction:step/64,before:before.intersections,after:after.intersections,complete:before.checked&&after.checked,newPairs:[...ap].filter(p=>!bp.has(p)).length,removedPairs:[...bp].filter(p=>!ap.has(p)).length,surfaceRegression:!noMeasuredRegression(inspect(p),inspect(p,undefined,shape))});if(step%16===0)console.error(JSON.stringify({form:e.form,step}));}\n assert.equal(JSON.stringify(rig.data),source);const regressions=samples.filter(s=>!s.complete||s.newPairs||s.surfaceRegression);results.push({form:e.form,sourceSha256:e.sha256,afterIssues:e.afterIssues,affectedVertices:e.affectedVertices,samples,regressions});console.error(JSON.stringify({form:e.form,regressions}));\n }finally{rig.dispose();disposeModel(model.scene);}\n}\nconsole.log(JSON.stringify({format:'pakachi-automatic-dense-pair-audit',softwareCommit:'b89c730a7592600b7750f3dbdb6bb58c904d055a',scope:'Deterministically rebuilds the recorded winning regions; verifies target count and sparse vertex count, then audits 65 complete body pair/strain/volume samples. No continuous or cross-mesh clearance.',results},null,2));\n",
+      "scripts/probe-100-midpoint-dense.mjs": "/** Read-only independent dense pair audit of the recorded 0.100.0 winning regions. */\nimport {readFile,writeFile} from 'node:fs/promises';import assert from 'node:assert/strict';import * as T from 'three';import {parseModel,disposeModel} from '../src/viewer.ts';import {StudioRig} from '../src/studio-rig.ts';import {buildEdgeRelaxationCorrection} from '../src/geometric-skin-correction.ts';import {limitCorrectiveStrain} from '../src/corrective-strain-guard.ts';import {distinctIntersectionPoses,attenuateCorrectiveIntersections,activeCorrectiveIntersectionPoses} from '../src/corrective-intersection-attenuation.ts';import {checkCandidateIntersectionFrames,selectCollisionMotionFrames,collisionMotionRefinementTimes} from '../src/automatic-skin-correction.ts';import {createPoseSurfaceChecker,poseSurfacePositions} from '../src/pose-surface-check.ts';import {correctionSamples,noMeasuredRegression} from '../src/pose-weight-correction.ts';import {moveCheckTimes} from '../src/move-limit-check.ts';import {checkSurfaceIntersections} from '../src/surface-intersections.ts';globalThis.ProgressEvent??=class extends Event{};\nconst reference=JSON.parse(await readFile('/tmp/pakachi-100-cost-reference.json','utf8')),results=[];\nfor(const e of reference.forms){\n const b=await readFile(e.source),model=await parseModel(Uint8Array.from(b).buffer),rig=new StudioRig(model.scene);try{\n const signal=new AbortController().signal,joint=rig.data.points.find(p=>p.name==='LeftHip'),rest=rig.capture(),v=structuredClone(rest);v[joint.id].rotation=new T.Quaternion().setFromAxisAngle(new T.Vector3(1,0,0),e.degrees*Math.PI/180).toArray();const pose={id:'hip',name:'Hip',seconds:1,values:v};rig.data.poses=[{id:'rest',name:'Rest',seconds:1,values:rest},pose];rig.data.moves=[{id:'loop',name:'Loop',loop:true,poses:['rest','hip']}];const source=JSON.stringify(rig.data),inspect=createPoseSurfaceChecker(rig),frames=moveCheckTimes(rig,rig.data.moves[0]).map(time=>{const p={id:'move-'+time,name:'Move',seconds:1,values:rig.sample(rig.data.moves[0],time)};return {pose:p,before:inspect(p),origin:{kind:'move',id:'loop',time}};}),motion=selectCollisionMotionFrames(frames),work={used:0,limit:12000000,exhausted:false};let shape=await buildEdgeRelaxationCorrection(rig,pose,joint,e.automatic.region.radius,signal,work,()=>true,e.automatic.region.center);assert.ok(shape);shape=await limitCorrectiveStrain(rig,shape,[...correctionSamples(rig,pose,8),pose],signal,work);assert.ok(shape);\n const neighboring=collisionMotionRefinementTimes(frames).map(({time})=>({id:'extra',name:'Extra',seconds:1,values:rig.sample(rig.data.moves[0],time)})),intersectionPoses=distinctIntersectionPoses([pose,...motion.map(f=>f.pose),...neighboring]);const gate=s=>Array.from({length:Math.ceil(intersectionPoses.length/4)},(_,i)=>intersectionPoses.slice(i*4,i*4+4)).every(poses=>checkCandidateIntersectionFrames(rig,poses,s.meshes.map(m=>m.mesh),undefined,s).accepted)&&checkCandidateIntersectionFrames(rig,correctionSamples(rig,pose),s.meshes.map(m=>m.mesh),undefined,s).accepted;\n if(!gate(shape)){const poses=activeCorrectiveIntersectionPoses(rig,[...intersectionPoses,...correctionSamples(rig,pose)],shape);for(let i=0;shape&&i<poses.length;i+=4)shape=await attenuateCorrectiveIntersections(rig,shape,poses.slice(i,i+4),signal,work);assert.ok(shape);shape=await limitCorrectiveStrain(rig,shape,[...correctionSamples(rig,pose,8),pose],signal,work);}\n assert.ok(shape);assert.equal(gate(shape),true);console.error(JSON.stringify({form:e.form,targetIssues:inspect(pose,undefined,shape).issues,vertices:shape.meshes.reduce((n,m)=>n+m.indices.length,0),work}));await writeFile(`/tmp/pakachi-100-${e.form}-midpoint-shape.json`,JSON.stringify(shape));\n const m=rig.surfaces.findIndex(s=>s.mesh.name==='PaKaChi_body'),idx=rig.surfaces[m].mesh.geometry.index.array,samples=[];\n for(let step=0;step<=64;step++){const values=structuredClone(rest);values[joint.id].rotation=new T.Quaternion().setFromAxisAngle(new T.Vector3(1,0,0),e.degrees*step/64*Math.PI/180).toArray();const p={...pose,values},bp=new Set(),ap=new Set(),before=checkSurfaceIntersections(poseSurfacePositions(rig,values,m),idx,100000,{onIntersection:(a,b)=>bp.add(a+':'+b)}),after=checkSurfaceIntersections(poseSurfacePositions(rig,values,m,undefined,shape),idx,100000,{onIntersection:(a,b)=>ap.add(a+':'+b)});samples.push({step,fraction:step/64,before:before.intersections,after:after.intersections,complete:before.checked&&after.checked,newPairs:[...ap].filter(p=>!bp.has(p)).length,removedPairs:[...bp].filter(p=>!ap.has(p)).length,surfaceRegression:!noMeasuredRegression(inspect(p),inspect(p,undefined,shape))});if(step%16===0)console.error(JSON.stringify({form:e.form,step}));}\n assert.equal(JSON.stringify(rig.data),source);const regressions=samples.filter(s=>!s.complete||s.newPairs||s.surfaceRegression);results.push({form:e.form,sourceSha256:e.sha256,afterIssues:inspect(pose,undefined,shape).issues,affectedVertices:shape.meshes.reduce((n,m)=>n+m.indices.length,0),samples,regressions});console.error(JSON.stringify({form:e.form,regressions}));\n }finally{rig.dispose();disposeModel(model.scene);}\n}\nconsole.log(JSON.stringify({format:'pakachi-automatic-dense-pair-audit',softwareVersion:'0.100.0 midpoint development',scope:'Deterministically rebuilds the recorded winning regions; verifies target count and sparse vertex count, then audits 65 complete body pair/strain/volume samples. No continuous or cross-mesh clearance.',results},null,2));\n"
+    },
+    "reference": {
+      "format": "pakachi-edge-relaxation-evidence",
+      "version": 1,
+      "scope": "Static independent-face collision samples and bounded pose/move checks; no anatomical, cross-mesh or continuous-motion clearance.",
+      "forms": [
+        {
+          "form": "humanoid",
+          "source": "public/model-zoo/pakachi-rigged/humanoid.glb",
+          "sha256": "2ffd6401a1484ea8ad279ed314c5944c0f01034743f0df9795c30a8121f65abd",
+          "joint": "LeftHip",
+          "axis": "X",
+          "degrees": 90,
+          "mode": "full-automatic-job",
+          "beforeIssues": 367,
+          "status": "accepted-automatic-proposal",
+          "afterIssues": 345,
+          "afterVolumeIssues": 0,
+          "method": "edge-relaxation",
+          "affectedVertices": 877,
+          "independentSamples": 65,
+          "regressions": [],
+          "bodyCuts": [
+            {
+              "fraction": 0.25,
+              "degrees": 22.5,
+              "before": 1,
+              "after": 1,
+              "beforeComplete": true,
+              "afterComplete": true
+            },
+            {
+              "fraction": 0.5,
+              "degrees": 45,
+              "before": 1,
+              "after": 1,
+              "beforeComplete": true,
+              "afterComplete": true
+            },
+            {
+              "fraction": 0.75,
+              "degrees": 67.5,
+              "before": 2,
+              "after": 1,
+              "beforeComplete": true,
+              "afterComplete": true
+            },
+            {
+              "fraction": 1,
+              "degrees": 90,
+              "before": 21,
+              "after": 8,
+              "beforeComplete": true,
+              "afterComplete": true
+            }
+          ],
+          "collisionGate": {
+            "accepted": true,
+            "checkedFrames": 4,
+            "unmeasurableFrames": 0,
+            "checkedMeshes": 4,
+            "unmeasurableMeshes": 0,
+            "newIntersections": 0,
+            "complete": true
+          },
+          "automatic": {
+            "checkedPoses": 2,
+            "motionSamples": 33,
+            "checkedMoves": 1,
+            "checkedCandidates": 30,
+            "region": {
+              "center": [
+                0.3,
+                -0.115,
+                0.065
+              ],
+              "radius": 0.14512063946937387
+            },
+            "strength": 1,
+            "edgeOperations": 4629135,
+            "vertexSamples": 99946875,
+            "vertexBudgetExhausted": true
+          }
+        },
+        {
+          "form": "animal",
+          "source": "public/model-zoo/pakachi-rigged/animal.glb",
+          "sha256": "25226f09bbdd02f4ec4e20f013f5585a3816df54dafc447ce308225a68202703",
+          "joint": "LeftHip",
+          "axis": "X",
+          "degrees": 22.5,
+          "mode": "full-automatic-job",
+          "beforeIssues": 760,
+          "status": "accepted-automatic-proposal",
+          "afterIssues": 745,
+          "afterVolumeIssues": 0,
+          "method": "edge-relaxation",
+          "affectedVertices": 897,
+          "independentSamples": 65,
+          "regressions": [],
+          "bodyCuts": [
+            {
+              "fraction": 0.25,
+              "degrees": 5.625,
+              "before": 74,
+              "after": 74,
+              "beforeComplete": true,
+              "afterComplete": true
+            },
+            {
+              "fraction": 0.5,
+              "degrees": 11.25,
+              "before": 256,
+              "after": 252,
+              "beforeComplete": true,
+              "afterComplete": true
+            },
+            {
+              "fraction": 0.75,
+              "degrees": 16.875,
+              "before": 398,
+              "after": 396,
+              "beforeComplete": true,
+              "afterComplete": true
+            },
+            {
+              "fraction": 1,
+              "degrees": 22.5,
+              "before": 551,
+              "after": 551,
+              "beforeComplete": true,
+              "afterComplete": true
+            }
+          ],
+          "collisionGate": {
+            "accepted": true,
+            "checkedFrames": 4,
+            "unmeasurableFrames": 0,
+            "checkedMeshes": 4,
+            "unmeasurableMeshes": 0,
+            "newIntersections": 0,
+            "complete": true
+          },
+          "automatic": {
+            "checkedPoses": 2,
+            "motionSamples": 33,
+            "checkedMoves": 1,
+            "checkedCandidates": 24,
+            "region": {
+              "center": [
+                -0.0036985462065786123,
+                -0.1316959609587987,
+                -0.28291594982147217
+              ],
+              "radius": 0.1437889077780341
+            },
+            "strength": 1,
+            "edgeOperations": 7214399,
+            "vertexSamples": 99879509,
+            "vertexBudgetExhausted": true
+          }
+        }
+      ],
+      "softwareVersion": "0.100.0",
+      "softwareCommit": "b89c730a7592600b7750f3dbdb6bb58c904d055a",
+      "measuredAt": "2026-11-11T00:47:08+01:00",
+      "reproduction": "node scripts/benchmark-edge-relaxation.mjs"
+    }
+  },
+  "nextSteps": [
+    "Restore experimental patch onto the exact base commit in an isolated checkout.",
+    "Reproduce with node --test tests/automatic-skin-correction.test.ts tests/corrective-intersection-attenuation.test.ts tests/intersection-pair-regression.test.ts.",
+    "Inspect actual before/after triangle pairs at additional times; keep pair-identity protection.",
+    "Finish both original-form automatic jobs and independent dense pair/strain/volume audit; use durable paths rather than /tmp.",
+    "Commit fixed runtime changes on develop, inspect full CI and artifact before main integration."
+  ]
+}

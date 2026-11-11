@@ -1,14 +1,5 @@
 name: PaKaChi real-form intersection evidence
 on:
-  push:
-    branches: [develop]
-    paths:
-      - '.github/workflows/pakachi-intersections.yml'
-      - 'scripts/benchmark-pakachi-intersections.mjs'
-      - 'src/surface-intersections.ts'
-      - 'src/pose-surface-check.ts'
-      - 'src/studio-rig.ts'
-      - 'src/viewer.ts'
   workflow_dispatch:
 permissions:
   contents: read
@@ -53,5 +44,5 @@ jobs:
         with:
           name: pakachi-intersection-evidence
           path: test-results/pakachi-intersections.json
-          retention-days: 30
+          retention-days: 7
           if-no-files-found: warn
