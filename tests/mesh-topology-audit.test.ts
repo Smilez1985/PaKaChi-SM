@@ -12,7 +12,8 @@ test('tracks duplicate faces and non-manifold edges without removing them',()=>{
  const positions=[0,0,0,1,0,0,0,1,0,0,-1,0,0,0,1];
  const r=auditMeshTopology(positions,[0,1,2,1,0,3,0,1,4,0,1,2]);
  assert.equal(r.duplicateFaces,1);assert.equal(r.nonManifoldEdges,1);
- assert.equal(r.inconsistentWindingEdges,0);
+ // The duplicate face repeats edges 1-2 and 0-2 in the same direction.
+ assert.equal(r.inconsistentWindingEdges,2);
 });
 test('detects exact duplicate vertex positions as advisory not a weld instruction',()=>{
  const p=[...tri([0,0,0],[1,0,0],[0,1,0]),...tri([0,0,0],[0,0,1],[0,1,0])];
