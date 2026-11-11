@@ -9,7 +9,7 @@ import {moveCheckTimes} from './move-limit-check.ts';
 import {transferSkinInfluences} from './studio-weight-transfer.ts';
 import {volumeSeverity} from './surface-volume.ts';
 import {buildGeometricCorrection,buildEdgeFitCorrection,buildEdgeRelaxationCorrection} from './geometric-skin-correction.ts';
-import {distinctIntersectionPoses,activeCorrectiveIntersectionPoses,attenuateCorrectiveIntersections} from './corrective-intersection-attenuation.ts';
+import {distinctIntersectionPoses,attenuateCorrectiveIntersections} from './corrective-intersection-attenuation.ts';
 import {limitCorrectiveStrain} from './corrective-strain-guard.ts';
 import {MAX_CORRECTIVE_VERTICES} from './studio-corrective-shapes.ts';
 import type {StudioCorrectiveShape} from './studio-corrective-shapes.ts';
@@ -61,7 +61,7 @@ export async function checkCandidateIntersectionSequence(rig:StudioRig,poses:rea
  if(!poses.length||poses.length>AUTOMATIC_SKIN_SAMPLE_LIMIT+12)throw Error('Ungültige Anzahl Schnitt-Stichproben.');
  let checkedFrames=0,unmeasurableFrames=0,newIntersections=0;
  for(const pose of poses){await yieldControl();const result=checkCandidateIntersectionRegression(rig,pose,affected,overrides,shape);checkedFrames++;if(!result.complete)unmeasurableFrames++;newIntersections+=result.newIntersections;if(newIntersections)break;}
- return {accepted:newIntersections===0,checkedFrames,unmeasurableFrames,newIntersections,complete:unmeasurableFrames===0&&checkedFrames===poses.length};
+ return {accepted:newIntersections===0,checkedFrames,unmeasurableFrames,newIntersections,failedFrame:newIntersections?checkedFrames-1:null,complete:unmeasurableFrames===0&&checkedFrames===poses.length};
 }
 /** Retain motion boundaries and spend the remaining collision probe at the worst measured frame.
  * Input is ordered by move and sample time. This is not a replacement for full sampling. */
@@ -145,7 +145,7 @@ export async function findAutomaticSkinCorrection(rig:StudioRig,signal:AbortSign
  const motionFrames=frames.filter(f=>f.origin.kind==='move');
  const neighboringMotion=collisionMotionRefinementTimes(motionFrames).map(({id,time})=>{const move=rig.data.moves.find(m=>m.id===id)!;return {id:'collision-midpoint',name:move.name,seconds:1,values:rig.sample(move,time)};});
  const intersectionPoses=distinctIntersectionPoses([...frames.map(f=>f.pose),...neighboringMotion]);
- const intersectionGate=async(poses:readonly Pose[],affected:readonly number[],overrides?:SkinOverrides,shape?:StudioCorrectiveShape)=>(await checkCandidateIntersectionSequence(rig,poses,affected,overrides,shape,async()=>{await tick();measure();})).accepted;
+ const intersectionReport=async(poses:readonly Pose[],affected:readonly number[],overrides?:SkinOverrides,shape?:StudioCorrectiveShape)=>checkCandidateIntersectionSequence(rig,poses,affected,overrides,shape,async()=>{await tick();measure();});
  const joints=correctionJoints(rig,target.before,target.pose);let best:AutomaticSkinProposal|null=null;
  const emptyScore=()=>({sampledIssues:0,sampledVolumeExcess:0}),scoreReport=(score:ReturnType<typeof emptyScore>,report:SurfaceReport)=>{score.sampledIssues+=report.issues;score.sampledVolumeExcess+=report.meshes.reduce((n,m)=>n+volumeSeverity(m.volume),0);},beats=(score:ReturnType<typeof emptyScore>,report:SurfaceReport)=>!best||score.sampledIssues<best.sampledIssues||score.sampledIssues===best.sampledIssues&&(score.sampledVolumeExcess<best.sampledVolumeExcess-1e-6||Math.abs(score.sampledVolumeExcess-best.sampledVolumeExcess)<=1e-6&&betterSurfaceReport(report,best.after));
  try{for(const {joint,radius,center}of joints){
@@ -169,13 +169,13 @@ export async function findAutomaticSkinCorrection(rig:StudioRig,signal:AbortSign
   const proposal=await searchWeightCorrection(rig,target.pose,joint,chosenRadius,signal,valid,{center,measure,candidate:()=>{state.candidates++;},accept:async(_candidate,overrides)=>{
    state.phase='validation';const score=emptyScore();
    for(const frame of frames){await tick();measure();const report=inspect(frame.pose,overrides);if(!noMeasuredRegression(frame.before,report)){state.phase='search';return false;}scoreReport(score,report);}
-   const accepted=await intersectionGate(intersectionPoses,[...overrides.keys()],overrides);
-   if(!accepted){state.phase='search';return false;}
+   const result=await intersectionReport(intersectionPoses,[...overrides.keys()],overrides);
+   if(!result.accepted){state.phase='search';return false;}
    scores.set(key(_candidate),score);state.phase='search';return true;
   }});
   if(proposal&&beats(scores.get(key(proposal))!,proposal.after))best={...proposal,...scores.get(key(proposal))!,target:structuredClone(target.pose),targetOrigin:{...target.origin},jointId:joint.id,motionSamples,checkedMoves:rig.data.moves.length,checkedJoints:state.joints,checkedCandidates:state.candidates};
   for(const method of ['dual-quaternion','edge-fit','edge-relaxation'] as const){
-  const centers=method==='edge-relaxation'&&new T.Vector3().fromArray(center).distanceToSquared(new T.Vector3().fromArray(joint.rest))>1e-12?[center,joint.rest]:[center];
+  const centers=method==='edge-relaxation'&&new T.Vector3().fromArray(center).distanceToSquared(new T.Vector3().fromArray(joint.rest))>1e-12?[joint.rest,center]:[center];
   for(const fitCenter of centers){
   let edgeShape:StudioCorrectiveShape|null=null;
   if(method==='edge-fit'){for(let k=0;k<4;k++)measure();edgeShape=await buildEdgeFitCorrection(rig,target.pose,joint,chosenRadius,signal,edgeBudget,valid,fitCenter);state.edgeOperations=edgeBudget.used;}
@@ -190,19 +190,24 @@ export async function findAutomaticSkinCorrection(rig:StudioRig,signal:AbortSign
     state.phase='search';return beats(score,after)?{after,score}:null;
    };
    let evaluation=await evaluate(shape);if(!evaluation)continue;
-   const collisionGate=async(candidate:StudioCorrectiveShape)=>await intersectionGate(intersectionPoses,candidate.meshes.map(m=>m.mesh),undefined,candidate)&&(method!=='edge-relaxation'||await intersectionGate(correctionSamples(rig,target.pose),candidate.meshes.map(m=>m.mesh),undefined,candidate));
-   if(!await collisionGate(shape)){
-    // Refine only the full-strength positional candidate. Every yielded diagnostic
-    // shares the existing work/revision reserve; the half-strength variant remains
-    // an independent candidate. Attenuation is followed by ALL ordinary gates again.
+   const collisionFailure=async(candidate:StudioCorrectiveShape)=>{
+    for(const poses of [intersectionPoses,...(method==='edge-relaxation'?[correctionSamples(rig,target.pose)]:[])]){
+     const result=await intersectionReport(poses,candidate.meshes.map(m=>m.mesh),undefined,candidate);
+     if(!result.accepted)return poses[result.failedFrame!];
+    }return null;
+   };
+   let failed=await collisionFailure(shape);
+   if(failed){
     if(method!=='edge-relaxation'||strength!==1)continue;
-    // Include the measured motion peak that actually caused rejection. Neutral
-    // and duplicate values spend no refinement query; every gate is repeated below.
-    const refinePoses=activeCorrectiveIntersectionPoses(rig,[...intersectionPoses,...correctionSamples(rig,target.pose)],shape);
-    for(let offset=0;shape&&offset<refinePoses.length;offset+=4)shape=await attenuateCorrectiveIntersections(rig,shape,refinePoses.slice(offset,offset+4),signal,edgeBudget,valid,measure);
-    if(shape)shape=await limitCorrectiveStrain(rig,shape,[...correctionSamples(rig,target.pose,8),target.pose],signal,edgeBudget,valid,measure);
-    state.edgeOperations=edgeBudget.used;if(!shape)continue;
-    evaluation=await evaluate(shape);if(!evaluation||!await collisionGate(shape))continue;
+    // Spend local refinement work only at a pose with a newly proven pair.
+    // Each change is followed by every strain/volume and full-sequence pair gate.
+    for(let pass=0;shape&&failed&&pass<4;pass++){
+     shape=await attenuateCorrectiveIntersections(rig,shape,[failed],signal,edgeBudget,valid,measure);
+     if(shape)shape=await limitCorrectiveStrain(rig,shape,[...correctionSamples(rig,target.pose,8),target.pose],signal,edgeBudget,valid,measure);
+     if(!shape)break;evaluation=await evaluate(shape);if(!evaluation)break;
+     failed=await collisionFailure(shape);
+    }
+    state.edgeOperations=edgeBudget.used;if(!shape||!evaluation||failed)continue;
    }
    const {after,score}=evaluation;
    const parent=rig.data.points.find(p=>p.kind==='bone'&&rig.bones[p.bone!]===rig.bones[joint.bone!].parent)!;

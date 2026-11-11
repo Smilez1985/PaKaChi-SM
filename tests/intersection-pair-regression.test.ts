@@ -22,7 +22,7 @@ test('removing an old cut never hides a different new pair, including a partiall
    const poses=Array.from({length:17},(_,i)=>{const v=rig.capture();v[point.id].rotation=new T.Quaternion().setFromAxisAngle(new T.Vector3(1,0,0),i/1000).toArray();return {...pose,values:v};});poses[7]=pose;
    assert.equal(checkCandidateIntersectionFrames(rig,[poses[0],poses[8],poses[16]],[0],undefined,shape).accepted,true,'sparse endpoints and midpoint miss the new pair');
    let yields=0;const sequence=await checkCandidateIntersectionSequence(rig,poses,[0],undefined,shape,async()=>{yields++;});
-   assert.equal(sequence.accepted,false);assert.equal(sequence.newIntersections,1);assert.equal(sequence.checkedFrames,8);assert.equal(yields,8);assert.equal(sequence.complete,false,'unvisited later frames are not certified');
+   assert.equal(sequence.accepted,false);assert.equal(sequence.newIntersections,1);assert.equal(sequence.checkedFrames,8);assert.equal(sequence.failedFrame,7);assert.equal(yields,8);assert.equal(sequence.complete,false,'unvisited later frames are not certified');
    const abort=new AbortController();await assert.rejects(()=>checkCandidateIntersectionSequence(rig,poses,[0],undefined,shape,async()=>{abort.abort();abort.signal.throwIfAborted();}),{name:'AbortError'});
    assert.equal(JSON.stringify(rig.data),source);assert.deepEqual(rig.capture(),live);
   }finally{rig.dispose();geometry.dispose();}
