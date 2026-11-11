@@ -1,0 +1,66 @@
+name: PaKaChi automatic motion evidence
+on:
+  workflow_dispatch:
+  push:
+    branches: [develop]
+    paths:
+      - '.github/workflows/correction-motion.yml'
+      - 'scripts/benchmark-correction-motion.mjs'
+      - 'scripts/*pakachi*'
+      - 'src/automatic-skin-correction.ts'
+      - 'src/corrective-intersection-attenuation.ts'
+      - 'src/corrective-strain-guard.ts'
+      - 'src/geometric-skin-correction.ts'
+      - 'src/pose-surface-check.ts'
+      - 'src/pose-weight-correction.ts'
+      - 'src/surface-intersections.ts'
+      - 'src/surface-edge-relaxation.ts'
+      - 'package-lock.json'
+permissions:
+  contents: read
+concurrency:
+  group: correction-motion-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  original-motion:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - run: npm run prepare:pakachi -- --if-needed
+      - name: Actual automatic proposals and independent dense audit
+        env:
+          PAKACHI_EVIDENCE_COMMIT: ${{ github.sha }}
+        run: |
+          mkdir -p test-results
+          node scripts/benchmark-correction-motion.mjs --output test-results/pakachi-motion-correction.json > test-results/pakachi-motion-correction.stdout.json
+      - name: Validate both complete original-form reports
+        run: |
+          node --input-type=module - <<'JS'
+          import assert from 'node:assert/strict';
+          import {readFile,writeFile} from 'node:fs/promises';
+          const e=JSON.parse(await readFile('test-results/pakachi-motion-correction.json','utf8'));
+          assert.equal(e.complete,true);assert.equal(e.sourceCommit,process.env.GITHUB_SHA);
+          assert.deepEqual(e.forms.map(f=>f.form),['humanoid','animal']);
+          for(const f of e.forms){assert.equal(f.status,'passed-dense-audit');assert.equal(f.sourcePreserved,true);assert.equal(f.samples.length,65);assert.equal(f.regressions.length,0);assert.ok(f.samples.every((s,i)=>s.step===i&&s.complete&&!s.newPairs.length&&!s.surfaceRegression));assert.ok(f.proposal.after.issues<f.proposal.before.issues);}
+          const summary={sourceCommit:e.sourceCommit,softwareVersion:e.softwareVersion,forms:e.forms.map(f=>({form:f.form,sha256:f.sha256,beforeIssues:f.proposal.before.issues,afterIssues:f.proposal.after.issues,targetCuts:{before:f.samples.at(-1).before,after:f.samples.at(-1).after},samples:f.samples.length,regressions:f.regressions.length,edgeOperations:f.proposal.edgeOperations,vertexSamples:f.proposal.vertexSamples,vertexBudgetExhausted:f.proposal.vertexBudgetExhausted}))};
+          await writeFile('test-results/motion-verification-summary.json',JSON.stringify(summary,null,2)+'\n');
+          console.log('PAKACHI_MOTION_VERIFICATION_SUMMARY='+JSON.stringify(summary));
+          JS
+      - name: Original motion evidence
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: pakachi-automatic-motion-evidence
+          path: |
+            test-results/
+            public/model-zoo/pakachi-rigged/
+          retention-days: 14
+          if-no-files-found: warn

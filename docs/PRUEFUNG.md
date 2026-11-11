@@ -6,6 +6,8 @@ Alle Prüfnachweise stehen in dieser Datei: ein Abschnitt je Softwareversion sow
 
 ## Version 0.101.0
 
+Wiederaufnahme nach Ausfall des Arbeitscontainers: Der Code ist als `1995480` auf `develop` gesichert. Der letzte lokale gelenknahe Arbeitsform-Suchlauf fand wieder 367 → 345 Dehnungswarnungen; die vollständige lokale Tierform-/Paarabnahme wurde durch `exec-server transport disconnected` unterbrochen und ist kein Nachweis. Die fehlende Abnahme erfolgt im separaten Workflow `PaKaChi automatic motion evidence` mit dem tatsächlichen aktuellen Programmstand. Der vollständige normale CI-Lauf bleibt separat verpflichtend; seine Artefaktinhalte werden jetzt vor dem Upload in GitHub validiert.
+
 Stand: 2026-11-11T07:15:32+01:00. Entwicklung auf `develop`, main-Abnahme ausstehend.
 
 Die zusätzliche Diagnose zeigt eine reale Lücke des alten Rasters: Ein am Ziel verbesserter 180°-Gewichtsvorschlag erzeugt bei 31/32 der Bewegung (174,375°) 432 neue unabhängige Dreieckspaare. Die neue Kernregression weist nach, dass das bisherige Raster den Kandidaten akzeptiert und die zusätzliche Probe ihn verwirft. Erfolgreiche Vorschau-/Übernahme-/Undo-/Berechtigungs-/Budgetprüfungen verwenden eine nichtsinguläre 160°-Verdrehung. Der ursprüngliche 180°-Fehlerfall bleibt als ausdrückliche Ablehnung erhalten.

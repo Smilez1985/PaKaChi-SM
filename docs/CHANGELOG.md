@@ -26,6 +26,7 @@ Entwicklung auf `develop`; vollständige CI und main-Abnahme ausstehend. [Prüfb
 
 ### Added
 
+- Separater GitHub-Runner für die tatsächlichen automatischen Originalform-Aufträge und je 65 unabhängige vollständige Körper-Paarprüfungen. Ein erfolgreicher Lauf verlangt zwei vollständige Berichte ohne neue Paare oder gemessene Dehnungs-/Volumenregressionen. Vorschläge und Zwischenstände werden auch bei Fehlern als Artefakt gesichert. Der normale CI-Auftrag validiert Browserbericht, fehlende Flaky-/Skip-Fälle, drei Importmessungen und Quell-Hashes vor der Veröffentlichung und schreibt eine maschinenlesbare Zusammenfassung.
 - Lesender Originalform-Benchmark `scripts/benchmark-correction-motion.mjs`: speichert den tatsächlich gefundenen Vorschlag und prüft 65 unabhängige Körper-Paaridentitäten samt Dehnung/Volumen. Mit `--output` entstehen atomare Zwischenstände je Form; `--replay` prüft einen gespeicherten Vorschlag ohne erneute automatische Suche.
 
 ### Changed
