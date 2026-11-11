@@ -1,12 +1,22 @@
 # Prüfstand und Protokolle
 
-**Softwarestand: 0.101.0 · Dokumentationsabgleich: 2026-11-11T09:09:33.097Z (UTC).**
+**Softwarestand: 0.101.0 · Dokumentationsabgleich: 2026-11-11T22:03:00+01:00 (Europe/Berlin).**
 
 Alle Prüfnachweise stehen in dieser Datei: ein Abschnitt je Softwareversion sowie gesonderte Abschnitte für datierte Zwischenprüfungen. Die Ergebnisse und Grenzen gelten für den jeweils genannten Stand. Spätere Läufe stehen als Nachtrag im selben Abschnitt. Produktänderungen gehören in den [Changelog](CHANGELOG.md), offene Aufgaben in die [Roadmap](ROADMAP.md).
 
+## Zwischenprüfung 2026-11-11 – Originalformen-Topologie und Kapselkorrektur
+
+**Ausgangsbefund:** Der lesende Originalformen-Lauf #5 bestand. Beide Formen besitzen jeweils 28 starre `_shell`-Teilmodelle; darin lagen insgesamt 672 dauerhaft flächenlose Pol-Dreiecke je Form (24 je Teilmodell). In den geprüften Posen wurde keines wieder gültig. Ungültige Geometrie und deckungsgleiche Dreiecke wurden nicht festgestellt. Die Ursache ist auf die neu erzeugten starren Finger-/Zehen-Kapseln eingegrenzt.
+
+**Generatoränderung:** Auf `develop`, Commit [`c1f9ac0`](https://github.com/Smilez1985/PaKaChi-SM/commit/c1f9ac0490fa16782551c09270487d2bf7d08455), entfernt `pruneDegenerateCapsuleFaces` ausschließlich Nullflächen aus dem Indexbuffer neu erzeugter starrer Kapseln. Positionen, UVs, Normalen und Knochenbindungen bleiben unverändert; die Funktion ist nicht für beliebige importierte, geskinnte oder Morph-Target-Modelle vorgesehen. `tests/pakachi-paws-cleanup.test.mjs` prüft drei Kapselabmessungen, exakt 24 entfernte Polflächen, unveränderte Vertexattribute und wiederholte Anwendung ohne weitere Änderungen.
+
+**Regenerierungsschutz:** `scripts/prepare-pakachi.mjs` berücksichtigt `pakachi-paws.mjs` im Pipeline-SHA-256. Der Workflow `pakachi-intersections.yml` führt deshalb bei `--if-needed` eine neue Erzeugung aus und verlangt danach je Form genau 28 `_shell`-Teilmodelle ohne Nullflächen sowie vollständige Topologie-/Reparaturberichte und alle acht statischen Gelenkproben. Der tatsächliche Ergebnisbericht des Folgelaufs #6 ist in diesem Nachtrag noch nicht ausgewertet; die Regenerierung wird daher nicht als bestanden behauptet.
+
+**Studio-Browserfall:** `tests/e2e/mesh-topology-markers.spec.ts` ist vorhanden und prüft das read-only Anzeigen/Zurücksetzen, unveränderte Projekt-Revision und fehlende Browserfehler. Der Fall lädt Mika und verlangt noch keine nichtleere Markeranzahl an einer gezielt eingebrachten Nullfläche. Eine echte visuelle Markerabnahme bleibt offen.
+
 ## Version 0.101.0
 
-Stand: 2026-11-11T08:33:14+01:00. Code auf `develop`; main-Abnahme ausstehend.
+Stand: 2026-11-11T13:25:26Z. Freigabekandidat `39eee8854a44f64e2e16d1d146726506998ccbd4`; [PR #2](https://github.com/Smilez1985/PaKaChi-SM/pull/2) nach erfolgreicher CI #122 nach `main` gemerged (Main-Commit `5d2733c1b9ed8aeabb9b73024d591f82b76e91a9`).
 
 Die automatische Paar-Sperre vergleicht alle gespeicherten Posen und alle vorhandenen Move-Stichproben. Bis zu zwölf Viertelschritt-Proben ergänzen vier Intervalle um die gemessene innere Risikohaltung. Exakte Duplikate werden einmal geprüft; unterschiedliche nahe Drehungen bleiben getrennt. Vor jeder vollständigen Einzelabfrage werden Steuerung, Abbruch- und Revisionsprüfung bedient. Eine vorzeitig abgelehnte Sequenz wird nicht als vollständig geprüft gemeldet.
 
@@ -45,7 +55,7 @@ Freigabelauf #120 für den eingefrorenen Kandidaten: 511/512 Tests bestanden, ei
 
 Freigabelauf [#121](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/42984914930) für `db6c047b`: **512/512 Node-Tests**, keine Fehler oder Skips; Produktionsbuild erfolgreich; **47/49 Browserfälle bestanden**. Beide Originalform-Fälle bestanden die automatische Suche, Qualitätswerte, Vorschau, Übernahme, Undo/Redo und Prüfung der heruntergeladenen Projektdaten. Erst beim erneuten Dateiimport lief die bisherige Fünf-Sekunden-Erwartung auf die Fertigmeldung ab. Der Import setzt die Dateiauswahl zurück und lädt asynchron; die Prüfungen warten nun auf den tatsächlichen Abschluss (initial 30, beim größeren Korrekturprojekt 60 Sekunden) und verlangen zusätzlich eine neue Studio-Sitzung. Das Ergebnis darf nicht aus dem alten Studio stammen. Importmessungen und Abschlussvalidierung wurden nach dem Browserfehler nicht ausgeführt; #121 ist keine vollständige Freigabe.
 
-Offener Folgeauftrag: [CI #122](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/42992027559) für `39eee8854a44f64e2e16d1d146726506998ccbd4` läuft. Keine vollständige Freigabe vor Abschluss und ausgewerteter Browser-/Import-Zusammenfassung. Die unabhängige erfolgreiche 65er-Geometrieabnahme wird wegen des unveränderten Programmstands nicht erneut gestartet.
+Abgeschlossener Freigabelauf [#122](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/42992027559) für den eingefrorenen PR-Kandidaten `39eee8854a44f64e2e16d1d146726506998ccbd4`: **512/512 Node-Tests**, Produktionsbuild und **49/49 Browserfälle** erfolgreich; 0 unerwartete, instabile oder übersprungene Fälle. Drei Produktionsbrowser-Importmessungen vollständig: 3.404,6 / 3.035,8 / 3.167,9 ms Frame-Grenzen, Median **3.167,9 ms**. Das Browser-/Import-Abschlussartefakt wurde erstellt und die PR #2 anschließend am 2026-11-11T13:25:26Z nach `main` übernommen. Diese Messung belegt den PR-Freigabekandidaten; ein separater main-only Nachlauf wird hier nicht behauptet. Die unabhängige erfolgreiche 65er-Geometrieabnahme wird wegen des unveränderten Programmstands nicht erneut gestartet.
 
 Grenzen: 65 diskrete Körpernetzproben sind keine kontinuierliche Kollisionsfreiheit. Bestehende Schnitte, Kontakte, angrenzende Dreiecke, getrennte Teilmodelle und allgemeine Anatomiequalität bleiben offen.
 
