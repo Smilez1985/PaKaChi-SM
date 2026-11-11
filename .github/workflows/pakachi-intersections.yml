@@ -44,5 +44,5 @@ jobs:
         with:
           name: pakachi-intersection-evidence
           path: test-results/pakachi-intersections.json
-          retention-days: 30
+          retention-days: 7
           if-no-files-found: warn

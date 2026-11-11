@@ -74,7 +74,6 @@ jobs:
           path: |
             playwright-report/
             test-results/
-            public/model-zoo/pakachi-rigged/
-            docs/benchmarks/pakachi-rigging-2026-11-07.json
-          retention-days: 14
+            test-results/verification-summary.json
+          retention-days: 5
           if-no-files-found: ignore

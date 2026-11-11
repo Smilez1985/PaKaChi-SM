@@ -46,6 +46,5 @@ jobs:
           name: pakachi-automatic-motion-evidence
           path: |
             test-results/
-            public/model-zoo/pakachi-rigged/
-          retention-days: 14
+          retention-days: 7
           if-no-files-found: warn
