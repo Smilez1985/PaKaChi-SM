@@ -14,10 +14,11 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ### Added
 
-- Synthetisches Studio-View-Regressionstest-Fixture für Nullflächenmarker: prüft den roten Marker am korrekten Restflächen-Schwerpunkt, das Zurücksetzen und unveränderte Quell-Positions-/Indexpuffer. Der Test ist committed; Ausführung steht noch aus.
+- Synthetisches Studio-View-Regressionstest-Fixture für Nullflächenmarker: prüft den roten Marker am korrekten Restflächen-Schwerpunkt, das Zurücksetzen und unveränderte Quell-Positions-/Indexpuffer. Separater Minimalworkflow #43145313187 bestanden (1/1 Test, 0 Fehler/Skips); kein vollständiger Player-Build.
 
 ### Changed
 
+- Gezielte Studio-Nullflächenmarkerprüfung erfolgreich: ein künstliches kollineares Dreieck wird im Restflächen-Schwerpunkt `[1,0,0]` markiert; Zurücksetzen und unveränderte Quellpuffer sind nachgewiesen. Die echte gerenderte Sichtbarkeit im Player bleibt manuell abzunehmen.
 - Originalformen-Lauf #6 bestätigt die regenerierten Tier- und Arbeitsform-GLBs ohne Nullflächen in allen 28 starren Finger-/Zehen-`_shell`-Teilmodellen je Form. Die Messberichte weisen zugleich aus, dass bei den acht statischen Hüft-/Knieproben je Form nur `PaKaChi_body` messbar war; 91 bzw. 89 Teilmodelle bleiben coplanar/touching-bedingt unmessbar. Keine vollständige Kollisionsfreigabe.
 
 
