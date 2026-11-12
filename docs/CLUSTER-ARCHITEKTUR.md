@@ -161,6 +161,18 @@ Ein Manifest ist nur gültig, wenn:
 
 Die Zuordnungskonfidenz ist ein Diagnosewert und keine automatische Freigabe. Unklare Grenzfälle bleiben sichtbar und werden nicht durch einen willkürlichen Schwellenwert versteckt.
 
+## 5.1 Implementierter Laufzeitkern auf `develop`
+
+`src/cluster-architecture.ts` enthält den ersten generischen Manifestkern:
+
+- TypeScript-Verträge für Anatomieteile, Oberflächenebenen, Quellmeshes, Dreieckszuordnungen und Overrides.
+- Validierung eindeutiger IDs, Elternreferenzen und Zyklen, Sortierschlüssel, Mesh-/Primitive-Grenzen, genau einer Zuordnung je Quell-Dreieck sowie gültiger Override-Operationen.
+- Gemeinsame kontrollierte Editoperationen für Nutzer und LLM; Änderungen werden mit Ursprung, Schutzrichtlinie und Zeitstempel protokolliert.
+- Nicht-destruktive Kandidaten-Neuberechnung. Bereits gesperrte manuelle Zuordnungen werden anhand der Quellmesh-ID und Dreiecksnummer übernommen; fehlen solche Dreiecke im neuen Vorschlag, wird die Neuberechnung abgebrochen.
+- SHA-256-Quellenidentität über Web Crypto, damit das Modul browserfähig bleibt.
+
+Synthetische Regressionstests liegen in `tests/cluster-architecture.test.ts`. Sie decken ungeriggte zusammenhängende Meshes, ungültige Referenzen/Zyklen, User-/LLM-Änderungen und geschützte Neuberechnung ab. **Der Stand ist noch nicht durch einen lokalen oder CI-Lauf bestätigt.** Es gibt noch keinen Generatoradapter, keine automatische anatomische Klassifikation, keine Studio-Ansicht und keinen LLM-Werkzeugaufruf. Das Modul verändert keine GLB- oder Three.js-Geometrie.
+
 ## 6. Einbindung in die allgemeine Bild-zu-3D-Pipeline
 
 Die verbindliche Reihenfolge lautet:
