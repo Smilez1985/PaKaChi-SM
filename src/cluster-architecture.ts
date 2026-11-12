@@ -46,7 +46,7 @@ export function validateClusterManifest(value:unknown):ClusterValidationIssue[]{
  if(!Number.isSafeInteger(value.revision)||Number(value.revision)<0)issue('manifest.revision','revision','Revision must be a non-negative safe integer.');
  if(!Array.isArray(value.overrides))issue('manifest.overrides','overrides','Overrides must be an array.');
  for(const key of ['parts','layers','meshes','assignments'])if(!Array.isArray(value[key]))issue('manifest.array',key,`${key} must be an array.`);
- if(issues.some(x=>x.code==='manifest.array'))return issues;
+ if(issues.some(x=>x.code==='manifest.array'||x.code==='manifest.overrides'))return issues;
  const parts=value.parts as unknown[],layers=value.layers as unknown[],meshes=value.meshes as unknown[],assignments=value.assignments as unknown[];
  const overrides=value.overrides as unknown[];
  const partIds=parts.map(p=>isRecord(p)&&typeof p.id==='string'?p.id:'');
@@ -91,7 +91,7 @@ function assertOperation(op:ClusterOperation){
  else throw new Error('Unsupported cluster operation.');
 }
 export function applyClusterOperation(manifest:ClusterManifest,operation:ClusterOperation,origin:'user'|'llm'='user',policy:OverridePolicy='locked'):ClusterManifest{
- assertValid(manifest);assertOperation(operation);const next=clone(manifest);
+ assertValid(manifest);assertOperation(operation);if(!['user','llm'].includes(origin)||!['recomputable','prefer','locked'].includes(policy))throw new Error('Invalid cluster edit provenance.');const next=clone(manifest);
  switch(operation.type){
   case 'rename-part':{const p=next.parts.find(x=>x.id===operation.partId);if(!p)throw new Error('Part not found.');p.name=operation.name.trim();break;}
   case 'reparent-part':{const p=next.parts.find(x=>x.id===operation.partId);if(!p)throw new Error('Part not found.');if(operation.parentPartId!==null&&!next.parts.some(x=>x.id===operation.parentPartId))throw new Error('Parent part not found.');p.parentPartId=operation.parentPartId;break;}
@@ -101,7 +101,7 @@ export function applyClusterOperation(manifest:ClusterManifest,operation:Cluster
   case 'add-part':if(next.parts.some(x=>x.id===operation.part.id))throw new Error('Part already exists.');next.parts.push(clone(operation.part));break;
   case 'remove-part':if(!next.parts.some(x=>x.id===operation.partId))throw new Error('Part not found.');if(next.parts.some(x=>x.parentPartId===operation.partId)||next.assignments.some(x=>x.partId===operation.partId)||next.layers.some(x=>x.partId===operation.partId))throw new Error('Part is still referenced; reassign its children, layers and triangles first.');next.parts=next.parts.filter(x=>x.id!==operation.partId);break;
  }
- next.overrides.push({id:globalThis.crypto.randomUUID(),origin,policy,operation:clone(operation),createdAt:new Date().toISOString()});
+ next.overrides.push({id:globalThis.crypto.randomUUID(),origin,policy:operation.type==='assign-mesh'?(operation.policy??policy):policy,operation:clone(operation),createdAt:new Date().toISOString()});
  next.revision++;assertValid(next);return next;
 }
 /** Replaces automatic assignments while retaining locked manual decisions by source triangle. */
