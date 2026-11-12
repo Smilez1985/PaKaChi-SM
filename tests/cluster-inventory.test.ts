@@ -67,3 +67,31 @@ test('creates a complete manifest without guessing anatomical assignments',()=>{
   assert.ok(manifest.assignments.every(a=>a.reason.includes('unclassified')));
   assert.equal(manifest.form,'animal');
 });
+
+test('preserves original GLTF node, mesh and primitive associations',()=>{
+  const scene=new THREE.Group();
+  const sourceNode=new THREE.Group();
+  sourceNode.name='CharacterRoot';
+  scene.add(sourceNode);
+  const associations=new Map<THREE.Object3D,unknown>();
+  associations.set(sourceNode,{nodes:12});
+  for(const primitiveIndex of [0,1]){
+    const geometry=new THREE.BufferGeometry();
+    geometry.setAttribute('position',new THREE.Float32BufferAttribute([
+      0,0,0, 1,0,0, 0,1,0,
+    ],3));
+    const primitive=new THREE.Mesh(geometry,new THREE.MeshBasicMaterial());
+    sourceNode.add(primitive);
+    associations.set(primitive,{meshes:7,primitives:primitiveIndex});
+  }
+  const inventory=collectClusterMeshInventory({
+    scene,
+    parser:{associations},
+  },hash);
+  assert.deepEqual(inventory.meshes.map(m=>[m.sourceNodeIndex,m.sourceNodeName,m.sourceMeshIndex,m.primitiveIndex]),[
+    [12,'CharacterRoot',7,0],
+    [12,'CharacterRoot',7,1],
+  ]);
+  assert.notEqual(inventory.meshes[0].id,inventory.meshes[1].id);
+  assert.ok(inventory.meshes.every(m=>m.sourceNodePath?.includes('CharacterRoot')));
+});
