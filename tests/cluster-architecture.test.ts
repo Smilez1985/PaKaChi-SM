@@ -13,6 +13,7 @@ const fixture=():ClusterManifest=>({
  ],
  layers:[{id:'fur',name:'Fur',partId:'body',orderKey:[1]}],
  meshes:[{id:'mesh-main',sourceMeshIndex:0,sourceMeshName:'Unified',primitiveIndex:0,vertexCount:4,triangleCount:2}],
+ overrides:[],
  assignments:[
   {meshId:'mesh-main',triangleIndex:0,partId:'body',surfaceLayerId:'fur',origin:'automatic',policy:'recomputable',confidence:.7,reason:'synthetic geometry'},
   {meshId:'mesh-main',triangleIndex:1,partId:'head',surfaceLayerId:'fur',origin:'automatic',policy:'recomputable',confidence:.8,reason:'synthetic landmark'},
@@ -35,7 +36,7 @@ test('applies user and LLM edits immutably and protects the source manifest',()=
  const source=fixture();const renamed=applyClusterOperation(source,{type:'rename-part',partId:'head',name:'Kopf'},'user');
  assert.equal(source.parts[1].name,'Head');assert.equal(renamed.parts[1].name,'Kopf');assert.equal(renamed.revision,1);
  const moved=applyClusterOperation(renamed,{type:'reorder-part',partId:'head',orderKey:[1,2]},'llm');
- assert.deepEqual(moved.parts[1].orderKey,[1,2]);assert.equal(moved.revision,2);
+ assert.deepEqual(moved.parts[1].orderKey,[1,2]);assert.equal(moved.revision,2);assert.equal(moved.overrides.length,2);assert.equal(moved.overrides[1].origin,'llm');
 });
 test('rejects cyclic reparenting and unsafe deletion without mutating source',()=>{
  const source=fixture();assert.throws(()=>applyClusterOperation(source,{type:'reparent-part',partId:'body',parentPartId:'head'}),/Invalid cluster manifest/);
