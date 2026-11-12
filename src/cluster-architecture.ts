@@ -1,5 +1,3 @@
-import {createHash} from 'node:crypto';
-
 export type ClusterForm='animal'|'humanoid'|'imported';
 export type ClusterOrigin='automatic'|'user'|'llm'|'imported';
 export type OverridePolicy='recomputable'|'prefer'|'locked';
@@ -110,4 +108,4 @@ export function recomputeClusterAssignments(current:ClusterManifest,proposed:Clu
  const next={...clone(current),assignments:merged,generatedAt:new Date().toISOString(),revision:current.revision+1};
  assertValid(next);return next;
 }
-export function clusterAssetHash(bytes:Uint8Array):string{return createHash('sha256').update(bytes).digest('hex');}
+export async function clusterAssetHash(bytes:Uint8Array):Promise<string>{const digest=await globalThis.crypto.subtle.digest('SHA-256',bytes as BufferSource);return Array.from(new Uint8Array(digest),v=>v.toString(16).padStart(2,'0')).join('');}
