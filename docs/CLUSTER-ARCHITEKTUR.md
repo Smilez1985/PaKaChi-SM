@@ -4,9 +4,11 @@ Stand: 2026-11-12 · Arbeitsbranch: `develop`
 
 ## Zweck
 
-Die Originalformen von PaKaChi werden als Cluster aus anatomisch zugeordneten Teilnetzen organisiert. Anatomie, Oberflächenaufbau, Mesh-Identität und Sortierreihenfolge sind getrennte Konzepte. Das Modell gilt identisch für Tierform (`animal`) und Arbeitsform (`humanoid`).
+Die Cluster-Architektur ist eine **generische, wiederverwendbare Pipeline-Stufe** des Bild-zu-3D-Ablaufs – kein PaKaChi-spezifischer Einmal-Schritt. Sie wird nach der 3D-Geometrieerzeugung und vor dem endgültigen Rigging ausgeführt. Sie gilt für Tierform (`animal`), Arbeitsform (`humanoid`) und später importierte Figuren.
 
-Diese Architektur ist eine nicht-destruktive Organisations- und Ableitungsschicht. Sie ist kein Redesign und ersetzt weder die Original-GLBs noch deren Charaktergestaltung.
+Die erste Cluster-Struktur wird automatisch vorgeschlagen. Nutzer und LLM dürfen sie anschließend über dieselben kontrollierten Änderungsoperationen anpassen. Das Studio bietet zusätzlich eine explizite Neuberechnung an, die aktuelle Geometrie, neue Evidenz und geschützte manuelle Festlegungen berücksichtigt. Die Architektur ist nicht-destruktiv: Original-Assets bleiben erhalten; Ableitungen und Zuordnungen sind nachvollziehbar.
+
+PaKaChi Tier- und Arbeitsform dienen als hochwertige Referenz- und Regressionstestfälle für den allgemeinen Algorithmus. Sie dürfen nicht als fest codierte Anatomie-Regeln missverstanden werden.
 
 ## 1. Vier getrennte Identitäten
 
@@ -77,6 +79,41 @@ type TriangleOrigin = {
 
 Die Typen sind der Datenvertrag, noch keine Behauptung einer bereits implementierten Laufzeitfunktion. Vor der Implementierung werden Namenskonventionen, ID-Namespace und Manifestversion im Code festgelegt und getestet.
 
+### Ergänzung: Erkennung, Overrides und Neuberechnung
+
+Das Manifest muss neben dem Ergebnis auch dessen Entstehung und Bearbeitungsstatus speichern. Die konkrete Laufzeit-API wird bei der Implementierung versioniert; konzeptionell gelten mindestens diese Informationen:
+
+```ts
+type AssignmentOrigin = 'automatic' | 'user' | 'llm' | 'imported';
+type OverridePolicy = 'recomputable' | 'prefer' | 'locked';
+
+type ClusterOverride = {
+  targetId: string;
+  operation: 'assign' | 'unassign' | 'split' | 'merge' | 'rename' | 'reparent' | 'reorder' | 'set-layer';
+  origin: AssignmentOrigin;
+  policy: OverridePolicy;
+  payload: unknown;
+  createdAt: string;
+};
+
+type ClusterManifest = {
+  schemaVersion: number;
+  sourceAssetSha256: string;
+  algorithmId: string;
+  algorithmVersion: string;
+  generatedAt: string;
+  parts: ClusterPart[];
+  layers: SurfaceLayer[];
+  meshes: MeshSource[];
+  assignments: MeshClusterAssignment[];
+  overrides: ClusterOverride[];
+};
+```
+
+`locked`-Overrides sind verbindlich und dürfen bei Neuberechnung nicht still überschrieben werden. `prefer`-Overrides sind starke Hinweise, die bei Konflikten als solche ausgewiesen werden. `recomputable`-Einträge dürfen neu bewertet werden. Änderungen durch Nutzer und LLM werden als nachvollziehbare Operationen gespeichert; das LLM verwendet dieselben validierten Operationen wie die Studio-Oberfläche und erhält keine direkte Schreibberechtigung auf rohe Geometriepuffer.
+
+Eine Neuberechnung erzeugt zunächst einen neuen Kandidatenmanifest-Stand. Sie vergleicht Quellhash, Algorithmusversion, bisherige Zuordnungen und Overrides, zeigt Konflikte bzw. Mehrdeutigkeiten und wird erst nach Validierung übernommen. Vorherige Stände bleiben über Undo/Versionierung wiederherstellbar. IDs werden soweit semantisch identisch stabil weitergeführt; neu erkannte oder nicht mehr vorhandene Teile werden ausdrücklich ausgewiesen.
+
 ## 3. Gemeinsame Anatomie beider Formen
 
 Beide Formen verwenden dieselben logischen `partId`-Werte, soweit die Anatomie vorhanden ist. Geometrie und Anzahl der Meshes dürfen abweichen. Fehlende Teile werden als nicht vorhanden ausgewiesen und nicht durch Ersatzgeometrie simuliert.
@@ -91,7 +128,9 @@ Grundbereiche:
 - Oberflächen: Fell und andere sichtbare Schichten, jeweils einer Anatomie zugeordnet.
 - Mechanische Details: tatsächlich vorhandene Gelenkabdeckungen und Ringe mit Referenz auf den zugehörigen Bereich bzw. das Gelenk.
 
-Gesichts-, Hand-, Finger-, Fuß- und Zehenmeshes, die bereits getrennt vorliegen, werden zuerst direkt zugeordnet. Die großen Körper- und Fellnetze werden danach anhand der Skin-Gewichte und Rig-Ketten dreiecksgenau klassifiziert.
+Die Erkennung darf **nicht** voraussetzen, dass bereits ein Rig oder Skin-Gewichte existieren. Sie muss mit ungeriggten Generatorausgaben und einem einzelnen zusammenhängenden Mesh funktionieren. Vorhandene getrennte Meshes werden über Generator-Metadaten, Namen, Geometrie und semantische Hinweise direkt oder mit Konfidenz zugeordnet. Zusammenhängende Netze werden über 2D-Semantik/Landmarken, 3D-Geometrie, räumliche Kontinuität und anatomische Plausibilität klassifiziert. Sobald Rig und Skin-Gewichte existieren, dienen Knochenketten und Gewichte als zusätzliche Evidenz und können die Zuordnung verfeinern.
+
+Die generische Erkennung kennt keine fest codierten PaKaChi-Koordinaten oder -Mesh-Namen. Solche Informationen dürfen ausschließlich in Test-Fixtures, Referenzprofilen oder expliziten Importadaptern liegen.
 
 ## 4. Herkunft und Nicht-Destruktivität
 
@@ -122,17 +161,40 @@ Ein Manifest ist nur gültig, wenn:
 
 Die Zuordnungskonfidenz ist ein Diagnosewert und keine automatische Freigabe. Unklare Grenzfälle bleiben sichtbar und werden nicht durch einen willkürlichen Schwellenwert versteckt.
 
-## 6. Umsetzung in kleinen, prüfbaren Schritten
+## 6. Einbindung in die allgemeine Bild-zu-3D-Pipeline
 
-1. Manifest-Schema und Validator implementieren; synthetische Tests für IDs, Elternzyklen, Sortierschlüssel und Referenzen.
-2. Asset-Hashes und reproduzierbares Mesh-/Primitive-Inventar beider Originalformen erfassen.
-3. Bereits getrennte Gesichts-, Hand-, Finger-, Fuß- und Zehenmeshes direkt zuordnen.
-4. Skin-Gewichte pro Dreieck auswerten und Körper/Fell anatomisch klassifizieren.
-5. Grenz- und Mehrdeutigkeitsflächen visualisieren und als Herkunftsdaten ausgeben.
-6. Nicht-destruktive Teilnetze ableiten und sämtliche Attribute/Herkunftsindizes vergleichen.
-7. Repräsentative Gelenkposen beider Formen prüfen; erst danach Übernahme in den Model Zoo.
+Die verbindliche Reihenfolge lautet:
 
-Rigging-Verbesserung und gemeinsame Morph-Topologie bauen auf dieser Zuordnung auf. Die reversible Normalform↔Arbeitsform-Animation bleibt nachgelagert.
+1. **2D-Eingabeanalyse:** Bildorientierung, Silhouette, sichtbare Körperteile, semantische Hinweise und Landmarken erfassen.
+2. **3D-Geometrieerzeugung:** Generatoradapter liefert eine unveränderte, versionierte Geometriequelle – getrennte Meshes sind optional, kein Muss.
+3. **Automatische anatomische Cluster-Erkennung:** Anatomie, Elternbeziehungen, Oberflächenebenen und Mesh-/Dreieckszuordnungen vorschlagen. Unklarheiten bleiben explizit.
+4. **Studio-/LLM-Korrektur:** Nutzer und LLM können dieselben kontrollierten Operationen anwenden; Herkunft und Override-Schutz werden gespeichert.
+5. **Neuberechnung:** Auf Knopfdruck Zuordnungen anhand des aktuellen Modells, der Algorithmusversion und aller Overrides neu bewerten; Konflikte vor Übernahme anzeigen.
+6. **Rigging und Skinning:** Erst jetzt werden Knochenketten und Gewichte erzeugt bzw. angepasst. Diese Daten dürfen anschließend als zusätzliche Evidenz in eine weitere Cluster-Neuberechnung einfließen.
+7. **Validierung und Ableitung:** Attribute/Herkunft prüfen, Teilnetze oder Cluster-Ansichten ableiten und repräsentative Posen testen.
+8. **Model Zoo / Moves / Morph:** Nur validierte und ausdrücklich übernommene Stände werden als Avatarbasis weiterverwendet.
+
+### Erkennungsadapter
+
+- **Segmentierter Generatoroutput:** vorhandene Mesh-Grenzen, Metadaten und Namen als Hinweise verwenden; Zuordnungen mit Konfidenz dokumentieren.
+- **Einzelnes zusammenhängendes Mesh:** zunächst semantische/Geometrieanalyse, Landmarken und räumliche Kontinuität nutzen; Dreiecke und Grenzbereiche nachvollziehbar zuordnen.
+- **Bereits geriggter Import:** Knochenhierarchie und Skin-Gewichte zusätzlich auswerten; nicht blind als Wahrheit übernehmen.
+
+### Studio-Verhalten
+
+Der Editor benötigt eine Cluster-Ansicht mit Auswahl, Umbenennen, Hinzufügen, Teilen, Zusammenführen, Umhängen, Neu-Zuordnen und Sortieren. Ein klarer Befehl **Cluster neu berechnen** startet einen nicht-destruktiven Kandidatenlauf. Vor dem Übernehmen zeigt das Studio geänderte Zuordnungen, Konflikte, unsichere Bereiche und Auswirkungen auf Rig-/Oberflächenreferenzen. Undo/Redo und Versionierung gelten auch für Cluster-Änderungen.
+
+### Umsetzungsstufen
+
+1. Manifest-Schema, Override-Modell und Validator implementieren; synthetische Regressionstests für IDs, Elternzyklen, Reihenfolge, Konflikte und Neuberechnung.
+2. Generatorunabhängige Pipeline-Schnittstelle und reproduzierbare Mesh-/Primitive-Inventur einführen.
+3. Segmentierten und unsegmentierten Eingabepfad mit gemeinsamen Zuweisungsergebnissen implementieren.
+4. 2D-Landmarken und 3D-Geometrie als Primärsignale klassifizieren; Rig-/Gewichtsinformationen nur als optionale spätere Evidenz ergänzen.
+5. Studio-Korrekturen, LLM-Operationen, geschützte Overrides und Neuberechnung implementieren.
+6. Nicht-destruktive Ableitungen und vollständige Attribute-/Herkunftsprüfung.
+7. PaKaChi Tier- und Arbeitsform als Referenzfälle und anschließend weitere generische Testkörper prüfen.
+
+Rigging-Verbesserung und gemeinsame Morph-Topologie bauen auf der validierten Cluster-Struktur auf. Die reversible Normalform↔Arbeitsform-Animation bleibt nachgelagert.
 
 ## Abnahmekriterien
 
