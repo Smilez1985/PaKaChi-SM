@@ -170,8 +170,9 @@ Die Zuordnungskonfidenz ist ein Diagnosewert und keine automatische Freigabe. Un
 - Gemeinsame kontrollierte Editoperationen für Nutzer und LLM; Änderungen werden mit Ursprung, Schutzrichtlinie und Zeitstempel protokolliert.
 - Nicht-destruktive Kandidaten-Neuberechnung. Bereits gesperrte manuelle Zuordnungen werden anhand der Quellmesh-ID und Dreiecksnummer übernommen; fehlen solche Dreiecke im neuen Vorschlag, wird die Neuberechnung abgebrochen.
 - SHA-256-Quellenidentität über Web Crypto, damit das Modul browserfähig bleibt.
+- Read-only-Inventuradapter `src/cluster-inventory.ts`: erfasst die vom produktiven Three.js-`GLTFLoader` bereitgestellten Mesh-Primitives mit Quellindex, Name, Vertex-/Dreieckszahl und hashgebundener Mesh-ID. Er verändert weder Geometriepuffer noch Materialien, Transformationen, Skinning oder Morph-Ziele. Er erzeugt noch keine anatomischen Zuordnungen.
 
-Synthetische Regressionstests liegen in `tests/cluster-architecture.test.ts`. Sie decken ungeriggte zusammenhängende Meshes, ungültige Referenzen/Zyklen, User-/LLM-Änderungen und geschützte Neuberechnung ab. **Der Stand ist noch nicht durch einen lokalen oder CI-Lauf bestätigt.** Es gibt noch keinen Generatoradapter, keine automatische anatomische Klassifikation, keine Studio-Ansicht und keinen LLM-Werkzeugaufruf. Das Modul verändert keine GLB- oder Three.js-Geometrie.
+Synthetische Regressionstests liegen in `tests/cluster-architecture.test.ts`. Sie decken ungeriggte zusammenhängende Meshes, ungültige Referenzen/Zyklen, User-/LLM-Änderungen und geschützte Neuberechnung ab. **Der Stand ist noch nicht durch einen lokalen oder CI-Lauf bestätigt.** Die Mesh-Inventur ist der erste GLTF-nahe Adapter; es gibt noch keine Generator-Metadatenübernahme, automatische anatomische Klassifikation, vollständige Dreieckszuordnung, Studio-Ansicht oder LLM-Werkzeugaufruf. Das Modul verändert keine GLB- oder Three.js-Geometrie.
 
 ## 6. Einbindung in die allgemeine Bild-zu-3D-Pipeline
 
