@@ -1,0 +1,34 @@
+name: PaKaChi cluster landmark regression
+on:
+  push:
+    branches: [develop]
+    paths:
+      - '.github/workflows/cluster-landmark-test.yml'
+      - 'src/cluster-*.ts'
+      - 'tests/cluster-*.test.ts'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'tsconfig.json'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: cluster-landmark-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  cluster-landmark:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: Run cluster architecture, inventory and landmark regressions
+        run: node --test --test-reporter=spec tests/cluster-architecture.test.ts tests/cluster-inventory.test.ts tests/cluster-landmark-classifier.test.ts
+      - name: Type-check project
+        run: npx tsc --noEmit
