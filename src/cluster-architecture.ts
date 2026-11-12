@@ -22,7 +22,7 @@ export interface ClusterAssignment {
 export interface ClusterManifest {
  schemaVersion:1;form:ClusterForm;sourceAssetSha256:string;algorithmId:string;algorithmVersion:string;
  generatedAt:string;parts:ClusterPart[];layers:ClusterSurfaceLayer[];meshes:ClusterMeshSource[];
- assignments:ClusterAssignment[];revision:number;
+ assignments:ClusterAssignment[];overrides:ClusterOverride[];revision:number;
 }
 export interface ClusterOverride {id:string;origin:'user'|'llm';policy:OverridePolicy;operation:ClusterOperation;createdAt:string}
 export interface ClusterValidationIssue {code:string;path:string;message:string}
@@ -44,9 +44,11 @@ export function validateClusterManifest(value:unknown):ClusterValidationIssue[]{
  if(typeof value.sourceAssetSha256!=='string'||!hashPattern.test(value.sourceAssetSha256))issue('manifest.hash','sourceAssetSha256','Expected a SHA-256 hex digest.');
  for(const key of ['algorithmId','algorithmVersion','generatedAt'])if(typeof value[key]!=='string'||!(value[key] as string).trim())issue('manifest.metadata',key,'Required metadata is missing.');
  if(!Number.isSafeInteger(value.revision)||Number(value.revision)<0)issue('manifest.revision','revision','Revision must be a non-negative safe integer.');
+ if(!Array.isArray(value.overrides))issue('manifest.overrides','overrides','Overrides must be an array.');
  for(const key of ['parts','layers','meshes','assignments'])if(!Array.isArray(value[key]))issue('manifest.array',key,`${key} must be an array.`);
  if(issues.some(x=>x.code==='manifest.array'))return issues;
  const parts=value.parts as unknown[],layers=value.layers as unknown[],meshes=value.meshes as unknown[],assignments=value.assignments as unknown[];
+ const overrides=value.overrides as unknown[];
  const partIds=parts.map(p=>isRecord(p)&&typeof p.id==='string'?p.id:'');
  const layerIds=layers.map(p=>isRecord(p)&&typeof p.id==='string'?p.id:'');
  const meshIds=meshes.map(p=>isRecord(p)&&typeof p.id==='string'?p.id:'');
@@ -72,6 +74,7 @@ export function validateClusterManifest(value:unknown):ClusterValidationIssue[]{
  meshes.forEach((m,i)=>{if(!isRecord(m)){issue('mesh.object',`meshes[${i}]`,'Mesh source must be an object.');return;}meshMap.set(String(m.id),m);for(const k of ['sourceMeshIndex','primitiveIndex','vertexCount','triangleCount'])if(!Number.isSafeInteger(m[k])||Number(m[k])<0)issue('mesh.count',`meshes[${i}].${k}`,`Invalid ${k}.`);if(typeof m.sourceMeshName!=='string')issue('mesh.name',`meshes[${i}].sourceMeshName`,'Mesh name must be a string.');});
  const seenTriangles=new Set<string>();
  assignments.forEach((a,i)=>{const path=`assignments[${i}]`;if(!isRecord(a)){issue('assignment.object',path,'Assignment must be an object.');return;}const mesh=meshMap.get(String(a.meshId));if(!mesh)issue('assignment.mesh',path+'.meshId','Unknown mesh.');if(!Number.isSafeInteger(a.triangleIndex)||Number(a.triangleIndex)<0||(mesh&&Number(a.triangleIndex)>=Number(mesh.triangleCount)))issue('assignment.triangle',path+'.triangleIndex','Triangle index is outside the source primitive.');if(a.partId!==null&&!partMap.has(String(a.partId)))issue('assignment.part',path+'.partId','Unknown anatomical part.');if(a.surfaceLayerId!==null&&!layerMap.has(String(a.surfaceLayerId)))issue('assignment.layer',path+'.surfaceLayerId','Unknown surface layer.');if(!['automatic','user','llm','imported'].includes(String(a.origin)))issue('assignment.origin',path+'.origin','Unknown assignment origin.');if(!['recomputable','prefer','locked'].includes(String(a.policy)))issue('assignment.policy',path+'.policy','Unknown override policy.');if(typeof a.confidence!=='number'||!Number.isFinite(a.confidence)||a.confidence<0||a.confidence>1)issue('assignment.confidence',path+'.confidence','Confidence must be between 0 and 1.');if(typeof a.reason!=='string'||a.reason.length>500)issue('assignment.reason',path+'.reason','Invalid assignment reason.');const key=`${String(a.meshId)}:${String(a.triangleIndex)}`;if(seenTriangles.has(key))issue('assignment.duplicate',path,'A source triangle has more than one assignment.');seenTriangles.add(key);});
+ overrides.forEach((o,i)=>{const path=\`overrides[\${i}]\`;if(!isRecord(o)){issue('override.object',path,'Override must be an object.');return;}if(!validId(o.id))issue('override.id',path+'.id','Invalid override ID.');if(!['user','llm'].includes(String(o.origin)))issue('override.origin',path+'.origin','Invalid override origin.');if(!['recomputable','prefer','locked'].includes(String(o.policy)))issue('override.policy',path+'.policy','Invalid override policy.');if(typeof o.createdAt!=='string'||!Number.isFinite(Date.parse(o.createdAt)))issue('override.date',path+'.createdAt','Invalid override timestamp.');if(!isRecord(o.operation)||typeof o.operation.type!=='string')issue('override.operation',path+'.operation','Invalid override operation.');});
  return issues;
 }
 function assertValid(manifest:ClusterManifest){const issues=validateClusterManifest(manifest);if(issues.length)throw new Error('Invalid cluster manifest: '+issues.map(x=>x.code+' at '+x.path).join(', '));}
@@ -98,6 +101,7 @@ export function applyClusterOperation(manifest:ClusterManifest,operation:Cluster
   case 'add-part':if(next.parts.some(x=>x.id===operation.part.id))throw new Error('Part already exists.');next.parts.push(clone(operation.part));break;
   case 'remove-part':if(!next.parts.some(x=>x.id===operation.partId))throw new Error('Part not found.');if(next.parts.some(x=>x.parentPartId===operation.partId)||next.assignments.some(x=>x.partId===operation.partId)||next.layers.some(x=>x.partId===operation.partId))throw new Error('Part is still referenced; reassign its children, layers and triangles first.');next.parts=next.parts.filter(x=>x.id!==operation.partId);break;
  }
+ next.overrides.push({id:globalThis.crypto.randomUUID(),origin,policy,operation:clone(operation),createdAt:new Date().toISOString()});
  next.revision++;assertValid(next);return next;
 }
 /** Replaces automatic assignments while retaining locked manual decisions by source triangle. */
