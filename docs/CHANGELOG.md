@@ -12,12 +12,12 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
-Zeitstempel der letzten Änderung: 2026-11-12T15:39:00+01:00 (Europe/Berlin).
+Zeitstempel der letzten Änderung: 2026-11-12T19:22:00+01:00 (Europe/Berlin).
 
 ### Added
 
 - Erster Laufzeitkern für Cluster auf `develop`: `src/cluster-architecture.ts` definiert Manifest-/Anatomietypen, prüft IDs, Hierarchiezyklen, Mesh-/Dreiecksreferenzen und Oberflächenebenen, speichert User-/LLM-Operationen als Overrides und bietet nicht-destruktive Bearbeitung plus geschützte Dreiecks-Neuberechnung. SHA-256-Quellenidentität verwendet Web Crypto statt Node-only APIs.
-- `tests/cluster-architecture.test.ts` ergänzt acht synthetische Tests für ungeriggte Meshes, fehlerhafte Referenzen/Zyklen, unveränderliche User-/LLM-Edits und geschützte Neuberechnung. **Die Tests wurden nicht ausgeführt; keine CI-Freigabe behauptet.**
+- `tests/cluster-architecture.test.ts` ergänzt acht synthetische Tests für ungeriggte Meshes, fehlerhafte Referenzen/Zyklen, unveränderliche User-/LLM-Edits und geschützte Neuberechnung. Der erste lokale Gesamtlauf wurde durch einen Syntaxfehler im Validator blockiert; dieser wurde auf `develop` korrigiert. Ein erfolgreicher Wiederholungslauf steht aus.
 - Read-only-GLTF-Inventur `src/cluster-inventory.ts`: zählt Mesh-Primitives, Vertices und Dreiecke aus Three.js-Objekten, vergibt reproduzierbare quellhashgebundene IDs, erhält originale GLTF-Node-/Mesh-/Primitive-Indizes samt Node-Pfad und kann direkt aus dem `parseModel()`-Ergebnis einen vollständigen unklassifizierten Manifest-Stand mit explizit ungelösten Dreiecken erzeugen. `tests/cluster-inventory.test.ts` prüft indexierte/nicht indexierte Geometrie, Determinismus, ungültige Eingaben, Quellpuffer, GLTF-Provenienz-Assoziationen, den Convenience-Einstieg und vollständige Abdeckung ohne Anatomie-Raterei. **Noch nicht ausgeführt.** Automatische Klassifikation, Studio-UI und LLM-Werkzeuganbindung sind weiterhin offen.
 - Anatomische Bestandsaufnahme beider PaKaChi-Originalformen dokumentiert: getrennte Gesichts-/Pfoten-/Finger-/Zehenmeshes sowie noch zusammenhängende Hauptkörper- und Fellmeshes; gemeinsame Anatomie-Taxonomie, Dreiecksherkunft und attributerhaltende Umsetzungsreihenfolge festgelegt. Noch keine Geometrie zerlegt oder Originaldatei verändert.
 - 16 zusätzliche gezielte Schnittprüfungen zusammen mit dem Studio-Nullflächenmarker-Test in einem kostenschlanken Workflow; Lauf #43215270194 erfolgreich (17/17, 0 Fehler/Skips, ca. 590 ms Testlauf).
@@ -25,12 +25,16 @@ Zeitstempel der letzten Änderung: 2026-11-12T15:39:00+01:00 (Europe/Berlin).
 
 ### Changed
 
+- Windows-Start prüft jetzt den SHA-256-Stand von `package-lock.json` und führt `npm ci` nur bei fehlender oder geänderter Abhängigkeitsinstallation aus; ein Marker verhindert Neuinstallationen bei jedem Start. Drei Regressionstests decken unveränderten Lockfile-Stand, Aktualisierung und Installationsfehler ab. Noch nicht lokal ausgeführt.
+
 - Schnittprüfung erkennt geometrisch gemeinsame Kanten über getrennte UV-Naht-Indizes hinweg und verwendet eine gegen große Weltkoordinaten abgesicherte, lokal skalierte Toleranz. Koplanare Kantenberührung wird per projizierter Überlappungsfläche von echter Flächenüberlappung unterschieden; nicht-koplanare gemeinsame Kanten bleiben nur ohne inneren Durchdringungstreffer unauffällig. Originalformen-Nachmessung steht noch aus.
 - Gezielte Studio-Nullflächenmarkerprüfung erfolgreich: ein künstliches kollineares Dreieck wird im Restflächen-Schwerpunkt `[1,0,0]` markiert; Zurücksetzen und unveränderte Quellpuffer sind nachgewiesen. Die echte gerenderte Sichtbarkeit im Player bleibt manuell abzunehmen.
 - Originalformen-Lauf #6 bestätigt die regenerierten Tier- und Arbeitsform-GLBs ohne Nullflächen in allen 28 starren Finger-/Zehen-`_shell`-Teilmodellen je Form. Die Messberichte weisen zugleich aus, dass bei den acht statischen Hüft-/Knieproben je Form nur `PaKaChi_body` messbar war; 91 bzw. 89 Teilmodelle bleiben coplanar/touching-bedingt unmessbar. Keine vollständige Kollisionsfreigabe.
 
 
 ### Fixed
+
+- Fehlerhaft escaptes Template-Literal im Cluster-Manifestvalidator korrigiert. Der Tunnel-Archivtest übergibt seine Testplattform explizit; Symlink-Sicherheitsfälle überspringen nur den Symlink-Teil, wenn Windows die Erstellung ohne erhöhte Rechte verweigert. Die übrigen Traversal-/Ausgabeprüfungen bleiben aktiv. Noch nicht lokal erneut ausgeführt.
 
 - Beim Erzeugen der zwei originalen Charakterformen werden flächenlose Pol-Dreiecke ausschließlich aus den neu erzeugten starren Finger-/Zehen-Kapseln entfernt; Vertexpositionen, UVs, Normals und Rig-Knochen bleiben unverändert. Der Originalformen-Workflow prüft die 28 betroffenen `_shell`-Teilmodelle auf Nullflächen und führt gezielte Generator-Tests aus. Keine nachträgliche Änderung importierter Fremdmodelle.
 
