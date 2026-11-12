@@ -28,6 +28,7 @@ Zeitstempel der letzten Änderung: 2026-11-12T21:00:00+01:00 (Europe/Berlin).
 - Erster generischer Landmarken-Klassifikator als nicht-destruktiver Vorschlag: bewertet Dreiecke eines einzelnen zusammenhängenden oder indexierten Meshes anhand caller-supplied anatomischer Seed-Punkte und Radien. Nicht ausreichend getrennte oder nicht abgedeckte Bereiche bleiben ausdrücklich ungeklärt; keine PaKaChi-Koordinaten, kein Rig und keine Geometrieänderung.
 - Landmarken-Vorschläge lassen sich jetzt als vollständiger Manifest-Kandidat erzeugen. Der Adapter prüft Quellhash, Mesh-Inventar, Vertex-/Dreieckszahlen und anatomische Layer-/Part-Referenzen; nicht bearbeitete Meshes bleiben unverändert, gesperrte manuelle Zuordnungen schützt die vorhandene Neuberechnung. Die Koordinaten müssen bereits im selben mesh-lokalen 3D-Raum liegen; eine 2D-Projektion ist nicht Teil dieser Änderung.
 - Kalibrierte 2D-Landmarken aus mindestens zwei Ansichten können nun per gewichteter Strahlenschnitt-Triangulation in 3D-Seeds überführt werden. Zu kleine Kamerabaselines und hohe Strahlresiduen bleiben ungeklärt; die Seeds werden aus dem gemeinsamen Weltkoordinatenraum in den lokalen Meshraum transformiert. Einzelbild-Tiefenschätzung wird bewusst nicht vorgetäuscht.
+- Der durchgängige Adapter verbindet 2D-Beobachtungen, Triangulation, mesh-lokale Seeds, Dreiecks-Klassifikation und Manifestvalidierung. Wenn keine Landmarke belastbar trianguliert werden kann, wird kein Manifest-Kandidat erzeugt; ungeklärte Dreiecke bleiben explizit offen.
 
 ### Changed
 
