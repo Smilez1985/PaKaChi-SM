@@ -29,4 +29,4 @@ jobs:
           cache: npm
       - run: npm ci
       - name: Run synthetic Studio topology marker regression
-        run: node --test tests/studio-view-topology.test.ts
+        run: node --test tests/studio-view-topology.test.ts tests/surface-intersections.test.ts
