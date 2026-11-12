@@ -14,7 +14,7 @@ export interface ClusterPart {
  id:string;name:string;parentPartId:string|null;orderKey:number[];rigBoneIds:string[];
 }
 export interface ClusterSurfaceLayer {id:string;name:string;partId:string|null;orderKey:number[]}
-export interface ClusterMeshSource {id:string;sourceMeshIndex:number;sourceMeshName:string;primitiveIndex:number;vertexCount:number;triangleCount:number}
+export interface ClusterMeshSource {id:string;sourceMeshIndex:number;sourceMeshName:string;primitiveIndex:number;vertexCount:number;triangleCount:number;sourceNodeIndex?:number;sourceNodeName?:string;sourceNodePath?:string}
 export interface ClusterAssignment {
  meshId:string;triangleIndex:number;partId:string|null;surfaceLayerId:string|null;
  origin:ClusterOrigin;policy:OverridePolicy;confidence:number;reason:string;
