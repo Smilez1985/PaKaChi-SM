@@ -50,6 +50,18 @@ test('dense spatial broad-phase is bounded and reports incomplete coverage',()=>
  assert.equal(report.checked,false);assert.equal(report.reason,'budget');
 });
 
+test('large world-space offsets do not weld nearby but distinct contact vertices',()=>{
+ const translate=(offset:number)=>[
+  ...tri([0,0,0],[1,0,0],[0,1,0]),
+  ...tri([.1,0,0],[1.1,0,.1],[2,2,1])
+ ].map((value)=>value+offset);
+ for(const offset of [0,1e9]){
+  const result=checkSurfaceIntersections(translate(offset));
+  assert.equal(result.intersections,0);
+  assert.equal(result.checked,false);
+  assert.equal(result.reason,'coplanar-or-touching');
+ }
+});
 test('unwelded seam vertices sharing a geometric edge are treated as adjacency',()=>{
  const unwelded=[...tri([0,0,0],[1,0,0],[0,1,0]),...tri([0,0,0],[0,0,1],[0,1,0])];
  const result=checkSurfaceIntersections(unwelded);
