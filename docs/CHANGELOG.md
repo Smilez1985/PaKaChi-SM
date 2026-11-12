@@ -23,6 +23,8 @@ Zeitstempel der letzten Änderung: 2026-11-12T19:22:00+01:00 (Europe/Berlin).
 - 16 zusätzliche gezielte Schnittprüfungen zusammen mit dem Studio-Nullflächenmarker-Test in einem kostenschlanken Workflow; Lauf #43215270194 erfolgreich (17/17, 0 Fehler/Skips, ca. 590 ms Testlauf).
 - Synthetisches Studio-View-Regressionstest-Fixture für Nullflächenmarker: prüft den roten Marker am korrekten Restflächen-Schwerpunkt, das Zurücksetzen und unveränderte Quell-Positions-/Indexpuffer. Separater Minimalworkflow #43145313187 bestanden (1/1 Test, 0 Fehler/Skips); kein vollständiger Player-Build.
 
+- Cluster-Neuberechnung verlangt jetzt einen vollständigen, validierten Kandidatenmanifest-Stand und weist abweichende Quellasset-Hashes, Formen sowie veraltete Mesh-Inventare zurück. Gesperrte manuelle Dreieckszuordnungen bleiben weiterhin erhalten; Algorithmus-ID und -Version des Kandidaten werden übernommen. Neue Regressionstests decken Asset- und Inventarabweichungen ab.
+
 ### Changed
 
 - Windows-Start prüft jetzt den SHA-256-Stand von `package-lock.json` und führt `npm ci` nur bei fehlender oder geänderter Abhängigkeitsinstallation aus; ein Marker verhindert Neuinstallationen bei jedem Start. Drei Regressionstests decken unveränderten Lockfile-Stand, Aktualisierung und Installationsfehler ab. Noch nicht lokal ausgeführt.

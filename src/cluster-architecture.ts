@@ -105,12 +105,17 @@ export function applyClusterOperation(manifest:ClusterManifest,operation:Cluster
  next.overrides.push({id:globalThis.crypto.randomUUID(),origin,policy:operation.type==='assign-mesh'?(operation.policy??policy):policy,operation:clone(operation),createdAt:new Date().toISOString()});
  next.revision++;assertValid(next);return next;
 }
-/** Replaces automatic assignments while retaining locked manual decisions by source triangle. */
-export function recomputeClusterAssignments(current:ClusterManifest,proposed:ClusterAssignment[]):ClusterManifest{
- assertValid(current);const locked=new Map(current.assignments.filter(a=>a.policy==='locked'&&a.origin!=='automatic').map(a=>[`${a.meshId}:${a.triangleIndex}`,a]));
- const merged=proposed.map(a=>{const key=`${a.meshId}:${a.triangleIndex}`;const prior=locked.get(key);if(prior){locked.delete(key);return clone(prior);}return clone(a);});
+/** Replaces assignments from a validated candidate for the exact same source asset and mesh inventory. */
+export function recomputeClusterAssignments(current:ClusterManifest,proposed:ClusterManifest):ClusterManifest{
+ assertValid(current);assertValid(proposed);
+ if(current.sourceAssetSha256!==proposed.sourceAssetSha256)throw new Error('Recalculation candidate belongs to a different source asset.');
+ if(current.form!==proposed.form)throw new Error('Recalculation candidate belongs to a different character form.');
+ const inventoryKey=(manifest:ClusterManifest)=>manifest.meshes.map(({id,sourceMeshIndex,sourceMeshName,primitiveIndex,vertexCount,triangleCount,sourceNodeIndex,sourceNodeName,sourceNodePath})=>({id,sourceMeshIndex,sourceMeshName,primitiveIndex,vertexCount,triangleCount,sourceNodeIndex,sourceNodeName,sourceNodePath})).sort((a,b)=>a.id.localeCompare(b.id));
+ if(JSON.stringify(inventoryKey(current))!==JSON.stringify(inventoryKey(proposed)))throw new Error('Recalculation candidate has a stale or mismatched mesh inventory.');
+ const locked=new Map(current.assignments.filter(a=>a.policy==='locked'&&a.origin!=='automatic').map(a=>[`${a.meshId}:${a.triangleIndex}`,a]));
+ const merged=proposed.assignments.map(a=>{const key=`${a.meshId}:${a.triangleIndex}`;const prior=locked.get(key);if(prior){locked.delete(key);return clone(prior);}return clone(a);});
  if(locked.size)throw new Error('Recalculation omitted '+locked.size+' locked triangle assignment(s).');
- const next={...clone(current),assignments:merged,generatedAt:new Date().toISOString(),revision:current.revision+1};
+ const next={...clone(current),algorithmId:proposed.algorithmId,algorithmVersion:proposed.algorithmVersion,assignments:merged,generatedAt:new Date().toISOString(),revision:current.revision+1};
  assertValid(next);return next;
 }
 export async function clusterAssetHash(bytes:Uint8Array):Promise<string>{const digest=await globalThis.crypto.subtle.digest('SHA-256',bytes as BufferSource);return Array.from(new Uint8Array(digest),v=>v.toString(16).padStart(2,'0')).join('');}

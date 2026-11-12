@@ -49,13 +49,21 @@ test('recalculation preserves locked user assignments and replaces automatic one
   {...current.assignments[0],partId:'head',origin:'automatic' as const,policy:'recomputable' as const,confidence:.2},
   {...current.assignments[1],partId:'body',origin:'automatic' as const,policy:'recomputable' as const,confidence:.9},
  ];
- const next=recomputeClusterAssignments(current,proposed);
+ const next=recomputeClusterAssignments(current,{...current,assignments:proposed});
  assert.equal(next.assignments[0].partId,'body');assert.equal(next.assignments[0].origin,'user');assert.equal(next.assignments[1].partId,'body');
  assert.equal(current.assignments[1].partId,'head');assert.equal(next.revision,1);
 });
 test('recalculation refuses to silently drop a locked source triangle',()=>{
  const current=fixture();current.assignments[0].origin='llm';current.assignments[0].policy='locked';
- assert.throws(()=>recomputeClusterAssignments(current,[current.assignments[1]]),/omitted 1 locked/);
+ assert.throws(()=>recomputeClusterAssignments(current,{...current,assignments:[current.assignments[1]]}),/omitted 1 locked/);
+});
+test('recalculation rejects candidates from another source asset or stale mesh inventory',()=>{
+ const current=fixture();
+ const wrongAsset=fixture();wrongAsset.sourceAssetSha256='b'.repeat(64);
+ assert.throws(()=>recomputeClusterAssignments(current,wrongAsset),/different source asset/);
+ const staleInventory=fixture();staleInventory.meshes[0].triangleCount=3;
+ staleInventory.assignments.push({...staleInventory.assignments[1],triangleIndex:2});
+ assert.throws(()=>recomputeClusterAssignments(current,staleInventory),/stale or mismatched mesh inventory/);
 });
 test('uses deterministic SHA-256 asset identity without Node-only dependencies',async()=>{
  assert.equal(await clusterAssetHash(new TextEncoder().encode('abc')),'ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad');
