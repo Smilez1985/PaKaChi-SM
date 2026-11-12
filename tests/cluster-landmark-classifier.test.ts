@@ -35,8 +35,9 @@ test('supports indexed geometry and rejects invalid or excessive input',()=>{
  ]);
  assert.equal(result.assignments.length,1);assert.equal(result.assignments[0].partId,'head');
  assert.throws(()=>proposeLandmarkClusterAssignments('mesh-main',positions,new Uint16Array([0,1,9]),[{partId:'head',position:[0,0,0],radius:2}]),/outside/);
- assert.throws(()=>proposeLandmarkClusterAssignments('mesh-main',positions,null,[]),/1–256/);
- assert.throws(()=>proposeLandmarkClusterAssignments('mesh-main',positions,null,[{partId:'head',position:[0,0,0],radius:2}],{maxTriangles:0}),/excessive/);
+ const singleTriangle=new Float32Array([0,0,0,1,0,0,0,1,0]);
+ assert.throws(()=>proposeLandmarkClusterAssignments('mesh-main',singleTriangle,null,[]),/1–256/);
+ assert.throws(()=>proposeLandmarkClusterAssignments('mesh-main',singleTriangle,null,[{partId:'head',position:[0,0,0],radius:2}],{maxTriangles:0}),/excessive/);
 });
 
 

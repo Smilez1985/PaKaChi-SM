@@ -64,7 +64,7 @@ test('creates a complete manifest without guessing anatomical assignments',()=>{
   assert.deepEqual(validateClusterManifest(manifest),[]);
   assert.equal(manifest.assignments.length,2);
   assert.ok(manifest.assignments.every(a=>a.partId===null&&a.surfaceLayerId===null&&a.confidence===0));
-  assert.ok(manifest.assignments.every(a=>a.reason.includes('unclassified')));
+  assert.ok(manifest.assignments.every(a=>/unclassified/i.test(a.reason)));
   assert.equal(manifest.form,'animal');
 });
 
