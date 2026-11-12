@@ -12,7 +12,7 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
-Zeitstempel der letzten Änderung: 2026-11-12T19:22:00+01:00 (Europe/Berlin).
+Zeitstempel der letzten Änderung: 2026-11-12T21:00:00+01:00 (Europe/Berlin).
 
 ### Added
 
@@ -26,6 +26,7 @@ Zeitstempel der letzten Änderung: 2026-11-12T19:22:00+01:00 (Europe/Berlin).
 - Cluster-Neuberechnung verlangt jetzt einen vollständigen, validierten Kandidatenmanifest-Stand und weist abweichende Quellasset-Hashes, Formen sowie veraltete Mesh-Inventare zurück. Gesperrte manuelle Dreieckszuordnungen bleiben weiterhin erhalten; Algorithmus-ID und -Version des Kandidaten werden übernommen. Neue Regressionstests decken Asset- und Inventarabweichungen ab.
 
 - Erster generischer Landmarken-Klassifikator als nicht-destruktiver Vorschlag: bewertet Dreiecke eines einzelnen zusammenhängenden oder indexierten Meshes anhand caller-supplied anatomischer Seed-Punkte und Radien. Nicht ausreichend getrennte oder nicht abgedeckte Bereiche bleiben ausdrücklich ungeklärt; keine PaKaChi-Koordinaten, kein Rig und keine Geometrieänderung.
+- Landmarken-Vorschläge lassen sich jetzt als vollständiger Manifest-Kandidat erzeugen. Der Adapter prüft Quellhash, Mesh-Inventar, Vertex-/Dreieckszahlen und anatomische Layer-/Part-Referenzen; nicht bearbeitete Meshes bleiben unverändert, gesperrte manuelle Zuordnungen schützt die vorhandene Neuberechnung. Die Koordinaten müssen bereits im selben mesh-lokalen 3D-Raum liegen; eine 2D-Projektion ist nicht Teil dieser Änderung.
 
 ### Changed
 

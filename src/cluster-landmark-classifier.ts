@@ -97,3 +97,93 @@ export function proposeLandmarkClusterAssignments(
   }
   return { assignments, classified, ambiguous, outsideEvidence };
 }
+
+
+import { recomputeClusterAssignments, validateClusterManifest } from './cluster-architecture.ts';
+import type { ClusterManifest } from './cluster-architecture.ts';
+
+export interface ClusterMeshLandmarkEvidence {
+  meshId: string;
+  positions: ArrayLike<number>;
+  indices: ArrayLike<number> | null;
+  seeds: readonly ClusterLandmarkSeed[];
+}
+
+/**
+ * Builds a complete, validated manifest candidate from per-mesh landmark
+ * evidence. Evidence is accepted only for the exact source asset and mesh
+ * inventory already represented by the manifest. Untouched meshes retain
+ * their existing assignments; locked manual assignments are preserved by
+ * recomputeClusterAssignments().
+ *
+ * Positions and seed coordinates must already share one mesh-local 3D space.
+ * This adapter deliberately does not infer a 2D-to-3D projection.
+ */
+export function proposeClusterManifestFromLandmarkEvidence(
+  current: ClusterManifest,
+  sourceAssetSha256: string,
+  evidence: readonly ClusterMeshLandmarkEvidence[],
+  generatedAt = new Date().toISOString(),
+): ClusterManifest {
+  const currentIssues = validateClusterManifest(current);
+  if (currentIssues.length) {
+    throw new Error('Invalid source cluster manifest: ' + currentIssues.map(issue => issue.code).join(', '));
+  }
+  if (sourceAssetSha256 !== current.sourceAssetSha256) {
+    throw new Error('Landmark evidence belongs to a different source asset.');
+  }
+  if (!Array.isArray(evidence) || evidence.length === 0) {
+    throw new Error('At least one mesh landmark evidence set is required.');
+  }
+  if (!Number.isFinite(Date.parse(generatedAt))) throw new Error('Invalid candidate timestamp.');
+
+  const meshById = new Map(current.meshes.map(mesh => [mesh.id, mesh]));
+  const seen = new Set<string>();
+  const proposedByMesh = new Map<string, ClusterAssignment[]>();
+  const partIds = new Set(current.parts.map(part => part.id));
+  const layerIds = new Set(current.layers.map(layer => layer.id));
+
+  for (const item of evidence) {
+    if (!item || typeof item.meshId !== 'string' || seen.has(item.meshId)) {
+      throw new Error('Landmark evidence contains an invalid or duplicate mesh ID.');
+    }
+    seen.add(item.meshId);
+    const source = meshById.get(item.meshId);
+    if (!source) throw new Error('Landmark evidence references a mesh outside the source inventory.');
+    if (item.positions.length / 3 !== source.vertexCount) {
+      throw new Error('Landmark evidence vertex count does not match the source mesh inventory.');
+    }
+    const elementCount = item.indices?.length ?? item.positions.length / 3;
+    if (elementCount / 3 !== source.triangleCount) {
+      throw new Error('Landmark evidence triangle count does not match the source mesh inventory.');
+    }
+    for (const seed of item.seeds) {
+      if (!partIds.has(seed.partId)) throw new Error('Landmark seed references an unknown anatomical part.');
+      if (seed.surfaceLayerId != null && !layerIds.has(seed.surfaceLayerId)) {
+        throw new Error('Landmark seed references an unknown surface layer.');
+      }
+    }
+    const result = proposeLandmarkClusterAssignments(
+      item.meshId, item.positions, item.indices, item.seeds,
+    );
+    if (result.assignments.length !== source.triangleCount) {
+      throw new Error('Landmark classifier did not cover the complete source mesh.');
+    }
+    proposedByMesh.set(item.meshId, result.assignments);
+  }
+
+  const candidate: ClusterManifest = {
+    ...structuredClone(current),
+    algorithmId: 'landmark-seed-proximity',
+    algorithmVersion: '0.1.0',
+    generatedAt,
+    assignments: current.assignments
+      .filter(assignment => !proposedByMesh.has(assignment.meshId))
+      .concat(...proposedByMesh.values()),
+  };
+  const candidateIssues = validateClusterManifest(candidate);
+  if (candidateIssues.length) {
+    throw new Error('Invalid landmark cluster candidate: ' + candidateIssues.map(issue => issue.code).join(', '));
+  }
+  return recomputeClusterAssignments(current, candidate);
+}
