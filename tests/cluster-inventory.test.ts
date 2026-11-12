@@ -1,7 +1,7 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import * as THREE from 'three';
-import {collectClusterMeshInventory,createUnclassifiedClusterManifest} from '../src/cluster-inventory.ts';
+import {collectClusterMeshInventory,createUnclassifiedClusterManifest,createClusterManifestFromGLTF} from '../src/cluster-inventory.ts';
 import {validateClusterManifest} from '../src/cluster-architecture.ts';
 
 const hash='a'.repeat(64);
@@ -94,4 +94,15 @@ test('preserves original GLTF node, mesh and primitive associations',()=>{
   ]);
   assert.notEqual(inventory.meshes[0].id,inventory.meshes[1].id);
   assert.ok(inventory.meshes.every(m=>m.sourceNodePath?.includes('CharacterRoot')));
+});
+
+test('parsed GLTF entry point combines provenance inventory and unresolved coverage',()=>{
+  const scene=new THREE.Group(),geometry=new THREE.BufferGeometry();
+  geometry.setAttribute('position',new THREE.Float32BufferAttribute([0,0,0,1,0,0,0,1,0],3));
+  scene.add(new THREE.Mesh(geometry,new THREE.MeshBasicMaterial()));
+  const manifest=createClusterManifestFromGLTF({scene},hash,'humanoid','2026-11-12T15:00:00.000Z');
+  assert.equal(manifest.form,'humanoid');
+  assert.equal(manifest.meshes.length,1);
+  assert.equal(manifest.assignments.length,1);
+  assert.deepEqual(validateClusterManifest(manifest),[]);
 });
