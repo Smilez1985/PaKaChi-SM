@@ -19,6 +19,8 @@ test('budget, malformed positions and coplanar candidates never silently pass',(
  const coplanar=[...tri([0,0,0],[2,0,0],[0,2,0]),...tri([.2,.2,0],[1,.2,0],[.2,1,0])];
  assert.equal(checkSurfaceIntersections(coplanar).checked,false);
  assert.equal(checkSurfaceIntersections(coplanar).reason,'coplanar-or-touching');
+ const edgeOnly=[...tri([0,0,0],[1,0,0],[0,1,0]),...tri([0,0,0],[0,0,1],[1,0,0])];
+ assert.equal(checkSurfaceIntersections(edgeOnly).checked,true);
  assert.throws(()=>checkSurfaceIntersections([0,0,0,1]));
 });
 
@@ -48,7 +50,7 @@ test('dense spatial broad-phase is bounded and reports incomplete coverage',()=>
  assert.equal(report.checked,false);assert.equal(report.reason,'budget');
 });
 
-test('unwelded seam vertices are treated as ambiguous contacts, unlike indexed adjacency',()=>{
+test('unwelded seam vertices sharing a geometric edge are treated as adjacency',()=>{
  const unwelded=[...tri([0,0,0],[1,0,0],[0,1,0]),...tri([0,0,0],[0,0,1],[0,1,0])];
  const result=checkSurfaceIntersections(unwelded);
  assert.equal(result.intersections,0);assert.equal(result.checked,false);
