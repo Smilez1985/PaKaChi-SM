@@ -1,0 +1,32 @@
+name: PaKaChi Studio topology marker regression
+on:
+  push:
+    branches: [develop]
+    paths:
+      - '.github/workflows/studio-topology-test.yml'
+      - 'src/studio-view.ts'
+      - 'src/studio-rig.ts'
+      - 'tests/studio-view-topology.test.ts'
+      - 'package.json'
+      - 'package-lock.json'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: studio-topology-{{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  studio-topology:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: Run synthetic Studio topology marker regression
+        run: node --test tests/studio-view-topology.test.ts
