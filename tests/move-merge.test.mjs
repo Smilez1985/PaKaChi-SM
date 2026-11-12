@@ -30,9 +30,9 @@ test('invalid poses, identity mismatch, malformed or missing files do not create
  await rm(b.path);await assert.rejects(()=>mergeMoves({base:a.dir,package:b.dir,output}));await assert.rejects(()=>access(output));
 });
 test('escaping symlinks, nested output and oversized files are rejected',async t=>{
- const root=await fixture(t),a=await pack(root,'wave'),b=await pack(root,'jump'),output=join(root,'combined'),outside=join(root,'outside.json');await writeFile(outside,await readFile(b.path));await rm(b.path);await symlink(outside,b.path);
- await assert.rejects(()=>mergeMoves({base:a.dir,package:b.dir,output}),/außerhalb/);await assert.rejects(()=>access(output));await assert.rejects(()=>mergeMoves({base:a.dir,package:b.dir,output:join(a.dir,'new')}),/außerhalb/);
- await rm(b.path);await writeFile(b.path,'');await truncate(b.path,8*1024*1024+1);await assert.rejects(()=>mergeMoves({base:a.dir,package:b.dir,output}),/groß/);await assert.rejects(()=>access(output));
+ const root=await fixture(t),a=await pack(root,'wave'),b=await pack(root,'jump'),output=join(root,'combined'),outside=join(root,'outside.json');await writeFile(outside,await readFile(b.path));await rm(b.path);let symlinkCreated=false;try{await symlink(outside,b.path);symlinkCreated=true;}catch(error){if(!['EPERM','EACCES'].includes(error.code))throw error;t.diagnostic('Symlink-Sicherheitsfall mangels Windows-Symlink-Berechtigung nicht ausgeführt.');}
+ if(symlinkCreated){await assert.rejects(()=>mergeMoves({base:a.dir,package:b.dir,output}),/außerhalb/);await assert.rejects(()=>access(output));}await assert.rejects(()=>mergeMoves({base:a.dir,package:b.dir,output:join(a.dir,'new')}),/außerhalb/);
+ await rm(b.path,{force:true});await writeFile(b.path,'');await truncate(b.path,8*1024*1024+1);await assert.rejects(()=>mergeMoves({base:a.dir,package:b.dir,output}),/groß/);await assert.rejects(()=>access(output));
 });
 test('CLI creates a merged collection and refuses an existing output without changes',async t=>{
  const root=await fixture(t),a=await pack(root,'wave'),b=await pack(root,'jump'),output=join(root,'combined'),args=['scripts/merge-moves.mjs','--base',a.dir,'--package',b.dir,'--output',output];const result=spawnSync(process.execPath,args,{encoding:'utf8'});assert.equal(result.status,0,result.stderr);const before=await readFile(join(output,'moves/catalog.json'));
