@@ -12,12 +12,16 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+Zeitstempel der letzten Änderung: 2026-11-12T12:20:00+01:00 (Europe/Berlin).
+
 ### Added
 
+- 15 zusätzliche gezielte Schnittprüfungen zusammen mit dem Studio-Nullflächenmarker-Test in einem kostenschlanken Workflow; Lauf #43208434448 erfolgreich (16/16, 0 Fehler/Skips).
 - Synthetisches Studio-View-Regressionstest-Fixture für Nullflächenmarker: prüft den roten Marker am korrekten Restflächen-Schwerpunkt, das Zurücksetzen und unveränderte Quell-Positions-/Indexpuffer. Separater Minimalworkflow #43145313187 bestanden (1/1 Test, 0 Fehler/Skips); kein vollständiger Player-Build.
 
 ### Changed
 
+- Schnittprüfung erkennt geometrisch gemeinsame Kanten über getrennte UV-Naht-Indizes hinweg. Koplanare Kantenberührung wird per projizierter Überlappungsfläche von echter Flächenüberlappung unterschieden; nicht-koplanare gemeinsame Kanten bleiben nur ohne inneren Durchdringungstreffer unauffällig. Originalformen-Nachmessung steht noch aus.
 - Gezielte Studio-Nullflächenmarkerprüfung erfolgreich: ein künstliches kollineares Dreieck wird im Restflächen-Schwerpunkt `[1,0,0]` markiert; Zurücksetzen und unveränderte Quellpuffer sind nachgewiesen. Die echte gerenderte Sichtbarkeit im Player bleibt manuell abzunehmen.
 - Originalformen-Lauf #6 bestätigt die regenerierten Tier- und Arbeitsform-GLBs ohne Nullflächen in allen 28 starren Finger-/Zehen-`_shell`-Teilmodellen je Form. Die Messberichte weisen zugleich aus, dass bei den acht statischen Hüft-/Knieproben je Form nur `PaKaChi_body` messbar war; 91 bzw. 89 Teilmodelle bleiben coplanar/touching-bedingt unmessbar. Keine vollständige Kollisionsfreigabe.
 
