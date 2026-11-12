@@ -28,7 +28,7 @@ jobs:
           node-version: '24'
           cache: npm
       - run: npm ci
-      - name: Run cluster architecture, inventory and landmark regressions
-        run: node --test --test-reporter=spec tests/cluster-architecture.test.ts tests/cluster-inventory.test.ts tests/cluster-landmark-classifier.test.ts tests/cluster-landmark-projection.test.ts tests/cluster-landmark-pipeline.test.ts
+      - name: Run cluster architecture, inventory, real PaKaChi asset and landmark regressions
+        run: node --test --test-reporter=spec tests/cluster-architecture.test.ts tests/cluster-inventory.test.ts tests/cluster-landmark-classifier.test.ts tests/cluster-landmark-projection.test.ts tests/cluster-landmark-pipeline.test.ts tests/cluster-pakachi-assets.test.ts
       - name: Type-check project
         run: npx tsc --noEmit
