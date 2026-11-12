@@ -159,3 +159,17 @@ export function createUnclassifiedClusterManifest(
     overrides: [],
   };
 }
+
+/** Convenience entry point for the exact GLTF document returned by parseModel(). */
+export function createClusterManifestFromGLTF(
+  gltf: GLTFDocumentLike,
+  sourceAssetSha256: string,
+  form: ClusterForm = 'imported',
+  generatedAt = new Date().toISOString(),
+): ClusterManifest {
+  return createUnclassifiedClusterManifest(
+    collectClusterMeshInventory(gltf, sourceAssetSha256),
+    form,
+    generatedAt,
+  );
+}
