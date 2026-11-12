@@ -6,6 +6,8 @@ on:
       - '.github/workflows/studio-topology-test.yml'
       - 'src/studio-view.ts'
       - 'src/studio-rig.ts'
+      - 'src/surface-intersections.ts'
+      - 'tests/surface-intersections.test.ts'
       - 'tests/studio-view-topology.test.ts'
       - 'package.json'
       - 'package-lock.json'
