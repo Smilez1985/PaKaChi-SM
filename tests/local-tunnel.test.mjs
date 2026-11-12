@@ -11,11 +11,11 @@ import {launchProcess} from '../server/local/process.mjs';
 function zip(entries){let offset=0;const locals=[],index=[];for(const [name,bytes,mode=0o100755] of entries){const n=Buffer.from(name),b=Buffer.from(bytes),l=Buffer.alloc(30),c=Buffer.alloc(46);l.writeUInt32LE(0x04034b50);l.writeUInt32LE(crc32(b),14);l.writeUInt32LE(b.length,18);l.writeUInt32LE(b.length,22);l.writeUInt16LE(n.length,26);c.writeUInt32LE(0x02014b50);c.writeUInt32LE(crc32(b),16);c.writeUInt32LE(b.length,20);c.writeUInt32LE(b.length,24);c.writeUInt16LE(n.length,28);c.writeUInt32LE((mode*65536)>>>0,38);c.writeUInt32LE(offset,42);locals.push(l,n,b);index.push(c,n);offset+=l.length+n.length+b.length;}const directory=Buffer.concat(index),end=Buffer.alloc(22);end.writeUInt32LE(0x06054b50);end.writeUInt16LE(entries.length,8);end.writeUInt16LE(entries.length,10);end.writeUInt32LE(directory.length,12);end.writeUInt32LE(offset,16);return Buffer.concat([...locals,directory,end]);}
 test('official bundle extraction requires both platform binaries and validates bytes without following archive paths',()=>{
  for(const platform of ['linux','win32']){const ext=platform==='win32'?'.exe':'',bytes=zip([['tunnel-client'+ext,'client'],['cloudflared'+ext,'proxy'],['../outside','escape']]);const files=extractBundle(bytes,platform);assert.equal(files.size,2);assert.equal(files.get('cloudflared'+ext).toString(),'proxy');}
- assert.throws(()=>extractBundle(zip([['tunnel-client','only one']])));
- assert.throws(()=>extractBundle(zip([['tunnel-client','link',0o120777],['cloudflared','proxy']])));
- assert.throws(()=>extractBundle(zip([['tunnel-client','one'],['tunnel-client','two'],['cloudflared','proxy']])));
- const broken=zip([['tunnel-client','client'],['cloudflared','proxy']]);broken[30+'tunnel-client'.length]^=1;assert.throws(()=>extractBundle(broken),/Prüfsumme/);
- assert.throws(()=>extractBundle(Buffer.alloc(2)));
+ assert.throws(()=>extractBundle(zip([['tunnel-client','only one']]),'linux'));
+ assert.throws(()=>extractBundle(zip([['tunnel-client','link',0o120777],['cloudflared','proxy']]),'linux'));
+ assert.throws(()=>extractBundle(zip([['tunnel-client','one'],['tunnel-client','two'],['cloudflared','proxy']]),'linux'));
+ const broken=zip([['tunnel-client','client'],['cloudflared','proxy']]);broken[30+'tunnel-client'.length]^=1;assert.throws(()=>extractBundle(broken,'linux'),/Prüfsumme/);
+ assert.throws(()=>extractBundle(Buffer.alloc(2),'linux'));
 });
 test('tunnel installation verifies official release digest and manages secret-free config, readiness and doctor',async t=>{
  const root=await mkdtemp(join(tmpdir(),'pakachi-tunnel-'));t.after(()=>rm(root,{recursive:true,force:true}));const settings=await createSettings(root);await settings.update({...settings.value,enabled:true,tunnelId:'tunnel_testing'});
