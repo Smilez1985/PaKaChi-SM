@@ -53,9 +53,9 @@ test('recalculation preserves locked user assignments and replaces automatic one
  assert.equal(next.assignments[0].partId,'body');assert.equal(next.assignments[0].origin,'user');assert.equal(next.assignments[1].partId,'body');
  assert.equal(current.assignments[1].partId,'head');assert.equal(next.revision,1);
 });
-test('recalculation refuses to silently drop a locked source triangle',()=>{
+test('recalculation rejects incomplete candidate coverage before applying locked overrides',()=>{
  const current=fixture();current.assignments[0].origin='llm';current.assignments[0].policy='locked';
- assert.throws(()=>recomputeClusterAssignments(current,{...current,assignments:[current.assignments[1]]}),/omitted 1 locked/);
+ assert.throws(()=>recomputeClusterAssignments(current,{...current,assignments:[current.assignments[1]]}),/assignment.coverage/);
 });
 test('recalculation rejects candidates from another source asset or stale mesh inventory',()=>{
  const current=fixture();
