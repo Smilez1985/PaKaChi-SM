@@ -26,6 +26,37 @@ function segmentPierces(a:V,b:V,tri:[V,V,V],tolerance:number):0|1|2{
  if(s< -tolerance||w< -tolerance||s+w>1+tolerance)return 0;
  return t>tolerance&&t<1-tolerance&&s>tolerance&&w>tolerance&&s+w<1-tolerance?1:2;
 }
+/** Count geometrically shared corners, including duplicated UV-seam vertices. */
+function sharedGeometricVertices(a:[V,V,V],b:[V,V,V],tolerance:number):number{
+ const used=new Set<number>();let count=0;
+ for(const p of a)for(let j=0;j<3;j++){
+  if(used.has(j))continue;
+  const q=b[j];
+  if(Math.hypot(p[0]-q[0],p[1]-q[1],p[2]-q[2])<=tolerance){used.add(j);count++;break;}
+ }
+ return count;
+}
+/** Area of the coplanar overlap after projection onto the dominant normal plane. */
+function coplanarOverlapArea(a:[V,V,V],b:[V,V,V],normal:V):number{
+ const drop=Math.abs(normal[0])>=Math.abs(normal[1])&&Math.abs(normal[0])>=Math.abs(normal[2])?0:Math.abs(normal[1])>=Math.abs(normal[2])?1:2;
+ const project=(p:V):[number,number]=>drop===0?[p[1],p[2]]:drop===1?[p[0],p[2]]:[p[0],p[1]];
+ const signed=(poly:[number,number][])=>poly.reduce((sum,p,i)=>{const q=poly[(i+1)%poly.length];return sum+p[0]*q[1]-q[0]*p[1];},0)/2;
+ const clip= a.map(project), subject=b.map(project), orientation=Math.sign(signed(clip))||1;
+ let polygon=subject;
+ for(let i=0;i<3&&polygon.length;i++){
+  const p=clip[i],q=clip[(i+1)%3];
+  const side=(v:[number,number])=>orientation*((q[0]-p[0])*(v[1]-p[1])-(q[1]-p[1])*(v[0]-p[0]));
+  const output:[number,number][]=[];
+  for(let j=0;j<polygon.length;j++){
+   const current=polygon[j],previous=polygon[(j+polygon.length-1)%polygon.length],dc=side(current),dp=side(previous);
+   const insideCurrent=dc>=-1e-12,insidePrevious=dp>=-1e-12;
+   if(insideCurrent!==insidePrevious){const t=dp/(dp-dc);output.push([previous[0]+t*(current[0]-previous[0]),previous[1]+t*(current[1]-previous[1])]);}
+   if(insideCurrent)output.push(current);
+  }
+  polygon=output;
+ }
+ return polygon.length<3?0:Math.abs(signed(polygon));
+}
 export interface SurfaceIntersectionOptions {
  /** Enumerate every detected pair within the chosen scope; bounded by the pair budget. */
  onIntersection?:(first:number,second:number)=>void;
@@ -112,15 +143,23 @@ export function checkSurfaceIntersections(positions:Numbers,index:Numbers|null=n
   const norm1=Math.hypot(...n1),norm2=Math.hypot(...n2);
   if(norm1<=1e-12||norm2<=1e-12){report.checked=false;report.reason='invalid';continue;}
   const parallel=Math.hypot(...cross(n1,n2))<=1e-10*norm1*norm2;
+  const coordinateScale=Math.max(1,...one.flatMap(p=>p.map(Math.abs)),...two.flatMap(p=>p.map(Math.abs)));
+  const geometricTolerance=1e-9*coordinateScale;
+  const sharedCorners=sharedGeometricVertices(one,two,geometricTolerance);
   if(parallel){
-   if(Math.abs(dot(n1,sub(two[0],one[0])))<=1e-10*norm1){report.checked=false;report.reason=report.reason??'coplanar-or-touching';}
+   if(Math.abs(dot(n1,sub(two[0],one[0])))<=1e-10*norm1){
+    const overlap=coplanarOverlapArea(one,two,n1);
+    const projectedScale=Math.max(1,norm1);
+    if(overlap>1e-12*projectedScale) {report.checked=false;report.reason=report.reason??'coplanar-or-touching';}
+   }
    continue;
   }
   const contacts=(p:[V,V,V],q:[V,V,V])=>[0,1,2].map(k=>segmentPierces(p[k],p[(k+1)%3],q,1e-9));
   const hits=[...contacts(one,two),...contacts(two,one)];
   if(hits.includes(1)){report.intersections++;options.onIntersection?.(Math.min(a,b),Math.max(a,b));if(report.examples.length<12)report.examples.push([Math.min(a,b),Math.max(a,b)]);}
-  // A strict piercing does not resolve a separate boundary contact in the same pair.
-  if(hits.includes(2)){report.checked=false;report.reason=report.reason??'coplanar-or-touching';}
+  // A shared geometric edge (including duplicated seam vertices) is expected
+  // adjacency. It is cleared only when no strict interior piercing is present.
+  if(hits.includes(2)&&!(sharedCorners>=2&&!hits.includes(1))){report.checked=false;report.reason=report.reason??'coplanar-or-touching';}
  }
  return report;
 }
