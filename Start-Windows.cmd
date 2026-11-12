@@ -7,13 +7,11 @@ if errorlevel 1 (
   pause
   exit /b 1
 )
-if not exist node_modules (
-  call npm ci
-  if errorlevel 1 (
-    echo Installation fehlgeschlagen.
-    pause
-    exit /b 1
-  )
+node scripts\ensure-dependencies.mjs
+if errorlevel 1 (
+  echo Abhaengigkeitsinstallation fehlgeschlagen.
+  pause
+  exit /b 1
 )
 call npm run local -- --open
 pause
