@@ -1,6 +1,6 @@
 # Prüfstand und Protokolle
 
-**Softwarestand: 0.101.0 · Dokumentationsabgleich: 2026-11-11T22:03:00+01:00 (Europe/Berlin).**
+**Softwarestand: 0.101.0 · Dokumentationsabgleich: 2026-11-12T04:05:00+01:00 (Europe/Berlin).**
 
 Alle Prüfnachweise stehen in dieser Datei: ein Abschnitt je Softwareversion sowie gesonderte Abschnitte für datierte Zwischenprüfungen. Die Ergebnisse und Grenzen gelten für den jeweils genannten Stand. Spätere Läufe stehen als Nachtrag im selben Abschnitt. Produktänderungen gehören in den [Changelog](CHANGELOG.md), offene Aufgaben in die [Roadmap](ROADMAP.md).
 
@@ -10,9 +10,9 @@ Alle Prüfnachweise stehen in dieser Datei: ein Abschnitt je Softwareversion sow
 
 **Generatoränderung:** Auf `develop`, Commit [`c1f9ac0`](https://github.com/Smilez1985/PaKaChi-SM/commit/c1f9ac0490fa16782551c09270487d2bf7d08455), entfernt `pruneDegenerateCapsuleFaces` ausschließlich Nullflächen aus dem Indexbuffer neu erzeugter starrer Kapseln. Positionen, UVs, Normalen und Knochenbindungen bleiben unverändert; die Funktion ist nicht für beliebige importierte, geskinnte oder Morph-Target-Modelle vorgesehen. `tests/pakachi-paws-cleanup.test.mjs` prüft drei Kapselabmessungen, exakt 24 entfernte Polflächen, unveränderte Vertexattribute und wiederholte Anwendung ohne weitere Änderungen.
 
-**Regenerierungsschutz:** `scripts/prepare-pakachi.mjs` berücksichtigt `pakachi-paws.mjs` im Pipeline-SHA-256. Der Workflow `pakachi-intersections.yml` führt deshalb bei `--if-needed` eine neue Erzeugung aus und verlangt danach je Form genau 28 `_shell`-Teilmodelle ohne Nullflächen sowie vollständige Topologie-/Reparaturberichte und alle acht statischen Gelenkproben. Der tatsächliche Ergebnisbericht des Folgelaufs #6 ist in diesem Nachtrag noch nicht ausgewertet; die Regenerierung wird daher nicht als bestanden behauptet.
+**Regenerierungsschutz:** `scripts/prepare-pakachi.mjs` berücksichtigt `pakachi-paws.mjs` im Pipeline-SHA-256. Der Workflow `pakachi-intersections.yml` führt deshalb bei `--if-needed` eine neue Erzeugung aus und verlangt danach je Form genau 28 `_shell`-Teilmodelle ohne Nullflächen sowie vollständige Topologie-/Reparaturberichte und alle acht statischen Gelenkproben. Der tatsächliche Ergebnisbericht des Folgelaufs #6 wurde im Abschnitt [Originalformen-Lauf #6](#originalformen-lauf-6--regenerierung-und-statische-gelenkproben) ausgewertet; beide regenerierten GLBs enthalten die korrigierten Kapseln.
 
-**Studio-Browserfall:** `tests/e2e/mesh-topology-markers.spec.ts` ist vorhanden und prüft das read-only Anzeigen/Zurücksetzen, unveränderte Projekt-Revision und fehlende Browserfehler. Der Fall lädt Mika und verlangt noch keine nichtleere Markeranzahl an einer gezielt eingebrachten Nullfläche. Eine echte visuelle Markerabnahme bleibt offen.
+**Studio-Browserfall:** `tests/e2e/mesh-topology-markers.spec.ts` ist vorhanden und prüft das read-only Anzeigen/Zurücksetzen, unveränderte Projekt-Revision und fehlende Browserfehler. Der Fall lädt Mika und verlangt noch keine nichtleere Markeranzahl an einer gezielt eingebrachten Nullfläche. Die isolierte Markerlogik wurde inzwischen durch den synthetischen View-Test im Abschnitt [Studio-Nullflächenmarker](#studio-nullflächenmarker--synthetischer-test-und-gezielter-ci-lauf) bestanden; die gerenderte Sichtbarkeit im vollständigen Player bleibt manuell abzunehmen.
 
 
 ## Originalformen-Lauf #6 – Regenerierung und statische Gelenkproben
@@ -37,9 +37,13 @@ Die lesende Reparaturvorschau umfasst je Form alle Meshes und jeweils 8 statisch
 
 Alle `volumeIssues` sind 0, außer Tierform/Knie bei 90° mit 1. Diese Zahlen sind Diagnosewerte, keine anatomische Freigabe. Besonders wichtig: Pro Probe war nur das Mesh `PaKaChi_body` messbar. Weitere 91 Meshes der Arbeitsform bzw. 89 der Tierform wurden mit `coplanar-or-touching` als unmessbar gemeldet. Die Artefakte zählen zwar transversale Schnittkandidaten am Körper (Arbeitsform 170–201, Tierform 241–2.472 je Probe), aber die übrigen Teilmodelle sind dadurch nicht abgedeckt. Eine vollständige Teilmodell-Kollisionsprüfung ist ausdrücklich **nicht** bestanden oder nachgewiesen.
 
-## Studio-Nullflächenmarker – synthetischer Test committed, Ausführung offen
+## Studio-Nullflächenmarker – synthetischer Test und gezielter CI-Lauf
 
-Commit `2b4623791f7875cb0c2330c01249dc29593724b0` ergänzt `tests/studio-view-topology.test.ts`. Das Fixture enthält ein absichtlich kollineares Dreieck und ein gültiges Kontroll-Dreieck. Der Test prüft eine Markerwolke mit genau einem Punkt am erwarteten Schwerpunkt `[1,0,0]`, das Entfernen der Marker und unveränderte ursprüngliche Positions-/Indexpuffer. Der Test ist auf `develop` committed; ein Ausführungsergebnis liegt noch nicht vor. Die bestehende Browserprüfung bleibt ergänzend, ersetzt diesen gezielten Test aber nicht.
+Commit `2b4623791f7875cb0c2330c01249dc29593724b0` ergänzt `tests/studio-view-topology.test.ts`. Das Fixture enthält ein absichtlich kollineares Dreieck und ein gültiges Kontroll-Dreieck. Der Test prüft eine Markerwolke mit genau einem Punkt am erwarteten Schwerpunkt `[1,0,0]`, das Entfernen der Marker und unveränderte ursprüngliche Positions-/Indexpuffer.
+
+Der minimale Workflow [`#43145313187`](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/43145313187) auf Commit `218df5ef14e6a56d4a422dc22e7af1d9df930bb8` ist erfolgreich: `npm ci` erfolgreich, anschließend **1 Test bestanden, 0 Fehler, 0 übersprungen**. Laufzeit des Tests ca. 27 ms. Der separate Workflow `.github/workflows/studio-topology-test.yml` wird nur bei Änderungen an der relevanten Studio-/Test-/Paketdatei oder manuell ausgeführt; kein vollständiger Player-Build und kein Geometriebenchmark. Die `npm ci`-Ausgabe meldet vier Abhängigkeitsschwachstellen (2 moderat, 2 hoch); sie wurden in diesem fokussierten Testlauf nicht automatisch verändert und müssen separat mit `npm audit` nach Komponenten/Erreichbarkeit eingeordnet werden.
+
+**Nachweisgrenze:** Dies belegt die Markerberechnung, Restflächenposition, Entfernung und Quellpuffer-Unverändertheit. Die tatsächliche Sichtbarkeit im gerenderten Player und das Zusammenspiel mit einem realen PaKaChi-Modell bleiben manuell abzunehmen.
 
 ## Version 0.101.0
 
