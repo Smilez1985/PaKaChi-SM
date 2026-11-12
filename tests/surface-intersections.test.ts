@@ -53,8 +53,8 @@ test('dense spatial broad-phase is bounded and reports incomplete coverage',()=>
 test('unwelded seam vertices sharing a geometric edge are treated as adjacency',()=>{
  const unwelded=[...tri([0,0,0],[1,0,0],[0,1,0]),...tri([0,0,0],[0,0,1],[0,1,0])];
  const result=checkSurfaceIntersections(unwelded);
- assert.equal(result.intersections,0);assert.equal(result.checked,false);
- assert.equal(result.reason,'coplanar-or-touching');
+ assert.equal(result.intersections,0);assert.equal(result.checked,true);
+ assert.equal(result.reason,undefined);
 });
 
 test('isolated degenerate triangles cannot yield a complete collision report',()=>{
