@@ -31,8 +31,8 @@ test('missing, malformed and identity-mismatched source files leave sources and 
  await rm(source);await assert.rejects(()=>mergeZoo({base:a.dir,package:b.dir,output}));assert.ok(!(await readdir(root)).includes('result'));
 });
 test('escaping symlink and output inside an input root are rejected',async t=>{
- const root=await fixture(t),a=await pack(root,'a'),b=await pack(root,'b'),source=join(b.dir,b.path),outside=join(root,'outside.json');await writeFile(outside,b.project);await rm(source);await symlink(outside,source);
- await assert.rejects(()=>mergeZoo({base:a.dir,package:b.dir,output:join(root,'result')}),/außerhalb/);await assert.rejects(()=>mergeZoo({base:a.dir,package:b.dir,output:join(a.dir,'nested')}),/außerhalb/);assert.ok(!(await readdir(root)).includes('result'));
+ const root=await fixture(t),a=await pack(root,'a'),b=await pack(root,'b'),source=join(b.dir,b.path),outside=join(root,'outside.json');await writeFile(outside,b.project);await rm(source);let symlinkCreated=false;try{await symlink(outside,source);symlinkCreated=true;}catch(error){if(!['EPERM','EACCES'].includes(error.code))throw error;t.diagnostic('Symlink-Sicherheitsfall mangels Windows-Symlink-Berechtigung nicht ausgeführt.');}
+ if(symlinkCreated){await assert.rejects(()=>mergeZoo({base:a.dir,package:b.dir,output:join(root,'result')}),/außerhalb/);assert.ok(!(await readdir(root)).includes('result'));}await assert.rejects(()=>mergeZoo({base:a.dir,package:b.dir,output:join(a.dir,'nested')}),/außerhalb/);
 });
 test('external model dependencies and reserved IDs are rejected before writing',async t=>{
  const root=await fixture(t),a=await pack(root,'a'),b=await pack(root,'b'),output=join(root,'result'),project=JSON.parse(b.project);project.model=Buffer.from(JSON.stringify({asset:{version:'2.0'},buffers:[{uri:'https://example.invalid/model.bin'}]})).toString('base64');await writeFile(join(b.dir,b.path),JSON.stringify(project));await assert.rejects(()=>mergeZoo({base:a.dir,package:b.dir,output}),/externe Ressourcen/);
