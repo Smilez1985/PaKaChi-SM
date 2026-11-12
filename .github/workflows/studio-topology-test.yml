@@ -13,7 +13,7 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: studio-topology-{{ github.ref }}
+  group: studio-topology-${{ github.ref }}
   cancel-in-progress: true
 jobs:
   studio-topology:
