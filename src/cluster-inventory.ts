@@ -43,7 +43,7 @@ export function collectClusterMeshInventory(
     const sourceMeshIndex = meshes.length;
     const triangleCount = elementCount / 3;
     meshes.push({
-      id: `mesh-${sourceAssetSha256.slice(0, 12)}-${sourceMeshIndex}`,
+      id: `mesh-${sourceAssetSha256}-${sourceMeshIndex}`,
       sourceMeshIndex,
       sourceMeshName: mesh.name.trim() || `Mesh ${sourceMeshIndex + 1}`,
       primitiveIndex: 0,
