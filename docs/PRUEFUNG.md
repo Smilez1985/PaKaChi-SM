@@ -1,8 +1,17 @@
 # Prüfstand und Protokolle
 
-**Softwarestand: 0.101.0 · Dokumentationsabgleich: 2026-11-12T04:05:00+01:00 (Europe/Berlin).**
+**Softwarestand: 0.101.0 · Dokumentationsabgleich: 2026-11-12T12:20:00+01:00 (Europe/Berlin).**
 
 Alle Prüfnachweise stehen in dieser Datei: ein Abschnitt je Softwareversion sowie gesonderte Abschnitte für datierte Zwischenprüfungen. Die Ergebnisse und Grenzen gelten für den jeweils genannten Stand. Spätere Läufe stehen als Nachtrag im selben Abschnitt. Produktänderungen gehören in den [Changelog](CHANGELOG.md), offene Aufgaben in die [Roadmap](ROADMAP.md).
+
+
+## Zwischenprüfung 2026-11-12 – geometrische Naht-/Kontaktklassifikation
+
+**Änderung auf `develop`:** `src/surface-intersections.ts` klassifiziert geometrisch gemeinsame Eckpunkte/Kanten unabhängig von der Vertex-Indexidentität. Das erfasst insbesondere UV-Nahtduplikate. Für parallele, koplanare Dreieckspaare wird die Überlappungsfläche nach Projektion auf die dominante Normalebene bestimmt: reine Kanten-/Punktberührung bleibt als erwartete Nachbarschaft bestehen; positive Flächenüberlappung bleibt ausdrücklich unmessbar. Nicht-koplanare Paare mit mindestens zwei geometrisch gemeinsamen Ecken werden nur dann als gemeinsame Kante freigegeben, wenn kein strikter innerer Piercing-Treffer vorliegt. Bestehende echte Schnitt- und Mehrdeutigkeitsmeldungen bleiben erhalten.
+
+**Regressionstest:** [Workflow #43208434448](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/43208434448), Commit `a158b326713355a1a714770046893b9880ee3550`. `npm ci` erfolgreich; danach **16/16 Tests bestanden**, 0 Fehler, 0 übersprungen, Laufzeit ca. 651 ms. Abgedeckt sind echte transversale Durchdringung, getrennte UV-Nahtindizes mit gemeinsamer Kante, reine koplanare Kantenberührung, positive koplanare Überlappung, einzelne Randkontakte, Budgetgrenzen, räumliche Baumvollständigkeit und Unveränderlichkeit der Quellpuffer. Der vorherige Push-Lauf `#43208409679` wurde durch die Workflow-Concurrency-Regel beim neueren Commit abgebrochen und zählt nicht als Testfehler.
+
+**Grenze:** Dies ist ein synthetischer Regressionstest, keine erneute Messung der Originalformen. Die früheren 91/89 wegen `coplanar-or-touching` unmessbaren Meshes sind damit noch nicht freigegeben. Der nächste Schritt ist eine gezielte Wiederholung der Originalform-Messung mit der neuen Klassifikation. `npm ci` meldet weiterhin vier Abhängigkeitsschwachstellen (2 moderat, 2 hoch); in diesem Lauf wurde nichts automatisch aktualisiert.
 
 ## Zwischenprüfung 2026-11-11 – Originalformen-Topologie und Kapselkorrektur
 
