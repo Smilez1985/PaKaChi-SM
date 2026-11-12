@@ -2,7 +2,7 @@
 
 ## Lokale Anwendung
 
-TypeScript und Three.js bilden den 3D-Player. Vite startet einen lokalen Entwicklungsserver und erstellt den Produktionsbuild. Es gibt noch keinen Desktop-Installer. Nach der Installation werden keine CDN-Dateien benötigt. Ein Browser mit WebGL2 ist für 3D notwendig; der bestehende Bildplayer benötigt kein WebGL.
+`src/cluster-architecture.ts` stellt den ersten generischen Cluster-Manifest-/Validator-/Editkern bereit; die automatische Erkennung und Studio-Integration stehen noch aus. TypeScript und Three.js bilden den 3D-Player. Vite startet einen lokalen Entwicklungsserver und erstellt den Produktionsbuild. Es gibt noch keinen Desktop-Installer. Nach der Installation werden keine CDN-Dateien benötigt. Ein Browser mit WebGL2 ist für 3D notwendig; der bestehende Bildplayer benötigt kein WebGL.
 
 ## Model Zoo
 
