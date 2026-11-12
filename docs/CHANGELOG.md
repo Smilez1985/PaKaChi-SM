@@ -12,10 +12,11 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
-Zeitstempel der letzten Änderung: 2026-11-12T13:20:00+01:00 (Europe/Berlin).
+Zeitstempel der letzten Änderung: 2026-11-12T13:33:00+01:00 (Europe/Berlin).
 
 ### Added
 
+- Anatomische Bestandsaufnahme beider PaKaChi-Originalformen dokumentiert: getrennte Gesichts-/Pfoten-/Finger-/Zehenmeshes sowie noch zusammenhängende Hauptkörper- und Fellmeshes; gemeinsame Anatomie-Taxonomie, Dreiecksherkunft und attributerhaltende Umsetzungsreihenfolge festgelegt. Noch keine Geometrie zerlegt oder Originaldatei verändert.
 - 16 zusätzliche gezielte Schnittprüfungen zusammen mit dem Studio-Nullflächenmarker-Test in einem kostenschlanken Workflow; Lauf #43215270194 erfolgreich (17/17, 0 Fehler/Skips, ca. 590 ms Testlauf).
 - Synthetisches Studio-View-Regressionstest-Fixture für Nullflächenmarker: prüft den roten Marker am korrekten Restflächen-Schwerpunkt, das Zurücksetzen und unveränderte Quell-Positions-/Indexpuffer. Separater Minimalworkflow #43145313187 bestanden (1/1 Test, 0 Fehler/Skips); kein vollständiger Player-Build.
 
