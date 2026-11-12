@@ -48,7 +48,7 @@ test('rejects single-view, low-parallax and inconsistent multi-view evidence',()
   const low=triangulateLandmarkSeeds([observation('nose','head',point,a),observation('nose','head',point,b)],new Matrix4().toArray());
   assert.match(low.rejected[0].reason,/baseline is too small/);
   const inconsistent=observation('ear','head',point,c);
-  inconsistent.x=Math.min(1,inconsistent.x+0.2);
+  inconsistent.x=Math.max(0,inconsistent.x-0.2);
   const bad=triangulateLandmarkSeeds([observation('ear','head',point,a),inconsistent],new Matrix4().toArray(),{maxRayErrorWorld:0.001});
   assert.match(bad.rejected[0].reason,/residual/);
 });
