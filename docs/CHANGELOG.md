@@ -25,6 +25,8 @@ Zeitstempel der letzten Änderung: 2026-11-12T19:22:00+01:00 (Europe/Berlin).
 
 - Cluster-Neuberechnung verlangt jetzt einen vollständigen, validierten Kandidatenmanifest-Stand und weist abweichende Quellasset-Hashes, Formen sowie veraltete Mesh-Inventare zurück. Gesperrte manuelle Dreieckszuordnungen bleiben weiterhin erhalten; Algorithmus-ID und -Version des Kandidaten werden übernommen. Neue Regressionstests decken Asset- und Inventarabweichungen ab.
 
+- Erster generischer Landmarken-Klassifikator als nicht-destruktiver Vorschlag: bewertet Dreiecke eines einzelnen zusammenhängenden oder indexierten Meshes anhand caller-supplied anatomischer Seed-Punkte und Radien. Nicht ausreichend getrennte oder nicht abgedeckte Bereiche bleiben ausdrücklich ungeklärt; keine PaKaChi-Koordinaten, kein Rig und keine Geometrieänderung.
+
 ### Changed
 
 - Windows-Start prüft jetzt den SHA-256-Stand von `package-lock.json` und führt `npm ci` nur bei fehlender oder geänderter Abhängigkeitsinstallation aus; ein Marker verhindert Neuinstallationen bei jedem Start. Drei Regressionstests decken unveränderten Lockfile-Stand, Aktualisierung und Installationsfehler ab. Noch nicht lokal ausgeführt.
