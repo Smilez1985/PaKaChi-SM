@@ -13,6 +13,16 @@ Alle Prüfnachweise stehen in dieser Datei: ein Abschnitt je Softwareversion sow
 
 **Grenze:** Dies sind synthetische Regressionstests, keine erneute Messung der Originalformen. Die früheren 91/89 wegen `coplanar-or-touching` unmessbaren Meshes sind damit noch nicht freigegeben. Die vorherigen Diagnosen zeigen, dass die Unmessbarkeit praktisch alle Neben-Meshes betrifft (u. a. Gesicht, Hände, Füße, Fell) und nicht nur eine einzelne Körperregion. Nächster Schritt ist deshalb eine kleine repräsentative Originalform-Messung auf wenigen ausgewählten Meshes; erst deren Ergebnis rechtfertigt einen vollständigen 16-Pose-Lauf. `npm ci` meldet weiterhin vier Abhängigkeitsschwachstellen (2 moderat, 2 hoch); in diesem Lauf wurde nichts automatisch aktualisiert.
 
+## Zwischenprüfung 2026-11-12 – Detailauswertung der bisherigen Originalform-Messung
+
+Die JSON-Ausgabe des Originalformen-Laufs #6 wurde zusätzlich auf Ebene der einzelnen Mesh-Diagnosen ausgewertet. Das bestätigt, dass die bisherige Unmessbarkeit nicht pauschal als bloßes UV-Nahtproblem behandelt werden darf:
+
+- In der Arbeitsform bleiben 91 von 92 Meshes, in der Tierform 89 von 90 Meshes wegen `coplanar-or-touching` unvollständig. Das betrifft auch kleine, separate Gesichts- und Pfotenmeshes; beispielsweise meldet `Muzzle_smile` 384 Dreiecke und 474 räumliche Kandidatenpaare in der Arbeitsform, aber keinen transversalen Treffer und dennoch keine vollständige Freigabe.
+- Die großen Körper- und Fellmeshes zeigen gleichzeitig echte transversale Schnittkandidaten. Bei der Hüftprobe 22,5° meldet die Arbeitsform 174 Treffer im Fell und 1 im Körper; bei 90° 180 im Fell und 21 im Körper. Die Tierform meldet bei 22,5° 551 im Körper und 251 im Fell; bei 90° 2.229 im Körper und 243 im Fell.
+- Diese Trefferzahlen sind Diagnosen innerhalb des jeweiligen Meshes. Sie sind weder eine anatomische Bewertung noch eine Bestätigung, dass die jeweiligen Oberflächen tatsächlich sichtbare Durchdringungen darstellen. Umgekehrt bedeutet `coplanar-or-touching` ausdrücklich, dass die betreffende Mesh-Prüfung nicht vollständig abgeschlossen wurde.
+
+**Konsequenz für den nächsten Schritt:** Keine globale Lockerung der Koplanar-Toleranz und keine pauschale Freigabe der Gesichts-/Pfotenmeshes. Zuerst muss die Messung die konkreten Dreieckspaare ausgeben, die die koplanare Mehrdeutigkeit auslösen. Danach werden nur wenige repräsentative Meshes aus Gesicht, Pfote und Fell in einer gezielten Originalform-Probe untersucht. Erst wenn diese Beispiele geometrisch verstanden und die Klassifikation durch Regressionstests abgesichert ist, wird über eine größere Messung entschieden. Der vollständige 16-Pose-Lauf wird bis dahin nicht erneut gestartet.
+
 ## Zwischenprüfung 2026-11-11 – Originalformen-Topologie und Kapselkorrektur
 
 **Ausgangsbefund:** Der lesende Originalformen-Lauf #5 bestand. Beide Formen besitzen jeweils 28 starre `_shell`-Teilmodelle; darin lagen insgesamt 672 dauerhaft flächenlose Pol-Dreiecke je Form (24 je Teilmodell). In den geprüften Posen wurde keines wieder gültig. Ungültige Geometrie und deckungsgleiche Dreiecke wurden nicht festgestellt. Die Ursache ist auf die neu erzeugten starren Finger-/Zehen-Kapseln eingegrenzt.
