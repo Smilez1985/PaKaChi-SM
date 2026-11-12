@@ -83,7 +83,7 @@ test('assets reject traversal, symlink escapes, malformed or conflicting chunks 
  const a=await f.app.assets.upload({name:'input.txt',data:Buffer.from('hello ').toString('base64')});
  await assert.rejects(()=>f.app.assets.upload({name:'input.txt',uploadId:a.uploadId,offset:1,data:'eA=='}),/Konflikt/);
  const finished=await f.app.assets.upload({name:'input.txt',uploadId:a.uploadId,offset:a.nextOffset,data:Buffer.from('world').toString('base64'),final:true});assert.equal(Buffer.from((await f.app.assets.read(finished.asset.id)).data,'base64').toString(),'hello world');
- const file=await f.app.assets.file(finished.asset.id);await rm(file);await symlink(join(f.directory,'settings.json'),file);await assert.rejects(()=>f.app.assets.read(finished.asset.id),/außerhalb/);
+ const file=await f.app.assets.file(finished.asset.id);await rm(file);let symlinkCreated=false;try{await symlink(join(f.directory,'settings.json'),file);symlinkCreated=true;}catch(error){if(!['EPERM','EACCES'].includes(error.code))throw error;t.diagnostic('Symlink-Sicherheitsfall mangels Windows-Symlink-Berechtigung nicht ausgeführt.');}if(symlinkCreated)await assert.rejects(()=>f.app.assets.read(finished.asset.id),/außerhalb/);
  assert.throws(()=>caddySnippet('https://example.com/mcp','host:8787\nroute'),/Upstream/);
 });
 
