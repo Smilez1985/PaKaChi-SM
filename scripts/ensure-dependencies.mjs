@@ -23,7 +23,7 @@ export async function ensureDependencies({root=defaultRoot,install}={}){
  if(result?.status!==undefined&&result.status!==0)throw new Error('npm ci fehlgeschlagen (Exit-Code '+result.status+').');
  if(result?.status===undefined&&result?.ok===false)throw new Error('Abhängigkeitsinstallation fehlgeschlagen.');
  await mkdir(join(root,'node_modules'),{recursive:true});
- await writeFile(markerPath,digest+'\\n',{mode:0o600});
+ await writeFile(markerPath,digest+'\n',{mode:0o600});
  return {installed:true,digest};
 }
 
