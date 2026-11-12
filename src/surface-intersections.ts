@@ -1,5 +1,5 @@
 /** Conservative, bounded triangle-triangle self-intersection diagnostics.
- * Adjacent faces are skipped, coplanar overlaps remain explicitly unresolved.
+ * Indexed neighbors are skipped; geometric seam contacts are classified separately.
  * This is not a continuous collision or anatomical clearance certificate. */
 export const SURFACE_INTERSECTION_PAIR_BUDGET=100_000;
 export const SURFACE_INTERSECTION_TRIANGLE_LIMIT=200_000;
@@ -143,8 +143,13 @@ export function checkSurfaceIntersections(positions:Numbers,index:Numbers|null=n
   const norm1=Math.hypot(...n1),norm2=Math.hypot(...n2);
   if(norm1<=1e-12||norm2<=1e-12){report.checked=false;report.reason='invalid';continue;}
   const parallel=Math.hypot(...cross(n1,n2))<=1e-10*norm1*norm2;
-  const coordinateScale=Math.max(1,...one.flatMap(p=>p.map(Math.abs)),...two.flatMap(p=>p.map(Math.abs)));
-  const geometricTolerance=1e-9*coordinateScale;
+  const coordinateMagnitude=Math.max(1,...one.flatMap(p=>p.map(Math.abs)),...two.flatMap(p=>p.map(Math.abs)));
+  const edgeScale=Math.max(1,...[one,two].flatMap(face=>[
+   Math.hypot(...sub(face[1],face[0])),Math.hypot(...sub(face[2],face[1])),Math.hypot(...sub(face[0],face[2]))
+  ]));
+  // Tolerance follows local mesh scale, with only a machine-precision allowance
+  // for large world-space offsets. A translated model must not gain huge weld radii.
+  const geometricTolerance=Math.max(1e-12*edgeScale,16*Number.EPSILON*coordinateMagnitude);
   const sharedCorners=sharedGeometricVertices(one,two,geometricTolerance);
   if(parallel){
    if(Math.abs(dot(n1,sub(two[0],one[0])))<=1e-10*norm1){
