@@ -43,13 +43,16 @@ test('rejects single-view, low-parallax and inconsistent multi-view evidence',()
   const a=camera('front',new Vector3(-0.01,0,0),point);
   const b=camera('nearby',new Vector3(0.01,0,0),point);
   const c=camera('side',new Vector3(1,0,0),point);
+  const d=camera('top',new Vector3(0,1,0),point);
   const single=triangulateLandmarkSeeds([observation('eye','head',point,a)],new Matrix4().toArray());
   assert.match(single.rejected[0].reason,/two calibrated views/);
   const low=triangulateLandmarkSeeds([observation('nose','head',point,a),observation('nose','head',point,b)],new Matrix4().toArray());
   assert.match(low.rejected[0].reason,/baseline is too small/);
-  const inconsistent=observation('ear','head',point,c);
-  inconsistent.x=Math.max(0,inconsistent.x-0.2);
-  const bad=triangulateLandmarkSeeds([observation('ear','head',point,a),inconsistent],new Matrix4().toArray(),{maxRayErrorWorld:0.001});
+  const inconsistent=observation('ear','head',point,d);
+  inconsistent.x=Math.min(1,inconsistent.x+0.2);
+  const bad=triangulateLandmarkSeeds([
+    observation('ear','head',point,a),observation('ear','head',point,c),inconsistent,
+  ],new Matrix4().toArray(),{maxRayErrorWorld:0.001});
   assert.match(bad.rejected[0].reason,/residual/);
 });
 
