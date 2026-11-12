@@ -1,7 +1,8 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import * as THREE from 'three';
-import {collectClusterMeshInventory} from '../src/cluster-inventory.ts';
+import {collectClusterMeshInventory,createUnclassifiedClusterManifest} from '../src/cluster-inventory.ts';
+import {validateClusterManifest} from '../src/cluster-architecture.ts';
 
 const hash='a'.repeat(64);
 
@@ -48,4 +49,21 @@ test('rejects invalid hashes, empty geometry and incomplete triangles',()=>{
   geometry.setIndex([0,1,2,0]);
   root.add(new THREE.Mesh(geometry,new THREE.MeshBasicMaterial()));
   assert.throws(()=>collectClusterMeshInventory(root,hash),/complete triangles/);
+});
+
+test('creates a complete manifest without guessing anatomical assignments',()=>{
+  const root=new THREE.Group();
+  const geometry=new THREE.BufferGeometry();
+  geometry.setAttribute('position',new THREE.Float32BufferAttribute([
+    0,0,0, 1,0,0, 0,1,0, 1,1,0,
+  ],3));
+  geometry.setIndex([0,1,2,1,3,2]);
+  root.add(new THREE.Mesh(geometry,new THREE.MeshBasicMaterial()));
+  const inventory=collectClusterMeshInventory(root,hash);
+  const manifest=createUnclassifiedClusterManifest(inventory,'animal','2026-11-12T14:00:00.000Z');
+  assert.deepEqual(validateClusterManifest(manifest),[]);
+  assert.equal(manifest.assignments.length,2);
+  assert.ok(manifest.assignments.every(a=>a.partId===null&&a.surfaceLayerId===null&&a.confidence===0));
+  assert.ok(manifest.assignments.every(a=>a.reason.includes('unclassified')));
+  assert.equal(manifest.form,'animal');
 });
