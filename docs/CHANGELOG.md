@@ -12,10 +12,11 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
-Zeitstempel der letzten Änderung: 2026-11-13T13:41:00+01:00 (Europe/Berlin).
+Zeitstempel der letzten Änderung: 2026-11-13T13:44:00+01:00 (Europe/Berlin).
 
 ### Added
 
+- Referenzsichtung der PaKaChi-Bilder: Die getrennten Tier-/Arbeitsform-Ansichtstafeln zeigen jeweils vier beschriftete Drehwinkel (0°, 90°, 180°, 270°), enthalten aber keine auslesbare Kamera-Intrinsik oder Welt-/Kameratransforms. Die Stichprobe der Legacy-Frames 001, 012, 024, 036, 048, 060 und 072 zeigt wechselnde Posen und einen Formübergang; diese 72 Bilder sind daher keine 72 Ansichten desselben statischen Modells und dürfen nicht als Mehrkamera-Triangulationsdaten behandelt werden.
 - `tests/cluster-pakachi-assets.test.ts` lädt die beiden eingecheckten Tier-/Arbeitsform-GLBs mit dem produktiven `parseModel()`-Loader, berechnet ihren SHA-256-Quellhash, baut das echte Mesh-/Primitive-Inventar und validiert die vollständige unklassifizierte Dreiecksabdeckung. Das prüft reale Geometrie und GLTF-Provenienz, ausdrücklich noch keine 2D-Kamera-Projektion oder Anatomie-Freigabe. Die gleiche Regression löst jetzt zusätzlich jede Inventar-ID in echte Meshobjekte, lokale Positions-/Indexpuffer und Weltmatrizen auf; beide GLBs bestehen diese Bindungsprüfung.
 
 - Erster Laufzeitkern für Cluster auf `develop`: `src/cluster-architecture.ts` definiert Manifest-/Anatomietypen, prüft IDs, Hierarchiezyklen, Mesh-/Dreiecksreferenzen und Oberflächenebenen, speichert User-/LLM-Operationen als Overrides und bietet nicht-destruktive Bearbeitung plus geschützte Dreiecks-Neuberechnung. SHA-256-Quellenidentität verwendet Web Crypto statt Node-only APIs.
