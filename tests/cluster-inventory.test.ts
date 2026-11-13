@@ -143,6 +143,6 @@ test('rejects mismatched source IDs and deformed geometry rather than guessing',
   changed.parser.associations.set(changed.mesh,{meshes:10,primitives:0});
   assert.throws(()=>resolveClusterMeshBindings(changed,inventory),/not present in the inventory/);
   const skinned=make();
-  (skinned.mesh as THREE.Mesh & {isSkinnedMesh:boolean}).isSkinnedMesh=true;
+  (skinned.mesh as unknown as {isSkinnedMesh:boolean}).isSkinnedMesh=true;
   assert.throws(()=>resolveClusterMeshBindings(skinned,inventory),/skinning or morph targets/);
 });
