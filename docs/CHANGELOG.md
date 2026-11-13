@@ -12,9 +12,11 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
-Zeitstempel der letzten Änderung: 2026-11-13T13:44:00+01:00 (Europe/Berlin).
+Zeitstempel der letzten Änderung: 2026-11-13T14:05:00+01:00 (Europe/Berlin).
 
 ### Added
+
+- Verbindliche Original-PaKaChi-Zielreferenz nach ausdrücklicher Nutzerbestätigung dokumentiert: Der finale Avatar muss dem am 2026-11-13 gezeigten gemeinsamen Referenzbild entsprechen und sowohl die dunkle, fellbedeckte vierbeinige Tierform als auch die fellbedeckte humanoide Arbeitsform mit gemeinsamer Charakteridentität enthalten. Die bestehenden Tier-/Humanoid-GLBs bleiben unverändert als zusätzliche technische Testmodelle erhalten; sie sind ausdrücklich nicht automatisch das finale Original-PaKaChi. Technische Modell-/CI-Gültigkeit ersetzt keine visuelle Designabnahme. Beide finalen Formen werden separat aufgebaut und abgenommen; Morphing folgt danach.
 
 - Referenzsichtung der PaKaChi-Bilder: Die getrennten Tier-/Arbeitsform-Ansichtstafeln zeigen jeweils vier beschriftete Drehwinkel (0°, 90°, 180°, 270°), enthalten aber keine auslesbare Kamera-Intrinsik oder Welt-/Kameratransforms. Die Stichprobe der Legacy-Frames 001, 012, 024, 036, 048, 060 und 072 zeigt wechselnde Posen und einen Formübergang; diese 72 Bilder sind daher keine 72 Ansichten desselben statischen Modells und dürfen nicht als Mehrkamera-Triangulationsdaten behandelt werden.
 - `tests/cluster-pakachi-assets.test.ts` lädt die beiden eingecheckten Tier-/Arbeitsform-GLBs mit dem produktiven `parseModel()`-Loader, berechnet ihren SHA-256-Quellhash, baut das echte Mesh-/Primitive-Inventar und validiert die vollständige unklassifizierte Dreiecksabdeckung. Das prüft reale Geometrie und GLTF-Provenienz, ausdrücklich noch keine 2D-Kamera-Projektion oder Anatomie-Freigabe. Die gleiche Regression löst jetzt zusätzlich jede Inventar-ID in echte Meshobjekte, lokale Positions-/Indexpuffer und Weltmatrizen auf; beide GLBs bestehen diese Bindungsprüfung.

@@ -10,6 +10,16 @@ Die erste Cluster-Struktur wird automatisch vorgeschlagen. Nutzer und LLM dürfe
 
 PaKaChi Tier- und Arbeitsform dienen als hochwertige Referenz- und Regressionstestfälle für den allgemeinen Algorithmus. Sie dürfen nicht als fest codierte Anatomie-Regeln missverstanden werden.
 
+## Verbindliche visuelle Zielreferenz
+
+Die vom Nutzer am 2026-11-13 ausdrücklich bestätigte Referenz ist das Bild mit **beiden** PaKaChi-Erscheinungsformen nebeneinander: links die dunkle, fellbedeckte vierbeinige Tierform, rechts die aufrechte, ebenfalls fellbedeckte humanoide Arbeitsform. Dieses Bild ist die maßgebliche visuelle Abnahmegrundlage für den finalen Original-PaKaChi-Avatar.
+
+Beide Formen müssen die gemeinsame Charakteridentität sichtbar bewahren: dunkles dichtes Fell, cremefarbene Gesichtszeichnung und Schnauze, große grüne Augen, grün leuchtende Innenohren und Wangenakzente, großer buschiger schwarz-grüner Schweif, grün leuchtender Brust-Energiekern sowie sichtbare mechanische Gelenke und grüne technische Leuchtelemente. Die Arbeitsform ist ausdrücklich **kein** weißer Fahrzeugroboter und keine bloß aufgerichtete Fremdfigur; sie ist die humanoide, fellbedeckte PaKaChi-Form aus der bestätigten Referenz.
+
+Die beiden vorhandenen GLB-Modelle bleiben als zusätzliche technische Testmodelle erhalten. Sie sind nützlich für Loader-, Inventar-, Cluster-, Geometrie- und Rigging-Regressionen, gelten aber nicht automatisch als visuelle Referenz oder als finales Original-PaKaChi. Der finale Avatar ist ein separates, zusätzliches Modellziel mit zwei eigenständig korrekt aufgebauten und riggbaren Formen. Bestehende Testmodelle werden dafür weder überschrieben noch gelöscht.
+
+**Abnahmeregel:** Technische Gültigkeit (GLB lädt, Meshes sind inventarisiert, Tests bestehen) ist keine visuelle Designfreigabe. Das finale Modell darf erst als Original-PaKaChi gelten, wenn Tierform und Arbeitsform jeweils gegen die bestätigte Referenz visuell geprüft wurden. Gemeinsames Schema und wiederverwendbare Pipeline bedeuten nicht identische Anatomie oder identische Mesh-Struktur. Morphing folgt erst nach der separaten Modell- und Rig-Abnahme beider Formen.
+
 ## 1. Vier getrennte Identitäten
 
 ### Anatomie

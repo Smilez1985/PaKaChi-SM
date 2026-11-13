@@ -4,9 +4,17 @@
 
 Diese Roadmap enthält offene Umsetzung und ausstehende Abnahme. Erledigte Änderungen stehen nach Version im [Changelog](CHANGELOG.md); Nachweise und Grenzen im [Prüfstand](PRUEFUNG.md).
 
+## Verbindliche Original-PaKaChi-Zieldefinition
+
+- **Finales Produktziel:** Ein neuer Original-PaKaChi-Avatar, der der vom Nutzer am 2026-11-13 bestätigten Bildreferenz entspricht und beide Formen enthält: die vierbeinige Tierform und die aufrechte humanoide Arbeitsform. Beide müssen dieselbe erkennbare Charakteridentität bewahren (dunkles Fell, cremefarbene Gesichtszeichnung, grüne Augen und Leuchtakzente, großer schwarz-grüner Schweif, grüner Brustkern, mechanische Gelenke).
+- **Keine Verwechslung mit älteren Vorlagen:** Die zuletzt bestätigte gemeinsame Referenzdarstellung ist maßgeblich. Frühere/andere 2D-Ansichtstafeln dürfen nicht ungeprüft als Ersatz für dieses Design oder als abweichende finale Charaktervorgabe behandelt werden.
+- **Vorhandene GLBs:** Die bestehenden Tier-/Humanoid-GLBs bleiben unverändert als zusätzliche technische Testmodelle im Repository. Sie dürfen weiterhin für Loader-, Mesh-Inventar-, Cluster-, Geometrie- und Rigging-Tests verwendet werden, sind aber nicht das finale Original-PaKaChi und setzen dessen Design nicht fest.
+- **Separates Qualitätsziel:** Original-PaKaChi wird als eigener Modellkandidat mit eigenem Herkunfts-/Versionsnachweis und visueller Abnahme geführt. Technische Tests der Testmodelle ersetzen keine visuelle Prüfung des Original-Avatars.
+- **Reihenfolge:** Referenzmerkmale erfassen → beide Originalformen separat modellieren/rekonstruieren → Design-Silhouette und Materialien visuell abnehmen → beide Formen riggen und Bewegungen prüfen → erst danach Morph-Topologie und reversible Transformation umsetzen.
+
 ## Übergabe und nächster Schritt
 
-**Übergabe aktualisiert:** 2026-11-13T13:41:00+01:00 (Europe/Berlin).
+**Übergabe aktualisiert:** 2026-11-13T14:05:00+01:00 (Europe/Berlin).
 
 - **Main-Meilenstein:** Version 0.101.0 wurde nach erfolgreicher PR-Prüfung #122 über [PR #2](https://github.com/Smilez1985/PaKaChi-SM/pull/2) am 2026-11-11T13:25:26Z nach `main` übernommen; Main-Commit `5d2733c1b9ed8aeabb9b73024d591f82b76e91a9`. CI #122 für den eingefrorenen Kandidaten `39eee8854a44f64e2e16d1d146726506998ccbd4` ist vollständig erfolgreich: **512/512 Node-Tests**, Produktionsbuild, **49/49 Browserfälle**, 0 Flaky-/Skip-Fälle und drei Importmessungen (3.404,6 / 3.035,8 / 3.167,9 ms; Median 3.167,9 ms). Ein separater main-only Nachlauf wird hier nicht behauptet. [Prüfnachweis](PRUEFUNG.md#version-01010).
 - **Arbeitsbranch:** `develop`. Neuester Diagnose-Meilenstein: geometrische Naht-/Nachbarschaftsklassifikation in `surface-intersections.ts` (Commits `f693042` und `d1c8485`). Die Änderung bleibt ausschließlich auf `develop`; `main` ist unverändert.
