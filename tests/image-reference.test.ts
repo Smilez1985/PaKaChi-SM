@@ -25,7 +25,7 @@ test('supports variable avatar, form and view counts without positional assumpti
  d.regions.push({id:'r-second',label:'Einzelfigur',kind:'view',status:'confirmed',geometry:{type:'rectangle',x:1200,y:100,width:200,height:300}});
  d.views.push({id:'v-second',label:'Einzelansicht',regionIds:['r-second']});
  d.forms[1].viewIds.push('v-second');
- assert.equal(checkImageReferenceReadiness(d).ready,true);
+ assert.deepEqual(checkImageReferenceReadiness(d).issues,[]);
 });
 
 test('blocks generation while suggestions remain unconfirmed',()=>{
@@ -43,7 +43,7 @@ test('rejects out-of-image rectangles, invalid polygons and duplicate or danglin
  const issues=validateImageReferenceDocument(d);
  assert.ok(issues.some(x=>x.path==='regions[0].geometry'));
  assert.ok(issues.some(x=>x.path==='regions[1].geometry.points'));
- assert.ok(issues.some(x=>x.path.includes('missing-view')));
+ assert.ok(issues.some(x=>x.message.includes('missing-view')));
  assert.ok(issues.some(x=>x.message.includes('bereits Form')));
 });
 
