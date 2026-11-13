@@ -152,8 +152,8 @@ export function editImageReferenceRectangle(region:ImageReferenceRegion,sourceWi
 }
 
 /** Reorder a region without changing its stable ID or any grouping references. */
-export function reorderImageReferenceRegions<T extends {id:string}>(regions:T[],regionId:string,offset:-1|1):T[] {
-  const index=regions.findIndex(region=>region.id===regionId);
+export function reorderImageReferenceRegions<T>(regions:T[],regionId:string,offset:-1|1,getId:(region:T)=>string=(region)=>(region as {id:string}).id):T[] {
+  const index=regions.findIndex(region=>getId(region)===regionId);
   if(index<0)throw new Error('unknown-image-region');
   const target=index+offset;
   if(target<0||target>=regions.length)return regions.slice();
