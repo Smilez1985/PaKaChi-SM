@@ -46,12 +46,18 @@ function validImageReferenceDocument(value:unknown):value is ImageReferenceDocum
  if(!obj(value)||value.format!=='pakachi-image-reference'||value.version!==1||!obj(value.source)||
     !Array.isArray(value.regions)||value.regions.length>2048||!Array.isArray(value.views)||value.views.length>512||
     !Array.isArray(value.forms)||value.forms.length>256||!Array.isArray(value.avatars)||value.avatars.length>128)return false;
- if(!value.regions.every(r=>obj(r)&&typeof r.id==='string'&&typeof r.label==='string'&&typeof r.kind==='string'&&typeof r.status==='string'&&obj(r.geometry)&&
-    (r.geometry.type==='rectangle'?['x','y','width','height'].every(k=>typeof r.geometry[k]==='number'):
-     r.geometry.type==='polygon'&&Array.isArray(r.geometry.points)&&r.geometry.points.length<=4096&&r.geometry.points.every(p=>obj(p)&&typeof p.x==='number'&&typeof p.y==='number'))))return false;
- if(!value.views.every(v=>obj(v)&&typeof v.id==='string'&&typeof v.label==='string'&&Array.isArray(v.regionIds)&&v.regionIds.every(id=>typeof id==='string')))return false;
- if(!value.forms.every(f=>obj(f)&&typeof f.id==='string'&&typeof f.label==='string'&&Array.isArray(f.viewIds)&&f.viewIds.every(id=>typeof id==='string')))return false;
- if(!value.avatars.every(a=>obj(a)&&typeof a.id==='string'&&typeof a.label==='string'&&Array.isArray(a.formIds)&&a.formIds.every(id=>typeof id==='string')))return false;
+ for(const region of value.regions){
+  if(!obj(region)||typeof region.id!=='string'||typeof region.label!=='string'||typeof region.kind!=='string'||typeof region.status!=='string'||!obj(region.geometry))return false;
+  const geometry=region.geometry;
+  if(geometry.type==='rectangle'){
+   if(!['x','y','width','height'].every(key=>typeof geometry[key]==='number'))return false;
+  }else if(geometry.type==='polygon'){
+   if(!Array.isArray(geometry.points)||geometry.points.length>4096||!geometry.points.every(point=>obj(point)&&typeof point.x==='number'&&typeof point.y==='number'))return false;
+  }else return false;
+ }
+ if(!value.views.every(view=>obj(view)&&typeof view.id==='string'&&typeof view.label==='string'&&Array.isArray(view.regionIds)&&view.regionIds.every(id=>typeof id==='string')))return false;
+ if(!value.forms.every(form=>obj(form)&&typeof form.id==='string'&&typeof form.label==='string'&&Array.isArray(form.viewIds)&&form.viewIds.every(id=>typeof id==='string')))return false;
+ if(!value.avatars.every(avatar=>obj(avatar)&&typeof avatar.id==='string'&&typeof avatar.label==='string'&&Array.isArray(avatar.formIds)&&avatar.formIds.every(id=>typeof id==='string')))return false;
  try{return validateImageReferenceDocument(value as unknown as ImageReferenceDocument).length===0;}catch{return false;}
 }
 

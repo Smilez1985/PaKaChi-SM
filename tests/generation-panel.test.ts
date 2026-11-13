@@ -12,6 +12,7 @@ import {draftFigure} from './helpers/draft-rig-fixture.ts';
 import {writeFigureGLB} from '../src/figure-glb.ts';
 import {parseModel,disposeModel} from '../src/viewer.ts';
 import type {prepareDraftRig} from '../src/draft-rig.ts';
+import type {ImageReferenceDocument} from '../src/image-reference.ts';
 const bytes=Uint8Array.from(glb());
 const referenceDocument:ImageReferenceDocument={format:'pakachi-image-reference',version:1,source:{sha256:'a'.repeat(64),width:100,height:100},regions:[{id:'region-front',label:'Front',kind:'view',status:'confirmed',geometry:{type:'rectangle',x:10,y:10,width:50,height:70}}],views:[{id:'view-front',label:'Front',regionIds:['region-front']}],forms:[{id:'form-animal',label:'Animal',viewIds:['view-front']}],avatars:[{id:'avatar-panda',label:'Panda',formIds:['form-animal']}]};
 async function until(check:()=>boolean){for(let i=0;i<100;i++){if(check())return;await new Promise(r=>setTimeout(r,5));}assert.fail('UI did not settle');}
