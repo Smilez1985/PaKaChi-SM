@@ -55,6 +55,13 @@ test('rejects shared regions and ambiguous confidence values',()=>{
  assert.ok(issues.some(x=>x.path==='regions[0].confidence'));
 });
 
+test('requires every detected region to be linked or explicitly ignored',()=>{
+ const d=base();d.regions.push({id:'r-uncertain',label:'Unklare Figur',kind:'avatar',status:'suggested',confidence:.42,geometry:{type:'rectangle',x:1100,y:50,width:150,height:200}});
+ let result=checkImageReferenceReadiness(d);assert.equal(result.ready,false);assert.ok(result.issues.some(x=>x.path==='regions.r-uncertain.status'));
+ d.regions[d.regions.length-1].status='ignored';result=checkImageReferenceReadiness(d);assert.equal(result.ready,true);
+ d.regions[d.regions.length-1].status='confirmed';result=checkImageReferenceReadiness(d);assert.equal(result.ready,false);assert.ok(result.issues.some(x=>x.path==='regions.r-uncertain'));
+});
+
 test('keeps incomplete empty draft valid but not ready for reconstruction',()=>{
  const d=base();d.avatars=[];d.forms=[];d.views=[];d.regions=[];
  assert.deepEqual(validateImageReferenceDocument(d),[]);

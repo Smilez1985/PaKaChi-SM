@@ -3,7 +3,7 @@
  * Coordinates are always pixels in the immutable source image.
  */
 export type ImageRegionKind = 'avatar'|'form'|'view'|'detail'|'helper';
-export type ImageRegionStatus = 'suggested'|'confirmed';
+export type ImageRegionStatus = 'suggested'|'confirmed'|'ignored';
 export type ImageRegionGeometry =
   | {type:'rectangle';x:number;y:number;width:number;height:number}
   | {type:'polygon';points:Array<{x:number;y:number}>};
@@ -52,7 +52,7 @@ export interface ImageReferenceReadiness {
 const idPattern=/^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/;
 const hashPattern=/^[a-f0-9]{64}$/i;
 const regionKinds=new Set<ImageRegionKind>(['avatar','form','view','detail','helper']);
-const statuses=new Set<ImageRegionStatus>(['suggested','confirmed']);
+const statuses=new Set<ImageRegionStatus>(['suggested','confirmed','ignored']);
 const finite=(n:number)=>Number.isFinite(n);
 const unique=(items:string[])=>new Set(items).size===items.length;
 
@@ -107,6 +107,7 @@ export function validateImageReferenceDocument(value:ImageReferenceDocument):Ima
   for(const f of value.forms)for(const id of f.viewIds){const previous=viewParents.get(id);if(previous)issues.push({path:`forms.${f.id}.viewIds`,message:`Ansicht ${id} ist bereits Form ${previous} zugeordnet.`});else viewParents.set(id,f.id);}
   for(const a of value.avatars)for(const id of a.formIds){const previous=formParents.get(id);if(previous)issues.push({path:`avatars.${a.id}.formIds`,message:`Form ${id} ist bereits Avatar ${previous} zugeordnet.`});else formParents.set(id,a.id);}
   for(const v of value.views)for(const id of v.regionIds){const previous=regionParents.get(id);if(previous)issues.push({path:`views.${v.id}.regionIds`,message:`Region ${id} ist bereits Ansicht ${previous} zugeordnet.`});else regionParents.set(id,v.id);}
+  for(const [id,r] of regions){if(r.status==='ignored'&&regionParents.has(id))issues.push({path:`regions.${id}.status`,message:'Ignorierte Region darf keiner Ansicht zugeordnet sein.'});}
   return issues;
 }
 
@@ -115,6 +116,11 @@ export function checkImageReferenceReadiness(value:ImageReferenceDocument):Image
   const issues=validateImageReferenceDocument(value);
   if(issues.length)return {ready:false,issues};
   if(value.avatars.length===0)issues.push({path:'avatars',message:'Mindestens einen Avatar zuordnen.'});
+  const assigned=new Set(value.views.flatMap(v=>v.regionIds));
+  for(const r of value.regions){
+    if(r.status==='suggested')issues.push({path:`regions.${r.id}.status`,message:'Regionsvorschlag erst bestätigen oder ausdrücklich ignorieren.'});
+    else if(r.status==='confirmed'&&!assigned.has(r.id))issues.push({path:`regions.${r.id}`,message:'Bestätigte Region muss einer Ansicht zugeordnet oder ausdrücklich ignoriert werden.'});
+  }
   for(const a of value.avatars){
     if(a.formIds.length===0)issues.push({path:`avatars.${a.id}.formIds`,message:'Diesem Avatar mindestens eine Form zuordnen.'});
     for(const formId of a.formIds){
@@ -123,7 +129,7 @@ export function checkImageReferenceReadiness(value:ImageReferenceDocument):Image
       for(const viewId of f.viewIds){
         const v=value.views.find(x=>x.id===viewId)!;
         if(v.regionIds.length===0)issues.push({path:`views.${v.id}.regionIds`,message:'Dieser Ansicht mindestens eine Bildregion zuordnen.'});
-        for(const regionId of v.regionIds)if(value.regions.find(x=>x.id===regionId)!.status!=='confirmed')issues.push({path:`regions.${regionId}.status`,message:'Vorgeschlagene Bildregion erst nach Benutzerbestätigung verwenden.'});
+        for(const regionId of v.regionIds)if(value.regions.find(x=>x.id===regionId)!.status!=='confirmed')issues.push({path:`regions.${regionId}.status`,message:'Nur bestätigte Bildregionen dürfen verwendet werden.'});
       }
     }
   }

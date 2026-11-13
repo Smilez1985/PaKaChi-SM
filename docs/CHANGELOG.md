@@ -12,9 +12,11 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
-Zeitstempel der letzten Änderung: 2026-11-13T14:35:00+01:00 (Europe/Berlin).
+Zeitstempel der letzten Änderung: 2026-11-13T15:05:00+01:00 (Europe/Berlin).
 
 ### Added
+
+- Erstes generisches TypeScript-Datenmodell für Bildreferenz-Import ergänzt: quellgebundene Pixelregionen (Rechteck/Polygon), variable Avatar-/Form-/Ansichts-Hierarchie mit stabilen IDs und expliziter Reihenfolge, Validierung von Geometrie und eindeutigen Zuordnungen sowie Freigabeprüfung. Vorgeschlagene Regionen müssen bestätigt oder ignoriert werden; bestätigte Regionen müssen einer Ansicht zugeordnet sein. Fokussierte Tests und ein eigener CI-Workflow wurden ergänzt.
 
 - Generische Bildsegmentierung und Avatar-Zuordnung ergänzt: variable Anzahl von Avataren/Formen/Ansichten, automatische Regionsvorschläge mit Konfidenz, interaktives Zeichnen/Beschriften beliebig vieler Bildrahmen oder Masken, explizite Gruppierung und Reihenfolge/Relationen, Rückfrage bei Mehrdeutigkeit sowie Schutz bestätigter manueller Zuordnungen. Die bisherige feste Annahme „linke Tierform/rechte Arbeitsform“ gilt nur für die konkret bestätigte PaKaChi-Referenz, nicht als allgemeine Importregel.
 

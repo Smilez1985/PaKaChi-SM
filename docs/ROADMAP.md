@@ -15,6 +15,8 @@ Diese Roadmap enthält offene Umsetzung und ausstehende Abnahme. Erledigte Ände
 
 ## Generische Bildsegmentierung und Avatar-Zuordnung
 
+- [x] **Referenzdatenmodell und Freigabeprüfung:** Ein versioniertes, quellhashgebundenes Modell für beliebig viele Avatare, Formen, Ansichten und Pixelregionen ist implementiert. Es validiert stabile IDs, Pixelgrenzen, Polygon-/Rechteckgeometrie, eindeutige Elternzuordnungen und geordnete Verknüpfungen. Die Rekonstruktion wird blockiert, bis jede erkannte Region bestätigt und zugeordnet oder ausdrücklich ignoriert wurde.
+
 - [ ] **Variable Anzahl unterstützen:** Import darf keine feste Anzahl von Avataren oder Formen voraussetzen. Ein Bild kann eine oder mehrere Figuren, mehrere Formen desselben Avatars, mehrere Ansichten oder Detailausschnitte enthalten.
 - [ ] **Automatische Erkennung mit Konfidenz:** Figuren-/Formregionen, Ansichten und mögliche Beziehungen vorschlagen; unsichere oder überlappende Fälle ausdrücklich zur Klärung vorlegen.
 - [ ] **Interaktiver Markierungseditor:** Benutzer kann beliebig viele Rahmen/Polygone/Masken direkt im Bild zeichnen, anpassen, teilen und löschen. Alle Koordinaten bleiben auf Originalpixel und Quellhash bezogen.
@@ -35,7 +37,7 @@ Diese Roadmap enthält offene Umsetzung und ausstehende Abnahme. Erledigte Ände
 
 ## Übergabe und nächster Schritt
 
-**Übergabe aktualisiert:** 2026-11-13T14:35:00+01:00 (Europe/Berlin).
+**Übergabe aktualisiert:** 2026-11-13T15:05:00+01:00 (Europe/Berlin).
 
 - **Main-Meilenstein:** Version 0.101.0 wurde nach erfolgreicher PR-Prüfung #122 über [PR #2](https://github.com/Smilez1985/PaKaChi-SM/pull/2) am 2026-11-11T13:25:26Z nach `main` übernommen; Main-Commit `5d2733c1b9ed8aeabb9b73024d591f82b76e91a9`. CI #122 für den eingefrorenen Kandidaten `39eee8854a44f64e2e16d1d146726506998ccbd4` ist vollständig erfolgreich: **512/512 Node-Tests**, Produktionsbuild, **49/49 Browserfälle**, 0 Flaky-/Skip-Fälle und drei Importmessungen (3.404,6 / 3.035,8 / 3.167,9 ms; Median 3.167,9 ms). Ein separater main-only Nachlauf wird hier nicht behauptet. [Prüfnachweis](PRUEFUNG.md#version-01010).
 - **Arbeitsbranch:** `develop`. Neuester Diagnose-Meilenstein: geometrische Naht-/Nachbarschaftsklassifikation in `surface-intersections.ts` (Commits `f693042` und `d1c8485`). Die Änderung bleibt ausschließlich auf `develop`; `main` ist unverändert.
