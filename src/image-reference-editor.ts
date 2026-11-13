@@ -11,13 +11,15 @@ export function mountImageReferenceEditor(host:HTMLElement,source:File,language:
  canvas.className='image-reference-canvas';canvas.setAttribute('aria-label','Source image marking surface');
  feedback.setAttribute('role','status');selectedLabel.textContent=de()?'Ausschnitt für 3D auswählen':'Select region for 3D';
  root.append(heading,help,canvas,list,selectedLabel,selected,feedback);host.replaceChildren(root);
- type PointerDrag={mode:'draw';x:number;y:number;endX:number;endY:number}|{mode:'move'|'resize';id:string;x:number;y:number;original:{x:number;y:number;width:number;height:number};handle?:import('./image-reference.ts').RectangleHandle};\n let width=0,height=0,entries:Entry[]=[],active=0,drag:PointerDrag|undefined,seq=0;
+ type PointerDrag={mode:'draw';x:number;y:number;endX:number;endY:number}|{mode:'move'|'resize';id:string;x:number;y:number;original:{x:number;y:number;width:number;height:number};handle?:import('./image-reference.ts').RectangleHandle};
+ let width=0,height=0,entries:Entry[]=[],active=0,drag:PointerDrag|undefined,seq=0;
  const t=(a:string,b:string)=>de()?a:b;
  const image=new Image();
  const draw=()=>{
   const context=canvas.getContext('2d');if(!context)return;context.clearRect(0,0,width,height);context.drawImage(image,0,0,width,height);
   entries.forEach((entry,i)=>{const g=entry.region.geometry;if(g.type!=='rectangle')return;context.lineWidth=Math.max(2,width/500);context.strokeStyle=entry.region.status==='ignored'?'#999':i===active?'#12a56b':'#e0a52d';context.strokeRect(g.x,g.y,g.width,g.height);context.fillStyle=context.strokeStyle;context.font=`${Math.max(14,width/60)}px sans-serif`;context.fillText(String(i+1),g.x+4,g.y+Math.max(16,width/60));});
-  if(drag?.mode==='draw'){context.strokeStyle='#00a878';context.setLineDash([8,5]);context.lineWidth=Math.max(2,width/500);context.strokeRect(Math.min(drag.x,drag.endX),Math.min(drag.y,drag.endY),Math.abs(drag.endX-drag.x),Math.abs(drag.endY-drag.y));context.setLineDash([]);}\n  const activeEntry=entries[active];if(activeEntry?.region.geometry.type==='rectangle'&&activeEntry.region.status!=='ignored'){const g=activeEntry.region.geometry,size=Math.max(7,width/180);context.fillStyle='#fff';context.strokeStyle='#087f59';context.lineWidth=Math.max(2,width/600);for(const [hx,hy] of [[g.x,g.y],[g.x+g.width/2,g.y],[g.x+g.width,g.y],[g.x+g.width,g.y+g.height/2],[g.x+g.width,g.y+g.height],[g.x+g.width/2,g.y+g.height],[g.x,g.y+g.height],[g.x,g.y+g.height/2]]){context.fillRect(hx-size/2,hy-size/2,size,size);context.strokeRect(hx-size/2,hy-size/2,size,size);}}
+  if(drag?.mode==='draw'){context.strokeStyle='#00a878';context.setLineDash([8,5]);context.lineWidth=Math.max(2,width/500);context.strokeRect(Math.min(drag.x,drag.endX),Math.min(drag.y,drag.endY),Math.abs(drag.endX-drag.x),Math.abs(drag.endY-drag.y));context.setLineDash([]);}
+  const activeEntry=entries[active];if(activeEntry?.region.geometry.type==='rectangle'&&activeEntry.region.status!=='ignored'){const g=activeEntry.region.geometry,size=Math.max(7,width/180);context.fillStyle='#fff';context.strokeStyle='#087f59';context.lineWidth=Math.max(2,width/600);for(const [hx,hy] of [[g.x,g.y],[g.x+g.width/2,g.y],[g.x+g.width,g.y],[g.x+g.width,g.y+g.height/2],[g.x+g.width,g.y+g.height],[g.x+g.width/2,g.y+g.height],[g.x,g.y+g.height],[g.x,g.y+g.height/2]]){context.fillRect(hx-size/2,hy-size/2,size,size);context.strokeRect(hx-size/2,hy-size/2,size,size);}}
  };
  const render=()=>{
   list.replaceChildren();selected.replaceChildren();
