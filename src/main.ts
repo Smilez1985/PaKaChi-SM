@@ -9,6 +9,7 @@ import {checkpointElements,disposeAll,installAtomically} from './avatar-installa
 import {ModelSwitchHistory} from './model-switch-history.ts';
 import {mountGenerationPanel} from './generation-panel.ts';
 import type {ProjectRevision} from './ai-jobs.ts';
+import {verifyImageReferenceSourceAsset} from './image-reference.ts';
 import type {ImageReferenceDocument} from './image-reference.ts';
 import {mountAssistantPanel} from './assistant-panel.ts';
 import {options} from './options.ts';
@@ -277,6 +278,7 @@ async function loadAvatar(avatar?: Avatar, file?: File, project?: StudioProject,
   try {
     if (!viewer) throw new Error('3D benötigt WebGL2/Hardwarebeschleunigung. Der Originalplayer bleibt verfügbar.');
     if(!project&&!file&&avatar?.project){project=await loadCatalogProject(avatar,import.meta.env.BASE_URL,fetchController.signal);if(token!==request||!valid())return false;}
+    if(project?.imageReference?.source.asset&&!await verifyImageReferenceSourceAsset(project.imageReference))throw new Error('Das eingebettete Quellbild ist beschädigt oder stimmt nicht mit seinem SHA-256-Hash überein.');
     let buffer: ArrayBuffer;
     if (project) {buffer = decodeModel(project.model);if(buffer.byteLength>50*1024*1024)throw new Error("Das enthaltene Modell ist größer als 50 MB.");}
     else if (file) {

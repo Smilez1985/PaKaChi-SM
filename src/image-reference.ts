@@ -111,6 +111,21 @@ export function validateImageReferenceDocument(value:ImageReferenceDocument):Ima
   return issues;
 }
 
+/** Verify that an embedded source asset matches its declared image type and SHA-256. */
+export async function verifyImageReferenceSourceAsset(value:ImageReferenceDocument):Promise<boolean>{
+ const asset=value.source.asset;if(!asset)return true;
+ try{
+  if(!['image/png','image/jpeg'].includes(asset.mediaType)||typeof atob!=='function'||!globalThis.crypto?.subtle)return false;
+  const binary=atob(asset.data),bytes=Uint8Array.from(binary,c=>c.charCodeAt(0));
+  if(bytes.byteLength===0||bytes.byteLength>20*1024*1024)return false;
+  const signature=asset.mediaType==='image/png'?[137,80,78,71,13,10,26,10]:[255,216,255];
+  if(!signature.every((byte,index)=>bytes[index]===byte))return false;
+  const digest=await crypto.subtle.digest('SHA-256',bytes);
+  const hash=[...new Uint8Array(digest)].map(v=>v.toString(16).padStart(2,'0')).join('');
+  return hash===value.source.sha256.toLowerCase();
+ }catch{return false;}
+}
+
 /** Generation is blocked until every hierarchy link and source region is explicit and confirmed. */
 export function checkImageReferenceReadiness(value:ImageReferenceDocument):ImageReferenceReadiness {
   const issues=validateImageReferenceDocument(value);
