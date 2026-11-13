@@ -9,6 +9,7 @@ import {checkpointElements,disposeAll,installAtomically} from './avatar-installa
 import {ModelSwitchHistory} from './model-switch-history.ts';
 import {mountGenerationPanel} from './generation-panel.ts';
 import type {ProjectRevision} from './ai-jobs.ts';
+import type {ImageReferenceDocument} from './image-reference.ts';
 import {mountAssistantPanel} from './assistant-panel.ts';
 import {options} from './options.ts';
 import {moveReview} from './studio-review.ts';
@@ -264,7 +265,7 @@ function showOriginal(remember=true): boolean {
   commitHistory?.();renderModelHistory();return true;
 }
 
-async function loadAvatar(avatar?: Avatar, file?: File, project?: StudioProject, valid:()=>boolean=()=>true, restore:{remember?:boolean;confirm?:boolean;dirty?:boolean;identity?:Pick<Avatar,'id'|'model'|'rigVersion'>}={}): Promise<boolean> {
+async function loadAvatar(avatar?: Avatar, file?: File, project?: StudioProject, valid:()=>boolean=()=>true, restore:{remember?:boolean;confirm?:boolean;dirty?:boolean;identity?:Pick<Avatar,'id'|'model'|'rigVersion'>;imageReference?:ImageReferenceDocument}={}): Promise<boolean> {
   if(editor?.interactionActive){message('Studio-Bewegung zuerst beenden.',true);return false;}
   if(!valid()||(restore.confirm!==false&&!mayReplace())||!valid()){renderCatalog();return false;}
   const token = ++request;
@@ -302,7 +303,7 @@ async function loadAvatar(avatar?: Avatar, file?: File, project?: StudioProject,
     let commitHistory:(()=>void)|undefined;
     if(editor?.interactionActive)throw new Error('Studio-Bewegung zuerst beenden.');
     const before=restore.remember!==false?captureModel():null;if(before)commitHistory=modelHistory.checkpoint(before);
-    const projectSource = {format:'pakachi-studio' as const,version:1 as const,model:project?.model ?? encodeModel(buffer),avatar:{...next,moves}};
+    const projectSource = {format:'pakachi-studio' as const,version:1 as const,model:project?.model ?? encodeModel(buffer),avatar:{...next,moves},...(project?.imageReference?{imageReference:project.imageReference}:restore.imageReference?{imageReference:restore.imageReference}:{})};
     parsed=undefined; // Ownership passes to the candidate, including preparation failures.
     const prepared=candidate=prepareAvatar({model:gltf,avatar:next,moves,source:projectSource,data:project?.studio,studio,speed:Number(el<HTMLSelectElement>('speed').value),dirty:restore.dirty??false,skeleton:el<HTMLInputElement>('skeleton').checked,resume:resumeBase,changed:refreshCapabilities,feedback:text=>message(text),playbackChanged:syncPlayback});
     // No await between the final target check and publication of the prepared candidate.
@@ -360,10 +361,10 @@ async function boot(): Promise<void> {
   mountAssistantPanel(document.querySelector('.agent-panel')!,rpc,()=>options.language,localStorage,undefined,(id,poses,session,revision)=>{if(busy||!editor)throw Error('Studio nicht verfügbar.');return editor.previewSequence(id,poses,session,revision);},(id,corrected,session,revision)=>{if(busy||!editor)throw Error('Studio nicht verfügbar.');const current=editor.inspect();if(current.session!==session||current.revision!==revision)throw Error('Studio-Stand hat sich geändert.');return editor.previewAutomaticSkinCorrection(id,corrected);});
   const generation=mountGenerationPanel(el('generation-host'),{
     target:()=>studio&&!busy&&!editor?.interactionActive?generationTarget():null,
-    adopt:(bytes,expected,valid)=>{
+    adopt:(bytes,expected,valid,reference)=>{
       if(busy)return Promise.resolve(false);
       const guard=()=>{const now=generationTarget();return valid()&&studio&&!editor?.interactionActive&&now.session===expected.session&&now.revision===expected.revision;};
-      return loadAvatar(undefined,new File([Uint8Array.from(bytes).buffer],'3D-Entwurf.glb',{type:'model/gltf-binary'}),undefined,guard);
+      return loadAvatar(undefined,new File([Uint8Array.from(bytes).buffer],'3D-Entwurf.glb',{type:'model/gltf-binary'}),undefined,guard,{imageReference:reference});
     },
   },()=>options.language,localStorage);
   try { viewer = new Viewer(el('viewport')); }

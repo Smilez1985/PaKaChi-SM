@@ -13,22 +13,23 @@ import {writeFigureGLB} from '../src/figure-glb.ts';
 import {parseModel,disposeModel} from '../src/viewer.ts';
 import type {prepareDraftRig} from '../src/draft-rig.ts';
 const bytes=Uint8Array.from(glb());
+const referenceDocument:ImageReferenceDocument={format:'pakachi-image-reference',version:1,source:{sha256:'a'.repeat(64),width:100,height:100},regions:[{id:'region-front',label:'Front',kind:'view',status:'confirmed',geometry:{type:'rectangle',x:10,y:10,width:50,height:70}}],views:[{id:'view-front',label:'Front',regionIds:['region-front']}],forms:[{id:'form-animal',label:'Animal',viewIds:['view-front']}],avatars:[{id:'avatar-panda',label:'Panda',formIds:['form-animal']}]};
 async function until(check:()=>boolean){for(let i=0;i<100;i++){if(check())return;await new Promise(r=>setTimeout(r,5));}assert.fail('UI did not settle');}
 function fixture(t:TestContext,run?:ProviderAdapter['run'],fallback=false,prepareRig?:typeof prepareDraftRig,referenceReady=true){
  const w=new Window();Object.assign(globalThis,{window:w,document:w.document});
  const host=document.createElement('div');document.body.append(host);
  const profile={id:'gen',name:'Local',adapter:'custom-generation' as const,endpoint:'http://127.0.0.1:8766',model:'triposr'};
  saveProviderConfig({version:1,profiles:fallback?[profile,{...profile,id:'backup',name:'Backup'}]:[profile],fallbacks:{assistant:[],generation:fallback?['backup']:[],rigging:[]},assignments:{assistant:null,generation:'gen',rigging:null}},w.localStorage);setProviderKey(profile,'x'.repeat(48));if(fallback)setProviderKey({...profile,id:'backup'},'y'.repeat(48));
- let beforeAdopt:(()=>Promise<void>)|undefined;
+ let beforeAdopt:(()=>Promise<void>)|undefined,adoptedReference:ImageReferenceDocument|undefined;
  let target={session:'one',revision:1},calls=0,adoptions=0,cleanups=0,previewCalls=0,adopted:Uint8Array|undefined;
- const panel=mountGenerationPanel(host,{target:()=>target,adopt:async(output,expected,valid)=>{await beforeAdopt?.();if(!valid()||expected.session!==target.session||expected.revision!==target.revision)return false;adopted=output;adoptions++;return true;}},()=> 'de',w.localStorage,{
+ const panel=mountGenerationPanel(host,{target:()=>target,adopt:async(output,expected,valid,reference)=>{await beforeAdopt?.();if(!valid()||expected.session!==target.session||expected.revision!==target.revision)return false;adopted=output;adoptedReference=reference;adoptions++;return true;}},()=> 'de',w.localStorage,{
   adapter:(key,p)=>{assert.equal(key,(p.id==='backup'?'y':'x').repeat(48));return {id:'custom-generation',probe:async()=>({model:'triposr',capabilities:['image-to-3d']}),run:async request=>{calls++;return run?run(request):{kind:'model',bytes};}};
-  },validate:validateGeneration,prepareRig,referenceEditor:(_host,_source,_language)=>({ready:async()=>referenceReady,selectedCrop:async()=>new File([new Uint8Array([1,2,3])],'region.png',{type:'image/png'}),reference:async()=>({} as never),dispose(){}}),preview:async()=>{previewCalls++;return ()=>{cleanups++;};},
+  },validate:validateGeneration,prepareRig,referenceEditor:(_host,_source,_language)=>({ready:async()=>referenceReady,selectedCrop:async()=>new File([new Uint8Array([1,2,3])],'region.png',{type:'image/png'}),reference:async()=>structuredClone(referenceDocument),dispose(){}}),preview:async()=>{previewCalls++;return ()=>{cleanups++;};},
  });
  t.after(()=>{panel.dispose();w.happyDOM.abort();});
  const button=(id:string)=>host.querySelector<HTMLButtonElement>('#generation-'+id)!;
  const choose=async()=>{panel.select(new File([new Uint8Array([137,80,78,71])],'panda.png',{type:'image/png'}));await new Promise(r=>setTimeout(r,0));};
- return {w,host,panel,button,choose,delayImport(fn:()=>Promise<void>){beforeAdopt=fn;},get calls(){return calls;},get adopted(){return adopted;},get adoptions(){return adoptions;},get cleanups(){return cleanups;},get previewCalls(){return previewCalls;},change(){target={...target,revision:target.revision+1};w.dispatchEvent(new w.Event('pakachi-sm:change'));}};
+ return {w,host,panel,button,choose,delayImport(fn:()=>Promise<void>){beforeAdopt=fn;},get calls(){return calls;},get adopted(){return adopted;},get adoptedReference(){return adoptedReference;},get adoptions(){return adoptions;},get cleanups(){return cleanups;},get previewCalls(){return previewCalls;},change(){target={...target,revision:target.revision+1};w.dispatchEvent(new w.Event('pakachi-sm:change'));}};
 }
 test('image selection does not send; generated preview requires explicit acceptance and releases viewer',async t=>{
  const f=fixture(t);await f.choose();assert.equal(f.calls,0);f.button('start').click();await until(()=>!f.button('apply').hidden);
@@ -85,4 +86,9 @@ test('cancellation during local skeleton preparation ignores late output and nev
 
 test('generation stays locked until every image region is explicitly assigned and confirmed',async t=>{
  const f=fixture(t,undefined,false,undefined,false);await f.choose();await new Promise(r=>setTimeout(r,10));assert.ok(f.button('start').disabled);f.button('start').click();assert.equal(f.calls,0);assert.equal(f.adoptions,0);
+});
+
+test('accepted generation passes the confirmed image-reference hierarchy to the adoption bridge',async t=>{
+ const f=fixture(t);await f.choose();f.button('start').click();await until(()=>!f.button('apply').hidden);f.button('apply').click();await until(()=>f.adoptions===1);
+ assert.deepEqual(f.adoptedReference,referenceDocument);
 });

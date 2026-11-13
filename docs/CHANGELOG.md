@@ -12,9 +12,11 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
-Zeitstempel der letzten Änderung: 2026-11-13T17:55:00+01:00
+Zeitstempel der letzten Änderung: 2026-11-13T18:25:00+01:00
 
 ### Added
+
+- Bestätigte Bildreferenzdaten werden jetzt beim Übernehmen des 3D-Entwurfs in das Studio-Projekt übernommen: SHA-256 und Pixelmaße des Quellbilds, alle Regionen/Geometrien sowie die Avatar-/Form-/Ansichtsverknüpfungen. `parseProject` validiert das optionale Referenzdokument mit Größenlimits und lehnt beschädigte oder inkonsistente Zuordnungen ab. Ein Panel-Test prüft die Übergabe an die Übernahmebrücke; ein separater Projekttest prüft Speichern/Laden und Fehlerfälle. Das Originalbild selbst ist noch nicht eingebettet.
 
 - Der Bildregionseditor erlaubt jetzt die nachträgliche Rechteckkorrektur über Quellpixel-Koordinatenfelder (X/Y/Breite/Höhe) mit Begrenzung auf das Originalbild. Regionen können außerdem auf-/abwärts sortiert werden; IDs und Gruppenzuordnungen bleiben stabil. Reine Geometrie-/Reihenfolge-Tests ergänzen den bestehenden Referenzmodelltest.
 

@@ -1,6 +1,8 @@
 import type {WeightView} from './studio-weight-visibility.ts';
 import {validCorrectiveShapes} from './studio-corrective-shapes.ts';
 import {REVIEW_REASONS} from './studio-review.ts';
+import {validateImageReferenceDocument} from './image-reference.ts';
+import type {ImageReferenceDocument} from './image-reference.ts';
 import type {ReviewReason} from './studio-review.ts';
 export type Vec3 = [number, number, number];
 export type Quat = [number, number, number, number];
@@ -35,8 +37,24 @@ export interface StudioProject {
   format: 'pakachi-studio'; version: 1; model: string;
   avatar: { id: string; name: string; description: string; moves: {id:string;name:string;clip:string;loop:boolean}[]; defaultMove?: string; states?: Record<string,string> };
   studio: StudioData;
+  /** Confirmed source-image segmentation retained with the avatar project. */
+  imageReference?: ImageReferenceDocument;
 }
 export const emptyStudio = (): StudioData => ({points:[],links:[],boneRest:[],poses:[],moves:[]});
+
+function validImageReferenceDocument(value:unknown):value is ImageReferenceDocument {
+ if(!obj(value)||value.format!=='pakachi-image-reference'||value.version!==1||!obj(value.source)||
+    !Array.isArray(value.regions)||value.regions.length>2048||!Array.isArray(value.views)||value.views.length>512||
+    !Array.isArray(value.forms)||value.forms.length>256||!Array.isArray(value.avatars)||value.avatars.length>128)return false;
+ if(!value.regions.every(r=>obj(r)&&typeof r.id==='string'&&typeof r.label==='string'&&typeof r.kind==='string'&&typeof r.status==='string'&&obj(r.geometry)&&
+    (r.geometry.type==='rectangle'?['x','y','width','height'].every(k=>typeof r.geometry[k]==='number'):
+     r.geometry.type==='polygon'&&Array.isArray(r.geometry.points)&&r.geometry.points.length<=4096&&r.geometry.points.every(p=>obj(p)&&typeof p.x==='number'&&typeof p.y==='number'))))return false;
+ if(!value.views.every(v=>obj(v)&&typeof v.id==='string'&&typeof v.label==='string'&&Array.isArray(v.regionIds)&&v.regionIds.every(id=>typeof id==='string')))return false;
+ if(!value.forms.every(f=>obj(f)&&typeof f.id==='string'&&typeof f.label==='string'&&Array.isArray(f.viewIds)&&f.viewIds.every(id=>typeof id==='string')))return false;
+ if(!value.avatars.every(a=>obj(a)&&typeof a.id==='string'&&typeof a.label==='string'&&Array.isArray(a.formIds)&&a.formIds.every(id=>typeof id==='string')))return false;
+ try{return validateImageReferenceDocument(value as unknown as ImageReferenceDocument).length===0;}catch{return false;}
+}
+
 const obj = (v: unknown): v is Record<string,unknown> => !!v && typeof v==='object' && !Array.isArray(v);
 const name = (v: unknown): v is string => typeof v==='string' && v.trim().length>0 && v.length<=100;
 const id = (v: unknown): v is string => name(v) && /^[a-z0-9][a-z0-9_-]*$/.test(v);
@@ -48,6 +66,7 @@ const transform = (v:unknown,figure=false) => obj(v) && (v.scale===undefined || 
 function require(condition:unknown, message='Ungültige Studio-Projektdatei.'): asserts condition { if(!condition) throw new Error(message); }
 export function parseProject(input: unknown): StudioProject {
   require(obj(input) && input.format==='pakachi-studio' && input.version===1,'Unbekanntes Studio-Projektformat.');
+  require(input.imageReference===undefined||validImageReferenceDocument(input.imageReference),'Ungültige oder beschädigte Bildreferenzdaten.');
   require(typeof input.model==='string' && input.model.length>0 && input.model.length<=70_000_000 && input.model.length%4===0 && /^[A-Za-z0-9+/]*={0,2}$/.test(input.model),'Modelldaten fehlen oder sind ungültig.');
   const a=input.avatar; require(obj(a) && id(a.id) && name(a.name) && typeof a.description==='string' && a.description.length<=1000 && Array.isArray(a.moves) && a.moves.length<=512);
   const moveIds=new Set<string>();

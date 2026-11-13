@@ -40,5 +40,7 @@ jobs:
         run: node --test tests/image-reference-crop.test.ts
       - name: Test generation panel gating
         run: node --test tests/generation-panel.test.ts
+      - name: Test persisted image-reference project metadata
+        run: node --test tests/image-reference-project.test.ts
       - name: Type-check project
         run: npx tsc --noEmit

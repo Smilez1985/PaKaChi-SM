@@ -7,11 +7,12 @@ import {createLocalGenerationAdapter} from './generation-adapter.ts';
 import {mountImageReferenceEditor} from './image-reference-editor.ts';
 import {validateGeneration,showGenerationPreview} from './generation-preview.ts';
 import {prepareDraftRig} from './draft-rig.ts';
+import type {ImageReferenceDocument} from './image-reference.ts';
 import type {DraftRigTemplate} from './draft-rig.ts';
 
 interface GenerationHost {
  target:()=>ProjectRevision|null;
- adopt:(bytes:Uint8Array,expected:ProjectRevision,valid:()=>boolean)=>Promise<boolean>;
+ adopt:(bytes:Uint8Array,expected:ProjectRevision,valid:()=>boolean,reference?:ImageReferenceDocument)=>Promise<boolean>;
 }
 type ReferenceEditor=ReturnType<typeof mountImageReferenceEditor>;
 interface Dependencies {
@@ -124,7 +125,7 @@ export function mountGenerationPanel(host:HTMLElement,bridge:GenerationHost,lang
   if(pending||job?.snapshot.status!=='preview')return;const target=job.snapshot.target;
   if(!matches(target)){apply.disabled=true;status.textContent=t('Projekt geändert: Übernahme gesperrt.','Project changed: import blocked.');return;}
   const output=job.preview();if(output.kind!=='model')return;const current=sequence;pending=true;refresh();apply.disabled=true;start.disabled=true;
-  try{const accepted=await bridge.adopt(prepared?.bytes??output.bytes,target,()=>!disposed&&sequence===current);if(current!==sequence)return;if(accepted){const wasRigged=!!prepared;clear(true);status.textContent=wasRigged?t('Beweglicher Entwurf geladen. Gelenke in „Gelenke bearbeiten“ korrigieren und Beugungen in „Figur bewegen“ prüfen.','Rigged draft loaded. Adjust joints in Edit joints and inspect bends in Move figure.'):t('Neuer Avatar geladen. Rigging und visuelle Qualitätsprüfung bleiben erforderlich.','New avatar loaded. Rigging and visual quality review are still required.');}else status.textContent=t('Nicht übernommen: abgebrochen oder Projekt inzwischen geändert.','Not applied: cancelled or project changed.');}
+  try{const reference=await referenceEditor?.reference();if(current!==sequence||!matches(target))return;const accepted=await bridge.adopt(prepared?.bytes??output.bytes,target,()=>!disposed&&sequence===current,reference);if(current!==sequence)return;if(accepted){const wasRigged=!!prepared;clear(true);status.textContent=wasRigged?t('Beweglicher Entwurf geladen. Gelenke in „Gelenke bearbeiten“ korrigieren und Beugungen in „Figur bewegen“ prüfen.','Rigged draft loaded. Adjust joints in Edit joints and inspect bends in Move figure.'):t('Neuer Avatar geladen. Rigging und visuelle Qualitätsprüfung bleiben erforderlich.','New avatar loaded. Rigging and visual quality review are still required.');}else status.textContent=t('Nicht übernommen: abgebrochen oder Projekt inzwischen geändert.','Not applied: cancelled or project changed.');}
   catch{if(current===sequence)status.textContent=t('Übernahme fehlgeschlagen.','Import failed.');}
   finally{if(current===sequence)pending=false;refresh();}
  };
