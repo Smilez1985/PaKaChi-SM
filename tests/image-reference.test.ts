@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {checkImageReferenceReadiness,validateImageReferenceDocument,editImageReferenceRectangle,reorderImageReferenceRegions} from '../src/image-reference.ts';
+import {checkImageReferenceReadiness,validateImageReferenceDocument,editImageReferenceRectangle,reorderImageReferenceRegions,moveImageReferenceRectangle,resizeImageReferenceRectangle} from '../src/image-reference.ts';
 import type {ImageReferenceDocument} from '../src/image-reference.ts';
 
 const base=():ImageReferenceDocument=>({
@@ -85,4 +85,23 @@ test('reorders regions without changing stable identities and handles boundaries
  assert.deepEqual(regions.map(region=>region.id),['r-animal-front','r-animal-side','r-work']);
  assert.deepEqual(reorderImageReferenceRegions(moved,'r-animal-side',-1).map(region=>region.id),['r-animal-side','r-animal-front','r-work']);
  assert.throws(()=>reorderImageReferenceRegions(regions,'missing',1),/unknown-image-region/);
+});
+
+
+test('moves rectangles by pointer delta and keeps them inside the source image',()=>{
+ const region=base().regions[0];
+ const moved=moveImageReferenceRectangle(region,1600,1000,500,900);
+ assert.deepEqual(moved.geometry,{type:'rectangle',x:1300,y:700,width:300,height:300});
+ const movedBack=moveImageReferenceRectangle(moved,1600,1000,-2000,-2000);
+ assert.deepEqual(movedBack.geometry,{type:'rectangle',x:0,y:0,width:300,height:300});
+});
+
+test('resizes rectangles from all handle directions with a four-pixel minimum',()=>{
+ const region=base().regions[0];
+ const west=resizeImageReferenceRectangle(region,1600,1000,'w',50,0);
+ assert.deepEqual(west.geometry,{type:'rectangle',x:150,y:100,width:250,height:300});
+ const northEast=resizeImageReferenceRectangle(region,1600,1000,'ne',40,-30);
+ assert.deepEqual(northEast.geometry,{type:'rectangle',x:100,y:0,width:340,height:400});
+ const min=resizeImageReferenceRectangle(region,1600,1000,'nw',1000,1000);
+ assert.deepEqual(min.geometry,{type:'rectangle',x:396,y:396,width:4,height:4});
 });

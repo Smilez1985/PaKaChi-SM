@@ -1,5 +1,5 @@
 import type {ImageReferenceDocument,ImageReferenceRegion} from './image-reference.ts';
-import {checkImageReferenceReadiness,editImageReferenceRectangle,reorderImageReferenceRegions} from './image-reference.ts';
+import {checkImageReferenceReadiness,editImageReferenceRectangle,reorderImageReferenceRegions,moveImageReferenceRectangle,resizeImageReferenceRectangle} from './image-reference.ts';
 import {cropImageReferenceRegion} from './image-reference-crop.ts';
 
 interface Entry {region:ImageReferenceRegion;avatar:string;form:string;view:string;use:boolean}
@@ -11,13 +11,13 @@ export function mountImageReferenceEditor(host:HTMLElement,source:File,language:
  canvas.className='image-reference-canvas';canvas.setAttribute('aria-label','Source image marking surface');
  feedback.setAttribute('role','status');selectedLabel.textContent=de()?'Ausschnitt für 3D auswählen':'Select region for 3D';
  root.append(heading,help,canvas,list,selectedLabel,selected,feedback);host.replaceChildren(root);
- let width=0,height=0,entries:Entry[]=[],active=0,drag:{x:number;y:number}|undefined,seq=0;
+ type PointerDrag={mode:'draw';x:number;y:number;endX:number;endY:number}|{mode:'move'|'resize';id:string;x:number;y:number;original:{x:number;y:number;width:number;height:number};handle?:import('./image-reference.ts').RectangleHandle};\n let width=0,height=0,entries:Entry[]=[],active=0,drag:PointerDrag|undefined,seq=0;
  const t=(a:string,b:string)=>de()?a:b;
  const image=new Image();
  const draw=()=>{
   const context=canvas.getContext('2d');if(!context)return;context.clearRect(0,0,width,height);context.drawImage(image,0,0,width,height);
   entries.forEach((entry,i)=>{const g=entry.region.geometry;if(g.type!=='rectangle')return;context.lineWidth=Math.max(2,width/500);context.strokeStyle=entry.region.status==='ignored'?'#999':i===active?'#12a56b':'#e0a52d';context.strokeRect(g.x,g.y,g.width,g.height);context.fillStyle=context.strokeStyle;context.font=`${Math.max(14,width/60)}px sans-serif`;context.fillText(String(i+1),g.x+4,g.y+Math.max(16,width/60));});
-  if(drag){context.strokeStyle='#00a878';context.setLineDash([8,5]);context.lineWidth=Math.max(2,width/500);context.strokeRect(drag.x,drag.y,0,0);context.setLineDash([]);}
+  if(drag?.mode==='draw'){context.strokeStyle='#00a878';context.setLineDash([8,5]);context.lineWidth=Math.max(2,width/500);context.strokeRect(Math.min(drag.x,drag.endX),Math.min(drag.y,drag.endY),Math.abs(drag.endX-drag.x),Math.abs(drag.endY-drag.y));context.setLineDash([]);}\n  const activeEntry=entries[active];if(activeEntry?.region.geometry.type==='rectangle'&&activeEntry.region.status!=='ignored'){const g=activeEntry.region.geometry,size=Math.max(7,width/180);context.fillStyle='#fff';context.strokeStyle='#087f59';context.lineWidth=Math.max(2,width/600);for(const [hx,hy] of [[g.x,g.y],[g.x+g.width/2,g.y],[g.x+g.width,g.y],[g.x+g.width,g.y+g.height/2],[g.x+g.width,g.y+g.height],[g.x+g.width/2,g.y+g.height],[g.x,g.y+g.height],[g.x,g.y+g.height/2]]){context.fillRect(hx-size/2,hy-size/2,size,size);context.strokeRect(hx-size/2,hy-size/2,size,size);}}
  };
  const render=()=>{
   list.replaceChildren();selected.replaceChildren();
@@ -49,8 +49,13 @@ export function mountImageReferenceEditor(host:HTMLElement,source:File,language:
   if(w<4||h<4)return;const n=++seq,id=makeId('region',n);
   entries.push({region:{id,label:t('Bereich ','Region ')+n,kind:'view',status:'suggested',geometry:{type:'rectangle',x,y,width:w,height:h}},avatar:'Avatar 1',form:'Tierform',view:'Ansicht '+n,use:true});active=entries.length-1;render();draw();changed();
  };
- canvas.onpointerdown=e=>{const r=canvas.getBoundingClientRect();drag={x:Math.max(0,Math.min(width,(e.clientX-r.left)*width/r.width)),y:Math.max(0,Math.min(height,(e.clientY-r.top)*height/r.height))};canvas.setPointerCapture?.(e.pointerId);};
- canvas.onpointerup=e=>{if(!drag)return;const r=canvas.getBoundingClientRect(),x=Math.max(0,Math.min(width,(e.clientX-r.left)*width/r.width)),y=Math.max(0,Math.min(height,(e.clientY-r.top)*height/r.height)),start=drag;drag=undefined;add(Math.min(start.x,x),Math.min(start.y,y),Math.abs(x-start.x),Math.abs(y-start.y));};
+ const point=(e:PointerEvent)=>{const r=canvas.getBoundingClientRect();return{x:Math.max(0,Math.min(width,(e.clientX-r.left)*width/r.width)),y:Math.max(0,Math.min(height,(e.clientY-r.top)*height/r.height))};};
+ const handleAt=(g:{x:number;y:number;width:number;height:number},p:{x:number;y:number},tolerance:number):import('./image-reference.ts').RectangleHandle|undefined=>{const midX=g.x+g.width/2,midY=g.y+g.height/2,handles:[import('./image-reference.ts').RectangleHandle,number,number][]=[['nw',g.x,g.y],['n',midX,g.y],['ne',g.x+g.width,g.y],['e',g.x+g.width,midY],['se',g.x+g.width,g.y+g.height],['s',midX,g.y+g.height],['sw',g.x,g.y+g.height],['w',g.x,midY]];return handles.find(([,x,y])=>Math.hypot(p.x-x,p.y-y)<=tolerance)?.[0];};
+ canvas.onpointerdown=e=>{const p=point(e),tolerance=Math.max(8,width/canvas.clientWidth*9);let found:Entry|undefined;for(let i=entries.length-1;i>=0;i--){const candidate=entries[i]!;const g=candidate.region.geometry;if(g.type==='rectangle'&&candidate.region.status!=='ignored'&&p.x>=g.x-tolerance&&p.x<=g.x+g.width+tolerance&&p.y>=g.y-tolerance&&p.y<=g.y+g.height+tolerance){found=candidate;active=i;break;}}
+  if(found&&found.region.geometry.type==='rectangle'){const g=found.region.geometry,handle=handleAt(g,p,tolerance);drag={mode:handle?'resize':'move',id:found.region.id,x:p.x,y:p.y,original:{x:g.x,y:g.y,width:g.width,height:g.height},handle};canvas.style.cursor=handle?'nwse-resize':'move';render();}else{drag={mode:'draw',x:p.x,y:p.y,endX:p.x,endY:p.y};canvas.style.cursor='crosshair';}canvas.setPointerCapture?.(e.pointerId);draw();};
+ canvas.onpointermove=e=>{if(!drag)return;const p=point(e);if(drag.mode==='draw'){drag.endX=p.x;drag.endY=p.y;}else{const entry=entries.find(item=>item.region.id===drag!.id);if(!entry)return;entry.region={...entry.region,geometry:drag.original};entry.region=drag.mode==='move'?moveImageReferenceRectangle(entry.region,width,height,p.x-drag.x,p.y-drag.y):resizeImageReferenceRectangle(entry.region,width,height,drag.handle!,p.x-drag.x,p.y-drag.y);}draw();};
+ const finishPointer=()=>{if(!drag)return;const current=drag;drag=undefined;canvas.style.cursor='crosshair';if(current.mode==='draw')add(Math.min(current.x,current.endX),Math.min(current.y,current.endY),Math.abs(current.endX-current.x),Math.abs(current.endY-current.y));else{render();draw();changed();}};
+ canvas.onpointerup=finishPointer;canvas.onpointercancel=finishPointer;
  selected.onchange=()=>{active=entries.findIndex(e=>e.region.id===selected.value);render();draw();changed();};
  image.onload=()=>{width=image.naturalWidth;height=image.naturalHeight;canvas.width=width;canvas.height=height;draw();};
  image.src=URL.createObjectURL(source);

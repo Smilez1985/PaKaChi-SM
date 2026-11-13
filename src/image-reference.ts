@@ -161,3 +161,25 @@ export function reorderImageReferenceRegions<T>(regions:T[],regionId:string,offs
   [reordered[index],reordered[target]]=[reordered[target]!,reordered[index]!];
   return reordered;
 }
+
+
+export type RectangleHandle='n'|'ne'|'e'|'se'|'s'|'sw'|'w'|'nw';
+
+/** Move a rectangle by a pointer delta in source-image pixels. */
+export function moveImageReferenceRectangle(region:ImageReferenceRegion,sourceWidth:number,sourceHeight:number,dx:number,dy:number):ImageReferenceRegion {
+  if(region.geometry.type!=='rectangle')throw new Error('rectangle-edit-requires-rectangle');
+  const g=region.geometry;
+  return editImageReferenceRectangle(region,sourceWidth,sourceHeight,{x:g.x+dx,y:g.y+dy});
+}
+
+/** Resize from one of eight edge/corner handles using source-image pixel deltas. */
+export function resizeImageReferenceRectangle(region:ImageReferenceRegion,sourceWidth:number,sourceHeight:number,handle:RectangleHandle,dx:number,dy:number):ImageReferenceRegion {
+  if(region.geometry.type!=='rectangle')throw new Error('rectangle-edit-requires-rectangle');
+  const g=region.geometry,min=4;
+  let left=g.x,top=g.y,right=g.x+g.width,bottom=g.y+g.height;
+  if(handle.includes('w'))left=Math.max(0,Math.min(right-min,left+dx));
+  if(handle.includes('e'))right=Math.min(sourceWidth,Math.max(left+min,right+dx));
+  if(handle.includes('n'))top=Math.max(0,Math.min(bottom-min,top+dy));
+  if(handle.includes('s'))bottom=Math.min(sourceHeight,Math.max(top+min,bottom+dy));
+  return editImageReferenceRectangle(region,sourceWidth,sourceHeight,{x:left,y:top,width:right-left,height:bottom-top});
+}

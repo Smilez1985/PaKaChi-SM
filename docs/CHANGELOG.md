@@ -12,7 +12,7 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
-Zeitstempel der letzten Änderung: 2026-11-13T17:40:00+01:00 (Europe/Berlin).
+Zeitstempel der letzten Änderung: 2026-11-13T17:55:00+01:00
 
 ### Added
 
