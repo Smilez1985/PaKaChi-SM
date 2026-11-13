@@ -4,6 +4,7 @@ import type {ProviderAdapter,ProviderConfig,ProviderProfile} from './ai-provider
 import {ProviderRegistry,readProviderConfig,providerRoute,remainingProviderConfig} from './ai-providers.ts';
 import {getProviderKey} from './provider-credentials.ts';
 import {createLocalGenerationAdapter} from './generation-adapter.ts';
+import {mountImageReferenceEditor} from './image-reference-editor.ts';
 import {validateGeneration,showGenerationPreview} from './generation-preview.ts';
 import {prepareDraftRig} from './draft-rig.ts';
 import type {DraftRigTemplate} from './draft-rig.ts';
@@ -12,7 +13,9 @@ interface GenerationHost {
  target:()=>ProjectRevision|null;
  adopt:(bytes:Uint8Array,expected:ProjectRevision,valid:()=>boolean)=>Promise<boolean>;
 }
+type ReferenceEditor=ReturnType<typeof mountImageReferenceEditor>;
 interface Dependencies {
+ referenceEditor?:typeof mountImageReferenceEditor;
  adapter?:(key:string,profile:Readonly<ProviderProfile>)=>ProviderAdapter;
  validate?:typeof validateGeneration;
  preview?:typeof showGenerationPreview;
@@ -20,25 +23,26 @@ interface Dependencies {
 }
 export function mountGenerationPanel(host:HTMLElement,bridge:GenerationHost,language:()=> 'de'|'en',storage:Pick<Storage,'getItem'>,deps:Dependencies={}){
  const panel=document.createElement('section');panel.className='generation-panel';panel.dataset.userText='';
- const heading=document.createElement('h2'),destination=document.createElement('p'),notice=document.createElement('p'),label=document.createElement('label'),file=document.createElement('input'),chosen=document.createElement('p'),start=document.createElement('button'),retry=document.createElement('button'),cancel=document.createElement('button'),discard=document.createElement('button'),apply=document.createElement('button'),status=document.createElement('p'),preview=document.createElement('div');
+ const heading=document.createElement('h2'),destination=document.createElement('p'),notice=document.createElement('p'),label=document.createElement('label'),file=document.createElement('input'),chosen=document.createElement('p'),referenceHost=document.createElement('div'),start=document.createElement('button'),retry=document.createElement('button'),cancel=document.createElement('button'),discard=document.createElement('button'),apply=document.createElement('button'),status=document.createElement('p'),preview=document.createElement('div');
  file.type='file';file.accept='image/png,image/jpeg';file.id='generation-image';label.htmlFor=file.id;
  retry.id='generation-retry';start.id='generation-start';cancel.id='generation-cancel';discard.id='generation-discard';apply.id='generation-apply';
  for(const button of [start,retry,cancel,discard,apply])button.type='button';
  status.setAttribute('role','status');preview.className='generation-preview';
+ referenceHost.className='image-reference-host';referenceHost.hidden=true;
  const rigControls=document.createElement('div'),rigLabel=document.createElement('label'),template=document.createElement('select'),alignmentLabel=document.createElement('label'),alignment=document.createElement('select'),rigNotice=document.createElement('p'),rig=document.createElement('button'),original=document.createElement('button'),rigStatus=document.createElement('p');
  template.id='generation-rig-template';rigLabel.htmlFor=template.id;rig.id='generation-rig';original.id='generation-original';rig.type=original.type='button';
  for(const value of ['biped','biped-relaxed','quadruped']){const option=document.createElement('option');option.value=value;template.append(option);}
  alignment.id='generation-rig-alignment';alignmentLabel.htmlFor=alignment.id;for(const value of ['support','bounds']){const option=document.createElement('option');option.value=value;alignment.append(option);}
  rigStatus.setAttribute('role','status');rigControls.append(rigLabel,template,alignmentLabel,alignment,rigNotice,rig,original,rigStatus);
- panel.append(heading,destination,notice,label,file,chosen,start,retry,cancel,discard,status,preview,rigControls,apply);host.append(panel);
- let source:File|undefined,job:ProviderJob|undefined,sequence=0,controller:AbortController|undefined,disposePreview:(()=>void)|undefined,pending=false,disposed=false;
+ panel.append(heading,destination,notice,label,file,chosen,referenceHost,start,retry,cancel,discard,status,preview,rigControls,apply);host.append(panel);
+ let source:File|undefined,referenceEditor:ReferenceEditor|undefined,referenceReady=false,job:ProviderJob|undefined,sequence=0,controller:AbortController|undefined,disposePreview:(()=>void)|undefined,pending=false,disposed=false;
  let prepared:Awaited<ReturnType<typeof prepareDraftRig>>|undefined;
  let rigPreviewHost:HTMLDivElement|undefined;
  let retryRequest:{config:ProviderConfig;target:ProjectRevision;selected:File;keys:Map<string,string>}|undefined;
  const t=(de:string,en:string)=>language()==='de'?de:en;
  const matches=(target:ProjectRevision)=>{const now=bridge.target();return !!now&&target.session===now.session&&target.revision===now.revision;};
- function clear(){sequence++;prepared=undefined;rigPreviewHost?.remove();rigPreviewHost=undefined;rigStatus.textContent='';rigControls.hidden=true;retryRequest=undefined;retry.hidden=true;job?.cancel();if(job?.snapshot.status==='preview'||job?.snapshot.status==='stale')job.discard();job=undefined;controller?.abort();controller=undefined;disposePreview?.();disposePreview=undefined;preview.replaceChildren();preview.hidden=true;pending=false;apply.hidden=true;cancel.disabled=true;discard.disabled=true;file.disabled=false;}
- function labels(){retry.textContent=t('Nächsten Anbieter versuchen','Try next provider');heading.textContent=t('Bild → 3D-Entwurf','Image → 3D draft');label.textContent=t('PNG/JPEG auswählen oder hier ablegen','Choose or drop a PNG/JPEG here');start.textContent=t('3D-Entwurf erzeugen','Generate 3D draft');cancel.textContent=t('Abbrechen','Cancel');discard.textContent=t('Ergebnis verwerfen','Discard result');apply.textContent=t('Als neuen Avatar laden','Load as new avatar');notice.textContent=t('Sendet das ausgewählte Bild an den angezeigten lokalen TripoSR-Dienst. Ein Entwurf ohne zugesichertes Skelett; keine Promptsteuerung. Das aktuelle Modell bleibt bis zur Übernahme erhalten. Der letzte Modellwechsel lässt sich über „Modellwechsel zurück“ wiederherstellen; Projekte zusätzlich speichern. Automatischer Anbieterwechsel nur vor dem Auftragsstart. Ein weiterer Auftrag benötigt einen ausdrücklichen Klick.','Sends the selected image to the configured local TripoSR service. A draft without a guaranteed skeleton; no prompt control. Your current model remains until acceptance. Use Undo model switch to restore the last project; also save projects to disk. Automatic fallback only before execution. Another job requires an explicit click.');}
+ function clear(){sequence++;referenceEditor?.dispose();referenceEditor=undefined;referenceReady=false;referenceHost.replaceChildren();referenceHost.hidden=true;prepared=undefined;rigPreviewHost?.remove();rigPreviewHost=undefined;rigStatus.textContent='';rigControls.hidden=true;retryRequest=undefined;retry.hidden=true;job?.cancel();if(job?.snapshot.status==='preview'||job?.snapshot.status==='stale')job.discard();job=undefined;controller?.abort();controller=undefined;disposePreview?.();disposePreview=undefined;preview.replaceChildren();preview.hidden=true;pending=false;apply.hidden=true;cancel.disabled=true;discard.disabled=true;file.disabled=false;}
+ function labels(){retry.textContent=t('Nächsten Anbieter versuchen','Try next provider');heading.textContent=t('Bild → 3D-Entwurf','Image → 3D draft');label.textContent=t('PNG/JPEG auswählen oder hier ablegen','Choose or drop a PNG/JPEG here');start.textContent=t('3D-Entwurf erzeugen','Generate 3D draft');cancel.textContent=t('Abbrechen','Cancel');discard.textContent=t('Ergebnis verwerfen','Discard result');apply.textContent=t('Als neuen Avatar laden','Load as new avatar');notice.textContent=t('Sendet nur den ausdrücklich ausgewählten und markierten Bildausschnitt an den lokalen TripoSR-Dienst. Ein Entwurf ohne zugesichertes Skelett; keine Promptsteuerung. Das aktuelle Modell bleibt bis zur Übernahme erhalten. Der letzte Modellwechsel lässt sich über „Modellwechsel zurück“ wiederherstellen; Projekte zusätzlich speichern. Automatischer Anbieterwechsel nur vor dem Auftragsstart. Ein weiterer Auftrag benötigt einen ausdrücklichen Klick.','Sends only the explicitly selected and marked image region to the configured local TripoSR service. A draft without a guaranteed skeleton; no prompt control. Your current model remains until acceptance. Use Undo model switch to restore the last project; also save projects to disk. Automatic fallback only before execution. Another job requires an explicit click.');}
  function refresh(){
   labels();const config=readProviderConfig(storage),route=providerRoute(config.config,'generation');
   rigLabel.textContent=t('Optionales erstes Skelett','Optional first skeleton');template.options[0].textContent=t('Zweibeiner · A-Pose','Biped · A-pose');template.options[1].textContent=t('Zweibeiner · Arme unten','Biped · arms down');template.options[2].textContent=t('Vierbeiner · stehend','Quadruped · standing');
@@ -49,19 +53,20 @@ export function mountGenerationPanel(host:HTMLElement,bridge:GenerationHost,lang
   rigControls.hidden=!hasPreview;rig.disabled=template.disabled=alignment.disabled=pending||!hasPreview||!matches(job!.snapshot.target);original.hidden=!prepared;original.disabled=rig.disabled;
   const supported=route.some(profile=>profile.adapter==='custom-generation'&&profile.model==='triposr');
   destination.textContent=route.length?route.map(profile=>`${profile.name} · ${profile.model} · ${profile.endpoint}`).join(' → '):t('Optionen: ein Profil „custom-generation“ mit Modell „triposr“ der Rolle 3D-Generator zuordnen.','Options: assign a custom-generation profile with model triposr to the 3D generator role.');
-  start.disabled=pending||!source||!supported||!bridge.target();chosen.textContent=source?`${source.name} · ${(source.size/1024/1024).toFixed(2)} MiB`:t('Noch kein Bild ausgewählt.','No image selected.');
+  start.disabled=pending||!source||!referenceReady||!supported||!bridge.target();chosen.textContent=source?`${source.name} · ${(source.size/1024/1024).toFixed(2)} MiB`:t('Noch kein Bild ausgewählt.','No image selected.');
   retry.disabled=pending||!retryRequest||!matches(retryRequest.target);
   if(job?.snapshot.status==='preview')apply.disabled=pending||!matches(job.snapshot.target);
  }
- function select(value:File){clear();source=undefined;status.textContent='';if(!['image/png','image/jpeg'].includes(value.type)||!value.size||value.size>20*1024*1024){status.textContent=t('PNG/JPEG bis 20 MiB erforderlich.','PNG/JPEG up to 20 MiB required.');}else source=value;refresh();}
+ function select(value:File){clear();source=undefined;status.textContent='';if(!['image/png','image/jpeg'].includes(value.type)||!value.size||value.size>20*1024*1024){status.textContent=t('PNG/JPEG bis 20 MiB erforderlich.','PNG/JPEG up to 20 MiB required.');}else{source=value;referenceHost.hidden=false;referenceEditor=(deps.referenceEditor??mountImageReferenceEditor)(referenceHost,value,language,()=>{referenceReady=false;refresh();void updateReferenceReadiness();});status.textContent=t('Bitte Bildbereiche markieren, zuordnen und bestätigen.','Mark, assign and confirm image regions before generation.');}refresh();}
+ async function updateReferenceReadiness(){const editor=referenceEditor;if(!editor)return;try{referenceReady=await editor.ready();if(referenceEditor===editor){refresh();if(!referenceReady)status.textContent=t('3D gesperrt: Alle Bereiche müssen bestätigt oder ignoriert und korrekt zugeordnet sein.','3D locked: every region must be confirmed or ignored and correctly assigned.');}}catch{referenceReady=false;refresh();}}
  file.onchange=()=>{const value=file.files?.[0];if(value)select(value);file.value='';};
  panel.ondragover=event=>{event.preventDefault();event.stopPropagation();};panel.ondrop=event=>{event.preventDefault();event.stopPropagation();document.body.classList.remove('dragging');const value=event.dataTransfer?.files[0];if(value)select(value);};
- start.onclick=()=>{
-  if(pending||!source)return;
+ start.onclick=async()=>{
+  if(pending||!source||!referenceEditor)return;
   const config=readProviderConfig(storage).config,target=bridge.target();
   if(!target||!providerRoute(config,'generation').length)return;
   const keys=new Map(config.profiles.map(profile=>[profile.id,getProviderKey(profile)]));
-  void begin(config,target,source,keys);
+  try{const crop=await referenceEditor.selectedCrop();if(!referenceReady||!source)return;void begin(config,target,crop,keys);}catch{status.textContent=t('Kein freigegebener Bildausschnitt. Markierungen und Zuordnungen prüfen.','No approved image crop. Check markings and assignments.');}
  };
  retry.onclick=()=>{if(pending||!retryRequest||!matches(retryRequest.target))return;const request=retryRequest;void begin(request.config,request.target,request.selected,request.keys);};
  async function begin(config:ProviderConfig,target:ProjectRevision,selected:File,keys:Map<string,string>){
