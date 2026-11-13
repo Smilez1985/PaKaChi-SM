@@ -101,7 +101,7 @@ test('resizes rectangles from all handle directions with a four-pixel minimum',(
  const west=resizeImageReferenceRectangle(region,1600,1000,'w',50,0);
  assert.deepEqual(west.geometry,{type:'rectangle',x:150,y:100,width:250,height:300});
  const northEast=resizeImageReferenceRectangle(region,1600,1000,'ne',40,-30);
- assert.deepEqual(northEast.geometry,{type:'rectangle',x:100,y:0,width:340,height:400});
+ assert.deepEqual(northEast.geometry,{type:'rectangle',x:100,y:70,width:340,height:330});
  const min=resizeImageReferenceRectangle(region,1600,1000,'nw',1000,1000);
  assert.deepEqual(min.geometry,{type:'rectangle',x:396,y:396,width:4,height:4});
 });
