@@ -596,7 +596,8 @@ export class StudioEditor {
   }
   save(){
     const value=this.exportProject();
-    const url=URL.createObjectURL(new Blob([JSON.stringify(value)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download=`${this.project.avatar.id}.pakachi.json`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);this.dirty=false;this.render();this.hooks.feedback('Studio-Projekt mit Modell, Kontrollpunkten, Posen und Bewegungen heruntergeladen.');
+    const json=JSON.stringify(value);if(new Blob([json]).size>80*1024*1024)throw new Error('Projekt ist größer als 80 MB. Bitte das Quellbild verkleinern oder ein kleineres Modell verwenden.');
+    const url=URL.createObjectURL(new Blob([json],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download=`${this.project.avatar.id}.pakachi.json`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);this.dirty=false;this.render();this.hooks.feedback('Studio-Projekt mit Modell, Kontrollpunkten, Posen, Bewegungen und unverändertem Quellbild heruntergeladen.');
   }
   dispose(){this.rig.stopSkinPreview();this.automaticCheck?.abort();this.automaticProposal=null;this.playbackTransition.cancel();if(this.proposalOrigin)this.stopMove();this.moveCheck?.abort();this.surfaceCheck?.abort();this.libraryRequest?.abort();this.disposed=true;this.view.dispose();this.rig.dispose();this.host.replaceChildren();}
 }

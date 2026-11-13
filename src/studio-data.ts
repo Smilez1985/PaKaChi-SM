@@ -46,6 +46,12 @@ function validImageReferenceDocument(value:unknown):value is ImageReferenceDocum
  if(!obj(value)||value.format!=='pakachi-image-reference'||value.version!==1||!obj(value.source)||
     !Array.isArray(value.regions)||value.regions.length>2048||!Array.isArray(value.views)||value.views.length>512||
     !Array.isArray(value.forms)||value.forms.length>256||!Array.isArray(value.avatars)||value.avatars.length>128)return false;
+ if(value.source.asset!==undefined){
+  const asset=value.source.asset;
+  if(!obj(asset)||!['image/png','image/jpeg'].includes(String(asset.mediaType))||typeof asset.data!=='string'||asset.data.length===0||asset.data.length>28_000_000||asset.data.length%4!==0||!/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(asset.data))return false;
+  const padding=asset.data.endsWith('==')?2:asset.data.endsWith('=')?1:0;
+  if(asset.data.length/4*3-padding>20*1024*1024)return false;
+ }
  for(const region of value.regions){
   if(!obj(region)||typeof region.id!=='string'||typeof region.label!=='string'||typeof region.kind!=='string'||typeof region.status!=='string'||!obj(region.geometry))return false;
   const geometry=region.geometry;

@@ -63,8 +63,12 @@ export function mountImageReferenceEditor(host:HTMLElement,source:File,language:
  image.src=URL.createObjectURL(source);
  render();
  const documentFor=async():Promise<ImageReferenceDocument>=>{
-  const digest=await crypto.subtle.digest('SHA-256',await source.arrayBuffer());
+  if(!['image/png','image/jpeg'].includes(source.type)||source.size<=0||source.size>20*1024*1024)throw new Error('source-image-limit-exceeded');
+  const bytes=await source.arrayBuffer();
+  const digest=await crypto.subtle.digest('SHA-256',bytes);
   const sha=[...new Uint8Array(digest)].map(v=>v.toString(16).padStart(2,'0')).join('');
+  let binary='';const view=new Uint8Array(bytes);for(let offset=0;offset<view.length;offset+=16384)binary+=String.fromCharCode(...view.subarray(offset,offset+16384));
+  const asset={mediaType:source.type as 'image/png'|'image/jpeg',data:btoa(binary)};
   const avatars=new Map<string,{id:string;label:string;formIds:string[]}>(),forms=new Map<string,{id:string;label:string;viewIds:string[]}>(),views=new Map<string,{id:string;label:string;regionIds:string[]}>();
   entries.forEach(entry=>{if(entry.region.status==='ignored')return;
    const a=entry.avatar.trim(),f=entry.form.trim(),v=entry.view.trim();if(!a||!f||!v)return;
@@ -76,7 +80,7 @@ export function mountImageReferenceEditor(host:HTMLElement,source:File,language:
    if(!forms.get(fid)!.viewIds.includes(vid))forms.get(fid)!.viewIds.push(vid);
    views.get(vid)!.regionIds.push(entry.region.id);
   });
-  return {format:'pakachi-image-reference',version:1,source:{sha256:sha,width,height},regions:entries.map(e=>e.region),views:[...views.values()],forms:[...forms.values()],avatars:[...avatars.values()]};
+  return {format:'pakachi-image-reference',version:1,source:{sha256:sha,width,height,asset},regions:entries.map(e=>e.region),views:[...views.values()],forms:[...forms.values()],avatars:[...avatars.values()]};
  };
  const readiness=async()=>{const doc=await documentFor();return checkImageReferenceReadiness(doc);};
  return {async ready(){if(!entries.length||entries.some(e=>e.region.status==='suggested'))return false;return (await readiness()).ready;},async selectedCrop(){if(!await this.ready())throw new Error('image-reference-not-ready');const entry=entries[active];if(!entry||entry.region.status!=='confirmed')throw new Error('image-reference-region-not-confirmed');return cropImageReferenceRegion(source,entry.region);},async reference(){return documentFor();},dispose(){image.onload=null;URL.revokeObjectURL(image.src);root.remove();}};

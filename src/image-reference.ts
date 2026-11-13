@@ -37,7 +37,7 @@ export interface ImageReferenceAvatar {
 export interface ImageReferenceDocument {
   format:'pakachi-image-reference';
   version:1;
-  source:{sha256:string;width:number;height:number};
+  source:{sha256:string;width:number;height:number;asset?:{mediaType:'image/png'|'image/jpeg';data:string}};
   regions:ImageReferenceRegion[];
   views:ImageReferenceView[];
   forms:ImageReferenceForm[];

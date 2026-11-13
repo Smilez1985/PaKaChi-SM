@@ -6,7 +6,7 @@ import type {ImageReferenceDocument} from '../src/image-reference.ts';
 
 const reference:ImageReferenceDocument={
  format:'pakachi-image-reference',version:1,
- source:{sha256:'b'.repeat(64),width:640,height:480},
+ source:{sha256:'b'.repeat(64),width:640,height:480,asset:{mediaType:'image/png',data:'AQIDBA=='}},
  regions:[{id:'region-front',label:'Front view',kind:'view',status:'confirmed',geometry:{type:'rectangle',x:20,y:30,width:200,height:300}}],
  views:[{id:'view-front',label:'Front',regionIds:['region-front']}],
  forms:[{id:'form-animal',label:'Animal form',viewIds:['view-front']}],
@@ -18,6 +18,18 @@ test('project round-trip preserves source hash, regions and avatar/form/view hie
  const project={...base,imageReference:reference};
  const restored=parseProject(JSON.parse(JSON.stringify(project)));
  assert.deepEqual(restored,project);
+});
+
+test('legacy metadata-only references remain loadable without an embedded source asset',()=>{
+ const metadataOnly=structuredClone({...base,imageReference:reference});delete metadataOnly.imageReference!.source.asset;
+ assert.deepEqual(parseProject(metadataOnly),metadataOnly);
+});
+
+test('project rejects malformed or oversized embedded source assets',()=>{
+ const malformed=structuredClone({...base,imageReference:reference});malformed.imageReference!.source.asset!.data='not-base64';
+ assert.throws(()=>parseProject(malformed),/Bildreferenzdaten/);
+ const oversized=structuredClone({...base,imageReference:reference});oversized.imageReference!.source.asset!.data='A'.repeat(28_000_004);
+ assert.throws(()=>parseProject(oversized),/Bildreferenzdaten/);
 });
 
 test('legacy projects without image-reference metadata remain valid',()=>{
