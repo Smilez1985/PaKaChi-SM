@@ -5,6 +5,7 @@ on:
     paths:
       - '.github/workflows/image-reference-test.yml'
       - 'src/image-reference.ts'
+      - 'src/main.ts'
       - 'src/studio-data.ts'
       - 'src/studio-editor.ts'
       - 'src/image-reference-crop.ts'

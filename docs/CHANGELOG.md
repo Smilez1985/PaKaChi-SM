@@ -14,7 +14,7 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ### Added
 
-- Unverändertes PNG/JPEG-Quellbild (bis 20 MiB) wird zusammen mit SHA-256, Pixelmaßen und Segmentzuordnungen im Studio-Projekt eingebettet. Projekt-Speichern und Model Zoo weisen Gesamtdateien über 80 MiB zurück; ältere Projekte ohne eingebettetes Asset bleiben kompatibel.
+- Unverändertes PNG/JPEG-Quellbild (bis 20 MiB) wird zusammen mit SHA-256, Pixelmaßen und Segmentzuordnungen im Studio-Projekt eingebettet; beim Laden werden Bildsignatur und SHA-256 gegen das Asset geprüft. Projekt-Speichern und Model Zoo weisen Gesamtdateien über 80 MiB zurück; ältere Projekte ohne eingebettetes Asset bleiben kompatibel.
 
 
 Zeitstempel der letzten Änderung: 2026-11-13T18:25:00+01:00
