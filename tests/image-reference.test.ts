@@ -24,7 +24,7 @@ test('supports variable avatar, form and view counts without positional assumpti
  assert.equal(checkImageReferenceReadiness(d).ready,false);
  d.regions.push({id:'r-second',label:'Einzelfigur',kind:'view',status:'confirmed',geometry:{type:'rectangle',x:1200,y:100,width:200,height:300}});
  d.views.push({id:'v-second',label:'Einzelansicht',regionIds:['r-second']});
- d.forms[1].viewIds.push('v-second');
+ d.forms[2].viewIds.push('v-second');
  assert.deepEqual(checkImageReferenceReadiness(d).issues,[]);
 });
 
