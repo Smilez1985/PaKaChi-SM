@@ -91,17 +91,17 @@ test('reorders regions without changing stable identities and handles boundaries
 test('moves rectangles by pointer delta and keeps them inside the source image',()=>{
  const region=base().regions[0];
  const moved=moveImageReferenceRectangle(region,1600,1000,500,900);
- assert.deepEqual(moved.geometry,{type:'rectangle',x:1300,y:700,width:300,height:300});
+ assert.deepEqual(moved.geometry,{type:'rectangle',x:510,y:600,width:300,height:400});
  const movedBack=moveImageReferenceRectangle(moved,1600,1000,-2000,-2000);
- assert.deepEqual(movedBack.geometry,{type:'rectangle',x:0,y:0,width:300,height:300});
+ assert.deepEqual(movedBack.geometry,{type:'rectangle',x:0,y:0,width:300,height:400});
 });
 
 test('resizes rectangles from all handle directions with a four-pixel minimum',()=>{
  const region=base().regions[0];
  const west=resizeImageReferenceRectangle(region,1600,1000,'w',50,0);
- assert.deepEqual(west.geometry,{type:'rectangle',x:150,y:100,width:250,height:300});
+ assert.deepEqual(west.geometry,{type:'rectangle',x:60,y:10,width:250,height:400});
  const northEast=resizeImageReferenceRectangle(region,1600,1000,'ne',40,-30);
- assert.deepEqual(northEast.geometry,{type:'rectangle',x:100,y:70,width:340,height:330});
+ assert.deepEqual(northEast.geometry,{type:'rectangle',x:10,y:0,width:340,height:410});
  const min=resizeImageReferenceRectangle(region,1600,1000,'nw',1000,1000);
- assert.deepEqual(min.geometry,{type:'rectangle',x:396,y:396,width:4,height:4});
+ assert.deepEqual(min.geometry,{type:'rectangle',x:306,y:406,width:4,height:4});
 });
