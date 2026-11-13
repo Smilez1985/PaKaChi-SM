@@ -27,8 +27,8 @@ Diese Roadmap enthält offene Umsetzung und ausstehende Abnahme. Erledigte Ände
 
 ## Bildgetriebene 2D-zu-3D-Rekonstruktion (verbindlich)
 
-- [x] **Referenzmetadaten im Studio-Projekt:** Bestätigte Bildregionen, Quellhash, Pixelmaße und Avatar-/Form-/Ansichtszuordnungen werden beim Übernehmen in die Studio-Projektdatei eingebettet und beim Laden validiert. Das unveränderte Originalbild selbst ist noch nicht eingebettet und bleibt ein separater offener Schritt.
-- [ ] **Originalbild als Quellasset sichern:** unverändertes Bild, SHA-256, Pixelmaße, Orientierung/Farbprofil soweit vorhanden und Versionsbezug zusammen mit den Metadaten dauerhaft verfügbar machen.
+- [x] **Referenzmetadaten im Studio-Projekt:** Bestätigte Bildregionen, Quellhash, Pixelmaße und Avatar-/Form-/Ansichtszuordnungen werden beim Übernehmen in die Studio-Projektdatei eingebettet und beim Laden validiert.
+- [x] **Originalbild als Quellasset sichern:** PNG/JPEG-Quelldateien bis 20 MiB werden bytegetreu als Base64-Asset mit Medientyp, SHA-256 und Pixelmaßen zusammen mit den Metadaten eingebettet. Alte Projekte ohne Asset bleiben ladbar; das Speichern und der lokale Model Zoo begrenzen die gesamte Projektdatei auf 80 MiB.
 - [ ] **Kompositbild segmentieren:** Im bestätigten PaKaChi-Bild linke Figur als Tierform (animal) und rechte Figur als Arbeitsform (humanoid) getrennt ausschneiden/maskieren. Crop-Rechtecke und Segmentmasken müssen auf Originalpixel zurückführbar und manuell korrigierbar sein; Originalbild niemals überschreiben.
 - [ ] **Bildbeobachtungen erfassen:** Silhouetten, Konturen, Landmarken, Proportionen, Farben, Fell-/Materialgrenzen und charakteristische Details pro Form als pixelgebundene Evidenz mit Konfidenz speichern.
 - [ ] **Bildkonditionierte Rekonstruktion umsetzen:** Das 2D-Bild bzw. daraus abgeleitete Masken/Konturen/Depth-/Feature-Maps müssen den Generator tatsächlich steuern. Rein textbasierte Neu-Erfindung ist für das finale Original-PaKaChi unzulässig; Prompts dürfen Bildbeobachtungen nicht überschreiben.
