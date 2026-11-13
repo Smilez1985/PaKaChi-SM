@@ -11,7 +11,7 @@ export function mountImageReferenceEditor(host:HTMLElement,source:File,language:
  canvas.className='image-reference-canvas';canvas.setAttribute('aria-label','Source image marking surface');
  feedback.setAttribute('role','status');selectedLabel.textContent=de()?'Ausschnitt für 3D auswählen':'Select region for 3D';
  root.append(heading,help,canvas,list,selectedLabel,selected,feedback);host.replaceChildren(root);
- let width=0,height=0,entries:Entry[]=[],active=0,drag:{x:number;y:number}|undefined,disposed=false,seq=0;
+ let width=0,height=0,entries:Entry[]=[],active=0,drag:{x:number;y:number}|undefined,seq=0;
  const t=(a:string,b:string)=>de()?a:b;
  const image=new Image();
  const draw=()=>{
@@ -49,7 +49,7 @@ export function mountImageReferenceEditor(host:HTMLElement,source:File,language:
   const digest=await crypto.subtle.digest('SHA-256',await source.arrayBuffer());
   const sha=[...new Uint8Array(digest)].map(v=>v.toString(16).padStart(2,'0')).join('');
   const avatars=new Map<string,{id:string;label:string;formIds:string[]}>(),forms=new Map<string,{id:string;label:string;viewIds:string[]}>(),views=new Map<string,{id:string;label:string;regionIds:string[]}>();
-  entries.forEach((entry,i)=>{if(entry.region.status==='ignored')return;
+  entries.forEach(entry=>{if(entry.region.status==='ignored')return;
    const a=entry.avatar.trim(),f=entry.form.trim(),v=entry.view.trim();if(!a||!f||!v)return;
    const aid='avatar-'+a.toLowerCase().replace(/[^a-z0-9]+/g,'-'),fid=aid+'-form-'+f.toLowerCase().replace(/[^a-z0-9]+/g,'-'),vid=fid+'-view-'+v.toLowerCase().replace(/[^a-z0-9]+/g,'-');
    if(!avatars.has(aid))avatars.set(aid,{id:aid,label:a,formIds:[]});
@@ -62,5 +62,5 @@ export function mountImageReferenceEditor(host:HTMLElement,source:File,language:
   return {format:'pakachi-image-reference',version:1,source:{sha256:sha,width,height},regions:entries.map(e=>e.region),views:[...views.values()],forms:[...forms.values()],avatars:[...avatars.values()]};
  };
  const readiness=async()=>{const doc=await documentFor();return checkImageReferenceReadiness(doc);};
- return {async ready(){if(!entries.length||entries.some(e=>e.region.status==='suggested'))return false;return (await readiness()).ready;},async selectedCrop(){if(!await this.ready())throw new Error('image-reference-not-ready');const entry=entries[active];if(!entry||entry.region.status!=='confirmed')throw new Error('image-reference-region-not-confirmed');return cropImageReferenceRegion(source,entry.region);},async reference(){return documentFor();},dispose(){disposed=true;image.onload=null;URL.revokeObjectURL(image.src);root.remove();}};
+ return {async ready(){if(!entries.length||entries.some(e=>e.region.status==='suggested'))return false;return (await readiness()).ready;},async selectedCrop(){if(!await this.ready())throw new Error('image-reference-not-ready');const entry=entries[active];if(!entry||entry.region.status!=='confirmed')throw new Error('image-reference-region-not-confirmed');return cropImageReferenceRegion(source,entry.region);},async reference(){return documentFor();},dispose(){image.onload=null;URL.revokeObjectURL(image.src);root.remove();}};
 }
