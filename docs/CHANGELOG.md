@@ -12,9 +12,11 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
-Zeitstempel der letzten Änderung: 2026-11-13T14:20:00+01:00 (Europe/Berlin).
+Zeitstempel der letzten Änderung: 2026-11-13T14:35:00+01:00 (Europe/Berlin).
 
 ### Added
+
+- Generische Bildsegmentierung und Avatar-Zuordnung ergänzt: variable Anzahl von Avataren/Formen/Ansichten, automatische Regionsvorschläge mit Konfidenz, interaktives Zeichnen/Beschriften beliebig vieler Bildrahmen oder Masken, explizite Gruppierung und Reihenfolge/Relationen, Rückfrage bei Mehrdeutigkeit sowie Schutz bestätigter manueller Zuordnungen. Die bisherige feste Annahme „linke Tierform/rechte Arbeitsform“ gilt nur für die konkret bestätigte PaKaChi-Referenz, nicht als allgemeine Importregel.
 
 - Verbindliche bildgetriebene 2D-zu-3D-Rekonstruktion spezifiziert: Das unveränderte Referenzbild ist die primäre Quelle; das zusammengesetzte PaKaChi-Bild wird in linke Tierform und rechte Arbeitsform segmentiert, mit pixelgenauen Quellbezügen und getrennten Rekonstruktionsprojekten. Die 3D-Erzeugung muss tatsächlich bildkonditioniert sein; rein textbasierte Neu-Erfindung ist für das finale Original-PaKaChi ausgeschlossen. Fehlende Tiefe/Verdecktes wird als inferiert gekennzeichnet. Iterative, kamera-ausgerichtete Rendervergleiche prüfen Pixel-/Farbabweichungen, Silhouette, Konturen, Landmarken und lokale Detailregionen; ein globaler Durchschnitt darf lokale Designabweichungen nicht kaschieren.
 

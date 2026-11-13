@@ -13,6 +13,16 @@ Diese Roadmap enthält offene Umsetzung und ausstehende Abnahme. Erledigte Ände
 - **Reihenfolge:** Referenzmerkmale erfassen → beide Originalformen separat modellieren/rekonstruieren → Design-Silhouette und Materialien visuell abnehmen → beide Formen riggen und Bewegungen prüfen → erst danach Morph-Topologie und reversible Transformation umsetzen.
 
 
+## Generische Bildsegmentierung und Avatar-Zuordnung
+
+- [ ] **Variable Anzahl unterstützen:** Import darf keine feste Anzahl von Avataren oder Formen voraussetzen. Ein Bild kann eine oder mehrere Figuren, mehrere Formen desselben Avatars, mehrere Ansichten oder Detailausschnitte enthalten.
+- [ ] **Automatische Erkennung mit Konfidenz:** Figuren-/Formregionen, Ansichten und mögliche Beziehungen vorschlagen; unsichere oder überlappende Fälle ausdrücklich zur Klärung vorlegen.
+- [ ] **Interaktiver Markierungseditor:** Benutzer kann beliebig viele Rahmen/Polygone/Masken direkt im Bild zeichnen, anpassen, teilen und löschen. Alle Koordinaten bleiben auf Originalpixel und Quellhash bezogen.
+- [ ] **Beschriften und gruppieren:** Jede Region benennen und als Avatar, Form, Ansicht, Detailreferenz oder Hilfsregion klassifizieren; mehrere Regionen einem Avatar und mehrere Formen/Ansichten der passenden Gruppe zuordnen.
+- [ ] **Reihenfolge und Beziehungen verknüpfen:** Benutzer kann Regionen explizit in der gewünschten Reihenfolge verknüpfen und Relationstypen wie gleiche Avatar-Identität, andere Form, weitere Ansicht oder Detailausschnitt festlegen. Reihenfolge/Zuordnung niemals allein aus Bildposition ableiten.
+- [ ] **Bestätigung und Korrektur:** Bei Mehrdeutigkeit nachfragen. Nutzerkorrekturen haben Vorrang, bleiben versioniert und werden durch erneute automatische Erkennung nicht überschrieben.
+- [ ] **Getrennte Rekonstruktionsziele:** Pro Avatar und pro Form/Ansicht ein nachvollziehbar verknüpftes Ziel erzeugen. Keine Vermischung mehrerer Avatare oder unabhängiger Formen.
+
 ## Bildgetriebene 2D-zu-3D-Rekonstruktion (verbindlich)
 
 - [ ] **Originalbild als Quellasset sichern:** unverändertes Bild, SHA-256, Pixelmaße, Orientierung/Farbprofil soweit vorhanden und Versionsbezug speichern.
@@ -25,7 +35,7 @@ Diese Roadmap enthält offene Umsetzung und ausstehende Abnahme. Erledigte Ände
 
 ## Übergabe und nächster Schritt
 
-**Übergabe aktualisiert:** 2026-11-13T14:20:00+01:00 (Europe/Berlin).
+**Übergabe aktualisiert:** 2026-11-13T14:35:00+01:00 (Europe/Berlin).
 
 - **Main-Meilenstein:** Version 0.101.0 wurde nach erfolgreicher PR-Prüfung #122 über [PR #2](https://github.com/Smilez1985/PaKaChi-SM/pull/2) am 2026-11-11T13:25:26Z nach `main` übernommen; Main-Commit `5d2733c1b9ed8aeabb9b73024d591f82b76e91a9`. CI #122 für den eingefrorenen Kandidaten `39eee8854a44f64e2e16d1d146726506998ccbd4` ist vollständig erfolgreich: **512/512 Node-Tests**, Produktionsbuild, **49/49 Browserfälle**, 0 Flaky-/Skip-Fälle und drei Importmessungen (3.404,6 / 3.035,8 / 3.167,9 ms; Median 3.167,9 ms). Ein separater main-only Nachlauf wird hier nicht behauptet. [Prüfnachweis](PRUEFUNG.md#version-01010).
 - **Arbeitsbranch:** `develop`. Neuester Diagnose-Meilenstein: geometrische Naht-/Nachbarschaftsklassifikation in `surface-intersections.ts` (Commits `f693042` und `d1c8485`). Die Änderung bleibt ausschließlich auf `develop`; `main` ist unverändert.

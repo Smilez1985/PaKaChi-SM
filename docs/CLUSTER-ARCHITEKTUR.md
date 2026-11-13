@@ -25,6 +25,21 @@ Die beiden vorhandenen GLB-Modelle bleiben als zusätzliche technische Testmodel
 
 Die 2D-Referenz ist die **primäre Quelle und geometrische Gestaltungsgrundlage**. Eine Textbeschreibung darf Metadaten, semantische Benennung oder Prüfhinweise liefern, aber niemals das Bild ersetzen und niemals eine freie Neugenerierung des Charakters autorisieren. Das Ziel ist Rekonstruktion plus vorsichtige Ergänzung fehlender räumlicher Information – keine textbasierte Neuinterpretation.
 
+### 1a. Generische Avatar-/Form-Erkennung und interaktive Zuordnung
+
+Die Anzahl und Anordnung der Figuren oder Formen ist **nicht fest vorgegeben**. Ein Quellbild kann keine, eine oder mehrere erkennbare Figuren enthalten; eine Figur kann in mehreren Ansichten oder getrennten Bildregionen dargestellt sein. Das System darf weder zwei Formen noch genau einen Avatar voraussetzen.
+
+- Die Bildanalyse schlägt mögliche Figuren-/Formregionen samt Begrenzungen, Segmentmasken und Konfidenz vor. Sie darf eine unsichere Erkennung nicht als Tatsache festschreiben.
+- Bei niedriger Konfidenz, überlappenden Figuren, mehrdeutigen Ansichten oder unklaren Zusammengehörigkeiten wechselt der Import in einen Klärungsdialog, statt automatisch zu generieren.
+- Der Benutzer kann direkt auf dem Bild beliebig viele Rahmen/Polygone/Masken zeichnen, verschieben, skalieren, ergänzen, teilen oder löschen. Jede Region wird mit Quellbild-Pixelkoordinaten gespeichert und bleibt auf das unveränderte Original zurückführbar.
+- Jede markierte Region erhält eine vom Benutzer bestätigte Bedeutung, z. B. Avatar, Form, Ansicht, Detailreferenz oder Hilfsregion. Freie Beschriftungen sind möglich; bekannte Rollen (z. B. Tierform/Arbeitsform) können zusätzlich strukturiert zugeordnet werden. Unbekannte Bezeichnungen werden nicht automatisch in bekannte Formen umgedeutet.
+- Mehrere Regionen können zu einem Avatar gruppiert werden; ein Avatar kann mehrere Formen enthalten; eine Form kann durch mehrere Ansichten/Referenzregionen beschrieben werden. Mehrere Avatare auf einem Bild bleiben getrennte Avatar-Gruppen.
+- Der Benutzer kann die Zusammengehörigkeit und Reihenfolge explizit verknüpfen, z. B. Avatar A → Tierform → Seitenansicht oder Avatar A → Arbeitsform. Die Reihenfolge ist eine explizite, versionierte Relation und wird niemals aus der räumlichen Position im Bild oder aus Dateinamen geraten.
+- Beziehungen wie „gleicher Avatar“, „andere Form desselben Avatars“, „weitere Ansicht derselben Form“, „Detailausschnitt von“ und „gehört nicht dazu“ müssen getrennt modelliert werden. Dadurch wird verhindert, dass z. B. ein zweiter Avatar oder ein Detailausschnitt irrtümlich als zusätzliche Körperregion behandelt wird.
+- Automatische Vorschläge bleiben bis zur Bestätigung als Vorschläge markiert. Manuelle Zuordnungen, Rahmen und Reihenfolgen haben Vorrang und werden bei erneuter Analyse nicht überschrieben. Jede Änderung ist rückgängig zu machen.
+
+Der Import darf erst in die 3D-Rekonstruktion wechseln, wenn alle relevanten Regionen entweder vom Benutzer bestätigt oder bei ausreichend hoher Konfidenz nach der konfigurierten Bestätigungsregel akzeptiert wurden. Bei mehreren Avataren entstehen getrennte Rekonstruktionsziele; bei mehreren Formen eines Avatars entstehen getrennte Formziele mit gemeinsamer Avatar-Verknüpfung.
+
 ### 1. Originalquelle sichern und zusammengesetzte Referenz trennen
 
 - Das unveränderte Originalbild wird als read-only Quellasset mit SHA-256, Pixelmaßen, Farbprofil/Orientierung (soweit vorhanden) und Herkunft gespeichert.
