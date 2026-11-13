@@ -5,9 +5,9 @@ on:
     paths:
       - '.github/workflows/image-reference-test.yml'
       - 'src/image-reference.ts'
-      - 'src/image-reference-crop.ts'
+      - 'src/image-reference-crop.ts'\n      - 'src/image-reference-editor.ts'\n      - 'src/generation-panel.ts'\n      - 'src/style.css'
       - 'tests/image-reference.test.ts'
-      - 'tests/image-reference-crop.test.ts'
+      - 'tests/image-reference-crop.test.ts'\n      - 'tests/generation-panel.test.ts'
       - 'tsconfig.json'
       - 'package.json'
       - 'package-lock.json'
@@ -34,5 +34,5 @@ jobs:
         run: node --test tests/image-reference.test.ts
       - name: Test source-region crop planning
         run: node --test tests/image-reference-crop.test.ts
-      - name: Type-check project
+      - name: Test generation panel gating\n        run: node --test tests/generation-panel.test.ts\n      - name: Type-check project
         run: npx tsc --noEmit
