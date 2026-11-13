@@ -1,0 +1,34 @@
+name: PaKaChi image reference model regression
+on:
+  push:
+    branches: [develop]
+    paths:
+      - '.github/workflows/image-reference-test.yml'
+      - 'src/image-reference.ts'
+      - 'tests/image-reference.test.ts'
+      - 'tsconfig.json'
+      - 'package.json'
+      - 'package-lock.json'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: image-reference-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  image-reference:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: Test image reference hierarchy and generation gate
+        run: node --test tests/image-reference.test.ts
+      - name: Type-check project
+        run: npx tsc --noEmit
