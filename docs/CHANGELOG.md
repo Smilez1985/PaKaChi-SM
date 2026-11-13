@@ -12,9 +12,11 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
-Zeitstempel der letzten Änderung: 2026-11-13T15:05:00+01:00 (Europe/Berlin).
+Zeitstempel der letzten Änderung: 2026-11-13T15:31:00+01:00 (Europe/Berlin).
 
 ### Added
+
+- Integrierter manueller Bildregionseditor im Avatar-Studio: beliebig viele rechteckige Bildbereiche zeichnen, benennen, Avatar/Form/Ansicht zuordnen, einzeln bestätigen oder ignorieren und einen freigegebenen Ausschnitt gezielt auswählen. Die lokale TripoSR-Generierung bleibt gesperrt, bis die Referenzprüfung erfolgreich ist; übertragen wird nur der ausgewählte Crop, nicht das vollständige Kompositbild. Referenzhash und Pixelmaße werden im Editor-Dokument erzeugt. Die aktuelle Editorfassung ist sitzungsintern; automatische Erkennung, Polygon-/Maskenbearbeitung, Verschieben/Skalieren, UI-Reihenfolge und dauerhafte Verknüpfung mit dem erzeugten Avatar sind noch offen. Fokussierte CI #43452568076 erfolgreich: 6 Referenzmodelltests, 3 Crop-Planungstests, 12 Generator-Paneltests und TypeScript.
 
 - Erstes generisches TypeScript-Datenmodell für Bildreferenz-Import ergänzt: quellgebundene Pixelregionen (Rechteck/Polygon), variable Avatar-/Form-/Ansichts-Hierarchie mit stabilen IDs und expliziter Reihenfolge, Validierung von Geometrie und eindeutigen Zuordnungen sowie Freigabeprüfung. Vorgeschlagene Regionen müssen bestätigt oder ignoriert werden; bestätigte Regionen müssen einer Ansicht zugeordnet sein. Fokussierte Tests und ein eigener CI-Workflow wurden ergänzt.
 
