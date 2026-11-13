@@ -14,7 +14,7 @@ import {parseModel,disposeModel} from '../src/viewer.ts';
 import type {prepareDraftRig} from '../src/draft-rig.ts';
 const bytes=Uint8Array.from(glb());
 async function until(check:()=>boolean){for(let i=0;i<100;i++){if(check())return;await new Promise(r=>setTimeout(r,5));}assert.fail('UI did not settle');}
-function fixture(t:TestContext,run?:ProviderAdapter['run'],fallback=false,prepareRig?:typeof prepareDraftRig){
+function fixture(t:TestContext,run?:ProviderAdapter['run'],fallback=false,prepareRig?:typeof prepareDraftRig,referenceReady=true){
  const w=new Window();Object.assign(globalThis,{window:w,document:w.document});
  const host=document.createElement('div');document.body.append(host);
  const profile={id:'gen',name:'Local',adapter:'custom-generation' as const,endpoint:'http://127.0.0.1:8766',model:'triposr'};
@@ -23,7 +23,7 @@ function fixture(t:TestContext,run?:ProviderAdapter['run'],fallback=false,prepar
  let target={session:'one',revision:1},calls=0,adoptions=0,cleanups=0,previewCalls=0,adopted:Uint8Array|undefined;
  const panel=mountGenerationPanel(host,{target:()=>target,adopt:async(output,expected,valid)=>{await beforeAdopt?.();if(!valid()||expected.session!==target.session||expected.revision!==target.revision)return false;adopted=output;adoptions++;return true;}},()=> 'de',w.localStorage,{
   adapter:(key,p)=>{assert.equal(key,(p.id==='backup'?'y':'x').repeat(48));return {id:'custom-generation',probe:async()=>({model:'triposr',capabilities:['image-to-3d']}),run:async request=>{calls++;return run?run(request):{kind:'model',bytes};}};
-  },validate:validateGeneration,prepareRig,preview:async()=>{previewCalls++;return ()=>{cleanups++;};},
+  },validate:validateGeneration,prepareRig,referenceEditor:(_host,_source,_language)=>({ready:async()=>referenceReady,selectedCrop:async()=>new File([new Uint8Array([1,2,3])],'region.png',{type:'image/png'}),reference:async()=>({} as never),dispose(){}}),preview:async()=>{previewCalls++;return ()=>{cleanups++;};},
  });
  t.after(()=>{panel.dispose();w.happyDOM.abort();});
  const button=(id:string)=>host.querySelector<HTMLButtonElement>('#generation-'+id)!;
@@ -81,4 +81,8 @@ test('cancellation during local skeleton preparation ignores late output and nev
  const f=fixture(t,undefined,false,async(_bytes,template,signal)=>{observed=signal;return new Promise(resolve=>{complete=r=>resolve({...r,report:{...r.report,template}});});});
  f.choose();f.button('start').click();await until(()=>!f.button('apply').hidden);f.button('rig').click();await until(()=>!!observed);f.button('cancel').click();assert.ok(observed!.aborted);
  complete({bytes,report:{template:'biped',bones:21,meshes:1,vertices:3,method:'proportional-template',review:'required'}});await new Promise(r=>setTimeout(r,15));assert.equal(f.adoptions,0);assert.equal(f.previewCalls,1);assert.ok(f.button('apply').hidden);
+});
+
+test('generation stays locked until every image region is explicitly assigned and confirmed',async t=>{
+ const f=fixture(t,undefined,false,undefined,false);f.choose();await new Promise(r=>setTimeout(r,10));assert.ok(f.button('start').disabled);f.button('start').click();assert.equal(f.calls,0);assert.equal(f.adoptions,0);
 });
