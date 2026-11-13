@@ -4,8 +4,10 @@ on:
     branches: [develop]
     paths:
       - '.github/workflows/image-reference-test.yml'
-      - 'src/image-reference.ts'\n      - 'src/image-reference-crop.ts'
-      - 'tests/image-reference.test.ts'\n      - 'tests/image-reference-crop.test.ts'
+      - 'src/image-reference.ts'
+      - 'src/image-reference-crop.ts'
+      - 'tests/image-reference.test.ts'
+      - 'tests/image-reference-crop.test.ts'
       - 'tsconfig.json'
       - 'package.json'
       - 'package-lock.json'
@@ -30,5 +32,7 @@ jobs:
       - run: npm ci
       - name: Test image reference hierarchy and generation gate
         run: node --test tests/image-reference.test.ts
-      - name: Test source-region crop planning\n        run: node --test tests/image-reference-crop.test.ts\n      - name: Type-check project
+      - name: Test source-region crop planning
+        run: node --test tests/image-reference-crop.test.ts
+      - name: Type-check project
         run: npx tsc --noEmit
