@@ -12,9 +12,11 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
-Zeitstempel der letzten Änderung: 2026-11-13T14:05:00+01:00 (Europe/Berlin).
+Zeitstempel der letzten Änderung: 2026-11-13T14:20:00+01:00 (Europe/Berlin).
 
 ### Added
+
+- Verbindliche bildgetriebene 2D-zu-3D-Rekonstruktion spezifiziert: Das unveränderte Referenzbild ist die primäre Quelle; das zusammengesetzte PaKaChi-Bild wird in linke Tierform und rechte Arbeitsform segmentiert, mit pixelgenauen Quellbezügen und getrennten Rekonstruktionsprojekten. Die 3D-Erzeugung muss tatsächlich bildkonditioniert sein; rein textbasierte Neu-Erfindung ist für das finale Original-PaKaChi ausgeschlossen. Fehlende Tiefe/Verdecktes wird als inferiert gekennzeichnet. Iterative, kamera-ausgerichtete Rendervergleiche prüfen Pixel-/Farbabweichungen, Silhouette, Konturen, Landmarken und lokale Detailregionen; ein globaler Durchschnitt darf lokale Designabweichungen nicht kaschieren.
 
 - Verbindliche Original-PaKaChi-Zielreferenz nach ausdrücklicher Nutzerbestätigung dokumentiert: Der finale Avatar muss dem am 2026-11-13 gezeigten gemeinsamen Referenzbild entsprechen und sowohl die dunkle, fellbedeckte vierbeinige Tierform als auch die fellbedeckte humanoide Arbeitsform mit gemeinsamer Charakteridentität enthalten. Die bestehenden Tier-/Humanoid-GLBs bleiben unverändert als zusätzliche technische Testmodelle erhalten; sie sind ausdrücklich nicht automatisch das finale Original-PaKaChi. Technische Modell-/CI-Gültigkeit ersetzt keine visuelle Designabnahme. Beide finalen Formen werden separat aufgebaut und abgenommen; Morphing folgt danach.
 

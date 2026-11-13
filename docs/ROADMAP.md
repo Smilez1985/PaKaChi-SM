@@ -12,9 +12,20 @@ Diese Roadmap enthält offene Umsetzung und ausstehende Abnahme. Erledigte Ände
 - **Separates Qualitätsziel:** Original-PaKaChi wird als eigener Modellkandidat mit eigenem Herkunfts-/Versionsnachweis und visueller Abnahme geführt. Technische Tests der Testmodelle ersetzen keine visuelle Prüfung des Original-Avatars.
 - **Reihenfolge:** Referenzmerkmale erfassen → beide Originalformen separat modellieren/rekonstruieren → Design-Silhouette und Materialien visuell abnehmen → beide Formen riggen und Bewegungen prüfen → erst danach Morph-Topologie und reversible Transformation umsetzen.
 
+
+## Bildgetriebene 2D-zu-3D-Rekonstruktion (verbindlich)
+
+- [ ] **Originalbild als Quellasset sichern:** unverändertes Bild, SHA-256, Pixelmaße, Orientierung/Farbprofil soweit vorhanden und Versionsbezug speichern.
+- [ ] **Kompositbild segmentieren:** Im bestätigten PaKaChi-Bild linke Figur als Tierform (animal) und rechte Figur als Arbeitsform (humanoid) getrennt ausschneiden/maskieren. Crop-Rechtecke und Segmentmasken müssen auf Originalpixel zurückführbar und manuell korrigierbar sein; Originalbild niemals überschreiben.
+- [ ] **Bildbeobachtungen erfassen:** Silhouetten, Konturen, Landmarken, Proportionen, Farben, Fell-/Materialgrenzen und charakteristische Details pro Form als pixelgebundene Evidenz mit Konfidenz speichern.
+- [ ] **Bildkonditionierte Rekonstruktion umsetzen:** Das 2D-Bild bzw. daraus abgeleitete Masken/Konturen/Depth-/Feature-Maps müssen den Generator tatsächlich steuern. Rein textbasierte Neu-Erfindung ist für das finale Original-PaKaChi unzulässig; Prompts dürfen Bildbeobachtungen nicht überschreiben.
+- [ ] **Fehlende 3D-Information kontrolliert ergänzen:** Tiefe, Rückseiten und Verdecktes als inferiert kennzeichnen; Unsicherheit und Methode speichern. Bei mehrdeutigen Bereichen zusätzliche Ansichten oder Nutzerentscheidung statt freier Erfindung verlangen.
+- [ ] **Iterative Rückkopplung:** 3D-Kandidat aus Referenzkamera rendern, ausrichten und gegen Originalregion vergleichen; Pixel-/Farbfehler, Silhouette, Konturen, Landmarken und regionale Fehlerkarten (insbesondere Gesicht, Schweif, Pfoten/Hände, Brustkern und Gelenke) getrennt auswerten. Hochauflösende Detail-/Pixelprüfung ist Teil der Abnahme.
+- [ ] **Design-Drift verhindern:** Jede Form braucht einen versionierten Vergleichsbericht mit Quellhash, Crop-/Maskenversion, Kameramodell, Metriken, Fehlerkarten und offenen inferierten Bereichen. Erst nach visueller Nutzerabnahme darf sie als finales Original-PaKaChi gelten.
+
 ## Übergabe und nächster Schritt
 
-**Übergabe aktualisiert:** 2026-11-13T14:05:00+01:00 (Europe/Berlin).
+**Übergabe aktualisiert:** 2026-11-13T14:20:00+01:00 (Europe/Berlin).
 
 - **Main-Meilenstein:** Version 0.101.0 wurde nach erfolgreicher PR-Prüfung #122 über [PR #2](https://github.com/Smilez1985/PaKaChi-SM/pull/2) am 2026-11-11T13:25:26Z nach `main` übernommen; Main-Commit `5d2733c1b9ed8aeabb9b73024d591f82b76e91a9`. CI #122 für den eingefrorenen Kandidaten `39eee8854a44f64e2e16d1d146726506998ccbd4` ist vollständig erfolgreich: **512/512 Node-Tests**, Produktionsbuild, **49/49 Browserfälle**, 0 Flaky-/Skip-Fälle und drei Importmessungen (3.404,6 / 3.035,8 / 3.167,9 ms; Median 3.167,9 ms). Ein separater main-only Nachlauf wird hier nicht behauptet. [Prüfnachweis](PRUEFUNG.md#version-01010).
 - **Arbeitsbranch:** `develop`. Neuester Diagnose-Meilenstein: geometrische Naht-/Nachbarschaftsklassifikation in `surface-intersections.ts` (Commits `f693042` und `d1c8485`). Die Änderung bleibt ausschließlich auf `develop`; `main` ist unverändert.

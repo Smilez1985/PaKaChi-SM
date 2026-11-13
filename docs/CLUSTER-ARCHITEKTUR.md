@@ -20,6 +20,51 @@ Die beiden vorhandenen GLB-Modelle bleiben als zusätzliche technische Testmodel
 
 **Abnahmeregel:** Technische Gültigkeit (GLB lädt, Meshes sind inventarisiert, Tests bestehen) ist keine visuelle Designfreigabe. Das finale Modell darf erst als Original-PaKaChi gelten, wenn Tierform und Arbeitsform jeweils gegen die bestätigte Referenz visuell geprüft wurden. Gemeinsames Schema und wiederverwendbare Pipeline bedeuten nicht identische Anatomie oder identische Mesh-Struktur. Morphing folgt erst nach der separaten Modell- und Rig-Abnahme beider Formen.
 
+
+## Verbindlicher 2D-zu-3D-Grundsatz: bildgetriebene Rekonstruktion
+
+Die 2D-Referenz ist die **primäre Quelle und geometrische Gestaltungsgrundlage**. Eine Textbeschreibung darf Metadaten, semantische Benennung oder Prüfhinweise liefern, aber niemals das Bild ersetzen und niemals eine freie Neugenerierung des Charakters autorisieren. Das Ziel ist Rekonstruktion plus vorsichtige Ergänzung fehlender räumlicher Information – keine textbasierte Neuinterpretation.
+
+### 1. Originalquelle sichern und zusammengesetzte Referenz trennen
+
+- Das unveränderte Originalbild wird als read-only Quellasset mit SHA-256, Pixelmaßen, Farbprofil/Orientierung (soweit vorhanden) und Herkunft gespeichert.
+- Enthält eine Vorlage mehrere Formen, werden vor jeder Rekonstruktion getrennte Form-Assets daraus angelegt. Im bestätigten PaKaChi-Beispiel ist die linke Figur die Tierform (animal), die rechte Figur die Arbeitsform (humanoid).
+- Die Trennung erfolgt über nachvollziehbare Regions-/Segmentmasken und begrenzende Ausschnitte. Crop-Rechtecke, Masken, Quellkoordinaten und Formzuordnung werden gespeichert; das Originalbild bleibt als gemeinsame unveränderte Quelle erhalten. Die beiden Formen dürfen nicht versehentlich zu einem einzigen 3D-Körper verschmolzen werden.
+- Bei überlappenden Figuren, Schweifen oder Schatten müssen Segmentgrenzen geprüft und bei Bedarf manuell korrigierbar sein. Keine stillschweigende automatische Zuordnung unsicherer Pixel.
+- Jede Form erhält ein eigenes Rekonstruktionsprojekt, behält aber einen Verweis auf das gemeinsame Quellbild und dessen exakte Pixelregion.
+
+### 2. Bildbeobachtungen statt Prompt-Neugenerierung
+
+Aus dem jeweiligen Form-Ausschnitt werden sichtbare Evidenzen extrahiert und auf Quellpixel zurückgeführt: Silhouette, Konturen, Landmarken, Proportionen, Farb- und Materialregionen, Fellgrenzen, Augen, Ohren, Schnauze, Schweif, Brustkern, Gelenke und technische Details. Beobachtungen speichern mindestens Quellbildhash, Pixel-/normalisierte Koordinaten, Maske/Region, semantisches Label, Konfidenz und Bearbeitungsherkunft.
+
+Ein Textprompt darf diese Messungen nicht überschreiben. Ein Generator muss die Bilddaten bzw. daraus abgeleitete Bildmerkmale tatsächlich als Conditioning verwenden (z. B. Bild-/Masken-/Tiefen-/Konturbedingungen oder direkte geometrische Projektion). Ein rein textgesteuerter Text-zu-Bild- oder Text-zu-3D-Lauf ist für das finale Original-PaKaChi kein zulässiger Rekonstruktionsschritt.
+
+### 3. Fehlende Dimensionen kontrolliert ergänzen
+
+Die 3D-Rekonstruktion ergänzt Tiefe, Rückseiten, Volumen und verdeckte Geometrie, die eine einzelne 2D-Aufnahme nicht direkt enthält. Dabei gilt:
+- Sichtbare, belegte Bildmerkmale sind harte bzw. priorisierte Randbedingungen und dürfen nicht zugunsten einer plausibleren, aber anderen Figur verändert werden.
+- Nicht sichtbare Bereiche werden als inferiert markiert, mit Methode und Konfidenz. Sie dürfen nicht als direkt aus dem Bild gemessene Fakten ausgegeben werden.
+- Wo mehrere 3D-Lösungen mit dem Bild vereinbar sind, wird die Unsicherheit dokumentiert; zusätzliche Ansichten oder Nutzerentscheidung haben Vorrang vor freier Erfindung.
+- Symmetrie, Anatomie und physikalische Plausibilität sind Hilfsbedingungen, keine Erlaubnis, sichtbare Vorlage-Merkmale zu verändern.
+- Originalbild, Masken, Beobachtungen und vorherige Rekonstruktionsstände bleiben unverändert versioniert. Jede 3D-Änderung ist auf die Evidenz zurückführbar, die sie begründet.
+
+### 4. Iterativer Render-/Bildvergleich bis auf Pixelebene
+
+Der Rekonstruktionsprozess ist eine geschlossene Schleife: 3D-Kandidat erzeugen/ändern → aus der passenden Referenzkamera rendern → Render und Originalregion geometrisch ausrichten → Abweichungen messen → lokale Korrekturen vorschlagen → erneut rendern und vergleichen. Die Kamera-/Projektionsannahmen müssen dokumentiert sein; ohne passende Kamerapose ist ein Pixelvergleich nicht aussagekräftig.
+
+Der Vergleich muss mehrstufig und lokal sein:
+- Pixelmetriken (z. B. MAE/RMSE und robuste Farbabweichung) auf ausgerichteten, gleich skalierten Bildregionen;
+- Silhouetten-/Maskenüberlappung und Konturabstand;
+- Landmarken- und Proportionsabweichungen;
+- struktur-/perzeptionsbasierte Vergleiche als Ergänzung, nicht als Ersatz für Pixel- und Konturprüfung;
+- separate Fehlerkarten pro Region (Gesicht, Ohren, Pfoten/Hände, Rumpf, Schweif, Brustkern, Gelenke) und Auflösung, einschließlich hochauflösender Detailausschnitte.
+
+Hintergrund, Schatten, Beleuchtung, Fellmikrostruktur und unbekannte Kamera-/Materialparameter können Pixelwerte beeinflussen. Deshalb müssen Bildausrichtung, Maske, Farb-/Lichtnormalisierung und Metrik getrennt ausgewiesen werden. Ein niedriger globaler Durchschnitt darf keine lokal gravierende Abweichung im Gesicht oder an charakteristischen Merkmalen verdecken. Pixelgenaue Prüfung ist ausdrücklich erwünscht, aber nur zusammen mit Registrierung, Maskierung und regionaler Fehleranalyse sinnvoll.
+
+### 5. Abnahme und Schutz vor Design-Drift
+
+Ein Kandidat wird nicht allein durch erfolgreiche Generierung, Mesh-Inventar oder Rigging freigegeben. Er benötigt für jede Form einen nachvollziehbaren Vergleichsbericht mit Quellhash, Crop-/Maskenversion, Kameraannahmen, Metriken, Fehlerkarten und offenen inferierten Bereichen. Sichtbare Schlüsselmerkmale erhalten eigene Mindestprüfungen. Nutzerfreigabe ist erforderlich, bevor eine Rekonstruktion als finales Original-PaKaChi markiert wird. Textbeschreibung und LLM-Vorschläge dürfen nur Korrekturvorschläge erzeugen; sie dürfen den Referenzpixeln nicht stillschweigend widersprechen.
+
 ## 1. Vier getrennte Identitäten
 
 ### Anatomie
