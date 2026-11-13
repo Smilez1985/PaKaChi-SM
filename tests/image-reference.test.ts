@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {checkImageReferenceReadiness,validateImageReferenceDocument} from '../src/image-reference.ts';
+import {checkImageReferenceReadiness,validateImageReferenceDocument,editImageReferenceRectangle,reorderImageReferenceRegions} from '../src/image-reference.ts';
 import type {ImageReferenceDocument} from '../src/image-reference.ts';
 
 const base=():ImageReferenceDocument=>({
@@ -66,4 +66,23 @@ test('keeps incomplete empty draft valid but not ready for reconstruction',()=>{
  const d=base();d.avatars=[];d.forms=[];d.views=[];d.regions=[];
  assert.deepEqual(validateImageReferenceDocument(d),[]);
  assert.equal(checkImageReferenceReadiness(d).ready,false);
+});
+
+
+test('edits rectangle geometry in source pixels and clamps it to image bounds',()=>{
+ const region=base().regions[0];
+ const moved=editImageReferenceRectangle(region,1600,1000,{x:1550,y:950,width:200,height:100});
+ assert.deepEqual(moved.geometry,{type:'rectangle',x:1400,y:900,width:200,height:100});
+ const resized=editImageReferenceRectangle(moved,1600,1000,{width:2,height:0});
+ assert.deepEqual(resized.geometry,{type:'rectangle',x:1400,y:900,width:4,height:4});
+ assert.throws(()=>editImageReferenceRectangle(base().regions[1],1600,1000,{x:1}),/rectangle-edit-requires-rectangle/);
+});
+
+test('reorders regions without changing stable identities and handles boundaries',()=>{
+ const regions=base().regions;
+ const moved=reorderImageReferenceRegions(regions,'r-animal-side',-1);
+ assert.deepEqual(moved.map(region=>region.id),['r-animal-side','r-animal-front','r-work']);
+ assert.deepEqual(regions.map(region=>region.id),['r-animal-front','r-animal-side','r-work']);
+ assert.deepEqual(reorderImageReferenceRegions(moved,'r-animal-side',-1).map(region=>region.id),['r-animal-side','r-animal-front','r-work']);
+ assert.throws(()=>reorderImageReferenceRegions(regions,'missing',1),/unknown-image-region/);
 });

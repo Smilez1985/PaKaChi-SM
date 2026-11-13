@@ -135,3 +135,29 @@ export function checkImageReferenceReadiness(value:ImageReferenceDocument):Image
   }
   return {ready:issues.length===0,issues};
 }
+
+
+export interface RectangleEdit {x?:number;y?:number;width?:number;height?:number}
+
+/** Apply source-pixel rectangle edits while preserving a minimum visible area and image bounds. */
+export function editImageReferenceRectangle(region:ImageReferenceRegion,sourceWidth:number,sourceHeight:number,edit:RectangleEdit):ImageReferenceRegion {
+  if(region.geometry.type!=='rectangle')throw new Error('rectangle-edit-requires-rectangle');
+  if(!Number.isSafeInteger(sourceWidth)||!Number.isSafeInteger(sourceHeight)||sourceWidth<=0||sourceHeight<=0)throw new Error('invalid-source-size');
+  const current=region.geometry,min=4;
+  const width=Math.max(min,Math.min(sourceWidth,edit.width??current.width));
+  const height=Math.max(min,Math.min(sourceHeight,edit.height??current.height));
+  const x=Math.max(0,Math.min(sourceWidth-width,edit.x??current.x));
+  const y=Math.max(0,Math.min(sourceHeight-height,edit.y??current.y));
+  return {...region,geometry:{type:'rectangle',x,y,width,height}};
+}
+
+/** Reorder a region without changing its stable ID or any grouping references. */
+export function reorderImageReferenceRegions<T extends {id:string}>(regions:T[],regionId:string,offset:-1|1):T[] {
+  const index=regions.findIndex(region=>region.id===regionId);
+  if(index<0)throw new Error('unknown-image-region');
+  const target=index+offset;
+  if(target<0||target>=regions.length)return regions.slice();
+  const reordered=regions.slice();
+  [reordered[index],reordered[target]]=[reordered[target]!,reordered[index]!];
+  return reordered;
+}

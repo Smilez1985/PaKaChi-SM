@@ -1,5 +1,5 @@
 import type {ImageReferenceDocument,ImageReferenceRegion} from './image-reference.ts';
-import {checkImageReferenceReadiness} from './image-reference.ts';
+import {checkImageReferenceReadiness,editImageReferenceRectangle,reorderImageReferenceRegions} from './image-reference.ts';
 import {cropImageReferenceRegion} from './image-reference-crop.ts';
 
 interface Entry {region:ImageReferenceRegion;avatar:string;form:string;view:string;use:boolean}
@@ -30,6 +30,16 @@ export function mountImageReferenceEditor(host:HTMLElement,source:File,language:
    const confirm=document.createElement('label'),confirmed=document.createElement('input');confirmed.type='checkbox';confirmed.checked=entry.region.status==='confirmed';confirmed.disabled=entry.region.status==='ignored';confirm.append(confirmed,document.createTextNode(t(' Markierung geprüft und bestätigen',' Confirm reviewed region')));confirmed.onchange=()=>{entry.region.status=confirmed.checked?'confirmed':'suggested';render();changed();};card.append(confirm);
    const ignore=document.createElement('label'),ignored=document.createElement('input');ignored.type='checkbox';ignored.checked=entry.region.status==='ignored';ignore.append(ignored,document.createTextNode(t(' Diesen Bereich ignorieren',' Ignore this region')));ignored.onchange=()=>{entry.region.status=ignored.checked?'ignored':'suggested';entry.use=false;render();changed();};card.append(ignore);
    const use=document.createElement('label'),useBox=document.createElement('input');useBox.type='radio';useBox.name='image-reference-selected';useBox.checked=active===i;useBox.disabled=entry.region.status!=='confirmed';use.append(useBox,document.createTextNode(t(' Für 3D verwenden',' Use for 3D')));useBox.onchange=()=>{active=i;render();changed();};card.append(use);
+   if(entry.region.geometry.type==='rectangle'){
+    const geometry=entry.region.geometry;
+    const geometryLabel=document.createElement('small');geometryLabel.textContent=t('Quellpixel (X, Y, Breite, Höhe)','Source pixels (X, Y, width, height)');card.append(geometryLabel);
+    const geometryFields:[keyof typeof geometry,string][]=[['x','X'],['y','Y'],['width',t('Breite','Width')],['height',t('Höhe','Height')]];
+    geometryFields.forEach(([key,label])=>{const l=document.createElement('label'),input=document.createElement('input');l.textContent=label;input.type='number';input.min=key==='width'||key==='height'?'4':'0';input.step='1';input.value=String(geometry[key]);input.addEventListener('change',()=>{const value=Number(input.value);if(!Number.isFinite(value)){input.value=String(geometry[key]);return;}entry.region=editImageReferenceRectangle(entry.region,width,height,{[key]:Math.round(value)});render();draw();changed();});l.append(input);card.append(l);});
+   }
+   const order=document.createElement('div');order.className='image-reference-order';
+   const up=document.createElement('button');up.type='button';up.textContent=t('Nach oben','Move up');up.disabled=i===0;up.onclick=()=>{entries=reorderImageReferenceRegions(entries,entry.region.id,-1);active=Math.max(0,entries.findIndex(item=>item.region.id===entry.region.id));render();draw();changed();};
+   const down=document.createElement('button');down.type='button';down.textContent=t('Nach unten','Move down');down.disabled=i===entries.length-1;down.onclick=()=>{entries=reorderImageReferenceRegions(entries,entry.region.id,1);active=Math.max(0,entries.findIndex(item=>item.region.id===entry.region.id));render();draw();changed();};
+   order.append(up,down);card.append(order);
    const remove=document.createElement('button');remove.type='button';remove.textContent=t('Markierung löschen','Delete region');remove.onclick=()=>{entries.splice(i,1);active=Math.max(0,Math.min(active,entries.length-1));render();draw();changed();};card.append(remove);list.append(card);
    const option=document.createElement('option');option.value=entry.region.id;option.textContent=`${i+1}. ${entry.region.label} · ${entry.avatar} / ${entry.form} / ${entry.view}`;option.selected=i===active;selected.append(option);
   });
