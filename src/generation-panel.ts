@@ -70,7 +70,7 @@ export function mountGenerationPanel(host:HTMLElement,bridge:GenerationHost,lang
  };
  retry.onclick=()=>{if(pending||!retryRequest||!matches(retryRequest.target))return;const request=retryRequest;void begin(request.config,request.target,request.selected,request.keys);};
  async function begin(config:ProviderConfig,target:ProjectRevision,selected:File,keys:Map<string,string>){
-  clear();const current=sequence;pending=true;controller=new AbortController();const signal=controller.signal;
+  clear(true);const current=sequence;pending=true;controller=new AbortController();const signal=controller.signal;
   const tokenFor=(profile:Readonly<ProviderProfile>)=>keys.get(profile.id)??'';
   const registry=new ProviderRegistry();
   registry.register(deps.adapter?{
@@ -98,8 +98,8 @@ export function mountGenerationPanel(host:HTMLElement,bridge:GenerationHost,lang
   }catch{if(current===sequence){job?.cancel();disposePreview?.();disposePreview=undefined;preview.hidden=true;status.textContent=t('Generierung oder Vorschau fehlgeschlagen. Dienst, Token, Bild und Laufzeit prüfen; vorhandenes Modell bleibt erhalten.','Generation or preview failed. Check service, token, image and runtime; current model is preserved.');if(retryRequest)status.textContent+=' '+t('Der vorherige Dienst könnte noch arbeiten. „Nächsten Anbieter versuchen“ sendet einen neuen Auftrag.','The previous service may still be running. “Try next provider” sends a new job.');}}
   finally{if(current===sequence){pending=false;cancel.disabled=true;file.disabled=false;refresh();}}
  };
- cancel.onclick=()=>{clear();status.textContent=t('Lokal abgebrochen; ein vollständiger Stopp des Dienstes ist nicht bestätigt.','Cancelled locally; complete service shutdown is not confirmed.');refresh();};
- discard.onclick=()=>{clear();status.textContent=t('Entwurf verworfen.','Draft discarded.');refresh();};
+ cancel.onclick=()=>{clear(true);status.textContent=t('Lokal abgebrochen; ein vollständiger Stopp des Dienstes ist nicht bestätigt.','Cancelled locally; complete service shutdown is not confirmed.');refresh();};
+ discard.onclick=()=>{clear(true);status.textContent=t('Entwurf verworfen.','Draft discarded.');refresh();};
  async function changeRig(withRig:boolean){
   if(pending||job?.snapshot.status!=='preview'||!matches(job.snapshot.target)||!controller)return;
   const output=job.preview();if(output.kind!=='model')return;
@@ -124,7 +124,7 @@ export function mountGenerationPanel(host:HTMLElement,bridge:GenerationHost,lang
   if(pending||job?.snapshot.status!=='preview')return;const target=job.snapshot.target;
   if(!matches(target)){apply.disabled=true;status.textContent=t('Projekt geändert: Übernahme gesperrt.','Project changed: import blocked.');return;}
   const output=job.preview();if(output.kind!=='model')return;const current=sequence;pending=true;refresh();apply.disabled=true;start.disabled=true;
-  try{const accepted=await bridge.adopt(prepared?.bytes??output.bytes,target,()=>!disposed&&sequence===current);if(current!==sequence)return;if(accepted){const wasRigged=!!prepared;clear();status.textContent=wasRigged?t('Beweglicher Entwurf geladen. Gelenke in „Gelenke bearbeiten“ korrigieren und Beugungen in „Figur bewegen“ prüfen.','Rigged draft loaded. Adjust joints in Edit joints and inspect bends in Move figure.'):t('Neuer Avatar geladen. Rigging und visuelle Qualitätsprüfung bleiben erforderlich.','New avatar loaded. Rigging and visual quality review are still required.');}else status.textContent=t('Nicht übernommen: abgebrochen oder Projekt inzwischen geändert.','Not applied: cancelled or project changed.');}
+  try{const accepted=await bridge.adopt(prepared?.bytes??output.bytes,target,()=>!disposed&&sequence===current);if(current!==sequence)return;if(accepted){const wasRigged=!!prepared;clear(true);status.textContent=wasRigged?t('Beweglicher Entwurf geladen. Gelenke in „Gelenke bearbeiten“ korrigieren und Beugungen in „Figur bewegen“ prüfen.','Rigged draft loaded. Adjust joints in Edit joints and inspect bends in Move figure.'):t('Neuer Avatar geladen. Rigging und visuelle Qualitätsprüfung bleiben erforderlich.','New avatar loaded. Rigging and visual quality review are still required.');}else status.textContent=t('Nicht übernommen: abgebrochen oder Projekt inzwischen geändert.','Not applied: cancelled or project changed.');}
   catch{if(current===sequence)status.textContent=t('Übernahme fehlgeschlagen.','Import failed.');}
   finally{if(current===sequence)pending=false;refresh();}
  };
