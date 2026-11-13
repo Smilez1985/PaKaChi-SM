@@ -56,7 +56,7 @@ test('rejects single-view, low-parallax and inconsistent multi-view evidence',()
   assert.match(bad.rejected[0].reason,/residual/);
 });
 
-test('rejects malformed calibration, duplicate views and singular mesh transforms',()=>{
+test('rejects intersections behind a calibrated camera',()=>{\n  const point=new Vector3(0,0,5);\n  const facingAway=camera('backwards',new Vector3(0,0,6),new Vector3(0,0,7));\n  const facingPoint=camera('front',new Vector3(-1,0,0),point);\n  const report=triangulateLandmarkSeeds([\n    observation('eye','head',point,facingAway),\n    observation('eye','head',point,facingPoint),\n  ],new Matrix4().toArray());\n  assert.equal(report.seeds.length,0);\n  assert.match(report.rejected[0].reason,/behind at least one camera/);\n});\n\ntest('rejects malformed calibration, duplicate views and singular mesh transforms',()=>{
   const point=new Vector3(0,0,3);
   const a=camera('front',new Vector3(-1,0,0),point);
   const b=camera('side',new Vector3(1,0,0),point);

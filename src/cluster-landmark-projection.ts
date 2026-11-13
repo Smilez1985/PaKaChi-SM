@@ -187,7 +187,7 @@ export function triangulateLandmarkSeeds(
       report.rejected.push({ landmarkId, reason: 'Camera rays do not provide a stable triangulation.' });
       continue;
     }
-    if (result.parallax < minParallax) {
+    // A ray intersection behind any camera is geometrically invalid even when\n    // the infinite lines intersect with a small residual. Enforce cheirality.\n    const behindCamera = rays.some(ray =>\n      result.point.clone().sub(ray.origin).dot(ray.direction) <= 1e-8,\n    );\n    if (behindCamera) {\n      report.rejected.push({ landmarkId, reason: 'Triangulated landmark lies behind at least one camera.' });\n      continue;\n    }\n    if (result.parallax < minParallax) {
       report.rejected.push({ landmarkId, reason: 'Camera baseline is too small for reliable depth.' });
       continue;
     }

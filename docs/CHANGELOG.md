@@ -12,7 +12,7 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
-Zeitstempel der letzten Änderung: 2026-11-12T21:00:00+01:00 (Europe/Berlin).
+Zeitstempel der letzten Änderung: 2026-11-13T01:20:00+01:00 (Europe/Berlin).
 
 ### Added
 
@@ -41,7 +41,7 @@ Zeitstempel der letzten Änderung: 2026-11-12T21:00:00+01:00 (Europe/Berlin).
 - Originalformen-Lauf #6 bestätigt die regenerierten Tier- und Arbeitsform-GLBs ohne Nullflächen in allen 28 starren Finger-/Zehen-`_shell`-Teilmodellen je Form. Die Messberichte weisen zugleich aus, dass bei den acht statischen Hüft-/Knieproben je Form nur `PaKaChi_body` messbar war; 91 bzw. 89 Teilmodelle bleiben coplanar/touching-bedingt unmessbar. Keine vollständige Kollisionsfreigabe.
 
 
-### Fixed
+### Fixed\n\n- Die 2D-Landmarken-Triangulation verwirft jetzt Schnittpunkte hinter einer oder mehreren Kameras (Cheirality-Prüfung). Ein kleiner Strahlabstand allein reicht nicht als geometrischer Nachweis; ein Regressionstest deckt rückwärts gerichtete Kameras ab.\n\n### Fixed
 
 - Fehlerhaft escaptes Template-Literal im Cluster-Manifestvalidator korrigiert. Der Tunnel-Archivtest übergibt seine Testplattform explizit; Symlink-Sicherheitsfälle überspringen nur den Symlink-Teil, wenn Windows die Erstellung ohne erhöhte Rechte verweigert. Die übrigen Traversal-/Ausgabeprüfungen bleiben aktiv. Noch nicht lokal erneut ausgeführt.
 
