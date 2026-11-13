@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {createHash} from 'node:crypto';
 import {parseModel,disposeModel} from '../src/viewer.ts';
-import {collectClusterMeshInventory,createClusterManifestFromGLTF} from '../src/cluster-inventory.ts';
+import {collectClusterMeshInventory,createClusterManifestFromGLTF,resolveClusterMeshBindings} from '../src/cluster-inventory.ts';
 import {validateClusterManifest} from '../src/cluster-architecture.ts';
 
 if(typeof globalThis.ProgressEvent==='undefined'){
@@ -25,6 +25,16 @@ test('real PaKaChi animal and work GLBs produce complete source-bound cluster in
    gltf.scene.updateMatrixWorld(true);
    const inventory=collectClusterMeshInventory(gltf,sourceHash);
    const manifest=createClusterManifestFromGLTF(gltf,sourceHash,item.form,'2026-11-12T00:00:00.000Z');
+   const bindings=resolveClusterMeshBindings(gltf,inventory);
+   assert.equal(bindings.length,inventory.totals.meshes,`${item.form}: every inventory mesh must resolve`);
+   assert.deepEqual(new Set(bindings.map(binding=>binding.meshId)),new Set(inventory.meshes.map(mesh=>mesh.id)));
+   for(const binding of bindings){
+    const source=inventory.meshes.find(mesh=>mesh.id===binding.meshId);
+    assert.ok(source);
+    assert.equal(binding.positions.length/3,source.vertexCount);
+    assert.equal((binding.indices?.length??binding.positions.length/3)/3,source.triangleCount);
+    assert.ok(binding.meshWorld.every(Number.isFinite));
+   }
    assert.ok(inventory.totals.meshes>0,`${item.form}: expected real meshes`);
    assert.ok(inventory.totals.vertices>=3,`${item.form}: expected real vertices`);
    assert.ok(inventory.totals.triangles>0,`${item.form}: expected real triangles`);

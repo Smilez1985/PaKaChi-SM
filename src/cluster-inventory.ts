@@ -12,6 +12,19 @@ export interface ClusterMeshInventory {
   totals: { meshes: number; vertices: number; triangles: number };
 }
 
+/** A verified bridge from one inventory ID to its exact parsed GLTF primitive. */
+export interface ClusterMeshBinding {
+  meshId: string;
+  mesh: THREE.Mesh;
+  geometry: THREE.BufferGeometry;
+  /** Base geometry positions in mesh-local coordinates, expanded to XYZ triples. */
+  positions: Float64Array;
+  /** Triangle indices; null means the source geometry is non-indexed. */
+  indices: Uint32Array | null;
+  /** Exact mesh world matrix, column-major, at binding time. */
+  meshWorld: number[];
+}
+
 function isGLTFDocument(value: THREE.Object3D | GLTFDocumentLike): value is GLTFDocumentLike {
   return 'scene' in value && value.scene instanceof THREE.Object3D;
 }
@@ -117,6 +130,93 @@ export function collectClusterMeshInventory(
     meshes,
     totals: { meshes: meshes.length, vertices, triangles },
   };
+}
+
+
+/**
+ * Resolves every inventory ID to its exact parsed GLTF mesh primitive.
+ * Source associations are used whenever available; the fallback identity is
+ * only valid for the same unassociated scene traversal used to build inventory.
+ * Returned arrays are safe copies and source geometry is never mutated.
+ */
+export function resolveClusterMeshBindings(
+  input: THREE.Object3D | GLTFDocumentLike,
+  inventory: ClusterMeshInventory,
+): ClusterMeshBinding[] {
+  if (inventory.schemaVersion !== 1 || !/^[a-f0-9]{64}$/.test(inventory.sourceAssetSha256)) {
+    throw new Error('A valid source-bound cluster inventory is required.');
+  }
+  const expected = new Map(inventory.meshes.map(item => [item.id, item]));
+  if (expected.size !== inventory.meshes.length) throw new Error('Inventory contains duplicate mesh IDs.');
+  const root = isGLTFDocument(input) ? input.scene : input;
+  const parser = isGLTFDocument(input) ? input.parser : undefined;
+  root.updateMatrixWorld(true);
+  const bindings: ClusterMeshBinding[] = [];
+  const seen = new Set<string>();
+  let traversalIndex = 0;
+
+  root.traverse(node => {
+    if (!(node as THREE.Object3D & { isMesh?: boolean }).isMesh) return;
+    const mesh = node as THREE.Mesh;
+    const meshAssociation = associationOf(parser, mesh);
+    let nodeObject: THREE.Object3D | null = mesh;
+    let nodeAssociation: GLTFAssociationLike = {};
+    while (nodeObject && nodeObject !== root.parent) {
+      const candidate = associationOf(parser, nodeObject);
+      if (candidate.nodes !== undefined) {
+        nodeAssociation = candidate;
+        break;
+      }
+      nodeObject = nodeObject.parent;
+    }
+    const sourceMeshIndex = meshAssociation.meshes ?? traversalIndex;
+    const primitiveIndex = meshAssociation.primitives ?? 0;
+    const sourceNodeIndex = nodeAssociation.nodes;
+    const stableNodeKey = sourceNodeIndex === undefined ? `walk${traversalIndex}` : `node${sourceNodeIndex}`;
+    const meshId = `mesh-${inventory.sourceAssetSha256}-${stableNodeKey}-mesh${sourceMeshIndex}-primitive${primitiveIndex}`;
+    traversalIndex++;
+
+    const expectedMesh = expected.get(meshId);
+    if (!expectedMesh) throw new Error(`Parsed GLTF contains a mesh not present in the inventory: ${meshId}`);
+    if (seen.has(meshId)) throw new Error(`Parsed GLTF resolves a duplicate mesh ID: ${meshId}`);
+    if ((mesh as THREE.Mesh & { isSkinnedMesh?: boolean }).isSkinnedMesh || mesh.geometry.morphAttributes.position?.length) {
+      throw new Error(`Mesh "${mesh.name || meshId}" is deformed by skinning or morph targets; bind a rest-pose geometry explicitly.`);
+    }
+    const position = mesh.geometry.getAttribute('position');
+    const elementCount = mesh.geometry.index?.count ?? position?.count ?? 0;
+    if (!position || position.count !== expectedMesh.vertexCount || elementCount % 3 !== 0 || elementCount / 3 !== expectedMesh.triangleCount) {
+      throw new Error(`Parsed geometry no longer matches inventory counts for ${meshId}.`);
+    }
+    const positions = new Float64Array(position.count * 3);
+    for (let i = 0; i < position.count; i++) {
+      const x = position.getX(i), y = position.getY(i), z = position.getZ(i);
+      if (![x, y, z].every(Number.isFinite)) throw new Error(`Mesh ${meshId} has non-finite vertex data.`);
+      positions[i * 3] = x;
+      positions[i * 3 + 1] = y;
+      positions[i * 3 + 2] = z;
+    }
+    let indices: Uint32Array | null = null;
+    if (mesh.geometry.index) {
+      const source = mesh.geometry.index;
+      indices = new Uint32Array(source.count);
+      for (let i = 0; i < source.count; i++) {
+        const index = source.getX(i);
+        if (!Number.isSafeInteger(index) || index < 0 || index >= position.count) {
+          throw new Error(`Mesh ${meshId} contains an out-of-range vertex index.`);
+        }
+        indices[i] = index;
+      }
+    }
+    const meshWorld = mesh.matrixWorld.toArray();
+    if (!meshWorld.every(Number.isFinite)) throw new Error(`Mesh ${meshId} has an invalid world transform.`);
+    bindings.push({ meshId, mesh, geometry: mesh.geometry, positions, indices, meshWorld });
+    seen.add(meshId);
+  });
+  if (seen.size !== expected.size) {
+    const missing = [...expected.keys()].filter(id => !seen.has(id));
+    throw new Error(`Parsed GLTF is missing inventory mesh binding(s): ${missing.slice(0, 5).join(', ')}`);
+  }
+  return bindings;
 }
 
 /**

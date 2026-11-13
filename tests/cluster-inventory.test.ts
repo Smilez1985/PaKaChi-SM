@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import * as THREE from 'three';
 import {collectClusterMeshInventory,createUnclassifiedClusterManifest,createClusterManifestFromGLTF} from '../src/cluster-inventory.ts';
 import {validateClusterManifest} from '../src/cluster-architecture.ts';
+import {resolveClusterMeshBindings} from '../src/cluster-inventory.ts';
 
 const hash='a'.repeat(64);
 
@@ -105,4 +106,42 @@ test('parsed GLTF entry point combines provenance inventory and unresolved cover
   assert.equal(manifest.meshes.length,1);
   assert.equal(manifest.assignments.length,1);
   assert.deepEqual(validateClusterManifest(manifest),[]);
+});
+
+test('resolves GLTF source IDs to exact local buffers and world transforms',()=>{
+  const scene=new THREE.Group();
+  const sourceNode=new THREE.Group();sourceNode.name='PakachiTorso';sourceNode.position.set(4,2,-1);scene.add(sourceNode);
+  const geometry=new THREE.BufferGeometry();
+  geometry.setAttribute('position',new THREE.Float32BufferAttribute([0,0,0,1,0,0,0,1,0],3));
+  geometry.setIndex([0,1,2]);
+  const mesh=new THREE.Mesh(geometry,new THREE.MeshBasicMaterial());sourceNode.add(mesh);
+  const associations=new Map<THREE.Object3D,unknown>();
+  associations.set(sourceNode,{nodes:4});associations.set(mesh,{meshes:2,primitives:0});
+  const gltf={scene,parser:{associations}};
+  const inventory=collectClusterMeshInventory(gltf,hash);
+  const bindings=resolveClusterMeshBindings(gltf,inventory);
+  assert.equal(bindings.length,1);
+  assert.equal(bindings[0].meshId,inventory.meshes[0].id);
+  assert.equal(bindings[0].mesh,mesh);
+  assert.equal(bindings[0].geometry,geometry);
+  assert.deepEqual(Array.from(bindings[0].positions),[0,0,0,1,0,0,0,1,0]);
+  assert.deepEqual(Array.from(bindings[0].indices??[]),[0,1,2]);
+  assert.deepEqual(bindings[0].meshWorld,mesh.matrixWorld.toArray());
+  assert.equal(bindings[0].meshWorld[12],4);
+});
+
+test('rejects mismatched source IDs and deformed geometry rather than guessing',()=>{
+  const make=()=>{
+    const scene=new THREE.Group(),geometry=new THREE.BufferGeometry();
+    geometry.setAttribute('position',new THREE.Float32BufferAttribute([0,0,0,1,0,0,0,1,0],3));
+    const mesh=new THREE.Mesh(geometry,new THREE.MeshBasicMaterial());scene.add(mesh);
+    const associations=new Map<THREE.Object3D,unknown>();associations.set(mesh,{meshes:9,primitives:0});
+    return {scene,parser:{associations},mesh};
+  };
+  const first=make(),inventory=collectClusterMeshInventory(first,hash);
+  const changed=make();
+  assert.throws(()=>resolveClusterMeshBindings(changed,inventory),/not present in the inventory/);
+  const skinned=make();
+  (skinned.mesh as THREE.Mesh & {isSkinnedMesh:boolean}).isSkinnedMesh=true;
+  assert.throws(()=>resolveClusterMeshBindings(skinned,inventory),/skinning or morph targets/);
 });
