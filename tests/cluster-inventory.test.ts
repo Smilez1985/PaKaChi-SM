@@ -140,6 +140,7 @@ test('rejects mismatched source IDs and deformed geometry rather than guessing',
   };
   const first=make(),inventory=collectClusterMeshInventory(first,hash);
   const changed=make();
+  changed.parser.associations.set(changed.mesh,{meshes:10,primitives:0});
   assert.throws(()=>resolveClusterMeshBindings(changed,inventory),/not present in the inventory/);
   const skinned=make();
   (skinned.mesh as THREE.Mesh & {isSkinnedMesh:boolean}).isSkinnedMesh=true;
