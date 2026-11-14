@@ -4,7 +4,7 @@ import {cropImageReferenceRegion} from './image-reference-crop.ts';
 
 interface Entry {region:ImageReferenceRegion;avatar:string;form:string;view:string;use:boolean}
 const makeId=(prefix:string,n:number)=>`${prefix}-${n}`;
-export function mountImageReferenceEditor(host:HTMLElement,source:File,language:()=> 'de'|'en',changed:()=>void){
+export function mountImageReferenceEditor(host:HTMLElement,source:File,language:()=> 'de'|'en',changed:()=>void,initial?:ImageReferenceDocument){
  const de=()=>language()==='de';
  const root=document.createElement('section');root.className='image-reference-editor';
  const heading=document.createElement('h3'),help=document.createElement('p'),canvas=document.createElement('canvas'),list=document.createElement('div'),selectedLabel=document.createElement('label'),selected=document.createElement('select'),feedback=document.createElement('p');
@@ -13,6 +13,10 @@ export function mountImageReferenceEditor(host:HTMLElement,source:File,language:
  root.append(heading,help,canvas,list,selectedLabel,selected,feedback);host.replaceChildren(root);
  type PointerDrag={mode:'draw';x:number;y:number;endX:number;endY:number}|{mode:'move'|'resize';id:string;x:number;y:number;original:{x:number;y:number;width:number;height:number};handle?:import('./image-reference.ts').RectangleHandle};
  let width=0,height=0,entries:Entry[]=[],active=0,drag:PointerDrag|undefined,seq=0;
+ const original=initial?structuredClone(initial):undefined;
+ const regionOwner=new Map<string,{avatar:string;form:string;view:string}>();
+ if(original){for(const avatar of original.avatars)for(const formId of avatar.formIds){const form=original.forms.find(item=>item.id===formId);if(!form)continue;for(const viewId of form.viewIds){const view=original.views.find(item=>item.id===viewId);if(!view)continue;for(const regionId of view.regionIds)regionOwner.set(regionId,{avatar:avatar.label,form:form.label,view:view.label});}}}
+ if(original){entries=original.regions.map(region=>{const owner=regionOwner.get(region.id),match=region.id.match(/^region-(\\d+)$/);if(match)seq=Math.max(seq,Number(match[1]));return {region:structuredClone(region),avatar:owner?.avatar??original.avatars[0]?.label??'Avatar 1',form:owner?.form??original.forms[0]?.label??'Tierform',view:owner?.view??region.label,use:region.status==='confirmed'};});}
  const t=(a:string,b:string)=>de()?a:b;
  const image=new Image();
  const draw=()=>{
@@ -72,7 +76,9 @@ export function mountImageReferenceEditor(host:HTMLElement,source:File,language:
   const avatars=new Map<string,{id:string;label:string;formIds:string[]}>(),forms=new Map<string,{id:string;label:string;viewIds:string[]}>(),views=new Map<string,{id:string;label:string;regionIds:string[]}>();
   entries.forEach(entry=>{if(entry.region.status==='ignored')return;
    const a=entry.avatar.trim(),f=entry.form.trim(),v=entry.view.trim();if(!a||!f||!v)return;
-   const aid='avatar-'+a.toLowerCase().replace(/[^a-z0-9]+/g,'-'),fid=aid+'-form-'+f.toLowerCase().replace(/[^a-z0-9]+/g,'-'),vid=fid+'-view-'+v.toLowerCase().replace(/[^a-z0-9]+/g,'-');
+   const priorAvatar=original?.avatars.find(item=>item.label===a),aid=priorAvatar?.id??'avatar-'+a.toLowerCase().replace(/[^a-z0-9]+/g,'-');
+   const priorForm=original?.forms.find(item=>item.label===f&&(!priorAvatar||priorAvatar.formIds.includes(item.id))),fid=priorForm?.id??aid+'-form-'+f.toLowerCase().replace(/[^a-z0-9]+/g,'-');
+   const priorView=original?.views.find(item=>item.label===v&&(!priorForm||priorForm.viewIds.includes(item.id))),vid=priorView?.id??fid+'-view-'+v.toLowerCase().replace(/[^a-z0-9]+/g,'-');
    if(!avatars.has(aid))avatars.set(aid,{id:aid,label:a,formIds:[]});
    if(!forms.has(fid))forms.set(fid,{id:fid,label:f,viewIds:[]});
    if(!views.has(vid))views.set(vid,{id:vid,label:v,regionIds:[]});

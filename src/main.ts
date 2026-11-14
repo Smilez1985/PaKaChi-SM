@@ -84,6 +84,7 @@ let catalog: Avatar[] = [];
 let zooEntries:ZooEntry[]=[];
 let zooPending=false;
 let zooPanel:ReturnType<typeof mountLocalZoo>|undefined;
+let generationPanel:ReturnType<typeof mountGenerationPanel>|undefined;
 function choices(){return catalogChoices(catalog,zooEntries,loaded,original);}
 function selectAvatar(id:string){
  if(zooPending||busy)return;
@@ -312,6 +313,7 @@ async function loadAvatar(avatar?: Avatar, file?: File, project?: StudioProject,
     if(token!==request||!valid()){prepared.dispose();return false;}
     const previous={viewer,editor,playback,loaded,original,modelEpoch};
     prepared.viewer.onFrame=viewer.onFrame;
+    if(project?.imageReference)generationPanel?.restoreReference(project.imageReference);
     const restoreBinding=machine.checkpointBinding();
     const restoreUI=checkpointElements(['viewport','studio-editor','moves','capabilities','move-count','avatar-cards','avatar-select','avatar-count','avatar-name','avatar-description','model-type','player-controls','studio-controls','legacy-controls','pause','timeline','activity','model-undo','model-redo','model-history-note','message'].map(id=>el(id)));
     const legacyStage=el('legacy-frame').parentElement!,wasLegacy=legacyStage.classList.contains('legacy');
@@ -361,7 +363,7 @@ async function boot(): Promise<void> {
   const agents = mountAgentPanel(rpc);
   const runtime=mountLocalRuntimePanel(el<HTMLButtonElement>('runtime-open'),{connectPlayer:agents.connectLocal,importModel:async file=>{if(busy)return false;const loaded=await loadAvatar(undefined,file);if(loaded)changeView(true);return loaded;}},()=>options.language);
   mountAssistantPanel(document.querySelector('.agent-panel')!,rpc,()=>options.language,localStorage,undefined,(id,poses,session,revision)=>{if(busy||!editor)throw Error('Studio nicht verfügbar.');return editor.previewSequence(id,poses,session,revision);},(id,corrected,session,revision)=>{if(busy||!editor)throw Error('Studio nicht verfügbar.');const current=editor.inspect();if(current.session!==session||current.revision!==revision)throw Error('Studio-Stand hat sich geändert.');return editor.previewAutomaticSkinCorrection(id,corrected);});
-  const generation=mountGenerationPanel(el('generation-host'),{
+  generationPanel=mountGenerationPanel(el('generation-host'),{
     target:()=>studio&&!busy&&!editor?.interactionActive?generationTarget():null,
     adopt:(bytes,expected,valid,reference)=>{
       if(busy)return Promise.resolve(false);
@@ -421,6 +423,6 @@ async function boot(): Promise<void> {
     catalog = parseCatalog(await response.json()); renderCatalog();
     showOriginal();
   } catch (error) { message(`Model Zoo: ${error instanceof Error ? error.message : String(error)}`, true); }
-  window.addEventListener('pagehide', () => { runtime.dispose();zoo.dispose();agents.dispose(); editor?.dispose(); fetchController?.abort(); request++; playback?.dispose(); viewer?.dispose(); }, { once: true });
+  window.addEventListener('pagehide', () => { runtime.dispose();zoo.dispose();agents.dispose();generationPanel?.dispose(); editor?.dispose(); fetchController?.abort(); request++; playback?.dispose(); viewer?.dispose(); }, { once: true });
 }
 void boot();
