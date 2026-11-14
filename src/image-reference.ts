@@ -55,6 +55,7 @@ const regionKinds=new Set<ImageRegionKind>(['avatar','form','view','detail','hel
 const statuses=new Set<ImageRegionStatus>(['suggested','confirmed','ignored']);
 const finite=(n:number)=>Number.isFinite(n);
 const unique=(items:string[])=>new Set(items).size===items.length;
+const cross=(a:{x:number;y:number},b:{x:number;y:number},c:{x:number;y:number})=>(b.x-a.x)*(c.y-a.y)-(b.y-a.y)*(c.x-a.x);
 
 /** Reject degenerate and self-intersecting contours before they reach reconstruction. */
 export function isValidImageReferencePolygon(points:Array<{x:number;y:number}>):boolean {
@@ -83,7 +84,6 @@ export function isValidImageReferencePolygon(points:Array<{x:number;y:number}>):
  */
 export function splitImageReferencePolygon(points:Array<{x:number;y:number}>,start:{x:number;y:number},end:{x:number;y:number}):[Array<{x:number;y:number}>,Array<{x:number;y:number}>]|undefined {
  if(!isValidImageReferencePolygon(points)||![start.x,start.y,end.x,end.y].every(Number.isFinite)||Math.hypot(end.x-start.x,end.y-start.y)<1e-6)return;
- const cross=(a:{x:number;y:number},b:{x:number;y:number},c:{x:number;y:number})=>(b.x-a.x)*(c.y-a.y)-(b.y-a.y)*(c.x-a.x);
  const hits:Array<{edge:number;t:number;point:{x:number;y:number};cutT:number}>=[];
  for(let i=0;i<points.length;i++){
   const a=points[i]!,b=points[(i+1)%points.length]!;
