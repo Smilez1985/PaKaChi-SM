@@ -136,6 +136,22 @@ test('splits a polygon only when a cut crosses its boundary twice and conserves 
  assert.equal(splitImageReferencePolygon(points,{x:0,y:10},{x:120,y:10}),undefined);
 });
 
+test('splits a concave L-shaped polygon into two valid pieces',()=>{
+ const points=[{x:0,y:0},{x:100,y:0},{x:100,y:30},{x:30,y:30},{x:30,y:100},{x:0,y:100}];
+ const pieces=splitImageReferencePolygon(points,{x:-10,y:50},{x:40,y:50});
+ assert.ok(pieces);
+ assert.equal(isValidImageReferencePolygon(pieces[0]),true);
+ assert.equal(isValidImageReferencePolygon(pieces[1]),true);
+ const area=(ring:Array<{x:number;y:number}>)=>Math.abs(ring.reduce((sum,p,i)=>{const q=ring[(i+1)%ring.length]!;return sum+p.x*q.y-q.x*p.y;},0))/2;
+ assert.equal(area(pieces[0])+area(pieces[1]),5100);
+});
+
+test('rejects a cut that crosses a concave contour more than twice',()=>{
+ const uShape=[{x:0,y:0},{x:100,y:0},{x:100,y:100},{x:70,y:100},{x:70,y:30},{x:30,y:30},{x:30,y:100},{x:0,y:100}];
+ assert.equal(isValidImageReferencePolygon(uShape),true);
+ assert.equal(splitImageReferencePolygon(uShape,{x:-10,y:50},{x:110,y:50}),undefined);
+});
+
 test('moves polygon vertices within image bounds and rejects invalid self-crossing edits',()=>{
  const region=base().regions[1];
  const moved=moveImageReferencePolygonVertex(region,0,390,-20,1600,1000);
