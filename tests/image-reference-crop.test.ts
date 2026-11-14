@@ -12,7 +12,7 @@ test('polygon crop plan preserves polygon points relative to its crop origin',()
 test('crop planning rejects invalid image sizes and geometry outside the source',()=>{
  assert.throws(()=>planImageReferenceCrop(region({type:'rectangle',x:0,y:0,width:10,height:10}),0,100),/invalid-source-size/);
  assert.throws(()=>planImageReferenceCrop(region({type:'rectangle',x:90,y:0,width:20,height:10}),100,100),/invalid-region-geometry/);
- assert.throws(()=>planImageReferenceCrop(region({type:'polygon',points:[{x:1,y:1},{x:1,y:1},{x:1,y:1}]}),100,100),/empty-region/);
+ assert.throws(()=>planImageReferenceCrop(region({type:'polygon',points:[{x:1,y:1},{x:1,y:1},{x:1,y:1}]}),100,100),/invalid-region-geometry/);
 });
 
 
