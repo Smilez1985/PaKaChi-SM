@@ -313,7 +313,6 @@ async function loadAvatar(avatar?: Avatar, file?: File, project?: StudioProject,
     if(token!==request||!valid()){prepared.dispose();return false;}
     const previous={viewer,editor,playback,loaded,original,modelEpoch};
     prepared.viewer.onFrame=viewer.onFrame;
-    if(project?.imageReference)generationPanel?.restoreReference(project.imageReference);
     const restoreBinding=machine.checkpointBinding();
     const restoreUI=checkpointElements(['viewport','studio-editor','moves','capabilities','move-count','avatar-cards','avatar-select','avatar-count','avatar-name','avatar-description','model-type','player-controls','studio-controls','legacy-controls','pause','timeline','activity','model-undo','model-redo','model-history-note','message'].map(id=>el(id)));
     const legacyStage=el('legacy-frame').parentElement!,wasLegacy=legacyStage.classList.contains('legacy');
@@ -337,6 +336,7 @@ async function loadAvatar(avatar?: Avatar, file?: File, project?: StudioProject,
       if(errors.length)throw new AggregateError(errors,'previous-avatar-cleanup-failed');
     });
     installed=true;
+    generationPanel?.restoreReference(project?.imageReference??restore.imageReference);
     if(cleanupErrors.length)message('Avatar geladen; alte Ressourcen konnten nicht vollständig freigegeben werden. Projekt speichern und Seite bei Bedarf neu laden.',true);
     return true;
   } catch (error) {

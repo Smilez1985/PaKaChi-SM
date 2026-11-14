@@ -21,17 +21,22 @@ function fixture(t:TestContext,run?:ProviderAdapter['run'],fallback=false,prepar
  const host=document.createElement('div');document.body.append(host);
  const profile={id:'gen',name:'Local',adapter:'custom-generation' as const,endpoint:'http://127.0.0.1:8766',model:'triposr'};
  saveProviderConfig({version:1,profiles:fallback?[profile,{...profile,id:'backup',name:'Backup'}]:[profile],fallbacks:{assistant:[],generation:fallback?['backup']:[],rigging:[]},assignments:{assistant:null,generation:'gen',rigging:null}},w.localStorage);setProviderKey(profile,'x'.repeat(48));if(fallback)setProviderKey({...profile,id:'backup'},'y'.repeat(48));
- let beforeAdopt:(()=>Promise<void>)|undefined,adoptedReference:ImageReferenceDocument|undefined;
+ let beforeAdopt:(()=>Promise<void>)|undefined,adoptedReference:ImageReferenceDocument|undefined,restoredReference:ImageReferenceDocument|undefined;
  let target={session:'one',revision:1},calls=0,adoptions=0,cleanups=0,previewCalls=0,adopted:Uint8Array|undefined;
  const panel=mountGenerationPanel(host,{target:()=>target,adopt:async(output,expected,valid,reference)=>{await beforeAdopt?.();if(!valid()||expected.session!==target.session||expected.revision!==target.revision)return false;adopted=output;adoptedReference=reference;adoptions++;return true;}},()=> 'de',w.localStorage,{
   adapter:(key,p)=>{assert.equal(key,(p.id==='backup'?'y':'x').repeat(48));return {id:'custom-generation',probe:async()=>({model:'triposr',capabilities:['image-to-3d']}),run:async request=>{calls++;return run?run(request):{kind:'model',bytes};}};
-  },validate:validateGeneration,prepareRig,referenceEditor:(_host,_source,_language)=>({ready:async()=>referenceReady,selectedCrop:async()=>new File([new Uint8Array([1,2,3])],'region.png',{type:'image/png'}),reference:async()=>structuredClone(referenceDocument),dispose(){}}),preview:async()=>{previewCalls++;return ()=>{cleanups++;};},
+  },validate:validateGeneration,prepareRig,referenceEditor:(_host,_source,_language,_changed,initial)=>{restoredReference=initial;return {ready:async()=>referenceReady,selectedCrop:async()=>new File([new Uint8Array([1,2,3])],'region.png',{type:'image/png'}),reference:async()=>structuredClone(referenceDocument),dispose(){}};},preview:async()=>{previewCalls++;return ()=>{cleanups++;};},
  });
  t.after(()=>{panel.dispose();w.happyDOM.abort();});
  const button=(id:string)=>host.querySelector<HTMLButtonElement>('#generation-'+id)!;
  const choose=async()=>{panel.select(new File([new Uint8Array([137,80,78,71])],'panda.png',{type:'image/png'}));await new Promise(r=>setTimeout(r,0));};
- return {w,host,panel,button,choose,delayImport(fn:()=>Promise<void>){beforeAdopt=fn;},get calls(){return calls;},get adopted(){return adopted;},get adoptedReference(){return adoptedReference;},get adoptions(){return adoptions;},get cleanups(){return cleanups;},get previewCalls(){return previewCalls;},change(){target={...target,revision:target.revision+1};w.dispatchEvent(new w.Event('pakachi-sm:change'));}};
+ return {w,host,panel,button,choose,get restoredReference(){return restoredReference;},delayImport(fn:()=>Promise<void>){beforeAdopt=fn;},get calls(){return calls;},get adopted(){return adopted;},get adoptedReference(){return adoptedReference;},get adoptions(){return adoptions;},get cleanups(){return cleanups;},get previewCalls(){return previewCalls;},change(){target={...target,revision:target.revision+1};w.dispatchEvent(new w.Event('pakachi-sm:change'));}};
 }
+test('saved source reference restores its original hierarchy and embedded pixels into the editor',t=>{
+ const f=fixture(t);const restored=structuredClone(referenceDocument);restored.source.asset={mediaType:'image/png',data:'iVBORw0KGgo='};
+ assert.equal(f.panel.restoreReference(restored),true);assert.equal(f.restoredReference?.avatars[0]?.id,'avatar-panda');assert.equal(f.restoredReference?.source.asset?.data,'iVBORw0KGgo=');
+});
+
 test('image selection does not send; generated preview requires explicit acceptance and releases viewer',async t=>{
  const f=fixture(t);await f.choose();assert.equal(f.calls,0);f.button('start').click();await until(()=>!f.button('apply').hidden);
  assert.equal(f.calls,1);assert.equal(f.previewCalls,1);assert.equal(f.adoptions,0);f.button('apply').click();await until(()=>f.adoptions===1&&f.cleanups===1);assert.ok(f.button('apply').hidden);

@@ -16,7 +16,7 @@ export function mountImageReferenceEditor(host:HTMLElement,source:File,language:
  const original=initial?structuredClone(initial):undefined;
  const regionOwner=new Map<string,{avatar:string;form:string;view:string}>();
  if(original){for(const avatar of original.avatars)for(const formId of avatar.formIds){const form=original.forms.find(item=>item.id===formId);if(!form)continue;for(const viewId of form.viewIds){const view=original.views.find(item=>item.id===viewId);if(!view)continue;for(const regionId of view.regionIds)regionOwner.set(regionId,{avatar:avatar.label,form:form.label,view:view.label});}}}
- if(original){entries=original.regions.map(region=>{const owner=regionOwner.get(region.id),match=region.id.match(/^region-(\\d+)$/);if(match)seq=Math.max(seq,Number(match[1]));return {region:structuredClone(region),avatar:owner?.avatar??original.avatars[0]?.label??'Avatar 1',form:owner?.form??original.forms[0]?.label??'Tierform',view:owner?.view??region.label,use:region.status==='confirmed'};});}
+ if(original){entries=original.regions.map(region=>{const owner=regionOwner.get(region.id),match=region.id.match(/^region-(\d+)$/);if(match)seq=Math.max(seq,Number(match[1]));return {region:structuredClone(region),avatar:owner?.avatar??original.avatars[0]?.label??'Avatar 1',form:owner?.form??original.forms[0]?.label??'Tierform',view:owner?.view??region.label,use:region.status==='confirmed'};});}
  const t=(a:string,b:string)=>de()?a:b;
  const image=new Image();
  const draw=()=>{
