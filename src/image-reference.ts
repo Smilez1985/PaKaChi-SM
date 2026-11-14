@@ -56,6 +56,28 @@ const statuses=new Set<ImageRegionStatus>(['suggested','confirmed','ignored']);
 const finite=(n:number)=>Number.isFinite(n);
 const unique=(items:string[])=>new Set(items).size===items.length;
 
+/** Reject degenerate and self-intersecting contours before they reach reconstruction. */
+export function isValidImageReferencePolygon(points:Array<{x:number;y:number}>):boolean {
+ if(points.length<3||points.some(p=>!Number.isFinite(p.x)||!Number.isFinite(p.y)))return false;
+ const same=(a:{x:number;y:number},b:{x:number;y:number})=>Math.hypot(a.x-b.x,a.y-b.y)<1e-6;
+ for(let i=0;i<points.length;i++)if(same(points[i]!,points[(i+1)%points.length]!))return false;
+ const cross=(a:{x:number;y:number},b:{x:number;y:number},c:{x:number;y:number})=>(b.x-a.x)*(c.y-a.y)-(b.y-a.y)*(c.x-a.x);
+ const intersects=(a:{x:number;y:number},b:{x:number;y:number},c:{x:number;y:number},d:{x:number;y:number})=>{
+  const abC=cross(a,b,c),abD=cross(a,b,d),cdA=cross(c,d,a),cdB=cross(c,d,b);
+  return ((abC>1e-8&&abD< -1e-8)||(abC< -1e-8&&abD>1e-8))&&((cdA>1e-8&&cdB< -1e-8)||(cdA< -1e-8&&cdB>1e-8));
+ };
+ let twiceArea=0;
+ for(let i=0;i<points.length;i++){
+  const a=points[i]!,b=points[(i+1)%points.length]!;
+  twiceArea+=a.x*b.y-b.x*a.y;
+  for(let j=i+1;j<points.length;j++){
+   if(j===(i+1)%points.length||i===(j+1)%points.length)continue;
+   if(intersects(a,b,points[j]!,points[(j+1)%points.length]!))return false;
+  }
+ }
+ return Math.abs(twiceArea)>=8;
+}
+
 /** Structural validation allows incomplete drafts while the user is drawing and linking. */
 export function validateImageReferenceDocument(value:ImageReferenceDocument):ImageReferenceIssue[] {
   const issues:ImageReferenceIssue[]=[];
@@ -77,7 +99,7 @@ export function validateImageReferenceDocument(value:ImageReferenceDocument):Ima
       const g=r.geometry;
       if(![g.x,g.y,g.width,g.height].every(finite)||g.width<=0||g.height<=0||g.x<0||g.y<0||g.x+g.width>source.width||g.y+g.height>source.height)issues.push({path:p+'.geometry',message:'Rechteck muss vollständig innerhalb des Quellbildes liegen und positive Fläche haben.'});
     }else if(r.geometry.type==='polygon'){
-      if(r.geometry.points.length<3)issues.push({path:p+'.geometry.points',message:'Ein Polygon benötigt mindestens drei Punkte.'});
+      if(!isValidImageReferencePolygon(r.geometry.points))issues.push({path:p+'.geometry.points',message:'Polygon muss mindestens drei unterschiedliche Punkte, eine Mindestfläche und keine Selbstüberschneidungen haben.'});
       r.geometry.points.forEach((q,j)=>point(q.x,q.y,`${p}.geometry.points[${j}]`));
     }else issues.push({path:p+'.geometry',message:'Unbekannter Geometrietyp.'});
   }

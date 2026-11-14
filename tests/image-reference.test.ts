@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {checkImageReferenceReadiness,validateImageReferenceDocument,editImageReferenceRectangle,reorderImageReferenceRegions,moveImageReferenceRectangle,resizeImageReferenceRectangle} from '../src/image-reference.ts';
+import {checkImageReferenceReadiness,validateImageReferenceDocument,editImageReferenceRectangle,reorderImageReferenceRegions,moveImageReferenceRectangle,resizeImageReferenceRectangle,isValidImageReferencePolygon} from '../src/image-reference.ts';
 import type {ImageReferenceDocument} from '../src/image-reference.ts';
 
 const base=():ImageReferenceDocument=>({
@@ -104,4 +104,12 @@ test('resizes rectangles from all handle directions with a four-pixel minimum',(
  assert.deepEqual(northEast.geometry,{type:'rectangle',x:10,y:0,width:340,height:410});
  const min=resizeImageReferenceRectangle(region,1600,1000,'nw',1000,1000);
  assert.deepEqual(min.geometry,{type:'rectangle',x:306,y:406,width:4,height:4});
+});
+
+
+test('accepts simple polygon contours and rejects duplicate, tiny or self-crossing contours',()=>{
+ assert.equal(isValidImageReferencePolygon([{x:10,y:10},{x:80,y:10},{x:60,y:70},{x:20,y:60}]),true);
+ assert.equal(isValidImageReferencePolygon([{x:10,y:10},{x:10,y:10},{x:60,y:70}]),false);
+ assert.equal(isValidImageReferencePolygon([{x:10,y:10},{x:11,y:10},{x:10,y:11}]),false);
+ assert.equal(isValidImageReferencePolygon([{x:10,y:10},{x:80,y:80},{x:10,y:80},{x:80,y:10}]),false);
 });

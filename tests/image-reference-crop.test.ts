@@ -14,3 +14,8 @@ test('crop planning rejects invalid image sizes and geometry outside the source'
  assert.throws(()=>planImageReferenceCrop(region({type:'rectangle',x:90,y:0,width:20,height:10}),100,100),/invalid-region-geometry/);
  assert.throws(()=>planImageReferenceCrop(region({type:'polygon',points:[{x:1,y:1},{x:1,y:1},{x:1,y:1}]}),100,100),/empty-region/);
 });
+
+
+test('crop planning rejects self-intersecting polygon contours',()=>{
+ assert.throws(()=>planImageReferenceCrop(region({type:'polygon',points:[{x:10,y:10},{x:80,y:80},{x:10,y:80},{x:80,y:10}]}),100,100),/invalid-region-geometry/);
+});

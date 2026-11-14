@@ -1,4 +1,5 @@
 import type {ImageReferenceRegion} from './image-reference.ts';
+import {isValidImageReferencePolygon} from './image-reference.ts';
 
 export interface ImageCropPlan {
  x:number;
@@ -11,6 +12,7 @@ export interface ImageCropPlan {
 /** Convert source-pixel geometry into a bounded crop plan without changing its coordinates. */
 export function planImageReferenceCrop(region:ImageReferenceRegion,sourceWidth:number,sourceHeight:number):ImageCropPlan {
  if(!Number.isSafeInteger(sourceWidth)||!Number.isSafeInteger(sourceHeight)||sourceWidth<=0||sourceHeight<=0)throw new Error('invalid-source-size');
+ if(region.geometry.type==='polygon'&&!isValidImageReferencePolygon(region.geometry.points))throw new Error('invalid-region-geometry');
  const points=region.geometry.type==='rectangle'
   ?[{x:region.geometry.x,y:region.geometry.y},{x:region.geometry.x+region.geometry.width,y:region.geometry.y+region.geometry.height}]
   :region.geometry.points;
