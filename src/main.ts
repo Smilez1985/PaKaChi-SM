@@ -415,7 +415,7 @@ async function boot(): Promise<void> {
   document.addEventListener('dragleave', () => { if (--dragDepth <= 0) document.body.classList.remove('dragging'); });
   document.addEventListener('drop', event => {
     event.preventDefault(); dragDepth = 0; document.body.classList.remove('dragging');
-    const file = event.dataTransfer?.files[0]; if(file&&['image/png','image/jpeg'].includes(file.type)){changeView(true);generation.select(file);}else if (file) void loadAvatar(undefined, file);
+    const file = event.dataTransfer?.files[0]; if(file&&['image/png','image/jpeg'].includes(file.type)){changeView(true);generationPanel?.select(file);}else if (file) void loadAvatar(undefined, file);
   });
   try {
     const response = await fetch(`${import.meta.env.BASE_URL}model-zoo/catalog.json`);
