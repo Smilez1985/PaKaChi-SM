@@ -28,6 +28,16 @@ test('supports variable avatar, form and view counts without positional assumpti
  assert.deepEqual(checkImageReferenceReadiness(d).issues,[]);
 });
 
+test('supports multiple independent crop regions inside one shared view',()=>{
+ const d=base();
+ d.regions.push({id:'r-face-detail',label:'Gesicht',kind:'detail',status:'confirmed',geometry:{type:'polygon',points:[{x:80,y:80},{x:180,y:80},{x:170,y:170},{x:90,y:180}]}});
+ d.views[0].regionIds.push('r-face-detail');
+ assert.deepEqual(validateImageReferenceDocument(d),[]);
+ assert.equal(checkImageReferenceReadiness(d).ready,true);
+ assert.equal(d.views[0].regionIds.length,2);
+ assert.notDeepEqual(d.regions[0].geometry,d.regions[3].geometry);
+});
+
 test('blocks generation while suggestions remain unconfirmed',()=>{
  const d=base();d.regions[0].status='suggested';
  const result=checkImageReferenceReadiness(d);

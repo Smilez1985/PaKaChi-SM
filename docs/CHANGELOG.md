@@ -12,7 +12,11 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+Zeitstempel der letzten Änderung: 2026-11-14T23:10:00+01:00 (Europe/Berlin)
+
 ### Added
+
+- Mehrere voneinander getrennte Rechteck-/Polygonbereiche können derselben Ansicht zugeordnet werden. Neu gezeichnete Bereiche übernehmen zunächst Avatar, Form und Ansicht der aktuell ausgewählten Markierung; zusätzliche Bereiche werden als Detailregionen klassifiziert. So lassen sich z. B. Gesicht, Pfote und mechanisches Detail separat zuschneiden, ohne sie geometrisch zu verbinden.
 
 - Gespeicherte Bildreferenzen können beim erneuten Laden eines Studio-Projekts wieder im Bildeditor geöffnet werden. Das eingebettete Quellbild wird bytegetreu rekonstruiert; Regionen, Status und Avatar-/Form-/Ansichtszuordnungen werden übernommen. Bestehende stabile IDs bleiben bei Bearbeitungen erhalten. CI #43640498687: 33 Tests bestanden, TypeScript erfolgreich.
 
