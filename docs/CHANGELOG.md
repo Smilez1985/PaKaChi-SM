@@ -12,9 +12,11 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
-Zeitstempel der letzten Änderung: 2026-11-14T23:10:00+01:00 (Europe/Berlin)
+Zeitstempel der letzten Änderung: 2026-11-14T23:25:00+01:00 (Europe/Berlin)
 
 ### Added
+
+- Polygonkonturen können mit einer Schnittlinie in genau zwei gültige Teilregionen zerlegt werden. Beide Teilregionen müssen nach dem Schnitt erneut bestätigt werden; uneindeutige oder tangentiale Schnitte werden abgewiesen.
 
 - Mehrere voneinander getrennte Rechteck-/Polygonbereiche können derselben Ansicht zugeordnet werden. Neu gezeichnete Bereiche übernehmen zunächst Avatar, Form und Ansicht der aktuell ausgewählten Markierung; zusätzliche Bereiche werden als Detailregionen klassifiziert. So lassen sich z. B. Gesicht, Pfote und mechanisches Detail separat zuschneiden, ohne sie geometrisch zu verbinden.
 

@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {checkImageReferenceReadiness,validateImageReferenceDocument,editImageReferenceRectangle,reorderImageReferenceRegions,moveImageReferenceRectangle,resizeImageReferenceRectangle,isValidImageReferencePolygon,moveImageReferencePolygonVertex} from '../src/image-reference.ts';
+import {checkImageReferenceReadiness,validateImageReferenceDocument,editImageReferenceRectangle,reorderImageReferenceRegions,moveImageReferenceRectangle,resizeImageReferenceRectangle,isValidImageReferencePolygon,moveImageReferencePolygonVertex,splitImageReferencePolygon} from '../src/image-reference.ts';
 import type {ImageReferenceDocument} from '../src/image-reference.ts';
 
 const base=():ImageReferenceDocument=>({
@@ -124,6 +124,17 @@ test('accepts simple polygon contours and rejects duplicate, tiny or self-crossi
  assert.equal(isValidImageReferencePolygon([{x:10,y:10},{x:80,y:80},{x:10,y:80},{x:80,y:10}]),false);
 });
 
+
+test('splits a polygon only when a cut crosses its boundary twice and conserves area',()=>{
+ const points=[{x:10,y:10},{x:110,y:10},{x:110,y:90},{x:10,y:90}];
+ const pieces=splitImageReferencePolygon(points,{x:60,y:0},{x:60,y:100});
+ assert.ok(pieces);
+ assert.equal(pieces[0].length,4);assert.equal(pieces[1].length,4);
+ const area=(ring:Array<{x:number;y:number}>)=>Math.abs(ring.reduce((sum,p,i)=>{const q=ring[(i+1)%ring.length]!;return sum+p.x*q.y-q.x*p.y;},0))/2;
+ assert.equal(area(pieces[0])+area(pieces[1]),8000);
+ assert.equal(splitImageReferencePolygon(points,{x:0,y:0},{x:5,y:5}),undefined);
+ assert.equal(splitImageReferencePolygon(points,{x:0,y:10},{x:120,y:10}),undefined);
+});
 
 test('moves polygon vertices within image bounds and rejects invalid self-crossing edits',()=>{
  const region=base().regions[1];

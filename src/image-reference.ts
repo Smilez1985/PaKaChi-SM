@@ -78,6 +78,44 @@ export function isValidImageReferencePolygon(points:Array<{x:number;y:number}>):
  return Math.abs(twiceArea)>=8;
 }
 
+/**
+ * Split a simple polygon with a finite cut segment that crosses its boundary exactly twice.
+ * Returns two independently valid contours; ambiguous/tangent/multi-crossing cuts are rejected.
+ */
+export function splitImageReferencePolygon(points:Array<{x:number;y:number}>,start:{x:number;y:number},end:{x:number;y:number}):[Array<{x:number;y:number}>,Array<{x:number;y:number}>]|undefined {
+ if(!isValidImageReferencePolygon(points)||![start.x,start.y,end.x,end.y].every(Number.isFinite)||Math.hypot(end.x-start.x,end.y-start.y)<1e-6)return;
+ const cross=(a:{x:number;y:number},b:{x:number;y:number},c:{x:number;y:number})=>(b.x-a.x)*(c.y-a.y)-(b.y-a.y)*(c.x-a.x);
+ const hits:Array<{edge:number;t:number;point:{x:number;y:number};cutT:number}>=[];
+ for(let i=0;i<points.length;i++){
+  const a=points[i]!,b=points[(i+1)%points.length]!;
+  const rx=end.x-start.x,ry=end.y-start.y,sx=b.x-a.x,sy=b.y-a.y;
+  const denominator=rx*sy-ry*sx;
+  if(Math.abs(denominator)<1e-9)continue;
+  const qx=a.x-start.x,qy=a.y-start.y;
+  const cutT=(qx*sy-qy*sx)/denominator,edgeT=(qx*ry-qy*rx)/denominator;
+  if(cutT>1e-8&&cutT<1-1e-8&&edgeT>=-1e-8&&edgeT<=1+1e-8){
+   const point={x:start.x+cutT*rx,y:start.y+cutT*ry};
+   if(!hits.some(hit=>Math.hypot(hit.point.x-point.x,hit.point.y-point.y)<1e-6))hits.push({edge:i,t:Math.max(0,Math.min(1,edgeT)),point,cutT});
+  }
+ }
+ if(hits.length!==2)return;
+ hits.sort((a,b)=>a.edge-b.edge||a.t-b.t);
+ const [first,second]=hits;
+ if(!first||!second||first.edge===second.edge&&Math.abs(first.t-second.t)<1e-8)return;
+ const walk=(from:typeof first,to:typeof second)=>{
+  const result=[from.point];
+  let index=(from.edge+1)%points.length,guard=0;
+  while(index!==(to.edge+1)%points.length&&guard++<=points.length){result.push(points[index]!);index=(index+1)%points.length;}
+  result.push(to.point);return result;
+ };
+ const a=walk(first,second),b=walk(second,first);
+ if(!isValidImageReferencePolygon(a)||!isValidImageReferencePolygon(b))return;
+ const area=(ring:Array<{x:number;y:number}>)=>Math.abs(ring.reduce((sum,p,i)=>{const q=ring[(i+1)%ring.length]!;return sum+p.x*q.y-q.x*p.y;},0))/2;
+ const originalArea=area(points),pieces=area(a)+area(b);
+ if(Math.abs(originalArea-pieces)>Math.max(1e-5,originalArea*1e-6))return;
+ return [a,b];
+}
+
 /** Move one polygon vertex in source pixels; invalid/self-crossing edits are rejected atomically. */
 export function moveImageReferencePolygonVertex(region:ImageReferenceRegion,index:number,x:number,y:number,sourceWidth:number,sourceHeight:number):ImageReferenceRegion {
  if(region.geometry.type!=='polygon')throw new Error('polygon-edit-requires-polygon');
