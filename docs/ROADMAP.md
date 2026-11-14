@@ -1,4 +1,5 @@
-### Bildimport: freie Konturen (14.11.2026)\n- [x] Polygon-Markierung per Mausklick mit Abschluss per Doppelklick, Enter oder Schaltfläche; Abbruch per Escape/Schaltfläche.\n- [x] Gespeicherte Polygonpunkte lassen sich im Bildeditor einzeln verschieben.\n- [x] Degenerierte und selbstüberschneidende Konturen werden vor Zuschnitt/Generierung abgewiesen.\n- [ ] Freihand-Masken, Konturvereinfachung und lokale Aufteilung/Lochmasken bleiben offen.\n\n# Roadmap – offene Aufgaben
+### Bildimport: freie Konturen (14.11.2026)\n- [x] Polygon-Markierung per Mausklick mit Abschluss per Doppelklick, Enter oder Schaltfläche; Abbruch per Escape/Schaltfläche.
+- [x] Freihand-Masken mit begrenzter Punktdichte, automatischer Polygonvalidierung und Alpha-Zuschnitt.\n- [x] Gespeicherte Polygonpunkte lassen sich im Bildeditor einzeln verschieben.\n- [x] Degenerierte und selbstüberschneidende Konturen werden vor Zuschnitt/Generierung abgewiesen.\n- [ ] Konturvereinfachung, lokale Aufteilung und Lochmasken bleiben offen.\n\n# Roadmap – offene Aufgaben
 
 **Entwicklungsstand: 0.101.0 · Abgleich: 14.11.2026.** Teil der [Blaupause](README.md).
 

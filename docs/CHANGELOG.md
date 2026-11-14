@@ -1,4 +1,4 @@
-## [Unreleased]\n\n### Added\n\n- Bildreferenz-Editor: freie Polygonkonturen zusätzlich zu Rechteckmarkierungen, inklusive Punktkorrektur und Tastatursteuerung.\n- Polygonvalidierung gegen degenerierte Flächen und Selbstüberschneidungen vor dem Zuschnitt.\n\n# Changelog
+## [Unreleased]\n\n### Added\n\n- Bildreferenz-Editor: freie Polygonkonturen zusätzlich zu Rechteckmarkierungen, inklusive Punktkorrektur, Tastatursteuerung und Freihand-Masken.\n- Polygonvalidierung gegen degenerierte Flächen und Selbstüberschneidungen vor dem Zuschnitt.\n\n# Changelog
 
 Alle wesentlichen Änderungen an PaKaChi-SM werden hier dokumentiert.
 
