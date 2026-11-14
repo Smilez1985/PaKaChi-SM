@@ -61,7 +61,6 @@ export function isValidImageReferencePolygon(points:Array<{x:number;y:number}>):
  if(points.length<3||points.some(p=>!Number.isFinite(p.x)||!Number.isFinite(p.y)))return false;
  const same=(a:{x:number;y:number},b:{x:number;y:number})=>Math.hypot(a.x-b.x,a.y-b.y)<1e-6;
  for(let i=0;i<points.length;i++)if(same(points[i]!,points[(i+1)%points.length]!))return false;
- const cross=(a:{x:number;y:number},b:{x:number;y:number},c:{x:number;y:number})=>(b.x-a.x)*(c.y-a.y)-(b.y-a.y)*(c.x-a.x);
  const intersects=(a:{x:number;y:number},b:{x:number;y:number},c:{x:number;y:number},d:{x:number;y:number})=>{
   const abC=cross(a,b,c),abD=cross(a,b,d),cdA=cross(c,d,a),cdB=cross(c,d,b);
   return ((abC>1e-8&&abD< -1e-8)||(abC< -1e-8&&abD>1e-8))&&((cdA>1e-8&&cdB< -1e-8)||(cdA< -1e-8&&cdB>1e-8));
