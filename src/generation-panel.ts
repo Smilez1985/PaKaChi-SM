@@ -132,8 +132,8 @@ export function mountGenerationPanel(host:HTMLElement,bridge:GenerationHost,lang
  const reset=()=>{clear(true);status.textContent='';refresh();};
  const events=['pakachi-options','pakachi-providers','pakachi-provider-keys','pakachi-vault-lock','storage','pagehide'];events.forEach(event=>window.addEventListener(event,reset));window.addEventListener('pakachi-sm:change',refresh);clear();refresh();
  return {select,restoreReference(reference?:ImageReferenceDocument){
-  if(!reference){clear();status.textContent='';refresh();return false;}
-  const asset=reference.source.asset;if(!asset){clear();status.textContent=t('Diese ältere Referenz enthält kein eingebettetes Quellbild.','This legacy reference has no embedded source image.');refresh();return false;}
+  if(!reference){clear();source=undefined;status.textContent='';refresh();return false;}
+  const asset=reference.source.asset;if(!asset){clear();source=undefined;status.textContent=t('Diese ältere Referenz enthält kein eingebettetes Quellbild.','This legacy reference has no embedded source image.');refresh();return false;}
   try{const binary=atob(asset.data),bytes=Uint8Array.from(binary,c=>c.charCodeAt(0));const extension=asset.mediaType==='image/png'?'png':'jpg';select(new File([bytes],`pakachi-reference.${extension}`,{type:asset.mediaType}),reference);status.textContent=t('Gespeicherte Bildreferenz wiederhergestellt. Markierungen können weiterbearbeitet werden.','Saved image reference restored. You can continue editing its regions.');return true;}catch{clear();status.textContent=t('Quellbild konnte nicht wiederhergestellt werden.','Could not restore source image.');refresh();return false;}
  },dispose(){disposed=true;clear();events.forEach(event=>window.removeEventListener(event,reset));window.removeEventListener('pakachi-sm:change',refresh);panel.remove();}};
 }
