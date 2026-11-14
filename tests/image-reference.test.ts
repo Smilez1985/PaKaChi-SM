@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {checkImageReferenceReadiness,validateImageReferenceDocument,editImageReferenceRectangle,reorderImageReferenceRegions,moveImageReferenceRectangle,resizeImageReferenceRectangle,isValidImageReferencePolygon} from '../src/image-reference.ts';
+import {checkImageReferenceReadiness,validateImageReferenceDocument,editImageReferenceRectangle,reorderImageReferenceRegions,moveImageReferenceRectangle,resizeImageReferenceRectangle,isValidImageReferencePolygon,moveImageReferencePolygonVertex} from '../src/image-reference.ts';
 import type {ImageReferenceDocument} from '../src/image-reference.ts';
 
 const base=():ImageReferenceDocument=>({
@@ -112,4 +112,14 @@ test('accepts simple polygon contours and rejects duplicate, tiny or self-crossi
  assert.equal(isValidImageReferencePolygon([{x:10,y:10},{x:10,y:10},{x:60,y:70}]),false);
  assert.equal(isValidImageReferencePolygon([{x:10,y:10},{x:11,y:10},{x:10,y:11}]),false);
  assert.equal(isValidImageReferencePolygon([{x:10,y:10},{x:80,y:80},{x:10,y:80},{x:80,y:10}]),false);
+});
+
+
+test('moves polygon vertices within image bounds and rejects invalid self-crossing edits',()=>{
+ const region=base().regions[1];
+ const moved=moveImageReferencePolygonVertex(region,0,390,-20,1600,1000);
+ assert.deepEqual(moved.geometry,{type:'polygon',points:[{x:390,y:0},{x:700,y:10},{x:650,y:410},{x:420,y:400}]});
+ const rejected=moveImageReferencePolygonVertex(region,0,680,405,1600,1000);
+ assert.equal(rejected,region);
+ assert.throws(()=>moveImageReferencePolygonVertex(region,9,10,10,1600,1000),/unknown-polygon-vertex/);
 });

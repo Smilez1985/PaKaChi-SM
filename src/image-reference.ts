@@ -78,6 +78,17 @@ export function isValidImageReferencePolygon(points:Array<{x:number;y:number}>):
  return Math.abs(twiceArea)>=8;
 }
 
+/** Move one polygon vertex in source pixels; invalid/self-crossing edits are rejected atomically. */
+export function moveImageReferencePolygonVertex(region:ImageReferenceRegion,index:number,x:number,y:number,sourceWidth:number,sourceHeight:number):ImageReferenceRegion {
+ if(region.geometry.type!=='polygon')throw new Error('polygon-edit-requires-polygon');
+ if(!Number.isInteger(index)||index<0||index>=region.geometry.points.length)throw new Error('unknown-polygon-vertex');
+ if(![x,y,sourceWidth,sourceHeight].every(Number.isFinite)||sourceWidth<=0||sourceHeight<=0)throw new Error('invalid-polygon-coordinate');
+ const points=region.geometry.points.map(p=>({...p}));
+ points[index]={x:Math.max(0,Math.min(sourceWidth,x)),y:Math.max(0,Math.min(sourceHeight,y))};
+ if(!isValidImageReferencePolygon(points))return region;
+ return {...region,geometry:{type:'polygon',points}};
+}
+
 /** Structural validation allows incomplete drafts while the user is drawing and linking. */
 export function validateImageReferenceDocument(value:ImageReferenceDocument):ImageReferenceIssue[] {
   const issues:ImageReferenceIssue[]=[];
