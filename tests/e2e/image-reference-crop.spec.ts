@@ -100,7 +100,7 @@ test('changing a region classification requires renewed review',async({page})=>{
  expect(region.status).toBe('suggested');
 });
 
-test('moving a confirmed rectangle invalidates its confirmation',async({page})=>{
+test('changing avatar, form or view assignment invalidates confirmation and selection',async({page})=>{\n await mountEditor(page);\n await expect(page.getByLabel('Confirm reviewed region')).toBeChecked();\n await expect(page.evaluate(async()=> (window as any).__imageReferenceEditor.selectedCrop().then(()=>true))).resolves.toBe(true);\n await page.getByLabel('Avatar',{exact:true}).fill('Different avatar');\n await page.getByLabel('Avatar',{exact:true}).press('Tab');\n const region=await page.evaluate(async()=> (await (window as any).__imageReferenceEditor.reference()).regions[0]);\n expect(region.status).toBe('suggested');\n await expect(page.evaluate(async()=> (window as any).__imageReferenceEditor.selectedCrop().then(()=>true,()=>false))).resolves.toBe(false);\n});\n\ntest('moving a confirmed rectangle invalidates its confirmation',async({page})=>{
  await mountRectangleEditor(page);
  const before=await page.evaluate(async()=> (await (window as any).__imageReferenceEditor.reference()).regions[0]);
  expect(before.status).toBe('confirmed');

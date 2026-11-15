@@ -10,7 +10,7 @@ Die Kategorien Added, Changed, Deprecated, Removed, Fixed und Security werden nu
 
 Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist ein lokaler Player vorhanden.
 
-## [Unreleased]
+## [Unreleased]\n\n### Fixed\n\n- Änderungen an Regionsbeschriftung sowie Avatar-/Form-/Ansichtszuordnung entziehen die bisherige Bestätigung und 3D-Freigabe; erneute Prüfung ist erforderlich.\n
 ### Fixed
 - Auch direkte Zahlenkorrekturen an X/Y/Breite/Höhe setzen bestätigte Bildregionen wieder auf prüfpflichtig und entfernen die 3D-Auswahl.
 
