@@ -67,7 +67,7 @@ async function mountRectangleEditor(page:Page){
   const blob=await new Promise<Blob>(resolve=>sourceCanvas.toBlob(value=>resolve(value!),'image/png'));
   const source=new File([blob],'touching-figures.png',{type:'image/png'});
   const initial={format:'pakachi-image-reference',version:1,source:{sha256:'0'.repeat(64),width:100,height:100},
-   regions:[{id:'joined',label:'Joined figures',kind:'helper',status:'confirmed',geometry:{type:'rectangle',x:10,y:10,width:80,height:80}}],
+   regions:[{id:'joined',label:'Joined figures',kind:'view',status:'confirmed',geometry:{type:'rectangle',x:10,y:10,width:80,height:80}}],
    views:[{id:'view-1',label:'Front',regionIds:['joined']}],forms:[{id:'form-1',label:'Animal',viewIds:['view-1']}],avatars:[{id:'avatar-1',label:'PaKaChi',formIds:['form-1']}]};
   const {mountImageReferenceEditor}=await import('../../src/image-reference-editor.ts');
   const host=document.createElement('div');document.body.append(host);
@@ -104,6 +104,7 @@ test('moving a confirmed rectangle invalidates its confirmation',async({page})=>
  await mountRectangleEditor(page);
  const before=await page.evaluate(async()=> (await (window as any).__imageReferenceEditor.reference()).regions[0]);
  expect(before.status).toBe('confirmed');
+ await expect(page.evaluate(async()=> (window as any).__imageReferenceEditor.selectedCrop().then(()=>true))).resolves.toBe(true);
  const canvas=page.locator('canvas.image-reference-canvas');
  const bounds=await canvas.boundingBox();expect(bounds).not.toBeNull();const box=bounds!;
  await page.mouse.move(box.x+box.width*0.5,box.y+box.height*0.5);
@@ -114,12 +115,13 @@ test('moving a confirmed rectangle invalidates its confirmation',async({page})=>
 
 test('editing rectangle source-pixel fields invalidates confirmation and selection',async({page})=>{
  await mountRectangleEditor(page);
- await page.getByLabel('Confirm reviewed region').check();
- await expect(page.getByLabel('Use for 3D')).toBeEnabled();
+ await expect(page.getByLabel('Confirm reviewed region')).toBeChecked();
+ await expect(page.getByLabel('Confirm reviewed region')).toBeChecked();
+ await expect(page.evaluate(async()=> (window as any).__imageReferenceEditor.selectedCrop().then(()=>true))).resolves.toBe(true);
  await page.getByLabel('X',{exact:true}).fill('12');
  await page.getByLabel('X',{exact:true}).press('Tab');
  const region=await page.evaluate(async()=> (await (window as any).__imageReferenceEditor.reference()).regions[0]);
  expect(region.geometry.x).toBe(12);
  expect(region.status).toBe('suggested');
- expect(region.use).not.toBe(true);
+ await expect(page.evaluate(async()=> (window as any).__imageReferenceEditor.selectedCrop().then(()=>true,()=>false))).resolves.toBe(false);
 });
