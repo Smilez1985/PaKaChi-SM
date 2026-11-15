@@ -10,7 +10,13 @@ Die Kategorien Added, Changed, Deprecated, Removed, Fixed und Security werden nu
 
 Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist ein lokaler Player vorhanden.
 
-## [Unreleased]\n\n### Fixed\n\n- Änderungen an Regionsbeschriftung sowie Avatar-/Form-/Ansichtszuordnung entziehen die bisherige Bestätigung und 3D-Freigabe; erneute Prüfung ist erforderlich.\n
+## [Unreleased]
+
+### Fixed
+
+- Änderungen an Regionsbeschriftung sowie Avatar-/Form-/Ansichtszuordnung entziehen die bisherige Bestätigung und 3D-Freigabe; erneute Prüfung ist erforderlich.
+- Fehlerhafte literale `\\n`-Sequenzen in Roadmap und Changelog durch echte Markdown-Zeilenumbrüche ersetzt; der aktuelle Übergabestand und der erfolgreiche CI-Lauf #43760802602 sind nachgetragen.
+
 ### Fixed
 - Auch direkte Zahlenkorrekturen an X/Y/Breite/Höhe setzen bestätigte Bildregionen wieder auf prüfpflichtig und entfernen die 3D-Auswahl.
 
@@ -47,7 +53,7 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 - Unverändertes PNG/JPEG-Quellbild (bis 20 MiB) wird zusammen mit SHA-256, Pixelmaßen und Segmentzuordnungen im Studio-Projekt eingebettet; beim Laden werden Bildsignatur und SHA-256 gegen das Asset geprüft. Projekt-Speichern und Model Zoo weisen Gesamtdateien über 80 MiB zurück; ältere Projekte ohne eingebettetes Asset bleiben kompatibel.
 
 
-Zeitstempel der letzten Änderung: 2026-11-14T21:02:00+01:00
+Zeitstempel der letzten Änderung: 2026-11-16T00:13:00+01:00 (Europe/Berlin)
 
 ### Added
 
@@ -91,7 +97,9 @@ Zeitstempel der letzten Änderung: 2026-11-14T21:02:00+01:00
 - Originalformen-Lauf #6 bestätigt die regenerierten Tier- und Arbeitsform-GLBs ohne Nullflächen in allen 28 starren Finger-/Zehen-`_shell`-Teilmodellen je Form. Die Messberichte weisen zugleich aus, dass bei den acht statischen Hüft-/Knieproben je Form nur `PaKaChi_body` messbar war; 91 bzw. 89 Teilmodelle bleiben coplanar/touching-bedingt unmessbar. Keine vollständige Kollisionsfreigabe.
 
 
-### Fixed\n\n- Die 2D-Landmarken-Triangulation verwirft jetzt Schnittpunkte hinter einer oder mehreren Kameras (Cheirality-Prüfung). Ein kleiner Strahlabstand allein reicht nicht als geometrischer Nachweis; ein Regressionstest deckt rückwärts gerichtete Kameras ab.\n\n### Fixed
+### Fixed
+
+- Die 2D-Landmarken-Triangulation verwirft jetzt Schnittpunkte hinter einer oder mehreren Kameras (Cheirality-Prüfung). Ein kleiner Strahlabstand allein reicht nicht als geometrischer Nachweis; ein Regressionstest deckt rückwärts gerichtete Kameras ab.
 
 - Fehlerhaft escaptes Template-Literal im Cluster-Manifestvalidator korrigiert. Der Tunnel-Archivtest übergibt seine Testplattform explizit; Symlink-Sicherheitsfälle überspringen nur den Symlink-Teil, wenn Windows die Erstellung ohne erhöhte Rechte verweigert. Die übrigen Traversal-/Ausgabeprüfungen bleiben aktiv. Noch nicht lokal erneut ausgeführt.
 
