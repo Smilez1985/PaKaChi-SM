@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {checkImageReferenceReadiness,validateImageReferenceDocument,editImageReferenceRectangle,reorderImageReferenceRegions,moveImageReferenceRectangle,resizeImageReferenceRectangle,isValidImageReferencePolygon,moveImageReferencePolygonVertex,splitImageReferencePolygon} from '../src/image-reference.ts';
+import {checkImageReferenceReadiness,validateImageReferenceDocument,editImageReferenceRectangle,reorderImageReferenceRegions,moveImageReferenceRectangle,resizeImageReferenceRectangle,isValidImageReferencePolygon,moveImageReferencePolygonVertex,splitImageReferencePolygon,simplifyImageReferencePolygon} from '../src/image-reference.ts';
 import type {ImageReferenceDocument} from '../src/image-reference.ts';
 
 const base=():ImageReferenceDocument=>({
@@ -150,6 +150,16 @@ test('rejects a cut that crosses a concave contour more than twice',()=>{
  const uShape=[{x:0,y:0},{x:100,y:0},{x:100,y:100},{x:70,y:100},{x:70,y:30},{x:30,y:30},{x:30,y:100},{x:0,y:100}];
  assert.equal(isValidImageReferencePolygon(uShape),true);
  assert.equal(splitImageReferencePolygon(uShape,{x:-10,y:50},{x:110,y:50}),undefined);
+});
+
+test('simplifies redundant polygon vertices without changing the silhouette materially',()=>{
+ const contour=[{x:0,y:0},{x:25,y:0},{x:50,y:0},{x:100,y:0},{x:100,y:100},{x:0,y:100}];
+ const simplified=simplifyImageReferencePolygon(contour,1);
+ assert.ok(simplified.length<contour.length);
+ assert.equal(isValidImageReferencePolygon(simplified),true);
+ const area=(ring:Array<{x:number;y:number}>)=>Math.abs(ring.reduce((sum,p,i)=>{const q=ring[(i+1)%ring.length]!;return sum+p.x*q.y-q.x*p.y;},0))/2;
+ assert.equal(area(simplified),10000);
+ assert.throws(()=>simplifyImageReferencePolygon(contour,0),/invalid-simplification-tolerance/);
 });
 
 test('moves polygon vertices within image bounds and rejects invalid self-crossing edits',()=>{

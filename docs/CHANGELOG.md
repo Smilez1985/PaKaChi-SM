@@ -12,11 +12,12 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
-Zeitstempel der letzten Änderung: 2026-11-15T00:00:00+01:00 (Europe/Berlin)
+Zeitstempel der letzten Änderung: 2026-11-15T03:52:00+01:00 (Europe/Berlin)
 
 ### Added
 
-- Polygonkonturen können mit einer Schnittlinie in genau zwei gültige Teilregionen zerlegt werden. Beide Teilregionen müssen nach dem Schnitt erneut bestätigt werden; uneindeutige oder tangentiale Schnitte werden abgewiesen. Zusätzliche Regressionen prüfen konkave L-Konturen und verwerfen Schnitte durch eine U-Kontur mit vier Grenzübertritten. CI #43651007627: 38/38 Tests bestanden, TypeScript erfolgreich.
+- Der Geometriekern vereinfacht Polygonkonturen konservativ: redundante Punkte werden nur entfernt, wenn die Kontur gültig bleibt und die Flächenabweichung innerhalb 1 % liegt. Der Editor bietet diese Funktion noch nicht an.
+- Polygonkonturen können mit einer Schnittlinie in genau zwei gültige Teilregionen zerlegt werden. Beide Teilregionen müssen nach dem Schnitt erneut bestätigt werden; uneindeutige oder tangentiale Schnitte werden abgewiesen. Zusätzliche Regressionen prüfen konkave L-Konturen und verwerfen Schnitte durch eine U-Kontur mit vier Grenzübertritten. CI #43651121349: 40/40 Tests bestanden, TypeScript erfolgreich.
 
 - Mehrere voneinander getrennte Rechteck-/Polygonbereiche können derselben Ansicht zugeordnet werden. Neu gezeichnete Bereiche übernehmen zunächst Avatar, Form und Ansicht der aktuell ausgewählten Markierung; zusätzliche Bereiche werden als Detailregionen klassifiziert. So lassen sich z. B. Gesicht, Pfote und mechanisches Detail separat zuschneiden, ohne sie geometrisch zu verbinden.
 

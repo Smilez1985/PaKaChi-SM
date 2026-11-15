@@ -115,6 +115,35 @@ export function splitImageReferencePolygon(points:Array<{x:number;y:number}>,sta
  return [a,b];
 }
 
+/**
+ * Conservatively remove redundant contour vertices. Each removal must keep the contour
+ * simple and stay within a small cumulative area-error budget; otherwise it is skipped.
+ */
+export function simplifyImageReferencePolygon(points:Array<{x:number;y:number}>,tolerance=1):Array<{x:number;y:number}> {
+ if(!isValidImageReferencePolygon(points))throw new Error('invalid-polygon');
+ if(!Number.isFinite(tolerance)||tolerance<=0)throw new Error('invalid-simplification-tolerance');
+ const area=(ring:Array<{x:number;y:number}>)=>Math.abs(ring.reduce((sum,p,i)=>{const q=ring[(i+1)%ring.length]!;return sum+p.x*q.y-q.x*p.y;},0))/2;
+ const distanceToSegment=(p:{x:number;y:number},a:{x:number;y:number},b:{x:number;y:number})=>{
+  const dx=b.x-a.x,dy=b.y-a.y,lengthSquared=dx*dx+dy*dy;
+  const t=lengthSquared===0?0:Math.max(0,Math.min(1,((p.x-a.x)*dx+(p.y-a.y)*dy)/lengthSquared));
+  return Math.hypot(p.x-(a.x+t*dx),p.y-(a.y+t*dy));
+ };
+ const originalArea=area(points),areaBudget=Math.max(1e-6,originalArea*0.01);
+ const result=points.map(p=>({...p}));
+ while(result.length>3){
+  let candidate=-1,bestDistance=Number.POSITIVE_INFINITY;
+  for(let i=0;i<result.length;i++){
+   const distance=distanceToSegment(result[i]!,result[(i+result.length-1)%result.length]!,result[(i+1)%result.length]!);
+   if(distance<=tolerance&&distance<bestDistance){candidate=i;bestDistance=distance;}
+  }
+  if(candidate<0)break;
+  const trial=result.filter((_,i)=>i!==candidate);
+  if(!isValidImageReferencePolygon(trial)||Math.abs(originalArea-area(trial))>areaBudget)break;
+  result.splice(candidate,1);
+ }
+ return result;
+}
+
 /** Move one polygon vertex in source pixels; invalid/self-crossing edits are rejected atomically. */
 export function moveImageReferencePolygonVertex(region:ImageReferenceRegion,index:number,x:number,y:number,sourceWidth:number,sourceHeight:number):ImageReferenceRegion {
  if(region.geometry.type!=='polygon')throw new Error('polygon-edit-requires-polygon');
