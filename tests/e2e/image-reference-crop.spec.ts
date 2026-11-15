@@ -16,7 +16,7 @@ async function mountEditor(page:Page){
    forms:[{id:'form-1',label:'Animal',viewIds:['view-1']}],
    avatars:[{id:'avatar-1',label:'PaKaChi',formIds:['form-1']}]
   };
-  const {mountImageReferenceEditor}=await import('/src/image-reference-editor.ts');
+  const {mountImageReferenceEditor}=await import('../../src/image-reference-editor.ts');
   const host=document.createElement('div');document.body.append(host);
   const editor=mountImageReferenceEditor(host,source,()=> 'en',()=>{},initial as any);
   (window as any).__imageReferenceEditor=editor;
