@@ -25,15 +25,16 @@ async function fixture(t,run){
  return {root,profile,endpoint,headers};
 }
 test('real HTTP adapter and job validate generated output, keep preview separate and preserve source',async t=>{
- let backendCalls=0;
- const f=await fixture(t,options=>{assert.deepEqual(options.reference,referenceManifest);return generate(options,{check:async()=>({ready:true,blockers:[],testDouble:true}),launch:async(_command,args,{signal})=>{
+ let backendCalls=0,generatedJob;
+ const f=await fixture(t,async options=>{assert.deepEqual(options.reference,referenceManifest);const result=await generate(options,{check:async()=>({ready:true,blockers:[],testDouble:true}),launch:async(_command,args,{signal})=>{
   backendCalls++;signal.throwIfAborted();const input=args[1];assert.deepEqual(await readFile(input),png);
   const destination=join(args[args.indexOf('--output-dir')+1],'0');await mkdir(destination,{recursive:true});await writeFile(join(destination,'mesh.glb'),glb());return {code:0};
- }});});
+ }});generatedJob=result.job;return result;});
  const registry=new ProviderRegistry();registry.register(createLocalGenerationAdapter(()=>token));let checked=false;
  const job=new ProviderJob(registry,{config:{version:1,profiles:[f.profile],assignments:{assistant:null,generation:'local',rigging:null}},role:'generation',input:{prompt:'Image reconstruction (label only)',source:{mediaType:'image/png',bytes:png},reference:referenceManifest},target:{session:'test',revision:1},validate:async output=>{assert.equal(output.kind,'model');const model=await parseModel(output.bytes.buffer);assert.equal(model.scene.children.length,1);disposeModel(model.scene);checked=true;}}).start();
  assert.equal((await job.done).status,'preview');assert.equal(backendCalls,1);assert.ok(checked);assert.equal(job.preview().kind,'model');
  assert.equal(job.accept(()=>({session:'test',revision:2}),()=>assert.fail('stale preview must not write')),false);
+ assert.deepEqual(JSON.parse(await readFile(join(generatedJob,'pakachi-reference.json'),'utf8')),referenceManifest);
  assert.ok(!(await readdir(f.root)).some(x=>x.startsWith('.upload-')));
 });
 test('service enforces authentication, exact origin, host and narrow preflight without invoking backend',async t=>{

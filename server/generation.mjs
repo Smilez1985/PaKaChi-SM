@@ -71,6 +71,7 @@ export function createGenerationService({token,origin='http://127.0.0.1:5173',..
    const image=join(staging,media==='image/png'?'source.png':'source.jpg');await writeFile(image,bytes,{flag:'wx',mode:0o600});
    const result=await run({...backend,output,image,signal:controller.signal,reference});controller.signal.throwIfAborted();
    if(result.report.status!=='generated-unreviewed'){reply(502,'generation-failed');return;}
+   if(reference)await writeFile(join(result.job,'pakachi-reference.json'),JSON.stringify(reference,null,2),{flag:'wx',mode:0o600});
    // Fixed backend-owned output location; never take a path from the request or report.
    const model=await readFile(join(result.job,'result','0','mesh.glb'));controller.signal.throwIfAborted();
    if(model.length>50*1024*1024){reply(502,'model-size');return;}
