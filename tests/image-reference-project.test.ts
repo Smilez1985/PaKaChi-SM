@@ -5,6 +5,7 @@ import {parseProject} from '../src/studio-data.ts';
 import type {StudioProject} from '../src/studio-data.ts';
 import {verifyImageReferenceSourceAsset} from '../src/image-reference.ts';
 import type {ImageReferenceDocument} from '../src/image-reference.ts';
+import type {ImageReferenceGenerationManifest} from '../src/image-reference-crop.ts';
 
 const reference:ImageReferenceDocument={
  format:'pakachi-image-reference',version:1,
@@ -14,6 +15,7 @@ const reference:ImageReferenceDocument={
  forms:[{id:'form-animal',label:'Animal form',viewIds:['view-front']}],
  avatars:[{id:'avatar-panda',label:'Panda',formIds:['form-animal']}],
 };
+const generationReference:ImageReferenceGenerationManifest={format:'pakachi-image-reference-generation',version:1,source:{sha256:'b'.repeat(64),width:640,height:480},selection:{regionId:'region-front',label:'Front view',kind:'view',avatar:{id:'avatar-panda',label:'Panda'},form:{id:'form-animal',label:'Animal form'},view:{id:'view-front',label:'Front'},crop:{x:20,y:30,width:200,height:300,sha256:'c'.repeat(64)},mask:{type:'polygon',vertices:4,holes:1}}};
 const base:StudioProject={format:'pakachi-studio',version:1,model:'AAAA',avatar:{id:'panda',name:'Panda',description:'',moves:[]},studio:{points:[],links:[],boneRest:[],poses:[],moves:[]}};
 
 test('project round-trip preserves source hash, regions and avatar/form/view hierarchy',()=>{
@@ -56,4 +58,18 @@ test('project rejects invalid image-reference hashes, geometry and dangling hier
  assert.throws(()=>parseProject(badGeometry),/Bildreferenzdaten/);
  const dangling=structuredClone({...base,imageReference:reference});dangling.imageReference!.views[0]!.regionIds=['missing-region'];
  assert.throws(()=>parseProject(dangling),/Bildreferenzdaten/);
+});
+
+
+test('project round-trip preserves exact generation crop provenance',()=>{
+ const project={...base,imageReference:reference,generationReference};
+ const restored=parseProject(JSON.parse(JSON.stringify(project)));
+ assert.deepEqual(restored.generationReference,generationReference);
+});
+
+test('project rejects generation provenance that does not match its source hierarchy',()=>{
+ const mismatch=structuredClone({...base,imageReference:reference,generationReference});mismatch.generationReference!.selection.avatar.id='another-avatar';
+ assert.throws(()=>parseProject(mismatch),/Generierungsherkunft/);
+ const outside=structuredClone({...base,imageReference:reference,generationReference});outside.generationReference!.selection.crop.width=999;
+ assert.throws(()=>parseProject(outside),/Generierungsherkunft/);
 });

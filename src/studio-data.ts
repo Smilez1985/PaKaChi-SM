@@ -3,6 +3,7 @@ import {validCorrectiveShapes} from './studio-corrective-shapes.ts';
 import {REVIEW_REASONS} from './studio-review.ts';
 import {validateImageReferenceDocument} from './image-reference.ts';
 import type {ImageReferenceDocument} from './image-reference.ts';
+import type {ImageReferenceGenerationManifest} from './image-reference-crop.ts';
 import type {ReviewReason} from './studio-review.ts';
 export type Vec3 = [number, number, number];
 export type Quat = [number, number, number, number];
@@ -39,6 +40,8 @@ export interface StudioProject {
   studio: StudioData;
   /** Confirmed source-image segmentation retained with the avatar project. */
   imageReference?: ImageReferenceDocument;
+  /** Exact selected crop provenance used for the accepted generation. */
+  generationReference?: ImageReferenceGenerationManifest;
 }
 export const emptyStudio = (): StudioData => ({points:[],links:[],boneRest:[],poses:[],moves:[]});
 
@@ -67,7 +70,24 @@ function validImageReferenceDocument(value:unknown):value is ImageReferenceDocum
  try{return validateImageReferenceDocument(value as unknown as ImageReferenceDocument).length===0;}catch{return false;}
 }
 
-const obj = (v: unknown): v is Record<string,unknown> => !!v && typeof v==='object' && !Array.isArray(v);
+
+function validGenerationReference(value:unknown,imageReference?:ImageReferenceDocument):value is ImageReferenceGenerationManifest {
+ if(!obj(value)||value.format!=='pakachi-image-reference-generation'||value.version!==1||!obj(value.source)||!obj(value.selection))return false;
+ const source=value.source,selection=value.selection,crop=selection.crop,mask=selection.mask;
+ if(!/^[a-f0-9]{64}$/i.test(String(source.sha256))||!Number.isSafeInteger(source.width)||!Number.isSafeInteger(source.height)||Number(source.width)<=0||Number(source.height)<=0||Number(source.width)>100000||Number(source.height)>100000)return false;
+ if(!id(selection.regionId)||!name(selection.label)||!['view','detail','avatar','form'].includes(String(selection.kind)))return false;
+ for(const key of ['avatar','form','view'])if(!obj(selection[key])||!id(selection[key]!.id)||!name(selection[key]!.label))return false;
+ if(!obj(crop)||!['x','y','width','height'].every(k=>Number.isSafeInteger(crop[k]))||Number(crop.x)<0||Number(crop.y)<0||Number(crop.width)<=0||Number(crop.height)<=0||Number(crop.x)+Number(crop.width)>Number(source.width)||Number(crop.y)+Number(crop.height)>Number(source.height)||!/^([a-f0-9]{64})$/i.test(String(crop.sha256)))return false;
+ if(!obj(mask)||!['rectangle','polygon'].includes(String(mask.type))||!Number.isInteger(mask.vertices)||Number(mask.vertices)<3||Number(mask.vertices)>4096||!Number.isInteger(mask.holes)||Number(mask.holes)<0||Number(mask.holes)>256||mask.type==='rectangle'&&(mask.vertices!==4||mask.holes!==0))return false;
+ if(imageReference){
+  if(source.sha256!==imageReference.source.sha256||source.width!==imageReference.source.width||source.height!==imageReference.source.height)return false;
+  const region=imageReference.regions.find(item=>item.id===selection.regionId);
+  const view=imageReference.views.find(item=>item.id===selection.view.id),form=imageReference.forms.find(item=>item.id===selection.form.id),avatar=imageReference.avatars.find(item=>item.id===selection.avatar.id);
+  if(!region||region.label!==selection.label||region.kind!==selection.kind||region.status!=='confirmed'||!view||view.label!==selection.view.label||!view.regionIds.includes(region.id)||!form||form.label!==selection.form.label||!form.viewIds.includes(view.id)||!avatar||avatar.label!==selection.avatar.label||!avatar.formIds.includes(form.id))return false;
+ }
+ return true;
+}
+\nconst obj = (v: unknown): v is Record<string,unknown> => !!v && typeof v==='object' && !Array.isArray(v);
 const name = (v: unknown): v is string => typeof v==='string' && v.trim().length>0 && v.length<=100;
 const id = (v: unknown): v is string => name(v) && /^[a-z0-9][a-z0-9_-]*$/.test(v);
 const finite = (v: unknown): v is number => typeof v==='number' && Number.isFinite(v) && Math.abs(v)<=10000;
@@ -78,7 +98,7 @@ const transform = (v:unknown,figure=false) => obj(v) && (v.scale===undefined || 
 function require(condition:unknown, message='Ungültige Studio-Projektdatei.'): asserts condition { if(!condition) throw new Error(message); }
 export function parseProject(input: unknown): StudioProject {
   require(obj(input) && input.format==='pakachi-studio' && input.version===1,'Unbekanntes Studio-Projektformat.');
-  require(input.imageReference===undefined||validImageReferenceDocument(input.imageReference),'Ungültige oder beschädigte Bildreferenzdaten.');
+  require(input.imageReference===undefined||validImageReferenceDocument(input.imageReference),'Ungültige oder beschädigte Bildreferenzdaten.');\n  require(input.generationReference===undefined||validGenerationReference(input.generationReference,input.imageReference as ImageReferenceDocument|undefined),'Ungültige Generierungsherkunft.');
   require(typeof input.model==='string' && input.model.length>0 && input.model.length<=70_000_000 && input.model.length%4===0 && /^[A-Za-z0-9+/]*={0,2}$/.test(input.model),'Modelldaten fehlen oder sind ungültig.');
   const a=input.avatar; require(obj(a) && id(a.id) && name(a.name) && typeof a.description==='string' && a.description.length<=1000 && Array.isArray(a.moves) && a.moves.length<=512);
   const moveIds=new Set<string>();
