@@ -20,6 +20,8 @@ Zeitstempel der letzten Änderung: 2026-11-15T13:13:00+01:00 (Europe/Berlin)
 
 ### Added
 
+- Erste automatische Bildsegmentierung für transparente PNG-/RGBA-Referenzen: getrennte Alpha-Vordergrundkomponenten werden als unbestätigte, einzeln zuordenbare Regionen vorgeschlagen. Die Erkennung arbeitet mit begrenzter Auflösung, filtert Kleinstrauschen und randverbundene Flächen und übernimmt weder Avatar-Identität noch Form-/Ansichtsbeziehungen. Opaque Hintergründe bleiben manuell zu markieren.
+
 - Übergabe der exakten Generierungsherkunft vom ausgewählten Bildausschnitt bis zur Avatar-Übernahme durch einen eigenen Regressionstest abgesichert; der Test prüft jetzt sowohl die Referenzhierarchie als auch das unveränderte Crop-Manifest.
 
 - Gezielte Chromium-Browserprüfung für Bildreferenz-Crops: erzeugte PNG-Dateien werden dekodiert und auf transparente Innenaussparung sowie deckende Außenfläche geprüft; zusätzlich wird das Verschieben eines Loch-Eckpunkts durch echte Editor-Pointerinteraktion geprüft. Beide Browserfälle bestanden. Der fokussierte Workflow #43671967701 war mit 47/47 Tests und TypeScript grün; keine vollständige E2E-Suite.
