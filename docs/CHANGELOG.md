@@ -11,11 +11,11 @@ Die Kategorien Added, Changed, Deprecated, Removed, Fixed und Security werden nu
 Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist ein lokaler Player vorhanden.
 
 ## [Unreleased]
-
 ### Added
+- Jede Bildregion kann im Editor ausdrücklich als Avatar-, Form-, Ansichts-, Detail- oder Hilfsbereich klassifiziert werden. Eine Änderung der Regionsart setzt den Prüfstatus zurück und verlangt eine erneute Bestätigung.
 - Der Markierungseditor kann auch rechteckige Regionen per Schnittlinie in zwei getrennte Polygonvorschläge teilen. Beide Teilbereiche bleiben unbestätigt und müssen separat geprüft werden; Innenaussparungen bleiben aus Sicherheitsgründen vom Teilen ausgeschlossen.
 
-Zeitstempel der letzten Änderung: 2026-11-15T14:25:00+01:00 (Europe/Berlin)
+Zeitstempel der letzten Änderung: 2026-11-15T14:45:00+01:00 (Europe/Berlin)
 
 ### Security
 

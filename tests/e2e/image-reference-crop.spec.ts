@@ -87,3 +87,13 @@ test('browser editor splits a rectangle into two separate unconfirmed polygon re
  const area=(points:Array<{x:number;y:number}>)=>Math.abs(points.reduce((sum,p,i)=>{const q=points[(i+1)%points.length]!;return sum+p.x*q.y-q.x*p.y;},0))/2;
  expect(area(regions[0].geometry.points)+area(regions[1].geometry.points)).toBe(6400);
 });
+
+test('changing a region classification requires renewed review',async({page})=>{
+ await mountEditor(page);
+ const kind=page.getByRole('combobox',{name:'Region type'});
+ await expect(kind).toHaveValue('view');
+ await kind.selectOption('detail');
+ const region=await page.evaluate(async()=> (await (window as any).__imageReferenceEditor.reference()).regions[0]);
+ expect(region.kind).toBe('detail');
+ expect(region.status).toBe('suggested');
+});
