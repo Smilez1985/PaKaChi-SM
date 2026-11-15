@@ -12,7 +12,11 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
-Zeitstempel der letzten Änderung: 2026-11-15T04:35:00+01:00 (Europe/Berlin)
+Zeitstempel der letzten Änderung: 2026-11-15T04:55:31+01:00 (Europe/Berlin)
+
+### Security
+
+- Sechs npm-Audit-Befunde aus transitiven Abhängigkeiten behoben: `@hono/node-server` auf 2.1.8, `body-parser` auf 2.4.0, `fast-uri` auf 3.1.9, `happy-dom` auf 21.0.4, `hono` auf 4.13.18 und `qs` auf 6.17.1 aktualisiert. Der fokussierte CI-Audit meldet danach **0 Schwachstellen**; die betroffenen Tests, Chromium-Prüfungen und TypeScript-Prüfung sind erfolgreich. Künftige relevante CI-Läufe prüfen `npm audit --audit-level=moderate` verbindlich.
 
 ### Added
 

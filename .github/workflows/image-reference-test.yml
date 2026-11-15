@@ -26,7 +26,7 @@ on:
       - 'package-lock.json'
   workflow_dispatch:
 permissions:
-  contents: write
+  contents: read
 concurrency:
   group: image-reference-${{ github.ref }}
   cancel-in-progress: true
@@ -42,15 +42,9 @@ jobs:
         with:
           node-version: '24'
           cache: npm
-      - name: Update vulnerable dependencies within declared ranges
-        run: npm audit fix --package-lock-only --ignore-scripts
       - run: npm ci
       - name: Require a clean dependency audit
         run: npm audit --audit-level=moderate
-      - name: Identify exact dependency advisories
-        run: |
-          npm audit --json > npm-audit.json || true
-          node --input-type=module -e "import fs from 'node:fs'; const a=JSON.parse(fs.readFileSync('npm-audit.json','utf8')); console.log(JSON.stringify({metadata:a.metadata?.vulnerabilities, vulnerabilities:Object.entries(a.vulnerabilities??{}).map(([name,v])=>({name,severity:v.severity,range:v.range,via:v.via.map(x=>typeof x==='string'?x:{title:x.title,url:x.url,range:x.range,severity:x.severity}),fixAvailable:v.fixAvailable,paths:v.nodes}))},null,2))"
       - name: Test image reference hierarchy and generation gate
         run: node --test tests/image-reference.test.ts
       - name: Test source-region crop planning
@@ -68,18 +62,3 @@ jobs:
       - name: Type-check project
         if: always()
         run: npx tsc --noEmit
-      - name: Commit verified dependency security updates
-        if: success()
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add package.json package-lock.json
-          if git diff --cached --quiet; then
-            echo "No dependency changes to commit."
-            exit 0
-          fi
-          git commit -m "Fix audited dependency vulnerabilities"
-          AUTH=$(printf 'x-access-token:%s' "$GITHUB_TOKEN" | base64 -w0)
-          git -c http.extraheader="AUTHORIZATION: basic $AUTH" push origin HEAD:develop
