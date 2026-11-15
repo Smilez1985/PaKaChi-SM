@@ -1,6 +1,6 @@
 import type {ImageReferenceDocument,ImageReferenceRegion} from './image-reference.ts';
 import {detectTransparentImageComponents,detectSolidBackgroundImageComponents} from './image-reference-detection.ts';
-import {checkImageReferenceReadiness,editImageReferenceRectangle,reorderImageReferenceRegions,moveImageReferenceRectangle,resizeImageReferenceRectangle,moveImageReferencePolygonVertex,moveImageReferencePolygonHoleVertex,isValidImageReferencePolygon,isValidImageReferencePolygonWithHoles,splitImageReferencePolygon,splitImageReferenceRegion,simplifyImageReferencePolygon} from './image-reference.ts';
+import {checkImageReferenceReadiness,editImageReferenceRectangle,reorderImageReferenceRegions,moveImageReferenceRectangle,resizeImageReferenceRectangle,moveImageReferencePolygonVertex,moveImageReferencePolygonHoleVertex,isValidImageReferencePolygon,isValidImageReferencePolygonWithHoles,splitImageReferenceRegion,simplifyImageReferencePolygon} from './image-reference.ts';
 import {createImageReferenceGenerationManifest,cropImageReferenceRegion} from './image-reference-crop.ts';
 
 interface Entry {region:ImageReferenceRegion;avatar:string;form:string;view:string;use:boolean}

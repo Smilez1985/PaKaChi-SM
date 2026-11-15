@@ -12,7 +12,10 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
-Zeitstempel der letzten Änderung: 2026-11-15T14:10:00+01:00 (Europe/Berlin)
+### Added
+- Der Markierungseditor kann auch rechteckige Regionen per Schnittlinie in zwei getrennte Polygonvorschläge teilen. Beide Teilbereiche bleiben unbestätigt und müssen separat geprüft werden; Innenaussparungen bleiben aus Sicherheitsgründen vom Teilen ausgeschlossen.
+
+Zeitstempel der letzten Änderung: 2026-11-15T14:25:00+01:00 (Europe/Berlin)
 
 ### Security
 

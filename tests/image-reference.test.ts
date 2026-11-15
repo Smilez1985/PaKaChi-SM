@@ -1,7 +1,7 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {checkImageReferenceReadiness,validateImageReferenceDocument,editImageReferenceRectangle,reorderImageReferenceRegions,moveImageReferenceRectangle,resizeImageReferenceRectangle,isValidImageReferencePolygon,isValidImageReferencePolygonWithHoles,moveImageReferencePolygonVertex,moveImageReferencePolygonHoleVertex,splitImageReferencePolygon,splitImageReferenceRegion,simplifyImageReferencePolygon} from '../src/image-reference.ts';
-import type {ImageReferenceDocument} from '../src/image-reference.ts';
+import type {ImageReferenceDocument,ImageReferenceRegion} from '../src/image-reference.ts';
 
 const base=():ImageReferenceDocument=>({
  format:'pakachi-image-reference',version:1,
