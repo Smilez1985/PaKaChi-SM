@@ -78,8 +78,8 @@ test('browser editor splits a rectangle into two separate unconfirmed polygon re
  const canvas=page.locator('canvas.image-reference-canvas'),bounds=await canvas.boundingBox();
  expect(bounds).not.toBeNull();const box=bounds!;
  await page.getByRole('button',{name:'Split contour'}).click();
- await page.mouse.click(box.x+box.width*0.5,box.y-box.height*0.1);
- await page.mouse.click(box.x+box.width*0.5,box.y+box.height*1.1);
+ await page.mouse.click(box.x+box.width*0.5,box.y+box.height*0.02);
+ await page.mouse.click(box.x+box.width*0.5,box.y+box.height*0.98);
  const regions=await page.evaluate(async()=> (await (window as any).__imageReferenceEditor.reference()).regions);
  expect(regions, 'editor reference should expose the updated split regions').toHaveLength(2);
  expect(regions.every((region:any)=>region.geometry.type==='polygon'&&region.status==='suggested')).toBe(true);
