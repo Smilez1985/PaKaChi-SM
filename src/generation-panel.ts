@@ -72,7 +72,7 @@ export function mountGenerationPanel(host:HTMLElement,bridge:GenerationHost,lang
  };
  retry.onclick=()=>{if(pending||!retryRequest||!matches(retryRequest.target))return;const request=retryRequest;void begin(request.config,request.target,request.selected,request.keys,request.reference);};
  async function begin(config:ProviderConfig,target:ProjectRevision,selected:File,keys:Map<string,string>,reference:ImageReferenceGenerationManifest){
-  clear(true);const current=sequence;pending=true;controller=new AbortController();const signal=controller.signal;
+  generationReference=reference;clear(true);const current=sequence;pending=true;controller=new AbortController();const signal=controller.signal;
   const tokenFor=(profile:Readonly<ProviderProfile>)=>keys.get(profile.id)??'';
   const registry=new ProviderRegistry();
   registry.register(deps.adapter?{
