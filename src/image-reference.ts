@@ -165,7 +165,6 @@ export function isValidImageReferencePolygonWithHoles(points:Array<{x:number;y:n
   if(((abC>1e-8&&abD< -1e-8)||(abC< -1e-8&&abD>1e-8))&&((cdA>1e-8&&cdB< -1e-8)||(cdA< -1e-8&&cdB>1e-8)))return true;
   return onSegment(c,a,b)||onSegment(d,a,b)||onSegment(a,c,d)||onSegment(b,c,d);
  };
- const rings=[points,...holes];
  for(let h=0;h<holes.length;h++){
   const hole=holes[h]!;
   if(!isValidImageReferencePolygon(hole)||!hole.every(p=>inside(p,points)))return false;
