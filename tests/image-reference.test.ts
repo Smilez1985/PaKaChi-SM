@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {checkImageReferenceReadiness,validateImageReferenceDocument,editImageReferenceRectangle,reorderImageReferenceRegions,moveImageReferenceRectangle,resizeImageReferenceRectangle,isValidImageReferencePolygon,isValidImageReferencePolygonWithHoles,moveImageReferencePolygonVertex,splitImageReferencePolygon,simplifyImageReferencePolygon} from '../src/image-reference.ts';
+import {checkImageReferenceReadiness,validateImageReferenceDocument,editImageReferenceRectangle,reorderImageReferenceRegions,moveImageReferenceRectangle,resizeImageReferenceRectangle,isValidImageReferencePolygon,isValidImageReferencePolygonWithHoles,moveImageReferencePolygonVertex,moveImageReferencePolygonHoleVertex,splitImageReferencePolygon,simplifyImageReferencePolygon} from '../src/image-reference.ts';
 import type {ImageReferenceDocument} from '../src/image-reference.ts';
 
 const base=():ImageReferenceDocument=>({
@@ -169,6 +169,15 @@ test('simplifies redundant polygon vertices without changing the silhouette mate
  const area=(ring:Array<{x:number;y:number}>)=>Math.abs(ring.reduce((sum,p,i)=>{const q=ring[(i+1)%ring.length]!;return sum+p.x*q.y-q.x*p.y;},0))/2;
  assert.equal(area(simplified),10000);
  assert.throws(()=>simplifyImageReferencePolygon(contour,0),/invalid-simplification-tolerance/);
+});
+
+test('moves interior-ring vertices only when all hole constraints remain valid',()=>{
+ const region={id:'r',label:'R',kind:'detail' as const,status:'confirmed' as const,geometry:{type:'polygon' as const,points:[{x:0,y:0},{x:100,y:0},{x:100,y:100},{x:0,y:100}],holes:[[{x:20,y:20},{x:20,y:40},{x:40,y:40},{x:40,y:20}]]}};
+ const moved=moveImageReferencePolygonHoleVertex(region,0,0,25,25,100,100);
+ assert.notEqual(moved,region);
+ assert.deepEqual(moved.geometry.type==='polygon'?moved.geometry.holes?.[0]?.[0]:undefined,{x:25,y:25});
+ assert.equal(moveImageReferencePolygonHoleVertex(region,0,0,0,0,100,100),region);
+ assert.equal(moveImageReferencePolygonHoleVertex(region,0,0,150,150,100,100),region);
 });
 
 test('moves polygon vertices within image bounds and rejects invalid self-crossing edits',()=>{

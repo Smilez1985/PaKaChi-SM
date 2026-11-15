@@ -16,7 +16,7 @@ Zeitstempel der letzten Änderung: 2026-11-15T03:52:00+01:00 (Europe/Berlin)
 
 ### Added
 
-- Polygonregionen unterstützen jetzt mehrere disjunkte Innenringe. Der Editor kann Innenaussparungen zeichnen, vorhandene Ringe nach Rückfrage entfernen und deren Eckpunkte verschieben; Validierung weist Außenkontakt, Überlappungen und außerhalb liegende Ringe zurück. Der Crop-Plan überträgt Innenringe und schneidet sie per Even-Odd-Füllregel transparent aus.
+- Polygonregionen unterstützen jetzt mehrere disjunkte Innenringe. Der Editor kann Innenaussparungen zeichnen, vorhandene Ringe nach Rückfrage entfernen und deren Eckpunkte verschieben; ungültige Bewegungen werden ohne Geometrieänderung verworfen. Validierung weist Außenkontakt, Überlappungen und außerhalb liegende Ringe zurück. Der Crop-Plan überträgt Innenringe und schneidet sie per Even-Odd-Füllregel transparent aus.
 - Polygonkonturen lassen sich im Bildeditor auf ausdrücklichen Klick konservativ vereinfachen. Die Funktion fragt vor der Änderung nach, entfernt nur redundante Punkte bei gültiger Kontur und höchstens 1 % Flächenabweichung; die geänderte Region wird wieder prüfpflichtig. CI #43669836712: 41/41 Tests bestanden, TypeScript erfolgreich.
 - Polygonkonturen können mit einer Schnittlinie in genau zwei gültige Teilregionen zerlegt werden. Beide Teilregionen müssen nach dem Schnitt erneut bestätigt werden; uneindeutige oder tangentiale Schnitte werden abgewiesen. Zusätzliche Regressionen prüfen konkave L-Konturen und verwerfen Schnitte durch eine U-Kontur mit vier Grenzübertritten. CI #43651121349: 40/40 Tests bestanden, TypeScript erfolgreich.
 

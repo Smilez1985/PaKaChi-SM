@@ -189,6 +189,20 @@ export function moveImageReferencePolygonVertex(region:ImageReferenceRegion,inde
  return {...region,geometry:{...region.geometry,points}};
 }
 
+/** Move an interior-ring vertex while preserving all ring relationships atomically. */
+export function moveImageReferencePolygonHoleVertex(region:ImageReferenceRegion,ringIndex:number,index:number,x:number,y:number,sourceWidth:number,sourceHeight:number):ImageReferenceRegion {
+ if(region.geometry.type!=='polygon')throw new Error('polygon-edit-requires-polygon');
+ const current=region.geometry.holes??[];
+ if(!Number.isInteger(ringIndex)||ringIndex<0||ringIndex>=current.length)throw new Error('unknown-polygon-hole');
+ const ring=current[ringIndex]!;
+ if(!Number.isInteger(index)||index<0||index>=ring.length)throw new Error('unknown-polygon-hole-vertex');
+ if(![x,y,sourceWidth,sourceHeight].every(Number.isFinite)||sourceWidth<=0||sourceHeight<=0)throw new Error('invalid-polygon-coordinate');
+ const holes=current.map(points=>points.map(p=>({...p})));
+ holes[ringIndex]![index]={x:Math.max(0,Math.min(sourceWidth,x)),y:Math.max(0,Math.min(sourceHeight,y))};
+ if(!isValidImageReferencePolygonWithHoles(region.geometry.points,holes))return region;
+ return {...region,geometry:{...region.geometry,holes}};
+}
+
 /** Structural validation allows incomplete drafts while the user is drawing and linking. */
 export function validateImageReferenceDocument(value:ImageReferenceDocument):ImageReferenceIssue[] {
   const issues:ImageReferenceIssue[]=[];

@@ -9,7 +9,7 @@ import type {ImageReferenceDocument} from '../src/image-reference.ts';
 const reference:ImageReferenceDocument={
  format:'pakachi-image-reference',version:1,
  source:{sha256:'b'.repeat(64),width:640,height:480,asset:{mediaType:'image/png',data:'AQIDBA=='}},
- regions:[{id:'region-front',label:'Front view',kind:'view',status:'confirmed',geometry:{type:'rectangle',x:20,y:30,width:200,height:300}}],
+ regions:[{id:'region-front',label:'Front view',kind:'view',status:'confirmed',geometry:{type:'polygon',points:[{x:20,y:30},{x:220,y:30},{x:220,y:330},{x:20,y:330}],holes:[[{x:70,y:90},{x:70,y:130},{x:110,y:130},{x:110,y:90}]]}}],
  views:[{id:'view-front',label:'Front',regionIds:['region-front']}],
  forms:[{id:'form-animal',label:'Animal form',viewIds:['view-front']}],
  avatars:[{id:'avatar-panda',label:'Panda',formIds:['form-animal']}],
