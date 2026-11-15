@@ -13,7 +13,7 @@ export function detectTransparentImageComponents(image:{width:number;height:numb
   while(read<write){const index=queue[read++]!,x=index%cols,y=Math.floor(index/cols);minX=Math.min(minX,x);maxX=Math.max(maxX,x);minY=Math.min(minY,y);maxY=Math.max(maxY,y);
    for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){if(!dx&&!dy)continue;const nx=x+dx,ny=y+dy;if(nx<0||ny<0||nx>=cols||ny>=rows)continue;const next=ny*cols+nx;if(active[next]&&!visited[next]){visited[next]=1;queue[write++]=next;}}
   }
-  if(write<minimum)continue;const x=minX*step,y=minY*step,right=Math.min(width,(maxX+1)*step),bottom=Math.min(height,(maxY+1)*step);
+  if(write<minimum||minX===0||minY===0||maxX===cols-1||maxY===rows-1)continue;const x=minX*step,y=minY*step,right=Math.min(width,(maxX+1)*step),bottom=Math.min(height,(maxY+1)*step);
   components.push({x,y,width:right-x,height:bottom-y,area:write*step*step});
  }
  return components.sort((a,b)=>b.area-a.area).slice(0,maxComponents);
