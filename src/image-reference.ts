@@ -6,7 +6,7 @@ export type ImageRegionKind = 'avatar'|'form'|'view'|'detail'|'helper';
 export type ImageRegionStatus = 'suggested'|'confirmed'|'ignored';
 export type ImageRegionGeometry =
   | {type:'rectangle';x:number;y:number;width:number;height:number}
-  | {type:'polygon';points:Array<{x:number;y:number}>};
+  | {type:'polygon';points:Array<{x:number;y:number}>;holes?:Array<Array<{x:number;y:number}>>};
 
 export interface ImageReferenceRegion {
   id:string;
@@ -144,6 +144,41 @@ export function simplifyImageReferencePolygon(points:Array<{x:number;y:number}>,
  return result;
 }
 
+/**
+ * Validate a polygon with zero or more disjoint interior rings. Holes must be
+ * strictly inside the outer ring and must neither touch nor overlap any ring.
+ */
+export function isValidImageReferencePolygonWithHoles(points:Array<{x:number;y:number}>,holes:Array<Array<{x:number;y:number}>>=[]):boolean {
+ if(!isValidImageReferencePolygon(points))return false;
+ const inside=(p:{x:number;y:number},ring:Array<{x:number;y:number}>)=>{
+  let result=false;
+  for(let i=0,j=ring.length-1;i<ring.length;j=i++){
+   const a=ring[i]!,b=ring[j]!;
+   if((a.y>p.y)!==(b.y>p.y)&&p.x<(b.x-a.x)*(p.y-a.y)/(b.y-a.y)+a.x)result=!result;
+  }
+  return result;
+ };
+ const onSegment=(p:{x:number;y:number},a:{x:number;y:number},b:{x:number;y:number})=>
+  Math.abs(cross(a,b,p))<1e-8&&p.x>=Math.min(a.x,b.x)-1e-8&&p.x<=Math.max(a.x,b.x)+1e-8&&p.y>=Math.min(a.y,b.y)-1e-8&&p.y<=Math.max(a.y,b.y)+1e-8;
+ const intersects=(a:{x:number;y:number},b:{x:number;y:number},c:{x:number;y:number},d:{x:number;y:number})=>{
+  const abC=cross(a,b,c),abD=cross(a,b,d),cdA=cross(c,d,a),cdB=cross(c,d,b);
+  if(((abC>1e-8&&abD< -1e-8)||(abC< -1e-8&&abD>1e-8))&&((cdA>1e-8&&cdB< -1e-8)||(cdA< -1e-8&&cdB>1e-8)))return true;
+  return onSegment(c,a,b)||onSegment(d,a,b)||onSegment(a,c,d)||onSegment(b,c,d);
+ };
+ const rings=[points,...holes];
+ for(let h=0;h<holes.length;h++){
+  const hole=holes[h]!;
+  if(!isValidImageReferencePolygon(hole)||!hole.every(p=>inside(p,points)))return false;
+  for(let i=0;i<hole.length;i++)for(let j=0;j<points.length;j++)if(intersects(hole[i]!,hole[(i+1)%hole.length]!,points[j]!,points[(j+1)%points.length]!))return false;
+  for(let other=0;other<h;other++){
+   const prior=holes[other]!;
+   if(hole.some(p=>inside(p,prior))||prior.some(p=>inside(p,hole)))return false;
+   for(let i=0;i<hole.length;i++)for(let j=0;j<prior.length;j++)if(intersects(hole[i]!,hole[(i+1)%hole.length]!,prior[j]!,prior[(j+1)%prior.length]!))return false;
+  }
+ }
+ return true;
+}
+
 /** Move one polygon vertex in source pixels; invalid/self-crossing edits are rejected atomically. */
 export function moveImageReferencePolygonVertex(region:ImageReferenceRegion,index:number,x:number,y:number,sourceWidth:number,sourceHeight:number):ImageReferenceRegion {
  if(region.geometry.type!=='polygon')throw new Error('polygon-edit-requires-polygon');
@@ -151,8 +186,8 @@ export function moveImageReferencePolygonVertex(region:ImageReferenceRegion,inde
  if(![x,y,sourceWidth,sourceHeight].every(Number.isFinite)||sourceWidth<=0||sourceHeight<=0)throw new Error('invalid-polygon-coordinate');
  const points=region.geometry.points.map(p=>({...p}));
  points[index]={x:Math.max(0,Math.min(sourceWidth,x)),y:Math.max(0,Math.min(sourceHeight,y))};
- if(!isValidImageReferencePolygon(points))return region;
- return {...region,geometry:{type:'polygon',points}};
+ if(!isValidImageReferencePolygonWithHoles(points,region.geometry.holes))return region;
+ return {...region,geometry:{...region.geometry,points}};
 }
 
 /** Structural validation allows incomplete drafts while the user is drawing and linking. */
@@ -176,7 +211,7 @@ export function validateImageReferenceDocument(value:ImageReferenceDocument):Ima
       const g=r.geometry;
       if(![g.x,g.y,g.width,g.height].every(finite)||g.width<=0||g.height<=0||g.x<0||g.y<0||g.x+g.width>source.width||g.y+g.height>source.height)issues.push({path:p+'.geometry',message:'Rechteck muss vollständig innerhalb des Quellbildes liegen und positive Fläche haben.'});
     }else if(r.geometry.type==='polygon'){
-      if(!isValidImageReferencePolygon(r.geometry.points))issues.push({path:p+'.geometry.points',message:'Polygon muss mindestens drei unterschiedliche Punkte, eine Mindestfläche und keine Selbstüberschneidungen haben.'});
+      if(!isValidImageReferencePolygonWithHoles(r.geometry.points,r.geometry.holes))issues.push({path:p+'.geometry.points',message:'Polygon muss mindestens drei unterschiedliche Punkte, eine Mindestfläche und keine Selbstüberschneidungen haben.'});
       r.geometry.points.forEach((q,j)=>point(q.x,q.y,`${p}.geometry.points[${j}]`));
     }else issues.push({path:p+'.geometry',message:'Unbekannter Geometrietyp.'});
   }

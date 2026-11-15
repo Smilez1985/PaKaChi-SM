@@ -152,6 +152,15 @@ test('rejects a cut that crosses a concave contour more than twice',()=>{
  assert.equal(splitImageReferencePolygon(uShape,{x:-10,y:50},{x:110,y:50}),undefined);
 });
 
+test('validates disjoint interior holes and rejects touching, outside, and overlapping rings',()=>{
+ const outer=[{x:0,y:0},{x:100,y:0},{x:100,y:100},{x:0,y:100}];
+ const hole=[{x:20,y:20},{x:20,y:40},{x:40,y:40},{x:40,y:20}];
+ assert.equal(isValidImageReferencePolygonWithHoles(outer,[hole]),true);
+ assert.equal(isValidImageReferencePolygonWithHoles(outer,[[{x:90,y:20},{x:110,y:20},{x:110,y:40},{x:90,y:40}]]),false);
+ assert.equal(isValidImageReferencePolygonWithHoles(outer,[[{x:0,y:20},{x:0,y:40},{x:20,y:40},{x:20,y:20}]]),false);
+ assert.equal(isValidImageReferencePolygonWithHoles(outer,[hole,[{x:30,y:30},{x:30,y:50},{x:50,y:50},{x:50,y:30}]]),false);
+});
+
 test('simplifies redundant polygon vertices without changing the silhouette materially',()=>{
  const contour=[{x:0,y:0},{x:25,y:0},{x:50,y:0},{x:100,y:0},{x:100,y:100},{x:0,y:100}];
  const simplified=simplifyImageReferencePolygon(contour,1);

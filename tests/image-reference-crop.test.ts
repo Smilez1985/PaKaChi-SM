@@ -16,6 +16,14 @@ test('crop planning rejects invalid image sizes and geometry outside the source'
 });
 
 
+test('polygon crop plans preserve interior rings in crop-local coordinates',()=>{
+ const shape=region({type:'polygon',points:[{x:10,y:10},{x:90,y:10},{x:90,y:90},{x:10,y:90}],holes:[[{x:30,y:30},{x:30,y:50},{x:50,y:50},{x:50,y:30}]]});
+ assert.deepEqual(planImageReferenceCrop(shape,100,100),{x:10,y:10,width:80,height:80,polygon:[{x:0,y:0},{x:80,y:0},{x:80,y:80},{x:0,y:80}],holes:[[{x:20,y:20},{x:20,y:40},{x:40,y:40},{x:40,y:20}]]});
+});
+test('crop planning rejects a hole outside the outer contour',()=>{
+ const shape=region({type:'polygon',points:[{x:10,y:10},{x:90,y:10},{x:90,y:90},{x:10,y:90}],holes:[[{x:80,y:20},{x:100,y:20},{x:100,y:40},{x:80,y:40}]]});
+ assert.throws(()=>planImageReferenceCrop(shape,100,100),/invalid-region-geometry/);
+});
 test('crop planning rejects self-intersecting polygon contours',()=>{
  assert.throws(()=>planImageReferenceCrop(region({type:'polygon',points:[{x:10,y:10},{x:80,y:80},{x:10,y:80},{x:80,y:10}]}),100,100),/invalid-region-geometry/);
 });
