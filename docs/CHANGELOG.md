@@ -12,13 +12,15 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 ### Fixed
+- Auch direkte Zahlenkorrekturen an X/Y/Breite/Höhe setzen bestätigte Bildregionen wieder auf prüfpflichtig und entfernen die 3D-Auswahl.
+
+### Fixed
 - Das Verschieben, Skalieren oder Bearbeiten von Polygonpunkten setzt eine zuvor bestätigte Bildregion jetzt wieder auf „vorgeschlagen“. Die Region muss nach jeder Geometrieänderung erneut geprüft und bestätigt werden, bevor sie für die 3D-Erzeugung freigegeben ist.
 
 ### Added
 - Jede Bildregion kann im Editor ausdrücklich als Avatar-, Form-, Ansichts-, Detail- oder Hilfsbereich klassifiziert werden. Eine Änderung der Regionsart setzt den Prüfstatus zurück und verlangt eine erneute Bestätigung.
 - Der Markierungseditor kann auch rechteckige Regionen per Schnittlinie in zwei getrennte Polygonvorschläge teilen. Beide Teilbereiche bleiben unbestätigt und müssen separat geprüft werden; Innenaussparungen bleiben aus Sicherheitsgründen vom Teilen ausgeschlossen.
 
-Zeitstempel der letzten Änderung: 2026-11-15T15:05:00+01:00 (Europe/Berlin)
 
 ### Security
 
@@ -123,6 +125,8 @@ Zeitstempel der letzten Änderung: 2026-11-14T21:02:00+01:00
 
 - Sichere lokale Trennkorrektur anhand von Blender-, CGAL- und PositionBasedDynamics-Primärquellen abgegrenzt: Erhalt von Hautgewichten/Morph-Zielen, kombinierte Abstands-/Formbedingungen und tatsächliche Originalform-Abnahme als nächste Umsetzung festgehalten. Noch kein implementierter Trennungsgenerator.
 - Actions-Verbrauch begrenzt: vollständige CI nur bei PR/main und manueller Auslösung; Originalformen-/Bewegungsbenchmarks nur manuell. Lesender Topologie-Audit zählt Null-/Doppelflächen, kaputte Indizes, nicht-manifold/offene Kanten und identische Koordinaten ohne UV-/Skinning-Daten automatisch zu verändern.
+
+Zeitstempel der letzten Änderung: 2026-11-15T15:20:00+01:00 (Europe/Berlin)
 
 ## [0.101.0] - 2026-11-11
 

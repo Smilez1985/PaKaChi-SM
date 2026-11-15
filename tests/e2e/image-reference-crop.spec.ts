@@ -109,3 +109,15 @@ test('moving a confirmed rectangle invalidates its confirmation',async({page})=>
  const region=await page.evaluate(async()=> (await (window as any).__imageReferenceEditor.reference()).regions[0]);
  expect(region.status).toBe('suggested');
 });
+
+test('editing rectangle source-pixel fields invalidates confirmation and selection',async({page})=>{
+ await mountRectangleEditor(page);
+ await page.getByLabel('Confirm reviewed region').check();
+ await expect(page.getByLabel('Use for 3D')).toBeEnabled();
+ await page.getByLabel('X',{exact:true}).fill('12');
+ await page.getByLabel('X',{exact:true}).press('Tab');
+ const region=await page.evaluate(async()=> (await (window as any).__imageReferenceEditor.reference()).regions[0]);
+ expect(region.geometry.x).toBe(12);
+ expect(region.status).toBe('suggested');
+ expect(region.use).not.toBe(true);
+});
