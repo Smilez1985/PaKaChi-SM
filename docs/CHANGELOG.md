@@ -15,7 +15,7 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 ### Fixed
 
 - Änderungen an Regionsbeschriftung sowie Avatar-/Form-/Ansichtszuordnung entziehen die bisherige Bestätigung und 3D-Freigabe; erneute Prüfung ist erforderlich.
-- Fehlerhafte literale `\\n`-Sequenzen in Roadmap und Changelog durch echte Markdown-Zeilenumbrüche ersetzt; der aktuelle Übergabestand und der erfolgreiche CI-Lauf #43760802602 sind nachgetragen.
+- Fehlerhafte Escape-Sequenzen für Zeilenumbrüche in Roadmap und Changelog durch echte Markdown-Zeilenumbrüche ersetzt; der aktuelle Übergabestand und der erfolgreiche CI-Lauf #43760802602 sind nachgetragen.
 
 ### Fixed
 - Auch direkte Zahlenkorrekturen an X/Y/Breite/Höhe setzen bestätigte Bildregionen wieder auf prüfpflichtig und entfernen die 3D-Auswahl.
