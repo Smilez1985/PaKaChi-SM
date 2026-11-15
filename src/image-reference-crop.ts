@@ -47,9 +47,10 @@ export async function cropImageReferenceRegion(source:File,region:ImageReference
 export interface ImageReferenceGenerationManifest {
  format:'pakachi-image-reference-generation'; version:1;
  source:{sha256:string;width:number;height:number};
- selection:{regionId:string;label:string;kind:ImageReferenceRegion['kind'];avatar:{id:string;label:string};form:{id:string;label:string};view:{id:string;label:string};crop:{x:number;y:number;width:number;height:number};mask:{type:'rectangle'|'polygon';vertices:number;holes:number}};
+ selection:{regionId:string;label:string;kind:ImageReferenceRegion['kind'];avatar:{id:string;label:string};form:{id:string;label:string};view:{id:string;label:string};crop:{x:number;y:number;width:number;height:number;sha256:string};mask:{type:'rectangle'|'polygon';vertices:number;holes:number}};
 }
-export function createImageReferenceGenerationManifest(document:ImageReferenceDocument,regionId:string):ImageReferenceGenerationManifest {
+export function createImageReferenceGenerationManifest(document:ImageReferenceDocument,regionId:string,cropSha256:string):ImageReferenceGenerationManifest {
+ if(!/^[a-f0-9]{64}$/i.test(cropSha256))throw new Error('invalid-generation-crop-hash');
  if(!checkImageReferenceReadiness(document).ready)throw new Error('image-reference-not-ready');
  const region=document.regions.find(item=>item.id===regionId);
  if(!region||region.status!=='confirmed')throw new Error('image-reference-region-not-confirmed');
@@ -62,5 +63,5 @@ export function createImageReferenceGenerationManifest(document:ImageReferenceDo
  const matchingAvatars=document.avatars.filter(avatar=>avatar.formIds.includes(form.id));
  if(matchingAvatars.length!==1)throw new Error('image-reference-avatar-assignment');
  const avatar=matchingAvatars[0]!,crop=planImageReferenceCrop(region,document.source.width,document.source.height),geometry=region.geometry;
- return {format:'pakachi-image-reference-generation',version:1,source:{sha256:document.source.sha256,width:document.source.width,height:document.source.height},selection:{regionId:region.id,label:region.label,kind:region.kind,avatar:{id:avatar.id,label:avatar.label},form:{id:form.id,label:form.label},view:{id:view.id,label:view.label},crop:{x:crop.x,y:crop.y,width:crop.width,height:crop.height},mask:{type:geometry.type,vertices:geometry.type==='polygon'?geometry.points.length:4,holes:geometry.type==='polygon'?(geometry.holes?.length??0):0}}};
+ return {format:'pakachi-image-reference-generation',version:1,source:{sha256:document.source.sha256,width:document.source.width,height:document.source.height},selection:{regionId:region.id,label:region.label,kind:region.kind,avatar:{id:avatar.id,label:avatar.label},form:{id:form.id,label:form.label},view:{id:view.id,label:view.label},crop:{x:crop.x,y:crop.y,width:crop.width,height:crop.height,sha256:cropSha256},mask:{type:geometry.type,vertices:geometry.type==='polygon'?geometry.points.length:4,holes:geometry.type==='polygon'?(geometry.holes?.length??0):0}}};
 }

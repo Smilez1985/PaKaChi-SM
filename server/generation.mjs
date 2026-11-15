@@ -1,6 +1,6 @@
 /** Local, opt-in image-to-3D transport. Backend paths/options come only from the operator. */
 import {createServer} from 'node:http';
-import {timingSafeEqual} from 'node:crypto';
+import {createHash,timingSafeEqual} from 'node:crypto';
 import {mkdtemp,writeFile,readFile,rm,mkdir} from 'node:fs/promises';
 import {join,resolve} from 'node:path';
 import {pathToFileURL} from 'node:url';
@@ -19,7 +19,7 @@ function parseReferenceManifest(header){
  if(!keys(selection,['regionId','label','kind','avatar','form','view','crop','mask'])||!text(selection.regionId)||!text(selection.label)||!['avatar','form','view','detail','helper'].includes(selection.kind))throw new Error('reference-selection');
  for(const parent of [selection.avatar,selection.form,selection.view])if(!keys(parent,['id','label'])||!text(parent.id)||!text(parent.label))throw new Error('reference-parent');
  const crop=selection.crop,mask=selection.mask;
- if(!keys(crop,['x','y','width','height'])||![crop.x,crop.y,crop.width,crop.height].every(Number.isSafeInteger)||crop.x<0||crop.y<0||crop.width<1||crop.height<1||crop.x+crop.width>source.width||crop.y+crop.height>source.height)throw new Error('reference-crop');
+ if(!keys(crop,['x','y','width','height','sha256'])||typeof crop.sha256!=='string'||!/^[a-f0-9]{64}$/i.test(crop.sha256)||![crop.x,crop.y,crop.width,crop.height].every(Number.isSafeInteger)||crop.x<0||crop.y<0||crop.width<1||crop.height<1||crop.x+crop.width>source.width||crop.y+crop.height>source.height)throw new Error('reference-crop');
  if(!keys(mask,['type','vertices','holes'])||!['rectangle','polygon'].includes(mask.type)||!Number.isSafeInteger(mask.vertices)||mask.vertices<(mask.type==='polygon'?3:4)||mask.vertices>4096||!Number.isSafeInteger(mask.holes)||mask.holes<0||mask.holes>64||(mask.type==='rectangle'&&mask.holes!==0))throw new Error('reference-mask');
  return value;
 }
@@ -64,6 +64,7 @@ export function createGenerationService({token,origin='http://127.0.0.1:5173',..
    const chunks=[];let size=0;
    for await(const chunk of req){controller.signal.throwIfAborted();size+=chunk.length;if(size>MAX_IMAGE){reply(413,'image-size');return;}chunks.push(chunk);}
    const bytes=Buffer.concat(chunks);
+   if(reference&&createHash('sha256').update(bytes).digest('hex')!==reference.selection.crop.sha256.toLowerCase()){reply(400,'reference-crop-hash');return;}
    if(media==='image/png'?!bytes.subarray(0,8).equals(png):!(bytes.length>=3&&bytes[0]===255&&bytes[1]===216&&bytes[2]===255)){reply(415,'image-signature');return;}
    controller.signal.throwIfAborted();
    const output=resolve(backend.output??'generated');await mkdir(output,{recursive:true});staging=await mkdtemp(join(output,'.upload-'));

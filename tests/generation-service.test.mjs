@@ -1,4 +1,5 @@
 import {request as httpRequest} from 'node:http';
+import {createHash} from 'node:crypto';
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {mkdtemp,mkdir,writeFile,readFile,rm,readdir} from 'node:fs/promises';
@@ -12,8 +13,9 @@ import {ProviderJob} from '../src/ai-jobs.ts';
 import {parseModel,disposeModel} from '../src/viewer.ts';
 import {glb} from './generation-fixture.mjs';
 const token='a'.repeat(48),origin='http://127.0.0.1:5173';
-const referenceManifest={format:'pakachi-image-reference-generation',version:1,source:{sha256:'a'.repeat(64),width:100,height:100},selection:{regionId:'region-front',label:'Front',kind:'view',avatar:{id:'avatar-panda',label:'Panda'},form:{id:'form-animal',label:'Animal'},view:{id:'view-front',label:'Front'},crop:{x:10,y:10,width:50,height:70},mask:{type:'rectangle',vertices:4,holes:0}}};
+
 const png=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+a9X8AAAAASUVORK5CYII=','base64');
+const referenceManifest={format:'pakachi-image-reference-generation',version:1,source:{sha256:'a'.repeat(64),width:100,height:100},selection:{regionId:'region-front',label:'Front',kind:'view',avatar:{id:'avatar-panda',label:'Panda'},form:{id:'form-animal',label:'Animal'},view:{id:'view-front',label:'Front'},crop:{x:10,y:10,width:50,height:70,sha256:createHash('sha256').update(png).digest('hex')},mask:{type:'rectangle',vertices:4,holes:0}}};
 async function fixture(t,run){
  const root=await mkdtemp(join(tmpdir(),'pakachi-service-'));
  const service=createGenerationService({token,origin,repo:root,output:root},{run});const endpoint=await service.listen(0);
@@ -46,6 +48,8 @@ test('service enforces authentication, exact origin, host and narrow preflight w
  assert.equal((await fetch(f.endpoint+'/generate',{method:'POST',headers:f.headers,body:'not an image'})).status,415);
  assert.equal(calls,0);
  const invalidManifest=await fetch(f.endpoint+'/generate',{method:'POST',headers:{...f.headers,'X-PaKaChi-Reference':'%7B%7D'},body:png});assert.equal(invalidManifest.status,400);
+ const wrongHash={...referenceManifest,selection:{...referenceManifest.selection,crop:{...referenceManifest.selection.crop,sha256:'c'.repeat(64)}}};
+ const mismatch=await fetch(f.endpoint+'/generate',{method:'POST',headers:{...f.headers,'X-PaKaChi-Reference':encodeURIComponent(JSON.stringify(wrongHash))},body:png});assert.equal(mismatch.status,400);
  const failure=await fetch(f.endpoint+'/generate',{method:'POST',headers:f.headers,body:png});assert.equal(failure.status,502);assert.deepEqual(await failure.json(),{error:'generation-failed'});
 });
 test('client disconnect reaches backend AbortSignal and concurrent inference is refused',async t=>{
