@@ -18,3 +18,43 @@ export function detectTransparentImageComponents(image:{width:number;height:numb
  }
  return components.sort((a,b)=>b.area-a.area).slice(0,maxComponents);
 }
+
+
+/** Conservative segmentation for images with a nearly uniform opaque border background. */
+export function detectSolidBackgroundImageComponents(
+ image:{width:number;height:number;data:Uint8ClampedArray},
+ options:{maxDimension?:number;minFraction?:number;maxComponents?:number;borderTolerance?:number;minBorderConsistency?:number}={}
+):TransparentImageComponent[]{
+ const {width,height,data}=image;
+ if(!Number.isInteger(width)||!Number.isInteger(height)||width<1||height<1||data.length!==width*height*4)throw new Error('invalid-image-data');
+ const maxDimension=options.maxDimension??1600,minFraction=options.minFraction??0.0002,maxComponents=options.maxComponents??24,borderTolerance=options.borderTolerance??36,minBorderConsistency=options.minBorderConsistency??0.78;
+ if(!Number.isInteger(maxDimension)||maxDimension<1||!Number.isFinite(minFraction)||minFraction<0||!Number.isInteger(maxComponents)||maxComponents<1||!Number.isFinite(borderTolerance)||borderTolerance<0||borderTolerance>255||!Number.isFinite(minBorderConsistency)||minBorderConsistency<0.5||minBorderConsistency>1)throw new Error('invalid-detection-options');
+ const step=Math.max(1,Math.ceil(Math.max(width,height)/maxDimension)),cols=Math.ceil(width/step),rows=Math.ceil(height/step),count=cols*rows;
+ const pixels=new Uint8Array(count*4);
+ for(let y=0;y<rows;y++)for(let x=0;x<cols;x++){const px=Math.min(width-1,x*step+Math.floor(step/2)),py=Math.min(height-1,y*step+Math.floor(step/2)),source=(py*width+px)*4,target=(y*cols+x)*4;pixels[target]=data[source]!;pixels[target+1]=data[source+1]!;pixels[target+2]=data[source+2]!;pixels[target+3]=data[source+3]!;}
+ const border:number[]=[];
+ for(let x=0;x<cols;x++){border.push(x,(rows-1)*cols+x);}
+ for(let y=1;y<rows-1;y++){border.push(y*cols,y*cols+cols-1);}
+ const channels=[0,1,2].map(channel=>{const values=border.filter(index=>pixels[index*4+3]!>=240).map(index=>pixels[index*4+channel]!);if(values.length<8)return -1;values.sort((a,b)=>a-b);return values[Math.floor(values.length/2)]!;});
+ if(channels.some(value=>value<0))return [];
+ const toleranceSquared=borderTolerance*borderTolerance;
+ const distance=(index:number)=>{const offset=index*4;const dr=pixels[offset]!-channels[0]!,dg=pixels[offset+1]!-channels[1]!,db=pixels[offset+2]!-channels[2]!;return dr*dr+dg*dg+db*db;};
+ const opaqueBorder=border.filter(index=>pixels[index*4+3]!>=240);
+ const consistent=opaqueBorder.filter(index=>distance(index)<=toleranceSquared).length/Math.max(1,opaqueBorder.length);
+ if(consistent<minBorderConsistency)return [];
+ const background=new Uint8Array(count),queue=new Int32Array(count);let read=0,write=0;
+ const enqueue=(index:number)=>{if(background[index]||pixels[index*4+3]!<240||distance(index)>toleranceSquared)return;background[index]=1;queue[write++]=index;};
+ for(let x=0;x<cols;x++){enqueue(x);enqueue((rows-1)*cols+x);}
+ for(let y=1;y<rows-1;y++){enqueue(y*cols);enqueue(y*cols+cols-1);}
+ while(read<write){const index=queue[read++]!,x=index%cols,y=Math.floor(index/cols);if(x>0)enqueue(index-1);if(x+1<cols)enqueue(index+1);if(y>0)enqueue(index-cols);if(y+1<rows)enqueue(index+cols);}
+ const visited=new Uint8Array(count),active=(index:number)=>pixels[index*4+3]!>=16&&!background[index],minimum=Math.max(4,Math.ceil(count*minFraction)),components:TransparentImageComponent[]=[];
+ for(let seed=0;seed<count;seed++){if(!active(seed)||visited[seed])continue;let qRead=0,qWrite=0,minX=cols,minY=rows,maxX=-1,maxY=-1;queue[qWrite++]=seed;visited[seed]=1;
+  while(qRead<qWrite){const index=queue[qRead++]!,x=index%cols,y=Math.floor(index/cols);minX=Math.min(minX,x);maxX=Math.max(maxX,x);minY=Math.min(minY,y);maxY=Math.max(maxY,y);
+   for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){if(!dx&&!dy)continue;const nx=x+dx,ny=y+dy;if(nx<0||ny<0||nx>=cols||ny>=rows)continue;const next=ny*cols+nx;if(active(next)&&!visited[next]){visited[next]=1;queue[qWrite++]=next;}}
+  }
+  if(qWrite<minimum||minX===0||minY===0||maxX===cols-1||maxY===rows-1)continue;
+  const x=minX*step,y=minY*step,right=Math.min(width,(maxX+1)*step),bottom=Math.min(height,(maxY+1)*step);
+  components.push({x,y,width:right-x,height:bottom-y,area:qWrite*step*step});
+ }
+ return components.sort((a,b)=>b.area-a.area).slice(0,maxComponents);
+}

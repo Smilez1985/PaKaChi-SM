@@ -12,7 +12,7 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
-Zeitstempel der letzten Änderung: 2026-11-15T13:13:00+01:00 (Europe/Berlin)
+Zeitstempel der letzten Änderung: 2026-11-15T14:10:00+01:00 (Europe/Berlin)
 
 ### Security
 
@@ -20,7 +20,7 @@ Zeitstempel der letzten Änderung: 2026-11-15T13:13:00+01:00 (Europe/Berlin)
 
 ### Added
 
-- Erste automatische Bildsegmentierung für transparente PNG-/RGBA-Referenzen: getrennte Alpha-Vordergrundkomponenten werden als unbestätigte, einzeln zuordenbare Regionen vorgeschlagen. Die Erkennung arbeitet mit begrenzter Auflösung, filtert Kleinstrauschen und randverbundene Flächen und übernimmt weder Avatar-Identität noch Form-/Ansichtsbeziehungen. Opaque Hintergründe bleiben manuell zu markieren.
+- Erste automatische Bildsegmentierung für transparente PNG-/RGBA-Referenzen: getrennte Alpha-Vordergrundkomponenten werden als unbestätigte, einzeln zuordenbare Regionen vorgeschlagen. Die Erkennung arbeitet mit begrenzter Auflösung, filtert Kleinstrauschen und randverbundene Flächen und übernimmt weder Avatar-Identität noch Form-/Ansichtsbeziehungen. Zusätzlich werden Figuren vor nahezu einfarbigem, deckendem Randhintergrund konservativ als unbestätigte Vorschläge erkannt. Dafür müssen die Randpixel ausreichend einheitlich sein; randberührende Vordergrundkomponenten und Kleinstrauschen werden verworfen. Keine automatische Identitäts- oder Formzuordnung.
 
 - Übergabe der exakten Generierungsherkunft vom ausgewählten Bildausschnitt bis zur Avatar-Übernahme durch einen eigenen Regressionstest abgesichert; der Test prüft jetzt sowohl die Referenzhierarchie als auch das unveränderte Crop-Manifest.
 
