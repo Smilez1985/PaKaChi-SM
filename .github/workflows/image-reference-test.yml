@@ -45,5 +45,9 @@ jobs:
         run: node --test tests/generation-panel.test.ts
       - name: Test persisted image-reference project metadata
         run: node --test tests/image-reference-project.test.ts
+      - name: Browser test for transparent image-reference masks
+        run: |
+          npx playwright install --with-deps chromium
+          npx playwright test tests/e2e/image-reference-crop.spec.ts
       - name: Type-check project
         run: npx tsc --noEmit

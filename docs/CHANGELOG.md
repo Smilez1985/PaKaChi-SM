@@ -12,9 +12,11 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
-Zeitstempel der letzten Änderung: 2026-11-15T04:04:00+01:00 (Europe/Berlin)
+Zeitstempel der letzten Änderung: 2026-11-15T04:20:00+01:00 (Europe/Berlin)
 
 ### Added
+
+- Gezielter Chromium-Browser-Test für die Bildreferenz-Crops: erzeugte PNG-Dateien werden dekodiert und auf transparente Innenaussparung sowie deckende Außenfläche geprüft; zusätzlich wird das Verschieben eines Loch-Eckpunkts durch die echte Editor-Pointerinteraktion geprüft. Der schlanke Bildreferenz-Workflow führt nur diesen einen Browserfall aus, nicht die vollständige E2E-Suite.
 
 - Polygonregionen unterstützen jetzt mehrere disjunkte Innenringe. Der Editor kann Innenaussparungen zeichnen, vorhandene Ringe nach Rückfrage entfernen und deren Eckpunkte verschieben; ungültige Bewegungen werden ohne Geometrieänderung verworfen. Validierung weist Außenkontakt, Überlappungen und außerhalb liegende Ringe zurück. Der Crop-Plan überträgt Innenringe und schneidet sie per Even-Odd-Füllregel transparent aus.
 - Polygonkonturen lassen sich im Bildeditor auf ausdrücklichen Klick konservativ vereinfachen. Die Funktion fragt vor der Änderung nach, entfernt nur redundante Punkte bei gültiger Kontur und höchstens 1 % Flächenabweichung; die geänderte Region wird wieder prüfpflichtig. CI #43670507676: 45/45 Tests bestanden, TypeScript erfolgreich.
