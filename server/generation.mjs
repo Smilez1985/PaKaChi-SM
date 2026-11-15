@@ -7,6 +7,22 @@ import {pathToFileURL} from 'node:url';
 import {parseArgs} from 'node:util';
 import {generate} from '../scripts/generate-model.mjs';
 const MAX_IMAGE=20*1024*1024;
+function parseReferenceManifest(header){
+ if(header===undefined)return undefined;
+ if(typeof header!=='string'||header.length>8192)throw new Error('reference-size');
+ let value;try{value=JSON.parse(decodeURIComponent(header));}catch{throw new Error('reference-json');}
+ const keys=(item,expected)=>item&&typeof item==='object'&&!Array.isArray(item)&&Object.keys(item).sort().join(',')===expected.slice().sort().join(',');
+ const text=value=>typeof value==='string'&&value.trim().length>0&&value.length<=128;
+ if(!keys(value,['format','version','source','selection'])||value.format!=='pakachi-image-reference-generation'||value.version!==1)throw new Error('reference-format');
+ const source=value.source,selection=value.selection;
+ if(!keys(source,['sha256','width','height'])||typeof source.sha256!=='string'||!/^[a-f0-9]{64}$/i.test(source.sha256)||!Number.isSafeInteger(source.width)||source.width<1||!Number.isSafeInteger(source.height)||source.height<1)throw new Error('reference-source');
+ if(!keys(selection,['regionId','label','kind','avatar','form','view','crop','mask'])||!text(selection.regionId)||!text(selection.label)||!['avatar','form','view','detail','helper'].includes(selection.kind))throw new Error('reference-selection');
+ for(const parent of [selection.avatar,selection.form,selection.view])if(!keys(parent,['id','label'])||!text(parent.id)||!text(parent.label))throw new Error('reference-parent');
+ const crop=selection.crop,mask=selection.mask;
+ if(!keys(crop,['x','y','width','height'])||![crop.x,crop.y,crop.width,crop.height].every(Number.isSafeInteger)||crop.x<0||crop.y<0||crop.width<1||crop.height<1||crop.x+crop.width>source.width||crop.y+crop.height>source.height)throw new Error('reference-crop');
+ if(!keys(mask,['type','vertices','holes'])||!['rectangle','polygon'].includes(mask.type)||!Number.isSafeInteger(mask.vertices)||mask.vertices<(mask.type==='polygon'?3:4)||mask.vertices>4096||!Number.isSafeInteger(mask.holes)||mask.holes<0||mask.holes>64||(mask.type==='rectangle'&&mask.holes!==0))throw new Error('reference-mask');
+ return value;
+}
 const png=Buffer.from([137,80,78,71,13,10,26,10]);
 export function createGenerationService({token,origin='http://127.0.0.1:5173',...backend},{run=generate}={}){
  if(typeof token!=='string'||!/^[-_a-zA-Z0-9]{32,256}$/.test(token))throw new Error('A 32–256 character token is required.');
@@ -25,7 +41,7 @@ export function createGenerationService({token,origin='http://127.0.0.1:5173',..
   if(req.method==='OPTIONS'){
    const method=req.headers['access-control-request-method'];
    const headers=(req.headers['access-control-request-headers']??'').toLowerCase().split(',').map(x=>x.trim()).filter(Boolean);
-   if(req.headers.origin!==origin||method!==(req.url==='/generate'?'POST':'GET')||headers.some(x=>!['authorization','content-type'].includes(x))){reply(403,'preflight');return;}
+   if(req.headers.origin!==origin||method!==(req.url==='/generate'?'POST':'GET')||headers.some(x=>!['authorization','content-type','x-pakachi-reference'].includes(x))){reply(403,'preflight');return;}
    res.writeHead(204,{'Access-Control-Allow-Methods':method,'Access-Control-Allow-Headers':'authorization, content-type'});res.end();return;
   }
   const provided=Buffer.from(req.headers.authorization??'');
@@ -37,6 +53,7 @@ export function createGenerationService({token,origin='http://127.0.0.1:5173',..
   if(active){reply(409,'busy');return;}
   const media=req.headers['content-type'];
   if(!['image/png','image/jpeg'].includes(media)){reply(415,'image-type');return;}
+  let reference;try{reference=parseReferenceManifest(req.headers['x-pakachi-reference']);}catch{reply(400,'reference-manifest');return;}
   if(Number(req.headers['content-length'])>MAX_IMAGE){reply(413,'image-size');return;}
   const controller=new AbortController();active=controller;let complete;activeDone=new Promise(resolve=>{complete=resolve;});
   const disconnect=()=>{if(!res.writableEnded)controller.abort();};res.on('close',disconnect);
@@ -51,7 +68,7 @@ export function createGenerationService({token,origin='http://127.0.0.1:5173',..
    controller.signal.throwIfAborted();
    const output=resolve(backend.output??'generated');await mkdir(output,{recursive:true});staging=await mkdtemp(join(output,'.upload-'));
    const image=join(staging,media==='image/png'?'source.png':'source.jpg');await writeFile(image,bytes,{flag:'wx',mode:0o600});
-   const result=await run({...backend,output,image,signal:controller.signal});controller.signal.throwIfAborted();
+   const result=await run({...backend,output,image,signal:controller.signal,reference});controller.signal.throwIfAborted();
    if(result.report.status!=='generated-unreviewed'){reply(502,'generation-failed');return;}
    // Fixed backend-owned output location; never take a path from the request or report.
    const model=await readFile(join(result.job,'result','0','mesh.glb'));controller.signal.throwIfAborted();

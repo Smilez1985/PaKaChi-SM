@@ -1,6 +1,6 @@
 import type {ImageReferenceDocument,ImageReferenceRegion} from './image-reference.ts';
 import {checkImageReferenceReadiness,editImageReferenceRectangle,reorderImageReferenceRegions,moveImageReferenceRectangle,resizeImageReferenceRectangle,moveImageReferencePolygonVertex,moveImageReferencePolygonHoleVertex,isValidImageReferencePolygon,isValidImageReferencePolygonWithHoles,splitImageReferencePolygon,simplifyImageReferencePolygon} from './image-reference.ts';
-import {cropImageReferenceRegion} from './image-reference-crop.ts';
+import {createImageReferenceGenerationManifest,cropImageReferenceRegion} from './image-reference-crop.ts';
 
 interface Entry {region:ImageReferenceRegion;avatar:string;form:string;view:string;use:boolean}
 const makeId=(prefix:string,n:number)=>`${prefix}-${n}`;
@@ -88,5 +88,6 @@ export function mountImageReferenceEditor(host:HTMLElement,source:File,language:
   return {format:'pakachi-image-reference',version:1,source:{sha256:sha,width,height,asset},regions:entries.map(e=>e.region),views:[...views.values()],forms:[...forms.values()],avatars:[...avatars.values()]};
  };
  const readiness=async()=>{const doc=await documentFor();return checkImageReferenceReadiness(doc);};
- return {async ready(){if(!entries.length||entries.some(e=>e.region.status==='suggested'))return false;return (await readiness()).ready;},async selectedCrop(){if(!await this.ready())throw new Error('image-reference-not-ready');const entry=entries[active];if(!entry||entry.region.status!=='confirmed')throw new Error('image-reference-region-not-confirmed');return cropImageReferenceRegion(source,entry.region);},async reference(){return documentFor();},dispose(){image.onload=null;URL.revokeObjectURL(image.src);root.remove();}};
+ const selectedPackage=async()=>{const document=await documentFor();if(!checkImageReferenceReadiness(document).ready||entries.some(e=>e.region.status==='suggested'))throw new Error('image-reference-not-ready');const entry=entries[active];if(!entry||entry.region.status!=='confirmed')throw new Error('image-reference-region-not-confirmed');return {crop:await cropImageReferenceRegion(source,entry.region),manifest:createImageReferenceGenerationManifest(document,entry.region.id)};};
+ return {async ready(){if(!entries.length||entries.some(e=>e.region.status==='suggested'))return false;return (await readiness()).ready;},async selectedCrop(){return (await selectedPackage()).crop;},async selectedPackage(){return selectedPackage();},async reference(){return documentFor();},dispose(){image.onload=null;URL.revokeObjectURL(image.src);root.remove();}};
 }

@@ -12,6 +12,7 @@ import {ProviderJob} from '../src/ai-jobs.ts';
 import {parseModel,disposeModel} from '../src/viewer.ts';
 import {glb} from './generation-fixture.mjs';
 const token='a'.repeat(48),origin='http://127.0.0.1:5173';
+const referenceManifest={format:'pakachi-image-reference-generation',version:1,source:{sha256:'a'.repeat(64),width:100,height:100},selection:{regionId:'region-front',label:'Front',kind:'view',avatar:{id:'avatar-panda',label:'Panda'},form:{id:'form-animal',label:'Animal'},view:{id:'view-front',label:'Front'},crop:{x:10,y:10,width:50,height:70},mask:{type:'rectangle',vertices:4,holes:0}}};
 const png=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+a9X8AAAAASUVORK5CYII=','base64');
 async function fixture(t,run){
  const root=await mkdtemp(join(tmpdir(),'pakachi-service-'));
@@ -23,12 +24,12 @@ async function fixture(t,run){
 }
 test('real HTTP adapter and job validate generated output, keep preview separate and preserve source',async t=>{
  let backendCalls=0;
- const f=await fixture(t,options=>generate(options,{check:async()=>({ready:true,blockers:[],testDouble:true}),launch:async(_command,args,{signal})=>{
+ const f=await fixture(t,options=>{assert.deepEqual(options.reference,referenceManifest);return generate(options,{check:async()=>({ready:true,blockers:[],testDouble:true}),launch:async(_command,args,{signal})=>{
   backendCalls++;signal.throwIfAborted();const input=args[1];assert.deepEqual(await readFile(input),png);
   const destination=join(args[args.indexOf('--output-dir')+1],'0');await mkdir(destination,{recursive:true});await writeFile(join(destination,'mesh.glb'),glb());return {code:0};
- }}));
+ }});});
  const registry=new ProviderRegistry();registry.register(createLocalGenerationAdapter(()=>token));let checked=false;
- const job=new ProviderJob(registry,{config:{version:1,profiles:[f.profile],assignments:{assistant:null,generation:'local',rigging:null}},role:'generation',input:{prompt:'Image reconstruction (label only)',source:{mediaType:'image/png',bytes:png}},target:{session:'test',revision:1},validate:async output=>{assert.equal(output.kind,'model');const model=await parseModel(output.bytes.buffer);assert.equal(model.scene.children.length,1);disposeModel(model.scene);checked=true;}}).start();
+ const job=new ProviderJob(registry,{config:{version:1,profiles:[f.profile],assignments:{assistant:null,generation:'local',rigging:null}},role:'generation',input:{prompt:'Image reconstruction (label only)',source:{mediaType:'image/png',bytes:png},reference:referenceManifest},target:{session:'test',revision:1},validate:async output=>{assert.equal(output.kind,'model');const model=await parseModel(output.bytes.buffer);assert.equal(model.scene.children.length,1);disposeModel(model.scene);checked=true;}}).start();
  assert.equal((await job.done).status,'preview');assert.equal(backendCalls,1);assert.ok(checked);assert.equal(job.preview().kind,'model');
  assert.equal(job.accept(()=>({session:'test',revision:2}),()=>assert.fail('stale preview must not write')),false);
  assert.ok(!(await readdir(f.root)).some(x=>x.startsWith('.upload-')));
@@ -39,11 +40,12 @@ test('service enforces authentication, exact origin, host and narrow preflight w
   assert.equal((await fetch(f.endpoint+'/generate',{method:'POST',headers,body:png})).status,status);
  }
  const hostStatus=await new Promise((resolve,reject)=>{const req=httpRequest(f.endpoint+'/capabilities',{headers:{Host:'evil.test',Authorization:'Bearer '+token}},res=>{res.resume();resolve(res.statusCode);});req.on('error',reject);req.end();});assert.equal(hostStatus,403);
- const allowed=await fetch(f.endpoint+'/generate',{method:'OPTIONS',headers:{Origin:origin,'Access-Control-Request-Method':'POST','Access-Control-Request-Headers':'authorization, content-type'}});
+ const allowed=await fetch(f.endpoint+'/generate',{method:'OPTIONS',headers:{Origin:origin,'Access-Control-Request-Method':'POST','Access-Control-Request-Headers':'authorization, content-type, x-pakachi-reference'}});
  assert.equal(allowed.status,204);assert.equal(allowed.headers.get('access-control-allow-origin'),origin);
  assert.equal((await fetch(f.endpoint+'/generate',{method:'OPTIONS',headers:{Origin:origin,'Access-Control-Request-Method':'DELETE'}})).status,403);
  assert.equal((await fetch(f.endpoint+'/generate',{method:'POST',headers:f.headers,body:'not an image'})).status,415);
  assert.equal(calls,0);
+ const invalidManifest=await fetch(f.endpoint+'/generate',{method:'POST',headers:{...f.headers,'X-PaKaChi-Reference':'%7B%7D'},body:png});assert.equal(invalidManifest.status,400);
  const failure=await fetch(f.endpoint+'/generate',{method:'POST',headers:f.headers,body:png});assert.equal(failure.status,502);assert.deepEqual(await failure.json(),{error:'generation-failed'});
 });
 test('client disconnect reaches backend AbortSignal and concurrent inference is refused',async t=>{

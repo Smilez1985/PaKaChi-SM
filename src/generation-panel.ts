@@ -8,6 +8,7 @@ import {mountImageReferenceEditor} from './image-reference-editor.ts';
 import {validateGeneration,showGenerationPreview} from './generation-preview.ts';
 import {prepareDraftRig} from './draft-rig.ts';
 import type {ImageReferenceDocument} from './image-reference.ts';
+import type {ImageReferenceGenerationManifest} from './image-reference-crop.ts';
 import type {DraftRigTemplate} from './draft-rig.ts';
 
 interface GenerationHost {
@@ -39,7 +40,7 @@ export function mountGenerationPanel(host:HTMLElement,bridge:GenerationHost,lang
  let source:File|undefined,referenceEditor:ReferenceEditor|undefined,referenceReady=false,job:ProviderJob|undefined,sequence=0,controller:AbortController|undefined,disposePreview:(()=>void)|undefined,pending=false,disposed=false;
  let prepared:Awaited<ReturnType<typeof prepareDraftRig>>|undefined;
  let rigPreviewHost:HTMLDivElement|undefined;
- let retryRequest:{config:ProviderConfig;target:ProjectRevision;selected:File;keys:Map<string,string>}|undefined;
+ let retryRequest:{config:ProviderConfig;target:ProjectRevision;selected:File;keys:Map<string,string>;reference:ImageReferenceGenerationManifest}|undefined;
  const t=(de:string,en:string)=>language()==='de'?de:en;
  const matches=(target:ProjectRevision)=>{const now=bridge.target();return !!now&&target.session===now.session&&target.revision===now.revision;};
  function clear(preserveReference=false){sequence++;if(!preserveReference){referenceEditor?.dispose();referenceEditor=undefined;referenceReady=false;referenceHost.replaceChildren();referenceHost.hidden=true;}prepared=undefined;rigPreviewHost?.remove();rigPreviewHost=undefined;rigStatus.textContent='';rigControls.hidden=true;retryRequest=undefined;retry.hidden=true;job?.cancel();if(job?.snapshot.status==='preview'||job?.snapshot.status==='stale')job.discard();job=undefined;controller?.abort();controller=undefined;disposePreview?.();disposePreview=undefined;preview.replaceChildren();preview.hidden=true;pending=false;apply.hidden=true;cancel.disabled=true;discard.disabled=true;file.disabled=false;}
@@ -67,10 +68,10 @@ export function mountGenerationPanel(host:HTMLElement,bridge:GenerationHost,lang
   const config=readProviderConfig(storage).config,target=bridge.target();
   if(!target||!providerRoute(config,'generation').length)return;
   const keys=new Map(config.profiles.map(profile=>[profile.id,getProviderKey(profile)]));
-  try{const crop=await referenceEditor.selectedCrop();if(!referenceReady||!source)return;void begin(config,target,crop,keys);}catch{status.textContent=t('Kein freigegebener Bildausschnitt. Markierungen und Zuordnungen prüfen.','No approved image crop. Check markings and assignments.');}
+  try{const selected=await referenceEditor.selectedPackage();if(!referenceReady||!source)return;void begin(config,target,selected.crop,keys,selected.manifest);}catch{status.textContent=t('Kein freigegebener Bildausschnitt. Markierungen und Zuordnungen prüfen.','No approved image crop. Check markings and assignments.');}
  };
- retry.onclick=()=>{if(pending||!retryRequest||!matches(retryRequest.target))return;const request=retryRequest;void begin(request.config,request.target,request.selected,request.keys);};
- async function begin(config:ProviderConfig,target:ProjectRevision,selected:File,keys:Map<string,string>){
+ retry.onclick=()=>{if(pending||!retryRequest||!matches(retryRequest.target))return;const request=retryRequest;void begin(request.config,request.target,request.selected,request.keys,request.reference);};
+ async function begin(config:ProviderConfig,target:ProjectRevision,selected:File,keys:Map<string,string>,reference:ImageReferenceGenerationManifest){
   clear(true);const current=sequence;pending=true;controller=new AbortController();const signal=controller.signal;
   const tokenFor=(profile:Readonly<ProviderProfile>)=>keys.get(profile.id)??'';
   const registry=new ProviderRegistry();
@@ -82,13 +83,13 @@ export function mountGenerationPanel(host:HTMLElement,bridge:GenerationHost,lang
   file.disabled=true;cancel.disabled=false;refresh();status.textContent=t('Bild wird vorbereitet …','Preparing image …');
   try{
    const bytes=new Uint8Array(await selected.arrayBuffer());if(current!==sequence)return;
-   const task=job=new ProviderJob(registry,{config,role:'generation',input:{prompt:'Image reconstruction',source:{mediaType:selected.type as 'image/png'|'image/jpeg',bytes}},target,timeoutMs:3600000,preflightFallbacks:true,mayRun:()=>current===sequence&&matches(target),validate:deps.validate??validateGeneration});
+   const task=job=new ProviderJob(registry,{config,role:'generation',input:{prompt:'Image reconstruction',source:{mediaType:selected.type as 'image/png'|'image/jpeg',bytes},reference},target,timeoutMs:3600000,preflightFallbacks:true,mayRun:()=>current===sequence&&matches(target),validate:deps.validate??validateGeneration});
    task.subscribe(state=>{if(current===sequence){const phases:Record<string,string>={checking:'Verbindung prüfen',queued:'Vorbereiten',running:'Generierung läuft',validating:'Modell prüfen',preview:'Vorschau vorbereiten',failed:'Fehlgeschlagen',cancelled:'Abgebrochen','timed-out':'Zeitlimit erreicht'};status.textContent=t('Auftrag: '+(phases[state.status]??state.status),'Job: '+state.status)+' · '+state.profile.name;}});task.start();
    const result=await task.done;if(current!==sequence)return;
    if(result.status!=='preview'){
     if(result.executionStarted&&['failed','timed-out'].includes(result.status)){
      const next=remainingProviderConfig(config,'generation',result.profile.id);
-     if(next){retryRequest={config:next,target,selected,keys};retry.hidden=false;}
+     if(next){retryRequest={config:next,target,selected,keys,reference};retry.hidden=false;}
     }
     throw new Error(result.status);
    }
