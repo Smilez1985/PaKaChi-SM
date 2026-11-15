@@ -80,10 +80,11 @@ function validGenerationReference(value:unknown,imageReference?:ImageReferenceDo
  if(!obj(crop)||!['x','y','width','height'].every(k=>Number.isSafeInteger(crop[k]))||Number(crop.x)<0||Number(crop.y)<0||Number(crop.width)<=0||Number(crop.height)<=0||Number(crop.x)+Number(crop.width)>Number(source.width)||Number(crop.y)+Number(crop.height)>Number(source.height)||!/^([a-f0-9]{64})$/i.test(String(crop.sha256)))return false;
  if(!obj(mask)||!['rectangle','polygon'].includes(String(mask.type))||!Number.isInteger(mask.vertices)||Number(mask.vertices)<3||Number(mask.vertices)>4096||!Number.isInteger(mask.holes)||Number(mask.holes)<0||Number(mask.holes)>256||mask.type==='rectangle'&&(mask.vertices!==4||mask.holes!==0))return false;
  if(imageReference){
+  const selectedView=selection.view as Record<string,unknown>,selectedForm=selection.form as Record<string,unknown>,selectedAvatar=selection.avatar as Record<string,unknown>;
   if(source.sha256!==imageReference.source.sha256||source.width!==imageReference.source.width||source.height!==imageReference.source.height)return false;
   const region=imageReference.regions.find(item=>item.id===selection.regionId);
-  const view=imageReference.views.find(item=>item.id===selection.view.id),form=imageReference.forms.find(item=>item.id===selection.form.id),avatar=imageReference.avatars.find(item=>item.id===selection.avatar.id);
-  if(!region||region.label!==selection.label||region.kind!==selection.kind||region.status!=='confirmed'||!view||view.label!==selection.view.label||!view.regionIds.includes(region.id)||!form||form.label!==selection.form.label||!form.viewIds.includes(view.id)||!avatar||avatar.label!==selection.avatar.label||!avatar.formIds.includes(form.id))return false;
+  const view=imageReference.views.find(item=>item.id===selectedView.id),form=imageReference.forms.find(item=>item.id===selectedForm.id),avatar=imageReference.avatars.find(item=>item.id===selectedAvatar.id);
+  if(!region||region.label!==selection.label||region.kind!==selection.kind||region.status!=='confirmed'||!view||view.label!==selectedView.label||!view.regionIds.includes(region.id)||!form||form.label!==selectedForm.label||!form.viewIds.includes(view.id)||!avatar||avatar.label!==selectedAvatar.label||!avatar.formIds.includes(form.id))return false;
  }
  return true;
 }
