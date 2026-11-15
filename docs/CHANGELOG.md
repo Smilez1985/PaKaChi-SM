@@ -12,13 +12,15 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
-Zeitstempel der letzten Änderung: 2026-11-15T04:55:31+01:00 (Europe/Berlin)
+Zeitstempel der letzten Änderung: 2026-11-15T13:13:00+01:00 (Europe/Berlin)
 
 ### Security
 
 - Sechs npm-Audit-Befunde aus transitiven Abhängigkeiten behoben: `@hono/node-server` auf 2.1.8, `body-parser` auf 2.4.0, `fast-uri` auf 3.1.9, `happy-dom` auf 21.0.4, `hono` auf 4.13.18 und `qs` auf 6.17.1 aktualisiert. Der fokussierte CI-Audit meldet danach **0 Schwachstellen**; die betroffenen Tests, Chromium-Prüfungen und TypeScript-Prüfung sind erfolgreich. Künftige relevante CI-Läufe prüfen `npm audit --audit-level=moderate` verbindlich.
 
 ### Added
+
+- Übergabe der exakten Generierungsherkunft vom ausgewählten Bildausschnitt bis zur Avatar-Übernahme durch einen eigenen Regressionstest abgesichert; der Test prüft jetzt sowohl die Referenzhierarchie als auch das unveränderte Crop-Manifest.
 
 - Gezielte Chromium-Browserprüfung für Bildreferenz-Crops: erzeugte PNG-Dateien werden dekodiert und auf transparente Innenaussparung sowie deckende Außenfläche geprüft; zusätzlich wird das Verschieben eines Loch-Eckpunkts durch echte Editor-Pointerinteraktion geprüft. Beide Browserfälle bestanden. Der fokussierte Workflow #43671967701 war mit 47/47 Tests und TypeScript grün; keine vollständige E2E-Suite.
 - Bestätigte Einzelregionen werden jetzt als Generierungspaket vorbereitet: Der Editor liefert den maskierten PNG-Crop und einen separaten Provenienzdatensatz mit SHA-256 des Originals, Originalpixelmaßen, Crop-Grenzen sowie eindeutiger Avatar-/Form-/Ansichts-/Regionszuordnung. Der lokale Generierungsadapter überträgt ausschließlich den Crop als Bild und die Provenienz separat in einem begrenzten Header; der HTTP-Dienst validiert das Schema und reicht die Metadaten als `reference` an den Backend-Aufruf weiter. Regressionen prüfen Paketzuordnung, Panel-Weitergabe, HTTP-Transport und Ablehnung ungültiger Metadaten. Der lokale Dienst vergleicht zusätzlich den SHA-256-Hash des tatsächlichen Uploads mit dem im Provenienzdatensatz deklarierten Crop-Hash und weist Abweichungen vor dem Generatorstart ab. Nach erfolgreicher Generierung wird `pakachi-reference.json` neben dem GLB gespeichert. CI #43672961488: **53/53 Tests**, einschließlich 2 Chromium-Browserfällen, TypeScript erfolgreich.
