@@ -49,6 +49,8 @@ jobs:
         run: node --test tests/image-reference-crop.test.ts
       - name: Test generation panel gating
         run: node --test tests/generation-panel.test.ts
+      - name: Test generation HTTP transport and provenance sidecar
+        run: node --test tests/generation-service.test.mjs
       - name: Test persisted image-reference project metadata
         run: node --test tests/image-reference-project.test.ts
       - name: Browser test for transparent image-reference masks

@@ -42,7 +42,7 @@ export function createGenerationService({token,origin='http://127.0.0.1:5173',..
    const method=req.headers['access-control-request-method'];
    const headers=(req.headers['access-control-request-headers']??'').toLowerCase().split(',').map(x=>x.trim()).filter(Boolean);
    if(req.headers.origin!==origin||method!==(req.url==='/generate'?'POST':'GET')||headers.some(x=>!['authorization','content-type','x-pakachi-reference'].includes(x))){reply(403,'preflight');return;}
-   res.writeHead(204,{'Access-Control-Allow-Methods':method,'Access-Control-Allow-Headers':'authorization, content-type'});res.end();return;
+   res.writeHead(204,{'Access-Control-Allow-Methods':method,'Access-Control-Allow-Headers':'authorization, content-type, x-pakachi-reference'});res.end();return;
   }
   const provided=Buffer.from(req.headers.authorization??'');
   if(provided.length!==authorization.length||!timingSafeEqual(provided,authorization)){reply(401,'authorization');return;}
