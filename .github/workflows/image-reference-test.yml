@@ -48,7 +48,7 @@ jobs:
       - name: Require a clean dependency audit
         run: npm audit --audit-level=moderate
       - name: Test image reference hierarchy and generation gate
-        run: node --test tests/image-reference.test.ts
+        run: node --test tests/image-reference.test.ts tests/image-reference-detection.test.ts
       - name: Test source-region crop planning
         run: node --test tests/image-reference-crop.test.ts
       - name: Test generation panel gating
