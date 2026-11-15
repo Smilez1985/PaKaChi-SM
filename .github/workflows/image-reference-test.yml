@@ -43,6 +43,10 @@ jobs:
           node-version: '24'
           cache: npm
       - run: npm ci
+      - name: Identify exact dependency advisories
+        run: |
+          npm audit --json > npm-audit.json || true
+          node --input-type=module -e "import fs from 'node:fs'; const a=JSON.parse(fs.readFileSync('npm-audit.json','utf8')); console.log(JSON.stringify({metadata:a.metadata?.vulnerabilities, vulnerabilities:Object.entries(a.vulnerabilities??{}).map(([name,v])=>({name,severity:v.severity,range:v.range,via:v.via.map(x=>typeof x==='string'?x:{title:x.title,url:x.url,range:x.range,severity:x.severity}),fixAvailable:v.fixAvailable,paths:v.nodes}))},null,2))"
       - name: Test image reference hierarchy and generation gate
         run: node --test tests/image-reference.test.ts
       - name: Test source-region crop planning
