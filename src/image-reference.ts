@@ -345,3 +345,23 @@ export function resizeImageReferenceRectangle(region:ImageReferenceRegion,source
   if(handle.includes('s'))bottom=Math.min(sourceHeight,Math.max(top+min,bottom+dy));
   return editImageReferenceRectangle(region,sourceWidth,sourceHeight,{x:left,y:top,width:right-left,height:bottom-top});
 }
+
+
+/** Split a rectangular or simple polygon region into two polygons; holes remain explicitly unsupported. */
+export function splitImageReferenceRegion(region:ImageReferenceRegion,start:{x:number;y:number},end:{x:number;y:number}):[ImageReferenceRegion,ImageReferenceRegion]|undefined {
+ let points:Array<{x:number;y:number}>;
+ if(region.geometry.type==='rectangle'){
+  const {x,y,width,height}=region.geometry;
+  if(![x,y,width,height].every(Number.isFinite)||width<4||height<4)return;
+  points=[{x,y},{x:x+width,y},{x:x+width,y:y+height},{x,y:y+height}];
+ }else{
+  if(region.geometry.holes?.length)return;
+  points=region.geometry.points;
+ }
+ const pieces=splitImageReferencePolygon(points,start,end);
+ if(!pieces)return;
+ return pieces.map((contour,index)=>({
+  ...region,id:region.id+'-split-'+(index+1),label:region.label+' ('+(index+1)+')',status:'suggested',
+  geometry:{type:'polygon',points:contour.map(point=>({...point}))}
+ })) as [ImageReferenceRegion,ImageReferenceRegion];
+}

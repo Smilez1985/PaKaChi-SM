@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {checkImageReferenceReadiness,validateImageReferenceDocument,editImageReferenceRectangle,reorderImageReferenceRegions,moveImageReferenceRectangle,resizeImageReferenceRectangle,isValidImageReferencePolygon,isValidImageReferencePolygonWithHoles,moveImageReferencePolygonVertex,moveImageReferencePolygonHoleVertex,splitImageReferencePolygon,simplifyImageReferencePolygon} from '../src/image-reference.ts';
+import {checkImageReferenceReadiness,validateImageReferenceDocument,editImageReferenceRectangle,reorderImageReferenceRegions,moveImageReferenceRectangle,resizeImageReferenceRectangle,isValidImageReferencePolygon,isValidImageReferencePolygonWithHoles,moveImageReferencePolygonVertex,moveImageReferencePolygonHoleVertex,splitImageReferencePolygon,splitImageReferenceRegion,simplifyImageReferencePolygon} from '../src/image-reference.ts';
 import type {ImageReferenceDocument} from '../src/image-reference.ts';
 
 const base=():ImageReferenceDocument=>({
@@ -187,4 +187,21 @@ test('moves polygon vertices within image bounds and rejects invalid self-crossi
  const rejected=moveImageReferencePolygonVertex(region,0,680,405,1600,1000);
  assert.equal(rejected,region);
  assert.throws(()=>moveImageReferencePolygonVertex(region,9,10,10,1600,1000),/unknown-polygon-vertex/);
+});
+
+test('splits a rectangle into two reviewable polygon regions and conserves its area',()=>{
+ const region:ImageReferenceRegion={id:'touching-figures',label:'Zwei verbundene Figuren',kind:'helper',status:'suggested',geometry:{type:'rectangle',x:10,y:20,width:100,height:60}};
+ const pieces=splitImageReferenceRegion(region,{x:60,y:10},{x:60,y:90});
+ assert.ok(pieces);
+ assert.equal(pieces[0].geometry.type,'polygon');assert.equal(pieces[1].geometry.type,'polygon');
+ assert.equal(pieces[0].status,'suggested');assert.equal(pieces[1].status,'suggested');
+ assert.notEqual(pieces[0].id,pieces[1].id);
+ const area=(ring:Array<{x:number;y:number}>)=>Math.abs(ring.reduce((sum,p,i)=>{const q=ring[(i+1)%ring.length]!;return sum+p.x*q.y-q.x*p.y;},0))/2;
+ if(pieces[0].geometry.type==='polygon'&&pieces[1].geometry.type==='polygon')assert.equal(area(pieces[0].geometry.points)+area(pieces[1].geometry.points),6000);
+});
+test('does not split polygon regions with interior holes or ambiguous rectangle cuts',()=>{
+ const withHole:ImageReferenceRegion={id:'hole',label:'Loch',kind:'detail',status:'suggested',geometry:{type:'polygon',points:[{x:0,y:0},{x:100,y:0},{x:100,y:100},{x:0,y:100}],holes:[[{x:20,y:20},{x:20,y:30},{x:30,y:30},{x:30,y:20}]]}};
+ assert.equal(splitImageReferenceRegion(withHole,{x:50,y:-10},{x:50,y:110}),undefined);
+ const rect:ImageReferenceRegion={id:'r',label:'R',kind:'detail',status:'suggested',geometry:{type:'rectangle',x:0,y:0,width:100,height:100}};
+ assert.equal(splitImageReferenceRegion(rect,{x:0,y:0},{x:10,y:10}),undefined);
 });
