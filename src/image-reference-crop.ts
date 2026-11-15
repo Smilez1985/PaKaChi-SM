@@ -6,7 +6,8 @@ export interface ImageCropPlan {
  y:number;
  width:number;
  height:number;
- polygon?:Array<{x:number;y:number}>;\n holes?:Array<Array<{x:number;y:number}>>;
+ polygon?:Array<{x:number;y:number}>;
+ holes?:Array<Array<{x:number;y:number}>>;
 }
 
 /** Convert source-pixel geometry into a bounded crop plan without changing its coordinates. */
