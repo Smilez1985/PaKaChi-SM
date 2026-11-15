@@ -53,6 +53,8 @@ test('a hole vertex can be moved in the editor and remains attached to its regio
   return document.regions[0].geometry.holes[0][0];
  });
  expect(point).toEqual({x:40,y:40});
+ const status=await page.evaluate(async()=> (await (window as any).__imageReferenceEditor.reference()).regions[0].status);
+ expect(status).toBe('suggested');
 });
 
 async function mountRectangleEditor(page:Page){
@@ -95,5 +97,15 @@ test('changing a region classification requires renewed review',async({page})=>{
  await kind.selectOption('detail');
  const region=await page.evaluate(async()=> (await (window as any).__imageReferenceEditor.reference()).regions[0]);
  expect(region.kind).toBe('detail');
+ expect(region.status).toBe('suggested');
+});
+
+test('moving a confirmed rectangle invalidates its confirmation',async({page})=>{
+ await mountRectangleEditor(page);
+ const canvas=page.locator('canvas.image-reference-canvas');
+ const bounds=await canvas.boundingBox();expect(bounds).not.toBeNull();const box=bounds!;
+ await page.mouse.move(box.x+box.width*0.5,box.y+box.height*0.5);
+ await page.mouse.down();await page.mouse.move(box.x+box.width*0.55,box.y+box.height*0.55,{steps:3});await page.mouse.up();
+ const region=await page.evaluate(async()=> (await (window as any).__imageReferenceEditor.reference()).regions[0]);
  expect(region.status).toBe('suggested');
 });
