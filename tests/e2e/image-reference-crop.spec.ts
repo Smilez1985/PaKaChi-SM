@@ -1,6 +1,7 @@
 import {test,expect,type Page} from '@playwright/test';
 
 async function mountEditor(page:Page){
+ await page.route('**/',route=>route.fulfill({contentType:'text/html',body:'<!doctype html><html><body></body></html>'}));
  await page.goto('/');
  await page.evaluate(async()=>{
   const sourceCanvas=document.createElement('canvas');sourceCanvas.width=100;sourceCanvas.height=100;

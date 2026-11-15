@@ -50,4 +50,5 @@ jobs:
           npx playwright install --with-deps chromium
           npx playwright test tests/e2e/image-reference-crop.spec.ts
       - name: Type-check project
+        if: always()
         run: npx tsc --noEmit
