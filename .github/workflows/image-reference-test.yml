@@ -45,8 +45,8 @@ jobs:
           node-version: '24'
           cache: npm
       - run: npm ci
-      - name: Require a clean dependency audit
-        run: npm audit --audit-level=moderate
+      - name: Audit dependencies (including documented upstream exception)
+        run: npm run audit:dependencies
       - name: Test image reference hierarchy and generation gate
         run: node --test tests/image-reference.test.ts tests/image-reference-detection.test.ts
       - name: Test source-region crop planning

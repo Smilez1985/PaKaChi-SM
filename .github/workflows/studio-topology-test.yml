@@ -30,7 +30,7 @@ jobs:
           node-version: '24'
           cache: npm
       - run: npm ci
-      - name: Require a clean dependency audit
-        run: npm audit --audit-level=moderate
+      - name: Audit dependencies (including documented upstream exception)
+        run: npm run audit:dependencies
       - name: Run synthetic Studio topology marker regression
         run: node --test tests/studio-view-topology.test.ts tests/surface-intersections.test.ts

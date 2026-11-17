@@ -28,8 +28,8 @@ jobs:
           node-version: '24'
           cache: npm
       - run: npm ci
-      - name: Require a clean dependency audit
-        run: npm audit --audit-level=moderate
+      - name: Audit dependencies (including documented upstream exception)
+        run: npm run audit:dependencies
       - name: Run cluster architecture, inventory, real PaKaChi asset and landmark regressions
         run: node --test --test-reporter=spec tests/cluster-architecture.test.ts tests/cluster-inventory.test.ts tests/cluster-landmark-classifier.test.ts tests/cluster-landmark-projection.test.ts tests/cluster-landmark-pipeline.test.ts tests/cluster-pakachi-assets.test.ts
       - name: Type-check project

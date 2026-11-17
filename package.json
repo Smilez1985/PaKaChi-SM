@@ -45,6 +45,7 @@
     "export:moves": "node scripts/export-moves.mjs",
     "merge:moves": "node scripts/merge-moves.mjs",
     "verify": "npm test && npm run build",
+    "audit:dependencies": "node scripts/check-dependency-audit.mjs",
     "verify:full": "npm run verify && npm run test:e2e",
     "benchmark:import": "node scripts/benchmark-project-import.mjs",
     "benchmark:transitions": "node scripts/benchmark-playback-transition.mjs",
