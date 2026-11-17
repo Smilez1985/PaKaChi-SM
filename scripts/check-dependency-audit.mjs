@@ -3,7 +3,7 @@ import {readFileSync} from 'node:fs';
 
 const advisory='GHSA-fc5q-39xc-vjpf';
 const allowed=new Map([
- ['picomatch',via=>via.length>0&&via.every(item=>typeof item==='object'&&item.source===advisory)],
+ ['picomatch',via=>via.length>0&&via.every(item=>typeof item==='object'&&item.url?.includes(advisory))],
  ['fdir',via=>via.length>0&&via.every(item=>item==='picomatch')],
  ['tinyglobby',via=>via.length>0&&via.every(item=>item==='fdir'||item==='picomatch')&&via.includes('fdir')],
  ['vite',via=>via.length>0&&via.every(item=>item==='tinyglobby'||item==='picomatch')&&via.includes('tinyglobby')]
