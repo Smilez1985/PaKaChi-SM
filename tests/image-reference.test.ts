@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {checkImageReferenceReadiness,validateImageReferenceDocument,editImageReferenceRectangle,reorderImageReferenceRegions,moveImageReferenceRectangle,resizeImageReferenceRectangle,isValidImageReferencePolygon,isValidImageReferencePolygonWithHoles,moveImageReferencePolygonVertex,moveImageReferencePolygonHoleVertex,splitImageReferencePolygon,splitImageReferenceRegion,simplifyImageReferencePolygon} from '../src/image-reference.ts';
+import {addImageReferenceRelation,removeImageReferenceRelation,checkImageReferenceReadiness,validateImageReferenceDocument,editImageReferenceRectangle,reorderImageReferenceRegions,moveImageReferenceRectangle,resizeImageReferenceRectangle,isValidImageReferencePolygon,isValidImageReferencePolygonWithHoles,moveImageReferencePolygonVertex,moveImageReferencePolygonHoleVertex,splitImageReferencePolygon,splitImageReferenceRegion,simplifyImageReferencePolygon} from '../src/image-reference.ts';
 import type {ImageReferenceDocument,ImageReferenceRegion} from '../src/image-reference.ts';
 
 const base=():ImageReferenceDocument=>({
@@ -204,4 +204,42 @@ test('does not split polygon regions with interior holes or ambiguous rectangle 
  assert.equal(splitImageReferenceRegion(withHole,{x:50,y:-10},{x:50,y:110}),undefined);
  const rect:ImageReferenceRegion={id:'r',label:'R',kind:'detail',status:'suggested',geometry:{type:'rectangle',x:0,y:0,width:100,height:100}};
  assert.equal(splitImageReferenceRegion(rect,{x:0,y:0},{x:10,y:10}),undefined);
+});
+
+
+test('stores explicit region relations independently from hierarchy and preserves stable IDs',()=>{
+ const d=base();
+ const linked=addImageReferenceRelation(d,{id:'rel-identity',kind:'same-avatar',sourceRegionId:'r-animal-front',targetRegionId:'r-work'});
+ assert.equal(d.relations,undefined);
+ assert.deepEqual(linked.relations,[{id:'rel-identity',kind:'same-avatar',sourceRegionId:'r-animal-front',targetRegionId:'r-work'}]);
+ assert.deepEqual(validateImageReferenceDocument(linked),[]);
+ const removed=removeImageReferenceRelation(linked,'rel-identity');
+ assert.deepEqual(removed.relations,[]);
+ assert.deepEqual(linked.relations?.map(relation=>relation.id),['rel-identity']);
+ assert.throws(()=>removeImageReferenceRelation(linked,'missing'),/unknown-image-reference-relation/);
+});
+
+test('validates relation endpoints, ignored regions, duplicate symmetry and direction',()=>{
+ const d=base();
+ d.relations=[
+  {id:'rel-a',kind:'same-avatar',sourceRegionId:'r-animal-front',targetRegionId:'r-work'},
+  {id:'rel-b',kind:'same-avatar',sourceRegionId:'r-work',targetRegionId:'r-animal-front'},
+  {id:'rel-c',kind:'detail-of',sourceRegionId:'r-animal-front',targetRegionId:'missing'},
+  {id:'rel-d',kind:'additional-view',sourceRegionId:'r-animal-side',targetRegionId:'r-animal-side'}
+ ];
+ d.regions[1]!.status='ignored';
+ const issues=validateImageReferenceDocument(d);
+ assert.ok(issues.some(issue=>issue.message.includes('bereits vorhanden')));
+ assert.ok(issues.some(issue=>issue.message.includes('Unbekannte Zielregion')));
+ assert.ok(issues.some(issue=>issue.message.includes('Ignorierte Regionen')));
+ assert.ok(issues.some(issue=>issue.message.includes('sich selbst')));
+});
+
+test('allows inverse detail-of relations because detail links are directional',()=>{
+ const d=base();
+ d.relations=[
+  {id:'rel-a',kind:'detail-of',sourceRegionId:'r-animal-side',targetRegionId:'r-animal-front'},
+  {id:'rel-b',kind:'detail-of',sourceRegionId:'r-animal-front',targetRegionId:'r-animal-side'}
+ ];
+ assert.deepEqual(validateImageReferenceDocument(d),[]);
 });

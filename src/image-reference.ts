@@ -42,6 +42,8 @@ export interface ImageReferenceDocument {
   views:ImageReferenceView[];
   forms:ImageReferenceForm[];
   avatars:ImageReferenceAvatar[];
+ /** Optional for backwards compatibility with version-1 projects created before relation editing. */
+ relations?:ImageReferenceRelation[];
 }
 export interface ImageReferenceIssue {path:string;message:string}
 export interface ImageReferenceReadiness {
@@ -255,7 +257,36 @@ export function validateImageReferenceDocument(value:ImageReferenceDocument):Ima
   for(const a of value.avatars)for(const id of a.formIds){const previous=formParents.get(id);if(previous)issues.push({path:`avatars.${a.id}.formIds`,message:`Form ${id} ist bereits Avatar ${previous} zugeordnet.`});else formParents.set(id,a.id);}
   for(const v of value.views)for(const id of v.regionIds){const previous=regionParents.get(id);if(previous)issues.push({path:`views.${v.id}.regionIds`,message:`Region ${id} ist bereits Ansicht ${previous} zugeordnet.`});else regionParents.set(id,v.id);}
   for(const [id,r] of regions){if(r.status==='ignored'&&regionParents.has(id))issues.push({path:`regions.${id}.status`,message:'Ignorierte Region darf keiner Ansicht zugeordnet sein.'});}
+  const relationKinds=new Set<ImageReferenceRelationKind>(['same-avatar','other-form','additional-view','detail-of']);
+  const seenRelations=new Set<string>();
+  for(const [i,relation] of (value.relations??[]).entries()){
+    const p=`relations[${i}]`;addId(relation.id,p+'.id');
+    if(!relationKinds.has(relation.kind))issues.push({path:p+'.kind',message:'Unbekannter Beziehungstyp.'});
+    const from=regions.get(relation.sourceRegionId),to=regions.get(relation.targetRegionId);
+    if(!from)issues.push({path:p+'.sourceRegionId',message:`Unbekannte Quellregion: ${relation.sourceRegionId}`});
+    if(!to)issues.push({path:p+'.targetRegionId',message:`Unbekannte Zielregion: ${relation.targetRegionId}`});
+    if(relation.sourceRegionId===relation.targetRegionId)issues.push({path:p,message:'Eine Region kann keine Beziehung zu sich selbst haben.'});
+    if(from?.status==='ignored'||to?.status==='ignored')issues.push({path:p,message:'Ignorierte Regionen dürfen nicht an Beziehungen teilnehmen.'});
+    const symmetric=relation.kind!=='detail-of';
+    const pair=symmetric?[relation.kind,...[relation.sourceRegionId,relation.targetRegionId].sort()].join(':'):[relation.kind,relation.sourceRegionId,relation.targetRegionId].join(':');
+    if(seenRelations.has(pair))issues.push({path:p,message:'Diese Beziehung ist bereits vorhanden.'});else seenRelations.add(pair);
+  }
   return issues;
+}
+
+/** Add an explicit, stable relation between two image regions without mutating the document. */
+export function addImageReferenceRelation(document:ImageReferenceDocument,relation:ImageReferenceRelation):ImageReferenceDocument {
+ const next={...document,relations:[...(document.relations??[]),{...relation}]};
+ const issues=validateImageReferenceDocument(next);
+ if(issues.length)throw new Error(`invalid-image-reference-relation:${issues.map(issue=>issue.path).join(',')}`);
+ return next;
+}
+
+/** Remove a relation by stable ID; all other IDs and hierarchy links remain untouched. */
+export function removeImageReferenceRelation(document:ImageReferenceDocument,relationId:string):ImageReferenceDocument {
+ const relations=document.relations??[];
+ if(!relations.some(relation=>relation.id===relationId))throw new Error('unknown-image-reference-relation');
+ return {...document,relations:relations.filter(relation=>relation.id!==relationId)};
 }
 
 /** Verify that an embedded source asset matches its declared image type and SHA-256. */
