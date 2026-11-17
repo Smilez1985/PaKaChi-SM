@@ -12,6 +12,10 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+### Added
+
+- Explizites, optionales Region-Beziehungsmodell mit stabilen IDs für `same-avatar`, `other-form`, `additional-view` und gerichtetes `detail-of`. Validierung weist unbekannte Endpunkte, Selbstbezüge, ignorierte Regionen und doppelte symmetrische Beziehungen zurück. Alte Version-1-Projekte ohne Beziehungsfeld bleiben kompatibel; CRUD- und Regressionstests ergänzen den Modellkern. Die sichtbare Editor-Bedienung folgt noch.
+
 ### Fixed
 
 - Änderungen an Regionsbeschriftung sowie Avatar-/Form-/Ansichtszuordnung entziehen die bisherige Bestätigung und 3D-Freigabe; erneute Prüfung ist erforderlich.
@@ -53,7 +57,7 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 - Unverändertes PNG/JPEG-Quellbild (bis 20 MiB) wird zusammen mit SHA-256, Pixelmaßen und Segmentzuordnungen im Studio-Projekt eingebettet; beim Laden werden Bildsignatur und SHA-256 gegen das Asset geprüft. Projekt-Speichern und Model Zoo weisen Gesamtdateien über 80 MiB zurück; ältere Projekte ohne eingebettetes Asset bleiben kompatibel.
 
 
-Zeitstempel der letzten Änderung: 2026-11-16T00:13:00+01:00 (Europe/Berlin)
+Zeitstempel der letzten Änderung: 2026-11-17T15:19:00+01:00 (Europe/Berlin)
 
 ### Added
 
