@@ -135,3 +135,25 @@ test('editing rectangle source-pixel fields invalidates confirmation and selecti
  expect(region.status).toBe('suggested');
  await expect(page.evaluate(async()=> (window as any).__imageReferenceEditor.selectedCrop().then(()=>true,()=>false))).resolves.toBe(false);
 });
+
+
+test('editor creates and removes explicit region relations with renewed review',async({page})=>{
+ await mountRectangleEditor(page);
+ const canvas=page.locator('canvas.image-reference-canvas'),bounds=await canvas.boundingBox();
+ expect(bounds).not.toBeNull();const box=bounds!;
+ await page.getByRole('button',{name:'Split contour'}).click();
+ await page.mouse.click(box.x+box.width*0.5,box.y+box.height*0.02);
+ await page.mouse.click(box.x+box.width*0.5,box.y+box.height*0.98);
+ const ids=await page.evaluate(async()=> (await (window as any).__imageReferenceEditor.reference()).regions.map((region:any)=>region.id));
+ await page.getByLabel('Source region').selectOption(ids[0]);
+ await page.getByLabel('Target region').selectOption(ids[1]);
+ await page.getByLabel('Relation type').selectOption('same-avatar');
+ await page.getByRole('button',{name:'Add relation'}).click();
+ let document=await page.evaluate(async()=> (window as any).__imageReferenceEditor.reference());
+ expect(document.relations).toHaveLength(1);
+ expect(document.relations[0]).toMatchObject({kind:'same-avatar',sourceRegionId:ids[0],targetRegionId:ids[1]});
+ expect(document.regions.every((region:any)=>region.status==='suggested')).toBe(true);
+ await page.getByRole('button',{name:'Remove'}).click();
+ document=await page.evaluate(async()=> (window as any).__imageReferenceEditor.reference());
+ expect(document.relations??[]).toHaveLength(0);
+});

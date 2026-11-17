@@ -14,7 +14,7 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ### Added
 
-- Explizites, optionales Region-Beziehungsmodell mit stabilen IDs für `same-avatar`, `other-form`, `additional-view` und gerichtetes `detail-of`. Validierung weist unbekannte Endpunkte, Selbstbezüge, ignorierte Regionen und doppelte symmetrische Beziehungen zurück. Alte Version-1-Projekte ohne Beziehungsfeld bleiben kompatibel; CRUD- und Regressionstests ergänzen den Modellkern. Die sichtbare Editor-Bedienung folgt noch.
+- Explizites, optionales Region-Beziehungsmodell mit stabilen IDs für `same-avatar`, `other-form`, `additional-view` und gerichtetes `detail-of`. Validierung weist unbekannte Endpunkte, Selbstbezüge, ignorierte Regionen und doppelte symmetrische Beziehungen zurück. Alte Version-1-Projekte ohne Beziehungsfeld bleiben kompatibel; CRUD- und Regressionstests ergänzen den Modellkern. Der Editor bietet die Beziehungen sichtbar an; beim Anlegen werden beide beteiligten Regionen erneut prüfpflichtig. Eine Chromium-Regression prüft Anlegen, Persistenz und Entfernen.
 
 ### Fixed
 
