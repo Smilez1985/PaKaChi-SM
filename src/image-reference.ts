@@ -282,6 +282,23 @@ export function validateImageReferenceDocument(value:ImageReferenceDocument):Ima
   return issues;
 }
 
+/** Conservative, non-binding proposals derived only from the explicitly assigned hierarchy. */
+export function suggestImageReferenceRelations(document:ImageReferenceDocument):ImageReferenceRelation[] {
+ const regions=new Map(document.regions.map(region=>[region.id,region]));
+ const existing=new Set((document.relations??[]).map(r=>r.kind==='detail-of'?[r.kind,r.sourceRegionId,r.targetRegionId].join(':'):[r.kind,...[r.sourceRegionId,r.targetRegionId].sort()].join(':')));
+ const result:ImageReferenceRelation[]=[];
+ const add=(kind:ImageReferenceRelationKind,sourceRegionId:string,targetRegionId:string)=>{
+  if(sourceRegionId===targetRegionId||regions.get(sourceRegionId)?.status==='ignored'||regions.get(targetRegionId)?.status==='ignored')return;
+  const key=kind==='detail-of'?[kind,sourceRegionId,targetRegionId].join(':'):[kind,...[sourceRegionId,targetRegionId].sort()].join(':');
+  if(existing.has(key)||result.some(r=>(r.kind==='detail-of'?[r.kind,r.sourceRegionId,r.targetRegionId].join(':'):[r.kind,...[r.sourceRegionId,r.targetRegionId].sort()].join(':'))===key))return;
+  result.push({id:'suggest-'+kind+':'+sourceRegionId+':'+targetRegionId,kind,sourceRegionId,targetRegionId});
+ };
+ for(const avatar of document.avatars){const forms=avatar.formIds.map(id=>document.forms.find(f=>f.id===id)).filter((f):f is ImageReferenceForm=>!!f);for(let i=0;i<forms.length;i++)for(let j=i+1;j<forms.length;j++){const lv=forms[i]!.viewIds.map(id=>document.views.find(v=>v.id===id)).find(v=>v?.regionIds.some(id=>regions.get(id)?.status!=='ignored'));const rv=forms[j]!.viewIds.map(id=>document.views.find(v=>v.id===id)).find(v=>v?.regionIds.some(id=>regions.get(id)?.status!=='ignored'));const a=lv?.regionIds.find(id=>regions.get(id)?.status!=='ignored'),b=rv?.regionIds.find(id=>regions.get(id)?.status!=='ignored');if(a&&b)add('other-form',a,b);}}
+ for(const form of document.forms)for(let i=0;i<form.viewIds.length;i++)for(let j=i+1;j<form.viewIds.length;j++){const a=document.views.find(v=>v.id===form.viewIds[i])?.regionIds.find(id=>regions.get(id)?.status!=='ignored'),b=document.views.find(v=>v.id===form.viewIds[j])?.regionIds.find(id=>regions.get(id)?.status!=='ignored');if(a&&b)add('additional-view',a,b);}
+ for(const view of document.views){const rs=view.regionIds.map(id=>regions.get(id)).filter((r):r is ImageReferenceRegion=>!!r&&r.status!=='ignored'),anchors=rs.filter(r=>r.kind!=='detail'&&r.kind!=='helper');if(anchors.length===1)for(const detail of rs.filter(r=>r.kind==='detail'))add('detail-of',detail.id,anchors[0]!.id);}
+ return result;
+}
+
 /** Add an explicit, stable relation between two image regions without mutating the document. */
 export function addImageReferenceRelation(document:ImageReferenceDocument,relation:ImageReferenceRelation):ImageReferenceDocument {
  const next={...document,relations:[...(document.relations??[]),{...relation}]};

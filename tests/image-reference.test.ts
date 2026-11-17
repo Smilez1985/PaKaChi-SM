@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {addImageReferenceRelation,removeImageReferenceRelation,checkImageReferenceReadiness,validateImageReferenceDocument,editImageReferenceRectangle,reorderImageReferenceRegions,moveImageReferenceRectangle,resizeImageReferenceRectangle,isValidImageReferencePolygon,isValidImageReferencePolygonWithHoles,moveImageReferencePolygonVertex,moveImageReferencePolygonHoleVertex,splitImageReferencePolygon,splitImageReferenceRegion,simplifyImageReferencePolygon} from '../src/image-reference.ts';
+import {addImageReferenceRelation,removeImageReferenceRelation,suggestImageReferenceRelations,checkImageReferenceReadiness,validateImageReferenceDocument,editImageReferenceRectangle,reorderImageReferenceRegions,moveImageReferenceRectangle,resizeImageReferenceRectangle,isValidImageReferencePolygon,isValidImageReferencePolygonWithHoles,moveImageReferencePolygonVertex,moveImageReferencePolygonHoleVertex,splitImageReferencePolygon,splitImageReferenceRegion,simplifyImageReferencePolygon} from '../src/image-reference.ts';
 import type {ImageReferenceDocument,ImageReferenceRegion} from '../src/image-reference.ts';
 
 const base=():ImageReferenceDocument=>({
@@ -242,4 +242,14 @@ test('allows inverse detail-of relations because detail links are directional',(
   {id:'rel-b',kind:'detail-of',sourceRegionId:'r-animal-front',targetRegionId:'r-animal-side'}
  ];
  assert.deepEqual(validateImageReferenceDocument(d),[]);
+});
+
+
+test('proposes conservative hierarchy relationships without mutating or auto-confirming regions',()=>{
+ const d=base(),proposals=suggestImageReferenceRelations(d);
+ assert.deepEqual(proposals.map(item=>item.kind).sort(),['additional-view','other-form'].sort());
+ assert.ok(proposals.every(item=>item.id.startsWith('suggest-')));
+ assert.equal(d.relations,undefined);assert.ok(d.regions.every(region=>region.status==='confirmed'));
+ d.relations=[proposals[0]!];assert.ok(!suggestImageReferenceRelations(d).some(item=>item.kind===proposals[0]!.kind&&item.sourceRegionId===proposals[0]!.sourceRegionId&&item.targetRegionId===proposals[0]!.targetRegionId));
+ d.regions[1]!.status='ignored';assert.ok(!suggestImageReferenceRelations(d).some(item=>item.sourceRegionId==='r-animal-side'||item.targetRegionId==='r-animal-side'));
 });
