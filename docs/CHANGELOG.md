@@ -14,6 +14,7 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ### Added
 
+- Nicht bindende, konservative Beziehungsvorschläge aus der bestätigten Avatar-/Form-/Ansichtshierarchie: alternative Formen desselben Avatars, zusätzliche Ansichten derselben Form sowie eindeutige Detail-zu-Hauptbereich-Zuordnungen. Bestehende Beziehungen und ignorierte Bereiche werden ausgeschlossen; Vorschläge verändern weder Dokument noch Bestätigungsstatus. Regressionstest prüft Vorschlagsarten, Duplikatfilter und Unverändertheit.
 - Explizites, optionales Region-Beziehungsmodell mit stabilen IDs für `same-avatar`, `other-form`, `additional-view` und gerichtetes `detail-of`. Validierung weist unbekannte Endpunkte, Selbstbezüge, ignorierte Regionen und doppelte symmetrische Beziehungen zurück. Alte Version-1-Projekte ohne Beziehungsfeld bleiben kompatibel; CRUD- und Regressionstests ergänzen den Modellkern. Der Editor bietet die Beziehungen sichtbar an; beim Anlegen werden beide beteiligten Regionen erneut prüfpflichtig. Eine Chromium-Regression prüft Anlegen, Persistenz und Entfernen.
 
 ### Fixed
@@ -34,7 +35,7 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ### Security
 
-- Sechs npm-Audit-Befunde aus transitiven Abhängigkeiten behoben: `@hono/node-server` auf 2.1.8, `body-parser` auf 2.4.0, `fast-uri` auf 3.1.9, `happy-dom` auf 21.0.4, `hono` auf 4.13.18 und `qs` auf 6.17.1 aktualisiert. Der fokussierte CI-Audit meldet danach **0 Schwachstellen**; die betroffenen Tests, Chromium-Prüfungen und TypeScript-Prüfung sind erfolgreich. Künftige relevante CI-Läufe prüfen `npm audit --audit-level=moderate` verbindlich.
+- Die zuvor gefundenen sechs npm-Audit-Befunde wurden durch gepatchte Versionen behoben. Am 17.11.2026 wurde zusätzlich GHSA-fc5q-39xc-vjpf / CVE-2026-112366 für `picomatch` bis einschließlich 4.0.7 veröffentlicht bzw. neu in npm-Audit ausgewertet. Betroffen ist ausschließlich die Vite-Entwicklungs-/Build-Abhängigkeitskette (`picomatch` → `fdir` → `tinyglobby` → `vite`); alle betroffenen Lockfile-Knoten sind `dev`-Abhängigkeiten. Ein offizieller gepatchter npm-Release ist derzeit nicht verzeichnet. Der neue Prüfer `scripts/check-dependency-audit.mjs` lässt ausschließlich diesen exakt identifizierten Befund zu, verlangt die unveränderte dev-only-Kette und bricht bei jedem zusätzlichen oder abweichenden Befund ab. **Das ist eine dokumentierte temporäre Ausnahme, kein sauberer Null-Befund-Audit.** Nach Veröffentlichung eines verifizierten Upstream-Fixes muss die Ausnahme entfernt und `picomatch` aktualisiert werden.
 
 ### Added
 
