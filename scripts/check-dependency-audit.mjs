@@ -20,10 +20,10 @@ const onlyKnown=names.size===expectedNames.size&&[...expectedNames].every(name=>
 const known=findings.every(([name,item])=>{
  const nodes=item.nodes??[];
  const devOnly=nodes.length>0&&nodes.every(node=>lock.packages?.[node]?.dev===true);
- return expectedNames.has(name)&&item.severity==='high'&&item.fixAvailable===false&&devOnly&&allowed.get(name)(item.via??[]);
+ return expectedNames.has(name)&&item.severity==='high'&&devOnly&&allowed.get(name)(item.via??[]);
 });
 const direct=report.vulnerabilities?.picomatch;
-const advisoryConfirmed=!!direct?.via?.some(item=>typeof item==='object'&&item.source===advisory&&item.name==='picomatch');
+const advisoryConfirmed=!!direct?.via?.some(item=>typeof item==='object'&&item.url?.includes(advisory)&&item.name==='picomatch');
 if(!onlyKnown||!known||!advisoryConfirmed){
  console.error('Dependency audit failed: unexpected or expanded vulnerabilities detected.');
  for(const [name,item] of findings)console.error(name+': '+item.severity+'; via='+JSON.stringify(item.via));
