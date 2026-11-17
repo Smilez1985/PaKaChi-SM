@@ -291,7 +291,7 @@ export function suggestImageReferenceRelations(document:ImageReferenceDocument):
   if(sourceRegionId===targetRegionId||regions.get(sourceRegionId)?.status==='ignored'||regions.get(targetRegionId)?.status==='ignored')return;
   const key=kind==='detail-of'?[kind,sourceRegionId,targetRegionId].join(':'):[kind,...[sourceRegionId,targetRegionId].sort()].join(':');
   if(existing.has(key)||result.some(r=>(r.kind==='detail-of'?[r.kind,r.sourceRegionId,r.targetRegionId].join(':'):[r.kind,...[r.sourceRegionId,r.targetRegionId].sort()].join(':'))===key))return;
-  result.push({id:'suggestion-'+(result.length+1),kind,sourceRegionId,targetRegionId});
+  result.push({id:'suggest-'+(result.length+1),kind,sourceRegionId,targetRegionId});
  };
  for(const avatar of document.avatars){const forms=avatar.formIds.map(id=>document.forms.find(f=>f.id===id)).filter((f):f is ImageReferenceForm=>!!f);for(let i=0;i<forms.length;i++)for(let j=i+1;j<forms.length;j++){const lv=forms[i]!.viewIds.map(id=>document.views.find(v=>v.id===id)).find(v=>v?.regionIds.some(id=>regions.get(id)?.status!=='ignored'));const rv=forms[j]!.viewIds.map(id=>document.views.find(v=>v.id===id)).find(v=>v?.regionIds.some(id=>regions.get(id)?.status!=='ignored'));const a=lv?.regionIds.find(id=>regions.get(id)?.status!=='ignored'),b=rv?.regionIds.find(id=>regions.get(id)?.status!=='ignored');if(a&&b)add('other-form',a,b);}}
  for(const form of document.forms)for(let i=0;i<form.viewIds.length;i++)for(let j=i+1;j<form.viewIds.length;j++){const a=document.views.find(v=>v.id===form.viewIds[i])?.regionIds.find(id=>regions.get(id)?.status!=='ignored'),b=document.views.find(v=>v.id===form.viewIds[j])?.regionIds.find(id=>regions.get(id)?.status!=='ignored');if(a&&b)add('additional-view',a,b);}
