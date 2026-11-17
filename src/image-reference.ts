@@ -34,6 +34,14 @@ export interface ImageReferenceAvatar {
   /** Ordered form IDs. A source image may contain any number of avatars/forms. */
   formIds:string[];
 }
+export type ImageReferenceRelationKind='same-avatar'|'other-form'|'additional-view'|'detail-of';
+export interface ImageReferenceRelation {
+ id:string;
+ kind:ImageReferenceRelationKind;
+ sourceRegionId:string;
+ targetRegionId:string;
+}
+
 export interface ImageReferenceDocument {
   format:'pakachi-image-reference';
   version:1;
