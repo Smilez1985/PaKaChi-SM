@@ -4,6 +4,7 @@ on:
     branches: [develop]
     paths:
       - '.github/workflows/image-reference-test.yml'
+      - 'scripts/check-dependency-audit.mjs'
       - 'src/image-reference.ts'
       - 'src/image-reference-detection.ts'
       - 'src/main.ts'
