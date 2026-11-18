@@ -14,6 +14,7 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ### Added
 
+- Der integrierte Bildeditor zeigt die konservativen Beziehungsvorschläge separat an und übernimmt sie ausschließlich nach explizitem Klick. Die Übernahme persistiert die Beziehung, entfernt den Vorschlag aus der Liste und setzt beide betroffenen Bereiche wieder auf prüfpflichtig. Der neue Chromium-Test deckt Anzeige, Nicht-Anwendung vor dem Klick und explizite Übernahme ab; fokussierter CI-Lauf #44270550630 erfolgreich (68 Node-Tests, 9 Browserfälle, TypeScript).
 - Nicht bindende, konservative Beziehungsvorschläge aus der bestätigten Avatar-/Form-/Ansichtshierarchie: alternative Formen desselben Avatars, zusätzliche Ansichten derselben Form sowie eindeutige Detail-zu-Hauptbereich-Zuordnungen. Bestehende Beziehungen und ignorierte Bereiche werden ausgeschlossen; Vorschläge verändern weder Dokument noch Bestätigungsstatus. Regressionstest prüft Vorschlagsarten, Duplikatfilter und Unverändertheit.
 - Explizites, optionales Region-Beziehungsmodell mit stabilen IDs für `same-avatar`, `other-form`, `additional-view` und gerichtetes `detail-of`. Validierung weist unbekannte Endpunkte, Selbstbezüge, ignorierte Regionen und doppelte symmetrische Beziehungen zurück. Alte Version-1-Projekte ohne Beziehungsfeld bleiben kompatibel; CRUD- und Regressionstests ergänzen den Modellkern. Der Editor bietet die Beziehungen sichtbar an; beim Anlegen werden beide beteiligten Regionen erneut prüfpflichtig. Eine Chromium-Regression prüft Anlegen, Persistenz und Entfernen.
 
