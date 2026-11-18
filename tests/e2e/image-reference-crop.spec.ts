@@ -6,7 +6,7 @@ async function mountEditor(page:Page){
  await page.evaluate(async()=>{
   const sourceCanvas=document.createElement('canvas');sourceCanvas.width=100;sourceCanvas.height=100;
   const sourceContext=sourceCanvas.getContext('2d')!;sourceContext.fillStyle='#ff0000';sourceContext.fillRect(0,0,100,100);
-  const blob=await new Promise<Blob>(resolve=>sourceCanvas.toBlob(value=>resolve(value!),'image/png'));
+  const blob=await new Promise<Blob>(resolve=>sourceCanvas.toBlob((value:Blob|null)=>resolve(value!)),'image/png'));
   const source=new File([blob],'reference.png',{type:'image/png'});
   const initial={
    format:'pakachi-image-reference',version:1,
@@ -64,7 +64,7 @@ async function mountRectangleEditor(page:Page){
   const sourceCanvas=document.createElement('canvas');sourceCanvas.width=100;sourceCanvas.height=100;
   const context=sourceCanvas.getContext('2d')!;context.fillStyle='#f5f5f5';context.fillRect(0,0,100,100);
   context.fillStyle='#202020';context.fillRect(10,10,80,80);
-  const blob=await new Promise<Blob>(resolve=>sourceCanvas.toBlob(value=>resolve(value!),'image/png'));
+  const blob=await new Promise<Blob>(resolve=>sourceCanvas.toBlob((value:Blob|null)=>resolve(value!)),'image/png'));
   const source=new File([blob],'touching-figures.png',{type:'image/png'});
   const initial={format:'pakachi-image-reference',version:1,source:{sha256:'0'.repeat(64),width:100,height:100},
    regions:[{id:'joined',label:'Joined figures',kind:'view',status:'confirmed',geometry:{type:'rectangle',x:10,y:10,width:80,height:80}}],
@@ -218,7 +218,7 @@ test('transparent detection shows visual similarity as a manual-only review hint
    context.fillRect(x+22,25,6,6);
    context.fillStyle='#111';context.fillRect(x+15,42,10,5);
   }
-  const blob=await new Promise<Blob>(resolve=>canvas.toBlob(value=>resolve(value!),'image/png'));
+  const blob=await new Promise<Blob>(resolve=>canvas.toBlob((value:Blob|null)=>resolve(value!)),'image/png'));
   const source=new File([blob],'similar-figures.png',{type:'image/png'});
   const {mountImageReferenceEditor}=await import('../../src/image-reference-editor.ts');
   const host=document.createElement('div');document.body.append(host);
