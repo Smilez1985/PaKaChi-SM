@@ -163,3 +163,20 @@ export function findSimilarImageComponentHashes(
  results.sort((a,b)=>b.score-a.score||a.leftId.localeCompare(b.leftId)||a.rightId.localeCompare(b.rightId));
  return results.slice(0,maxResults);
 }
+
+
+/** Remove newly detected boxes that substantially duplicate existing helper regions. */
+export function filterOverlappingImageComponents<T extends TransparentImageComponent>(
+ candidates:T[],
+ existing:TransparentImageComponent[],
+ threshold=0.75
+):T[] {
+ if(!Number.isFinite(threshold)||threshold<=0||threshold>1)throw new Error('invalid-overlap-threshold');
+ const intersectionOverUnion=(a:TransparentImageComponent,b:TransparentImageComponent)=>{
+  const left=Math.max(a.x,b.x),top=Math.max(a.y,b.y),right=Math.min(a.x+a.width,b.x+b.width),bottom=Math.min(a.y+a.height,b.y+b.height);
+  const intersection=Math.max(0,right-left)*Math.max(0,bottom-top);
+  const union=a.width*a.height+b.width*b.height-intersection;
+  return union>0?intersection/union:0;
+ };
+ return candidates.filter(candidate=>!existing.some(region=>intersectionOverUnion(candidate,region)>=threshold));
+}
