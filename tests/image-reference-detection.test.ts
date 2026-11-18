@@ -45,3 +45,19 @@ test('perceptual crop hash validates bounds and hash format',()=>{
  assert.throws(()=>imageComponentPerceptualHash(image,{x:-1,y:0,width:10,height:10,area:100}),/invalid-component-hash-input/);
  assert.throws(()=>compareImageComponentHashes('bad','0'.repeat(16)),/invalid-component-hash/);
 });
+
+import {findSimilarImageComponentHashes} from '../src/image-reference-detection.ts';
+test('similarity review compares only the newest 64 crops and returns the best 12 deterministically',()=>{
+ const entries=Array.from({length:70},(_,index)=>({id:'region-'+String(index).padStart(2,'0'),hash:'0'.repeat(16)}));
+ const first=findSimilarImageComponentHashes(entries);
+ const second=findSimilarImageComponentHashes(entries);
+ assert.equal(first.length,12);
+ assert.deepEqual(first,second);
+ assert.ok(first.every(pair=>Number(pair.leftId.slice(-2))>=6&&Number(pair.rightId.slice(-2))>=6));
+ assert.ok(first.every(pair=>pair.score===1));
+});
+test('similarity review validates thresholds and workload bounds',()=>{
+ assert.throws(()=>findSimilarImageComponentHashes([],{threshold:2}),/invalid-similarity-options/);
+ assert.throws(()=>findSimilarImageComponentHashes([],{maxCandidates:1}),/invalid-similarity-options/);
+ assert.throws(()=>findSimilarImageComponentHashes([],{maxResults:0}),/invalid-similarity-options/);
+});
