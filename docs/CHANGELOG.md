@@ -14,6 +14,11 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ### Changed
 
+- Die Umrechnung vorhandener Rechteck- und Polygonregionen in Bounding-Boxen ist als gemeinsam genutzte, validierende Hilfsfunktion zentralisiert. Die Erkennung verwendet damit denselben geprüften Geometriepfad für manuelle, bestätigte und ignorierte Regionen; ungültige Geometrien werden nicht stillschweigend aus dem Duplikatfilter entfernt.
+
+
+### Changed
+
 - Wiederholte Alpha- und Einfarbhintergrund-Erkennung überspringt neue Vorschläge, deren Bounding-Box mindestens 75 % Intersection-over-Union mit einer bereits vorhandenen Region erreicht. Das gilt auch für manuell markierte und ignorierte Bereiche; bestehende Geometrien werden nicht ersetzt oder automatisch bestätigt.
 
 - Die visuellen Ähnlichkeitshinweise vergleichen höchstens 64 aktuelle erkannte Ausschnitte und zeigen maximal 12 Treffer; dadurch bleibt die manuelle Prüfliste auch bei wiederholter Erkennung begrenzt. Die Begrenzung und deterministische Rangfolge sind jetzt zusätzlich mit Unit-Tests abgesichert; die Editor-Oberfläche nutzt dafür eine separat getestete Hilfsfunktion.
