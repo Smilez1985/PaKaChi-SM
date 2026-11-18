@@ -236,4 +236,10 @@ test('transparent detection shows visual similarity as a manual-only review hint
  expect(document.avatars).toHaveLength(2);
  expect(document.avatars.every((avatar:any)=>avatar.label.startsWith('Unzugeordnet '))).toBe(true);
  expect(document.forms.every((form:any)=>form.label==='Unklassifiziert')).toBe(true);
+ // A moved crop no longer represents the pixels used for its original hash.
+ const canvas=page.locator('canvas.image-reference-canvas'),bounds=await canvas.boundingBox();
+ expect(bounds).not.toBeNull();const box=bounds!;const first=regions[0].geometry;
+ const startX=box.x+(first.x+first.width/2)*box.width/200,startY=box.y+(first.y+first.height/2)*box.height/100;
+ await page.mouse.move(startX,startY);await page.mouse.down();await page.mouse.move(startX+8,startY+4,{steps:3});await page.mouse.up();
+ await expect(page.getByText(/Visually similar crops – review manually/)).toHaveCount(0);
 });
