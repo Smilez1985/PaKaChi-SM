@@ -12,6 +12,15 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+
+### Fixed
+
+- Veraltete Ähnlichkeitshinweise für transparente Bildausschnitte werden nach Geometrieänderungen verworfen; beim Teilen einer Region wird der alte visuelle Hash nicht auf Teilflächen übertragen.
+
+### Changed
+
+- Die geometrische Qualitätsbewertung wird bei der automatischen Erkennung je Komponente nur einmal berechnet.
+
 ### Added
 
 - Geometrische Qualitätsbewertung für automatisch segmentierte Vordergrundkomponenten: ein nachvollziehbarer 0–1-Wert aus Flächenfüllung, relativer Größe, Randabstand und Boxgröße wird samt Evidenzmerkmalen an vorgeschlagenen Hilfsregionen gespeichert und im Editor angezeigt. Die UI-Klassifizierung bleibt unberührt; der Wert ist ausdrücklich keine semantische Avatar-/Form-/Ansichtserkennung. Drei Regressionstests decken Evidenz, schwache Geometrie und ungültige Eingaben ab.
