@@ -14,7 +14,7 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ### Fixed
 
-- Der Browser-Regressionstest für die Qualität der Einfarbhintergrund-Erkennung verwendet jetzt eine leere Referenzregionenliste. So prüft er die Segmentierungsqualität unabhängig vom Duplikatschutz bereits bestätigter Bildbereiche.
+- Der Browser-Regressionstest für die Qualität der Einfarbhintergrund-Erkennung verwendet eine leere Referenzregionenliste; der Fixture-Parameter wird explizit in den `page.evaluate`-Browserkontext übergeben. So prüfen Segmentierungsqualität und bestehende Editor-Regressionen unabhängig voneinander.
 - Der Bounding-Box-IoU-Vergleich verwendet den gemeinsamen Geometrietyp ohne Pixel-Flächenwert; dadurch ist der generische Filter auch mit reinen Rechteck-/Polygon-Bounds typsicher.
 
 

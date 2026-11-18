@@ -60,7 +60,7 @@ test('a hole vertex can be moved in the editor and remains attached to its regio
 async function mountRectangleEditor(page:Page,includeInitialRegion=true){
  await page.route('**/',route=>route.fulfill({contentType:'text/html',body:'<!doctype html><html><body></body></html>'}));
  await page.goto('/');
- await page.evaluate(async()=>{
+ await page.evaluate(async(includeInitialRegion:boolean)=>{
   const sourceCanvas=document.createElement('canvas');sourceCanvas.width=100;sourceCanvas.height=100;
   const context=sourceCanvas.getContext('2d')!;context.fillStyle='#f5f5f5';context.fillRect(0,0,100,100);
   context.fillStyle='#202020';context.fillRect(10,10,80,80);
