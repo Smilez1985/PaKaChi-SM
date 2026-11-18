@@ -184,6 +184,10 @@ Die Umsetzung des integrierten MCP-Arbeitsplatzes, der Caddy-/DuckDNS-Konfigurat
 
 - [ ] Mit dem [CPU- und Browser-Importbenchmark](IMPORT-BENCHMARK.md) große reale Projekte einschließlich Texturen auf Zielhardware messen und anschließend gezielt optimieren. Das Browser-Messwerkzeug ist seit 0.81.0 implementiert; repräsentative Großmodelle, GPU-Fertigstellung und manuelle Performance-Abnahme bleiben offen.
 
+## Abgeschlossen: Bildreferenz-Erkennung
+
+- [x] Für transparente Komponenten einen kleinen perceptual hash ergänzen und visuell ähnliche Ausschnitte als reine manuelle Prüfhilfe anzeigen; keine automatische Identitäts-, Form- oder Ansichtszuordnung.
+
 ## Noch zu entscheiden
 
 - Desktop-Verpackung und geprüfte Betriebssysteme.
@@ -192,4 +196,3 @@ Die Umsetzung des integrierten MCP-Arbeitsplatzes, der Caddy-/DuckDNS-Konfigurat
 - Erweiterungen der Exportformate und sichere Remote-Anbindung.
 
 Three.js, glTF/GLB, JSON-Katalog, Studio-Projektformat 1 und unabhängige Anbieterprofile pro Rolle sind festgelegt.
-\n- [x] Für transparente Komponenten einen kleinen perceptual hash ergänzen und visuell ähnliche Ausschnitte als reine manuelle Prüfhilfe anzeigen; keine automatische Identitäts-, Form- oder Ansichtszuordnung.\n
