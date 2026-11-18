@@ -164,7 +164,7 @@ async function mountSuggestionEditor(page:Page){
  await page.evaluate(async()=>{
   const canvas=document.createElement('canvas');canvas.width=100;canvas.height=100;
   const context=canvas.getContext('2d')!;context.fillStyle='#eee';context.fillRect(0,0,100,100);
-  const blob=await new Promise<Blob>(resolve=>canvas.toBlob(value=>resolve(value!),'image/png'));
+  const blob=await new Promise<Blob>(resolve=>canvas.toBlob((value:Blob|null)=>resolve(value!),'image/png'));
   const source=new File([blob],'two-forms.png',{type:'image/png'});
   const initial={format:'pakachi-image-reference',version:1,source:{sha256:'0'.repeat(64),width:100,height:100},
    regions:[
@@ -233,5 +233,7 @@ test('transparent detection shows visual similarity as a manual-only review hint
  await expect(page.getByText(/luminance-pattern similarity, not an identity prediction/)).toBeVisible();
  const document=await page.evaluate(async()=> (window as any).__imageReferenceEditor.reference());
  expect(document.relations??[]).toHaveLength(0);
- expect(document.avatars??[]).toHaveLength(0);
+ expect(document.avatars).toHaveLength(2);
+ expect(document.avatars.every((avatar:any)=>avatar.label.startsWith('Unzugeordnet '))).toBe(true);
+ expect(document.forms.every((form:any)=>form.label==='Unklassifiziert')).toBe(true);
 });
