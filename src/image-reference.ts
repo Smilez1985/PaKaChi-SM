@@ -14,6 +14,8 @@ export interface ImageReferenceRegion {
   kind:ImageRegionKind;
   status:ImageRegionStatus;
   confidence?:number;
+  /** Machine-readable geometric evidence; never a semantic identity label. */
+  confidenceEvidence?:string[];
   geometry:ImageRegionGeometry;
 }
 export interface ImageReferenceView {
@@ -229,6 +231,7 @@ export function validateImageReferenceDocument(value:ImageReferenceDocument):Ima
     if(!regionKinds.has(r.kind))issues.push({path:p+'.kind',message:'Unbekannte Regionsart.'});
     if(!statuses.has(r.status))issues.push({path:p+'.status',message:'Unbekannter Bestätigungsstatus.'});
     if(r.confidence!==undefined&&(!finite(r.confidence)||r.confidence<0||r.confidence>1))issues.push({path:p+'.confidence',message:'Konfidenz muss zwischen 0 und 1 liegen.'});
+    if(r.confidenceEvidence!==undefined&&(!Array.isArray(r.confidenceEvidence)||r.confidenceEvidence.length>16||r.confidenceEvidence.some(item=>typeof item!=='string'||item.length>80)))issues.push({path:p+'.confidenceEvidence',message:'Geometrische Evidenz muss eine begrenzte Liste kurzer Textmerkmale sein.'});
     const point=(x:number,y:number,path:string)=>{if(!finite(x)||!finite(y)||x<0||y<0||x>source.width||y>source.height)issues.push({path,message:'Punkt liegt außerhalb des Quellbildes oder ist nicht endlich.'});};
     if(r.geometry.type==='rectangle'){
       const g=r.geometry;

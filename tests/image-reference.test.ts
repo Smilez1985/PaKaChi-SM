@@ -59,10 +59,11 @@ test('rejects out-of-image rectangles, invalid polygons and duplicate or danglin
 
 test('rejects shared regions and ambiguous confidence values',()=>{
  const d=base();d.views[1].regionIds.push('r-animal-front');
- d.regions[0].confidence=1.2;
+ d.regions[0].confidence=1.2;d.regions[0].confidenceEvidence=['compact-foreground','x'.repeat(81)];
  const issues=validateImageReferenceDocument(d);
  assert.ok(issues.some(x=>x.message.includes('bereits Ansicht')));
  assert.ok(issues.some(x=>x.path==='regions[0].confidence'));
+ assert.ok(issues.some(x=>x.path==='regions[0].confidenceEvidence'));
 });
 
 test('requires every detected region to be linked or explicitly ignored',()=>{
