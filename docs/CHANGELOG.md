@@ -14,6 +14,9 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ### Changed
 
+- Wiederholte Alpha- und Einfarbhintergrund-Erkennung überspringt neue Hilfsregionen, deren Bounding-Box mindestens 75 % Intersection-over-Union mit einer bestehenden Hilfsregion erreicht. Vorhandene Regionen werden nicht ersetzt oder automatisch bestätigt; Unit-Tests decken Duplikatfilter und ungültige Schwellenwerte ab.
+
+
 - Die visuellen Ähnlichkeitshinweise vergleichen höchstens 64 aktuelle erkannte Ausschnitte und zeigen maximal 12 Treffer; dadurch bleibt die manuelle Prüfliste auch bei wiederholter Erkennung begrenzt. Die Begrenzung und deterministische Rangfolge sind jetzt zusätzlich mit Unit-Tests abgesichert; die Editor-Oberfläche nutzt dafür eine separat getestete Hilfsfunktion.
 
 
