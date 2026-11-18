@@ -12,6 +12,10 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+### Changed
+
+- Die visuellen Ähnlichkeitshinweise vergleichen höchstens 64 aktuelle erkannte Ausschnitte und zeigen maximal 12 Treffer; dadurch bleibt die manuelle Prüfliste auch bei wiederholter Erkennung begrenzt.
+
 
 ### Fixed
 
