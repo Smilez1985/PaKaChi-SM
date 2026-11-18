@@ -138,3 +138,28 @@ export function compareImageComponentHashes(left:string,right:string):number {
  while(differing){distance+=Number(differing&1n);differing>>=1n;}
  return Math.round((1-distance/64)*100)/100;
 }
+
+
+export interface ImageComponentSimilarityPair {leftId:string;rightId:string;score:number}
+
+/**
+ * Compare only the newest bounded set of identified crops and return the best
+ * manual-review hints. This deliberately has no identity or assignment semantics.
+ */
+export function findSimilarImageComponentHashes(
+ entries:Array<{id:string;hash:string}>,
+ options:{threshold?:number;maxCandidates?:number;maxResults?:number}={}
+):ImageComponentSimilarityPair[] {
+ const threshold=options.threshold??0.8,maxCandidates=options.maxCandidates??64,maxResults=options.maxResults??12;
+ if(!Number.isFinite(threshold)||threshold<0||threshold>1||!Number.isInteger(maxCandidates)||maxCandidates<2||!Number.isInteger(maxResults)||maxResults<1)throw new Error('invalid-similarity-options');
+ const candidates=entries.slice(-maxCandidates);
+ const results:ImageComponentSimilarityPair[]=[];
+ for(let i=0;i<candidates.length;i++)for(let j=i+1;j<candidates.length;j++){
+  const left=candidates[i]!,right=candidates[j]!;
+  if(left.id===right.id)continue;
+  const score=compareImageComponentHashes(left.hash,right.hash);
+  if(score>=threshold)results.push({leftId:left.id,rightId:right.id,score});
+ }
+ results.sort((a,b)=>b.score-a.score||a.leftId.localeCompare(b.leftId)||a.rightId.localeCompare(b.rightId));
+ return results.slice(0,maxResults);
+}
