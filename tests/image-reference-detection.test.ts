@@ -78,3 +78,13 @@ test('duplicate filtering validates overlap threshold and keeps non-overlapping 
  assert.throws(()=>filterOverlappingImageComponents([candidate],[],0),/invalid-overlap-threshold/);
  assert.throws(()=>filterOverlappingImageComponents([candidate],[],1.1),/invalid-overlap-threshold/);
 });
+
+import {imageReferenceGeometryBounds} from '../src/image-reference-detection.ts';
+test('computes stable outer bounds for rectangles and polygon outlines',()=>{
+ assert.deepEqual(imageReferenceGeometryBounds({type:'rectangle',x:4,y:8,width:20,height:30}),{x:4,y:8,width:20,height:30});
+ assert.deepEqual(imageReferenceGeometryBounds({type:'polygon',points:[{x:8,y:12},{x:30,y:10},{x:25,y:44},{x:3,y:38}]}),{x:3,y:10,width:27,height:34});
+});
+test('rejects invalid geometry bounds instead of silently disabling duplicate filtering',()=>{
+ assert.throws(()=>imageReferenceGeometryBounds({type:'rectangle',x:0,y:0,width:0,height:4}),/invalid-image-reference-geometry/);
+ assert.throws(()=>imageReferenceGeometryBounds({type:'polygon',points:[{x:1,y:1},{x:2,y:2}]}),/invalid-image-reference-geometry/);
+});
