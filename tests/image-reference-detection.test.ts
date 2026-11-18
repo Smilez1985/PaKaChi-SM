@@ -61,3 +61,20 @@ test('similarity review validates thresholds and workload bounds',()=>{
  assert.throws(()=>findSimilarImageComponentHashes([],{maxCandidates:1}),/invalid-similarity-options/);
  assert.throws(()=>findSimilarImageComponentHashes([],{maxResults:0}),/invalid-similarity-options/);
 });
+
+import {filterOverlappingImageComponents} from '../src/image-reference-detection.ts';
+test('duplicate filtering preserves manual geometry and skips only strongly overlapping proposals',()=>{
+ const candidates=[
+  {x:11,y:11,width:39,height:59,area:2300},
+  {x:70,y:10,width:20,height:30,area:600},
+  {x:10,y:70,width:20,height:20,area:400}
+ ];
+ const existing=[{x:10,y:10,width:40,height:60,area:2400}];
+ assert.deepEqual(filterOverlappingImageComponents(candidates,existing),[candidates[1],candidates[2]]);
+});
+test('duplicate filtering validates overlap threshold and keeps non-overlapping regions',()=>{
+ const candidate={x:10,y:10,width:20,height:20,area:400};
+ assert.deepEqual(filterOverlappingImageComponents([candidate],[]),[candidate]);
+ assert.throws(()=>filterOverlappingImageComponents([candidate],[],0),/invalid-overlap-threshold/);
+ assert.throws(()=>filterOverlappingImageComponents([candidate],[],1.1),/invalid-overlap-threshold/);
+});
