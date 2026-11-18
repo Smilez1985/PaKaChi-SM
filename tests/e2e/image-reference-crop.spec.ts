@@ -157,3 +157,40 @@ test('editor creates and removes explicit region relations with renewed review',
  document=await page.evaluate(async()=> (window as any).__imageReferenceEditor.reference());
  expect(document.relations??[]).toHaveLength(0);
 });
+
+async function mountSuggestionEditor(page:Page){
+ await page.route('**/',route=>route.fulfill({contentType:'text/html',body:'<!doctype html><html><body></body></html>'}));
+ await page.goto('/');
+ await page.evaluate(async()=>{
+  const canvas=document.createElement('canvas');canvas.width=100;canvas.height=100;
+  const context=canvas.getContext('2d')!;context.fillStyle='#eee';context.fillRect(0,0,100,100);
+  const blob=await new Promise<Blob>(resolve=>canvas.toBlob(value=>resolve(value!),'image/png'));
+  const source=new File([blob],'two-forms.png',{type:'image/png'});
+  const initial={format:'pakachi-image-reference',version:1,source:{sha256:'0'.repeat(64),width:100,height:100},
+   regions:[
+    {id:'animal-front',label:'Animal front',kind:'view',status:'confirmed',geometry:{type:'rectangle',x:5,y:5,width:40,height:80}},
+    {id:'work-front',label:'Work front',kind:'view',status:'confirmed',geometry:{type:'rectangle',x:55,y:5,width:40,height:80}}
+   ],
+   views:[{id:'animal-view',label:'Animal front',regionIds:['animal-front']},{id:'work-view',label:'Work front',regionIds:['work-front']}],
+   forms:[{id:'animal-form',label:'Animal',viewIds:['animal-view']},{id:'work-form',label:'Work',viewIds:['work-view']}],
+   avatars:[{id:'pakachi',label:'PaKaChi',formIds:['animal-form','work-form']}]};
+  const {mountImageReferenceEditor}=await import('../../src/image-reference-editor.ts');
+  const host=document.createElement('div');document.body.append(host);
+  (window as any).__imageReferenceEditor=mountImageReferenceEditor(host,source,()=> 'en',()=>{},initial as any);
+ });
+}
+test('editor presents hierarchy relation suggestions and only applies them after explicit acceptance',async({page})=>{
+ await mountSuggestionEditor(page);
+ await expect(page.getByText('Suggested relations (not applied)')).toBeVisible();
+ const accept=page.getByRole('button',{name:/Accept suggestion:/});
+ await expect(accept).toHaveCount(1);
+ let document=await page.evaluate(async()=> (window as any).__imageReferenceEditor.reference());
+ expect(document.relations??[]).toHaveLength(0);
+ expect(document.regions.every((region:any)=>region.status==='confirmed')).toBe(true);
+ await accept.click();
+ document=await page.evaluate(async()=> (window as any).__imageReferenceEditor.reference());
+ expect(document.relations).toHaveLength(1);
+ expect(document.relations[0]).toMatchObject({kind:'other-form',sourceRegionId:'animal-front',targetRegionId:'work-front'});
+ expect(document.regions.every((region:any)=>region.status==='suggested')).toBe(true);
+ await expect(page.getByRole('button',{name:/Accept suggestion:/})).toHaveCount(0);
+});
