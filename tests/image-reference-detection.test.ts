@@ -69,7 +69,7 @@ test('duplicate filtering preserves manual geometry and skips only strongly over
   {x:70,y:10,width:20,height:30,area:600},
   {x:10,y:70,width:20,height:20,area:400}
  ];
- const existing=[{x:10,y:10,width:40,height:60,area:2400}];
+ const existing=[{x:10,y:10,width:40,height:60}];
  assert.deepEqual(filterOverlappingImageComponents(candidates,existing),[candidates[1],candidates[2]]);
 });
 test('duplicate filtering validates overlap threshold and keeps non-overlapping regions',()=>{
