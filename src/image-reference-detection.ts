@@ -173,7 +173,7 @@ export function filterOverlappingImageComponents<T extends ImageComponentBounds>
  threshold=0.75
 ):T[] {
  if(!Number.isFinite(threshold)||threshold<=0||threshold>1)throw new Error('invalid-overlap-threshold');
- const intersectionOverUnion=(a:TransparentImageComponent,b:TransparentImageComponent)=>{
+ const intersectionOverUnion=(a:ImageComponentBounds,b:ImageComponentBounds)=>{
   const left=Math.max(a.x,b.x),top=Math.max(a.y,b.y),right=Math.min(a.x+a.width,b.x+b.width),bottom=Math.min(a.y+a.height,b.y+b.height);
   const intersection=Math.max(0,right-left)*Math.max(0,bottom-top);
   const union=a.width*a.height+b.width*b.height-intersection;

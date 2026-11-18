@@ -57,7 +57,7 @@ test('a hole vertex can be moved in the editor and remains attached to its regio
  expect(status).toBe('suggested');
 });
 
-async function mountRectangleEditor(page:Page){
+async function mountRectangleEditor(page:Page,includeInitialRegion=true){
  await page.route('**/',route=>route.fulfill({contentType:'text/html',body:'<!doctype html><html><body></body></html>'}));
  await page.goto('/');
  await page.evaluate(async()=>{
@@ -67,13 +67,13 @@ async function mountRectangleEditor(page:Page){
   const blob=await new Promise<Blob>(resolve=>sourceCanvas.toBlob((value:Blob|null)=>resolve(value!),'image/png'));
   const source=new File([blob],'touching-figures.png',{type:'image/png'});
   const initial={format:'pakachi-image-reference',version:1,source:{sha256:'0'.repeat(64),width:100,height:100},
-   regions:[{id:'joined',label:'Joined figures',kind:'view',status:'confirmed',geometry:{type:'rectangle',x:10,y:10,width:80,height:80}}],
-   views:[{id:'view-1',label:'Front',regionIds:['joined']}],forms:[{id:'form-1',label:'Animal',viewIds:['view-1']}],avatars:[{id:'avatar-1',label:'PaKaChi',formIds:['form-1']}]};
+   regions:includeInitialRegion?[{id:'joined',label:'Joined figures',kind:'view',status:'confirmed',geometry:{type:'rectangle',x:10,y:10,width:80,height:80}}]:[],
+   views:[{id:'view-1',label:'Front',regionIds:includeInitialRegion?['joined']:[]}],forms:[{id:'form-1',label:'Animal',viewIds:['view-1']}],avatars:[{id:'avatar-1',label:'PaKaChi',formIds:['form-1']}]};
   const {mountImageReferenceEditor}=await import('../../src/image-reference-editor.ts');
   const host=document.createElement('div');document.body.append(host);
   const editor=mountImageReferenceEditor(host,source,()=> 'en',()=>{},initial as any);
   (window as any).__imageReferenceEditor=editor;
- });
+ },includeInitialRegion);
 }
 test('browser editor splits a rectangle into two separate unconfirmed polygon regions',async({page})=>{
  await mountRectangleEditor(page);
@@ -196,7 +196,7 @@ test('editor presents hierarchy relation suggestions and only applies them after
 });
 
 test('solid-background detection shows geometry quality and its evidence without semantic claims',async({page})=>{
- await mountRectangleEditor(page);
+ await mountRectangleEditor(page,false);
  await page.getByRole('button',{name:'Detect solid background'}).click();
  const region=await page.evaluate(async()=> (await (window as any).__imageReferenceEditor.reference()).regions.find((item:any)=>item.status==='suggested'));
  expect(region.confidence).toBeGreaterThan(0);
