@@ -204,3 +204,34 @@ test('solid-background detection shows geometry quality and its evidence without
  await expect(page.getByText(/Geometric segmentation quality:/)).toBeVisible();
  await expect(page.getByText(/not an avatar-identity or form prediction/)).toBeVisible();
 });
+
+
+test('transparent detection shows visual similarity as a manual-only review hint',async({page})=>{
+ await page.route('**/',route=>route.fulfill({contentType:'text/html',body:'<!doctype html><html><body></body></html>'}));
+ await page.goto('/');
+ await page.evaluate(async()=>{
+  const canvas=document.createElement('canvas');canvas.width=200;canvas.height=100;
+  const context=canvas.getContext('2d')!;
+  for(const x of [20,130]){
+   context.fillStyle='#111';context.fillRect(x+5,15,30,50);
+   context.fillStyle='#eee';context.fillRect(x+12,25,6,6);
+   context.fillRect(x+22,25,6,6);
+   context.fillStyle='#111';context.fillRect(x+15,42,10,5);
+  }
+  const blob=await new Promise<Blob>(resolve=>canvas.toBlob(value=>resolve(value!),'image/png'));
+  const source=new File([blob],'similar-figures.png',{type:'image/png'});
+  const {mountImageReferenceEditor}=await import('../../src/image-reference-editor.ts');
+  const host=document.createElement('div');document.body.append(host);
+  (window as any).__imageReferenceEditor=mountImageReferenceEditor(host,source,()=> 'en',()=>{});
+ });
+ await page.getByRole('button',{name:'Detect transparent figures'}).click();
+ const regions=await page.evaluate(async()=> (await (window as any).__imageReferenceEditor.reference()).regions);
+ expect(regions).toHaveLength(2);
+ expect(regions.every((region:any)=>region.status==='suggested'&&region.kind==='helper')).toBe(true);
+ const hint=page.getByText(/Visually similar crops – review manually/);
+ await expect(hint).toBeVisible();
+ await expect(page.getByText(/luminance-pattern similarity, not an identity prediction/)).toBeVisible();
+ const document=await page.evaluate(async()=> (window as any).__imageReferenceEditor.reference());
+ expect(document.relations??[]).toHaveLength(0);
+ expect(document.avatars??[]).toHaveLength(0);
+});
