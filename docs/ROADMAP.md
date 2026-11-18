@@ -190,3 +190,4 @@ Die Umsetzung des integrierten MCP-Arbeitsplatzes, der Caddy-/DuckDNS-Konfigurat
 - Erweiterungen der Exportformate und sichere Remote-Anbindung.
 
 Three.js, glTF/GLB, JSON-Katalog, Studio-Projektformat 1 und unabhängige Anbieterprofile pro Rolle sind festgelegt.
+\n- [x] Für transparente Komponenten einen kleinen perceptual hash ergänzen und visuell ähnliche Ausschnitte als reine manuelle Prüfhilfe anzeigen; keine automatische Identitäts-, Form- oder Ansichtszuordnung.\n

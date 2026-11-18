@@ -98,3 +98,43 @@ export function assessImageComponent(
  else evidence.push('thin-or-small-box');
  return {confidence:Math.round(Math.min(1,confidence)*100)/100,evidence};
 }
+
+
+/**
+ * Compute a small difference hash for a crop. It is a weak visual cue, not
+ * identity recognition: pose, lighting, crop bounds and background affect it.
+ */
+export function imageComponentPerceptualHash(
+ image:{width:number;height:number;data:Uint8ClampedArray},
+ component:TransparentImageComponent
+):string {
+ const {width,height,data}=image;
+ if(!Number.isInteger(width)||!Number.isInteger(height)||width<1||height<1||data.length!==width*height*4||
+  ![component.x,component.y,component.width,component.height].every(Number.isFinite)||
+  component.x<0||component.y<0||component.width<=0||component.height<=0||
+  component.x+component.width>width||component.y+component.height>height)throw new Error('invalid-component-hash-input');
+ const luminance:number[]=[];
+ for(let gy=0;gy<8;gy++)for(let gx=0;gx<9;gx++){
+  let sum=0,count=0;
+  for(let sy=0;sy<3;sy++)for(let sx=0;sx<3;sx++){
+   const x=Math.min(width-1,Math.floor(component.x+(gx+(sx+0.5)/3)*component.width/9));
+   const y=Math.min(height-1,Math.floor(component.y+(gy+(sy+0.5)/3)*component.height/8));
+   const offset=(y*width+x)*4,alpha=data[offset+3]!/255;
+   if(alpha<0.06)continue;
+   sum+=(0.2126*data[offset]!+0.7152*data[offset+1]!+0.0722*data[offset+2]!)*alpha;
+   count++;
+  }
+  luminance.push(count?sum/count:0);
+ }
+ let bits=0n;
+ for(let y=0;y<8;y++)for(let x=0;x<8;x++)if(luminance[y*9+x]!>luminance[y*9+x+1]!)bits|=1n<<BigInt(y*8+x);
+ return bits.toString(16).padStart(16,'0');
+}
+
+/** Returns a normalized dHash similarity. Values are only a review hint. */
+export function compareImageComponentHashes(left:string,right:string):number {
+ if(!/^[a-f0-9]{16}$/i.test(left)||!/^[a-f0-9]{16}$/i.test(right))throw new Error('invalid-component-hash');
+ let differing=BigInt('0x'+left)^BigInt('0x'+right),distance=0;
+ while(differing){distance+=Number(differing&1n);differing>>=1n;}
+ return Math.round((1-distance/64)*100)/100;
+}

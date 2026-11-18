@@ -30,3 +30,18 @@ test('does not give sparse or tiny edge-adjacent components a high geometry scor
 test('rejects invalid component assessment geometry',()=>{
  assert.throws(()=>assessImageComponent({x:-1,y:0,width:10,height:10,area:20},{width:100,height:100}),/invalid-component-assessment-input/);
 });
+
+
+import {imageComponentPerceptualHash,compareImageComponentHashes} from '../src/image-reference-detection.ts';
+test('perceptual crop hash recognizes identical visual patterns as a review cue',()=>{
+ const image={width:90,height:40,data:new Uint8ClampedArray(90*40*4)};
+ for(let y=0;y<40;y++)for(let x=0;x<90;x++){const i=(y*90+x)*4;image.data[i+3]=255;const inside=(x>=5&&x<35)||(x>=55&&x<85);const stripe=(x%10)<5;const value=inside&&stripe?230:inside?20:0;image.data[i]=value;image.data[i+1]=value;image.data[i+2]=value;}
+ const left=imageComponentPerceptualHash(image,{x:5,y:0,width:30,height:40,area:1200});
+ const right=imageComponentPerceptualHash(image,{x:55,y:0,width:30,height:40,area:1200});
+ assert.equal(compareImageComponentHashes(left,right),1);
+});
+test('perceptual crop hash validates bounds and hash format',()=>{
+ const image=pixels(20,20,[[2,2,10,10]]);
+ assert.throws(()=>imageComponentPerceptualHash(image,{x:-1,y:0,width:10,height:10,area:100}),/invalid-component-hash-input/);
+ assert.throws(()=>compareImageComponentHashes('bad','0'.repeat(16)),/invalid-component-hash/);
+});
