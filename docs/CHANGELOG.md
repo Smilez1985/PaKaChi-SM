@@ -16,12 +16,12 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 - Wiederholte Alpha- und Einfarbhintergrund-Erkennung überspringt neue Hilfsregionen, deren Bounding-Box mindestens 75 % Intersection-over-Union mit einer bestehenden Hilfsregion erreicht. Vorhandene Regionen werden nicht ersetzt oder automatisch bestätigt; Unit-Tests decken Duplikatfilter und ungültige Schwellenwerte ab.
 
-
 - Die visuellen Ähnlichkeitshinweise vergleichen höchstens 64 aktuelle erkannte Ausschnitte und zeigen maximal 12 Treffer; dadurch bleibt die manuelle Prüfliste auch bei wiederholter Erkennung begrenzt. Die Begrenzung und deterministische Rangfolge sind jetzt zusätzlich mit Unit-Tests abgesichert; die Editor-Oberfläche nutzt dafür eine separat getestete Hilfsfunktion.
 
 
 ### Fixed
 
+- Der Duplikatfilter für Bildausschnitte akzeptiert nun reine Bounding-Box-Geometrien ohne Pixel-Flächenwert. Dadurch können auch vorhandene manuelle Rechtecke und aus Polygonen abgeleitete Boxen verglichen werden.
 - Veraltete Ähnlichkeitshinweise für transparente Bildausschnitte werden nach Geometrieänderungen verworfen; beim Teilen einer Region wird der alte visuelle Hash nicht auf Teilflächen übertragen.
 
 ### Changed
@@ -71,7 +71,6 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 - Mehrere voneinander getrennte Rechteck-/Polygonbereiche können derselben Ansicht zugeordnet werden. Neu gezeichnete Bereiche übernehmen zunächst Avatar, Form und Ansicht der aktuell ausgewählten Markierung; zusätzliche Bereiche werden als Detailregionen klassifiziert. So lassen sich z. B. Gesicht, Pfote und mechanisches Detail separat zuschneiden, ohne sie geometrisch zu verbinden.
 
 - Gespeicherte Bildreferenzen können beim erneuten Laden eines Studio-Projekts wieder im Bildeditor geöffnet werden. Das eingebettete Quellbild wird bytegetreu rekonstruiert; Regionen, Status und Avatar-/Form-/Ansichtszuordnungen werden übernommen. Bestehende stabile IDs bleiben bei Bearbeitungen erhalten. CI #43640498687: 33 Tests bestanden, TypeScript erfolgreich.
-
 
 - Unverändertes PNG/JPEG-Quellbild (bis 20 MiB) wird zusammen mit SHA-256, Pixelmaßen und Segmentzuordnungen im Studio-Projekt eingebettet; beim Laden werden Bildsignatur und SHA-256 gegen das Asset geprüft. Projekt-Speichern und Model Zoo weisen Gesamtdateien über 80 MiB zurück; ältere Projekte ohne eingebettetes Asset bleiben kompatibel.
 
@@ -228,21 +227,16 @@ Geprüfter Meilenstein auf `main`; [vollständige Prüfungen und Artefaktnachwei
 
 - Eigener GitHub-Actions-Workflow für den bereits vorhandenen lesenden Schnittbenchmark auf den beiden echten PaKaChi-Rigged-GLBs. Er validiert die 16 Hüft-/Knie-Posen und sichert die vollständige JSON-Ausgabe als Artefakt, auch wenn die Ergebnisprüfung fehlschlägt. Ein erfolgreicher Lauf bedeutet nicht, dass keine Kollisionen vorhanden sind. Die normale vollständige CI bleibt separat.
 
-
 - Räumlicher X-AABB-Sweep ersetzt die bisherige harte 2.048-Dreiecks-Grenze der Selbstschnittdiagnose. Bis zu 200.000 Dreiecke pro Teilmodell sind als Eingabe möglich; jeder mögliche Paarvergleich über beliebige Verarbeitungsteilmengen hinweg wird räumlich vorausgefiltert. Unverändert harte Budgets für Kandidatenpaare und breite Überlappungen liefern statt einer scheinbaren Freigabe den Status unvollständig. Regressionen mit mehr als 2.048 Dreiecken und einem Schnitt zwischen weit getrennten Eingabeblöcken ergänzt.
 
-
 - Neuer reproduzierbarer, ausschließlich lesender Prüfbericht für transversale Selbstüberschneidungen auf den beiden echten PaKaChi-Rigged-GLBs. Der CLI-Auftrag misst linke Hüfte und linkes Knie bei 0°, 22,5°, 45° und 90°, protokolliert Eingabe-Hashes, Dehnungs-/Volumenwarnungen, gefundene Schnitte sowie unmessbare oder budgetbegrenzte Teilmodelle. Keine Kollisions- oder anatomische Freigabe; der Lauf muss auf Entwicklungs- oder CI-Hardware separat ausgeführt werden.
-
 
 - Ein reproduzierbarer 180°-Hautverdrehungstest prüft die Auswahl des geometrisch auffälligsten inneren Bewegungsbilds an real berechneten Skinned-Mesh-Posen. Ein zusätzlicher Schnittfall prüft den Übergang von zwei getrennten Dreiecken zu einer transversalen Durchdringung.
 - Die maximal drei zusätzlichen Schnitt-Stichproben behalten Anfang und Ende der gespeicherten Bewegungsbilder; statt eines festen mittleren Bildes wählen sie die durch Dehnung und Volumenwarnungen auffälligste innere Stichprobe. Regressionstest prüft Priorisierung, Randfälle und unveränderte Eingaben. Kein vollständiger Kollisionsnachweis.
 
 - Zusätzliche, auf höchstens drei Move-Stichproben begrenzte Schnittsperre für automatische Gewichts- und Geometriekandidaten. Ein nachgewiesener neuer Schnitt verwirft den Kandidaten. Abbruch, Revisionskontrolle und Vertexbudget bleiben aktiv. Ungeprüfte oder unmessbare Bewegungsbilder sind keine Kollisionsfreigabe.
 
-
 - Zielposen-Gegenprüfung für automatische Gewichts- und geometrische Hautkorrekturen verwirft Kandidaten mit mehr nachgewiesenen transversalen Selbstschnitten auf betroffenen Teilmodellen. Die Prüfung meldet ihre messbare Abdeckung separat; große, coplanare und andere ungeeignete Flächen sind **nicht freigegeben**. Andere Posen, Zwischenbilder und Teilmodell-Kollisionen sind weiterhin nicht von dieser zusätzlichen Schnittsperre abgedeckt. Bestehende Dehnungs-/Volumen-Gegenprüfungen bleiben maßgeblich.
-
 
 
 - Begrenzte transversale Selbstschnittdiagnose wird jetzt in der ausdrücklichen Studio-Poseprüfung pro Teilmodell und in der Moveprüfung für ein ausgewähltes Bild je Teilmodell angezeigt. KI-Diagnose meldet Schnittzahl und Messabdeckung. Keine Änderung der automatischen Korrekturfrei­gabe; Kontakte, benachbarte Dreiecke, Teilmodell-übergreifende Kollisionen und weitere Move-Bilder bleiben ungeprüft.
@@ -262,15 +256,11 @@ Geprüfter Meilenstein auf `main`; [vollständige Prüfungen und Artefaktnachwei
 - Vier zusätzliche Kernregressionen vergleichen die Suche mit vollständiger Paarprüfung, vertauschten Eingabereihenfolgen und Achsen, getrennten Flächen mit gleichem X-Bereich, Indexnachbarschaft sowie leeren/zu großen Eingaben. Zwei echte Körpernetz-Regressionen verlangen vollständige Baseline-/90°-Hüftmessung und eine nachgewiesene Verschlechterung für die bestehende Korrektursperre.
 
 
-
 - GitHub Actions Browserfall für geschlossene Haut (`automatic-skin-correction.spec.ts`) an die aktuelle KI-Schnittdiagnose angepasst: statt des veralteten `unchecked: self-intersections` wird der tatsächlich gemessene Teilmodell-Schnittbericht geprüft; ungemessene Teilmodell-übergreifende Kollisionen und angrenzende Kontakte bleiben ausdrücklich als ungeprüft markiert. Ursache von Actions-Run #105: 473 Node-Tests und Build erfolgreich, 45/46 Browserfälle erfolgreich; nur die veraltete Browsererwartung schlug fehl.
-
 
 - Gleichzeitige transversale Durchdringung und ungeklärter Randkontakt eines Dreieckspaars wird jetzt als Schnitt **und** unvollständige Prüfung gemeldet. Die automatische Korrektursperre verwirft neu nachgewiesene Schnitte auch dann, wenn das veränderte Netz zusätzlich ungeklärte Kontakte aufweist, sofern die Ausgangsprüfung vollständig war. Tests für beide Fälle ergänzt.
 
-
 - Entartete, kollineare und nicht endlich berechenbare Dreiecke werden bereits beim Einlesen des Netzes als ungültig erkannt, selbst wenn ihre Bounding-Box keine andere Fläche überlappt. Regressionen für isolierte Nullflächen sowie Kanten-/Eckkontakte ergänzt.
-
 
 - Nicht-coplanare Kanten- und Eckkontakte unabhängiger Dreiecke werden nicht länger stillschweigend als frei bewertet: Der Schnittprüfer markiert solche Kontakte als unvollständig; echte transversale Durchdringungen bleiben zählbar. Zwei Regressionen für Endpunkt- und Randkontakte ergänzt. Die Diagnose bleibt keine allgemeine Kollisionsfreigabe.
 
