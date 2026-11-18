@@ -181,3 +181,20 @@ export function filterOverlappingImageComponents<T extends ImageComponentBounds>
  };
  return candidates.filter(candidate=>!existing.some(region=>intersectionOverUnion(candidate,region)>=threshold));
 }
+
+/** Convert a validated rectangle or polygon outline into its conservative outer bounding box. */
+export function imageReferenceGeometryBounds(
+ geometry:
+  | {type:'rectangle';x:number;y:number;width:number;height:number}
+  | {type:'polygon';points:Array<{x:number;y:number}>}
+):ImageComponentBounds {
+ if(geometry.type==='rectangle'){
+  if(![geometry.x,geometry.y,geometry.width,geometry.height].every(Number.isFinite)||geometry.width<=0||geometry.height<=0)throw new Error('invalid-image-reference-geometry');
+  return {x:geometry.x,y:geometry.y,width:geometry.width,height:geometry.height};
+ }
+ if(geometry.points.length<3||geometry.points.some(point=>![point.x,point.y].every(Number.isFinite)))throw new Error('invalid-image-reference-geometry');
+ const xs=geometry.points.map(point=>point.x),ys=geometry.points.map(point=>point.y);
+ const x=Math.min(...xs),y=Math.min(...ys),right=Math.max(...xs),bottom=Math.max(...ys);
+ if(right<=x||bottom<=y)throw new Error('invalid-image-reference-geometry');
+ return {x,y,width:right-x,height:bottom-y};
+}
