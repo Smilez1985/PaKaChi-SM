@@ -14,3 +14,19 @@ test('proposes separate figures against a uniform opaque background',()=>{const 
 test('rejects inconsistent borders and foreground touching the image edge',()=>{const mixed=rgbPixels(80,60,[245,245,245],[{box:[0,0,25,60],color:[20,20,20]}]);assert.deepEqual(detectSolidBackgroundImageComponents(mixed),[]);const gradient={...rgbPixels(80,60,[245,245,245],[])};for(let y=0;y<60;y++)for(let x=0;x<80;x++){const i=(y*80+x)*4;gradient.data[i]=x*3;gradient.data[i+1]=x*3;gradient.data[i+2]=x*3;}assert.deepEqual(detectSolidBackgroundImageComponents(gradient),[]);});
 test('filters isolated foreground noise and downsamples source coordinates',()=>{const result=detectSolidBackgroundImageComponents(rgbPixels(4000,2000,[250,250,250],[{box:[1000,500,800,600],color:[0,0,0]},{box:[3000,1700,1,1],color:[0,0,0]}]),{maxDimension:1000});assert.equal(result.length,1);assert.ok(Math.abs(result[0]!.x-1000)<=4);assert.ok(Math.abs(result[0]!.width-800)<=8);});
 test('rejects invalid solid-background options',()=>{assert.throws(()=>detectSolidBackgroundImageComponents(rgbPixels(10,10,[255,255,255],[]),{minBorderConsistency:0.2}),/invalid-detection-options/);});
+
+import {assessImageComponent} from '../src/image-reference-detection.ts';
+test('scores segmentation geometry separately from semantic identity and explains the evidence',()=>{
+ const assessment=assessImageComponent({x:20,y:20,width:40,height:60,area:2200},{width:100,height:120});
+ assert.equal(assessment.confidence,0.8);
+ assert.deepEqual(assessment.evidence,['compact-foreground','usable-relative-area','separated-from-image-edge','measurable-box-size']);
+});
+test('does not give sparse or tiny edge-adjacent components a high geometry score',()=>{
+ const assessment=assessImageComponent({x:0,y:2,width:80,height:90,area:500},{width:100,height:100});
+ assert.ok(assessment.confidence<0.7);
+ assert.ok(assessment.evidence.includes('sparse-or-irregular-foreground'));
+ assert.ok(assessment.evidence.includes('close-to-image-edge'));
+});
+test('rejects invalid component assessment geometry',()=>{
+ assert.throws(()=>assessImageComponent({x:-1,y:0,width:10,height:10,area:20},{width:100,height:100}),/invalid-component-assessment-input/);
+});

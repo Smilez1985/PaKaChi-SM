@@ -58,3 +58,43 @@ export function detectSolidBackgroundImageComponents(
  }
  return components.sort((a,b)=>b.area-a.area).slice(0,maxComponents);
 }
+
+/**
+ * Explainable geometry-quality estimate for a segmented component.
+ * This is NOT confidence that the component is a person, avatar, form, or view.
+ * Scores only describe how well the extracted foreground pixels support the box.
+ */
+export interface ImageComponentAssessment {
+ confidence:number;
+ evidence:string[];
+}
+export function assessImageComponent(
+ component:TransparentImageComponent,
+ source:{width:number;height:number}
+):ImageComponentAssessment {
+ const {width,height}=source;
+ if(!Number.isInteger(width)||!Number.isInteger(height)||width<1||height<1||
+  ![component.x,component.y,component.width,component.height,component.area].every(Number.isFinite)||
+  component.x<0||component.y<0||component.width<=0||component.height<=0||component.area<=0||
+  component.x+component.width>width||component.y+component.height>height||component.area>width*height) {
+  throw new Error('invalid-component-assessment-input');
+ }
+ const boxArea=component.width*component.height;
+ const fillRatio=Math.min(1,component.area/boxArea);
+ const imageFraction=component.area/(width*height);
+ const margin=Math.min(component.x,component.y,width-(component.x+component.width),height-(component.y+component.height));
+ const normalizedMargin=margin/Math.min(width,height);
+ let confidence=0.45;
+ const evidence:string[]=[];
+ if(fillRatio>=0.7){confidence+=0.2;evidence.push('compact-foreground');}
+ else if(fillRatio>=0.4){confidence+=0.1;evidence.push('moderate-foreground-fill');}
+ else evidence.push('sparse-or-irregular-foreground');
+ if(imageFraction>=0.01&&imageFraction<=0.8){confidence+=0.15;evidence.push('usable-relative-area');}
+ else if(imageFraction>0.8)evidence.push('very-large-foreground');
+ else evidence.push('small-foreground');
+ if(normalizedMargin>=0.02){confidence+=0.1;evidence.push('separated-from-image-edge');}
+ else evidence.push('close-to-image-edge');
+ if(component.width/width>=0.02&&component.height/height>=0.02){confidence+=0.1;evidence.push('measurable-box-size');}
+ else evidence.push('thin-or-small-box');
+ return {confidence:Math.round(Math.min(1,confidence)*100)/100,evidence};
+}
