@@ -14,7 +14,7 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ### Changed
 
-- Die visuellen Ähnlichkeitshinweise vergleichen höchstens 64 aktuelle erkannte Ausschnitte und zeigen maximal 12 Treffer; dadurch bleibt die manuelle Prüfliste auch bei wiederholter Erkennung begrenzt.
+- Die visuellen Ähnlichkeitshinweise vergleichen höchstens 64 aktuelle erkannte Ausschnitte und zeigen maximal 12 Treffer; dadurch bleibt die manuelle Prüfliste auch bei wiederholter Erkennung begrenzt. Die Begrenzung und deterministische Rangfolge sind jetzt zusätzlich mit Unit-Tests abgesichert; die Editor-Oberfläche nutzt dafür eine separat getestete Hilfsfunktion.
 
 
 ### Fixed
