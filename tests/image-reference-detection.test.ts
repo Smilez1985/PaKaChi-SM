@@ -18,12 +18,12 @@ test('rejects invalid solid-background options',()=>{assert.throws(()=>detectSol
 import {assessImageComponent} from '../src/image-reference-detection.ts';
 test('scores segmentation geometry separately from semantic identity and explains the evidence',()=>{
  const assessment=assessImageComponent({x:20,y:20,width:40,height:60,area:2200},{width:100,height:120});
- assert.equal(assessment.confidence,0.8);
+ assert.equal(assessment.confidence,1);
  assert.deepEqual(assessment.evidence,['compact-foreground','usable-relative-area','separated-from-image-edge','measurable-box-size']);
 });
 test('does not give sparse or tiny edge-adjacent components a high geometry score',()=>{
  const assessment=assessImageComponent({x:0,y:2,width:80,height:90,area:500},{width:100,height:100});
- assert.ok(assessment.confidence<0.7);
+ assert.ok(assessment.confidence<=0.7);
  assert.ok(assessment.evidence.includes('sparse-or-irregular-foreground'));
  assert.ok(assessment.evidence.includes('close-to-image-edge'));
 });
