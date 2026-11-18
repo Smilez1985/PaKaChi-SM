@@ -166,9 +166,10 @@ export function findSimilarImageComponentHashes(
 
 
 /** Remove newly detected boxes that substantially duplicate existing helper regions. */
-export function filterOverlappingImageComponents<T extends TransparentImageComponent>(
+export interface ImageComponentBounds {x:number;y:number;width:number;height:number}
+export function filterOverlappingImageComponents<T extends ImageComponentBounds>(
  candidates:T[],
- existing:TransparentImageComponent[],
+ existing:ImageComponentBounds[],
  threshold=0.75
 ):T[] {
  if(!Number.isFinite(threshold)||threshold<=0||threshold>1)throw new Error('invalid-overlap-threshold');
