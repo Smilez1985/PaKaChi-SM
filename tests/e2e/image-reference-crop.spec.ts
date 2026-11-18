@@ -194,3 +194,13 @@ test('editor presents hierarchy relation suggestions and only applies them after
  expect(document.regions.every((region:any)=>region.status==='suggested')).toBe(true);
  await expect(page.getByRole('button',{name:/Accept suggestion:/})).toHaveCount(0);
 });
+
+test('solid-background detection shows geometry quality and its evidence without semantic claims',async({page})=>{
+ await mountRectangleEditor(page);
+ await page.getByRole('button',{name:'Detect solid background'}).click();
+ const region=await page.evaluate(async()=> (await (window as any).__imageReferenceEditor.reference()).regions.find((item:any)=>item.status==='suggested'));
+ expect(region.confidence).toBeGreaterThan(0);
+ expect(region.confidenceEvidence.length).toBeGreaterThan(0);
+ await expect(page.getByText(/Geometric segmentation quality:/)).toBeVisible();
+ await expect(page.getByText(/not an avatar-identity or form prediction/)).toBeVisible();
+});
