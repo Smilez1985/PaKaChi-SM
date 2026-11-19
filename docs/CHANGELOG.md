@@ -14,6 +14,10 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ### Added
 
+- Landmarken-Editor: Anatomische Teile und Oberflächenlagen werden über auswählbare Einträge aus dem gemeinsamen PaKaChi-Katalog gesetzt. Unbekannte IDs aus älteren oder externen Projekten bleiben als benutzerdefinierte Auswahl erhalten. Browserregression für Katalogauswahl und Persistenz.
+
+### Added
+
 - Der integrierte Bildreferenz-Editor kann die konservativen 2D-Anatomiezuordnungen auf Anforderung als separate Prüfliste anzeigen. Es werden ausschließlich Landmarken aus bestätigten Regionen verwendet; Vorschläge zeigen Begründung/Konfidenz und verändern weder Bildbereiche noch Bestätigungsstatus. Browserregression deckt einen gemischten Crop ab.
 
  
