@@ -34,7 +34,7 @@ test('resolves an explicitly reviewed 2D landmark to a barycentric mesh-local su
 });
 
 test('rejects unconfirmed picks and mismatched source or form provenance', () => {
-  const unconfirmed = input(); unconfirmed.picks[0] = { ...unconfirmed.picks[0]!, confirmed: false as true };
+  const unconfirmed = input(); unconfirmed.picks[0] = { ...unconfirmed.picks[0]!, confirmed: false as unknown as true };
   assert.throws(() => resolveReviewedLandmarkSurfacePicks(unconfirmed), /unconfirmed/);
   const wrongImage = input(); wrongImage.picks[0] = { ...wrongImage.picks[0]!, sourceImageSha256: 'c'.repeat(64) };
   assert.throws(() => resolveReviewedLandmarkSurfacePicks(wrongImage), /provenance/);
