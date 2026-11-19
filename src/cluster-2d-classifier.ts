@@ -50,7 +50,7 @@ export interface Cluster2DClassificationReport {
   outsideEvidence:number;
 }
 
-const idPattern=/^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/;
+const idPattern=/^[a-z0-9][a-z0-9_-]{0,127}$/;
 const finite=(n:number)=>Number.isFinite(n);
 const unique=(values:string[])=>new Set(values).size===values.length;
 

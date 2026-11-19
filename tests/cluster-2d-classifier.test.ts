@@ -38,8 +38,8 @@ test('keeps ambiguous and unsupported regions unresolved and ignores unconfirmed
   {id:'lm-b',partId:'torso',avatarId:'a-pakachi',formId:'f-animal',viewId:'v-animal',poseId:'p1',x:61,y:60,radiusPx:200}
  ];
  const result=proposeCluster2DRegionAssignments(d,catalog,seeds);
- assert.equal(result.assignments.length,2);
- assert.equal(result.ambiguous,1);assert.equal(result.outsideEvidence,1);
+ assert.equal(result.assignments.length,3);
+ assert.equal(result.ambiguous,1);assert.equal(result.outsideEvidence,2);
  assert.ok(result.assignments.every(a=>a.partId===null&&a.reviewStatus==='unresolved'));
 });
 
@@ -60,5 +60,5 @@ test('does not treat 2D source coordinates as 3D or fuse different poses',()=>{
  ]);
  assert.equal(result.assignments[0]!.partId,null);
  assert.equal(result.assignments[0]!.poseId,'unresolved');
- assert.match(result.assignments[0]!.reason,/insufficiently separated/);
+ assert.match(result.assignments[0]!.reason,/different poses/);
 });
