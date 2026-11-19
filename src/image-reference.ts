@@ -65,6 +65,8 @@ export interface ImageReferenceDocument {
   avatars:ImageReferenceAvatar[];
  /** Optional for backwards compatibility with version-1 projects created before relation editing. */
  relations?:ImageReferenceRelation[];
+ /** Explicit user-placed 2D semantic anchors in immutable source-image pixels. */
+ landmarks?:ImageReferenceLandmark[];
 }
 export interface ImageReferenceIssue {path:string;message:string}
 export interface ImageReferenceReadiness {
