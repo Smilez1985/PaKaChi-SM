@@ -14,6 +14,8 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ### Added
 
+- Explizite 2D/3D-Landmarken-Korrespondenz als konservativer Resolver: Eine bestätigte 2D-Landmarke wird über Quellbild-/3D-Assethash, Avatar-/Form-/Ansichts-/Posen-Provenienz und eine vom Nutzer ausgewählte Mesh-Dreiecksfläche verknüpft. Der 3D-Oberflächenpunkt wird baryzentrisch im Mesh-Lokalraum berechnet; Ausgabe als nutzerverursachte, gesperrte Evidenz. Keine Tiefenableitung aus Einzelbildern und keine automatische Manifestübernahme. Vier gezielte Regressionen decken Herkunft, Bestätigung, Dreiecksgrenzen und Layerkompatibilität ab. Stand: 2026-11-19T07:39:00+01:00.
+
 - Landmarkenbearbeitung im integrierten Bildreferenz-Editor: 2D-Punkte auf bestätigten Regionen setzen, per Maus oder Quellpixel-Feldern verschieben, semantische Part-/Surface-Layer-/Pose-IDs pflegen und löschen. Landmarken werden quellpixelgebunden im Bildreferenz-Dokument gespeichert und über die explizite Avatar-/Form-/Ansicht-Hierarchie in Seeds für den 2D-Klassifikator überführt. Projekt-Roundtrip und Browserregressionen ergänzen.
 
 - Separater 2D-Clusterkern mit charakterweit stabilen Anatomie- und Oberflächen-IDs, quellpixelgebundenen Landmarken und strikter Avatar-/Form-/Ansichts-/Posen-Provenienz. Der Klassifikator erzeugt ausschließlich prüfpflichtige Vorschläge für bestätigte Bildregionen; Mehrdeutigkeit, fehlende Evidenz und mehrere Posen bleiben ungelöst. 2D-Koordinaten werden nicht als 3D-Geometrie interpretiert. Regressionen decken Tier-/Arbeitsform, Pose-Trennung, ungültige Herkunft und Mehrdeutigkeit ab.

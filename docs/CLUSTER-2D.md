@@ -27,3 +27,9 @@ Der Klassifikator berücksichtigt nur bestätigte Regionen und Landmarken aus ex
 ## Aktueller Umfang
 
 Implementiert sind der unabhängige 2D-Semantikkatalog, die Provenienzvalidierung, die regiongebundene Klassifikationsvorschlagsfunktion sowie die Landmarkenbearbeitung im integrierten Bildreferenz-Editor. Punkte können auf bestätigten Regionen gesetzt, per Maus oder Pixel-Feldern verschoben, semantisch beschriftet und gelöscht werden. Das version-1-Bildreferenz-Dokument speichert die Landmarken quellpixelgebunden; ein Adapter leitet Avatar/Form/Ansicht ausschließlich aus der bestehenden Hierarchie ab. Projekt-Roundtrip und Browserregressionen decken die Integration ab. Offen bleiben Undo/Redo, die verwaltbare Katalogauswahl und die spätere kalibrierte 2D/3D-Korrespondenz.
+
+## 2D/3D-Korrespondenz durch geprüfte Oberflächenpunkte
+
+Neben kalibrierter Mehransicht-Triangulation gibt es jetzt einen getrennten Resolver für explizit vom Nutzer ausgewählte Mesh-Oberflächenpunkte. Eine gespeicherte 2D-Landmarke wird dabei über Quellbildhash, Avatar, Form, Ansicht und Pose an ein konkretes Quellmesh und Dreieck gebunden. Baryzentrische Koordinaten bestimmen den Punkt im Mesh-Lokalraum. Der Resolver prüft zusätzlich den 3D-Assethash, Mesh-Inventar, Dreiecksindex, Anatomie-/Surface-Layer-IDs und eine ausdrückliche Bestätigung.
+
+Das Ergebnis ist eine nutzerverursachte, gesperrte Korrespondenz (origin: user, policy: locked) und ein 3D-Landmarken-Seed. Sie wird noch nicht automatisch in das Manifest übernommen. Die interaktive Mesh-Auswahl und persistente Speicherung bleiben offen. Siehe [Korrespondenzvertrag](CLUSTER-2D-3D-KORRESPONDENZ.md).
