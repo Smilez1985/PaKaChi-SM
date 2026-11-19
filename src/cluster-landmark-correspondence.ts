@@ -103,11 +103,12 @@ export function resolveReviewedLandmarkSurfacePicks(
         throw new Error('Reviewed pick references an incompatible surface layer.');
       }
     }
+    const barycentric = pick.barycentric as readonly number[];
     if (!Number.isSafeInteger(pick.triangleIndex) || pick.triangleIndex < 0 ||
-        !Array.isArray(pick.barycentric) || pick.barycentric.length !== 3 ||
-        !pick.barycentric.every(Number.isFinite) ||
-        pick.barycentric.some(value => value < 0 || value > 1) ||
-        Math.abs(pick.barycentric.reduce((sum, value) => sum + value, 0) - 1) > 1e-5 ||
+        !Array.isArray(barycentric) || barycentric.length !== 3 ||
+        !barycentric.every((value: number) => Number.isFinite(value)) ||
+        barycentric.some((value: number) => value < 0 || value > 1) ||
+        Math.abs(barycentric.reduce((sum: number, value: number) => sum + value, 0) - 1) > 1e-5 ||
         !Number.isFinite(pick.radiusLocal) || pick.radiusLocal <= 0) {
       throw new Error('Invalid triangle, barycentric coordinates, or local evidence radius.');
     }

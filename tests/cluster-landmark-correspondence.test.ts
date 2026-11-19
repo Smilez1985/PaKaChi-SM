@@ -2,6 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { resolveReviewedLandmarkSurfacePicks } from '../src/cluster-landmark-correspondence.ts';
 import type { ClusterManifest } from '../src/cluster-architecture.ts';
+import type { ReviewedLandmarkSurfacePick } from '../src/cluster-landmark-correspondence.ts';
 
 const manifest = (): ClusterManifest => ({
   schemaVersion: 1, form: 'animal', sourceAssetSha256: 'a'.repeat(64),
@@ -19,9 +20,9 @@ const input = () => ({
   picks: [{
     landmarkId: 'left-eye', sourceImageSha256: 'b'.repeat(64), avatarId: 'pakachi',
     formId: 'animal-form', viewId: 'front', poseId: 'neutral',
-    meshId: 'mesh-head', triangleIndex: 0, barycentric: [0.2, 0.3, 0.5] as const,
-    partId: 'head', surfaceLayerId: 'fur', radiusLocal: 0.15, confirmed: true as const,
-  }],
+    meshId: 'mesh-head', triangleIndex: 0, barycentric: [0.2, 0.3, 0.5],
+    partId: 'head', surfaceLayerId: 'fur', radiusLocal: 0.15, confirmed: true,
+  }] as ReviewedLandmarkSurfacePick[],
   geometry: [{ meshId: 'mesh-head', positions: [0,0,0, 1,0,0, 0,1,0], indices: [0,1,2] }],
 });
 
@@ -38,6 +39,8 @@ test('rejects unconfirmed picks and mismatched source or form provenance', () =>
   assert.throws(() => resolveReviewedLandmarkSurfacePicks(unconfirmed), /unconfirmed/);
   const wrongImage = input(); wrongImage.picks[0] = { ...wrongImage.picks[0]!, sourceImageSha256: 'c'.repeat(64) };
   assert.throws(() => resolveReviewedLandmarkSurfacePicks(wrongImage), /provenance/);
+  const wrongAsset = input(); wrongAsset.sourceAssetSha256 = 'c'.repeat(64);
+  assert.throws(() => resolveReviewedLandmarkSurfacePicks(wrongAsset), /different source 3D asset/);
   const wrongForm = input(); wrongForm.current.form = 'humanoid';
   assert.throws(() => resolveReviewedLandmarkSurfacePicks(wrongForm), /form provenance/);
 });
