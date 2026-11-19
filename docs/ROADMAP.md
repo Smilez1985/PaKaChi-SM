@@ -1,6 +1,6 @@
 # Roadmap – offene Aufgaben
 
-**Entwicklungsstand: 0.101.0 · Abgleich: 18.11.2026.** Teil der [Blaupause](README.md).
+**Entwicklungsstand: 0.101.0 · Abgleich: 19.11.2026.** Teil der [Blaupause](README.md).
 
 Diese Roadmap enthält offene Umsetzung und ausstehende Abnahme. Erledigte Änderungen stehen nach Version im [Changelog](CHANGELOG.md); Nachweise und Grenzen im [Prüfstand](PRUEFUNG.md).
 
@@ -192,7 +192,9 @@ Die Umsetzung des integrierten MCP-Arbeitsplatzes, der Caddy-/DuckDNS-Konfigurat
 
 - [x] Separaten 2D-Semantikvertrag mit stabilen Anatomie-/Oberflächen-IDs, quellpixelgebundenen Landmarken und Avatar-/Form-/Ansichts-/Posen-Provenienz ergänzen.
 - [x] Konservative 2D-Regionsklassifikation auf bestätigte Bildregionen begrenzen; automatische Vorschläge bleiben unbestätigt, Mehrdeutigkeit und Ansichts-/Posenvermischung bleiben ungelöst.
-- [ ] Landmarken im integrierten Bildeditor setzen, verschieben, löschen und mit stabilen semantischen IDs verknüpfen; Projekt-Speichern/Laden und Undo abnehmen.
+- [x] Landmarken im integrierten Bildeditor auf bestätigten Bildregionen setzen, per Maus oder Zahlenfeldern verschieben, semantisch beschriften und löschen; Speicherung im bestehenden Bildreferenz-Dokument.
+- [x] Persistierte Landmarken über die explizite Region-/Ansicht-/Form-/Avatar-Hierarchie in 2D-Klassifikator-Seeds überführen.
+- [ ] Landmarken-Undo/Redo und eine auswählbare, charakterweite Part-/Surface-Layer-Katalogverwaltung im Studio ergänzen.
 - [ ] Explizite 2D/3D-Korrespondenz mit kalibrierten Kameras oder geprüfter Nutzerzuordnung umsetzen; keine Tiefenableitung aus Einzelbildern.
 - [ ] Tier- und Arbeitsform gegen denselben Charakterkatalog prüfen und 3D-Mesh-Zuordnungen über gemeinsame semantische IDs vergleichen.
 

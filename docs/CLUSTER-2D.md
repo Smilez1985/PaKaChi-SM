@@ -26,4 +26,4 @@ Der Klassifikator berücksichtigt nur bestätigte Regionen und Landmarken aus ex
 
 ## Aktueller Umfang
 
-Implementiert sind der unabhängige 2D-Semantikkatalog, die Provenienzvalidierung für Landmarken, die regiongebundene Klassifikationsvorschlagsfunktion und Regressionen für mehrere Formen, Pose-Trennung, Mehrdeutigkeit und ungültige Provenienz. UI-Platzierung/-Bearbeitung von Landmarken, persistente Projektintegration und die spätere kalibrierte 2D/3D-Korrespondenz bleiben offen.
+Implementiert sind der unabhängige 2D-Semantikkatalog, die Provenienzvalidierung, die regiongebundene Klassifikationsvorschlagsfunktion sowie die Landmarkenbearbeitung im integrierten Bildreferenz-Editor. Punkte können auf bestätigten Regionen gesetzt, per Maus oder Pixel-Feldern verschoben, semantisch beschriftet und gelöscht werden. Das version-1-Bildreferenz-Dokument speichert die Landmarken quellpixelgebunden; ein Adapter leitet Avatar/Form/Ansicht ausschließlich aus der bestehenden Hierarchie ab. Projekt-Roundtrip und Browserregressionen decken die Integration ab. Offen bleiben Undo/Redo, die verwaltbare Katalogauswahl und die spätere kalibrierte 2D/3D-Korrespondenz.

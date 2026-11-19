@@ -8,6 +8,17 @@ export type ImageRegionGeometry =
   | {type:'rectangle';x:number;y:number;width:number;height:number}
   | {type:'polygon';points:Array<{x:number;y:number}>;holes?:Array<Array<{x:number;y:number}>>};
 
+export interface ImageReferenceLandmark {
+  id:string;
+  regionId:string;
+  partId:string;
+  surfaceLayerId?:string|null;
+  poseId:string;
+  x:number;
+  y:number;
+  radiusPx:number;
+}
+
 export interface ImageReferenceRegion {
   id:string;
   label:string;
@@ -268,6 +279,19 @@ export function validateImageReferenceDocument(value:ImageReferenceDocument):Ima
   for(const a of value.avatars)for(const id of a.formIds){const previous=formParents.get(id);if(previous)issues.push({path:`avatars.${a.id}.formIds`,message:`Form ${id} ist bereits Avatar ${previous} zugeordnet.`});else formParents.set(id,a.id);}
   for(const v of value.views)for(const id of v.regionIds){const previous=regionParents.get(id);if(previous)issues.push({path:`views.${v.id}.regionIds`,message:`Region ${id} ist bereits Ansicht ${previous} zugeordnet.`});else regionParents.set(id,v.id);}
   for(const [id,r] of regions){if(r.status==='ignored'&&regionParents.has(id))issues.push({path:`regions.${id}.status`,message:'Ignorierte Region darf keiner Ansicht zugeordnet sein.'});}
+  const landmarks=value.landmarks??[];
+  if(!Array.isArray(landmarks)||landmarks.length>10000)issues.push({path:'landmarks',message:'Maximal 10.000 2D-Landmarken sind zulässig.'});
+  else for(const [i,landmark] of landmarks.entries()){
+    const p=`landmarks[${i}]`;
+    addId(landmark.id,p+'.id');
+    if(!regions.has(landmark.regionId))issues.push({path:p+'.regionId',message:'Landmarke verweist auf eine unbekannte Bildregion.'});
+    const semanticId=/^[a-z0-9][a-z0-9_-]{0,127}$/;
+    if(typeof landmark.partId!=='string'||!semanticId.test(landmark.partId))issues.push({path:p+'.partId',message:'Anatomische Part-ID ist ungültig.'});
+    if(landmark.surfaceLayerId!=null&&(typeof landmark.surfaceLayerId!=='string'||!semanticId.test(landmark.surfaceLayerId)))issues.push({path:p+'.surfaceLayerId',message:'Oberflächen-Layer-ID ist ungültig.'});
+    if(typeof landmark.poseId!=='string'||!semanticId.test(landmark.poseId))issues.push({path:p+'.poseId',message:'Pose-ID ist ungültig.'});
+    if(!finite(landmark.x)||!finite(landmark.y)||landmark.x<0||landmark.y<0||landmark.x>source.width||landmark.y>source.height)issues.push({path:p+'.position',message:'Landmarke liegt außerhalb des Quellbildes.'});
+    if(!finite(landmark.radiusPx)||landmark.radiusPx<=0||landmark.radiusPx>Math.max(source.width,source.height)*2)issues.push({path:p+'.radiusPx',message:'Landmarkenradius muss positiv und begrenzt sein.'});
+  }
   const relationKinds=new Set<ImageReferenceRelationKind>(['same-avatar','other-form','additional-view','detail-of']);
   const seenRelations=new Set<string>();
   for(const [i,relation] of (value.relations??[]).entries()){

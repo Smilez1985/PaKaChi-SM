@@ -254,3 +254,20 @@ test('proposes conservative hierarchy relationships without mutating or auto-con
  d.relations=[proposals[0]!];assert.ok(!suggestImageReferenceRelations(d).some(item=>item.kind===proposals[0]!.kind&&item.sourceRegionId===proposals[0]!.sourceRegionId&&item.targetRegionId===proposals[0]!.targetRegionId));
  d.regions[1]!.status='ignored';assert.ok(!suggestImageReferenceRelations(d).some(item=>item.sourceRegionId==='r-animal-side'||item.targetRegionId==='r-animal-side'));
 });
+
+
+test('stores and validates explicit source-pixel 2D landmarks with stable semantic IDs',()=>{
+ const d=base();
+ d.landmarks=[{id:'landmark-head-front',regionId:'r-animal-front',partId:'head',surfaceLayerId:'fur',poseId:'front-neutral',x:120,y:160,radiusPx:80}];
+ assert.deepEqual(validateImageReferenceDocument(d),[]);
+ const restored=JSON.parse(JSON.stringify(d)) as ImageReferenceDocument;
+ assert.deepEqual(restored.landmarks,d.landmarks);
+ const outside=structuredClone(d);outside.landmarks![0]!.x=1601;
+ assert.ok(validateImageReferenceDocument(outside).some(issue=>issue.path==='landmarks[0].position'));
+ const dangling=structuredClone(d);dangling.landmarks![0]!.regionId='missing-region';
+ assert.ok(validateImageReferenceDocument(dangling).some(issue=>issue.path==='landmarks[0].regionId'));
+ const duplicate=structuredClone(d);duplicate.landmarks![0]!.id='r-animal-front';
+ assert.ok(validateImageReferenceDocument(duplicate).some(issue=>issue.path==='landmarks[0].id'));
+ const invalidSemantic=structuredClone(d);invalidSemantic.landmarks![0]!.partId='Head';
+ assert.ok(validateImageReferenceDocument(invalidSemantic).some(issue=>issue.path==='landmarks[0].partId'));
+});

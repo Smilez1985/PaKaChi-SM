@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {proposeCluster2DRegionAssignments,validateCluster2DSemanticCatalog} from '../src/cluster-2d-classifier.ts';
+import {imageReferenceLandmarksToCluster2DSeeds,proposeCluster2DRegionAssignments,validateCluster2DSemanticCatalog} from '../src/cluster-2d-classifier.ts';
 import type {ImageReferenceDocument} from '../src/image-reference.ts';
 
 const document=():ImageReferenceDocument=>({
@@ -61,4 +61,12 @@ test('does not treat 2D source coordinates as 3D or fuse different poses',()=>{
  assert.equal(result.assignments[0]!.partId,null);
  assert.equal(result.assignments[0]!.poseId,'unresolved');
  assert.match(result.assignments[0]!.reason,/different poses/);
+});
+
+
+test('adapts editor-persisted landmarks to classifier seeds using explicit avatar/form/view ancestry',()=>{
+ const d=document();
+ d.landmarks=[{id:'lm-persisted',regionId:'r-head',partId:'head',surfaceLayerId:'fur',poseId:'front-neutral',x:70,y:70,radiusPx:80}];
+ const seeds=imageReferenceLandmarksToCluster2DSeeds(d);
+ assert.deepEqual(seeds,[{id:'lm-persisted',partId:'head',surfaceLayerId:'fur',avatarId:'a-pakachi',formId:'f-animal',viewId:'v-animal',poseId:'front-neutral',x:70,y:70,radiusPx:80}]);
 });

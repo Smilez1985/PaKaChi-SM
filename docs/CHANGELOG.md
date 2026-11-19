@@ -14,6 +14,8 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ### Added
 
+- Landmarkenbearbeitung im integrierten Bildreferenz-Editor: 2D-Punkte auf bestätigten Regionen setzen, per Maus oder Quellpixel-Feldern verschieben, semantische Part-/Surface-Layer-/Pose-IDs pflegen und löschen. Landmarken werden quellpixelgebunden im Bildreferenz-Dokument gespeichert und über die explizite Avatar-/Form-/Ansicht-Hierarchie in Seeds für den 2D-Klassifikator überführt. Projekt-Roundtrip und Browserregressionen ergänzen.
+
 - Separater 2D-Clusterkern mit charakterweit stabilen Anatomie- und Oberflächen-IDs, quellpixelgebundenen Landmarken und strikter Avatar-/Form-/Ansichts-/Posen-Provenienz. Der Klassifikator erzeugt ausschließlich prüfpflichtige Vorschläge für bestätigte Bildregionen; Mehrdeutigkeit, fehlende Evidenz und mehrere Posen bleiben ungelöst. 2D-Koordinaten werden nicht als 3D-Geometrie interpretiert. Regressionen decken Tier-/Arbeitsform, Pose-Trennung, ungültige Herkunft und Mehrdeutigkeit ab.
 
 
@@ -95,7 +97,7 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 - Unverändertes PNG/JPEG-Quellbild (bis 20 MiB) wird zusammen mit SHA-256, Pixelmaßen und Segmentzuordnungen im Studio-Projekt eingebettet; beim Laden werden Bildsignatur und SHA-256 gegen das Asset geprüft. Projekt-Speichern und Model Zoo weisen Gesamtdateien über 80 MiB zurück; ältere Projekte ohne eingebettetes Asset bleiben kompatibel.
 
 
-Zeitstempel der letzten Änderung: 2026-11-19T23:00:00+01:00 (Europe/Berlin)
+Zeitstempel der letzten Änderung: 2026-11-19T23:30:00+01:00 (Europe/Berlin)
 
 ### Added
 

@@ -243,3 +243,30 @@ test('transparent detection shows visual similarity as a manual-only review hint
  await page.mouse.move(startX,startY);await page.mouse.down();await page.mouse.move(startX+8,startY+4,{steps:3});await page.mouse.up();
  await expect(page.getByText(/Visually similar crops – review manually/)).toHaveCount(0);
 });
+
+
+test('editor places, moves, edits and deletes semantic 2D landmarks on the source image',async({page})=>{
+ await mountEditor(page);
+ const canvas=page.locator('canvas.image-reference-canvas'),bounds=await canvas.boundingBox();
+ expect(bounds).not.toBeNull();const box=bounds!;
+ await page.getByRole('button',{name:'Landmark mode'}).click();
+ await page.getByLabel('Anatomical part ID').fill('head');
+ await page.getByLabel('Surface layer ID (optional)').fill('fur');
+ await page.getByLabel('Pose ID').fill('front-neutral');
+ await page.getByLabel('Influence radius in source pixels').fill('60');
+ await page.mouse.click(box.x+box.width*.25,box.y+box.height*.25);
+ let document=await page.evaluate(async()=> (window as any).__imageReferenceEditor.reference());
+ expect(document.landmarks).toHaveLength(1);
+ expect(document.landmarks[0]).toMatchObject({regionId:'region-1',partId:'head',surfaceLayerId:'fur',poseId:'front-neutral',x:25,y:25,radiusPx:60});
+ await page.mouse.move(box.x+box.width*.25,box.y+box.height*.25);await page.mouse.down();
+ await page.mouse.move(box.x+box.width*.30,box.y+box.height*.30,{steps:4});await page.mouse.up();
+ document=await page.evaluate(async()=> (window as any).__imageReferenceEditor.reference());
+ expect(document.landmarks[0]).toMatchObject({x:30,y:30});
+ await page.getByLabel('Landmark X').fill('28');await page.getByLabel('Landmark X').press('Tab');
+ document=await page.evaluate(async()=> (window as any).__imageReferenceEditor.reference());
+ expect(document.landmarks[0].x).toBe(28);
+ await page.getByLabel('Active landmark').selectOption('landmark-1');
+ await page.getByRole('button',{name:'Delete landmark'}).click();
+ document=await page.evaluate(async()=> (window as any).__imageReferenceEditor.reference());
+ expect(document.landmarks??[]).toHaveLength(0);
+});

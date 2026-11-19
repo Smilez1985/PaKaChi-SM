@@ -168,3 +168,19 @@ export function proposeCluster2DRegionAssignments(
  }
  return {assignments,classified,ambiguous,outsideEvidence};
 }
+
+
+/** Convert persisted editor landmarks into classifier seeds using the region's explicit hierarchy. */
+export function imageReferenceLandmarksToCluster2DSeeds(document:ImageReferenceDocument):Cluster2DLandmarkSeed[] {
+ const issues=validateImageReferenceDocument(document);
+ if(issues.length)throw new Error('Invalid image reference document: '+issues.map(issue=>issue.path).join(', '));
+ const result:Cluster2DLandmarkSeed[]=[];
+ for(const landmark of document.landmarks??[]){
+  const view=document.views.find(item=>item.regionIds.includes(landmark.regionId));
+  const form=view&&document.forms.find(item=>item.viewIds.includes(view.id));
+  const avatar=form&&document.avatars.find(item=>item.formIds.includes(form.id));
+  if(!view||!form||!avatar)throw new Error('2D landmark region is not assigned to an avatar, form, and view.');
+  result.push({id:landmark.id,partId:landmark.partId,surfaceLayerId:landmark.surfaceLayerId??null,avatarId:avatar.id,formId:form.id,viewId:view.id,poseId:landmark.poseId,x:landmark.x,y:landmark.y,radiusPx:landmark.radiusPx});
+ }
+ return result;
+}
