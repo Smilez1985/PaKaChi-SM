@@ -14,6 +14,32 @@ export interface Cluster2DSemanticCatalog {
   parts:Cluster2DSemanticPart[];
   surfaceLayers:Cluster2DSurfaceLayer[];
 }
+
+/** Shared starter taxonomy. IDs are semantic, not mesh names or ordering keys. */
+export function createPaKaChiSemanticCatalog():Cluster2DSemanticCatalog {
+ const parts:Cluster2DSemanticPart[]=[
+  {id:'body',label:'Body',parentPartId:null},{id:'torso',label:'Torso',parentPartId:'body'},
+  {id:'chest',label:'Chest',parentPartId:'torso'},{id:'pelvis',label:'Pelvis',parentPartId:'body'},
+  {id:'neck',label:'Neck',parentPartId:'torso'},{id:'head',label:'Head',parentPartId:'neck'},
+  {id:'muzzle',label:'Muzzle',parentPartId:'head'},{id:'ears',label:'Ears',parentPartId:'head'},
+  {id:'eyes',label:'Eyes',parentPartId:'head'},{id:'eyelids',label:'Eyelids',parentPartId:'eyes'},
+  {id:'mouth',label:'Mouth',parentPartId:'muzzle'},{id:'shoulders',label:'Shoulders',parentPartId:'torso'},
+  {id:'forelimbs',label:'Forelimbs',parentPartId:'shoulders'},{id:'upper-arms',label:'Upper arms',parentPartId:'forelimbs'},
+  {id:'forearms',label:'Forearms',parentPartId:'upper-arms'},{id:'hands',label:'Hands',parentPartId:'forearms'},
+  {id:'paws',label:'Paws',parentPartId:'forelimbs'},{id:'digits',label:'Fingers and toes',parentPartId:'hands'},
+  {id:'hips',label:'Hips',parentPartId:'pelvis'},{id:'hindlimbs',label:'Hindlimbs',parentPartId:'hips'},
+  {id:'thighs',label:'Thighs',parentPartId:'hindlimbs'},{id:'lower-legs',label:'Lower legs',parentPartId:'thighs'},
+  {id:'feet',label:'Feet',parentPartId:'lower-legs'},{id:'tail',label:'Tail',parentPartId:'body'},
+  {id:'tail-tip',label:'Tail tip',parentPartId:'tail'}
+ ];
+ const surfaceLayers:Cluster2DSurfaceLayer[]=[
+  {id:'fur',label:'Fur',partId:null},{id:'skin',label:'Skin',partId:null},
+  {id:'armor',label:'Armor and hard covers',partId:null},{id:'mechanics',label:'Mechanical joints and hardware',partId:null},
+  {id:'emissive',label:'Green emissive elements',partId:null},{id:'eyes',label:'Eye surfaces',partId:'eyes'},
+  {id:'claws',label:'Claws',partId:null}
+ ];
+ return {schemaVersion:1,characterId:'pakachi',parts,surfaceLayers};
+}
 export interface Cluster2DLandmarkSeed {
   id:string;
   partId:string;
@@ -144,6 +170,13 @@ export function proposeCluster2DRegionAssignments(
   const candidates=seeds.filter(s=>s.avatarId===avatarId&&s.formId===formId&&s.viewId===viewId&&contains(region,s.x,s.y));
   const poses=new Set(candidates.map(s=>s.poseId));
   if(poses.size>1){ambiguous++;assignments.push({regionId:region.id,avatarId,formId,viewId,poseId:'unresolved',partId:null,surfaceLayerId:null,landmarkIds:[],origin:'automatic',policy:'recomputable',reviewStatus:'unresolved',confidence:0,reason:'Landmarks from different poses cannot be fused into one 2D region.'});continue;}
+  // Composite crops must not be collapsed to whichever landmark is nearest.
+  const semanticTargets=new Set(candidates.map(seed=>seed.partId+'|'+(seed.surfaceLayerId??'')));
+  if(semanticTargets.size>1){
+   ambiguous++;
+   assignments.push({regionId:region.id,avatarId,formId,viewId,poseId:candidates[0]!.poseId,partId:null,surfaceLayerId:null,landmarkIds:[],origin:'automatic',policy:'recomputable',reviewStatus:'unresolved',confidence:0,reason:'Region contains multiple anatomical or surface-layer targets; split or review it explicitly.'});
+   continue;
+  }
   const byPart=new Map<string,{score:number;layer:string|null;ids:string[]}>();
   for(const seed of candidates){
    const score=Math.hypot(center.x-seed.x,center.y-seed.y)/seed.radiusPx;

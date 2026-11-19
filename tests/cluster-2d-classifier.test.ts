@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {imageReferenceLandmarksToCluster2DSeeds,proposeCluster2DRegionAssignments,validateCluster2DSemanticCatalog} from '../src/cluster-2d-classifier.ts';
+import {createPaKaChiSemanticCatalog,imageReferenceLandmarksToCluster2DSeeds,proposeCluster2DRegionAssignments,validateCluster2DSemanticCatalog} from '../src/cluster-2d-classifier.ts';
 import type {ImageReferenceDocument} from '../src/image-reference.ts';
 
 const document=():ImageReferenceDocument=>({
@@ -69,4 +69,38 @@ test('adapts editor-persisted landmarks to classifier seeds using explicit avata
  d.landmarks=[{id:'lm-persisted',regionId:'r-head',partId:'head',surfaceLayerId:'fur',poseId:'front-neutral',x:70,y:70,radiusPx:80}];
  const seeds=imageReferenceLandmarksToCluster2DSeeds(d);
  assert.deepEqual(seeds,[{id:'lm-persisted',partId:'head',surfaceLayerId:'fur',avatarId:'a-pakachi',formId:'f-animal',viewId:'v-animal',poseId:'front-neutral',x:70,y:70,radiusPx:80}]);
+});
+
+test('keeps composite crops unresolved when they contain distinct anatomical targets',()=>{
+ const d=document();
+ const result=proposeCluster2DRegionAssignments(d,catalog,[
+  {id:'lm-torso-center',partId:'torso',avatarId:'a-pakachi',formId:'f-animal',viewId:'v-animal',poseId:'front-neutral',x:230,y:140,radiusPx:200},
+  {id:'lm-head-edge',partId:'head',avatarId:'a-pakachi',formId:'f-animal',viewId:'v-animal',poseId:'front-neutral',x:185,y:85,radiusPx:200}
+ ]);
+ const body=result.assignments.find(item=>item.regionId==='r-body')!;
+ assert.equal(body.partId,null);assert.equal(body.reviewStatus,'unresolved');
+ assert.match(body.reason,/multiple anatomical or surface-layer targets/);
+ assert.equal(body.landmarkIds.length,0);
+});
+
+test('keeps a crop unresolved when one anatomical part has multiple surface-layer targets',()=>{
+ const d=document();
+ const mixedCatalog={...catalog,surfaceLayers:[...catalog.surfaceLayers,{id:'armor',label:'Armor',partId:'head'}]};
+ const mixed=proposeCluster2DRegionAssignments(d,mixedCatalog,[
+  {id:'lm-fur',partId:'head',surfaceLayerId:'fur',avatarId:'a-pakachi',formId:'f-animal',viewId:'v-animal',poseId:'front-neutral',x:70,y:70,radiusPx:200},
+  {id:'lm-armor',partId:'head',surfaceLayerId:'armor',avatarId:'a-pakachi',formId:'f-animal',viewId:'v-animal',poseId:'front-neutral',x:25,y:25,radiusPx:200}
+ ]);
+ const head=mixed.assignments.find(item=>item.regionId==='r-head')!;
+ assert.equal(head.partId,null);assert.equal(head.surfaceLayerId,null);
+ assert.equal(head.reviewStatus,'unresolved');
+});
+
+test('provides a validated shared PaKaChi anatomy and surface catalog for both forms',()=>{
+ const value=createPaKaChiSemanticCatalog();
+ assert.deepEqual(validateCluster2DSemanticCatalog(value),[]);
+ assert.equal(value.characterId,'pakachi');
+ assert.ok(value.parts.some(part=>part.id==='paws'));
+ assert.ok(value.parts.some(part=>part.id==='hands'));
+ assert.ok(value.surfaceLayers.some(layer=>layer.id==='fur'));
+ assert.ok(value.surfaceLayers.some(layer=>layer.id==='mechanics'));
 });

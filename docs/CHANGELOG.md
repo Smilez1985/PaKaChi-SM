@@ -12,6 +12,16 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+ 
+### Added
+
+- Validierter, gemeinsamer PaKaChi-Startkatalog für Tier- und Arbeitsform mit stabilen Anatomie-IDs sowie getrennten Oberflächenlagen für Fell, Haut, Panzerung, Mechanik und Leuchtelemente. Fehlende Formteile werden nicht künstlich ergänzt. Stand: 2026-11-19T18:06:00+01:00.
+- Regressionen für zusammengesetzte Bildausschnitte mit mehreren anatomischen oder Oberflächen-Zielen sowie für die gemeinsame Katalogvalidierung.
+
+### Fixed
+
+- Der 2D-Klassifizierer ordnet zusammengesetzte Regionen nicht mehr willkürlich dem nächstgelegenen Landmarkenpunkt zu. Mehrere Part-/Surface-Layer-Ziele innerhalb derselben bestätigten Region bleiben mit erklärtem Grund ungelöst und müssen vor einer Einzelzuordnung explizit getrennt oder geprüft werden.
+
 ### Added
 
 - Explizite 2D/3D-Landmarken-Korrespondenz als konservativer Resolver: Eine bestätigte 2D-Landmarke wird über Quellbild-/3D-Assethash, Avatar-/Form-/Ansichts-/Posen-Provenienz und eine vom Nutzer ausgewählte Mesh-Dreiecksfläche verknüpft. Der 3D-Oberflächenpunkt wird baryzentrisch im Mesh-Lokalraum berechnet; Ausgabe als nutzerverursachte, gesperrte Evidenz. Keine Tiefenableitung aus Einzelbildern und keine automatische Manifestübernahme. Vier gezielte Regressionen decken Herkunft, Bestätigung, Dreiecksgrenzen und Layerkompatibilität ab. Stand: 2026-11-19T07:39:00+01:00.
