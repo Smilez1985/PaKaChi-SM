@@ -68,7 +68,7 @@ export function validateCluster2DSemanticCatalog(value:unknown):string[] {
   const known=new Set(partIds as string[]);
   for(const p of parts){
     if(!p||typeof p.label!=='string'||!p.label.trim())errors.push('catalog.part-label');
-    if(p?.parentPartId!==null&&!known.has(p?.parentPartId))errors.push('catalog.part-parent');
+    if(p.parentPartId!==null&&!known.has(p.parentPartId))errors.push('catalog.part-parent');
   }
   for(const p of parts){const seen=new Set<string>();let current:Cluster2DSemanticPart|undefined=p;while(current?.parentPartId){if(seen.has(current.id)){errors.push('catalog.part-cycle');break;}seen.add(current.id);current=parts.find(item=>item.id===current!.parentPartId);}}
   for(const l of layers){
