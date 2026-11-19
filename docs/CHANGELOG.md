@@ -14,6 +14,10 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ### Fixed
 
+- Der Bildregion-Duplikatfilter weist ungültige Bounding-Boxen (nicht-endliche, negative oder nicht-positive Maße sowie überlaufende Grenzen) jetzt ausdrücklich zurück, statt fehlerhafte Werte stillschweigend als Nichtüberlappung zu behandeln.
+
+### Fixed
+
 - Der Browser-Regressionstest für die Qualität der Einfarbhintergrund-Erkennung verwendet eine leere Referenzregionenliste; der Fixture-Parameter wird explizit in den `page.evaluate`-Browserkontext übergeben. So prüfen Segmentierungsqualität und bestehende Editor-Regressionen unabhängig voneinander.
 - Der Bounding-Box-IoU-Vergleich verwendet den gemeinsamen Geometrietyp ohne Pixel-Flächenwert; dadurch ist der generische Filter auch mit reinen Rechteck-/Polygon-Bounds typsicher.
 

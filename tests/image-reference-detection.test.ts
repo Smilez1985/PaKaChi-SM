@@ -88,3 +88,10 @@ test('rejects invalid geometry bounds instead of silently disabling duplicate fi
  assert.throws(()=>imageReferenceGeometryBounds({type:'rectangle',x:0,y:0,width:0,height:4}),/invalid-image-reference-geometry/);
  assert.throws(()=>imageReferenceGeometryBounds({type:'polygon',points:[{x:1,y:1},{x:2,y:2}]}),/invalid-image-reference-geometry/);
 });
+
+test('duplicate filtering rejects malformed candidate and existing bounds',()=>{
+ const valid={x:10,y:10,width:20,height:20,area:400};
+ assert.throws(()=>filterOverlappingImageComponents([{...valid,x:Number.NaN}],[]),/invalid-image-component-bounds/);
+ assert.throws(()=>filterOverlappingImageComponents([valid],[{x:0,y:0,width:0,height:10}]),/invalid-image-component-bounds/);
+ assert.throws(()=>filterOverlappingImageComponents([valid],[{x:0,y:0,width:Number.MAX_VALUE,height:10}]),/invalid-image-component-bounds/);
+});

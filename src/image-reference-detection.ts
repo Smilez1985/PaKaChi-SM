@@ -173,6 +173,8 @@ export function filterOverlappingImageComponents<T extends ImageComponentBounds>
  threshold=0.75
 ):T[] {
  if(!Number.isFinite(threshold)||threshold<=0||threshold>1)throw new Error('invalid-overlap-threshold');
+ const validBounds=(bounds:ImageComponentBounds)=>[bounds.x,bounds.y,bounds.width,bounds.height].every(Number.isFinite)&&bounds.x>=0&&bounds.y>=0&&bounds.width>0&&bounds.height>0&&Number.isFinite(bounds.x+bounds.width)&&Number.isFinite(bounds.y+bounds.height);
+ if(candidates.some(candidate=>!validBounds(candidate))||existing.some(region=>!validBounds(region)))throw new Error('invalid-image-component-bounds');
  const intersectionOverUnion=(a:ImageComponentBounds,b:ImageComponentBounds)=>{
   const left=Math.max(a.x,b.x),top=Math.max(a.y,b.y),right=Math.min(a.x+a.width,b.x+b.width),bottom=Math.min(a.y+a.height,b.y+b.height);
   const intersection=Math.max(0,right-left)*Math.max(0,bottom-top);
