@@ -12,6 +12,11 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+### Added
+
+- Separater 2D-Clusterkern mit charakterweit stabilen Anatomie- und Oberflächen-IDs, quellpixelgebundenen Landmarken und strikter Avatar-/Form-/Ansichts-/Posen-Provenienz. Der Klassifikator erzeugt ausschließlich prüfpflichtige Vorschläge für bestätigte Bildregionen; Mehrdeutigkeit, fehlende Evidenz und mehrere Posen bleiben ungelöst. 2D-Koordinaten werden nicht als 3D-Geometrie interpretiert. Regressionen decken Tier-/Arbeitsform, Pose-Trennung, ungültige Herkunft und Mehrdeutigkeit ab.
+
+
 ### Fixed
 
 - Der Bildregion-Duplikatfilter weist ungültige Bounding-Boxen (nicht-endliche, negative oder nicht-positive Maße sowie überlaufende Grenzen) jetzt ausdrücklich zurück, statt fehlerhafte Werte stillschweigend als Nichtüberlappung zu behandeln.
@@ -90,7 +95,7 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 - Unverändertes PNG/JPEG-Quellbild (bis 20 MiB) wird zusammen mit SHA-256, Pixelmaßen und Segmentzuordnungen im Studio-Projekt eingebettet; beim Laden werden Bildsignatur und SHA-256 gegen das Asset geprüft. Projekt-Speichern und Model Zoo weisen Gesamtdateien über 80 MiB zurück; ältere Projekte ohne eingebettetes Asset bleiben kompatibel.
 
 
-Zeitstempel der letzten Änderung: 2026-11-17T15:28:00+01:00 (Europe/Berlin)
+Zeitstempel der letzten Änderung: 2026-11-19T23:00:00+01:00 (Europe/Berlin)
 
 ### Added
 

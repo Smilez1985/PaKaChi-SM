@@ -188,6 +188,14 @@ Die Umsetzung des integrierten MCP-Arbeitsplatzes, der Caddy-/DuckDNS-Konfigurat
 
 - [x] Für transparente Komponenten einen kleinen perceptual hash ergänzen und visuell ähnliche Ausschnitte als reine manuelle Prüfhilfe anzeigen; keine automatische Identitäts-, Form- oder Ansichtszuordnung.
 
+## 2D-Clusterkern und Landmarken
+
+- [x] Separaten 2D-Semantikvertrag mit stabilen Anatomie-/Oberflächen-IDs, quellpixelgebundenen Landmarken und Avatar-/Form-/Ansichts-/Posen-Provenienz ergänzen.
+- [x] Konservative 2D-Regionsklassifikation auf bestätigte Bildregionen begrenzen; automatische Vorschläge bleiben unbestätigt, Mehrdeutigkeit und Ansichts-/Posenvermischung bleiben ungelöst.
+- [ ] Landmarken im integrierten Bildeditor setzen, verschieben, löschen und mit stabilen semantischen IDs verknüpfen; Projekt-Speichern/Laden und Undo abnehmen.
+- [ ] Explizite 2D/3D-Korrespondenz mit kalibrierten Kameras oder geprüfter Nutzerzuordnung umsetzen; keine Tiefenableitung aus Einzelbildern.
+- [ ] Tier- und Arbeitsform gegen denselben Charakterkatalog prüfen und 3D-Mesh-Zuordnungen über gemeinsame semantische IDs vergleichen.
+
 ## Noch zu entscheiden
 
 - Desktop-Verpackung und geprüfte Betriebssysteme.

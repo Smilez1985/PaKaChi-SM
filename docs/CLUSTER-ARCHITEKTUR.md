@@ -290,3 +290,8 @@ Rigging-Verbesserung und gemeinsame Morph-Topologie bauen auf der validierten Cl
 - Neue Teile lassen sich einsortieren, ohne bestehende IDs oder Parent-Beziehungen zu ändern.
 - Einfügen und Umsortieren verändert ausschließlich `orderKey`.
 - Tierform und Arbeitsform durchlaufen denselben Validator und dieselbe Ableitungspipeline.
+
+
+## Vorstufe: 2D-Clusterkern
+
+Der vorgelagerte pixelgebundene Semantikvertrag ist in [CLUSTER-2D.md](CLUSTER-2D.md) dokumentiert und wird durch `src/cluster-2d-classifier.ts` umgesetzt. Er ergänzt den 3D-Vertrag, ersetzt ihn nicht: stabile semantische IDs können geteilt werden, Koordinatenräume und Geometrien bleiben getrennt. Landmarken verschiedener Posen oder Ansichten werden nicht ohne explizite Korrespondenz fusioniert.
