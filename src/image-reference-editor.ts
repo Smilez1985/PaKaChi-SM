@@ -2,18 +2,19 @@ import type {ImageReferenceDocument,ImageReferenceRegion,ImageReferenceRelation,
 import {detectTransparentImageComponents,detectSolidBackgroundImageComponents,assessImageComponent,imageComponentPerceptualHash,findSimilarImageComponentHashes,filterOverlappingImageComponents,imageReferenceGeometryBounds} from './image-reference-detection.ts';
 import {addImageReferenceRelation,removeImageReferenceRelation,suggestImageReferenceRelations,checkImageReferenceReadiness,editImageReferenceRectangle,reorderImageReferenceRegions,moveImageReferenceRectangle,resizeImageReferenceRectangle,moveImageReferencePolygonVertex,moveImageReferencePolygonHoleVertex,isValidImageReferencePolygon,isValidImageReferencePolygonWithHoles,splitImageReferenceRegion,simplifyImageReferencePolygon} from './image-reference.ts';
 import {createImageReferenceGenerationManifest,cropImageReferenceRegion} from './image-reference-crop.ts';
+import {createPaKaChiSemanticCatalog,imageReferenceLandmarksToCluster2DSeeds,proposeCluster2DRegionAssignments} from './cluster-2d-classifier.ts';
 
 interface Entry {region:ImageReferenceRegion;avatar:string;form:string;view:string;use:boolean;appearanceHash?:string}
 const makeId=(prefix:string,n:number)=>`${prefix}-${n}`;
 export function mountImageReferenceEditor(host:HTMLElement,source:File,language:()=> 'de'|'en',changed:()=>void,initial?:ImageReferenceDocument){
  const de=()=>language()==='de';
  const root=document.createElement('section');root.className='image-reference-editor';
- const heading=document.createElement('h3'),help=document.createElement('p'),toolbar=document.createElement('div'),landmarkMode=document.createElement('button'),landmarkPanel=document.createElement('fieldset'),rectangleMode=document.createElement('button'),polygonMode=document.createElement('button'),freehandMode=document.createElement('button'),splitMode=document.createElement('button'),simplifyMode=document.createElement('button'),holeMode=document.createElement('button'),detectMode=document.createElement('button'),detectSolidMode=document.createElement('button'),finishPolygon=document.createElement('button'),cancelPolygon=document.createElement('button'),canvas=document.createElement('canvas'),list=document.createElement('div'),relationPanel=document.createElement('fieldset'),suggestionPanel=document.createElement('fieldset'),selectedLabel=document.createElement('label'),selected=document.createElement('select'),feedback=document.createElement('p');
+ const heading=document.createElement('h3'),help=document.createElement('p'),toolbar=document.createElement('div'),landmarkMode=document.createElement('button'),landmarkPanel=document.createElement('fieldset'),rectangleMode=document.createElement('button'),polygonMode=document.createElement('button'),freehandMode=document.createElement('button'),splitMode=document.createElement('button'),simplifyMode=document.createElement('button'),holeMode=document.createElement('button'),detectMode=document.createElement('button'),detectSolidMode=document.createElement('button'),finishPolygon=document.createElement('button'),cancelPolygon=document.createElement('button'),canvas=document.createElement('canvas'),list=document.createElement('div'),relationPanel=document.createElement('fieldset'),suggestionPanel=document.createElement('fieldset'),clusterPanel=document.createElement('fieldset'),selectedLabel=document.createElement('label'),selected=document.createElement('select'),feedback=document.createElement('p');
  canvas.className='image-reference-canvas';canvas.setAttribute('aria-label','Source image marking surface');
  feedback.setAttribute('role','status');selectedLabel.textContent=de()?'Ausschnitt für 3D auswählen':'Select region for 3D';
- toolbar.className='image-reference-tools';[landmarkMode,rectangleMode,polygonMode,freehandMode,splitMode,simplifyMode,holeMode,detectMode,detectSolidMode,finishPolygon,cancelPolygon].forEach(button=>{button.type='button';toolbar.append(button);});root.append(heading,help,toolbar,canvas,landmarkPanel,list,relationPanel,suggestionPanel,selectedLabel,selected,feedback);host.replaceChildren(root);
+ toolbar.className='image-reference-tools';[landmarkMode,rectangleMode,polygonMode,freehandMode,splitMode,simplifyMode,holeMode,detectMode,detectSolidMode,finishPolygon,cancelPolygon].forEach(button=>{button.type='button';toolbar.append(button);});root.append(heading,help,toolbar,canvas,landmarkPanel,list,relationPanel,suggestionPanel,clusterPanel,selectedLabel,selected,feedback);host.replaceChildren(root);
  type PointerDrag={mode:'draw';x:number;y:number;endX:number;endY:number}|{mode:'landmark';id:string}|{mode:'move'|'resize';id:string;x:number;y:number;original:{x:number;y:number;width:number;height:number};handle?:import('./image-reference.ts').RectangleHandle}|{mode:'vertex'|'hole-vertex';id:string;index:number;ring?:number};
- let width=0,height=0,entries:Entry[]=[],relations:ImageReferenceRelation[]=[],landmarks:ImageReferenceLandmark[]=[],activeLandmark='',active=0,drag:PointerDrag|undefined,seq=0,relationSeq=0,landmarkSeq=0,shapeMode:'rectangle'|'polygon'|'freehand'|'split'|'hole'|'landmark'='rectangle',polygonDraft:Array<{x:number;y:number}>=[],freehandDrawing=false;
+ let width=0,height=0,entries:Entry[]=[],relations:ImageReferenceRelation[]=[],landmarks:ImageReferenceLandmark[]=[],activeLandmark='',active=0,showClusterPreview=false,drag:PointerDrag|undefined,seq=0,relationSeq=0,landmarkSeq=0,shapeMode:'rectangle'|'polygon'|'freehand'|'split'|'hole'|'landmark'='rectangle',polygonDraft:Array<{x:number;y:number}>=[],freehandDrawing=false;
  const original=initial?structuredClone(initial):undefined;
  const regionOwner=new Map<string,{avatar:string;form:string;view:string}>();
  if(original){for(const avatar of original.avatars)for(const formId of avatar.formIds){const form=original.forms.find(item=>item.id===formId);if(!form)continue;for(const viewId of form.viewIds){const view=original.views.find(item=>item.id===viewId);if(!view)continue;for(const regionId of view.regionIds)regionOwner.set(regionId,{avatar:avatar.label,form:form.label,view:view.label});}}}
@@ -59,11 +60,31 @@ export function mountImageReferenceEditor(host:HTMLElement,source:File,language:
   return {format:'pakachi-image-reference',version:1,source:{sha256:original?.source.sha256??'0'.repeat(64),width,height},regions:entries.map(entry=>entry.region),views:[...views.values()],forms:[...forms.values()],avatars:[...avatars.values()],relations:relations.map(relation=>({...relation})),landmarks:structuredClone(landmarks)};
  };
  const render=()=>{
-  list.replaceChildren();selected.replaceChildren();landmarkSelect.replaceChildren();relationPanel.replaceChildren();suggestionPanel.replaceChildren();
+  list.replaceChildren();selected.replaceChildren();landmarkSelect.replaceChildren();relationPanel.replaceChildren();suggestionPanel.replaceChildren();clusterPanel.replaceChildren();
   landmarks.forEach(item=>{const option=document.createElement('option');option.value=item.id;const region=entries.find(entry=>entry.region.id===item.regionId)?.region.label??item.regionId;option.textContent=region+' · '+item.partId+' · '+item.poseId;landmarkSelect.append(option);});
   if(!activeLandmark||!landmarks.some(item=>item.id===activeLandmark))activeLandmark=landmarks[0]?.id??'';
   landmarkSelect.value=activeLandmark;landmarkSelect.disabled=landmarks.length===0;const activePoint=landmarks.find(item=>item.id===activeLandmark);[partInput,layerInput,poseInput,radiusInput].forEach(control=>{control.disabled=false;});[xInput,yInput,deleteLandmark].forEach(control=>{control.disabled=!activePoint;});
   if(activePoint){partInput.value=activePoint.partId;layerInput.value=activePoint.surfaceLayerId??'';poseInput.value=activePoint.poseId;radiusInput.value=String(activePoint.radiusPx);xInput.value=String(activePoint.x);yInput.value=String(activePoint.y);}
+
+  const clusterLegend=document.createElement('legend');clusterLegend.textContent=t('2D-Anatomie-Vorschläge','2D anatomy proposals');clusterPanel.append(clusterLegend);
+  const clusterPreviewButton=document.createElement('button');clusterPreviewButton.type='button';clusterPreviewButton.textContent=showClusterPreview?t('Vorschläge aktualisieren','Refresh proposals'):t('2D-Zuordnungsvorschläge anzeigen','Show 2D classification proposals');
+  clusterPreviewButton.disabled=!landmarks.length;clusterPreviewButton.onclick=()=>{showClusterPreview=true;render();};clusterPanel.append(clusterPreviewButton);
+  const clusterHelp=document.createElement('p');clusterHelp.textContent=t('Nur bestätigte Bildbereiche und deren Landmarken werden verwendet. Vorschläge werden niemals automatisch übernommen oder bestätigt.','Only confirmed image regions and their landmarks are used. Proposals are never applied or confirmed automatically.');clusterPanel.append(clusterHelp);
+  if(showClusterPreview){
+   try{
+    const previewDocument=suggestionDocument();
+    const seeds=imageReferenceLandmarksToCluster2DSeeds(previewDocument);
+    const report=proposeCluster2DRegionAssignments(previewDocument,createPaKaChiSemanticCatalog(),seeds);
+    const summary=document.createElement('p');summary.textContent=t(`Vorschläge: ${report.classified} · ungeklärt: ${report.ambiguous+report.outsideEvidence}`, `Suggested: ${report.classified} · unresolved: ${report.ambiguous+report.outsideEvidence}`);clusterPanel.append(summary);
+    report.assignments.forEach(assignment=>{
+     const entry=entries.find(item=>item.region.id===assignment.regionId);if(!entry)return;
+     const row=document.createElement('p');
+     const target=assignment.partId?assignment.partId+(assignment.surfaceLayerId?' / '+assignment.surfaceLayerId:''):'Unresolved';
+     row.textContent=entry.region.label+' · '+target+' · '+(assignment.reviewStatus==='suggested'?Math.round(assignment.confidence*100)+'% · '+t('Vorschlag – manuell prüfen','Proposal – review manually'):t('Ungeklärt','Unresolved'))+' · '+assignment.reason;
+     clusterPanel.append(row);
+    });
+   }catch(error){const note=document.createElement('p');note.textContent=t('Vorschau nicht möglich: '+String(error),'Preview unavailable: '+String(error));clusterPanel.append(note);}
+  }
   const relationTitle=document.createElement('legend');relationTitle.textContent=t('Beziehungen zwischen Bildbereichen','Relations between image regions');relationPanel.append(relationTitle);
   const relationSource=document.createElement('select'),relationTarget=document.createElement('select'),relationKind=document.createElement('select');relationSource.setAttribute('aria-label',t('Quellbereich','Source region'));relationTarget.setAttribute('aria-label',t('Zielbereich','Target region'));relationKind.setAttribute('aria-label',t('Beziehungstyp','Relation type'));
   const addOption=(select:HTMLSelectElement,value:string,label:string)=>{const option=document.createElement('option');option.value=value;option.textContent=label;select.append(option);};

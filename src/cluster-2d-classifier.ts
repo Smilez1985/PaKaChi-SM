@@ -209,6 +209,9 @@ export function imageReferenceLandmarksToCluster2DSeeds(document:ImageReferenceD
  if(issues.length)throw new Error('Invalid image reference document: '+issues.map(issue=>issue.path).join(', '));
  const result:Cluster2DLandmarkSeed[]=[];
  for(const landmark of document.landmarks??[]){
+  const region=document.regions.find(item=>item.id===landmark.regionId);
+  // Suggested/ignored geometry is not approved evidence and cannot seed proposals.
+  if(region?.status!=='confirmed')continue;
   const view=document.views.find(item=>item.regionIds.includes(landmark.regionId));
   const form=view&&document.forms.find(item=>item.viewIds.includes(view.id));
   const avatar=form&&document.avatars.find(item=>item.formIds.includes(form.id));

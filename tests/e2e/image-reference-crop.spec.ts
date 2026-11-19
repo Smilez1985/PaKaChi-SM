@@ -270,3 +270,20 @@ test('editor places, moves, edits and deletes semantic 2D landmarks on the sourc
  document=await page.evaluate(async()=> (window as any).__imageReferenceEditor.reference());
  expect(document.landmarks??[]).toHaveLength(0);
 });
+
+test('2D classifier preview keeps a composite confirmed crop unresolved and never auto-applies it',async({page})=>{
+ await mountEditor(page);
+ await page.getByRole('button',{name:'Landmark mode'}).click();
+ const canvas=page.locator('canvas.image-reference-canvas'),bounds=await canvas.boundingBox();
+ expect(bounds).not.toBeNull();const box=bounds!;
+ await page.getByLabel('Anatomical part ID').fill('head');
+ await page.getByLabel('Pose ID').fill('front-neutral');
+ await page.mouse.click(box.x+box.width*.25,box.y+box.height*.25);
+ await page.getByLabel('Anatomical part ID').fill('torso');
+ await page.mouse.click(box.x+box.width*.75,box.y+box.height*.75);
+ await page.getByRole('button',{name:'Show 2D classification proposals'}).click();
+ await expect(page.getByText(/Panda torso · Unresolved · Unresolved/)).toBeVisible();
+ const document=await page.evaluate(async()=> (window as any).__imageReferenceEditor.reference());
+ expect(document.regions[0].status).toBe('confirmed');
+ expect(document.landmarks).toHaveLength(2);
+});

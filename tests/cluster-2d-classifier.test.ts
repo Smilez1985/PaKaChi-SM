@@ -104,3 +104,14 @@ test('provides a validated shared PaKaChi anatomy and surface catalog for both f
  assert.ok(value.surfaceLayers.some(layer=>layer.id==='fur'));
  assert.ok(value.surfaceLayers.some(layer=>layer.id==='mechanics'));
 });
+
+test('does not use landmarks attached to unconfirmed regions as classifier evidence',()=>{
+ const d=document();
+ d.regions.find(region=>region.id==='r-body')!.status='suggested';
+ d.landmarks=[
+  {id:'lm-confirmed',regionId:'r-head',partId:'head',poseId:'front',x:50,y:50,radiusPx:30},
+  {id:'lm-unconfirmed',regionId:'r-body',partId:'torso',poseId:'front',x:220,y:120,radiusPx:30}
+ ];
+ const seeds=imageReferenceLandmarksToCluster2DSeeds(d);
+ assert.deepEqual(seeds.map(seed=>seed.id),['lm-confirmed']);
+});
