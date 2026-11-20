@@ -7,14 +7,17 @@ on:
       - 'src/cluster-*.ts'
       - 'src/studio-landmark-picking.ts'
       - 'src/studio-editor.ts'
+      - 'src/studio-rig.ts'
       - 'src/avatar-candidate.ts'
       - 'src/studio-surface-hit.ts'
       - 'src/studio-view.ts'
       - 'tests/cluster-*.test.ts'
       - 'tests/studio-landmark-picking.test.ts'
       - 'tests/studio-surface-hit.test.ts'
+      - 'tests/e2e/studio-surface-pick.spec.ts'
       - 'package.json'
       - 'package-lock.json'
+      - 'playwright.config.ts'
       - 'tsconfig.json'
   workflow_dispatch:
 permissions:
@@ -25,7 +28,7 @@ concurrency:
 jobs:
   cluster-landmark:
     runs-on: ubuntu-24.04
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7.0.1
         with:
@@ -39,5 +42,10 @@ jobs:
         run: npm run audit:dependencies
       - name: Run cluster architecture, inventory, real PaKaChi asset and landmark regressions
         run: node --test --test-reporter=spec tests/cluster-architecture.test.ts tests/cluster-inventory.test.ts tests/cluster-landmark-classifier.test.ts tests/cluster-landmark-projection.test.ts tests/cluster-landmark-pipeline.test.ts tests/cluster-pakachi-assets.test.ts tests/cluster-2d-classifier.test.ts tests/cluster-landmark-correspondence.test.ts tests/studio-landmark-picks.test.ts tests/studio-landmark-picking.test.ts tests/studio-surface-hit.test.ts
+      - name: Browser regression for real 3D surface picking
+        run: |
+          npx playwright install --with-deps chromium
+          npx playwright test tests/e2e/studio-surface-pick.spec.ts
       - name: Type-check project
+        if: always()
         run: npx tsc --noEmit
