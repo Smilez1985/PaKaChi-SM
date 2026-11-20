@@ -3,6 +3,11 @@ import assert from 'node:assert/strict';
 import { createStudioLandmarkSurfacePick } from '../src/studio-landmark-picking.ts';
 import type { ImageReferenceDocument } from '../src/image-reference.ts';
 import type { ClusterMeshInventory } from '../src/cluster-inventory.ts';
+import { Window } from 'happy-dom';
+import * as T from 'three';
+import { StudioRig } from '../src/studio-rig.ts';
+import { StudioEditor } from '../src/studio-editor.ts';
+import type { StudioView } from '../src/studio-view.ts';
 
 const document = (): ImageReferenceDocument => ({
   format: 'pakachi-image-reference', version: 1,
@@ -63,4 +68,50 @@ test('rejects invalid source hashes and preserves 2D avatar/form/view/pose prove
   assert.throws(() => createStudioLandmarkSurfacePick(badHash), /source image hash/);
   const wrongHierarchy = input(); wrongHierarchy.document.views[0]!.regionIds = [];
   assert.throws(() => createStudioLandmarkSurfacePick(wrongHierarchy), /not assigned to an avatar, form, and view/);
+});
+
+
+test('studio UI previews a 3D hit and persists it only after explicit confirmation; undo removes it', () => {
+  const w = new Window();
+  Object.assign(globalThis, {
+    document: w.document,
+    Event: w.Event,
+    Option: function (label = '', value = '') {
+      const option = w.document.createElement('option');
+      option.textContent = label;
+      option.value = value;
+      return option;
+    },
+  });
+  const root = new T.Group();
+  root.add(new T.Mesh(new T.BoxGeometry(1, 1, 1)));
+  const rig = new StudioRig(root);
+  const view = new Proxy({ onSurfacePick: (_hit: unknown) => {} }, {
+    get(target, key) { return key in target ? target[key as keyof typeof target] : () => {}; },
+    set(target, key, value) { Reflect.set(target, key, value); return true; },
+  }) as unknown as StudioView;
+  const host = w.document.createElement('div');
+  const project = {
+    format: 'pakachi-studio' as const, version: 1 as const, model: 'AAAA',
+    avatar: { id: 'pakachi', name: 'PaKaChi', description: '', moves: [] },
+    imageReference: document(),
+  };
+  const editor = new StudioEditor(rig, view, host, project, {
+    suspend() {}, resume() {}, changed() {}, feedback() {},
+  });
+  editor.configureLandmarkPicking(project.imageReference, inventory());
+  editor.enter();
+  host.querySelector<HTMLButtonElement>('#mode-rig')!.click();
+  assert.ok(host.querySelector('#landmark-pick-select'));
+  assert.equal(host.querySelector<HTMLButtonElement>('#landmark-surface-confirm')!.disabled, true);
+  host.querySelector<HTMLButtonElement>('#landmark-surface-pick')!.click();
+  view.onSurfacePick({ meshIndex: 0, triangleIndex: 0, barycentric: [0.2, 0.3, 0.5] });
+  assert.equal(editor.exportProject().studio.landmarkSurfacePicks, undefined);
+  assert.equal(host.querySelector<HTMLButtonElement>('#landmark-surface-confirm')!.disabled, false);
+  host.querySelector<HTMLButtonElement>('#landmark-surface-confirm')!.click();
+  assert.equal(editor.exportProject().studio.landmarkSurfacePicks?.[0]?.meshId, inventory().meshes[0]!.id);
+  host.querySelector<HTMLButtonElement>('#studio-undo')!.click();
+  assert.equal(editor.exportProject().studio.landmarkSurfacePicks?.length ?? 0, 0);
+  editor.dispose();
+  w.happyDOM.abort();
 });
