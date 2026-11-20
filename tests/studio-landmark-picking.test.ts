@@ -105,6 +105,9 @@ test('studio UI previews a 3D hit and persists it only after explicit confirmati
   assert.ok(host.querySelector('#landmark-pick-select'));
   assert.equal(host.querySelector<HTMLButtonElement>('#landmark-surface-confirm')!.disabled, true);
   host.querySelector<HTMLButtonElement>('#landmark-surface-pick')!.click();
+  view.onSurfacePick({ meshIndex: 0, triangleIndex: 1, barycentric: [0.2, 0.3, 0.5] });
+  assert.equal(host.querySelector<HTMLButtonElement>('#landmark-surface-confirm')!.disabled, true);
+  assert.equal(editor.exportProject().studio.landmarkSurfacePicks, undefined);
   view.onSurfacePick({ meshIndex: 0, triangleIndex: 0, barycentric: [0.2, 0.3, 0.5] });
   assert.equal(editor.exportProject().studio.landmarkSurfacePicks, undefined);
   assert.equal(host.querySelector<HTMLButtonElement>('#landmark-surface-confirm')!.disabled, false);
