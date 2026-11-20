@@ -276,7 +276,7 @@ test('2D classifier preview keeps a composite confirmed crop unresolved and neve
  await page.getByRole('button',{name:'Landmark mode'}).click();
  const canvas=page.locator('canvas.image-reference-canvas'),bounds=await canvas.boundingBox();
  expect(bounds).not.toBeNull();const box=bounds!;
- await page.getByLabel('Anatomical part ID').fill('head');
+ await page.getByLabel('Anatomical part ID').selectOption('head');
  await page.getByLabel('Pose ID').fill('front-neutral');
  await page.mouse.click(box.x+box.width*.25,box.y+box.height*.25);
  await page.getByLabel('Anatomical part ID').selectOption('torso');
@@ -293,8 +293,8 @@ test('landmark editor exposes the shared semantic catalog as selectable anatomy 
  await page.getByRole('button',{name:'Landmark mode'}).click();
  const parts=page.getByLabel('Anatomical part ID');
  const layers=page.getByLabel('Surface layer ID (optional)');
- await expect(parts.locator('option')).toContainText(['Head (head)','Paws (paws)','Hands (hands)','Tail (tail)']);
- await expect(layers.locator('option')).toContainText(['No surface layer','Fur (fur)','Armor and hard covers (armor)','Mechanical joints and hardware (mechanics)']);
+ for (const label of ['Head (head)','Paws (paws)','Hands (hands)','Tail (tail)']) await expect(parts.locator('option')).toContainText(label);
+ for (const label of ['No surface layer','Fur (fur)','Armor and hard covers (armor)','Mechanical joints and hardware (mechanics)']) await expect(layers.locator('option')).toContainText(label);
  await parts.selectOption('paws');
  await layers.selectOption('fur');
  const canvas=page.locator('canvas.image-reference-canvas'),bounds=await canvas.boundingBox();
