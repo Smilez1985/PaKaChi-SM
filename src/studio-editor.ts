@@ -25,6 +25,11 @@ import type { StudioData, StudioProject, Transform, ControlPoint, StudioMove } f
 import { StudioRig } from './studio-rig.ts';
 import type { StudioView } from './studio-view.ts';
 import type { Move } from './catalog.ts';
+import { imageReferenceLandmarksToCluster2DSeeds } from './cluster-2d-classifier.ts';
+import type { ImageReferenceDocument } from './image-reference.ts';
+import type { ClusterMeshInventory } from './cluster-inventory.ts';
+import { createStudioLandmarkSurfacePick } from './studio-landmark-picking.ts';
+import type { StudioSurfacePickHit } from './studio-landmark-picking.ts';
 interface Snapshot {data:StudioData;values:Record<string,Transform>}
 interface Hooks { suspend:()=>void; resume:()=>void; changed:()=>void; feedback:(s:string)=>void }
 const uid=()=>`p-${crypto.randomUUID()}`;
@@ -62,6 +67,11 @@ export class StudioEditor {
   private revision=0;
   private agentEditing=false;
   private disposed=false;
+  private landmarkDocument:ImageReferenceDocument|null=null;
+  private landmarkInventory:ClusterMeshInventory|null=null;
+  private selectedLandmarkId:string|null=null;
+  private pendingSurfaceHit:StudioSurfacePickHit|null=null;
+  private landmarkPickRadius=.05;
   private exportingFigure=false;
   private moveCheck:AbortController|null=null;
   private surfaceCheck:AbortController|null=null;
@@ -78,6 +88,12 @@ export class StudioEditor {
   constructor(rig:StudioRig,view:StudioView,host:HTMLElement,project:Omit<StudioProject,'studio'>,hooks:Hooks) {
     this.rig=rig;this.playbackTransition=new PlaybackTransition(rig.root);this.view=view;this.host=host;this.project=project;this.hooks=hooks;this.initial=structuredClone(rig.initial);
     view.onSelect=id=>{this.surfaceCheck?.abort();this.weightCorrection=null;this.selected=id;this.render();};
+    view.onSurfacePick=hit=>{
+      this.pendingSurfaceHit=hit;
+      this.view.setAction('select');
+      this.render();
+      this.hooks.feedback('3D-Treffer vorgemerkt. Erst nach Prüfung und ausdrücklicher Bestätigung wird er gespeichert.');
+    };
     view.onAdd=(position,mesh)=>{
       const parent=this.data.points.find(p=>p.id===this.addingBoneParent);
       if(!this.addingBoneParent){this.addPoint(position,mesh);return;}
@@ -102,6 +118,16 @@ export class StudioEditor {
     };
     view.onBrushSample=position=>{if(!this.weightStroke)return;try{this.weightStroke.sample(position);this.refreshWeightColors();this.view.setWeightRegion?.(position?{center:position.toArray(),radius:this.weightRadius}:null);}catch(error){this.weightStroke=null;this.view.setAction('select');this.render();this.hooks.feedback((error as Error).message+' Pinselstrich zurückgenommen.');}};
     view.onBrushEnd=cancel=>{const stroke=this.weightStroke;this.weightStroke=null;if(!stroke)return;if(cancel)stroke.cancel();else if(stroke.finish()){flagAffectedPoses(stroke.before.data,this.data);this.history.push(stroke.before);this.mark();}this.view.setAction('select');this.render();this.hooks.feedback(cancel?'Pinselstrich abgebrochen.':'Pinselstrich abgeschlossen. Posen und Bewegungen prüfen.');};
+    this.render();
+  }
+  configureLandmarkPicking(document:ImageReferenceDocument,inventory:ClusterMeshInventory){
+    if(this.disposed)return;
+    const seeds=imageReferenceLandmarksToCluster2DSeeds(document);
+    if(!seeds.length||inventory.schemaVersion!==1||!inventory.meshes.length)return;
+    this.landmarkDocument=structuredClone(document);
+    this.landmarkInventory=inventory;
+    this.selectedLandmarkId=seeds[0]!.id;
+    this.pendingSurfaceHit=null;
     this.render();
   }
   get point(){if(this.selected===FIGURE_TRACK&&!this.edit)return this.rig.figure;return this.rig.data.points.find(p=>p.id===this.selected);}
@@ -154,11 +180,17 @@ export class StudioEditor {
     const remembered = Object.fromEntries(['pose-name','move-name','move-id','pose-list','studio-moves','library-moves','move-steps'].map(id=>[id,this.host.querySelector<HTMLInputElement>(`#${id}`)?.value ?? '']));
     const loop = this.host.querySelector<HTMLInputElement>('#move-loop')?.checked ?? false;
     const selected=this.selected;const poses=this.data.poses;
+    const landmarkSeeds=this.landmarkDocument?imageReferenceLandmarksToCluster2DSeeds(this.landmarkDocument):[];
+    if(!landmarkSeeds.some(seed=>seed.id===this.selectedLandmarkId))this.selectedLandmarkId=landmarkSeeds[0]?.id??null;
+    const landmarkPanel=this.landmarkInventory&&landmarkSeeds.length
+      ? '<section class="studio-landmark-picking"><h3>2D ↔ 3D-Landmarke</h3><p class="subtle">Eine bestätigte 2D-Landmarke auswählen, dann den sichtbaren 3D-Oberflächenpunkt anklicken. Gespeichert wird erst nach separater Bestätigung.</p><label for="landmark-pick-select">Bestätigte 2D-Landmarke</label><select id="landmark-pick-select">'+landmarkSeeds.map(seed=>'<option value="'+seed.id+'">'+seed.partId+' · '+seed.id+'</option>').join('')+'</select><label for="landmark-pick-radius">Lokaler Einflussradius</label><input id="landmark-pick-radius" type="number" min="0.001" max="10" step="0.001" value="'+this.landmarkPickRadius+'"><div class="studio-actions"><button id="landmark-surface-pick" '+(!this.edit||!this.selectedLandmarkId?'disabled':'')+'>3D-Oberflächenpunkt wählen</button><button id="landmark-surface-confirm" '+(!this.pendingSurfaceHit?'disabled':'')+'>Zuordnung bestätigen</button></div><p id="landmark-pick-preview" role="status">'+(this.pendingSurfaceHit?'Treffer: Mesh '+(this.pendingSurfaceHit.meshIndex+1)+', Dreieck '+this.pendingSurfaceHit.triangleIndex+', baryzentrisch ('+this.pendingSurfaceHit.barycentric.map(value=>value.toFixed(4)).join(', ')+').':'Noch kein 3D-Treffer ausgewählt.')+'</p><p class="subtle">'+(this.data.landmarkSurfacePicks?.some(pick=>pick.landmarkId===this.selectedLandmarkId)?'Für diese Landmarke besteht bereits eine Zuordnung. Eine neue bestätigte Auswahl ersetzt sie.':'Noch keine bestätigte 3D-Zuordnung für diese Landmarke.')+'</p></section>'
+      : '<section class="studio-landmark-picking"><h3>2D ↔ 3D-Landmarke</h3><p class="subtle">Nicht verfügbar: Bildreferenz mit bestätigter Landmarke und gültiges 3D-Meshinventar erforderlich.</p></section>';
     this.host.innerHTML=`<h2>Avatar-Studio</h2><label class="check"><input id="studio-agent-edit" type="checkbox" ${this.agentEditing?'checked':''}> KI darf dieses Studio bearbeiten</label><p class="subtle">Nur für diese Sitzung. Änderungen sind rückgängig machbar.</p><div class="studio-file-actions"><button id="studio-new">Neu</button><button id="studio-save">Speichern${this.dirty?' *':''}</button><button id="figure-glb" ${this.exportingFigure?'disabled':''}>Figur als GLB (Standbild)</button><button id="figure-rig-glb" ${this.exportingFigure?'disabled':''}>Figur als GLB (mit Rig)</button></div><p class="subtle">Standbild ohne Rig oder aktuelle Form mit Hautskelett. Beide ohne Animationen. Studio-Projekt zusätzlich speichern.</p>
     <label class="check" ${poseMorphBindings(this.rig.root).length?'':'hidden'}><input id="studio-pose-corrections" type="checkbox" ${this.rig.poseCorrectionsActive?'checked':''} ${this.rig.poseCorrectionsCompatible?'':'disabled'}> Poseabhängige Hautkorrekturen</label><p class="subtle" ${poseMorphBindings(this.rig.root).length?'':'hidden'}> Geprüfte Haltungen; bei unpassenden Achsen- oder Gelenkkombinationen blenden Korrekturen aus. Nach Rig-/Gewichtsänderungen ausgeschaltet. Bewegung visuell prüfen.</p><div class="studio-modes" role="group" aria-label="Bearbeitungsmodus"><button id="mode-pose" aria-pressed="${!this.edit}">Figur bewegen</button><button id="mode-rig" aria-pressed="${this.edit}">Gelenke bearbeiten</button></div>
     <p class="subtle">${this.edit?'Punkte setzen und verbinden. Bestehende Skelettpunkte verschieben ihren Drehpunkt.':'Ziehen bewegt verbundene Gelenkketten. Unter Drehen lässt sich die Ausrichtung direkt mit der Maus ändern.'}</p>
     <div class="studio-actions"><button id="studio-undo" ${this.history.canUndo?'':'disabled'}>↶ Zurück</button><button id="studio-redo" ${this.history.canRedo?'':'disabled'}>↷ Wiederholen</button></div>
     <div class="studio-detection" ${this.edit?'':'hidden'}><button id="detect-joints">Joints automatisch erkennen</button><button id="detect-links">Joint-Verbindungen automatisch erkennen</button><p class="subtle">Erkennung verwendet vorhandene Skelettdaten. Für Modelle ohne Skelett ist KI-Rigging noch nicht verfügbar.</p></div>
+    ${landmarkPanel}
     <button id="figure-select" ${this.edit?'hidden':''}>Gesamte Figur bewegen</button>
     <label for="studio-points">Gelenk / Gesichtspunkt</label><select id="studio-points"><option value="">Punkt auswählen …</option></select>
     <div class="studio-actions" ${this.edit?'':'hidden'}><label>Position auf der Knochenstrecke <output id="bone-ratio-value">${Math.round(this.insertionRatio*100)} %</output><input id="bone-ratio" type="range" min="10" max="90" step="1" value="${Math.round(this.insertionRatio*100)}" aria-label="Position des Zwischengelenks"><span class="subtle">Vom Elternknochen zum ausgewählten Kindknochen; 50 % = Mitte.</span></label><button id="bone-add">＋ Knochen setzen</button><button id="bone-insert">Knochen dazwischen einfügen</button><button id="point-add">＋ Punkt setzen</button><button id="point-connect" ${this.point?'':'disabled'}>Verbinden / lösen</button></div>
@@ -192,6 +224,26 @@ export class StudioEditor {
     const points=q<HTMLSelectElement>('studio-points');if(!this.edit){const option=new Option('Gesamte Figur',FIGURE_TRACK);option.dataset.figureLabel='';points.add(option);}for(const p of this.data.points)points.add(new Option(`${p.kind==='bone'?'◇':'●'} ${p.name}`,p.id));points.value=selected??'';
     points.onchange=()=>{this.surfaceCheck?.abort();this.weightCorrection=null;this.selected=points.value||null;this.addingBoneParent=null;this.view.setAction('select');this.render();};
     input('studio-agent-edit').onchange=()=>{this.agentEditing=input('studio-agent-edit').checked;this.revision++;};
+    if(this.landmarkInventory&&landmarkSeeds.length){
+      const landmarkSelect=q<HTMLSelectElement>('landmark-pick-select');
+      landmarkSelect.value=this.selectedLandmarkId??'';
+      landmarkSelect.onchange=()=>{this.selectedLandmarkId=landmarkSelect.value||null;this.pendingSurfaceHit=null;this.render();};
+      const radius=q<HTMLInputElement>('landmark-pick-radius');
+      radius.onchange=()=>{const value=Number(radius.value);if(!Number.isFinite(value)||value<=0||value>10){radius.setCustomValidity('Radius muss größer 0 und höchstens 10 sein.');radius.reportValidity();return;}radius.setCustomValidity('');this.landmarkPickRadius=value;};
+      on('landmark-surface-pick',()=>{
+        if(!this.edit||!this.active||this.interactionActive)throw Error('Zum Auswählen in den Modus „Gelenke bearbeiten“ wechseln und laufende Bewegungen beenden.');
+        if(!this.selectedLandmarkId)throw Error('Bestätigte 2D-Landmarke auswählen.');
+        this.pendingSurfaceHit=null;this.view.setAction('surface-pick');
+        this.hooks.feedback('Klicke in der 3D-Ansicht auf die sichtbare Oberfläche. Der Treffer wird zunächst nur vorgemerkt.');
+      });
+      on('landmark-surface-confirm',()=>{
+        if(!this.pendingSurfaceHit||!this.selectedLandmarkId||!this.landmarkDocument||!this.landmarkInventory)throw Error('Zuerst eine 2D-Landmarke und einen 3D-Treffer auswählen.');
+        const pick=createStudioLandmarkSurfacePick({document:this.landmarkDocument,inventory:this.landmarkInventory,landmarkId:this.selectedLandmarkId,hit:this.pendingSurfaceHit,radiusLocal:this.landmarkPickRadius,confirmed:true});
+        this.mutate(()=>{this.data.landmarkSurfacePicks??=[];this.data.landmarkSurfacePicks=this.data.landmarkSurfacePicks.filter(item=>item.landmarkId!==pick.landmarkId);this.data.landmarkSurfacePicks.push(pick);});
+        this.pendingSurfaceHit=null;this.view.setAction('select');
+        this.hooks.feedback('2D/3D-Zuordnung mit Quellhash und stabiler Mesh-ID gespeichert. Rückgängig ist möglich.');
+      });
+    }
     on('figure-select',()=>{this.selected=FIGURE_TRACK;this.addingBoneParent=null;this.view.setAction('select');this.render();});
     on('mode-pose',()=>{this.revision++;this.edit=false;this.addingBoneParent=null;this.view.setAction('select');this.rig.reset();this.render();});
     on('mode-rig',()=>{this.revision++;this.edit=true;if(this.selected===FIGURE_TRACK)this.selected=null;this.addingBoneParent=null;this.view.setAction('select');this.rig.reset();this.render();});
