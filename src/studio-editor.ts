@@ -89,8 +89,18 @@ export class StudioEditor {
     this.rig=rig;this.playbackTransition=new PlaybackTransition(rig.root);this.view=view;this.host=host;this.project=project;this.hooks=hooks;this.initial=structuredClone(rig.initial);
     view.onSelect=id=>{this.surfaceCheck?.abort();this.weightCorrection=null;this.selected=id;this.render();};
     view.onSurfacePick=hit=>{
-      this.pendingSurfaceHit=hit;
       this.view.setAction('select');
+      const mesh=this.landmarkInventory?.meshes[hit.meshIndex];
+      const weights=hit.barycentric;
+      if(!mesh||!Number.isSafeInteger(hit.triangleIndex)||hit.triangleIndex<0||hit.triangleIndex>=mesh.triangleCount||
+         !Array.isArray(weights)||weights.length!==3||!weights.every(value=>Number.isFinite(value)&&value>=0&&value<=1)||
+         Math.abs(weights.reduce((sum,value)=>sum+value,0)-1)>1e-5){
+        this.pendingSurfaceHit=null;
+        this.render();
+        this.hooks.feedback('3D-Treffer passt nicht zum geprüften Meshinventar oder enthält ungültige baryzentrische Koordinaten. Bitte erneut wählen.');
+        return;
+      }
+      this.pendingSurfaceHit=hit;
       this.render();
       this.hooks.feedback('3D-Treffer vorgemerkt. Erst nach Prüfung und ausdrücklicher Bestätigung wird er gespeichert.');
     };
