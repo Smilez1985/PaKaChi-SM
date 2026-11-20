@@ -15,7 +15,7 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 ### Fixed
 
 - Bildreferenz-Browserprüfungen verwenden für anatomische Katalogfelder die tatsächlichen Auswahl-Steuerelemente und prüfen Katalogeinträge unabhängig von ihrer Reihenfolge.
-- 2D-Klassifikationsprüfung validiert bei zusammengesetzten Bildbereichen den expliziten Mehrdeutigkeitsgrund statt eines veralteten Kurztextes.
+- 2D-Klassifikations-Browserprüfung setzt die Semantik des jeweils neu angelegten Landmarkenpunkts, ohne versehentlich den zuvor aktiven Punkt umzuschreiben.
 
 ### Added
 
