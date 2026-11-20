@@ -61,5 +61,5 @@ test('rejects invalid source hashes and preserves 2D avatar/form/view/pose prove
   const badHash = input(); badHash.document.source.sha256 = 'invalid';
   assert.throws(() => createStudioLandmarkSurfacePick(badHash), /source image hash/);
   const wrongHierarchy = input(); wrongHierarchy.document.views[0]!.regionIds = [];
-  assert.throws(() => createStudioLandmarkSurfacePick(wrongHierarchy), /Invalid image reference document/);
+  assert.throws(() => createStudioLandmarkSurfacePick(wrongHierarchy), /not assigned to an avatar, form, and view/);
 });
