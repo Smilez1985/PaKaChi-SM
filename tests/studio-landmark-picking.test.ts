@@ -21,9 +21,10 @@ const inventory = (): ClusterMeshInventory => ({
     sourceMeshIndex: 0, sourceMeshName: 'Head', primitiveIndex: 0, vertexCount: 3, triangleCount: 1 }],
   totals: { meshes: 1, vertices: 3, triangles: 1 },
 });
-const input = () => ({
+interface PickInput { document: ImageReferenceDocument; inventory: ClusterMeshInventory; landmarkId: string; hit: { meshIndex: number; triangleIndex: number; barycentric: readonly [number, number, number] }; radiusLocal: number; confirmed: boolean }
+const input = (): PickInput => ({
   document: document(), inventory: inventory(), landmarkId: 'left-eye',
-  hit: { meshIndex: 0, triangleIndex: 0, barycentric: [0.2, 0.3, 0.5] as const },
+  hit: { meshIndex: 0, triangleIndex: 0, barycentric: [0.2, 0.3, 0.5] },
   radiusLocal: 0.08, confirmed: true,
 });
 
