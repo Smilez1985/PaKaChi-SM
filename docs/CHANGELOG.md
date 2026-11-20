@@ -12,6 +12,11 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+### Added
+
+- 3D-Studio-Ansicht erhält einen expliziten Oberflächen-Pick-Modus: Raycast-Treffer liefern Mesh-Index, Dreiecksindex und baryzentrische Koordinaten. Die Umrechnung berücksichtigt die Welttransformation des Meshes; ungültige Treffer außerhalb oder auf entarteten Dreiecken werden verworfen. Zwei Regressionstests decken Transformation und Grenzfälle ab. Stand: 2026-11-20T11:45:00+01:00.
+
+
 ### Fixed
 
 - Bildreferenz-Browserprüfungen verwenden für anatomische Katalogfelder die tatsächlichen Auswahl-Steuerelemente und prüfen Katalogeinträge unabhängig von ihrer Reihenfolge.
