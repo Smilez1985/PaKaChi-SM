@@ -6,6 +6,8 @@ on:
       - '.github/workflows/cluster-landmark-test.yml'
       - 'src/cluster-*.ts'
       - 'src/studio-landmark-picking.ts'
+      - 'src/studio-editor.ts'
+      - 'src/avatar-candidate.ts'
       - 'src/studio-surface-hit.ts'
       - 'src/studio-view.ts'
       - 'tests/cluster-*.test.ts'
