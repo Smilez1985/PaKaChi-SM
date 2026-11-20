@@ -5,10 +5,11 @@ test('StudioView raycasts a real canvas click to the source mesh triangle',async
  await page.goto('/');
  await page.evaluate(async()=>{
   const canvas=document.querySelector<HTMLCanvasElement>('#studio')!;
-  const {mountSurfacePickFixture}=await import('/tests/e2e/fixtures/studio-surface-pick.ts');
+  const fixtureUrl='/tests/e2e/fixtures/studio-surface-pick.ts';
+  const {mountSurfacePickFixture}=await import(/* @vite-ignore */ fixtureUrl);
   const state=mountSurfacePickFixture(canvas);
   (window as any).__surfacePick=state;
- });;
+ });
  const bounds=await page.locator('#studio').boundingBox();
  expect(bounds).not.toBeNull();
  const box=bounds!;
