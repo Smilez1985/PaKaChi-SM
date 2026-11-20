@@ -14,6 +14,11 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ### Added
 
+- Integrierte Studio-Bedienoberfläche für geprüfte 2D/3D-Landmarken: bestätigte 2D-Landmarken auswählen, sichtbare 3D-Oberflächenpunkte per Raycast voranzeigen, lokalen Einflussradius festlegen und die Zuordnung erst nach separater Nutzerbestätigung speichern. Die stabile Mesh-ID wird aus dem SHA-256-Hash der unveränderten GLB-Quellbytes inventarisiert; die Zuordnung bleibt Teil von Studio-Projekt, Undo und Redo. Ein Regressionstest prüft Vorschau, explizite Bestätigung und Rücknahme. Stand: 2026-11-20T15:53:00+01:00 (Europe/Berlin).
+
+
+### Added
+
 - 3D-Studio-Ansicht erhält einen expliziten Oberflächen-Pick-Modus: Raycast-Treffer liefern Mesh-Index, Dreiecksindex und baryzentrische Koordinaten. Die Umrechnung berücksichtigt die Welttransformation des Meshes; ungültige Treffer außerhalb oder auf entarteten Dreiecken werden verworfen. Zwei Regressionstests decken Transformation und Grenzfälle ab. Stand: 2026-11-20T11:45:00+01:00.
 
 
