@@ -279,8 +279,8 @@ test('2D classifier preview keeps a composite confirmed crop unresolved and neve
  await page.getByLabel('Anatomical part ID').selectOption('head');
  await page.getByLabel('Pose ID').fill('front-neutral');
  await page.mouse.click(box.x+box.width*.25,box.y+box.height*.25);
- await page.getByLabel('Anatomical part ID').selectOption('torso');
  await page.mouse.click(box.x+box.width*.75,box.y+box.height*.75);
+ await page.getByLabel('Anatomical part ID').selectOption('torso');
  await page.getByRole('button',{name:'Show 2D classification proposals'}).click();
  await expect(page.getByText(/Region contains multiple anatomical or surface-layer targets/)).toBeVisible();
  const document=await page.evaluate(async()=> (window as any).__imageReferenceEditor.reference());
