@@ -1,6 +1,7 @@
 import {StudioWeightColors} from './studio-weight-colors.ts';
 import {StudioWeightPointer} from './studio-weight-pointer.ts';
 import {StudioWeightPreview} from './studio-weight-preview.ts';
+import {studioSurfaceHitBarycentric} from './studio-surface-hit.ts';
 import type {WeightRegion} from './studio-data.ts';
 import {FIGURE_TRACK} from './studio-data.ts';
 import * as T from 'three';
@@ -95,20 +96,9 @@ export class StudioView {
       const hit=this.ray.intersectObjects(meshes,false)[0];
       if(!hit||!hit.face||!Number.isSafeInteger(hit.faceIndex))return;
       const mesh=hit.object as T.Mesh;
-      const localPoint=mesh.worldToLocal(hit.point.clone());
-      const a=mesh.getVertexPosition(hit.face.a,new T.Vector3());
-      const b=mesh.getVertexPosition(hit.face.b,new T.Vector3());
-      const c=mesh.getVertexPosition(hit.face.c,new T.Vector3());
-      const weights=T.Triangle.getBarycoord(localPoint,a,b,c,new T.Vector3());
-      if(!weights||![weights.x,weights.y,weights.z].every(Number.isFinite))return;
-      const raw=[weights.x,weights.y,weights.z];
-      if(raw.some(value=>value < -1e-5 || value > 1+1e-5))return;
-      const clamped=raw.map(value=>T.MathUtils.clamp(value,0,1));
-      const total=clamped.reduce((sum,value)=>sum+value,0);
-      if(!Number.isFinite(total)||total<=0)return;
-      const barycentric=clamped.map(value=>value/total) as [number,number,number];
+      const barycentric=studioSurfaceHitBarycentric(mesh,hit.face,hit.point);
       const meshIndex=meshes.indexOf(mesh);
-      if(meshIndex<0)return;
+      if(!barycentric||meshIndex<0)return;
       this.onSurfacePick({meshIndex,triangleIndex:hit.faceIndex!,barycentric});
       return;
     }
