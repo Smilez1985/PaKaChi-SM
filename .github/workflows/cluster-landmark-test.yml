@@ -15,6 +15,7 @@ on:
       - 'tests/studio-landmark-picking.test.ts'
       - 'tests/studio-surface-hit.test.ts'
       - 'tests/e2e/studio-surface-pick.spec.ts'
+      - 'tests/e2e/fixtures/studio-surface-pick.ts'
       - 'package.json'
       - 'package-lock.json'
       - 'playwright.config.ts'
