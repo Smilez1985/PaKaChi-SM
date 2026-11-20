@@ -6,6 +6,7 @@ import {StudioEditor} from './studio-editor.ts';
 import {Playback} from './playback.ts';
 import {Viewer,disposeModel} from './viewer.ts';
 import {disposeAll} from './avatar-installation.ts';
+import {collectClusterMeshInventory} from './cluster-inventory.ts';
 
 type CandidateViewer=Pick<Viewer,'show'|'createStudioView'|'setStudio'|'showSkeleton'|'dispose'|'onFrame'>;
 interface CandidateOptions {
@@ -35,6 +36,20 @@ export function prepareAvatar(options:CandidateOptions,makeViewer:(host:HTMLElem
    suspend:()=>playback!.suspend(),resume:()=>{if(live)options.resume();else{const id=options.avatar.defaultMove;if(id)playback!.setBaseMove(id);}},
    changed:()=>{if(live)options.changed();},feedback:text=>{if(live)options.feedback(text);},
   });
+  // Build a source-byte-bound inventory asynchronously; normal avatar loading stays synchronous.
+  if(options.source.imageReference){
+   const targetEditor=editor;
+   void (async()=>{
+    const binary=atob(options.source.model);
+    const bytes=Uint8Array.from(binary,character=>character.charCodeAt(0));
+    const digest=await crypto.subtle.digest('SHA-256',bytes);
+    const sourceAssetSha256=Array.from(new Uint8Array(digest),value=>value.toString(16).padStart(2,'0')).join('');
+    const inventory=collectClusterMeshInventory(options.model,sourceAssetSha256);
+    if(!disposed&&editor===targetEditor)targetEditor.configureLandmarkPicking(options.source.imageReference!,inventory);
+   })().catch(error=>{
+    if(!disposed&&live)options.feedback('3D-Landmarkenauswahl nicht verfügbar: '+(error instanceof Error?error.message:'Meshinventar konnte nicht erstellt werden.'));
+   });
+  }
   rig.restoreSource();
   const idle=options.avatar.states?.idle;
   const initial=idle&&options.moves.some(m=>m.id===idle)?idle:options.avatar.defaultMove;
