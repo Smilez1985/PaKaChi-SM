@@ -14,6 +14,8 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ### Added
 
+- Chromium-Browserregression für die echte 3D-Oberflächenwahl: ein realer Canvas-Klick wird durch `StudioView` per Raycaster dem korrekten Quellmesh und Dreieck zugeordnet; baryzentrische Koordinaten werden im Browser geprüft. Der fokussierte Cluster-Workflow führt diesen Test zusätzlich zu den schnellen Node-Regressionen aus. Stand: 2026-11-20T17:25:00+01:00 (Europe/Berlin).
+
 - Integrierte Studio-Bedienoberfläche für geprüfte 2D/3D-Landmarken: bestätigte 2D-Landmarken auswählen, sichtbare 3D-Oberflächenpunkte per Raycast voranzeigen, lokalen Einflussradius festlegen und die Zuordnung erst nach separater Nutzerbestätigung speichern. Die stabile Mesh-ID wird aus dem SHA-256-Hash der unveränderten GLB-Quellbytes inventarisiert; die Zuordnung bleibt Teil von Studio-Projekt, Undo und Redo. Treffer außerhalb des geprüften Meshinventars werden bereits vor der Bestätigung abgewiesen. Regressionstests prüfen Vorschau, explizite Bestätigung, ungültige Treffer und Rücknahme. Stand: 2026-11-20T17:09:00+01:00 (Europe/Berlin).
 
 
