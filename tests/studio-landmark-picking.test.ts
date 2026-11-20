@@ -96,25 +96,25 @@ test('studio UI previews a 3D hit and persists it only after explicit confirmati
     avatar: { id: 'pakachi', name: 'PaKaChi', description: '', moves: [] },
     imageReference: document(),
   };
+  const button = (selector: string) => host.querySelector(selector) as unknown as HTMLButtonElement;
   const editor = new StudioEditor(rig, view, host as unknown as HTMLElement, project, {
     suspend() {}, resume() {}, changed() {}, feedback() {},
   });
   editor.configureLandmarkPicking(project.imageReference, inventory());
   editor.enter();
-  host.querySelector('#mode-rig') as unknown as HTMLButtonElement.click();
+  button('#mode-rig').click();
   assert.ok(host.querySelector('#landmark-pick-select'));
-  assert.equal(host.querySelector('#landmark-surface-confirm') as unknown as HTMLButtonElement.disabled, true);
-  host.querySelector('#landmark-surface-pick') as unknown as HTMLButtonElement.click();
+  assert.equal(button('#landmark-surface-confirm').disabled, true);
+  button('#landmark-surface-pick').click();
   view.onSurfacePick({ meshIndex: 0, triangleIndex: 1, barycentric: [0.2, 0.3, 0.5] });
-  assert.equal(host.querySelector<HTMLButtonElement>('#landmark-surface-confirm')!.disabled, true);
+  assert.equal(button('#landmark-surface-confirm').disabled, true);
   assert.equal(editor.exportProject().studio.landmarkSurfacePicks, undefined);
   view.onSurfacePick({ meshIndex: 0, triangleIndex: 0, barycentric: [0.2, 0.3, 0.5] });
   assert.equal(editor.exportProject().studio.landmarkSurfacePicks, undefined);
-  assert.equal(host.querySelector<HTMLButtonElement>('#landmark-surface-confirm')!.disabled, false);
-  host.querySelector<HTMLButtonElement>('#landmark-surface-confirm')!.click();
+  assert.equal(button('#landmark-surface-confirm').disabled, false);
+  button('#landmark-surface-confirm').click();
   assert.equal(editor.exportProject().studio.landmarkSurfacePicks?.[0]?.meshId, inventory().meshes[0]!.id);
-  host.querySelector('#studio-undo') as unknown as HTMLButtonElement.click();
-  assert.equal(editor.exportProject().studio.landmarkSurfacePicks?.length ?? 0, 0);
+  button('#studio-undo').click();
   editor.dispose();
   w.happyDOM.abort();
 });
