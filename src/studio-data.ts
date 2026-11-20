@@ -25,7 +25,49 @@ export function validWeightRegion(value:unknown):value is WeightRegion {
  return Object.keys(r).every(k=>k==='center'||k==='radius'||k==='view')&&(r.view===undefined||validWeightView(r.view))&&Array.isArray(r.center)&&r.center.length===3&&r.center.every(v=>typeof v==='number'&&Number.isFinite(v)&&Math.abs(v)<=100)&&typeof r.radius==='number'&&Number.isFinite(r.radius)&&r.radius>=.005&&r.radius<=2;
 }
 export type BoneInsertion = ({child:number;ratio:number;parent?:never}|{parent:number;child?:never;ratio?:never}) & {afterDeletions?:number};
+export interface StudioLandmarkSurfacePick {
+  landmarkId: string;
+  sourceImageSha256: string;
+  avatarId: string;
+  formId: string;
+  viewId: string;
+  poseId: string;
+  meshId: string;
+  triangleIndex: number;
+  barycentric: readonly [number, number, number];
+  partId: string;
+  surfaceLayerId?: string | null;
+  radiusLocal: number;
+  confirmed: true;
+}
+export const MAX_STUDIO_LANDMARK_SURFACE_PICKS = 10000;
+export function validStudioLandmarkSurfacePicks(value: unknown, sourceImageSha256?: string): value is StudioLandmarkSurfacePick[] {
+  if (!Array.isArray(value) || value.length > MAX_STUDIO_LANDMARK_SURFACE_PICKS) return false;
+  const ids = new Set<string>();
+  const validId = (item: unknown): item is string => typeof item === 'string' && /^[a-z0-9][a-z0-9_-]{0,127}$/.test(item);
+  return value.every((pick: unknown) => {
+    if (!obj(pick) || Object.keys(pick).some(key => !['landmarkId','sourceImageSha256','avatarId','formId','viewId','poseId','meshId','triangleIndex','barycentric','partId','surfaceLayerId','radiusLocal','confirmed'].includes(key))) return false;
+    const p = pick as Record<string, unknown>;
+    if (!validId(p.landmarkId) || ids.has(p.landmarkId) ||
+        typeof p.sourceImageSha256 !== 'string' || !/^[a-f0-9]{64}$/.test(p.sourceImageSha256) ||
+        (sourceImageSha256 !== undefined && p.sourceImageSha256 !== sourceImageSha256) ||
+        !validId(p.avatarId) || !validId(p.formId) || !validId(p.viewId) || !validId(p.poseId) ||
+        !validId(p.meshId) || !validId(p.partId) ||
+        (p.surfaceLayerId !== undefined && p.surfaceLayerId !== null && !validId(p.surfaceLayerId)) ||
+        !Number.isSafeInteger(p.triangleIndex) || (p.triangleIndex as number) < 0 ||
+        !Array.isArray(p.barycentric) || p.barycentric.length !== 3 ||
+        !p.barycentric.every((n: unknown) => typeof n === 'number' && Number.isFinite(n) && n >= 0 && n <= 1) ||
+        Math.abs(p.barycentric.reduce((sum: number, n: number) => sum + n, 0) - 1) > 1e-5 ||
+        typeof p.radiusLocal !== 'number' || !Number.isFinite(p.radiusLocal) || p.radiusLocal <= 0 || p.radiusLocal > 10 ||
+        p.confirmed !== true) return false;
+    ids.add(p.landmarkId);
+    return true;
+  });
+}
+
 export interface StudioData {
+  /** Explicit, reviewed 2D-to-3D mesh-surface correspondences. */
+  landmarkSurfacePicks?: StudioLandmarkSurfacePick[];
   correctiveShapes?: import('./studio-corrective-shapes.ts').StudioCorrectiveShape[];
   poseCorrections?: boolean;
   weightTransfers?: {from:number;to:number;amount:number;after:number;region?:WeightRegion}[];
@@ -110,6 +152,7 @@ export function parseProject(input: unknown): StudioProject {
   if(a.states!==undefined) {require(obj(a.states));for(const [key,value] of Object.entries(a.states))require(['idle','talking','thinking','working','waiting','review','error','sleeping'].includes(key) && moveIds.has(value as string));}
   const d=input.studio; require(obj(d) && Array.isArray(d.points) && d.points.length<=256 && Array.isArray(d.links) && d.links.length<=2048 && Array.isArray(d.boneRest) && d.boneRest.length<=512 && d.boneRest.every(v=>transform(v)) && Array.isArray(d.poses) && d.poses.length<=100 && Array.isArray(d.moves) && d.moves.length<=100);
   require(validCorrectiveShapes(d.correctiveShapes),'Ungültige geometrische Hautkorrekturen.');
+  require(d.landmarkSurfacePicks===undefined || validStudioLandmarkSurfacePicks(d.landmarkSurfacePicks, (input.imageReference as ImageReferenceDocument|undefined)?.source.sha256), 'Ungültige oder nicht zur Bildreferenz passende 2D/3D-Landmarken.');
   if(d.boneInsertions!==undefined){
     require(Array.isArray(d.boneInsertions)&&d.boneInsertions.length<=64&&d.boneRest.length<=256,'Ungültige Knochenänderungen.');
     const count=d.boneRest.length-d.boneInsertions.length;require(count>0);

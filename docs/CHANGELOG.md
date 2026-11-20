@@ -14,6 +14,8 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ### Added
 
+- Studio-Projektvertrag für geprüfte 2D/3D-Landmarken-Oberflächenzuordnungen ergänzt: begrenzte Anzahl, stabile IDs, Quellbildhash, Avatar-/Form-/Ansichts-/Posenprovenienz, eindeutige Landmarken, gültige baryzentrische Koordinaten, Dreiecksindex und Evidenzradius werden beim Projektimport geprüft. Bei vorhandener Bildreferenz muss der Quellhash übereinstimmen. Die Daten liegen in `studio.landmarkSurfacePicks` und werden von bestehenden Studio-Snapshots für Undo/Redo mitgeführt. Stand: 2026-11-20T09:15:00+01:00.
+
 - Landmarken-Editor: Anatomische Teile und Oberflächenlagen werden über auswählbare Einträge aus dem gemeinsamen PaKaChi-Katalog gesetzt. Unbekannte IDs aus älteren oder externen Projekten bleiben als benutzerdefinierte Auswahl erhalten. Browserregression für Katalogauswahl und Persistenz.
 
 ### Added

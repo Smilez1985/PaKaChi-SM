@@ -199,7 +199,8 @@ Die Umsetzung des integrierten MCP-Arbeitsplatzes, der Caddy-/DuckDNS-Konfigurat
 - [x] Landmarken im integrierten Bildeditor auf bestätigten Bildregionen setzen, per Maus oder Zahlenfeldern verschieben, semantisch beschriften und löschen; Speicherung im bestehenden Bildreferenz-Dokument.
 - [x] Persistierte Landmarken über die explizite Region-/Ansicht-/Form-/Avatar-Hierarchie in 2D-Klassifikator-Seeds überführen.
 - [ ] Landmarken-Undo/Redo und eine auswählbare, charakterweite Part-/Surface-Layer-Katalogverwaltung im Studio ergänzen.
-- [x] Resolver für explizit geprüfte 2D/3D-Oberflächenkorrespondenzen ergänzen: 2D-Quellhash und Avatar/Form/Ansicht/Pose, 3D-Assethash, Mesh-/Dreiecks-ID und baryzentrischer Oberflächenpunkt werden validiert; keine Tiefenableitung aus Einzelbildern. Die interaktive Mesh-Auswahl und persistente Speicherung bleiben offen ([Vertrag](CLUSTER-2D-3D-KORRESPONDENZ.md)).
+- [x] Resolver für explizit geprüfte 2D/3D-Oberflächenkorrespondenzen ergänzen: 2D-Quellhash und Avatar/Form/Ansicht/Pose, 3D-Assethash, Mesh-/Dreiecks-ID und baryzentrischer Oberflächenpunkt werden validiert; keine Tiefenableitung aus Einzelbildern. ([Vertrag](CLUSTER-2D-3D-KORRESPONDENZ.md))
+- [x] Persistenzvertrag für geprüfte Oberflächenkorrespondenzen im Studio-Projekt ergänzen: begrenzte Liste, eindeutige Landmarken-IDs, Quellhashabgleich mit Bildreferenz, bestätigte Evidenz und baryzentrische Validierung. Studio-History-Snapshots enthalten den Datensatz automatisch; die interaktive Mesh-Auswahl fehlt noch.
 - [ ] Tier- und Arbeitsform gegen denselben Charakterkatalog prüfen und 3D-Mesh-Zuordnungen über gemeinsame semantische IDs vergleichen.
 
 ## Noch zu entscheiden
