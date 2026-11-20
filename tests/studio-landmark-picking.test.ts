@@ -96,15 +96,15 @@ test('studio UI previews a 3D hit and persists it only after explicit confirmati
     avatar: { id: 'pakachi', name: 'PaKaChi', description: '', moves: [] },
     imageReference: document(),
   };
-  const editor = new StudioEditor(rig, view, host, project, {
+  const editor = new StudioEditor(rig, view, host as unknown as HTMLElement, project, {
     suspend() {}, resume() {}, changed() {}, feedback() {},
   });
   editor.configureLandmarkPicking(project.imageReference, inventory());
   editor.enter();
-  host.querySelector<HTMLButtonElement>('#mode-rig')!.click();
+  host.querySelector('#mode-rig') as unknown as HTMLButtonElement.click();
   assert.ok(host.querySelector('#landmark-pick-select'));
-  assert.equal(host.querySelector<HTMLButtonElement>('#landmark-surface-confirm')!.disabled, true);
-  host.querySelector<HTMLButtonElement>('#landmark-surface-pick')!.click();
+  assert.equal(host.querySelector('#landmark-surface-confirm') as unknown as HTMLButtonElement.disabled, true);
+  host.querySelector('#landmark-surface-pick') as unknown as HTMLButtonElement.click();
   view.onSurfacePick({ meshIndex: 0, triangleIndex: 1, barycentric: [0.2, 0.3, 0.5] });
   assert.equal(host.querySelector<HTMLButtonElement>('#landmark-surface-confirm')!.disabled, true);
   assert.equal(editor.exportProject().studio.landmarkSurfacePicks, undefined);
@@ -113,7 +113,7 @@ test('studio UI previews a 3D hit and persists it only after explicit confirmati
   assert.equal(host.querySelector<HTMLButtonElement>('#landmark-surface-confirm')!.disabled, false);
   host.querySelector<HTMLButtonElement>('#landmark-surface-confirm')!.click();
   assert.equal(editor.exportProject().studio.landmarkSurfacePicks?.[0]?.meshId, inventory().meshes[0]!.id);
-  host.querySelector<HTMLButtonElement>('#studio-undo')!.click();
+  host.querySelector('#studio-undo') as unknown as HTMLButtonElement.click();
   assert.equal(editor.exportProject().studio.landmarkSurfacePicks?.length ?? 0, 0);
   editor.dispose();
   w.happyDOM.abort();
