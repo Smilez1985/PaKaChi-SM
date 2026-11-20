@@ -12,6 +12,10 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+### Fixed
+
+- Bildreferenz-Browserprüfungen verwenden für anatomische Katalogfelder die tatsächlichen Auswahl-Steuerelemente und prüfen Katalogeinträge unabhängig von ihrer Reihenfolge.
+
 ### Added
 
 - Studio-Projektvertrag für geprüfte 2D/3D-Landmarken-Oberflächenzuordnungen ergänzt: begrenzte Anzahl, stabile IDs, Quellbildhash, Avatar-/Form-/Ansichts-/Posenprovenienz, eindeutige Landmarken, gültige baryzentrische Koordinaten, Dreiecksindex und Evidenzradius werden beim Projektimport geprüft. Bei vorhandener Bildreferenz muss der Quellhash übereinstimmen. Die Daten liegen in `studio.landmarkSurfacePicks` und werden von bestehenden Studio-Snapshots für Undo/Redo mitgeführt. Stand: 2026-11-20T09:15:00+01:00.
