@@ -201,6 +201,7 @@ Die Umsetzung des integrierten MCP-Arbeitsplatzes, der Caddy-/DuckDNS-Konfigurat
 - [ ] Landmarken-Undo/Redo und eine auswählbare, charakterweite Part-/Surface-Layer-Katalogverwaltung im Studio ergänzen.
 - [x] Resolver für explizit geprüfte 2D/3D-Oberflächenkorrespondenzen ergänzen: 2D-Quellhash und Avatar/Form/Ansicht/Pose, 3D-Assethash, Mesh-/Dreiecks-ID und baryzentrischer Oberflächenpunkt werden validiert; keine Tiefenableitung aus Einzelbildern. ([Vertrag](CLUSTER-2D-3D-KORRESPONDENZ.md))
 - [x] Persistenzvertrag für geprüfte Oberflächenkorrespondenzen im Studio-Projekt ergänzen: begrenzte Liste, eindeutige Landmarken-IDs, Quellhashabgleich mit Bildreferenz, bestätigte Evidenz und baryzentrische Validierung. Studio-History-Snapshots enthalten den Datensatz automatisch; die interaktive Mesh-Auswahl fehlt noch.
+- [x] Adapter für explizit bestätigte Studio-Mesh-Treffer ergänzen: Trefferindex wird in eine SHA-256-gebundene stabile Mesh-ID aufgelöst; 2D-Provenienz wird aus der bestätigten Landmarke übernommen. Noch ohne Mausmodus/UI-Anbindung.
 - [ ] Tier- und Arbeitsform gegen denselben Charakterkatalog prüfen und 3D-Mesh-Zuordnungen über gemeinsame semantische IDs vergleichen.
 
 ## Noch zu entscheiden
