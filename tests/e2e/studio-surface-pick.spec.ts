@@ -40,6 +40,5 @@ test('StudioView raycasts a real canvas click to the source mesh triangle',async
  await page.evaluate(()=>{
   const state=(window as any).__surfacePick;
   state.view.dispose();
-  state.rig.dispose?.();
  });
 });
