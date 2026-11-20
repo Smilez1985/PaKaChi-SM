@@ -22,7 +22,7 @@ export class StudioView {
   private readonly ray=new T.Raycaster();
   private enabled=false;
   private selected:string|null=null;
-  private action:'select'|'add'|'connect'|'brush'='select';
+  private action:'select'|'add'|'connect'|'brush'|'surface-pick'='select';
   private rotation=false;
   private figureEnabled=false;
   setFigureEnabled(value:boolean){this.figureEnabled=value;}
@@ -31,6 +31,7 @@ export class StudioView {
   onSelect:(id:string)=>void=()=>{};
   onAdd:(position:T.Vector3,mesh?:number)=>void=()=>{};
   onConnect:(id:string)=>void=()=>{};
+  onSurfacePick:(hit:{meshIndex:number;triangleIndex:number;barycentric:readonly [number,number,number]})=>void=()=>{};
   onStart:()=>void=()=>{};
   onMove:(position:T.Vector3,rotation:T.Quaternion,intent?:'translate'|'rotate')=>void=()=>{};
   onEnd:()=>void=()=>{};
@@ -54,8 +55,8 @@ export class StudioView {
     this.brush=new StudioWeightPointer(canvas,(x,y)=>{this.aim(x,y);return this.ray.intersectObjects(this.rig.surfaces.map(s=>s.mesh),false)[0]?.point??null;},()=>this.onBrushStart(),p=>this.onBrushSample(p),cancel=>this.onBrushEnd(cancel),orbit);
     this.setEnabled(false);
   }
-  setEnabled(value:boolean) {if(!value){this.brush.finish();this.weightColors.clear();}this.brush.enabled=value&&this.action==='brush';this.enabled=value;this.canvas.style.cursor=value&&this.action==='add'?'crosshair':'';this.group.visible=value;this.gizmo.enabled=value;this.orbit.enabled=true;if(!value){this.gizmo.detach();this.dragging=false;}else this.refresh();}
-  setAction(value:'select'|'add'|'connect'|'brush'){if(value!=='brush')this.brush.finish();this.brush.enabled=this.enabled&&value==='brush';this.action=value;if(value!=='select')this.gizmo.detach();else this.refresh();this.canvas.style.cursor=(value==='add'||value==='brush')?'crosshair':'';}
+  setEnabled(value:boolean) {if(!value){this.brush.finish();this.weightColors.clear();}this.brush.enabled=value&&this.action==='brush';this.enabled=value;this.canvas.style.cursor=value&&(this.action==='add'||this.action==='surface-pick')?'crosshair':'';this.group.visible=value;this.gizmo.enabled=value;this.orbit.enabled=true;if(!value){this.gizmo.detach();this.dragging=false;}else this.refresh();}
+  setAction(value:'select'|'add'|'connect'|'brush'|'surface-pick'){if(value!=='brush')this.brush.finish();this.brush.enabled=this.enabled&&value==='brush';this.action=value;if(value!=='select')this.gizmo.detach();else this.refresh();this.canvas.style.cursor=(value==='add'||value==='brush'||value==='surface-pick')?'crosshair':'';}
   setRotation(value:boolean){this.rotation=value;this.gizmo.setMode(value?'rotate':'translate');}
   select(id:string|null){this.selected=id;this.refresh();}
   private start:{x:number;y:number}|null=null;
@@ -88,6 +89,29 @@ export class StudioView {
     // Minimum 10 px pick radius keeps tiny face points usable without enlarging their display.
     const click=new T.Vector2(event.clientX,event.clientY);
     const hits=this.points.map(p=>{const world=this.rig.position(p),v=world.clone().project(this.camera);const pixel=new T.Vector2(rect.left+(v.x+1)*rect.width/2,rect.top+(1-v.y)*rect.height/2);const radius=Math.max(10,p.size*rect.height/(2*Math.tan(T.MathUtils.degToRad(this.camera.fov/2))*world.distanceTo(this.camera.position)));return {id:p.id,d:pixel.distanceTo(click),radius,z:v.z};}).filter(x=>x.z>=-1&&x.z<=1&&x.d<=x.radius).sort((a,b)=>a.d-b.d);
+    if(this.action==='surface-pick') {
+      event.preventDefault();event.stopImmediatePropagation();
+      const meshes=this.rig.surfaces.map(s=>s.mesh);
+      const hit=this.ray.intersectObjects(meshes,false)[0];
+      if(!hit||!hit.face||!Number.isSafeInteger(hit.faceIndex))return;
+      const mesh=hit.object as T.Mesh;
+      const localPoint=mesh.worldToLocal(hit.point.clone());
+      const a=mesh.getVertexPosition(hit.face.a,new T.Vector3());
+      const b=mesh.getVertexPosition(hit.face.b,new T.Vector3());
+      const c=mesh.getVertexPosition(hit.face.c,new T.Vector3());
+      const weights=T.Triangle.getBarycoord(localPoint,a,b,c,new T.Vector3());
+      if(!weights||![weights.x,weights.y,weights.z].every(Number.isFinite))return;
+      const raw=[weights.x,weights.y,weights.z];
+      if(raw.some(value=>value < -1e-5 || value > 1+1e-5))return;
+      const clamped=raw.map(value=>T.MathUtils.clamp(value,0,1));
+      const total=clamped.reduce((sum,value)=>sum+value,0);
+      if(!Number.isFinite(total)||total<=0)return;
+      const barycentric=clamped.map(value=>value/total) as [number,number,number];
+      const meshIndex=meshes.indexOf(mesh);
+      if(meshIndex<0)return;
+      this.onSurfacePick({meshIndex,triangleIndex:hit.faceIndex!,barycentric});
+      return;
+    }
     if(this.action==='add') {
       const meshes=this.rig.surfaces.map(s=>s.mesh);const hit=this.ray.intersectObjects(meshes,false)[0];
       if(hit){this.onAdd(hit.point,meshes.indexOf(hit.object as T.Mesh));return;}
