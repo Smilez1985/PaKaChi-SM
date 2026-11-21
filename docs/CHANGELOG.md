@@ -13,6 +13,8 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 ## [Unreleased]
 
 ### Added
+- Die Anatomieauswahl der 2D-Landmarken zeigt jetzt den vollständigen semantischen Elternpfad (z. B. Körper › Rumpf › Hals › Kopf), während die stabilen Part-IDs unverändert bleiben. So lassen sich gleichnamige oder tief verschachtelte Bereiche im gemeinsamen Tier-/Arbeitsform-Katalog leichter unterscheiden. Browserregression prüft die angezeigten Pfade. Stand: 2026-11-21T20:31:00+01:00 (Europe/Berlin).
+
 
 - Chromium-Browserregression für die echte 3D-Oberflächenwahl: ein realer Canvas-Klick wird durch `StudioView` per Raycaster dem korrekten Quellmesh und Dreieck zugeordnet; baryzentrische Koordinaten werden im Browser geprüft. Der fokussierte Cluster-Workflow führt diesen Test zusätzlich zu den schnellen Node-Regressionen aus. Stand: 2026-11-20T17:25:00+01:00 (Europe/Berlin).
 

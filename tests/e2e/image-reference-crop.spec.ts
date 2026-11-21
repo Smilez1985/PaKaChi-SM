@@ -293,7 +293,7 @@ test('landmark editor exposes the shared semantic catalog as selectable anatomy 
  await page.getByRole('button',{name:'Landmark mode'}).click();
  const parts=page.getByLabel('Anatomical part ID');
  const layers=page.getByLabel('Surface layer ID (optional)');
- expect(await parts.locator('option').allTextContents()).toEqual(expect.arrayContaining(['Head (head)','Paws (paws)','Hands (hands)','Tail (tail)']));
+ expect(await parts.locator('option').allTextContents()).toEqual(expect.arrayContaining(['Body › Torso › Neck › Head (head)','Body › Torso › Shoulders › Forelimbs › Paws (paws)','Body › Torso › Shoulders › Forelimbs › Upper arms › Forearms › Hands (hands)','Body › Tail (tail)']));
  expect(await layers.locator('option').allTextContents()).toEqual(expect.arrayContaining(['No surface layer','Fur (fur)','Armor and hard covers (armor)','Mechanical joints and hardware (mechanics)']));
  await parts.selectOption('paws');
  await layers.selectOption('fur');
