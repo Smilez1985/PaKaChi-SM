@@ -200,7 +200,8 @@ Die Umsetzung des integrierten MCP-Arbeitsplatzes, der Caddy-/DuckDNS-Konfigurat
 - [x] Konservative 2D-Regionsklassifikation auf bestätigte Bildregionen begrenzen; automatische Vorschläge bleiben unbestätigt, Mehrdeutigkeit und Ansichts-/Posenvermischung bleiben ungelöst.
 - [x] Landmarken im integrierten Bildeditor auf bestätigten Bildregionen setzen, per Maus oder Zahlenfeldern verschieben, semantisch beschriften und löschen; Speicherung im bestehenden Bildreferenz-Dokument.
 - [x] Manuelle RGBA-Farbproben direkt aus dem unveränderten Quellbild erfassen, an eine bestätigte Region binden, in Quellpixeln persistieren, visualisieren und einzeln löschen; keine automatische Materialklassifikation.
-- [ ] Materialgrenzen als manuell gezeichnete Quellpixel-Polylinien im Bildeditor erfassen, korrigieren und löschen.
+- [x] Materialgrenzen als Quellpixel-Polylinien erfassen und löschen: Im Bildeditor können Materialgrenzen in bestätigten Regionen gezeichnet, überlagert, gespeichert und einzeln entfernt werden. Die Zuordnung bleibt eine 2D-Beobachtung; es wird keine Materialklasse automatisch vergeben.
+- [ ] Materialgrenzen-Punkte nachträglich korrigieren: Einzelne Stützpunkte einer gespeicherten Polylinie direkt im Bildeditor verschieben; Änderungen bleiben auf Originalpixel bezogen und werden ohne Änderung der Region-/Anatomiezuordnung gespeichert.
 - [x] Persistierte Landmarken über die explizite Region-/Ansicht-/Form-/Avatar-Hierarchie in 2D-Klassifikator-Seeds überführen.
 - [ ] Landmarken-Undo/Redo und eine auswählbare, charakterweite Part-/Surface-Layer-Katalogverwaltung im Studio ergänzen.
 - [x] Resolver für explizit geprüfte 2D/3D-Oberflächenkorrespondenzen ergänzen: 2D-Quellhash und Avatar/Form/Ansicht/Pose, 3D-Assethash, Mesh-/Dreiecks-ID und baryzentrischer Oberflächenpunkt werden validiert; keine Tiefenableitung aus Einzelbildern. ([Vertrag](CLUSTER-2D-3D-KORRESPONDENZ.md))

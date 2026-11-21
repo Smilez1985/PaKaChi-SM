@@ -337,3 +337,22 @@ test('editor captures, displays, persists and removes material-boundary polyline
  document=await page.evaluate(async()=> (window as any).__imageReferenceEditor.reference());
  expect(document.observations??[]).toHaveLength(0);
 });
+
+ 
+test('editor corrects individual material-boundary vertices in source pixels',async({page})=>{
+ await mountEditor(page);
+ await page.getByRole('button',{name:'Draw material boundary'}).click();
+ const canvas=page.locator('canvas.image-reference-canvas'),bounds=await canvas.boundingBox();
+ expect(bounds).not.toBeNull();const box=bounds!;
+ await page.mouse.click(box.x+box.width*.2,box.y+box.height*.3);
+ await page.mouse.click(box.x+box.width*.5,box.y+box.height*.4);
+ await page.mouse.click(box.x+box.width*.8,box.y+box.height*.6);
+ await page.getByRole('button',{name:'Finish',exact:true}).click();
+ await page.getByRole('button',{name:'Edit material boundary'}).click();
+ await page.mouse.move(box.x+box.width*.2,box.y+box.height*.3);
+ await page.mouse.down();
+ await page.mouse.move(box.x+box.width*.25,box.y+box.height*.35,{steps:4});
+ await page.mouse.up();
+ const document=await page.evaluate(async()=> (window as any).__imageReferenceEditor.reference());
+ expect(document.observations[0].points[0]).toMatchObject({x:25,y:35});
+});
