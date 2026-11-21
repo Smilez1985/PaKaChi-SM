@@ -8,7 +8,7 @@ import type { StudioView } from '../src/studio-view.ts';
 
 test('shared semantic catalog editor adds, validates, deletes safely and participates in undo/redo',()=>{
  const window=new Window();Object.assign(globalThis,{document:window.document,Option:function(text="",value=""){const o=window.document.createElement("option");o.textContent=text;o.value=value;return o;}});
- const host=window.document.createElement('div'),root=new T.Group();root.add(new T.Mesh(new T.SphereGeometry(.5,8,8)));const rig=new StudioRig(root);
+ const host=window.document.createElement('div') as unknown as HTMLElement,root=new T.Group();root.add(new T.Mesh(new T.SphereGeometry(.5,8,8)));const rig=new StudioRig(root);
  const view={setEnabled(){},setFigureEnabled(){},setAction(){},setRotation(){},select(){},refresh(){},dispose(){}};
  const project={format:'pakachi-studio' as const,version:1 as const,model:'AAAA',avatar:{id:'x',name:'X',description:'',moves:[]}};
  let feedback='';const editor=new StudioEditor(rig,view as unknown as StudioView,host,project,{suspend(){},resume(){},changed(){},feedback(value){feedback=value;}});
@@ -23,7 +23,7 @@ test('shared semantic catalog editor adds, validates, deletes safely and partici
  select('catalog-part').value='facial-cheek';click('catalog-part-delete');assert.ok(!editor.exportProject().semanticCatalog?.parts.some(part=>part.id==='facial-cheek'));
  field('catalog-layer-id','cheek-fur');field('catalog-layer-label','Cheek fur');select('catalog-layer-part').value='head';click('catalog-layer-save');
  assert.ok(editor.exportProject().semanticCatalog?.surfaceLayers.some(layer=>layer.id==='cheek-fur'&&layer.partId==='head'));
- host.querySelector<HTMLSelectElement>('#catalog-part')!.value='head';click('catalog-part-delete');assert.match(feedback,/child parts/);
+ (host.querySelector('#catalog-part') as unknown as HTMLSelectElement).value='head';click('catalog-part-delete');assert.match(feedback,/child parts/);
  editor.dispose();window.happyDOM.abort();
 });
 
