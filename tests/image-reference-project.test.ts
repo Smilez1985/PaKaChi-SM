@@ -6,6 +6,7 @@ import type {StudioProject} from '../src/studio-data.ts';
 import {verifyImageReferenceSourceAsset} from '../src/image-reference.ts';
 import type {ImageReferenceDocument} from '../src/image-reference.ts';
 import type {ImageReferenceGenerationManifest} from '../src/image-reference-crop.ts';
+import {createPaKaChiSemanticCatalog} from '../src/cluster-2d-classifier.ts';
 
 const reference:ImageReferenceDocument={
  format:'pakachi-image-reference',version:1,
@@ -73,4 +74,21 @@ test('project rejects generation provenance that does not match its source hiera
  assert.throws(()=>parseProject(mismatch),/Generierungsherkunft/);
  const outside=structuredClone({...base,imageReference:reference,generationReference});outside.generationReference!.selection.crop.width=999;
  assert.throws(()=>parseProject(outside),/Generierungsherkunft/);
+});
+
+test('project round-trip preserves the shared character semantic catalog',()=>{
+ const project={...base,semanticCatalog:createPaKaChiSemanticCatalog()};
+ const restored=parseProject(JSON.parse(JSON.stringify(project)));
+ assert.deepEqual(restored.semanticCatalog,project.semanticCatalog);
+ assert.equal(restored.semanticCatalog?.parts.find(part=>part.id==='toes')?.parentPartId,'feet');
+ assert.equal(restored.semanticCatalog?.parts.find(part=>part.id==='digits')?.parentPartId,'hands');
+});
+
+test('project rejects invalid shared semantic catalogs',()=>{
+ const duplicate=structuredClone({...base,semanticCatalog:createPaKaChiSemanticCatalog()});
+ duplicate.semanticCatalog!.parts.push({...duplicate.semanticCatalog!.parts[0]!});
+ assert.throws(()=>parseProject(duplicate),/gemeinsamer Anatomie- und Oberflächenkatalog/);
+ const cycle=structuredClone({...base,semanticCatalog:createPaKaChiSemanticCatalog()});
+ cycle.semanticCatalog!.parts.find(part=>part.id==='body')!.parentPartId='head';
+ assert.throws(()=>parseProject(cycle),/gemeinsamer Anatomie- und Oberflächenkatalog/);
 });

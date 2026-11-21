@@ -4,6 +4,8 @@ import {REVIEW_REASONS} from './studio-review.ts';
 import {validateImageReferenceDocument} from './image-reference.ts';
 import type {ImageReferenceDocument} from './image-reference.ts';
 import type {ImageReferenceGenerationManifest} from './image-reference-crop.ts';
+import {validateCluster2DSemanticCatalog} from './cluster-2d-classifier.ts';
+import type {Cluster2DSemanticCatalog} from './cluster-2d-classifier.ts';
 import type {ReviewReason} from './studio-review.ts';
 export type Vec3 = [number, number, number];
 export type Quat = [number, number, number, number];
@@ -80,6 +82,8 @@ export interface StudioProject {
   format: 'pakachi-studio'; version: 1; model: string;
   avatar: { id: string; name: string; description: string; moves: {id:string;name:string;clip:string;loop:boolean}[]; defaultMove?: string; states?: Record<string,string> };
   studio: StudioData;
+  /** Shared character-wide anatomy and surface taxonomy for both avatar forms. */
+  semanticCatalog?: Cluster2DSemanticCatalog;
   /** Confirmed source-image segmentation retained with the avatar project. */
   imageReference?: ImageReferenceDocument;
   /** Exact selected crop provenance used for the accepted generation. */
@@ -143,6 +147,7 @@ function require(condition:unknown, message='Ungültige Studio-Projektdatei.'): 
 export function parseProject(input: unknown): StudioProject {
   require(obj(input) && input.format==='pakachi-studio' && input.version===1,'Unbekanntes Studio-Projektformat.');
   require(input.imageReference===undefined||validImageReferenceDocument(input.imageReference),'Ungültige oder beschädigte Bildreferenzdaten.');
+  require(input.semanticCatalog===undefined||validateCluster2DSemanticCatalog(input.semanticCatalog).length===0,'Ungültiger gemeinsamer Anatomie- und Oberflächenkatalog.');
   require(input.generationReference===undefined||validGenerationReference(input.generationReference,input.imageReference as ImageReferenceDocument|undefined),'Ungültige Generierungsherkunft.');
   require(typeof input.model==='string' && input.model.length>0 && input.model.length<=70_000_000 && input.model.length%4===0 && /^[A-Za-z0-9+/]*={0,2}$/.test(input.model),'Modelldaten fehlen oder sind ungültig.');
   const a=input.avatar; require(obj(a) && id(a.id) && name(a.name) && typeof a.description==='string' && a.description.length<=1000 && Array.isArray(a.moves) && a.moves.length<=512);
