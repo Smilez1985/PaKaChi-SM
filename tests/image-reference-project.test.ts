@@ -114,3 +114,10 @@ test('project rejects observations outside source pixels or with broken landmark
  dangling.observations=[{id:'obs-ratio',kind:'proportion',regionId:'region-front',fromLandmarkId:'missing',toLandmarkId:'landmark-face',ratio:1}];
  assert.throws(()=>parseProject({...base,imageReference:dangling}),/Bildreferenzdaten/);
 });
+
+
+test('project rejects a proportion observation that measures a landmark against itself',()=>{
+ const same=structuredClone(reference);
+ same.observations=[{id:'obs-self',kind:'proportion',regionId:'region-front',fromLandmarkId:'landmark-face',toLandmarkId:'landmark-face',ratio:1}];
+ assert.throws(()=>parseProject({...base,imageReference:same}),/Bildreferenzdaten/);
+});

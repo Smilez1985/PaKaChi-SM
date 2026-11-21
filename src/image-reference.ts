@@ -307,7 +307,7 @@ export function validateImageReferenceDocument(value:ImageReferenceDocument):Ima
     if(!finite(landmark.radiusPx)||landmark.radiusPx<=0||landmark.radiusPx>Math.max(source.width,source.height)*2)issues.push({path:p+'.radiusPx',message:'Landmarkenradius muss positiv und begrenzt sein.'});
   }
   const observations=value.observations??[];
-  const landmarkById=new Map(landmarks.map(item=>[item.id,item]));
+  const landmarkById=new Map(Array.isArray(landmarks)?landmarks.map(item=>[item.id,item]):[]);
   if(!Array.isArray(observations)||observations.length>10000)issues.push({path:'observations',message:'Maximal 10.000 Bildbeobachtungen sind zulässig.'});
   else for(const [i,observation] of observations.entries()){
     const p=`observations[${i}]`;addId(observation.id,p+'.id');
@@ -318,6 +318,7 @@ export function validateImageReferenceDocument(value:ImageReferenceDocument):Ima
     }else if(observation.kind==='proportion'){
       const from=landmarkById.get(observation.fromLandmarkId),to=landmarkById.get(observation.toLandmarkId);
       if(!from||!to)issues.push({path:p+'.landmarks',message:'Proportionsmessung benötigt zwei vorhandene Landmarken.'});
+      else if(observation.fromLandmarkId===observation.toLandmarkId||Math.hypot(from.x-to.x,from.y-to.y)<1e-6)issues.push({path:p+'.landmarks',message:'Proportionsmessung benötigt zwei unterschiedliche Landmarkenpositionen.'});
       else if(from.regionId!==observation.regionId||to.regionId!==observation.regionId)issues.push({path:p+'.landmarks',message:'Proportionslandmarken müssen zur angegebenen Bildregion gehören.'});
       if(!finite(observation.ratio)||observation.ratio<=0||observation.ratio>1000)issues.push({path:p+'.ratio',message:'Proportionsverhältnis muss positiv und begrenzt sein.'});
     }else if(observation.kind==='color-sample'){
