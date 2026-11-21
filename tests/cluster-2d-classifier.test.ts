@@ -123,7 +123,8 @@ test('supports safe immutable edits of the shared character semantic catalog',()
  assert.equal(original.parts.some(part=>part.id==='ear-inner'),false);
  assert.throws(()=>upsertCluster2DSemanticPart(withPart,{id:'ears',label:'Ears',parentPartId:'ear-inner'}),/catalog.part-cycle/);
  assert.throws(()=>removeCluster2DSemanticPart(withPart,'ears'),/child parts/);
- assert.throws(()=>removeCluster2DSemanticPart(original,'eyes'),/surface layer/);
+ const withAttachedLayer=upsertCluster2DSurfaceLayer(original,{id:'chest-armor',label:'Chest armor',partId:'chest'});
+ assert.throws(()=>removeCluster2DSemanticPart(withAttachedLayer,'chest'),/surface layer/);
  assert.throws(()=>removeCluster2DSemanticPart(original,'tail',['tail']),/landmarks or mesh bindings/);
  const withLayer=upsertCluster2DSurfaceLayer(original,{id:'inner-ear',label:'Inner ear surface',partId:'ears'});
  assert.ok(withLayer.surfaceLayers.some(layer=>layer.id==='inner-ear'));
