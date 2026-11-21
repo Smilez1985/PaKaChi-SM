@@ -13,6 +13,7 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 ## [Unreleased]
 
 ### Fixed
+- Den gespeicherten charakterweiten Semantikkatalog an den Bildreferenz-Editor weiterreichen; 2D-Landmarken und Klassifikationsvorschau verwenden damit denselben Katalog wie das geladene Studio-Projekt statt einer unabhängigen Standardkopie.
 - Gemeinsamen Anatomie-/Oberflächenkatalog beim Laden eines Studio-Projekts in die neue Player-/Studio-Session übernehmen; eigene semantische IDs gehen beim Laden nicht mehr verloren.
 
 ### Added

@@ -366,6 +366,7 @@ async function boot(): Promise<void> {
   mountAssistantPanel(document.querySelector('.agent-panel')!,rpc,()=>options.language,localStorage,undefined,(id,poses,session,revision)=>{if(busy||!editor)throw Error('Studio nicht verfügbar.');return editor.previewSequence(id,poses,session,revision);},(id,corrected,session,revision)=>{if(busy||!editor)throw Error('Studio nicht verfügbar.');const current=editor.inspect();if(current.session!==session||current.revision!==revision)throw Error('Studio-Stand hat sich geändert.');return editor.previewAutomaticSkinCorrection(id,corrected);});
   generationPanel=mountGenerationPanel(el('generation-host'),{
     target:()=>studio&&!busy&&!editor?.interactionActive?generationTarget():null,
+    semanticCatalog:()=>editor?.exportProject().semanticCatalog,
     adopt:(bytes,expected,valid,reference,generationReference)=>{
       if(busy)return Promise.resolve(false);
       const guard=()=>{const now=generationTarget();return valid()&&studio&&!editor?.interactionActive&&now.session===expected.session&&now.revision===expected.revision;};

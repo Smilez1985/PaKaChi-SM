@@ -9,10 +9,12 @@ import {validateGeneration,showGenerationPreview} from './generation-preview.ts'
 import {prepareDraftRig} from './draft-rig.ts';
 import type {ImageReferenceDocument} from './image-reference.ts';
 import type {ImageReferenceGenerationManifest} from './image-reference-crop.ts';
+import type {Cluster2DSemanticCatalog} from './cluster-2d-classifier.ts';
 import type {DraftRigTemplate} from './draft-rig.ts';
 
 interface GenerationHost {
  target:()=>ProjectRevision|null;
+ semanticCatalog?:()=>Cluster2DSemanticCatalog|undefined;
  adopt:(bytes:Uint8Array,expected:ProjectRevision,valid:()=>boolean,reference?:ImageReferenceDocument,generationReference?:ImageReferenceGenerationManifest)=>Promise<boolean>;
 }
 type ReferenceEditor=ReturnType<typeof mountImageReferenceEditor>;
@@ -59,7 +61,7 @@ export function mountGenerationPanel(host:HTMLElement,bridge:GenerationHost,lang
   retry.disabled=pending||!retryRequest||!matches(retryRequest.target);
   if(job?.snapshot.status==='preview')apply.disabled=pending||!matches(job.snapshot.target);
  }
- function select(value:File,initial?:ImageReferenceDocument){clear();source=undefined;status.textContent='';if(!['image/png','image/jpeg'].includes(value.type)||!value.size||value.size>20*1024*1024){status.textContent=t('PNG/JPEG bis 20 MiB erforderlich.','PNG/JPEG up to 20 MiB required.');}else{source=value;referenceHost.hidden=false;referenceEditor=(deps.referenceEditor??mountImageReferenceEditor)(referenceHost,value,language,()=>{referenceReady=false;refresh();void updateReferenceReadiness();},initial);void updateReferenceReadiness();status.textContent=t('Bitte Bildbereiche markieren, zuordnen und bestätigen.','Mark, assign and confirm image regions before generation.');}refresh();}
+ function select(value:File,initial?:ImageReferenceDocument){clear();source=undefined;status.textContent='';if(!['image/png','image/jpeg'].includes(value.type)||!value.size||value.size>20*1024*1024){status.textContent=t('PNG/JPEG bis 20 MiB erforderlich.','PNG/JPEG up to 20 MiB required.');}else{source=value;referenceHost.hidden=false;referenceEditor=(deps.referenceEditor??mountImageReferenceEditor)(referenceHost,value,language,()=>{referenceReady=false;refresh();void updateReferenceReadiness();},initial,bridge.semanticCatalog?.());void updateReferenceReadiness();status.textContent=t('Bitte Bildbereiche markieren, zuordnen und bestätigen.','Mark, assign and confirm image regions before generation.');}refresh();}
  async function updateReferenceReadiness(){const editor=referenceEditor;if(!editor)return;try{referenceReady=await editor.ready();if(referenceEditor===editor){refresh();if(!referenceReady)status.textContent=t('3D gesperrt: Alle Bereiche müssen bestätigt oder ignoriert und korrekt zugeordnet sein.','3D locked: every region must be confirmed or ignored and correctly assigned.');}}catch{referenceReady=false;refresh();}}
  file.onchange=()=>{const value=file.files?.[0];if(value)select(value);file.value='';};
  panel.ondragover=event=>{event.preventDefault();event.stopPropagation();};panel.ondrop=event=>{event.preventDefault();event.stopPropagation();document.body.classList.remove('dragging');const value=event.dataTransfer?.files[0];if(value)select(value);};
