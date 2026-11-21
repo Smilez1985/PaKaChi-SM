@@ -12,6 +12,9 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+### Fixed
+- Unbekannte Anatomie- oder Oberflächen-IDs aus bestehenden 2D-Landmarken blockieren die Klassifikationsvorschau nicht mehr: Sie werden erst dann als Evidenz verwendet, wenn der gemeinsame Projektkatalog sie definiert und Layer-/Part-Zuordnung zusammenpassen. Eigene Katalog-IDs bleiben klassifizierbar; nicht auflösbare Landmarken bleiben ungeklärt. Stand: 2026-11-21T22:40:00+01:00 (Europe/Berlin).
+
 ### Changed
 - Der Bildreferenz-Editor übernimmt denselben validierten Charakterkatalog wie das Avatar-Studio. Eigene Parts und Oberflächen-Layer stehen dadurch auch bei 2D-Landmarken zur Auswahl. Stand: 2026-11-21T22:35:00+01:00 (Europe/Berlin).
 
