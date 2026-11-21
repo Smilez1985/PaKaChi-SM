@@ -12,6 +12,9 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+### Fixed
+- Proportions-Roundtrip-Test mit zwei räumlich getrennten Quell-Landmarken statt einer Selbstreferenz korrigiert; die separate Negativregression für Selbstmessungen bleibt erhalten. Die Produktvalidierung war korrekt und wurde nicht abgeschwächt. Stand: 2026-11-21T23:05:00+01:00 (Europe/Berlin).
+
 ### Added
 - Optionaler, rückwärtskompatibler Beobachtungsvertrag für Bildreferenzen: Silhouettenkonturen, Landmarken-Proportionen, pixelgebundene RGBA-Farbproben und Materialgrenzen werden mit Quellregion und optionaler Konfidenz persistiert. Validierung schützt Pixelgrenzen und Landmarkenreferenzen; keine Tiefen- oder Materialsemantik wird automatisch erfunden. Stand: 2026-11-21T22:55:00+01:00 (Europe/Berlin).
 

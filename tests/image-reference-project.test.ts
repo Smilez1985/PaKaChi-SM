@@ -15,7 +15,7 @@ const reference:ImageReferenceDocument={
  views:[{id:'view-front',label:'Front',regionIds:['region-front']}],
  forms:[{id:'form-animal',label:'Animal form',viewIds:['view-front']}],
  avatars:[{id:'avatar-panda',label:'Panda',formIds:['form-animal']}],
- landmarks:[{id:'landmark-face',regionId:'region-front',partId:'head',surfaceLayerId:'fur',poseId:'front-neutral',x:120,y:140,radiusPx:50}],
+ landmarks:[{id:'landmark-face',regionId:'region-front',partId:'head',surfaceLayerId:'fur',poseId:'front-neutral',x:120,y:140,radiusPx:50},{id:'landmark-body',regionId:'region-front',partId:'torso',surfaceLayerId:'fur',poseId:'front-neutral',x:180,y:260,radiusPx:35}],
 };
 const generationReference:ImageReferenceGenerationManifest={format:'pakachi-image-reference-generation',version:1,source:{sha256:'b'.repeat(64),width:640,height:480},selection:{regionId:'region-front',label:'Front view',kind:'view',avatar:{id:'avatar-panda',label:'Panda'},form:{id:'form-animal',label:'Animal form'},view:{id:'view-front',label:'Front'},crop:{x:20,y:30,width:200,height:300,sha256:'c'.repeat(64)},mask:{type:'polygon',vertices:4,holes:1}}};
 const base:StudioProject={format:'pakachi-studio',version:1,model:'AAAA',avatar:{id:'panda',name:'Panda',description:'',moves:[]},studio:{points:[],links:[],boneRest:[],poses:[],moves:[]}};
@@ -98,7 +98,7 @@ test('project round-trip preserves pixel-bound silhouette, proportion, color and
  const observed=structuredClone(reference);
  observed.observations=[
   {id:'obs-silhouette',kind:'silhouette',regionId:'region-front',confidence:0.98},
-  {id:'obs-proportion',kind:'proportion',regionId:'region-front',fromLandmarkId:'landmark-face',toLandmarkId:'landmark-face',ratio:1.25,confidence:0.8},
+  {id:'obs-proportion',kind:'proportion',regionId:'region-front',fromLandmarkId:'landmark-face',toLandmarkId:'landmark-body',ratio:1.25,confidence:0.8},
   {id:'obs-color',kind:'color-sample',regionId:'region-front',x:125,y:145,rgba:[12,34,56,255],radiusPx:3},
   {id:'obs-boundary',kind:'material-boundary',regionId:'region-front',points:[{x:80,y:100},{x:90,y:110},{x:105,y:120}]}
  ];
