@@ -25,12 +25,12 @@ import type { StudioData, StudioProject, Transform, ControlPoint, StudioMove } f
 import { StudioRig } from './studio-rig.ts';
 import type { StudioView } from './studio-view.ts';
 import type { Move } from './catalog.ts';
-import { imageReferenceLandmarksToCluster2DSeeds } from './cluster-2d-classifier.ts';
-import type { ImageReferenceDocument } from './image-reference.ts';
+import { imageReferenceLandmarksToCluster2DSeeds,createPaKaChiSemanticCatalog,upsertCluster2DSemanticPart,removeCluster2DSemanticPart,upsertCluster2DSurfaceLayer,removeCluster2DSurfaceLayer } from './cluster-2d-classifier.ts';
+import type { ImageReferenceDocument,Cluster2DSemanticCatalog } from './cluster-2d-classifier.ts';
 import type { ClusterMeshInventory } from './cluster-inventory.ts';
 import { createStudioLandmarkSurfacePick } from './studio-landmark-picking.ts';
 import type { StudioSurfacePickHit } from './studio-landmark-picking.ts';
-interface Snapshot {data:StudioData;values:Record<string,Transform>}
+interface Snapshot {data:StudioData;values:Record<string,Transform>;semanticCatalog:Cluster2DSemanticCatalog}
 interface Hooks { suspend:()=>void; resume:()=>void; changed:()=>void; feedback:(s:string)=>void }
 const uid=()=>`p-${crypto.randomUUID()}`;
 const volumeText=(v:SurfaceVolumeReport)=>`Volumenschätzung: ${v.measuredComponents?'min '+v.minimumRatio?.toFixed(3)+'× · max '+v.maximumRatio?.toFixed(3)+'×':'nicht messbar'} · ${v.issues} auffällig · ${v.measuredComponents} messbar · ${v.unmeasurableComponents} nicht messbar`;
@@ -86,7 +86,7 @@ export class StudioEditor {
   paused=false;
   speed=1;
   constructor(rig:StudioRig,view:StudioView,host:HTMLElement,project:Omit<StudioProject,'studio'>,hooks:Hooks) {
-    this.rig=rig;this.playbackTransition=new PlaybackTransition(rig.root);this.view=view;this.host=host;this.project=project;this.hooks=hooks;this.initial=structuredClone(rig.initial);
+    this.rig=rig;this.playbackTransition=new PlaybackTransition(rig.root);this.view=view;this.host=host;this.project={...project,semanticCatalog:structuredClone(project.semanticCatalog??createPaKaChiSemanticCatalog())};this.hooks=hooks;this.initial=structuredClone(rig.initial);
     view.onSelect=id=>{this.surfaceCheck?.abort();this.weightCorrection=null;this.selected=id;this.render();};
     view.onSurfacePick=hit=>{
       this.view.setAction('select');
@@ -148,8 +148,9 @@ export class StudioEditor {
   get progress(){return this.duration ? this.timeline!.time/this.duration:0;}
   private refreshWeightColors(){this.view.setWeightBone?.(this.active&&this.edit&&!this.playing&&this.weightColors&&this.point?.kind==='bone'?this.point.bone!:null);}
   private refreshWeightPreview(){const p=this.point;this.view.setWeightRegion?.(this.active&&this.edit&&!this.playing&&this.weightLocal&&p?.kind==='bone'?{center:[...p.rest],radius:this.weightRadius}:null);}
-  private snapshot():Snapshot{return {data:structuredClone(this.data),values:this.rig.capture()};}
-  private restore(s:Snapshot){this.rig.data=structuredClone(s.data);this.rig.reset();this.rig.apply(s.values);this.mark();this.render();}
+  private snapshot():Snapshot{return {data:structuredClone(this.data),values:this.rig.capture(),semanticCatalog:structuredClone(this.project.semanticCatalog!)};}
+  private restore(s:Snapshot){this.rig.data=structuredClone(s.data);this.project.semanticCatalog=structuredClone(s.semanticCatalog);this.rig.reset();this.rig.apply(s.values);this.mark();this.render();}
+  private changeSemanticCatalog(next:Cluster2DSemanticCatalog){if(!this.active||this.interactionActive)throw Error('Katalog nur im aktiven, ruhenden Studio bearbeiten.');const before=this.snapshot();this.project.semanticCatalog=structuredClone(next);this.history.push(before);this.mark();this.render();this.hooks.feedback('Gemeinsamer Anatomie-/Oberflächenkatalog geändert. Rückgängig ist möglich; beide Formen verwenden denselben Katalog.');}
   private mark(){this.automaticCheck?.abort();this.automaticProposal=null;this.automaticOutcome='';this.moveCheck?.abort();this.surfaceCheck?.abort();this.weightCorrection=null;this.revision++;this.dirty=true;this.hooks.changed();}
   private mutate(fn:()=>void){this.rig.stopSkinPreview();const before=this.snapshot();fn();flagAffectedPoses(before.data,this.data);this.history.push(before);this.mark();this.render();}
   beginPlaybackTransition(){
@@ -201,6 +202,9 @@ export class StudioEditor {
     <div class="studio-actions"><button id="studio-undo" ${this.history.canUndo?'':'disabled'}>↶ Zurück</button><button id="studio-redo" ${this.history.canRedo?'':'disabled'}>↷ Wiederholen</button></div>
     <div class="studio-detection" ${this.edit?'':'hidden'}><button id="detect-joints">Joints automatisch erkennen</button><button id="detect-links">Joint-Verbindungen automatisch erkennen</button><p class="subtle">Erkennung verwendet vorhandene Skelettdaten. Für Modelle ohne Skelett ist KI-Rigging noch nicht verfügbar.</p></div>
     ${landmarkPanel}
+    <section class="studio-semantic-catalog" aria-labelledby="semantic-catalog-title"><h3 id="semantic-catalog-title">Gemeinsame Anatomie &amp; Oberflächen</h3><p class="subtle">Ein Charakterkatalog für Tierform und Arbeitsform. IDs bleiben stabil; Umbenennen ändert nur die lesbare Bezeichnung.</p>
+      <h4>Anatomische Teile</h4><label for="catalog-part">Teil auswählen</label><select id="catalog-part"></select><label for="catalog-part-id">Stabile Part-ID</label><input id="catalog-part-id" maxlength="128" pattern="[a-z0-9][a-z0-9_-]*"><label for="catalog-part-label">Bezeichnung</label><input id="catalog-part-label" maxlength="100"><label for="catalog-part-parent">Übergeordnetes Teil</label><select id="catalog-part-parent"></select><div class="studio-actions"><button id="catalog-part-save">Teil speichern / hinzufügen</button><button id="catalog-part-delete">Teil löschen</button></div>
+      <h4>Oberflächen-Layer</h4><label for="catalog-layer">Layer auswählen</label><select id="catalog-layer"></select><label for="catalog-layer-id">Stabile Layer-ID</label><input id="catalog-layer-id" maxlength="128" pattern="[a-z0-9][a-z0-9_-]*"><label for="catalog-layer-label">Bezeichnung</label><input id="catalog-layer-label" maxlength="100"><label for="catalog-layer-part">Anatomische Zuordnung</label><select id="catalog-layer-part"></select><div class="studio-actions"><button id="catalog-layer-save">Layer speichern / hinzufügen</button><button id="catalog-layer-delete">Layer löschen</button></div><p class="subtle" id="catalog-feedback" role="status">Gelöschte Teile oder Layer mit abhängigen Kindern, Landmarken oder Bindungen werden geschützt.</p></section>
     <button id="figure-select" ${this.edit?'hidden':''}>Gesamte Figur bewegen</button>
     <label for="studio-points">Gelenk / Gesichtspunkt</label><select id="studio-points"><option value="">Punkt auswählen …</option></select>
     <div class="studio-actions" ${this.edit?'':'hidden'}><label>Position auf der Knochenstrecke <output id="bone-ratio-value">${Math.round(this.insertionRatio*100)} %</output><input id="bone-ratio" type="range" min="10" max="90" step="1" value="${Math.round(this.insertionRatio*100)}" aria-label="Position des Zwischengelenks"><span class="subtle">Vom Elternknochen zum ausgewählten Kindknochen; 50 % = Mitte.</span></label><button id="bone-add">＋ Knochen setzen</button><button id="bone-insert">Knochen dazwischen einfügen</button><button id="point-add">＋ Punkt setzen</button><button id="point-connect" ${this.point?'':'disabled'}>Verbinden / lösen</button></div>
@@ -231,6 +235,20 @@ export class StudioEditor {
     const q=<E extends HTMLElement=HTMLElement>(id:string)=>this.host.querySelector<E>(`#${id}`)!;
     const input=(id:string)=>q<HTMLInputElement>(id);
     const on=(id:string,fn:()=>void)=>{q<HTMLButtonElement>(id).onclick=()=>{try{fn();}catch(e){this.hooks.feedback(e instanceof Error?e.message:String(e));}};};
+    const catalog=this.project.semanticCatalog!;
+    const partSelect=q<HTMLSelectElement>('catalog-part'),parentSelectCatalog=q<HTMLSelectElement>('catalog-part-parent'),layerSelect=q<HTMLSelectElement>('catalog-layer'),layerPartSelect=q<HTMLSelectElement>('catalog-layer-part');
+    const partPath=(part:Cluster2DSemanticCatalog['parts'][number])=>{const labels=[part.label];let parent=part.parentPartId;while(parent){const ancestor=catalog.parts.find(item=>item.id===parent);if(!ancestor)break;labels.unshift(ancestor.label);parent=ancestor.parentPartId;}return labels.join(' › ')+' ('+part.id+')';};
+    for(const part of catalog.parts)partSelect.add(new Option(partPath(part),part.id));
+    parentSelectCatalog.add(new Option('Kein Elternteil',''));for(const part of catalog.parts)parentSelectCatalog.add(new Option(partPath(part),part.id));
+    layerPartSelect.add(new Option('Keine feste Anatomie-Zuordnung',''));for(const part of catalog.parts)layerPartSelect.add(new Option(partPath(part),part.id));
+    for(const layer of catalog.surfaceLayers)layerSelect.add(new Option(layer.label+' ('+layer.id+')',layer.id));
+    const showPart=()=>{const part=catalog.parts.find(item=>item.id===partSelect.value);q<HTMLInputElement>('catalog-part-id').value=part?.id??'';q<HTMLInputElement>('catalog-part-label').value=part?.label??'';parentSelectCatalog.value=part?.parentPartId??'';};
+    const showLayer=()=>{const layer=catalog.surfaceLayers.find(item=>item.id===layerSelect.value);q<HTMLInputElement>('catalog-layer-id').value=layer?.id??'';q<HTMLInputElement>('catalog-layer-label').value=layer?.label??'';layerPartSelect.value=layer?.partId??'';};
+    partSelect.onchange=showPart;layerSelect.onchange=showLayer;showPart();showLayer();
+    on('catalog-part-save',()=>{const id=q<HTMLInputElement>('catalog-part-id').value.trim(),label=q<HTMLInputElement>('catalog-part-label').value.trim(),parentPartId=parentSelectCatalog.value||null;if(!id||!label)throw Error('Part-ID und Bezeichnung sind erforderlich.');this.changeSemanticCatalog(upsertCluster2DSemanticPart(catalog,{id,label,parentPartId}));});
+    on('catalog-part-delete',()=>{const id=partSelect.value;if(!id)throw Error('Anatomisches Teil auswählen.');const referenced=this.landmarkDocument?.landmarks.map(item=>item.partId)??[];this.changeSemanticCatalog(removeCluster2DSemanticPart(catalog,id,referenced));});
+    on('catalog-layer-save',()=>{const id=q<HTMLInputElement>('catalog-layer-id').value.trim(),label=q<HTMLInputElement>('catalog-layer-label').value.trim(),partId=layerPartSelect.value||null;if(!id||!label)throw Error('Layer-ID und Bezeichnung sind erforderlich.');this.changeSemanticCatalog(upsertCluster2DSurfaceLayer(catalog,{id,label,partId}));});
+    on('catalog-layer-delete',()=>{const id=layerSelect.value;if(!id)throw Error('Oberflächen-Layer auswählen.');const referenced=this.landmarkDocument?.landmarks.map(item=>item.surfaceLayerId??'').filter(Boolean)??[];this.changeSemanticCatalog(removeCluster2DSurfaceLayer(catalog,id,referenced));});
     const points=q<HTMLSelectElement>('studio-points');if(!this.edit){const option=new Option('Gesamte Figur',FIGURE_TRACK);option.dataset.figureLabel='';points.add(option);}for(const p of this.data.points)points.add(new Option(`${p.kind==='bone'?'◇':'●'} ${p.name}`,p.id));points.value=selected??'';
     points.onchange=()=>{this.surfaceCheck?.abort();this.weightCorrection=null;this.selected=points.value||null;this.addingBoneParent=null;this.view.setAction('select');this.render();};
     input('studio-agent-edit').onchange=()=>{this.agentEditing=input('studio-agent-edit').checked;this.revision++;};

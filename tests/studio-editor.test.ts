@@ -6,6 +6,26 @@ import { StudioRig } from '../src/studio-rig.ts';
 import { StudioEditor,encodeModel,decodeModel } from '../src/studio-editor.ts';
 import type { StudioView } from '../src/studio-view.ts';
 
+test('shared semantic catalog editor adds, validates, deletes safely and participates in undo/redo',()=>{
+ const window=new Window();Object.assign(globalThis,{document:window.document,Option:function(text="",value=""){const o=window.document.createElement("option");o.textContent=text;o.value=value;return o;}});
+ const host=window.document.createElement('div'),root=new T.Group();root.add(new T.Mesh(new T.SphereGeometry(.5,8,8)));const rig=new StudioRig(root);
+ const view={setEnabled(){},setFigureEnabled(){},setAction(){},setRotation(){},select(){},refresh(){},dispose(){}};
+ const project={format:'pakachi-studio' as const,version:1 as const,model:'AAAA',avatar:{id:'x',name:'X',description:'',moves:[]}};
+ const editor=new StudioEditor(rig,view as unknown as StudioView,host,project,{suspend(){},resume(){},changed(){},feedback(){}});
+ const click=(id:string)=>host.querySelector<HTMLButtonElement>('#'+id)!.click();
+ const field=(id:string,value:string)=>{const input=host.querySelector<HTMLInputElement>('#'+id)!;input.value=value;};
+ editor.enter();assert.ok(host.querySelector('#catalog-part'));
+ field('catalog-part-id','facial-cheek');field('catalog-part-label','Cheeks');host.querySelector<HTMLSelectElement>('#catalog-part-parent')!.value='head';click('catalog-part-save');
+ assert.ok(editor.exportProject().semanticCatalog?.parts.some(part=>part.id==='facial-cheek'&&part.parentPartId==='head'));
+ click('studio-undo');assert.ok(!editor.exportProject().semanticCatalog?.parts.some(part=>part.id==='facial-cheek'));
+ click('studio-redo');assert.ok(editor.exportProject().semanticCatalog?.parts.some(part=>part.id==='facial-cheek'));
+ host.querySelector<HTMLSelectElement>('#catalog-part')!.value='facial-cheek';click('catalog-part-delete');assert.ok(!editor.exportProject().semanticCatalog?.parts.some(part=>part.id==='facial-cheek'));
+ field('catalog-layer-id','cheek-fur');field('catalog-layer-label','Cheek fur');host.querySelector<HTMLSelectElement>('#catalog-layer-part')!.value='head';click('catalog-layer-save');
+ assert.ok(editor.exportProject().semanticCatalog?.surfaceLayers.some(layer=>layer.id==='cheek-fur'&&layer.partId==='head'));
+ host.querySelector<HTMLSelectElement>('#catalog-part')!.value='head';click('catalog-part-delete');assert.match(host.querySelector('#catalog-feedback')?.textContent??'',/.*/);
+ editor.dispose();window.happyDOM.abort();
+});
+
 test('studio DOM workflow adds, sizes, connects, undoes, poses and plays a real surface move',()=>{
   const window=new Window();Object.assign(globalThis,{document:window.document,Option:function(text="",value=""){const o=window.document.createElement("option");o.textContent=text;o.value=value;return o;}});
   const host=window.document.createElement('div');window.document.body.append(host);

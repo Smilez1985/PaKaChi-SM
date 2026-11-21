@@ -12,6 +12,9 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+### Added
+- Das integrierte Avatar-Studio bietet jetzt einen gemeinsamen Katalogeditor für anatomische Teile und Oberflächen-Layer. IDs bleiben stabil, Elternbeziehungen werden validiert und Löschungen mit abhängigen Kindern, Landmarken oder Layern blockiert. Katalogänderungen sind über Studio-Undo/Redo rückgängig zu machen. Stand: 2026-11-21T22:20:00+01:00 (Europe/Berlin).
+
 ### Fixed
 - Den gespeicherten charakterweiten Semantikkatalog an den Bildreferenz-Editor weiterreichen; 2D-Landmarken und Klassifikationsvorschau verwenden damit denselben Katalog wie das geladene Studio-Projekt statt einer unabhängigen Standardkopie.
 - Gemeinsamen Anatomie-/Oberflächenkatalog beim Laden eines Studio-Projekts in die neue Player-/Studio-Session übernehmen; eigene semantische IDs gehen beim Laden nicht mehr verloren.
