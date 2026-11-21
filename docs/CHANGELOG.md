@@ -12,6 +12,9 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+### Fixed
+- Gemeinsamen Anatomie-/Oberflächenkatalog beim Laden eines Studio-Projekts in die neue Player-/Studio-Session übernehmen; eigene semantische IDs gehen beim Laden nicht mehr verloren.
+
 ### Added
 - Studio-Projekte können jetzt optional den gemeinsamen, charakterweiten Anatomie- und Oberflächenkatalog speichern. Beim Laden werden IDs, Elternbeziehungen, Zyklen und Layer-Zuordnungen validiert; ältere Projekte ohne Katalog bleiben kompatibel. Roundtrip- und Fehlerfalltests decken die Persistenz ab. Stand: 2026-11-21T21:55:00+01:00 (Europe/Berlin).
 
