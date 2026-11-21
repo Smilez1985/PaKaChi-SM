@@ -12,6 +12,9 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+### Changed
+- Der Bildreferenz-Editor übernimmt denselben validierten Charakterkatalog wie das Avatar-Studio. Eigene Parts und Oberflächen-Layer stehen dadurch auch bei 2D-Landmarken zur Auswahl. Stand: 2026-11-21T22:35:00+01:00 (Europe/Berlin).
+
 ### Added
 - Das integrierte Avatar-Studio bietet jetzt einen gemeinsamen Katalogeditor für anatomische Teile und Oberflächen-Layer. IDs bleiben stabil, Elternbeziehungen werden validiert und Löschungen mit abhängigen Kindern, Landmarken oder Layern blockiert. Katalogänderungen sind über Studio-Undo/Redo rückgängig zu machen. Stand: 2026-11-21T22:20:00+01:00 (Europe/Berlin).
 
