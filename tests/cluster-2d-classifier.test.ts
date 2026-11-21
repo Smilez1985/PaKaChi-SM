@@ -140,3 +140,18 @@ test('separates fingers and toes in the shared anatomy tree',()=>{
  assert.equal(value.parts.find(part=>part.id==='digits')?.parentPartId,'hands');
  assert.equal(value.parts.find(part=>part.id==='toes')?.parentPartId,'feet');
 });
+
+
+test('keeps unknown semantic IDs unresolved while accepting custom IDs from the shared catalog',()=>{
+ const d=document();
+ d.landmarks=[{id:'lm-unknown',regionId:'r-head',partId:'custom-cheek',surfaceLayerId:'custom-fur',poseId:'front-neutral',x:70,y:70,radiusPx:80}];
+ const unresolved=imageReferenceLandmarksToCluster2DSeeds(d,catalog);
+ assert.deepEqual(unresolved,[]);
+ const extended={...catalog,parts:[...catalog.parts,{id:'custom-cheek',label:'Custom cheek',parentPartId:'head'}],surfaceLayers:[...catalog.surfaceLayers,{id:'custom-fur',label:'Custom fur',partId:'custom-cheek'}]};
+ const seeds=imageReferenceLandmarksToCluster2DSeeds(d,extended);
+ assert.equal(seeds.length,1);
+ assert.equal(seeds[0]!.partId,'custom-cheek');
+ assert.equal(seeds[0]!.surfaceLayerId,'custom-fur');
+ const report=proposeCluster2DRegionAssignments(d,extended,seeds);
+ assert.equal(report.assignments.find(item=>item.regionId==='r-head')?.partId,'custom-cheek');
+});

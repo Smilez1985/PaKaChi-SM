@@ -238,14 +238,23 @@ export function proposeCluster2DRegionAssignments(
 
 
 /** Convert persisted editor landmarks into classifier seeds using the region's explicit hierarchy. */
-export function imageReferenceLandmarksToCluster2DSeeds(document:ImageReferenceDocument):Cluster2DLandmarkSeed[] {
+export function imageReferenceLandmarksToCluster2DSeeds(document:ImageReferenceDocument,catalog?:Cluster2DSemanticCatalog):Cluster2DLandmarkSeed[] {
  const issues=validateImageReferenceDocument(document);
  if(issues.length)throw new Error('Invalid image reference document: '+issues.map(issue=>issue.path).join(', '));
+ if(catalog){const catalogIssues=validateCluster2DSemanticCatalog(catalog);if(catalogIssues.length)throw new Error('Invalid 2D semantic catalog: '+catalogIssues.join(', '));}
+ const knownParts=catalog?new Set(catalog.parts.map(part=>part.id)):null;
+ const knownLayers=catalog?new Map(catalog.surfaceLayers.map(layer=>[layer.id,layer])):null;
  const result:Cluster2DLandmarkSeed[]=[];
  for(const landmark of document.landmarks??[]){
   const region=document.regions.find(item=>item.id===landmark.regionId);
   // Suggested/ignored geometry is not approved evidence and cannot seed proposals.
   if(region?.status!=='confirmed')continue;
+  // Unknown/custom semantic IDs remain visible in the editor but cannot become classifier evidence
+  // until the shared project catalog defines them. Excluding them leaves their region unresolved.
+  if(knownParts&&!knownParts.has(landmark.partId))continue;
+  const layer=landmark.surfaceLayerId?knownLayers?.get(landmark.surfaceLayerId):undefined;
+  if(knownLayers&&landmark.surfaceLayerId&&!layer)continue;
+  if(layer?.partId&&layer.partId!==landmark.partId)continue;
   const view=document.views.find(item=>item.regionIds.includes(landmark.regionId));
   const form=view&&document.forms.find(item=>item.viewIds.includes(view.id));
   const avatar=form&&document.avatars.find(item=>item.formIds.includes(form.id));
