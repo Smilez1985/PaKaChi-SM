@@ -314,7 +314,7 @@ test('editor samples exact RGBA source pixels and persists/removes color observa
  expect(document.observations).toHaveLength(1);
  expect(document.observations[0]).toMatchObject({kind:'color-sample',regionId:'region-1',x:50,y:50,rgba:[255,0,0,255],radiusPx:3});
  await expect(page.getByText(/RGBA 255, 0, 0, 255/)).toBeVisible();
- await page.getByRole('button',{name:'Delete',exact:true}).click();
+ await page.getByRole('button',{name:'Delete observation',exact:true}).click();
  document=await page.evaluate(async()=> (window as any).__imageReferenceEditor.reference());
  expect(document.observations??[]).toHaveLength(0);
 });
