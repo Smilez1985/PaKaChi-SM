@@ -87,7 +87,7 @@ export class StudioEditor {
   paused=false;
   speed=1;
   constructor(rig:StudioRig,view:StudioView,host:HTMLElement,project:Omit<StudioProject,'studio'>,hooks:Hooks) {
-    this.rig=rig;this.playbackTransition=new PlaybackTransition(rig.root);this.view=view;this.host=host;this.project={...project,semanticCatalog:structuredClone(project.semanticCatalog??createPaKaChiSemanticCatalog())};this.hooks=hooks;this.initial=structuredClone(rig.initial);
+    this.rig=rig;this.playbackTransition=new PlaybackTransition(rig.root);this.view=view;this.host=host;this.project={...project,semanticCatalog:structuredClone(project.semanticCatalog??createPaKaChiSemanticCatalog())};this.landmarkDocument=project.imageReference?structuredClone(project.imageReference):null;this.hooks=hooks;this.initial=structuredClone(rig.initial);
     view.onSelect=id=>{this.surfaceCheck?.abort();this.weightCorrection=null;this.selected=id;this.render();};
     view.onSurfacePick=hit=>{
       this.view.setAction('select');

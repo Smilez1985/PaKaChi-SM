@@ -10,7 +10,7 @@ test('shared semantic catalog editor adds, validates, deletes safely and partici
  const window=new Window();Object.assign(globalThis,{document:window.document,Option:function(text="",value=""){const o=window.document.createElement("option");o.textContent=text;o.value=value;return o;}});
  const host=window.document.createElement('div') as unknown as HTMLElement,root=new T.Group();root.add(new T.Mesh(new T.SphereGeometry(.5,8,8)));const rig=new StudioRig(root);
  const view={setEnabled(){},setFigureEnabled(){},setAction(){},setRotation(){},select(){},refresh(){},dispose(){}};
- const project={format:'pakachi-studio' as const,version:1 as const,model:'AAAA',avatar:{id:'x',name:'X',description:'',moves:[]}};
+ const project={format:'pakachi-studio' as const,version:1 as const,model:'AAAA',avatar:{id:'x',name:'X',description:'',moves:[]},imageReference:{format:'pakachi-image-reference' as const,version:1 as const,source:{sha256:'a'.repeat(64),width:100,height:100},regions:[],views:[],forms:[],avatars:[],landmarks:[{id:'lm-cheek',regionId:'region-cheek',partId:'facial-cheek',surfaceLayerId:'cheek-fur',poseId:'pose-neutral',x:20,y:20,radiusPx:4}]}};
  let feedback='';const editor=new StudioEditor(rig,view as unknown as StudioView,host,project,{suspend(){},resume(){},changed(){},feedback(value){feedback=value;}});
  const click=(id:string)=>{(host.querySelector('#'+id) as unknown as HTMLButtonElement).click();};
  const select=(id:string)=>host.querySelector('#'+id) as unknown as HTMLSelectElement;
@@ -20,9 +20,9 @@ test('shared semantic catalog editor adds, validates, deletes safely and partici
  assert.ok(editor.exportProject().semanticCatalog?.parts.some(part=>part.id==='facial-cheek'&&part.parentPartId==='head'));
  click('studio-undo');assert.ok(!editor.exportProject().semanticCatalog?.parts.some(part=>part.id==='facial-cheek'));
  click('studio-redo');assert.ok(editor.exportProject().semanticCatalog?.parts.some(part=>part.id==='facial-cheek'));
- select('catalog-part').value='facial-cheek';click('catalog-part-delete');assert.ok(!editor.exportProject().semanticCatalog?.parts.some(part=>part.id==='facial-cheek'));
+ select('catalog-part').value='facial-cheek';click('catalog-part-delete');assert.ok(editor.exportProject().semanticCatalog?.parts.some(part=>part.id==='facial-cheek'));assert.match(feedback,/landmarks/);
  field('catalog-layer-id','cheek-fur');field('catalog-layer-label','Cheek fur');select('catalog-layer-part').value='head';click('catalog-layer-save');
- assert.ok(editor.exportProject().semanticCatalog?.surfaceLayers.some(layer=>layer.id==='cheek-fur'&&layer.partId==='head'));
+ assert.ok(editor.exportProject().semanticCatalog?.surfaceLayers.some(layer=>layer.id==='cheek-fur'&&layer.partId==='head'));select('catalog-layer').value='cheek-fur';click('catalog-layer-delete');assert.ok(editor.exportProject().semanticCatalog?.surfaceLayers.some(layer=>layer.id==='cheek-fur'));assert.match(feedback,/referenced/);
  (host.querySelector('#catalog-part') as unknown as HTMLSelectElement).value='head';click('catalog-part-delete');assert.match(feedback,/child parts/);
  editor.dispose();window.happyDOM.abort();
 });
