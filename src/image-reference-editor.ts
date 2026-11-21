@@ -85,7 +85,7 @@ export function mountImageReferenceEditor(host:HTMLElement,source:File,language:
   if(showClusterPreview){
    try{
     const previewDocument=suggestionDocument();
-    const seeds=imageReferenceLandmarksToCluster2DSeeds(previewDocument);
+    const seeds=imageReferenceLandmarksToCluster2DSeeds(previewDocument,semanticCatalog);
     const report=proposeCluster2DRegionAssignments(previewDocument,semanticCatalog,seeds);
     const summary=document.createElement('p');summary.textContent=t(`Vorschläge: ${report.classified} · ungeklärt: ${report.ambiguous+report.outsideEvidence}`, `Suggested: ${report.classified} · unresolved: ${report.ambiguous+report.outsideEvidence}`);clusterPanel.append(summary);
     report.assignments.forEach(assignment=>{
