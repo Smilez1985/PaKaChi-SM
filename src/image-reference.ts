@@ -19,6 +19,16 @@ export interface ImageReferenceLandmark {
   radiusPx:number;
 }
 
+/**
+ * Pixel-bound observations augment region contours and landmarks without
+ * claiming 3D depth or automatically assigning anatomy/material semantics.
+ */
+export type ImageReferenceObservation =
+ | {id:string;kind:'silhouette';regionId:string;confidence?:number}
+ | {id:string;kind:'proportion';regionId:string;fromLandmarkId:string;toLandmarkId:string;ratio:number;confidence?:number}
+ | {id:string;kind:'color-sample';regionId:string;x:number;y:number;rgba:[number,number,number,number];radiusPx:number;confidence?:number}
+ | {id:string;kind:'material-boundary';regionId:string;points:Array<{x:number;y:number}>;confidence?:number};
+
 export interface ImageReferenceRegion {
   id:string;
   label:string;
@@ -67,6 +77,8 @@ export interface ImageReferenceDocument {
  relations?:ImageReferenceRelation[];
  /** Explicit user-placed 2D semantic anchors in immutable source-image pixels. */
  landmarks?:ImageReferenceLandmark[];
+ /** Optional pixel-bound silhouette, proportion, color and material-boundary observations. */
+ observations?:ImageReferenceObservation[];
 }
 export interface ImageReferenceIssue {path:string;message:string}
 export interface ImageReferenceReadiness {
@@ -293,6 +305,29 @@ export function validateImageReferenceDocument(value:ImageReferenceDocument):Ima
     if(typeof landmark.poseId!=='string'||!semanticId.test(landmark.poseId))issues.push({path:p+'.poseId',message:'Pose-ID ist ungültig.'});
     if(!finite(landmark.x)||!finite(landmark.y)||landmark.x<0||landmark.y<0||landmark.x>source.width||landmark.y>source.height)issues.push({path:p+'.position',message:'Landmarke liegt außerhalb des Quellbildes.'});
     if(!finite(landmark.radiusPx)||landmark.radiusPx<=0||landmark.radiusPx>Math.max(source.width,source.height)*2)issues.push({path:p+'.radiusPx',message:'Landmarkenradius muss positiv und begrenzt sein.'});
+  }
+  const observations=value.observations??[];
+  const landmarkById=new Map(landmarks.map(item=>[item.id,item]));
+  if(!Array.isArray(observations)||observations.length>10000)issues.push({path:'observations',message:'Maximal 10.000 Bildbeobachtungen sind zulässig.'});
+  else for(const [i,observation] of observations.entries()){
+    const p=`observations[${i}]`;addId(observation.id,p+'.id');
+    if(!regions.has(observation.regionId))issues.push({path:p+'.regionId',message:'Beobachtung verweist auf eine unbekannte Bildregion.'});
+    if(observation.confidence!==undefined&&(!finite(observation.confidence)||observation.confidence<0||observation.confidence>1))issues.push({path:p+'.confidence',message:'Konfidenz muss zwischen 0 und 1 liegen.'});
+    if(observation.kind==='silhouette'){
+      if(regions.get(observation.regionId)?.geometry.type!=='polygon')issues.push({path:p+'.regionId',message:'Silhouettenbeobachtung benötigt eine Polygonkontur.'});
+    }else if(observation.kind==='proportion'){
+      const from=landmarkById.get(observation.fromLandmarkId),to=landmarkById.get(observation.toLandmarkId);
+      if(!from||!to)issues.push({path:p+'.landmarks',message:'Proportionsmessung benötigt zwei vorhandene Landmarken.'});
+      else if(from.regionId!==observation.regionId||to.regionId!==observation.regionId)issues.push({path:p+'.landmarks',message:'Proportionslandmarken müssen zur angegebenen Bildregion gehören.'});
+      if(!finite(observation.ratio)||observation.ratio<=0||observation.ratio>1000)issues.push({path:p+'.ratio',message:'Proportionsverhältnis muss positiv und begrenzt sein.'});
+    }else if(observation.kind==='color-sample'){
+      if(!finite(observation.x)||!finite(observation.y)||observation.x<0||observation.y<0||observation.x>source.width||observation.y>source.height)issues.push({path:p+'.position',message:'Farbprobe liegt außerhalb des Quellbildes.'});
+      if(!Array.isArray(observation.rgba)||observation.rgba.length!==4||observation.rgba.some(channel=>!Number.isInteger(channel)||channel<0||channel>255))issues.push({path:p+'.rgba',message:'Farbprobe benötigt vier ganzzahlige RGBA-Kanäle zwischen 0 und 255.'});
+      if(!finite(observation.radiusPx)||observation.radiusPx<=0||observation.radiusPx>Math.max(source.width,source.height))issues.push({path:p+'.radiusPx',message:'Radius der Farbprobe muss positiv und begrenzt sein.'});
+    }else if(observation.kind==='material-boundary'){
+      if(!Array.isArray(observation.points)||observation.points.length<2||observation.points.length>2048)issues.push({path:p+'.points',message:'Materialgrenze benötigt 2 bis 2.048 Pixelpunkte.'});
+      else observation.points.forEach((point,j)=>{if(!finite(point.x)||!finite(point.y)||point.x<0||point.y<0||point.x>source.width||point.y>source.height)issues.push({path:`${p}.points[${j}]`,message:'Materialgrenzenpunkt liegt außerhalb des Quellbildes.'});});
+    }else issues.push({path:p+'.kind',message:'Unbekannter Beobachtungstyp.'});
   }
   const relationKinds=new Set<ImageReferenceRelationKind>(['same-avatar','other-form','additional-view','detail-of']);
   const seenRelations=new Set<string>();

@@ -92,3 +92,25 @@ test('project rejects invalid shared semantic catalogs',()=>{
  cycle.semanticCatalog!.parts.find(part=>part.id==='body')!.parentPartId='head';
  assert.throws(()=>parseProject(cycle),/gemeinsamer Anatomie- und Oberflächenkatalog/);
 });
+
+
+test('project round-trip preserves pixel-bound silhouette, proportion, color and material observations',()=>{
+ const observed=structuredClone(reference);
+ observed.observations=[
+  {id:'obs-silhouette',kind:'silhouette',regionId:'region-front',confidence:0.98},
+  {id:'obs-proportion',kind:'proportion',regionId:'region-front',fromLandmarkId:'landmark-face',toLandmarkId:'landmark-face',ratio:1.25,confidence:0.8},
+  {id:'obs-color',kind:'color-sample',regionId:'region-front',x:125,y:145,rgba:[12,34,56,255],radiusPx:3},
+  {id:'obs-boundary',kind:'material-boundary',regionId:'region-front',points:[{x:80,y:100},{x:90,y:110},{x:105,y:120}]}
+ ];
+ const project={...base,imageReference:observed};
+ assert.deepEqual(parseProject(JSON.parse(JSON.stringify(project))),project);
+});
+
+test('project rejects observations outside source pixels or with broken landmark references',()=>{
+ const outside=structuredClone(reference);
+ outside.observations=[{id:'obs-color',kind:'color-sample',regionId:'region-front',x:900,y:2,rgba:[0,0,0,255],radiusPx:2}];
+ assert.throws(()=>parseProject({...base,imageReference:outside}),/Bildreferenzdaten/);
+ const dangling=structuredClone(reference);
+ dangling.observations=[{id:'obs-ratio',kind:'proportion',regionId:'region-front',fromLandmarkId:'missing',toLandmarkId:'landmark-face',ratio:1}];
+ assert.throws(()=>parseProject({...base,imageReference:dangling}),/Bildreferenzdaten/);
+});
