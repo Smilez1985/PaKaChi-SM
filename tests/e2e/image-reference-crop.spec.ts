@@ -318,3 +318,22 @@ test('editor samples exact RGBA source pixels and persists/removes color observa
  document=await page.evaluate(async()=> (window as any).__imageReferenceEditor.reference());
  expect(document.observations??[]).toHaveLength(0);
 });
+
+
+test('editor captures, displays, persists and removes material-boundary polylines',async({page})=>{
+ await mountEditor(page);
+ await page.getByRole('button',{name:'Draw material boundary'}).click();
+ const canvas=page.locator('canvas.image-reference-canvas'),bounds=await canvas.boundingBox();
+ expect(bounds).not.toBeNull();const box=bounds!;
+ await page.mouse.click(box.x+box.width*.2,box.y+box.height*.3);
+ await page.mouse.click(box.x+box.width*.5,box.y+box.height*.4);
+ await page.mouse.click(box.x+box.width*.8,box.y+box.height*.6);
+ await page.getByRole('button',{name:'Finish',exact:true}).click();
+ let document=await page.evaluate(async()=> (window as any).__imageReferenceEditor.reference());
+ expect(document.observations).toHaveLength(1);
+ expect(document.observations[0]).toMatchObject({kind:'material-boundary',regionId:'region-1',points:[{x:20,y:30},{x:50,y:40},{x:80,y:60}]});
+ await expect(page.getByText(/Material boundary · 3 points/)).toBeVisible();
+ await page.getByRole('button',{name:'Delete observation'}).click();
+ document=await page.evaluate(async()=> (window as any).__imageReferenceEditor.reference());
+ expect(document.observations??[]).toHaveLength(0);
+});
