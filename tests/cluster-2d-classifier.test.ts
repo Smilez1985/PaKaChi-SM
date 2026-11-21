@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {createPaKaChiSemanticCatalog,imageReferenceLandmarksToCluster2DSeeds,proposeCluster2DRegionAssignments,validateCluster2DSemanticCatalog} from '../src/cluster-2d-classifier.ts';
+import {createPaKaChiSemanticCatalog,imageReferenceLandmarksToCluster2DSeeds,proposeCluster2DRegionAssignments,removeCluster2DSemanticPart,removeCluster2DSurfaceLayer,upsertCluster2DSemanticPart,upsertCluster2DSurfaceLayer,validateCluster2DSemanticCatalog} from '../src/cluster-2d-classifier.ts';
 import type {ImageReferenceDocument} from '../src/image-reference.ts';
 
 const document=():ImageReferenceDocument=>({
@@ -114,4 +114,27 @@ test('does not use landmarks attached to unconfirmed regions as classifier evide
  ];
  const seeds=imageReferenceLandmarksToCluster2DSeeds(d);
  assert.deepEqual(seeds.map(seed=>seed.id),['lm-confirmed']);
+});
+
+test('supports safe immutable edits of the shared character semantic catalog',()=>{
+ const original=createPaKaChiSemanticCatalog();
+ const withPart=upsertCluster2DSemanticPart(original,{id:'ear-inner',label:'Inner ear',parentPartId:'ears'});
+ assert.ok(withPart.parts.some(part=>part.id==='ear-inner'));
+ assert.equal(original.parts.some(part=>part.id==='ear-inner'),false);
+ assert.throws(()=>upsertCluster2DSemanticPart(withPart,{id:'ears',label:'Ears',parentPartId:'ear-inner'}),/catalog.part-cycle/);
+ assert.throws(()=>removeCluster2DSemanticPart(withPart,'ears'),/child parts/);
+ assert.throws(()=>removeCluster2DSemanticPart(original,'eyes'),/surface layer/);
+ assert.throws(()=>removeCluster2DSemanticPart(original,'tail',['tail']),/landmarks or mesh bindings/);
+ const withLayer=upsertCluster2DSurfaceLayer(original,{id:'inner-ear',label:'Inner ear surface',partId:'ears'});
+ assert.ok(withLayer.surfaceLayers.some(layer=>layer.id==='inner-ear'));
+ assert.throws(()=>removeCluster2DSurfaceLayer(withLayer,'inner-ear',['inner-ear']),/still referenced/);
+ const clean=removeCluster2DSurfaceLayer(withLayer,'inner-ear');
+ assert.equal(clean.surfaceLayers.some(layer=>layer.id==='inner-ear'),false);
+ assert.deepEqual(validateCluster2DSemanticCatalog(clean),[]);
+});
+
+test('separates fingers and toes in the shared anatomy tree',()=>{
+ const value=createPaKaChiSemanticCatalog();
+ assert.equal(value.parts.find(part=>part.id==='digits')?.parentPartId,'hands');
+ assert.equal(value.parts.find(part=>part.id==='toes')?.parentPartId,'feet');
 });

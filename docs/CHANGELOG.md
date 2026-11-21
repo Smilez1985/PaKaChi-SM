@@ -13,6 +13,8 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 ## [Unreleased]
 
 ### Added
+- Der gemeinsame Anatomiekatalog trennt jetzt Finger (`digits` unter `hands`) und Zehen (`toes` unter `feet`). Neue unveränderliche Bearbeitungsfunktionen erlauben das Ergänzen und Umhängen semantischer Parts sowie Oberflächen-Layer; Löschungen werden blockiert, solange Kinder, Layer, Landmarken oder Mesh-Bindungen darauf verweisen. Regressionen prüfen Zyklen, Referenzschutz und unveränderte Ausgangsdaten. Stand: 2026-11-21T20:42:00+01:00 (Europe/Berlin).
+
 - Die Anatomieauswahl der 2D-Landmarken zeigt jetzt den vollständigen semantischen Elternpfad (z. B. Körper › Rumpf › Hals › Kopf), während die stabilen Part-IDs unverändert bleiben. So lassen sich gleichnamige oder tief verschachtelte Bereiche im gemeinsamen Tier-/Arbeitsform-Katalog leichter unterscheiden. Browserregression prüft die angezeigten Pfade. Stand: 2026-11-21T20:31:00+01:00 (Europe/Berlin).
 
 

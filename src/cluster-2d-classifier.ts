@@ -26,10 +26,10 @@ export function createPaKaChiSemanticCatalog():Cluster2DSemanticCatalog {
   {id:'mouth',label:'Mouth',parentPartId:'muzzle'},{id:'shoulders',label:'Shoulders',parentPartId:'torso'},
   {id:'forelimbs',label:'Forelimbs',parentPartId:'shoulders'},{id:'upper-arms',label:'Upper arms',parentPartId:'forelimbs'},
   {id:'forearms',label:'Forearms',parentPartId:'upper-arms'},{id:'hands',label:'Hands',parentPartId:'forearms'},
-  {id:'paws',label:'Paws',parentPartId:'forelimbs'},{id:'digits',label:'Fingers and toes',parentPartId:'hands'},
+  {id:'paws',label:'Paws',parentPartId:'forelimbs'},{id:'digits',label:'Fingers',parentPartId:'hands'},
   {id:'hips',label:'Hips',parentPartId:'pelvis'},{id:'hindlimbs',label:'Hindlimbs',parentPartId:'hips'},
   {id:'thighs',label:'Thighs',parentPartId:'hindlimbs'},{id:'lower-legs',label:'Lower legs',parentPartId:'thighs'},
-  {id:'feet',label:'Feet',parentPartId:'lower-legs'},{id:'tail',label:'Tail',parentPartId:'body'},
+  {id:'feet',label:'Feet',parentPartId:'lower-legs'},{id:'toes',label:'Toes',parentPartId:'feet'},{id:'tail',label:'Tail',parentPartId:'body'},
   {id:'tail-tip',label:'Tail tip',parentPartId:'tail'}
  ];
  const surfaceLayers:Cluster2DSurfaceLayer[]=[
@@ -102,6 +102,40 @@ export function validateCluster2DSemanticCatalog(value:unknown):string[] {
     if(l?.partId!==null&&!known.has(l?.partId))errors.push('catalog.layer-part');
   }
   return errors;
+}
+
+/** Immutable catalog edit. Semantic IDs stay stable when labels or parents change. */
+export function upsertCluster2DSemanticPart(catalog:Cluster2DSemanticCatalog,part:Cluster2DSemanticPart):Cluster2DSemanticCatalog {
+ const parts=catalog.parts.filter(item=>item.id!==part.id).concat({...part});
+ const next={...catalog,parts};
+ const issues=validateCluster2DSemanticCatalog(next);
+ if(issues.length)throw new Error('Invalid semantic part: '+issues.join(', '));
+ return next;
+}
+
+/** Refuses deletion while descendants, surface layers or landmarks still reference the part. */
+export function removeCluster2DSemanticPart(catalog:Cluster2DSemanticCatalog,partId:string,referencedPartIds:readonly string[]=[]):Cluster2DSemanticCatalog {
+ if(!catalog.parts.some(part=>part.id===partId))return catalog;
+ if(catalog.parts.some(part=>part.parentPartId===partId))throw new Error('Cannot remove a semantic part that still has child parts.');
+ if(catalog.surfaceLayers.some(layer=>layer.partId===partId))throw new Error('Cannot remove a semantic part that is still used by a surface layer.');
+ if(referencedPartIds.includes(partId))throw new Error('Cannot remove a semantic part that is still used by landmarks or mesh bindings.');
+ return {...catalog,parts:catalog.parts.filter(part=>part.id!==partId)};
+}
+
+/** Immutable surface-layer edit with optional anatomical attachment. */
+export function upsertCluster2DSurfaceLayer(catalog:Cluster2DSemanticCatalog,layer:Cluster2DSurfaceLayer):Cluster2DSemanticCatalog {
+ const surfaceLayers=catalog.surfaceLayers.filter(item=>item.id!==layer.id).concat({...layer});
+ const next={...catalog,surfaceLayers};
+ const issues=validateCluster2DSemanticCatalog(next);
+ if(issues.length)throw new Error('Invalid surface layer: '+issues.join(', '));
+ return next;
+}
+
+/** Refuses deletion while a landmark or mesh binding still references the layer. */
+export function removeCluster2DSurfaceLayer(catalog:Cluster2DSemanticCatalog,layerId:string,referencedLayerIds:readonly string[]=[]):Cluster2DSemanticCatalog {
+ if(!catalog.surfaceLayers.some(layer=>layer.id===layerId))return catalog;
+ if(referencedLayerIds.includes(layerId))throw new Error('Cannot remove a surface layer that is still referenced.');
+ return {...catalog,surfaceLayers:catalog.surfaceLayers.filter(layer=>layer.id!==layerId)};
 }
 
 function regionBounds(region:ImageReferenceRegion):{x:number;y:number;width:number;height:number}{
