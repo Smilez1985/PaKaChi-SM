@@ -12,6 +12,9 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+### Added
+- Integrierter Bildeditor: manuelle RGBA-Farbproben werden per Klick aus dem Original-Quellbild gelesen, an die aktuell bestätigte Region gebunden, als quellpixelgebundene Beobachtungen gespeichert und auf der Arbeitsfläche angezeigt. Einzelnes Löschen sowie das Entfernen referenzierter Proben beim Löschen einer Region sind berücksichtigt; Materialgrenzen bleiben der nächste Editor-Schritt. Stand: 2026-11-22T00:20:00+01:00 (Europe/Berlin).
+
 ### Fixed
 - Proportions-Roundtrip-Test mit zwei räumlich getrennten Quell-Landmarken statt einer Selbstreferenz korrigiert; die separate Negativregression für Selbstmessungen bleibt erhalten. Die Produktvalidierung war korrekt und wurde nicht abgeschwächt. Stand: 2026-11-21T23:05:00+01:00 (Europe/Berlin).
 

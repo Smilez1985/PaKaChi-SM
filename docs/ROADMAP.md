@@ -1,6 +1,6 @@
 # Roadmap – offene Aufgaben
 
-**Entwicklungsstand: 0.101.0 · Abgleich: 19.11.2026.** Teil der [Blaupause](README.md).
+**Entwicklungsstand: 0.101.0 · Abgleich: 22.11.2026.** Teil der [Blaupause](README.md).
 
 Diese Roadmap enthält offene Umsetzung und ausstehende Abnahme. Erledigte Änderungen stehen nach Version im [Changelog](CHANGELOG.md); Nachweise und Grenzen im [Prüfstand](PRUEFUNG.md).
 
@@ -198,6 +198,8 @@ Die Umsetzung des integrierten MCP-Arbeitsplatzes, der Caddy-/DuckDNS-Konfigurat
 - [x] Separaten 2D-Semantikvertrag mit stabilen Anatomie-/Oberflächen-IDs, quellpixelgebundenen Landmarken und Avatar-/Form-/Ansichts-/Posen-Provenienz ergänzen.
 - [x] Konservative 2D-Regionsklassifikation auf bestätigte Bildregionen begrenzen; automatische Vorschläge bleiben unbestätigt, Mehrdeutigkeit und Ansichts-/Posenvermischung bleiben ungelöst.
 - [x] Landmarken im integrierten Bildeditor auf bestätigten Bildregionen setzen, per Maus oder Zahlenfeldern verschieben, semantisch beschriften und löschen; Speicherung im bestehenden Bildreferenz-Dokument.
+- [x] Manuelle RGBA-Farbproben direkt aus dem unveränderten Quellbild erfassen, an eine bestätigte Region binden, in Quellpixeln persistieren, visualisieren und einzeln löschen; keine automatische Materialklassifikation.
+- [ ] Materialgrenzen als manuell gezeichnete Quellpixel-Polylinien im Bildeditor erfassen, korrigieren und löschen.
 - [x] Persistierte Landmarken über die explizite Region-/Ansicht-/Form-/Avatar-Hierarchie in 2D-Klassifikator-Seeds überführen.
 - [ ] Landmarken-Undo/Redo und eine auswählbare, charakterweite Part-/Surface-Layer-Katalogverwaltung im Studio ergänzen.
 - [x] Resolver für explizit geprüfte 2D/3D-Oberflächenkorrespondenzen ergänzen: 2D-Quellhash und Avatar/Form/Ansicht/Pose, 3D-Assethash, Mesh-/Dreiecks-ID und baryzentrischer Oberflächenpunkt werden validiert; keine Tiefenableitung aus Einzelbildern. ([Vertrag](CLUSTER-2D-3D-KORRESPONDENZ.md))

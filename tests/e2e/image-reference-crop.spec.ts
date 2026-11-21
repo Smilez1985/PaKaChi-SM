@@ -303,3 +303,18 @@ test('landmark editor exposes the shared semantic catalog as selectable anatomy 
  const document=await page.evaluate(async()=> (window as any).__imageReferenceEditor.reference());
  expect(document.landmarks[0]).toMatchObject({partId:'paws',surfaceLayerId:'fur'});
 });
+
+test('editor samples exact RGBA source pixels and persists/removes color observations',async({page})=>{
+ await mountEditor(page);
+ await page.getByRole('button',{name:'Add color sample'}).click();
+ const canvas=page.locator('canvas.image-reference-canvas'),bounds=await canvas.boundingBox();
+ expect(bounds).not.toBeNull();const box=bounds!;
+ await page.mouse.click(box.x+box.width*.5,box.y+box.height*.5);
+ let document=await page.evaluate(async()=> (window as any).__imageReferenceEditor.reference());
+ expect(document.observations).toHaveLength(1);
+ expect(document.observations[0]).toMatchObject({kind:'color-sample',regionId:'region-1',x:50,y:50,rgba:[255,0,0,255],radiusPx:3});
+ await expect(page.getByText(/RGBA 255, 0, 0, 255/)).toBeVisible();
+ await page.getByRole('button',{name:'Delete'}).click();
+ document=await page.evaluate(async()=> (window as any).__imageReferenceEditor.reference());
+ expect(document.observations??[]).toHaveLength(0);
+});
