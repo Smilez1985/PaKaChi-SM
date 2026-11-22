@@ -16,6 +16,7 @@ import type {Cluster2DSemanticCatalog} from './cluster-2d-classifier.ts';
 import {mountAssistantPanel} from './assistant-panel.ts';
 import {options} from './options.ts';
 import {moveReview} from './studio-review.ts';
+import {mountClusterFormComparison} from './cluster-form-comparison-panel.ts';
 import './style.css';
 import {mountOptions,translate} from './options.ts';
 import { StudioEditor, encodeModel, decodeModel } from './studio-editor.ts';
@@ -68,6 +69,7 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
           <p class="subtle">Dein Editor, direkt im Player.</p>
           <label class="check"><input type="checkbox" id="skeleton"> Skelett anzeigen</label>
           <div id="studio-editor"><p class="subtle">Zuerst einen 3D-Avatar auswählen. Für den Original-Bildplayer liegt noch kein 3D-Modell vor.</p></div>
+          <div id="form-comparison-host" class="form-comparison-host"></div>
           <button id="back-player" class="button outline">Zurück zum Player</button>
         </div>
         <p class="local-note">GLB-Import bleibt lokal im Browser und gilt für diese Sitzung. Es werden keine Modelle hochgeladen.</p>
@@ -364,6 +366,7 @@ async function boot(): Promise<void> {
   },()=>options.language);
   window.addEventListener('pakachi-options',renderCatalog);
   const agents = mountAgentPanel(rpc);
+  const formComparison = mountClusterFormComparison(el('form-comparison-host'), () => editor?.exportProject().semanticCatalog);
   const runtime=mountLocalRuntimePanel(el<HTMLButtonElement>('runtime-open'),{connectPlayer:agents.connectLocal,importModel:async file=>{if(busy)return false;const loaded=await loadAvatar(undefined,file);if(loaded)changeView(true);return loaded;}},()=>options.language);
   mountAssistantPanel(document.querySelector('.agent-panel')!,rpc,()=>options.language,localStorage,undefined,(id,poses,session,revision)=>{if(busy||!editor)throw Error('Studio nicht verfügbar.');return editor.previewSequence(id,poses,session,revision);},(id,corrected,session,revision)=>{if(busy||!editor)throw Error('Studio nicht verfügbar.');const current=editor.inspect();if(current.session!==session||current.revision!==revision)throw Error('Studio-Stand hat sich geändert.');return editor.previewAutomaticSkinCorrection(id,corrected);});
   generationPanel=mountGenerationPanel(el('generation-host'),{
@@ -427,6 +430,6 @@ async function boot(): Promise<void> {
     catalog = parseCatalog(await response.json()); renderCatalog();
     showOriginal();
   } catch (error) { message(`Model Zoo: ${error instanceof Error ? error.message : String(error)}`, true); }
-  window.addEventListener('pagehide', () => { runtime.dispose();zoo.dispose();agents.dispose();generationPanel?.dispose(); editor?.dispose(); fetchController?.abort(); request++; playback?.dispose(); viewer?.dispose(); }, { once: true });
+  window.addEventListener('pagehide', () => { runtime.dispose();zoo.dispose();agents.dispose();formComparison.dispose();generationPanel?.dispose(); editor?.dispose(); fetchController?.abort(); request++; playback?.dispose(); viewer?.dispose(); }, { once: true });
 }
 void boot();

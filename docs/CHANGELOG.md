@@ -13,6 +13,7 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 ## [Unreleased]
 
 ### Added
+- Studio: Der Tierform-/Arbeitsform-Vergleich ist als lesender Bericht integriert. Zwei JSON-Manifeste werden explizit geladen, gegen den gemeinsamen Projektkatalog validiert und hinsichtlich anatomischer Parts, Oberflächen-Layer, Dreiecksdifferenzen und unzugewiesener Flächen gegenübergestellt. Mesh-IDs bleiben getrennt; keine automatische Paarung, Geometriegleichheit oder Morph-Freigabe. Stand: 2026-11-22T20:49:00+01:00 (Europe/Berlin).
 - Vergleichsbericht für Tier- und Arbeitsform auf Basis des gemeinsamen Charakterkatalogs: semantische Abdeckung, Dreiecksdifferenzen, nicht zugewiesene Dreiecke und getrennte Mesh-Inventare. Gleiche IDs werden nicht als geometrische Gleichheit oder Morph-Kompatibilität interpretiert. Regressionstests für Formvertauschung, fehlende Abdeckung und fremde semantische IDs. Stand: 2026-11-22T16:30:00+01:00 (Europe/Berlin).
 
 ### Fixed
