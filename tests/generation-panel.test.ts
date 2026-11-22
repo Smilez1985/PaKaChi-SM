@@ -14,25 +14,27 @@ import {parseModel,disposeModel} from '../src/viewer.ts';
 import type {prepareDraftRig} from '../src/draft-rig.ts';
 import type {ImageReferenceDocument} from '../src/image-reference.ts';
 import type {ImageReferenceGenerationManifest} from '../src/image-reference-crop.ts';
+import type {Cluster2DSemanticCatalog} from '../src/cluster-2d-classifier.ts';
 const bytes=Uint8Array.from(glb());
 const referenceManifest:ImageReferenceGenerationManifest={format:'pakachi-image-reference-generation',version:1,source:{sha256:'a'.repeat(64),width:100,height:100},selection:{regionId:'region-front',label:'Front',kind:'view',avatar:{id:'avatar-panda',label:'Panda'},form:{id:'form-animal',label:'Animal'},view:{id:'view-front',label:'Front'},crop:{x:10,y:10,width:50,height:70,sha256:'b'.repeat(64)},mask:{type:'rectangle',vertices:4,holes:0}}};
 const referenceDocument:ImageReferenceDocument={format:'pakachi-image-reference',version:1,source:{sha256:'a'.repeat(64),width:100,height:100},regions:[{id:'region-front',label:'Front',kind:'view',status:'confirmed',geometry:{type:'rectangle',x:10,y:10,width:50,height:70}}],views:[{id:'view-front',label:'Front',regionIds:['region-front']}],forms:[{id:'form-animal',label:'Animal',viewIds:['view-front']}],avatars:[{id:'avatar-panda',label:'Panda',formIds:['form-animal']}]};
+const semanticCatalog:Cluster2DSemanticCatalog={schemaVersion:1,characterId:'pakachi',parts:[{id:'head',label:'Head',parentPartId:null}],surfaceLayers:[{id:'fur',label:'Fur',partId:null}]};
 async function until(check:()=>boolean){for(let i=0;i<100;i++){if(check())return;await new Promise(r=>setTimeout(r,5));}assert.fail('UI did not settle');}
 function fixture(t:TestContext,run?:ProviderAdapter['run'],fallback=false,prepareRig?:typeof prepareDraftRig,referenceReady=true){
  const w=new Window();Object.assign(globalThis,{window:w,document:w.document});
  const host=document.createElement('div');document.body.append(host);
  const profile={id:'gen',name:'Local',adapter:'custom-generation' as const,endpoint:'http://127.0.0.1:8766',model:'triposr'};
  saveProviderConfig({version:1,profiles:fallback?[profile,{...profile,id:'backup',name:'Backup'}]:[profile],fallbacks:{assistant:[],generation:fallback?['backup']:[],rigging:[]},assignments:{assistant:null,generation:'gen',rigging:null}},w.localStorage);setProviderKey(profile,'x'.repeat(48));if(fallback)setProviderKey({...profile,id:'backup'},'y'.repeat(48));
- let beforeAdopt:(()=>Promise<void>)|undefined,adoptedReference:ImageReferenceDocument|undefined,adoptedGenerationReference:ImageReferenceGenerationManifest|undefined,restoredReference:ImageReferenceDocument|undefined,seenReference:ImageReferenceGenerationManifest|undefined;
+ let beforeAdopt:(()=>Promise<void>)|undefined,adoptedReference:ImageReferenceDocument|undefined,adoptedGenerationReference:ImageReferenceGenerationManifest|undefined,adoptedSemanticCatalog:Cluster2DSemanticCatalog|undefined,restoredReference:ImageReferenceDocument|undefined,seenReference:ImageReferenceGenerationManifest|undefined;
  let target={session:'one',revision:1},calls=0,adoptions=0,cleanups=0,previewCalls=0,adopted:Uint8Array|undefined;
- const panel=mountGenerationPanel(host,{target:()=>target,adopt:async(output,expected,valid,reference,generationReference)=>{await beforeAdopt?.();if(!valid()||expected.session!==target.session||expected.revision!==target.revision)return false;adopted=output;adoptedReference=reference;adoptedGenerationReference=generationReference;adoptions++;return true;}},()=> 'de',w.localStorage,{
+ const panel=mountGenerationPanel(host,{target:()=>target,semanticCatalog:()=>structuredClone(semanticCatalog),adopt:async(output,expected,valid,reference,generationReference,catalog)=>{await beforeAdopt?.();if(!valid()||expected.session!==target.session||expected.revision!==target.revision)return false;adopted=output;adoptedReference=reference;adoptedGenerationReference=generationReference;adoptedSemanticCatalog=catalog;adoptions++;return true;}},()=> 'de',w.localStorage,{
   adapter:(key,p)=>{assert.equal(key,(p.id==='backup'?'y':'x').repeat(48));return {id:'custom-generation',probe:async()=>({model:'triposr',capabilities:['image-to-3d']}),run:async request=>{calls++;seenReference=request.input.reference;return run?run(request):{kind:'model',bytes};}};
   },validate:validateGeneration,prepareRig,referenceEditor:(_host,_source,_language,_changed,initial)=>{restoredReference=initial;return {ready:async()=>referenceReady,selectedCrop:async()=>new File([new Uint8Array([1,2,3])],'region.png',{type:'image/png'}),selectedPackage:async()=>({crop:new File([new Uint8Array([1,2,3])],'region.png',{type:'image/png'}),manifest:structuredClone(referenceManifest)}),reference:async()=>structuredClone(referenceDocument),dispose(){}};},preview:async()=>{previewCalls++;return ()=>{cleanups++;};},
  });
  t.after(()=>{panel.dispose();w.happyDOM.abort();});
  const button=(id:string)=>host.querySelector<HTMLButtonElement>('#generation-'+id)!;
  const choose=async()=>{panel.select(new File([new Uint8Array([137,80,78,71])],'panda.png',{type:'image/png'}));await new Promise(r=>setTimeout(r,0));};
- return {w,host,panel,button,choose,get restoredReference(){return restoredReference;},delayImport(fn:()=>Promise<void>){beforeAdopt=fn;},get calls(){return calls;},get adopted(){return adopted;},get adoptedReference(){return adoptedReference;},get adoptedGenerationReference(){return adoptedGenerationReference;},get seenReference(){return seenReference;},get adoptions(){return adoptions;},get cleanups(){return cleanups;},get previewCalls(){return previewCalls;},change(){target={...target,revision:target.revision+1};w.dispatchEvent(new w.Event('pakachi-sm:change'));}};
+ return {w,host,panel,button,choose,get restoredReference(){return restoredReference;},delayImport(fn:()=>Promise<void>){beforeAdopt=fn;},get calls(){return calls;},get adopted(){return adopted;},get adoptedReference(){return adoptedReference;},get adoptedGenerationReference(){return adoptedGenerationReference;},get adoptedSemanticCatalog(){return adoptedSemanticCatalog;},get seenReference(){return seenReference;},get adoptions(){return adoptions;},get cleanups(){return cleanups;},get previewCalls(){return previewCalls;},change(){target={...target,revision:target.revision+1};w.dispatchEvent(new w.Event('pakachi-sm:change'));}};
 }
 test('saved source reference restores its original hierarchy and embedded pixels into the editor',t=>{
  const f=fixture(t);const restored=structuredClone(referenceDocument);restored.source.asset={mediaType:'image/png',data:'iVBORw0KGgo='};
@@ -43,6 +45,10 @@ test('image selection does not send; generated preview requires explicit accepta
  const f=fixture(t);await f.choose();assert.equal(f.calls,0);f.button('start').click();await until(()=>!f.button('apply').hidden);
  assert.equal(f.calls,1);assert.equal(f.previewCalls,1);assert.equal(f.adoptions,0);f.button('apply').click();await until(()=>f.adoptions===1&&f.cleanups===1);assert.ok(f.button('apply').hidden);
 });
+test('generated model adoption carries the shared character semantic catalog',async t=>{
+ const f=fixture(t);await f.choose();f.button('start').click();await until(()=>!f.button('apply').hidden);f.button('apply').click();await until(()=>f.adoptions===1);assert.deepEqual(f.adoptedSemanticCatalog,semanticCatalog);
+});
+
 test('manual project changes disable adoption; discarding releases preview without changing project',async t=>{
  const f=fixture(t);await f.choose();f.button('start').click();await until(()=>!f.button('apply').hidden);f.change();assert.ok(f.button('apply').disabled);f.button('apply').click();assert.equal(f.adoptions,0);f.button('discard').click();assert.equal(f.cleanups,1);
 });

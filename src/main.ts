@@ -12,6 +12,7 @@ import type {ProjectRevision} from './ai-jobs.ts';
 import {verifyImageReferenceSourceAsset} from './image-reference.ts';
 import type {ImageReferenceDocument} from './image-reference.ts';
 import type {ImageReferenceGenerationManifest} from './image-reference-crop.ts';
+import type {Cluster2DSemanticCatalog} from './cluster-2d-classifier.ts';
 import {mountAssistantPanel} from './assistant-panel.ts';
 import {options} from './options.ts';
 import {moveReview} from './studio-review.ts';
@@ -268,7 +269,7 @@ function showOriginal(remember=true): boolean {
   commitHistory?.();renderModelHistory();return true;
 }
 
-async function loadAvatar(avatar?: Avatar, file?: File, project?: StudioProject, valid:()=>boolean=()=>true, restore:{remember?:boolean;confirm?:boolean;dirty?:boolean;identity?:Pick<Avatar,'id'|'model'|'rigVersion'>;imageReference?:ImageReferenceDocument;generationReference?:ImageReferenceGenerationManifest}={}): Promise<boolean> {
+async function loadAvatar(avatar?: Avatar, file?: File, project?: StudioProject, valid:()=>boolean=()=>true, restore:{remember?:boolean;confirm?:boolean;dirty?:boolean;identity?:Pick<Avatar,'id'|'model'|'rigVersion'>;imageReference?:ImageReferenceDocument;generationReference?:ImageReferenceGenerationManifest;semanticCatalog?:Cluster2DSemanticCatalog}={}): Promise<boolean> {
   if(editor?.interactionActive){message('Studio-Bewegung zuerst beenden.',true);return false;}
   if(!valid()||(restore.confirm!==false&&!mayReplace())||!valid()){renderCatalog();return false;}
   const token = ++request;
@@ -307,7 +308,8 @@ async function loadAvatar(avatar?: Avatar, file?: File, project?: StudioProject,
     let commitHistory:(()=>void)|undefined;
     if(editor?.interactionActive)throw new Error('Studio-Bewegung zuerst beenden.');
     const before=restore.remember!==false?captureModel():null;if(before)commitHistory=modelHistory.checkpoint(before);
-    const projectSource = {format:'pakachi-studio' as const,version:1 as const,model:project?.model ?? encodeModel(buffer),avatar:{...next,moves},...(project?.semanticCatalog?{semanticCatalog:project.semanticCatalog}:{}),...(project?.imageReference?{imageReference:project.imageReference}:restore.imageReference?{imageReference:restore.imageReference}:{}),...(project?.generationReference?{generationReference:project.generationReference}:restore.generationReference?{generationReference:restore.generationReference}:{})};
+    const semanticCatalog=project?.semanticCatalog??restore.semanticCatalog;
+    const projectSource = {format:'pakachi-studio' as const,version:1 as const,model:project?.model ?? encodeModel(buffer),avatar:{...next,moves},...(semanticCatalog?{semanticCatalog:structuredClone(semanticCatalog)}:{}),...(project?.imageReference?{imageReference:project.imageReference}:restore.imageReference?{imageReference:restore.imageReference}:{}),...(project?.generationReference?{generationReference:project.generationReference}:restore.generationReference?{generationReference:restore.generationReference}:{})};
     parsed=undefined; // Ownership passes to the candidate, including preparation failures.
     const prepared=candidate=prepareAvatar({model:gltf,avatar:next,moves,source:projectSource,data:project?.studio,studio,speed:Number(el<HTMLSelectElement>('speed').value),dirty:restore.dirty??false,skeleton:el<HTMLInputElement>('skeleton').checked,resume:resumeBase,changed:refreshCapabilities,feedback:text=>message(text),playbackChanged:syncPlayback});
     // No await between the final target check and publication of the prepared candidate.
@@ -367,10 +369,10 @@ async function boot(): Promise<void> {
   generationPanel=mountGenerationPanel(el('generation-host'),{
     target:()=>studio&&!busy&&!editor?.interactionActive?generationTarget():null,
     semanticCatalog:()=>editor?.exportProject().semanticCatalog,
-    adopt:(bytes,expected,valid,reference,generationReference)=>{
+    adopt:(bytes,expected,valid,reference,generationReference,semanticCatalog)=>{
       if(busy)return Promise.resolve(false);
       const guard=()=>{const now=generationTarget();return valid()&&studio&&!editor?.interactionActive&&now.session===expected.session&&now.revision===expected.revision;};
-      return loadAvatar(undefined,new File([Uint8Array.from(bytes).buffer],'3D-Entwurf.glb',{type:'model/gltf-binary'}),undefined,guard,{imageReference:reference,generationReference});
+      return loadAvatar(undefined,new File([Uint8Array.from(bytes).buffer],'3D-Entwurf.glb',{type:'model/gltf-binary'}),undefined,guard,{imageReference:reference,generationReference,semanticCatalog});
     },
   },()=>options.language,localStorage);
   try { viewer = new Viewer(el('viewport')); }
