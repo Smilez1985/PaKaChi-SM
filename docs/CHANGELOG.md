@@ -12,6 +12,9 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+### Fixed
+- Übernahme eines neu generierten 3D-Modells bewahrt jetzt den aktiven charakterweiten Anatomie-/Oberflächenkatalog. Der Katalog wird zusammen mit Bildreferenz und Generierungsprovenienz an das neue Studio-Projekt übergeben, statt beim Modellwechsel auf die Standardtaxonomie zurückzufallen. Ein Regressionstest prüft die Übergabe bis zur Importgrenze. Stand: 2026-11-22T14:37:00+01:00 (Europe/Berlin).
+
 ### Added
 - Bildreferenz-Editor: begrenzte Landmarken-Undo-/Redo-History für Erstellen, Mausziehen, Zahlen-/Semantikfeldänderungen und Löschen. Die History verändert ausschließlich Landmarken und lässt Regionen, Beobachtungen sowie Bestätigungsstatus unangetastet. Stand: 2026-11-22T20:55:00+01:00 (Europe/Berlin).
 - Bildreferenz-Editor: einzelne Stützpunkte gespeicherter Materialgrenzen lassen sich in einem separaten Korrekturmodus per Maus verschieben. Die Änderung bleibt auf Original-Quellpixel bezogen; Regionsstatus, Anatomiezuordnung und Materialklassifikation werden nicht verändert. Stand: 2026-11-22T20:45:00+01:00 (Europe/Berlin).
