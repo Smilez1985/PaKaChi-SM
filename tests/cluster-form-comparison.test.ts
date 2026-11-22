@@ -16,7 +16,7 @@ function manifest(form: 'animal' | 'humanoid', hash: string, assignments: Cluste
       { id: form + '-mesh-body', sourceMeshIndex: 0, sourceMeshName: 'Body', primitiveIndex: 0, vertexCount: 6, triangleCount: 2 },
       { id: form + '-mesh-head', sourceMeshIndex: 1, sourceMeshName: 'Head', primitiveIndex: 0, vertexCount: 3, triangleCount: 1 },
     ],
-    assignments, overrides: [], revision: 0,
+    assignments, overrides: [],
   };
 }
 const assignments = (form: 'animal' | 'humanoid', bodyPart: string, headPart: string): ClusterManifest['assignments'] => [
