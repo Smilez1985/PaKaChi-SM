@@ -273,8 +273,8 @@ test('editor places, moves, edits and deletes semantic 2D landmarks on the sourc
 
 test('landmark undo and redo restores creation, drag, field edits and deletion without touching regions',async({page})=>{
  await mountEditor(page);
- const canvas=page.locator('canvas.image-reference-canvas'),bounds=await canvas.boundingBox();expect(bounds).not.toBeNull();const box=bounds!;
  await page.getByRole('button',{name:'Landmark mode'}).click();
+ const canvas=page.locator('canvas.image-reference-canvas'),bounds=await canvas.boundingBox();expect(bounds).not.toBeNull();const box=bounds!;
  await page.mouse.click(box.x+box.width*.25,box.y+box.height*.25);
  let document=await page.evaluate(async()=> (window as any).__imageReferenceEditor.reference());
  expect(document.landmarks).toHaveLength(1);
