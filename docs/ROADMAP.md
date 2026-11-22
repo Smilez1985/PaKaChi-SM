@@ -210,7 +210,7 @@ Die Umsetzung des integrierten MCP-Arbeitsplatzes, der Caddy-/DuckDNS-Konfigurat
 - [x] 3D-Ansicht um einen expliziten `surface-pick`-Raycast-Modus ergänzen: sichtbaren Mesh-Treffer, Dreiecksindex und baryzentrische Koordinaten im Mesh-Lokalraum erfassen; transformierte und entartete Dreiecke regressionsprüfen.
 - [x] Studio-Bedienoberfläche angebunden: bestätigte 2D-Landmarke auswählen, 3D-Treffer voranzeigen, lokalen Radius festlegen und erst nach separater Nutzerbestätigung mit SHA-256-gebundener stabiler Mesh-ID persistieren. Die Inventarisierung verwendet die unveränderten GLB-Quellbytes; Undo/Redo umfasst die bestätigte Zuordnung. Ein Chromium-Browserfall klickt den echten Canvas und prüft Raycast-Mesh, Dreieck und baryzentrische Koordinaten. Die vollständige UI-Bestätigung mit einem realen PaKaChi-Modell bleibt manuell abzunehmen.
 - [x] Adapter für explizit bestätigte Studio-Mesh-Treffer ergänzen: Trefferindex wird in eine SHA-256-gebundene stabile Mesh-ID aufgelöst; 2D-Provenienz wird aus der bestätigten Landmarke übernommen. Mausmodus, Vorschau, explizite UI-Bestätigung und Persistenz sind integriert.
-- [ ] Tier- und Arbeitsform gegen denselben Charakterkatalog prüfen und 3D-Mesh-Zuordnungen über gemeinsame semantische IDs vergleichen.
+- [x] Tier- und Arbeitsform gegen denselben Charakterkatalog prüfen: semantische Part-/Surface-Layer-Abdeckung, Dreiecksdifferenzen und unzugewiesene Flächen vergleichen; formgebundene Mesh-IDs bleiben getrennt. Der Vergleich erzeugt nur einen Bericht und behauptet keine geometrische Gleichheit oder Morph-Kompatibilität. ([Vertrag](CLUSTER-FORM-VERGLEICH.md))
 
 ## Noch zu entscheiden
 

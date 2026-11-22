@@ -12,6 +12,9 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+### Added
+- Vergleichsbericht für Tier- und Arbeitsform auf Basis des gemeinsamen Charakterkatalogs: semantische Abdeckung, Dreiecksdifferenzen, nicht zugewiesene Dreiecke und getrennte Mesh-Inventare. Gleiche IDs werden nicht als geometrische Gleichheit oder Morph-Kompatibilität interpretiert. Regressionstests für Formvertauschung, fehlende Abdeckung und fremde semantische IDs. Stand: 2026-11-22T16:30:00+01:00 (Europe/Berlin).
+
 ### Fixed
 - Übernahme eines neu generierten 3D-Modells bewahrt jetzt den aktiven charakterweiten Anatomie-/Oberflächenkatalog. Der Katalog wird zusammen mit Bildreferenz und Generierungsprovenienz an das neue Studio-Projekt übergeben, statt beim Modellwechsel auf die Standardtaxonomie zurückzufallen. Ein Regressionstest prüft die Übergabe bis zur Importgrenze. Stand: 2026-11-22T14:37:00+01:00 (Europe/Berlin).
 
