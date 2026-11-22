@@ -35,12 +35,12 @@ test('Studio comparison panel validates both form files and renders the shared s
   try {
     const host = window.document.createElement('div');
     const catalog = createPaKaChiSemanticCatalog();
-    const panel = mountClusterFormComparison(host, () => catalog);
+    const panel = mountClusterFormComparison(host as unknown as HTMLElement, () => catalog);
     const inputs = host.querySelectorAll('input');
-    installFile(inputs[0], manifest('animal', 'animal-mesh'));
-    installFile(inputs[1], manifest('humanoid', 'humanoid-mesh'));
+    installFile(inputs[0] as unknown as HTMLInputElement, manifest('animal', 'animal-mesh'));
+    installFile(inputs[1] as unknown as HTMLInputElement, manifest('humanoid', 'humanoid-mesh'));
     const button = host.querySelector('button')!;
-    assert.equal((button as HTMLButtonElement).disabled, false);
+    assert.equal((button as unknown as HTMLButtonElement).disabled, false);
     button.click();
     await new Promise(resolve => setTimeout(resolve, 0));
     assert.match(host.textContent ?? '', /Vergleich erfolgreich/);
@@ -67,7 +67,7 @@ test('Studio comparison panel reports invalid form files without producing a rep
   Object.defineProperty(globalThis, 'Event', { configurable: true, value: window.Event });
   try {
     const host = window.document.createElement('div');
-    const panel = mountClusterFormComparison(host, () => createPaKaChiSemanticCatalog());
+    const panel = mountClusterFormComparison(host as unknown as HTMLElement, () => createPaKaChiSemanticCatalog());
     const inputs = host.querySelectorAll('input');
     installFile(inputs[0], manifest('humanoid', 'wrong-form'));
     installFile(inputs[1], manifest('humanoid', 'humanoid-mesh'));
