@@ -37,7 +37,7 @@ import type { ClusterManifest } from './cluster-architecture.ts';
 import { createStudioLandmarkSurfacePick } from './studio-landmark-picking.ts';
 import { mountClusterFormComparison } from './cluster-form-comparison-panel.ts';
 import type { StudioSurfacePickHit } from './studio-landmark-picking.ts';
-interface Snapshot {data:StudioData;values:Record<string,Transform>;semanticCatalog?:Cluster2DSemanticCatalog}
+interface Snapshot {data:StudioData;values:Record<string,Transform>;semanticCatalog?:Cluster2DSemanticCatalog;clusterFormManifests?:StudioProject['clusterFormManifests']}
 interface Hooks { suspend:()=>void; resume:()=>void; changed:()=>void; feedback:(s:string)=>void }
 const uid=()=>`p-${crypto.randomUUID()}`;
 const volumeText=(v:SurfaceVolumeReport)=>`Volumenschätzung: ${v.measuredComponents?'min '+v.minimumRatio?.toFixed(3)+'× · max '+v.maximumRatio?.toFixed(3)+'×':'nicht messbar'} · ${v.issues} auffällig · ${v.measuredComponents} messbar · ${v.unmeasurableComponents} nicht messbar`;
@@ -95,7 +95,7 @@ export class StudioEditor {
   paused=false;
   speed=1;
   constructor(rig:StudioRig,view:StudioView,host:HTMLElement,project:Omit<StudioProject,'studio'>,hooks:Hooks) {
-    this.rig=rig;this.playbackTransition=new PlaybackTransition(rig.root);this.view=view;this.host=host;this.project={...project,semanticCatalog:structuredClone(project.semanticCatalog??createPaKaChiSemanticCatalog())};this.landmarkDocument=project.imageReference?structuredClone(project.imageReference):null;this.hooks=hooks;this.initial=structuredClone(rig.initial);
+    this.rig=rig;this.playbackTransition=new PlaybackTransition(rig.root);this.view=view;this.host=host;this.project={...project,semanticCatalog:structuredClone(project.semanticCatalog??createPaKaChiSemanticCatalog()),...(project.clusterFormManifests?{clusterFormManifests:structuredClone(project.clusterFormManifests)}:{})};this.landmarkDocument=project.imageReference?structuredClone(project.imageReference):null;this.hooks=hooks;this.initial=structuredClone(rig.initial);
     view.onSelect=id=>{this.surfaceCheck?.abort();this.weightCorrection=null;this.selected=id;this.render();};
     view.onSurfacePick=hit=>{
       this.view.setAction('select');
@@ -159,8 +159,8 @@ export class StudioEditor {
   get progress(){return this.duration ? this.timeline!.time/this.duration:0;}
   private refreshWeightColors(){this.view.setWeightBone?.(this.active&&this.edit&&!this.playing&&this.weightColors&&this.point?.kind==='bone'?this.point.bone!:null);}
   private refreshWeightPreview(){const p=this.point;this.view.setWeightRegion?.(this.active&&this.edit&&!this.playing&&this.weightLocal&&p?.kind==='bone'?{center:[...p.rest],radius:this.weightRadius}:null);}
-  private snapshot():Snapshot{return {data:structuredClone(this.data),values:this.rig.capture(),semanticCatalog:structuredClone(this.project.semanticCatalog!)};}
-  private restore(s:Snapshot){this.rig.data=structuredClone(s.data);if(s.semanticCatalog)this.project.semanticCatalog=structuredClone(s.semanticCatalog);this.rig.reset();this.rig.apply(s.values);this.mark();this.render();}
+  private snapshot():Snapshot{return {data:structuredClone(this.data),values:this.rig.capture(),semanticCatalog:structuredClone(this.project.semanticCatalog!),...(this.project.clusterFormManifests?{clusterFormManifests:structuredClone(this.project.clusterFormManifests)}:{})};}
+  private restore(s:Snapshot){this.rig.data=structuredClone(s.data);if(s.semanticCatalog)this.project.semanticCatalog=structuredClone(s.semanticCatalog);if(s.clusterFormManifests)this.project.clusterFormManifests=structuredClone(s.clusterFormManifests);else delete this.project.clusterFormManifests;this.rig.reset();this.rig.apply(s.values);this.mark();this.render();}
   private changeSemanticCatalog(next:Cluster2DSemanticCatalog){if(!this.active||this.interactionActive)throw Error('Katalog nur im aktiven, ruhenden Studio bearbeiten.');const before=this.snapshot();this.project.semanticCatalog=structuredClone(next);this.history.push(before);this.mark();this.render();this.hooks.feedback('Gemeinsamer Anatomie-/Oberflächenkatalog geändert. Rückgängig ist möglich; beide Formen verwenden denselben Katalog.');}
   private mark(){this.automaticCheck?.abort();this.automaticProposal=null;this.automaticOutcome='';this.moveCheck?.abort();this.surfaceCheck?.abort();this.weightCorrection=null;this.landmarkReviewManifest=null;this.landmarkReviewPreview=null;this.revision++;this.dirty=true;this.hooks.changed();}
   private mutate(fn:()=>void){this.rig.stopSkinPreview();const before=this.snapshot();fn();flagAffectedPoses(before.data,this.data);this.history.push(before);this.mark();this.render();}
@@ -298,7 +298,7 @@ export class StudioEditor {
     <label for="studio-moves">Eigene Bewegungen</label><select id="studio-moves"></select><label for="move-steps">Posenfolge dieser Bewegung</label><select id="move-steps" data-user-text></select><div class="studio-actions"><button id="move-step-up">Schritt nach vorne</button><button id="move-step-down">Schritt nach hinten</button><button id="move-step-remove">Schritt entfernen</button></div><div class="studio-actions"><button id="move-step-add">Ausgewählte Pose einfügen</button><button id="move-step-replace">Schritt durch ausgewählte Pose ersetzen</button></div><p class="subtle">Die Pose oben auswählen. Wiederholungen sind einzelne Schritte; Posen bleiben im Projekt erhalten.</p><p id="move-review" class="studio-review" hidden>Diese Bewegung enthält Posen mit Prüfhinweisen. Vorschau ansehen und die markierten Posen prüfen.</p><div class="studio-actions"><button id="move-preview">Vorschau</button><button id="move-stop">Stopp</button><button id="move-inspect-save" ${this.inspectionOrigin?'':'hidden'}>Prüfbild als neue Pose übernehmen</button><button id="move-delete">Löschen</button></div><div class="studio-actions"><button id="move-check-limits">Beugegrenzen der Bewegung prüfen</button><button id="move-check-surface">Oberfläche der Bewegung prüfen</button><button id="move-check-cancel">Prüfung abbrechen</button></div><div id="move-limit-result" role="status"></div><div id="move-surface-result" role="status"></div><div class="studio-actions"><button id="move-export">Move exportieren</button><button id="move-glb-export">Move als GLB (Animation)</button><button id="move-import">Move importieren</button><input id="move-file" type="file" accept=".json,.pakachi-move.json" hidden></div><p class="subtle">GLB: Knochen-, Figuren- und Oberflächenbewegung. Schleife im Zielprogramm wählen.</p><label for="library-moves">Gemeinsame Move-Sammlung</label><select id="library-moves" data-user-text></select><div class="studio-actions"><button id="library-refresh">Sammlung laden</button><button id="library-import">Aus Sammlung importieren</button></div><p class="subtle">Die Sammlung gehört zur Anwendung. Import nur bei passendem Modell und Rig.</p><p class="subtle">Move-Dateien benötigen dasselbe Modell und dieselbe Gelenkstruktur. Kein automatisches Retargeting.</p></div>
     <p class="subtle">Projekt laden: „Projekt laden“ oben. Mausrad: Nahzoom · rechts ziehen: Ansicht verschieben.</p>`;
     const q=<E extends HTMLElement=HTMLElement>(id:string)=>this.host.querySelector<E>(`#${id}`)!;
-    mountClusterFormComparison(q('cluster-form-comparison'),()=>this.project.semanticCatalog);
+    mountClusterFormComparison(q('cluster-form-comparison'),()=>this.project.semanticCatalog,()=>this.project.clusterFormManifests,pair=>this.setClusterFormManifests(pair));
     q<HTMLButtonElement>('cluster-export-current-manifest').onclick=()=>{void (async()=>{
       const button=q<HTMLButtonElement>('cluster-export-current-manifest'),status=q('cluster-manifest-status');
       if(button.disabled)return;button.disabled=true;status.textContent='Quellasset prüfen und Meshinventar erstellen …';
@@ -842,6 +842,14 @@ export class StudioEditor {
     this.mutate(()=>{const before=this.snapshot();try{if(p.kind==='geometry')this.rig.addCorrective(p.shape!);else this.rig.transferWeights(from,to,p.amount,p.region);const actual=inspectPoseSurface(this.rig,p.target);if(!noMeasuredRegression(p.after,actual)||actual.issues>p.after.issues)throw Error('Korrektur stimmt nicht mit dem geprüften Vorschlag überein.');this.rig.apply(before.values);}catch(error){this.rig.data=before.data;this.rig.reset();this.rig.apply(before.values);throw error;}});this.view.setEnabled(true);this.view.refresh();this.hooks.feedback('Geprüfte Hautkorrektur übernommen. Posen und Moves bleiben erhalten.');
   }
   restoreDirty(value:boolean){this.dirty=value;this.render();}
+  setClusterFormManifests(pair:NonNullable<StudioProject['clusterFormManifests']>){
+    if(!this.active||this.interactionActive)throw new Error('Form-Manifeste nur im aktiven, ruhenden Studio speichern.');
+    const catalog=this.project.semanticCatalog;
+    if(!catalog)throw new Error('Gemeinsamer Charakterkatalog fehlt.');
+    compareClusterCharacterForms(catalog,pair.animal,pair.humanoid);
+    const before=this.snapshot();this.project.clusterFormManifests=structuredClone(pair);this.history.push(before);this.mark();this.render();
+    this.hooks.feedback('Tier- und Arbeitsform-Manifeste gemeinsam im Studio-Projekt gespeichert.');
+  }
   exportProject():StudioProject {
     if(this.interactionActive)throw new Error('Studio-Bewegung zuerst beenden.');
     const studio=structuredClone(this.data);

@@ -2,6 +2,7 @@ import { compareClusterCharacterForms } from './cluster-form-comparison.ts';
 import type { ClusterFormComparison } from './cluster-form-comparison.ts';
 import type { Cluster2DSemanticCatalog } from './cluster-2d-classifier.ts';
 import type { ClusterManifest } from './cluster-architecture.ts';
+import type { ClusterFormManifestPair } from './studio-data.ts';
 const MAX_MANIFEST_BYTES = 20 * 1024 * 1024;
 function node<K extends keyof HTMLElementTagNameMap>(tag: K, text?: string): HTMLElementTagNameMap[K] {
   const result = document.createElement(tag);
@@ -52,7 +53,7 @@ function render(host: HTMLElement, report: ClusterFormComparison): void {
   }
   host.append(details, node('p', 'Dreieckszahlen messen nur semantische Abdeckung. Sie belegen weder geometrische Gleichheit noch Morph-Kompatibilität. Mesh-IDs bleiben je Form getrennt.'));
 }
-export function mountClusterFormComparison(host: HTMLElement, getCatalog: () => Cluster2DSemanticCatalog | undefined): {dispose: () => void} {
+export function mountClusterFormComparison(host: HTMLElement, getCatalog: () => Cluster2DSemanticCatalog | undefined, getSavedPair: () => ClusterFormManifestPair | undefined = () => undefined, onSave: (pair: ClusterFormManifestPair) => void = () => {}): {dispose: () => void} {
   const panel = node('section'); panel.className = 'form-comparison';
   panel.append(node('h3', 'Tierform ↔ Arbeitsform vergleichen'));
   panel.append(node('p', 'Lade beide Cluster-Manifeste. Sie werden gegen den gemeinsamen Charakterkatalog des geöffneten Studio-Projekts validiert.'));
@@ -66,6 +67,8 @@ export function mountClusterFormComparison(host: HTMLElement, getCatalog: () => 
   const status = node('p', 'Beide Manifeste auswählen und die gemeinsame Charakteridentität ausdrücklich bestätigen.'); status.setAttribute('role','status'); status.setAttribute('aria-live','polite');
   const output = node('div'); output.className = 'form-comparison-report';
   const update = () => { button.disabled = !animal.files?.length || !humanoid.files?.length || !pairing.checked; };
+  const saved=getSavedPair();
+  if(saved){try{const catalog=getCatalog();if(!catalog)throw new Error('Katalog fehlt.');render(output,compareClusterCharacterForms(catalog,saved.animal,saved.humanoid));status.textContent='Gespeichertes Manifestpaar geladen.';}catch(error){status.textContent='Gespeichertes Manifestpaar ungültig: '+(error instanceof Error?error.message:String(error));}}
   animal.addEventListener('change', update); humanoid.addEventListener('change', update); pairing.addEventListener('change', update);
   button.addEventListener('click', async () => {
     button.disabled = true; output.replaceChildren();
@@ -73,8 +76,10 @@ export function mountClusterFormComparison(host: HTMLElement, getCatalog: () => 
       const catalog = getCatalog();
       if (!catalog) throw new Error('Zuerst ein Studio-Projekt mit gemeinsamem Charakterkatalog öffnen.');
       const [a, h] = await Promise.all([readManifest(animal, 'animal'), readManifest(humanoid, 'humanoid')]);
+      const pair={animal:a,humanoid:h};
       render(output, compareClusterCharacterForms(catalog, a, h));
-      status.textContent = 'Vergleich erfolgreich. Die Originalmanifeste wurden nicht verändert.';
+      onSave(pair);
+      status.textContent = 'Vergleich erfolgreich. Beide Manifeste wurden gemeinsam im Studio-Projekt gespeichert.';
     } catch (error) { status.textContent = error instanceof Error ? error.message : String(error); }
     finally { update(); }
   });

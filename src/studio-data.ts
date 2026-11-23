@@ -6,6 +6,8 @@ import type {ImageReferenceDocument} from './image-reference.ts';
 import type {ImageReferenceGenerationManifest} from './image-reference-crop.ts';
 import {validateCluster2DSemanticCatalog} from './cluster-2d-classifier.ts';
 import type {Cluster2DSemanticCatalog} from './cluster-2d-classifier.ts';
+import {compareClusterCharacterForms} from './cluster-form-comparison.ts';
+import type {ClusterManifest} from './cluster-architecture.ts';
 import type {ReviewReason} from './studio-review.ts';
 export type Vec3 = [number, number, number];
 export type Quat = [number, number, number, number];
@@ -78,12 +80,15 @@ export interface StudioData {
   boneInsertions?: BoneInsertion[];
   points: ControlPoint[]; links: [string, string][]; boneRest: Transform[]; poses: Pose[]; moves: StudioMove[]; draft?: Record<string,Transform>;
 }
+export interface ClusterFormManifestPair {animal:ClusterManifest;humanoid:ClusterManifest}
 export interface StudioProject {
   format: 'pakachi-studio'; version: 1; model: string;
   avatar: { id: string; name: string; description: string; moves: {id:string;name:string;clip:string;loop:boolean}[]; defaultMove?: string; states?: Record<string,string> };
   studio: StudioData;
   /** Shared character-wide anatomy and surface taxonomy for both avatar forms. */
   semanticCatalog?: Cluster2DSemanticCatalog;
+  /** Validated animal/work-form manifests; mesh identities remain form-local. */
+  clusterFormManifests?: ClusterFormManifestPair;
   /** Confirmed source-image segmentation retained with the avatar project. */
   imageReference?: ImageReferenceDocument;
   /** Exact selected crop provenance used for the accepted generation. */
@@ -144,6 +149,15 @@ export function validBendLimit(v:unknown):v is {min:number;max:number}{return ob
 export const validFigureScale = (v:unknown):v is number => typeof v==='number' && Number.isFinite(v) && v>=.1 && v<=5;
 const transform = (v:unknown,figure=false) => obj(v) && (v.scale===undefined || figure && validFigureScale(v.scale)) && vector(v.position,3) && vector(v.rotation,4) && Math.abs((v.rotation as number[]).reduce((s,x)=>s+x*x,0)-1)<.01;
 function require(condition:unknown, message='Ungültige Studio-Projektdatei.'): asserts condition { if(!condition) throw new Error(message); }
+export function validClusterFormManifestPair(value:unknown,catalog:Cluster2DSemanticCatalog):value is ClusterFormManifestPair {
+ if(!obj(value)||Object.keys(value).length!==2||!('animal' in value)||!('humanoid' in value))return false;
+ try {
+  const animal=value.animal as ClusterManifest,humanoid=value.humanoid as ClusterManifest;
+  if(JSON.stringify(animal).length>20_000_000||JSON.stringify(humanoid).length>20_000_000)return false;
+  compareClusterCharacterForms(catalog,animal,humanoid);
+  return true;
+ } catch{return false;}
+}
 export function parseProject(input: unknown): StudioProject {
   require(obj(input) && input.format==='pakachi-studio' && input.version===1,'Unbekanntes Studio-Projektformat.');
   require(input.imageReference===undefined||validImageReferenceDocument(input.imageReference),'Ungültige oder beschädigte Bildreferenzdaten.');

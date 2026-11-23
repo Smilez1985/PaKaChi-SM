@@ -311,7 +311,7 @@ async function loadAvatar(avatar?: Avatar, file?: File, project?: StudioProject,
     if(editor?.interactionActive)throw new Error('Studio-Bewegung zuerst beenden.');
     const before=restore.remember!==false?captureModel():null;if(before)commitHistory=modelHistory.checkpoint(before);
     const semanticCatalog=project?.semanticCatalog??restore.semanticCatalog;
-    const projectSource = {format:'pakachi-studio' as const,version:1 as const,model:project?.model ?? encodeModel(buffer),avatar:{...next,moves},...(semanticCatalog?{semanticCatalog:structuredClone(semanticCatalog)}:{}),...(project?.imageReference?{imageReference:project.imageReference}:restore.imageReference?{imageReference:restore.imageReference}:{}),...(project?.generationReference?{generationReference:project.generationReference}:restore.generationReference?{generationReference:restore.generationReference}:{})};
+    const projectSource = {format:'pakachi-studio' as const,version:1 as const,model:project?.model ?? encodeModel(buffer),avatar:{...next,moves},...(semanticCatalog?{semanticCatalog:structuredClone(semanticCatalog)}:{}),...(project?.clusterFormManifests?{clusterFormManifests:structuredClone(project.clusterFormManifests)}:{}),...(project?.imageReference?{imageReference:project.imageReference}:restore.imageReference?{imageReference:restore.imageReference}:{}),...(project?.generationReference?{generationReference:project.generationReference}:restore.generationReference?{generationReference:restore.generationReference}:{})};
     parsed=undefined; // Ownership passes to the candidate, including preparation failures.
     const prepared=candidate=prepareAvatar({model:gltf,avatar:next,moves,source:projectSource,data:project?.studio,studio,speed:Number(el<HTMLSelectElement>('speed').value),dirty:restore.dirty??false,skeleton:el<HTMLInputElement>('skeleton').checked,resume:resumeBase,changed:refreshCapabilities,feedback:text=>message(text),playbackChanged:syncPlayback});
     // No await between the final target check and publication of the prepared candidate.
@@ -366,7 +366,7 @@ async function boot(): Promise<void> {
   },()=>options.language);
   window.addEventListener('pakachi-options',renderCatalog);
   const agents = mountAgentPanel(rpc);
-  const formComparison = mountClusterFormComparison(el('form-comparison-host'), () => editor?.exportProject().semanticCatalog);
+  const formComparison = mountClusterFormComparison(el('form-comparison-host'), () => editor?.exportProject().semanticCatalog, () => editor?.exportProject().clusterFormManifests, pair => editor?.setClusterFormManifests(pair));
   const runtime=mountLocalRuntimePanel(el<HTMLButtonElement>('runtime-open'),{connectPlayer:agents.connectLocal,importModel:async file=>{if(busy)return false;const loaded=await loadAvatar(undefined,file);if(loaded)changeView(true);return loaded;}},()=>options.language);
   mountAssistantPanel(document.querySelector('.agent-panel')!,rpc,()=>options.language,localStorage,undefined,(id,poses,session,revision)=>{if(busy||!editor)throw Error('Studio nicht verfügbar.');return editor.previewSequence(id,poses,session,revision);},(id,corrected,session,revision)=>{if(busy||!editor)throw Error('Studio nicht verfügbar.');const current=editor.inspect();if(current.session!==session||current.revision!==revision)throw Error('Studio-Stand hat sich geändert.');return editor.previewAutomaticSkinCorrection(id,corrected);});
   generationPanel=mountGenerationPanel(el('generation-host'),{

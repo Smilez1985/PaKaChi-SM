@@ -13,6 +13,7 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 ## [Unreleased]
 
 ### Added
+- Tier- und Arbeitsform-Manifeste können nach expliziter gemeinsamer Identitätsbestätigung als vollständiges Paar im Studio-Projekt gespeichert werden. Beim Laden werden beide Manifestverträge gegen den gemeinsamen Charakterkatalog validiert; unvollständige Paare und fremde semantische IDs werden abgewiesen. Beide Form-Manifeste behalten getrennte Mesh-/Quellasset-Identitäten. Speicherung ist in Studio-Undo/Redo eingebunden. Stand: 2026-11-23T21:30:00+01:00 (Europe/Berlin).
 - Kompositbild-Übergabe für zwei ausdrücklich ausgewählte Formen desselben Avatars: bestätigte Hauptregionen werden mit ihrer Quellpixelmaske als zwei unabhängige PNG-Crops extrahiert. Vorher werden Originalbild-SHA-256 und Pixelmaße geprüft; jeder Crop erhält ein eigenes Generierungsmanifest mit Crop-Hash und expliziter Avatar-/Form-/Ansichtsprovenienz. Es gibt keine Links-/Rechts-Heuristik oder automatische Formzuordnung. Der Editor-/Studio-Auftragsablauf für beide Generatorläufe bleibt offen. [CI #45198810004](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/45198810004), Commit `a55a5a2a9f6f53fa8d043c1f762c166aef387fd4`: 101 gezielte Node-Tests, 20 Chromium-Fälle und TypeScript-Check erfolgreich.
 
 
