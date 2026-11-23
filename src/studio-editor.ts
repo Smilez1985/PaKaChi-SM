@@ -238,6 +238,22 @@ export class StudioEditor {
     <p class="subtle">Projekt laden: „Projekt laden“ oben. Mausrad: Nahzoom · rechts ziehen: Ansicht verschieben.</p>`;
     const q=<E extends HTMLElement=HTMLElement>(id:string)=>this.host.querySelector<E>(`#${id}`)!;
     mountClusterFormComparison(q('cluster-form-comparison'),()=>this.project.semanticCatalog);
+    q<HTMLButtonElement>('cluster-export-current-manifest').onclick=()=>{void (async()=>{
+      const button=q<HTMLButtonElement>('cluster-export-current-manifest'),status=q('cluster-manifest-status');
+      if(button.disabled)return;button.disabled=true;status.textContent='Quellasset prüfen und Meshinventar erstellen …';
+      try{
+        const form=q<HTMLSelectElement>('cluster-current-form').value;
+        if(form!=='animal'&&form!=='humanoid')throw Error('Tierform oder Arbeitsform ausdrücklich auswählen.');
+        const manifest=await createStudioFormManifest(this.rig.root,this.project.model,form);
+        if(this.disposed)return;
+        const json=JSON.stringify(manifest,null,2),url=URL.createObjectURL(new Blob([json],{type:'application/json'}));
+        const anchor=document.createElement('a');anchor.href=url;anchor.download=(this.project.avatar.id.replace(/[^a-z0-9_-]/gi,'_')||'pakachi')+'-'+form+'-cluster-manifest.json';anchor.click();
+        window.setTimeout(()=>URL.revokeObjectURL(url),1000);
+        status.textContent='Manifest erzeugt: '+manifest.meshes.length+' Meshes, '+manifest.assignments.length+' unklassifizierte Dreiecke. SHA-256: '+manifest.sourceAssetSha256;
+        this.hooks.feedback('Form-Manifest exportiert. Anatomische und Oberflächen-Zuordnungen bleiben bewusst offen.');
+      }catch(error){status.textContent=error instanceof Error?error.message:String(error);}
+      finally{if(!this.disposed)button.disabled=false;}
+    })();};
     const input=(id:string)=>q<HTMLInputElement>(id);
     const on=(id:string,fn:()=>void)=>{q<HTMLButtonElement>(id).onclick=()=>{try{fn();}catch(e){this.hooks.feedback(e instanceof Error?e.message:String(e));}};};
     const catalog=this.project.semanticCatalog!;
