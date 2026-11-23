@@ -10,6 +10,8 @@ export type ImageRegionGeometry =
 
 export interface ImageReferenceLandmark {
   id:string;
+  /** Stable semantic anchor identity shared across distinct views; each pixel pick keeps its own id. */
+  correspondenceId?:string;
   regionId:string;
   partId:string;
   surfaceLayerId?:string|null;
@@ -338,6 +340,7 @@ export function validateImageReferenceDocument(value:ImageReferenceDocument):Ima
     addId(landmark.id,p+'.id');
     if(!regions.has(landmark.regionId))issues.push({path:p+'.regionId',message:'Landmarke verweist auf eine unbekannte Bildregion.'});
     const semanticId=/^[a-z0-9][a-z0-9_-]{0,127}$/;
+    if(landmark.correspondenceId!==undefined&&(typeof landmark.correspondenceId!=='string'||!semanticId.test(landmark.correspondenceId)))issues.push({path:p+'.correspondenceId',message:'Ansichtsübergreifende Landmarken-ID ist ungültig.'});
     if(typeof landmark.partId!=='string'||!semanticId.test(landmark.partId))issues.push({path:p+'.partId',message:'Anatomische Part-ID ist ungültig.'});
     if(landmark.surfaceLayerId!=null&&(typeof landmark.surfaceLayerId!=='string'||!semanticId.test(landmark.surfaceLayerId)))issues.push({path:p+'.surfaceLayerId',message:'Oberflächen-Layer-ID ist ungültig.'});
     if(typeof landmark.poseId!=='string'||!semanticId.test(landmark.poseId))issues.push({path:p+'.poseId',message:'Pose-ID ist ungültig.'});

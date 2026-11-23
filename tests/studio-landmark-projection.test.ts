@@ -12,8 +12,8 @@ function fixture():ImageReferenceDocument {
   views:[{id:'front',label:'Front',regionIds:['front-region']},{id:'side',label:'Side',regionIds:['side-region']}],
   forms:[{id:'animal-form',label:'Animal',viewIds:['front','side']},{id:'work-form',label:'Work',viewIds:[]}],
   avatars:[{id:'pakachi',label:'PaKaChi',formIds:['animal-form','work-form']}],
-  landmarks:[{id:'eye-left',regionId:'front-region',partId:'head',poseId:'neutral',x:200,y:100,radiusPx:8},
-   {id:'eye-left',regionId:'side-region',partId:'head',poseId:'neutral',x:600,y:100,radiusPx:8}],
+  landmarks:[{id:'eye-left-front',correspondenceId:'eye-left',regionId:'front-region',partId:'head',poseId:'neutral',x:200,y:100,radiusPx:8},
+   {id:'eye-left-side',correspondenceId:'eye-left',regionId:'side-region',partId:'head',poseId:'neutral',x:600,y:100,radiusPx:8}],
   cameraCalibrations:[
    {id:'cal-front',sourceImageSha256:hash,avatarId:'pakachi',formId:'animal-form',poseId:'neutral',viewId:'front',fx:1,fy:1,cx:.5,cy:.5,cameraToWorld:[1,0,0,0,0,1,0,0,0,0,1,0,-1,0,0,1]},
    {id:'cal-side',sourceImageSha256:hash,avatarId:'pakachi',formId:'animal-form',poseId:'neutral',viewId:'side',fx:1,fy:1,cx:.5,cy:.5,cameraToWorld:[1,0,0,0,0,1,0,0,0,0,1,0,1,0,0,1]},

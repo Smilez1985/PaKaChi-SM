@@ -58,7 +58,7 @@ export function createCalibratedLandmarkObservations(
       avatarId: identity.avatarId,
       formId: identity.formId,
       poseId: identity.poseId,
-      landmarkId: landmark.id,
+      landmarkId: landmark.correspondenceId ?? landmark.id,
       partId: landmark.partId,
       x: landmark.x / document.source.width,
       y: landmark.y / document.source.height,
