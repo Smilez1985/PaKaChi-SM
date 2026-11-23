@@ -31,6 +31,7 @@ import type { Cluster2DSemanticCatalog } from './cluster-2d-classifier.ts';
 import type { ClusterMeshInventory } from './cluster-inventory.ts';
 import { createStudioFormManifest } from './studio-form-manifest.ts';
 import { createStudioLandmarkEvidenceBundle, validateStudioLandmarkEvidenceBundle } from './studio-landmark-evidence.ts';
+import { createClusterLandmarkClassificationPreview } from './cluster-landmark-preview.ts';
 import { createStudioLandmarkSurfacePick } from './studio-landmark-picking.ts';
 import { mountClusterFormComparison } from './cluster-form-comparison-panel.ts';
 import type { StudioSurfacePickHit } from './studio-landmark-picking.ts';
@@ -291,7 +292,11 @@ export class StudioEditor {
           const parsed:unknown=JSON.parse(await file.text());
           const evidence=validateStudioLandmarkEvidenceBundle(this.rig.root,manifest,this.landmarkDocument,parsed,q<HTMLInputElement>('cluster-landmark-form-mapping-confirm').checked);
           if(this.disposed)return;
-          status.textContent='Landmarken-Beleg gültig: '+evidence.correspondences.length+' bestätigte Oberflächenpunkte. Keine Manifest- oder Mesh-Zuordnung wurde geändert.';
+          const preview=createClusterLandmarkClassificationPreview(manifest,evidence);
+          const previewJson=JSON.stringify(preview,null,2),previewUrl=URL.createObjectURL(new Blob([previewJson],{type:'application/json'}));
+          const previewAnchor=document.createElement('a');previewAnchor.href=previewUrl;previewAnchor.download=(this.project.avatar.id.replace(/[^a-z0-9_-]/gi,'_')||'pakachi')+'-'+form+'-landmark-classification-preview.json';previewAnchor.click();
+          window.setTimeout(()=>URL.revokeObjectURL(previewUrl),1000);
+          status.textContent='Landmarken-Beleg gültig. Review-Vorschau exportiert: '+preview.items.length+' Dreieck-Hinweise ('+preview.items.filter(item=>item.status==='conflict').length+' Konflikte). Keine Manifest-Zuordnung geändert.';
           this.hooks.feedback('Landmarken-Beleg erfolgreich gegen das aktuelle Modell und die Bildreferenz geprüft.');
         }catch(error){status.textContent=error instanceof Error?error.message:String(error);}
         finally{if(!this.disposed)button.disabled=false;}
