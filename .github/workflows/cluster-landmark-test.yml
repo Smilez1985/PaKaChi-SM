@@ -6,6 +6,7 @@ on:
       - '.github/workflows/cluster-landmark-test.yml'
       - 'src/cluster-*.ts'
       - 'src/studio-landmark-picking.ts'
+      - 'src/studio-landmark-evidence.ts'
       - 'src/studio-form-manifest.ts'
       - 'src/studio-editor.ts'
       - 'src/main.ts'
