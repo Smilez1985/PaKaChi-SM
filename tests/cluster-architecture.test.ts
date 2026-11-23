@@ -68,3 +68,38 @@ test('recalculation rejects candidates from another source asset or stale mesh i
 test('uses deterministic SHA-256 asset identity without Node-only dependencies',async()=>{
  assert.equal(await clusterAssetHash(new TextEncoder().encode('abc')),'ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad');
 });
+
+test('accepts one reviewed landmark triangle immutably with locked evidence provenance',()=>{
+ const source=fixture();
+ source.assignments[0]!.partId=null;source.assignments[0]!.surfaceLayerId=null;
+ const accepted=applyClusterOperation(source,{
+  type:'assign-triangle',meshId:'mesh-main',triangleIndex:0,partId:'head',surfaceLayerId:'fur',
+  sourceImageSha256:'b'.repeat(64),landmarkIds:['left-eye','right-eye'],
+ },'user','locked');
+ assert.equal(source.assignments[0]!.partId,null);
+ assert.equal(accepted.assignments[0]!.partId,'head');
+ assert.equal(accepted.assignments[0]!.surfaceLayerId,'fur');
+ assert.equal(accepted.assignments[0]!.origin,'user');
+ assert.equal(accepted.assignments[0]!.policy,'locked');
+ assert.equal(accepted.revision,1);
+ assert.equal(accepted.overrides[0]!.operation.type,'assign-triangle');
+ assert.deepEqual(validateClusterManifest(accepted),[]);
+});
+test('rejects a reviewed triangle proposal when the target is already classified or protected',()=>{
+ const source=fixture();
+ assert.throws(()=>applyClusterOperation(source,{
+  type:'assign-triangle',meshId:'mesh-main',triangleIndex:0,partId:'head',surfaceLayerId:'fur',
+  sourceImageSha256:'b'.repeat(64),landmarkIds:['left-eye'],
+ }),/already classified or protected/);
+});
+test('rejects malformed landmark provenance and out-of-range triangle acceptance',()=>{
+ const source=fixture();
+ assert.throws(()=>applyClusterOperation(source,{
+  type:'assign-triangle',meshId:'mesh-main',triangleIndex:9,partId:'head',surfaceLayerId:'fur',
+  sourceImageSha256:'b'.repeat(64),landmarkIds:['left-eye'],
+ }),/Invalid cluster operation|Triangle not found/);
+ assert.throws(()=>applyClusterOperation(source,{
+  type:'assign-triangle',meshId:'mesh-main',triangleIndex:0,partId:'head',surfaceLayerId:'fur',
+  sourceImageSha256:'invalid',landmarkIds:['left-eye'],
+ }),/Invalid cluster operation/);
+});
