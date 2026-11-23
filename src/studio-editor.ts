@@ -30,6 +30,7 @@ import type { ImageReferenceDocument } from './image-reference.ts';
 import type { Cluster2DSemanticCatalog } from './cluster-2d-classifier.ts';
 import type { ClusterMeshInventory } from './cluster-inventory.ts';
 import { createStudioFormManifest } from './studio-form-manifest.ts';
+import { createStudioLandmarkEvidenceBundle } from './studio-landmark-evidence.ts';
 import { createStudioLandmarkSurfacePick } from './studio-landmark-picking.ts';
 import { mountClusterFormComparison } from './cluster-form-comparison-panel.ts';
 import type { StudioSurfacePickHit } from './studio-landmark-picking.ts';
@@ -208,7 +209,7 @@ export class StudioEditor {
     <section class="studio-semantic-catalog" aria-labelledby="semantic-catalog-title"><h3 id="semantic-catalog-title">Gemeinsame Anatomie &amp; Oberflächen</h3><p class="subtle">Ein Charakterkatalog für Tierform und Arbeitsform. IDs bleiben stabil; Umbenennen ändert nur die lesbare Bezeichnung.</p>
       <h4>Anatomische Teile</h4><label for="catalog-part">Teil auswählen</label><select id="catalog-part"></select><label for="catalog-part-id">Stabile Part-ID</label><input id="catalog-part-id" maxlength="128" pattern="[a-z0-9][a-z0-9_-]*"><label for="catalog-part-label">Bezeichnung</label><input id="catalog-part-label" maxlength="100"><label for="catalog-part-parent">Übergeordnetes Teil</label><select id="catalog-part-parent"></select><div class="studio-actions"><button id="catalog-part-save">Teil speichern / hinzufügen</button><button id="catalog-part-delete">Teil löschen</button></div>
       <h4>Oberflächen-Layer</h4><label for="catalog-layer">Layer auswählen</label><select id="catalog-layer"></select><label for="catalog-layer-id">Stabile Layer-ID</label><input id="catalog-layer-id" maxlength="128" pattern="[a-z0-9][a-z0-9_-]*"><label for="catalog-layer-label">Bezeichnung</label><input id="catalog-layer-label" maxlength="100"><label for="catalog-layer-part">Anatomische Zuordnung</label><select id="catalog-layer-part"></select><div class="studio-actions"><button id="catalog-layer-save">Layer speichern / hinzufügen</button><button id="catalog-layer-delete">Layer löschen</button></div><p class="subtle" id="catalog-feedback" role="status">Gelöschte Teile oder Layer mit abhängigen Kindern, Landmarken oder Bindungen werden geschützt.</p></section>
-    <section class="studio-form-manifest"><h3>Manifest für geöffnetes Modell erzeugen</h3><p class="subtle">Die Form wird ausdrücklich von dir ausgewählt. Das Quellasset wird per SHA-256 gebunden; alle Dreiecke bleiben zunächst anatomisch und als Oberflächen-Layer unklassifiziert.</p><label for="cluster-current-form">Form dieses Modells</label><select id="cluster-current-form"><option value="animal">Tierform</option><option value="humanoid">Arbeitsform</option></select><button id="cluster-export-current-manifest">Unklassifiziertes Form-Manifest exportieren</button><p id="cluster-manifest-status" role="status" aria-live="polite">Noch kein Manifest erzeugt.</p></section><section class="studio-form-comparison"><div id="cluster-form-comparison"></div></section>
+    <section class="studio-form-manifest"><h3>Manifest für geöffnetes Modell erzeugen</h3><p class="subtle">Die Form wird ausdrücklich von dir ausgewählt. Das Quellasset wird per SHA-256 gebunden; alle Dreiecke bleiben zunächst anatomisch und als Oberflächen-Layer unklassifiziert.</p><label for="cluster-current-form">Form dieses Modells</label><select id="cluster-current-form"><option value="animal">Tierform</option><option value="humanoid">Arbeitsform</option></select><button id="cluster-export-current-manifest">Unklassifiziertes Form-Manifest exportieren</button><button id="cluster-export-landmark-evidence">Bestätigte Landmarken-Belege exportieren</button><p id="cluster-manifest-status" role="status" aria-live="polite">Noch kein Manifest erzeugt.</p></section><section class="studio-form-comparison"><div id="cluster-form-comparison"></div></section>
     <button id="figure-select" ${this.edit?'hidden':''}>Gesamte Figur bewegen</button>
     <label for="studio-points">Gelenk / Gesichtspunkt</label><select id="studio-points"><option value="">Punkt auswählen …</option></select>
     <div class="studio-actions" ${this.edit?'':'hidden'}><label>Position auf der Knochenstrecke <output id="bone-ratio-value">${Math.round(this.insertionRatio*100)} %</output><input id="bone-ratio" type="range" min="10" max="90" step="1" value="${Math.round(this.insertionRatio*100)}" aria-label="Position des Zwischengelenks"><span class="subtle">Vom Elternknochen zum ausgewählten Kindknochen; 50 % = Mitte.</span></label><button id="bone-add">＋ Knochen setzen</button><button id="bone-insert">Knochen dazwischen einfügen</button><button id="point-add">＋ Punkt setzen</button><button id="point-connect" ${this.point?'':'disabled'}>Verbinden / lösen</button></div>
@@ -251,6 +252,25 @@ export class StudioEditor {
         window.setTimeout(()=>URL.revokeObjectURL(url),1000);
         status.textContent='Manifest erzeugt: '+manifest.meshes.length+' Meshes, '+manifest.assignments.length+' unklassifizierte Dreiecke. SHA-256: '+manifest.sourceAssetSha256;
         this.hooks.feedback('Form-Manifest exportiert. Anatomische und Oberflächen-Zuordnungen bleiben bewusst offen.');
+      }catch(error){status.textContent=error instanceof Error?error.message:String(error);}
+      finally{if(!this.disposed)button.disabled=false;}
+    })();};
+    q<HTMLButtonElement>('cluster-export-landmark-evidence').onclick=()=>{void (async()=>{
+      const button=q<HTMLButtonElement>('cluster-export-landmark-evidence'),status=q('cluster-manifest-status');
+      if(button.disabled)return;button.disabled=true;
+      try{
+        const form=q<HTMLSelectElement>('cluster-current-form').value;
+        if(form!=='animal'&&form!=='humanoid')throw Error('Tierform oder Arbeitsform ausdrücklich auswählen.');
+        if(!this.landmarkDocument)throw Error('Zuerst eine Bildreferenz mit bestätigten Landmarken laden.');
+        const manifest=await createStudioFormManifest(this.rig.root,this.project.model,form,new Date().toISOString(),this.project.semanticCatalog);
+        const picks=this.data.landmarkSurfacePicks??[];
+        const evidence=createStudioLandmarkEvidenceBundle(this.rig.root,manifest,this.landmarkDocument,picks);
+        if(this.disposed)return;
+        const json=JSON.stringify(evidence,null,2),url=URL.createObjectURL(new Blob([json],{type:'application/json'}));
+        const anchor=document.createElement('a');anchor.href=url;anchor.download=(this.project.avatar.id.replace(/[^a-z0-9_-]/gi,'_')||'pakachi')+'-'+form+'-landmark-evidence.json';anchor.click();
+        window.setTimeout(()=>URL.revokeObjectURL(url),1000);
+        status.textContent='Landmarken-Beleg exportiert: '+evidence.correspondences.length+' bestätigte Oberflächenpunkte. Manifest-Dreiecke bleiben unverändert unklassifiziert.';
+        this.hooks.feedback('2D/3D-Landmarken als separater, quellgebundener Evidenz-Beleg exportiert. Keine Dreieckszuordnung wurde verändert.');
       }catch(error){status.textContent=error instanceof Error?error.message:String(error);}
       finally{if(!this.disposed)button.disabled=false;}
     })();};
