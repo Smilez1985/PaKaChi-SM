@@ -128,6 +128,7 @@ export function createImageReferenceFormPairCropPlan(
 export interface ImageReferenceFormPairCrops {
  plan:ImageReferenceFormPairCropPlan;
  crops:[File,File];
+ manifests:[ImageReferenceGenerationManifest,ImageReferenceGenerationManifest];
 }
 
 /** Extract both explicitly selected form regions as independent PNGs without modifying the source. */
@@ -147,6 +148,11 @@ export async function cropImageReferenceFormPair(
  }finally{bitmap.close();}
  const plan=createImageReferenceFormPairCropPlan(document,avatarId,selections);
  const selected=selections.map(selection=>document.regions.find(region=>region.id===selection.regionId)!);
- const crops=await Promise.all(selected.map(region=>cropImageReferenceRegion(source,region)));
- return {plan,crops:crops as [File,File]};
+ const crops=await Promise.all(selected.map(region=>cropImageReferenceRegion(source,region))) as [File,File];
+ const cropHashes=await Promise.all(crops.map(async file=>{
+  const digest=await crypto.subtle.digest('SHA-256',await file.arrayBuffer());
+  return Array.from(new Uint8Array(digest),value=>value.toString(16).padStart(2,'0')).join('');
+ })) as [string,string];
+ const manifests=selections.map((selection,index)=>createImageReferenceGenerationManifest(document,selection.regionId,cropHashes[index]!)) as [ImageReferenceGenerationManifest,ImageReferenceGenerationManifest];
+ return {plan,crops,manifests};
 }

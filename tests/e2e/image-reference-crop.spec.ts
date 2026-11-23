@@ -410,11 +410,13 @@ test('composite form-pair crop extracts independently confirmed forms and preser
    const target=document.createElement('canvas');target.width=bitmap.width;target.height=bitmap.height;
    const ctx=target.getContext('2d')!;ctx.drawImage(bitmap,0,0);return Array.from(ctx.getImageData(x,y,1,1).data);
   };
-  const result={plan:pair.plan,crops:pair.crops.map((file,index)=>({name:file.name,type:file.type,width:bitmaps[index]!.width,height:bitmaps[index]!.height,center:sample(bitmaps[index]!,10,10),hole:index===0?sample(bitmaps[index]!,85,85):null}))};
+  const result={plan:pair.plan,manifests:pair.manifests,crops:pair.crops.map((file,index)=>({name:file.name,type:file.type,width:bitmaps[index]!.width,height:bitmaps[index]!.height,center:sample(bitmaps[index]!,10,10),hole:index===0?sample(bitmaps[index]!,85,85):null}))};
   bitmaps.forEach(bitmap=>bitmap.close());
   return result;
  });
  expect(result.plan.forms.map(form=>form.form.id)).toEqual(['animal-form','work-form']);
+ expect(result.manifests.map(manifest=>manifest.selection.form.id)).toEqual(['animal-form','work-form']);
+ expect(result.manifests.every(manifest=>/^[a-f0-9]{64}$/.test(manifest.selection.crop.sha256))).toBe(true);
  expect(result.crops.map(crop=>({type:crop.type,width:crop.width,height:crop.height}))).toEqual([
   {type:'image/png',width:180,height:180},{type:'image/png',width:180,height:180}
  ]);
