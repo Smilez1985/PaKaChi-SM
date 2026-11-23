@@ -145,6 +145,8 @@ export class StudioEditor {
     if(!seeds.length||inventory.schemaVersion!==1||!inventory.meshes.length)return;
     this.landmarkDocument=structuredClone(document);
     this.landmarkInventory=inventory;
+    this.landmarkReviewManifest=null;
+    this.landmarkReviewPreview=null;
     this.selectedLandmarkId=seeds[0]!.id;
     this.pendingSurfaceHit=null;
     this.render();
@@ -160,7 +162,7 @@ export class StudioEditor {
   private snapshot():Snapshot{return {data:structuredClone(this.data),values:this.rig.capture(),semanticCatalog:structuredClone(this.project.semanticCatalog!)};}
   private restore(s:Snapshot){this.rig.data=structuredClone(s.data);if(s.semanticCatalog)this.project.semanticCatalog=structuredClone(s.semanticCatalog);this.rig.reset();this.rig.apply(s.values);this.mark();this.render();}
   private changeSemanticCatalog(next:Cluster2DSemanticCatalog){if(!this.active||this.interactionActive)throw Error('Katalog nur im aktiven, ruhenden Studio bearbeiten.');const before=this.snapshot();this.project.semanticCatalog=structuredClone(next);this.history.push(before);this.mark();this.render();this.hooks.feedback('Gemeinsamer Anatomie-/Oberflächenkatalog geändert. Rückgängig ist möglich; beide Formen verwenden denselben Katalog.');}
-  private mark(){this.automaticCheck?.abort();this.automaticProposal=null;this.automaticOutcome='';this.moveCheck?.abort();this.surfaceCheck?.abort();this.weightCorrection=null;this.revision++;this.dirty=true;this.hooks.changed();}
+  private mark(){this.automaticCheck?.abort();this.automaticProposal=null;this.automaticOutcome='';this.moveCheck?.abort();this.surfaceCheck?.abort();this.weightCorrection=null;this.landmarkReviewManifest=null;this.landmarkReviewPreview=null;this.revision++;this.dirty=true;this.hooks.changed();}
   private mutate(fn:()=>void){this.rig.stopSkinPreview();const before=this.snapshot();fn();flagAffectedPoses(before.data,this.data);this.history.push(before);this.mark();this.render();}
   beginPlaybackTransition(){
     const d=this.data;
@@ -573,6 +575,7 @@ export class StudioEditor {
     input('move-file').onchange=()=>{const file=input('move-file').files?.[0],revision=this.revision;input('move-file').value='';if(!file)return;void (async()=>{if(file.size>MAX_MOVE_FILE)throw Error('Move-Datei ist größer als 8 MiB.');await this.importMove(JSON.parse(await file.text()),revision);})().catch(error=>{if(!this.disposed)this.hooks.feedback(error instanceof Error?error.message:'Move-Import fehlgeschlagen.');});};
     if(this.playing){this.host.querySelectorAll<HTMLButtonElement|HTMLInputElement|HTMLSelectElement>('button,input,select').forEach(e=>e.disabled=e.id!=='move-stop'&&e.id!=='studio-agent-edit'&&!(e.id==='move-inspect-save'&&this.inspectionOrigin&&this.paused&&this.data.poses.length<100));}
     if(this.rig.skinPreviewActive){this.host.querySelectorAll<HTMLButtonElement|HTMLInputElement|HTMLSelectElement>('button,input,select').forEach(e=>e.disabled=!['skin-auto-original','skin-auto-preview','skin-auto-stop','skin-auto-apply'].includes(e.id)||e.id!=='skin-auto-stop'&&!this.automaticSummary());}
+    this.renderLandmarkReview();
     this.view.setFigureEnabled(!this.edit);this.view.setRotation(this.rotate && !this.edit);this.view.select(this.selected);this.refreshWeightPreview();this.refreshWeightColors();this.refreshNumbers();
   }
   inspect(args:Record<string,unknown>={}) {
