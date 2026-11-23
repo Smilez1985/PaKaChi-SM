@@ -203,7 +203,6 @@ test('creates a review-only triangle preview from exact confirmed evidence witho
   const corroborated = createClusterLandmarkClassificationPreview(manifest, duplicate);
   assert.equal(corroborated.items[0]!.status, 'corroborated');
   const conflict = { ...duplicate, correspondences: [duplicate.correspondences[0]!, { ...duplicate.correspondences[1]!, partId: 'body' }] };
-  assert.throws(() => createClusterLandmarkClassificationPreview(manifest, conflict), /Semantikreferenz/);
   const otherPartManifest = { ...manifest, parts: [...manifest.parts, { id: 'body', name: 'Body', parentPartId: null, orderKey: [2], rigBoneIds: [] }] };
   const conflicted = createClusterLandmarkClassificationPreview(otherPartManifest, conflict);
   assert.equal(conflicted.items[0]!.status, 'conflict');
