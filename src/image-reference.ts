@@ -82,6 +82,31 @@ export interface ImageReferenceCameraCalibration {
   cameraToWorld: number[];
 }
 
+/**
+ * Build a column-major camera-to-world transform from explicit translation and
+ * Euler angles in degrees. Rotation order is X, then Y, then Z (Rz * Ry * Rx).
+ * The camera looks along its local +Z axis. No image-derived defaults are used.
+ */
+export function createImageReferenceCameraTransform(input: {
+  translation: { x: number; y: number; z: number };
+  rotationDegrees: { x: number; y: number; z: number };
+}): number[] {
+  const values = [input.translation.x, input.translation.y, input.translation.z,
+    input.rotationDegrees.x, input.rotationDegrees.y, input.rotationDegrees.z];
+  if (!values.every(Number.isFinite)) throw new Error('invalid-camera-transform-input');
+  const radians = Math.PI / 180;
+  const [rx, ry, rz] = [input.rotationDegrees.x, input.rotationDegrees.y, input.rotationDegrees.z].map(value => value * radians);
+  const sx = Math.sin(rx!), cx = Math.cos(rx!), sy = Math.sin(ry!), cy = Math.cos(ry!), sz = Math.sin(rz!), cz = Math.cos(rz!);
+  const matrix = [
+    cz*cy, sz*cy, -sy, 0,
+    cz*sy*sx-sz*cx, sz*sy*sx+cz*cx, cy*sx, 0,
+    cz*sy*cx+sz*sx, sz*sy*cx-cz*sx, cy*cx, 0,
+    input.translation.x, input.translation.y, input.translation.z, 1,
+  ];
+  if (!isValidImageReferenceCameraTransform(matrix)) throw new Error('invalid-camera-transform-input');
+  return matrix;
+}
+
 /** Validate a column-major camera-to-world rigid transform (local camera +Z forward). */
 export function isValidImageReferenceCameraTransform(values: readonly number[], tolerance = 1e-4): boolean {
   if (!Array.isArray(values) || values.length !== 16 || !values.every(Number.isFinite) ||

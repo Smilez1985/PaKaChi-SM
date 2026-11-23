@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {isValidImageReferenceCameraTransform,addImageReferenceRelation,removeImageReferenceRelation,suggestImageReferenceRelations,checkImageReferenceReadiness,validateImageReferenceDocument,editImageReferenceRectangle,reorderImageReferenceRegions,moveImageReferenceRectangle,resizeImageReferenceRectangle,isValidImageReferencePolygon,isValidImageReferencePolygonWithHoles,moveImageReferencePolygonVertex,moveImageReferencePolygonHoleVertex,splitImageReferencePolygon,splitImageReferenceRegion,simplifyImageReferencePolygon} from '../src/image-reference.ts';
+import {createImageReferenceCameraTransform,isValidImageReferenceCameraTransform,addImageReferenceRelation,removeImageReferenceRelation,suggestImageReferenceRelations,checkImageReferenceReadiness,validateImageReferenceDocument,editImageReferenceRectangle,reorderImageReferenceRegions,moveImageReferenceRectangle,resizeImageReferenceRectangle,isValidImageReferencePolygon,isValidImageReferencePolygonWithHoles,moveImageReferencePolygonVertex,moveImageReferencePolygonHoleVertex,splitImageReferencePolygon,splitImageReferenceRegion,simplifyImageReferencePolygon} from '../src/image-reference.ts';
 import type {ImageReferenceDocument,ImageReferenceRegion} from '../src/image-reference.ts';
 
 const base=():ImageReferenceDocument=>({
@@ -281,4 +281,19 @@ test('accepts only rigid right-handed camera-to-world transforms',()=>{
  const reflected=[...identity];reflected[0]=-1;assert.equal(isValidImageReferenceCameraTransform(reflected),false);
  const perspective=[...identity];perspective[3]=.1;assert.equal(isValidImageReferenceCameraTransform(perspective),false);
  const malformed=[...identity];malformed[15]=0;assert.equal(isValidImageReferenceCameraTransform(malformed),false);
+});
+
+test('builds explicit camera-to-world transforms with documented Euler order',()=>{
+ const identity=createImageReferenceCameraTransform({translation:{x:0,y:0,z:0},rotationDegrees:{x:0,y:0,z:0}});
+ assert.deepEqual(identity,[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]);
+ const translated=createImageReferenceCameraTransform({translation:{x:2,y:-3,z:4},rotationDegrees:{x:0,y:0,z:0}});
+ assert.deepEqual(translated.slice(12),[2,-3,4,1]);
+ const quarterTurn=createImageReferenceCameraTransform({translation:{x:0,y:0,z:0},rotationDegrees:{x:0,y:0,z:90}});
+ assert.ok(Math.abs(quarterTurn[0]!)<1e-10);
+ assert.ok(Math.abs(quarterTurn[1]!-1)<1e-10);
+ assert.ok(isValidImageReferenceCameraTransform(quarterTurn));
+});
+test('rejects non-finite camera transform editor inputs',()=>{
+ assert.throws(()=>createImageReferenceCameraTransform({translation:{x:0,y:Number.NaN,z:0},rotationDegrees:{x:0,y:0,z:0}}),/invalid-camera-transform-input/);
+ assert.throws(()=>createImageReferenceCameraTransform({translation:{x:0,y:0,z:0},rotationDegrees:{x:0,y:0,z:Number.POSITIVE_INFINITY}}),/invalid-camera-transform-input/);
 });

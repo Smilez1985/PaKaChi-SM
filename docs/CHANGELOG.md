@@ -12,6 +12,9 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+### Added
+- Bildreferenz-Kalibrierung: Eine gemeinsame, getestete Hilfsfunktion erzeugt starre Kamera-zu-Welt-Transformationen aus ausdrücklich angegebenen Translationen und Euler-Winkeln (Grad; Rotationsfolge X→Y→Z, Kameravorwärtsrichtung lokal +Z). Nicht-endliche Eingaben werden abgewiesen. Dies ist die Rechenbasis für die noch folgende Kalibrierungsoberfläche; es gibt weiterhin keine automatische Kameraschätzung. Stand: 2026-11-23T13:05:00+01:00 (Europe/Berlin).
+
 ### Fixed
 - Kamerakalibrierungen akzeptieren nur noch starre, rechtshändige 4×4-Kameratransformationen. Skalierung, Scherung, Spiegelung und perspektivische Matrizen werden als ungültige Kamera-Posen zurückgewiesen. Stand: 2026-11-23T12:25:00+01:00 (Europe/Berlin).
 
