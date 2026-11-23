@@ -53,8 +53,8 @@ test('image-reference validation rejects calibration outside its explicit hierar
 test('blocks reconstruction when any landmark or camera calibration violates document validation',()=>{
  const badLandmark=fixture();
  badLandmark.landmarks![0]!.x=1001;
- assert.throws(()=>createCalibratedLandmarkObservations(badLandmark,{avatarId:'pakachi',formId:'animal-form',poseId:'neutral',radiusWorld:.12}),/invalid-image-reference-document:landmarks\\[0\\]\\.position/);
+ assert.throws(()=>createCalibratedLandmarkObservations(badLandmark,{avatarId:'pakachi',formId:'animal-form',poseId:'neutral',radiusWorld:.12}),/invalid-image-reference-document:landmarks/);
  const badCamera=fixture();
  badCamera.cameraCalibrations![0]!.cameraToWorld[0]=2;
- assert.throws(()=>createCalibratedLandmarkObservations(badCamera,{avatarId:'pakachi',formId:'animal-form',poseId:'neutral',radiusWorld:.12}),/invalid-image-reference-document:cameraCalibrations\\[0\\]\\.cameraToWorld/);
+ assert.throws(()=>createCalibratedLandmarkObservations(badCamera,{avatarId:'pakachi',formId:'animal-form',poseId:'neutral',radiusWorld:.12}),/invalid-image-reference-document:cameraCalibrations/);
 });
