@@ -103,8 +103,9 @@ export function createImageReferenceCameraTransform(input: {
     cz*sy*cx+sz*sx, sz*sy*cx-cz*sx, cy*cx, 0,
     input.translation.x, input.translation.y, input.translation.z, 1,
   ];
-  if (!isValidImageReferenceCameraTransform(matrix)) throw new Error('invalid-camera-transform-input');
-  return matrix;
+  const normalized = matrix.map(value => Object.is(value, -0) ? 0 : value);
+  if (!isValidImageReferenceCameraTransform(normalized)) throw new Error('invalid-camera-transform-input');
+  return normalized;
 }
 
 /** Validate a column-major camera-to-world rigid transform (local camera +Z forward). */
