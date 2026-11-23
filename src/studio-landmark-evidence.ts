@@ -131,7 +131,7 @@ export function validateStudioLandmarkEvidenceBundle(
     throw new Error('Landmarken-Beleg hat eine abweichende Avatar-/Formzuordnung oder Anzahl.');
   }
   for (let index = 0; index < rebuilt.correspondences.length; index++) {
-    const actual = candidate.correspondences[index] as Record<string, unknown>;
+    const actual = candidate.correspondences[index] as unknown as Record<string, unknown>;
     const expected = rebuilt.correspondences[index]!;
     const keys = ['landmarkId','viewId','poseId','meshId','triangleIndex','partId','surfaceLayerId','radius','origin','policy'];
     if (keys.some(key => actual[key] !== (expected as unknown as Record<string, unknown>)[key]) ||
