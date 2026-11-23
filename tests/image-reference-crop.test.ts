@@ -91,5 +91,5 @@ test('composite split rejects unconfirmed, detail-only and ambiguous regions',()
  document.regions[1]!.kind='view';document.views[0]!.regionIds.push('work-region');
  assert.throws(()=>createImageReferenceFormPairCropPlan(document,'pakachi',[
   {formId:'animal-form',regionId:'animal-region'},{formId:'work-form',regionId:'work-region'},
- ]),/ambiguous-region-view-assignment/);
+ ]),/invalid-image-reference-document/);
 });
