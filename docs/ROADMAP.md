@@ -1,6 +1,6 @@
 # Roadmap – offene Aufgaben
 
-**Entwicklungsstand: 0.101.0 · Abgleich: 22.11.2026.** Teil der [Blaupause](README.md).
+**Entwicklungsstand: 0.102.0 · Abgleich: 23.11.2026.** Teil der [Blaupause](README.md).
 
 Diese Roadmap enthält offene Umsetzung und ausstehende Abnahme. Erledigte Änderungen stehen nach Version im [Changelog](CHANGELOG.md); Nachweise und Grenzen im [Prüfstand](PRUEFUNG.md).
 

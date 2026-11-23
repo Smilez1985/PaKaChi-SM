@@ -12,6 +12,12 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+## [0.102.0] - 2026-11-23
+
+### Fixed
+- Die Bildreferenz-Rekonstruktion validiert vor jeder Umwandlung bestätigter 2D-Landmarken das vollständige Dokument. Ungültige Pixelkoordinaten und fehlerhafte Kameratransformationen werden abgewiesen, bevor daraus 3D-Beobachtungen entstehen. Regressionen decken beide Fehlerklassen ab. Stand: 2026-11-23T15:39:14+01:00 (Europe/Berlin).
+
+
 ### Fixed
 - Die Kameraprojektion berücksichtigt jetzt die unterschiedliche Y-Ausrichtung: Bildpixel zählen nach unten, die lokale Kameraachse +Y zeigt nach oben. Ein asymmetrischer Höhen-Landmarken-Test prüft die korrekte Rekonstruktion statt nur zentrierter Bildpunkte. Stand: 2026-11-23T15:12:00+01:00 (Europe/Berlin).
 

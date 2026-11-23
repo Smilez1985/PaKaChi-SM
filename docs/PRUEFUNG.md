@@ -1,8 +1,22 @@
 # Prüfstand und Protokolle
 
-**Softwarestand: 0.101.0 · Dokumentationsabgleich: 2026-11-12T13:20:00+01:00 (Europe/Berlin).**
+**Softwarestand: 0.102.0 · Dokumentationsabgleich: 2026-11-23T15:39:14+01:00 (Europe/Berlin).**
 
 Alle Prüfnachweise stehen in dieser Datei: ein Abschnitt je Softwareversion sowie gesonderte Abschnitte für datierte Zwischenprüfungen. Die Ergebnisse und Grenzen gelten für den jeweils genannten Stand. Spätere Läufe stehen als Nachtrag im selben Abschnitt. Produktänderungen gehören in den [Changelog](CHANGELOG.md), offene Aufgaben in die [Roadmap](ROADMAP.md).
+
+## Version 0.102.0 – Bildreferenz und 2D/3D-Clusterkern
+
+**Meilensteinstand:** 2026-11-23T15:39:14+01:00 (Europe/Berlin). Die Version bündelt den quellhashgebundenen Bildreferenz-Workflow, bestätigte Pixel-Landmarken, manuelle Kamerakalibrierung, ansichtsübergreifende Triangulation und den nicht automatisch übernehmenden Cluster-Kandidatenpfad.
+
+**Verifizierte CI-Nachweise:**
+
+- [Bildreferenz-Workflow #45195453224](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/45195453224), Commit `c4a4341eba573782181947db5cd084070e25e04e`: **success**. `npm ci`, Dependency-Audit, Bildreferenz-Hierarchie und Generierungsfreigabe, kalibrierte Landmarkenprojektion und Bildreferenz→Cluster-Bridge, Crop-Planung, Generierungsfreigabe, HTTP-Transport/Provenienz-Sidecar, persistierte Projektmetadaten, Chromium-Test transparenter Masken sowie abschließender TypeScript-Check erfolgreich.
+- [Cluster-Landmarken-Workflow #45193576167](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/45193576167), Commit `b075073f737b533d6b63f95f8f1533fc0bec80fe`: **success**. Cluster-Landmarken-Regressionen und Browser-Surface-Picking erfolgreich; die Bild-Y-Ausrichtung wurde mit asymmetrischer Höhenprobe abgesichert.
+
+**Inhalt des Meilensteins:** Kamera-Kalibrierungen sind an Quellbild-SHA-256, Avatar, Form, Pose und Ansicht gebunden. Nur bestätigte Bildregionen und explizit passende Kalibrierungen werden in normalisierte Beobachtungen umgewandelt. Mehransichten-Triangulation hält Avatar/Form/Pose/Landmarkenidentität getrennt und berücksichtigt affine GLB-Welttransformationen einschließlich nicht-uniformer Skalierung. Die daraus erzeugte Clusterklassifikation bleibt ein Kandidat; das Quellmanifest wird nicht verändert und eine Übernahme erfordert weiterhin eine separate Nutzerentscheidung. Der vollständige Bildreferenz-Dokumentvalidator läuft vor der Rekonstruktion und weist ungültige Landmarken oder Kameramatrizen zurück.
+
+**Grenzen / nicht Teil der Freigabe:** Keine automatische Kameraschätzung, keine Tiefenableitung aus einer einzelnen Ansicht, keine automatische Avatar-/Formidentifikation und keine automatische Manifestübernahme. Die automatische semantische Erkennung, bildkonditionierte 3D-Rekonstruktion, visuelle Abnahme beider Original-PaKaChi-Formen und deren Rigging bleiben offen. Die technischen Test-GLBs sind weiterhin kein finales Original-PaKaChi. Der gezielte CI-Lauf ersetzt weder den vollständigen `npm test`-Gesamtlauf noch die manuelle Charakterabnahme.
+
 
 
 ## Zwischenprüfung 2026-11-12 – geometrische Naht-/Kontaktklassifikation
