@@ -391,7 +391,7 @@ test('composite form-pair crop extracts independently confirmed forms and preser
   const source=new File([blob],'pakachi-composite.png',{type:'image/png'});
   const digest=await crypto.subtle.digest('SHA-256',await source.arrayBuffer());
   const hash=Array.from(new Uint8Array(digest),value=>value.toString(16).padStart(2,'0')).join('');
-  const document={
+  const reference={
    format:'pakachi-image-reference',version:1,source:{sha256:hash,width:400,height:200},
    regions:[
     {id:'animal-region',label:'Tierform',kind:'view',status:'confirmed',geometry:{type:'polygon',points:[{x:10,y:10},{x:190,y:10},{x:190,y:190},{x:10,y:190}],holes:[[{x:80,y:80},{x:80,y:110},{x:110,y:110},{x:110,y:80}]]}},
@@ -402,7 +402,7 @@ test('composite form-pair crop extracts independently confirmed forms and preser
    avatars:[{id:'pakachi',label:'PaKaChi',formIds:['animal-form','work-form']}],
   };
   const {cropImageReferenceFormPair}=await import('../../src/image-reference-crop.ts');
-  const pair=await cropImageReferenceFormPair(source,document as any,'pakachi',[
+  const pair=await cropImageReferenceFormPair(source,reference as any,'pakachi',[
    {formId:'animal-form',regionId:'animal-region'},{formId:'work-form',regionId:'work-region'}
   ]);
   const bitmaps=await Promise.all(pair.crops.map(file=>createImageBitmap(file)));
