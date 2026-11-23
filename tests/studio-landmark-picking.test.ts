@@ -158,3 +158,23 @@ test('rejects evidence export for mismatched form and image provenance', async (
   assert.throws(() => createStudioLandmarkEvidenceBundle(root, manifest, document(), [{...pick,formId:'other-form'}], true), /Bildreferenz|same image reference/);
   assert.throws(() => createStudioLandmarkEvidenceBundle(root, manifest, document(), [{...pick,sourceImageSha256:'c'.repeat(64)}], true), /Bildreferenz|same image reference/);
 });
+
+test('round-trips a landmark evidence sidecar only when model, image, form and geometry still match', async () => {
+  Object.defineProperty(globalThis, 'crypto', { configurable: true, value: webcrypto });
+  const root = new T.Group();
+  const geometry = new T.BufferGeometry();
+  geometry.setAttribute('position', new T.Float32BufferAttribute([0,0,0, 1,0,0, 0,1,0], 3));
+  root.add(new T.Mesh(geometry));
+  const manifest = await createStudioFormManifest(root, Buffer.from('roundtrip source').toString('base64'), 'animal', new Date().toISOString(), createPaKaChiSemanticCatalog());
+  const pick = createStudioLandmarkSurfacePick(input());
+  pick.meshId = manifest.meshes[0]!.id;
+  const exported = createStudioLandmarkEvidenceBundle(root, manifest, document(), [pick], true);
+  const { validateStudioLandmarkEvidenceBundle } = await import('../src/studio-landmark-evidence.ts');
+  const imported = validateStudioLandmarkEvidenceBundle(root, manifest, document(), JSON.parse(JSON.stringify(exported)), true);
+  assert.deepEqual(imported, exported);
+  assert.throws(() => validateStudioLandmarkEvidenceBundle(root, manifest, document(), exported, false), /ausdrücklich bestätigt/);
+  assert.throws(() => validateStudioLandmarkEvidenceBundle(root, {...manifest, sourceAssetSha256:'c'.repeat(64)}, document(), exported, true), /anderes Quellmodell/);
+  const changed = JSON.parse(JSON.stringify(exported));
+  changed.correspondences[0].position[0] += 0.1;
+  assert.throws(() => validateStudioLandmarkEvidenceBundle(root, manifest, document(), changed, true), /Mesh-Geometrie/);
+});
