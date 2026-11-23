@@ -106,7 +106,14 @@ test('studio UI previews a 3D hit and persists it only after explicit confirmati
   });
   editor.configureLandmarkPicking(project.imageReference, inventory());
   editor.enter();
+  const reviewState=editor as unknown as {landmarkReviewManifest:unknown;landmarkReviewPreview:unknown};
+  reviewState.landmarkReviewManifest={overrides:[]};
+  reviewState.landmarkReviewPreview={items:[{meshId:inventory().meshes[0]!.id,triangleIndex:0,status:'single-evidence',evidenceCount:1,landmarkIds:['left-eye'],proposedPartId:'head',proposedSurfaceLayerId:'fur',reasons:[]}]};
   button('#mode-rig').click();
+  assert.match(host.textContent??'',/Einzelprüfung der Dreieck-Vorschläge/);
+  assert.match(host.textContent??'',/Diesen Vorschlag übernehmen/);
+  button('#studio-new').click();
+  assert.match(host.textContent??'',/Noch keine Klassifikationsvorschläge geladen/);
   assert.ok(host.querySelector('#landmark-pick-select'));
   assert.equal(button('#landmark-surface-confirm').disabled, true);
   button('#landmark-surface-pick').click();
