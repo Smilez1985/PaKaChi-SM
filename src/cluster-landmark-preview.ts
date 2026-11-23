@@ -64,10 +64,11 @@ export function createClusterLandmarkClassificationPreview(
     const partIds = new Set(group.map(item => item.partId));
     const layerIds = new Set(group.map(item => item.surfaceLayerId));
     const conflict = partIds.size !== 1 || layerIds.size !== 1;
+    const status: ClusterLandmarkPreviewItem['status'] = conflict ? 'conflict' : group.length > 1 ? 'corroborated' : 'single-evidence';
     return {
       meshId: first.meshId,
       triangleIndex: first.triangleIndex,
-      status: conflict ? 'conflict' : group.length > 1 ? 'corroborated' : 'single-evidence',
+      status,
       evidenceCount: group.length,
       landmarkIds: group.map(item => item.landmarkId).sort(),
       proposedPartId: partIds.size === 1 ? first.partId : null,
