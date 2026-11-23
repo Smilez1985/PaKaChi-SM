@@ -444,3 +444,41 @@ test('composite form-pair crop rejects a different source image even with matchi
  });
  expect(error).toBe('image-reference-source-hash-mismatch');
 });
+
+
+test('image-reference editor exposes explicit same-avatar form-pair crops to the generation host',async({page})=>{
+ await page.route('**/',route=>route.fulfill({contentType:'text/html',body:'<!doctype html><html><body></body></html>'}));
+ await page.goto('/');
+ const result=await page.evaluate(async()=>{
+  const canvas=document.createElement('canvas');canvas.width=400;canvas.height=200;
+  const context=canvas.getContext('2d')!;context.fillStyle='#173b25';context.fillRect(0,0,200,200);context.fillStyle='#204080';context.fillRect(200,0,200,200);
+  const blob=await new Promise<Blob>(resolve=>canvas.toBlob((value:Blob|null)=>resolve(value!),'image/png'));
+  const source=new File([blob],'pakachi-pair.png',{type:'image/png'});
+  const digest=await crypto.subtle.digest('SHA-256',await source.arrayBuffer());
+  const hash=Array.from(new Uint8Array(digest),value=>value.toString(16).padStart(2,'0')).join('');
+  const initial={
+   format:'pakachi-image-reference',version:1,source:{sha256:hash,width:400,height:200},
+   regions:[
+    {id:'animal-region',label:'Tierform',kind:'view',status:'confirmed',geometry:{type:'rectangle',x:10,y:10,width:180,height:180}},
+    {id:'work-region',label:'Arbeitsform',kind:'view',status:'confirmed',geometry:{type:'rectangle',x:210,y:10,width:180,height:180}},
+   ],
+   views:[{id:'animal-view',label:'Tierform frontal',regionIds:['animal-region']},{id:'work-view',label:'Arbeitsform frontal',regionIds:['work-region']}],
+   forms:[{id:'animal-form',label:'Tierform',viewIds:['animal-view']},{id:'work-form',label:'Arbeitsform',viewIds:['work-view']}],
+   avatars:[{id:'pakachi',label:'PaKaChi',formIds:['animal-form','work-form']}],
+  };
+  const {mountImageReferenceEditor}=await import('../../src/image-reference-editor.ts');
+  const host=document.createElement('div');document.body.append(host);
+  const editor=mountImageReferenceEditor(host,source,()=> 'en',()=>{},initial as any);
+  const pair=await editor.selectedFormPairPackage('pakachi',[
+   {formId:'animal-form',regionId:'animal-region'},{formId:'work-form',regionId:'work-region'}
+  ]);
+  const result={avatar:pair.plan.avatar.id,forms:pair.manifests.map(item=>item.selection.form.id),regionIds:pair.manifests.map(item=>item.selection.regionId),sourceHashes:pair.manifests.map(item=>item.source.sha256),cropHashes:pair.manifests.map(item=>item.selection.crop.sha256),sizes:pair.crops.map(file=>file.size),types:pair.crops.map(file=>file.type)};
+  editor.dispose();return result;
+ });
+ expect(result).toMatchObject({avatar:'pakachi',forms:['animal-form','work-form'],regionIds:['animal-region','work-region'],types:['image/png','image/png']});
+ expect(result.sourceHashes[0]).toBe(result.sourceHashes[1]);
+ expect(result.sourceHashes[0]).toMatch(/^[a-f0-9]{64}$/);
+ expect(result.cropHashes.every(hash=>/^[a-f0-9]{64}$/.test(hash))).toBe(true);
+ expect(result.cropHashes[0]).not.toBe(result.cropHashes[1]);
+ expect(result.sizes.every(size=>size>0)).toBe(true);
+});
