@@ -12,6 +12,9 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+### Added
+- Avatar-Studio: Bereits übernommene Landmarken-Manifeste lassen sich wiederherstellen. Der Import prüft Quellasset-Hash, Form, Meshinventar, Anatomie-/Oberflächenkatalog, aktuellen Bild-Hash und das vollständige Override-Protokoll. Ausschließlich gesperrte Einzel-Dreieck-Zuweisungen aus Nutzerbestätigungen werden erneut angewendet; manipulierte oder fremde Zuweisungen werden abgewiesen. Stand: 2026-11-23T10:20:42+01:00 (Europe/Berlin).
+
 ### Fixed
 - Avatar-Studio: Die Einzelprüfung importierter Landmarken-Vorschläge bleibt bei normalen UI-Neudarstellungen sichtbar. Nach einer Studio-Datenänderung oder einer neuen Bildreferenz wird die Vorschau vorsorglich verworfen, damit keine veralteten Vorschläge übernommen werden. Stand: 2026-11-23T10:13:09+01:00 (Europe/Berlin).
 
