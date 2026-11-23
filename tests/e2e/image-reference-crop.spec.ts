@@ -419,7 +419,7 @@ test('composite form-pair crop extracts independently confirmed forms and preser
   {type:'image/png',width:180,height:180},{type:'image/png',width:180,height:180}
  ]);
  expect(Number(result.crops[0].center[1])).toBeGreaterThan(Number(result.crops[0].center[0]));
- expect(Number(result.crops[0].hole?.[3])).toBe(0);
+ expect(Number(result.crops[0]?.hole?.[3])).toBe(0);
  expect(Number(result.crops[1].center[2])).toBeGreaterThan(Number(result.crops[1].center[0]));
 });
 

@@ -83,7 +83,7 @@ test('composite split rejects unconfirmed, detail-only and ambiguous regions',()
  document.regions[1]!.status='suggested';
  assert.throws(()=>createImageReferenceFormPairCropPlan(document,'pakachi',[
   {formId:'animal-form',regionId:'animal-region'},{formId:'work-form',regionId:'work-region'},
- ]),/invalid-image-reference-document/);
+ ]),/form-region-not-confirmed/);
  document.regions[1]!.status='confirmed';document.regions[1]!.kind='detail';
  assert.throws(()=>createImageReferenceFormPairCropPlan(document,'pakachi',[
   {formId:'animal-form',regionId:'animal-region'},{formId:'work-form',regionId:'work-region'},
@@ -91,5 +91,5 @@ test('composite split rejects unconfirmed, detail-only and ambiguous regions',()
  document.regions[1]!.kind='view';document.views[0]!.regionIds.push('work-region');
  assert.throws(()=>createImageReferenceFormPairCropPlan(document,'pakachi',[
   {formId:'animal-form',regionId:'animal-region'},{formId:'work-form',regionId:'work-region'},
- ]),/invalid-image-reference-document/);
+ ]),/ambiguous-region-view-assignment/);
 });
