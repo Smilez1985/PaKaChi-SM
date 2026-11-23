@@ -18,7 +18,9 @@ function manifest(form: 'animal' | 'humanoid', meshId: string): ClusterManifest 
   };
 }
 
-function installFile(input: HTMLInputElement, value: unknown) {
+type TestInput = { files?: unknown; checked: boolean; dispatchEvent(event: any): boolean; click(): void; disabled: boolean };
+
+function installFile(input: TestInput, value: unknown) {
   Object.defineProperty(input, 'files', {
     configurable: true,
     value: [{ size: JSON.stringify(value).length, text: async () => JSON.stringify(value) }],
@@ -37,14 +39,14 @@ test('Studio comparison panel validates both form files and renders the shared s
     const catalog = createPaKaChiSemanticCatalog();
     const panel = mountClusterFormComparison(host as unknown as HTMLElement, () => catalog);
     const inputs = host.querySelectorAll('input');
-    installFile(inputs[0] as unknown as HTMLInputElement, manifest('animal', 'animal-mesh'));
-    installFile(inputs[1] as unknown as HTMLInputElement, manifest('humanoid', 'humanoid-mesh'));
-    const pairing = host.querySelector<HTMLInputElement>('#form-comparison-same-character')!;
-    const button = host.querySelector('button')!;
+    installFile(inputs[0] as unknown as TestInput, manifest('animal', 'animal-mesh'));
+    installFile(inputs[1] as unknown as TestInput, manifest('humanoid', 'humanoid-mesh'));
+    const pairing = host.querySelector('#form-comparison-same-character') as unknown as TestInput;
+    const button = host.querySelector('button') as unknown as TestInput;
     assert.equal(button.disabled, true);
     pairing.checked = true;
     pairing.dispatchEvent(new Event('change', { bubbles: true }));
-    assert.equal((button as unknown as HTMLButtonElement).disabled, false);
+    assert.equal(button.disabled, false);
     button.click();
     await new Promise(resolve => setTimeout(resolve, 0));
     assert.match(host.textContent ?? '', /Vergleich erfolgreich/);
