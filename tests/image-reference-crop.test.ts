@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {createImageReferenceGenerationManifest,planImageReferenceCrop} from '../src/image-reference-crop.ts';
+import {createImageReferenceFormPairCropPlan,createImageReferenceGenerationManifest,planImageReferenceCrop} from '../src/image-reference-crop.ts';
 import type {ImageReferenceDocument} from '../src/image-reference.ts';
 import type {ImageReferenceRegion} from '../src/image-reference.ts';
 const region=(geometry:ImageReferenceRegion['geometry']):ImageReferenceRegion=>({id:'region-1',label:'Test',kind:'view',status:'confirmed',geometry});
