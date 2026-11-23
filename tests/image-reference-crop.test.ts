@@ -34,3 +34,62 @@ test('generation manifest binds one confirmed crop to its explicit avatar, form 
  assert.deepEqual(createImageReferenceGenerationManifest(document,'region-1','b'.repeat(64)),{format:'pakachi-image-reference-generation',version:1,source:{sha256:'a'.repeat(64),width:100,height:100},selection:{regionId:'region-1',label:'Panda face',kind:'detail',avatar:{id:'avatar-1',label:'PaKaChi'},form:{id:'form-1',label:'Animal'},view:{id:'view-1',label:'Front'},crop:{x:10,y:10,width:50,height:50,sha256:'b'.repeat(64)},mask:{type:'polygon',vertices:4,holes:1}}});
  assert.throws(()=>createImageReferenceGenerationManifest(document,'missing','b'.repeat(64)),/image-reference-not-ready|image-reference-region-not-confirmed/);
 });
+
+
+function pairDocument():ImageReferenceDocument {
+ return {
+  format:'pakachi-image-reference',version:1,
+  source:{sha256:'a'.repeat(64),width:400,height:200},
+  regions:[
+   {id:'animal-region',label:'Animal silhouette',kind:'view',status:'confirmed',geometry:{type:'polygon',points:[{x:10,y:10},{x:180,y:10},{x:180,y:190},{x:10,y:190}]}},
+   {id:'work-region',label:'Work silhouette',kind:'view',status:'confirmed',geometry:{type:'rectangle',x:210,y:10,width:180,height:180}},
+  ],
+  views:[
+   {id:'animal-view',label:'Animal front',regionIds:['animal-region']},
+   {id:'work-view',label:'Work front',regionIds:['work-region']},
+  ],
+  forms:[
+   {id:'animal-form',label:'Tierform',viewIds:['animal-view']},
+   {id:'work-form',label:'Arbeitsform',viewIds:['work-view']},
+  ],
+  avatars:[{id:'pakachi',label:'PaKaChi',formIds:['animal-form','work-form']}],
+ };
+}
+test('composite reference produces two independently bounded form crops with explicit identities',()=>{
+ const document=pairDocument();
+ assert.deepEqual(createImageReferenceFormPairCropPlan(document,'pakachi',[
+  {formId:'animal-form',regionId:'animal-region'},
+  {formId:'work-form',regionId:'work-region'},
+ ]),{
+  format:'pakachi-image-reference-form-pair',version:1,
+  source:{sha256:'a'.repeat(64),width:400,height:200},avatar:{id:'pakachi',label:'PaKaChi'},
+  forms:[
+   {region:{id:'animal-region',label:'Animal silhouette',kind:'view'},form:{id:'animal-form',label:'Tierform'},view:{id:'animal-view',label:'Animal front'},crop:{x:10,y:10,width:170,height:180,polygon:[{x:0,y:0},{x:170,y:0},{x:170,y:180},{x:0,y:180}]}},
+   {region:{id:'work-region',label:'Work silhouette',kind:'view'},form:{id:'work-form',label:'Arbeitsform'},view:{id:'work-view',label:'Work front'},crop:{x:210,y:10,width:180,height:180}},
+  ],
+ });
+});
+test('composite split requires two distinct explicitly selected forms of the same avatar',()=>{
+ const document=pairDocument();
+ assert.throws(()=>createImageReferenceFormPairCropPlan(document,'pakachi',[
+  {formId:'animal-form',regionId:'animal-region'},{formId:'animal-form',regionId:'work-region'},
+ ]),/distinct-form-selections-required/);
+ assert.throws(()=>createImageReferenceFormPairCropPlan(document,'missing',[
+  {formId:'animal-form',regionId:'animal-region'},{formId:'work-form',regionId:'work-region'},
+ ]),/unknown-image-reference-avatar/);
+});
+test('composite split rejects unconfirmed, detail-only and ambiguous regions',()=>{
+ const document=pairDocument();
+ document.regions[1]!.status='suggested';
+ assert.throws(()=>createImageReferenceFormPairCropPlan(document,'pakachi',[
+  {formId:'animal-form',regionId:'animal-region'},{formId:'work-form',regionId:'work-region'},
+ ]),/invalid-image-reference-document/);
+ document.regions[1]!.status='confirmed';document.regions[1]!.kind='detail';
+ assert.throws(()=>createImageReferenceFormPairCropPlan(document,'pakachi',[
+  {formId:'animal-form',regionId:'animal-region'},{formId:'work-form',regionId:'work-region'},
+ ]),/form-region-must-be-main-view/);
+ document.regions[1]!.kind='view';document.views[0]!.regionIds.push('work-region');
+ assert.throws(()=>createImageReferenceFormPairCropPlan(document,'pakachi',[
+  {formId:'animal-form',regionId:'animal-region'},{formId:'work-form',regionId:'work-region'},
+ ]),/invalid-image-reference-document/);
+});

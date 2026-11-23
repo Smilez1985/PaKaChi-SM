@@ -1,5 +1,5 @@
 import type {ImageReferenceDocument,ImageReferenceRegion} from './image-reference.ts';
-import {checkImageReferenceReadiness,isValidImageReferencePolygonWithHoles} from './image-reference.ts';
+import {checkImageReferenceReadiness,isValidImageReferencePolygonWithHoles,validateImageReferenceDocument} from './image-reference.ts';
 
 export interface ImageCropPlan {
  x:number;
@@ -64,4 +64,62 @@ export function createImageReferenceGenerationManifest(document:ImageReferenceDo
  if(matchingAvatars.length!==1)throw new Error('image-reference-avatar-assignment');
  const avatar=matchingAvatars[0]!,crop=planImageReferenceCrop(region,document.source.width,document.source.height),geometry=region.geometry;
  return {format:'pakachi-image-reference-generation',version:1,source:{sha256:document.source.sha256,width:document.source.width,height:document.source.height},selection:{regionId:region.id,label:region.label,kind:region.kind,avatar:{id:avatar.id,label:avatar.label},form:{id:form.id,label:form.label},view:{id:view.id,label:view.label},crop:{x:crop.x,y:crop.y,width:crop.width,height:crop.height,sha256:cropSha256},mask:{type:geometry.type,vertices:geometry.type==='polygon'?geometry.points.length:4,holes:geometry.type==='polygon'?(geometry.holes?.length??0):0}}};
+}
+
+
+export interface ImageReferenceFormCropSelection {formId:string;regionId:string}
+export interface ImageReferenceFormCropPlan {
+ region:{id:string;label:string;kind:'form'|'view'};
+ form:{id:string;label:string};
+ view:{id:string;label:string};
+ crop:ImageCropPlan;
+}
+export interface ImageReferenceFormPairCropPlan {
+ format:'pakachi-image-reference-form-pair';
+ version:1;
+ source:{sha256:string;width:number;height:number};
+ avatar:{id:string;label:string};
+ forms:[ImageReferenceFormCropPlan,ImageReferenceFormCropPlan];
+}
+
+/**
+ * Plan two independently generated forms from one composite source image.
+ * Both form and region identities must be explicitly selected by the user;
+ * this function never infers animal/work identity from image position or pixels.
+ */
+export function createImageReferenceFormPairCropPlan(
+ document:ImageReferenceDocument,
+ avatarId:string,
+ selections:readonly [ImageReferenceFormCropSelection,ImageReferenceFormCropSelection],
+):ImageReferenceFormPairCropPlan {
+ const issues=validateImageReferenceDocument(document);
+ if(issues.length)throw new Error('invalid-image-reference-document');
+ if(!/^[a-f0-9]{64}$/i.test(document.source.sha256))throw new Error('invalid-image-reference-source');
+ const avatar=document.avatars.find(item=>item.id===avatarId);
+ if(!avatar)throw new Error('unknown-image-reference-avatar');
+ const [first,second]=selections;
+ if(!first||!second||first.formId===second.formId||first.regionId===second.regionId)throw new Error('distinct-form-selections-required');
+ const selectedForms=[first,second].map(selection=>{
+  if(!avatar.formIds.includes(selection.formId))throw new Error('form-not-owned-by-avatar');
+  const form=document.forms.find(item=>item.id===selection.formId);
+  if(!form)throw new Error('unknown-image-reference-form');
+  const owners=document.avatars.filter(item=>item.formIds.includes(form.id));
+  if(owners.length!==1||owners[0]!.id!==avatar.id)throw new Error('ambiguous-form-avatar-assignment');
+  const matches=document.views.filter(view=>form.viewIds.includes(view.id)&&view.regionIds.includes(selection.regionId));
+  if(matches.length!==1)throw new Error('form-region-view-assignment');
+  const region=document.regions.find(item=>item.id===selection.regionId);
+  if(!region||region.status!=='confirmed')throw new Error('form-region-not-confirmed');
+  if(region.kind!=='form'&&region.kind!=='view')throw new Error('form-region-must-be-main-view');
+  const globalAssignments=document.views.filter(view=>view.regionIds.includes(region.id));
+  if(globalAssignments.length!==1)throw new Error('ambiguous-region-view-assignment');
+  if(form.viewIds.filter(id=>id===matches[0]!.id).length!==1)throw new Error('ambiguous-form-view-assignment');
+  const crop=planImageReferenceCrop(region,document.source.width,document.source.height);
+  return {region:{id:region.id,label:region.label,kind:region.kind},form:{id:form.id,label:form.label},view:{id:matches[0]!.id,label:matches[0]!.label},crop};
+ });
+ return {
+  format:'pakachi-image-reference-form-pair',version:1,
+  source:{sha256:document.source.sha256,width:document.source.width,height:document.source.height},
+  avatar:{id:avatar.id,label:avatar.label},
+  forms:selectedForms as [ImageReferenceFormCropPlan,ImageReferenceFormCropPlan],
+ };
 }
