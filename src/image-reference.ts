@@ -65,6 +65,21 @@ export interface ImageReferenceRelation {
  targetRegionId:string;
 }
 
+export interface ImageReferenceCameraCalibration {
+  id: string;
+  sourceImageSha256: string;
+  avatarId: string;
+  formId: string;
+  poseId: string;
+  viewId: string;
+  fx: number;
+  fy: number;
+  cx: number;
+  cy: number;
+  /** Column-major camera-to-world transform; camera forward is local +Z. */
+  cameraToWorld: number[];
+}
+
 export interface ImageReferenceDocument {
   format:'pakachi-image-reference';
   version:1;
@@ -73,6 +88,8 @@ export interface ImageReferenceDocument {
   views:ImageReferenceView[];
   forms:ImageReferenceForm[];
   avatars:ImageReferenceAvatar[];
+ /** Explicit, source-bound camera calibrations; absence means no 3D depth reconstruction is available. */
+ cameraCalibrations?:ImageReferenceCameraCalibration[];
  /** Optional for backwards compatibility with version-1 projects created before relation editing. */
  relations?:ImageReferenceRelation[];
  /** Explicit user-placed 2D semantic anchors in immutable source-image pixels. */
@@ -293,6 +310,27 @@ export function validateImageReferenceDocument(value:ImageReferenceDocument):Ima
   for(const a of value.avatars)for(const id of a.formIds){const previous=formParents.get(id);if(previous)issues.push({path:`avatars.${a.id}.formIds`,message:`Form ${id} ist bereits Avatar ${previous} zugeordnet.`});else formParents.set(id,a.id);}
   for(const v of value.views)for(const id of v.regionIds){const previous=regionParents.get(id);if(previous)issues.push({path:`views.${v.id}.regionIds`,message:`Region ${id} ist bereits Ansicht ${previous} zugeordnet.`});else regionParents.set(id,v.id);}
   for(const [id,r] of regions){if(r.status==='ignored'&&regionParents.has(id))issues.push({path:`regions.${id}.status`,message:'Ignorierte Region darf keiner Ansicht zugeordnet sein.'});}
+  const calibrations=value.cameraCalibrations??[];
+  if(!Array.isArray(calibrations)||calibrations.length>1000)issues.push({path:'cameraCalibrations',message:'Maximal 1.000 explizite Kamerakalibrierungen sind zulässig.'});
+  else {
+    const seenCalibrations=new Set<string>();
+    for(const [i,calibration] of calibrations.entries()){
+      const p=`cameraCalibrations[${i}]`;
+      addId(calibration.id,p+'.id');
+      const semanticId=/^[a-z0-9][a-z0-9_-]{0,127}$/;
+      if(!hashPattern.test(calibration.sourceImageSha256)||calibration.sourceImageSha256!==source.sha256)issues.push({path:p+'.sourceImageSha256',message:'Kamerakalibrierung muss an den unveränderten Hash des aktuellen Quellbildes gebunden sein.'});
+      for(const [field,id] of [['avatarId',calibration.avatarId],['formId',calibration.formId],['poseId',calibration.poseId],['viewId',calibration.viewId]] as const)if(typeof id!=='string'||!semanticId.test(id))issues.push({path:p+'.'+field,message:'Kamerakalibrierung benötigt gültige Avatar-, Form-, Pose- und Ansichts-IDs.'});
+      const avatar=value.avatars.find(item=>item.id===calibration.avatarId);
+      const form=value.forms.find(item=>item.id===calibration.formId);
+      const view=value.views.find(item=>item.id===calibration.viewId);
+      if(!avatar||!avatar.formIds.includes(calibration.formId)||!form||!form.viewIds.includes(calibration.viewId)||!view)issues.push({path:p+'.viewId',message:'Kamerakalibrierung verweist nicht auf die angegebene Avatar-/Form-/Ansichtshierarchie.'});
+      if(![calibration.fx,calibration.fy,calibration.cx,calibration.cy].every(finite)||calibration.fx<=0||calibration.fy<=0||calibration.cx<0||calibration.cx>1||calibration.cy<0||calibration.cy>1)issues.push({path:p+'.intrinsics',message:'Normierte Kameraintrinsiken sind ungültig.'});
+      if(!Array.isArray(calibration.cameraToWorld)||calibration.cameraToWorld.length!==16||calibration.cameraToWorld.some(item=>!finite(item)))issues.push({path:p+'.cameraToWorld',message:'Kameratransformation benötigt 16 endliche Spaltenvektorwerte.'});
+      const key=JSON.stringify([calibration.avatarId,calibration.formId,calibration.poseId,calibration.viewId]);
+      if(seenCalibrations.has(key))issues.push({path:p,message:'Für Avatar, Form, Pose und Ansicht darf nur eine Kalibrierung existieren.'});
+      seenCalibrations.add(key);
+    }
+  }
   const landmarks=value.landmarks??[];
   if(!Array.isArray(landmarks)||landmarks.length>10000)issues.push({path:'landmarks',message:'Maximal 10.000 2D-Landmarken sind zulässig.'});
   else for(const [i,landmark] of landmarks.entries()){

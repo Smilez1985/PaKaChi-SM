@@ -12,6 +12,9 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+### Added
+- Bildreferenz und 3D-Rekonstruktion: Explizite Kamerakalibrierungen sind jetzt an Quellbild-Hash, Avatar, Form, Pose und Ansichts-ID gebunden. Ein Adapter erzeugt daraus ausschließlich für bestätigte Bildregionen normalisierte 2D-Beobachtungen; fremde Form-/Pose-Kalibrierungen werden nicht übernommen. Die Kalibrierwerte müssen weiterhin explizit bereitgestellt werden; automatische Kameraschätzung und Studio-Bedienoberfläche sind noch nicht enthalten. Stand: 2026-11-23T12:11:00+01:00 (Europe/Berlin).
+
 ### Changed
 - 2D-zu-3D-Landmarken: Triangulation gruppiert Beobachtungen jetzt nach stabiler Avatar-, Form-, Pose- und Landmarken-ID; verschiedene Ansichten derselben Pose dürfen gemeinsam Tiefe liefern, unterschiedliche Formen oder Posen dagegen nicht. Der Manifest-Pipeline-Aufruf verlangt zusätzlich eine explizite Zielidentität und weist gemischte Evidenz zurück. Stand: 2026-11-23T11:44:00+01:00 (Europe/Berlin).
 
