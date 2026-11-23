@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import type { ClusterManifest } from './cluster-architecture.ts';
 import type { ImageReferenceDocument } from './image-reference.ts';
 import type { StudioLandmarkSurfacePick } from './studio-data.ts';
+import { imageReferenceLandmarksToCluster2DSeeds } from './cluster-2d-classifier.ts';
 import { collectClusterMeshInventory, resolveClusterMeshBindings } from './cluster-inventory.ts';
 import { resolveReviewedLandmarkSurfacePicks } from './cluster-landmark-correspondence.ts';
 
@@ -28,10 +29,20 @@ export function createStudioLandmarkEvidenceBundle(
   picks: readonly StudioLandmarkSurfacePick[],
 ): StudioLandmarkEvidenceBundle {
   if (!picks.length) throw new Error('Für einen Landmarken-Beleg müssen bestätigte 2D/3D-Zuordnungen vorhanden sein.');
+  if (manifest.form !== 'animal' && manifest.form !== 'humanoid') throw new Error('Ein Landmarken-Beleg benötigt ein explizites Form-Manifest.');
   const first = picks[0]!;
   if (picks.some(pick => pick.avatarId !== first.avatarId || pick.formId !== first.formId ||
       pick.sourceImageSha256 !== document.source.sha256)) {
     throw new Error('Die gespeicherten Landmarken gehören nicht zu derselben Bildreferenz, Avatar- und Formauswahl.');
+  }
+  const sourceSeeds = new Map(imageReferenceLandmarksToCluster2DSeeds(document).map(seed => [seed.id, seed]));
+  for (const pick of picks) {
+    const seed = sourceSeeds.get(pick.landmarkId);
+    if (!seed || seed.avatarId !== pick.avatarId || seed.formId !== pick.formId ||
+        seed.viewId !== pick.viewId || seed.poseId !== pick.poseId || seed.partId !== pick.partId ||
+        (seed.surfaceLayerId ?? null) !== (pick.surfaceLayerId ?? null)) {
+      throw new Error('Eine gespeicherte Landmarke stimmt nicht mehr mit der bestätigten Bildreferenz überein.');
+    }
   }
   const inventory = collectClusterMeshInventory(root, manifest.sourceAssetSha256);
   const inventoryManifest = {
