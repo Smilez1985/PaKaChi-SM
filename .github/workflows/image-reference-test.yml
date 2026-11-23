@@ -21,7 +21,9 @@ on:
       - 'src/style.css'
       - 'tests/image-reference.test.ts'
       - 'src/studio-landmark-projection.ts'
+      - 'src/image-reference-cluster-pipeline.ts'
       - 'tests/studio-landmark-projection.test.ts'
+      - 'tests/image-reference-cluster-pipeline.test.ts'
       - 'tests/image-reference-crop.test.ts'
       - 'tests/generation-panel.test.ts'
       - 'tests/e2e/image-reference-crop.spec.ts'
@@ -52,8 +54,8 @@ jobs:
         run: npm run audit:dependencies
       - name: Test image reference hierarchy and generation gate
         run: node --test tests/image-reference.test.ts tests/image-reference-detection.test.ts
-      - name: Test calibrated landmark projection bridge
-        run: node --test tests/studio-landmark-projection.test.ts
+      - name: Test calibrated landmark projection and image-to-cluster bridge
+        run: node --test tests/studio-landmark-projection.test.ts tests/image-reference-cluster-pipeline.test.ts
       - name: Test source-region crop planning
         run: node --test tests/image-reference-crop.test.ts
       - name: Test generation panel gating

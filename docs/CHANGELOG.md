@@ -12,6 +12,9 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+### Added
+- Bildreferenz → Cluster-Kandidat: Ein durchgängiger Adapter verbindet bestätigte 2D-Landmarken mit den explizit passenden, quellbildgebundenen Kamera-Kalibrierungen, trianguliert sie ansichtsübergreifend für genau Avatar/Form/Pose und erzeugt daraus einen geprüften Cluster-Kandidaten. Eine Ansicht reicht weiterhin nicht für Tiefe; fehlende oder fremde Kalibrierungen werden nicht ersetzt. Der bestehende Manifestzustand bleibt unverändert; Übernahme und Dreieck-Zuweisung bleiben separate Nutzeraktionen. Regressionen laufen im vorhandenen Bildreferenz-CI-Job. Stand: 2026-11-23T14:21:00+01:00 (Europe/Berlin).
+
 ### Fixed
 - Der Kamerakalibrierungsdialog verwendet einen eigenständigen Schlüssel ohne den Text „Pose ID“, damit barrierefreie Label-Abfragen und die bestehende 2D-Landmarken-Pose-Auswahl eindeutig bleiben. Neue Kalibrierungen erhalten außerdem fortlaufende, kollisionsfreie IDs auch nach dem Löschen älterer Einträge. Stand: 2026-11-23T13:48:00+01:00 (Europe/Berlin).
 
