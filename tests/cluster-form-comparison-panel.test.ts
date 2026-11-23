@@ -75,9 +75,9 @@ test('Studio comparison panel reports invalid form files without producing a rep
     const host = window.document.createElement('div');
     const panel = mountClusterFormComparison(host as unknown as HTMLElement, () => createPaKaChiSemanticCatalog());
     const inputs = host.querySelectorAll('input');
-    installFile(inputs[0] as unknown as HTMLInputElement, manifest('humanoid', 'wrong-form'));
-    installFile(inputs[1] as unknown as HTMLInputElement, manifest('humanoid', 'humanoid-mesh'));
-    const pairing = host.querySelector<HTMLInputElement>('#form-comparison-same-character')!;
+    installFile(inputs[0] as unknown as TestInput, manifest('humanoid', 'wrong-form'));
+    installFile(inputs[1] as unknown as TestInput, manifest('humanoid', 'humanoid-mesh'));
+    const pairing = host.querySelector('#form-comparison-same-character') as unknown as TestInput;
     pairing.checked = true;
     pairing.dispatchEvent(new Event('change', { bubbles: true }));
     host.querySelector('button')!.click();
