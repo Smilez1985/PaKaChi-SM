@@ -25,7 +25,7 @@ function render(host: HTMLElement, report: ClusterFormComparison): void {
   const totals = node('div'); totals.className = 'form-comparison-totals';
   for (const [label, form] of [['Tierform', report.animal], ['Arbeitsform', report.humanoid]] as const) {
     const card = node('section');
-    card.append(node('b', label), node('span', form.totalTriangles.toLocaleString('de-DE') + ' Dreiecke'), node('small', form.unassignedTriangles.toLocaleString('de-DE') + ' ohne Anatomie-Part'));
+    card.append(node('b', label), node('span', form.totalTriangles.toLocaleString('de-DE') + ' Dreiecke'), node('small', form.unassignedTriangles.toLocaleString('de-DE') + ' ohne Anatomie-Part'), node('small', 'Quellasset SHA-256: ' + form.sourceAssetSha256));
     totals.append(card);
   }
   host.append(totals);
@@ -60,11 +60,13 @@ export function mountClusterFormComparison(host: HTMLElement, getCatalog: () => 
   animal.type = 'file'; animal.accept = '.json,application/json'; animalLabel.append(animal);
   const humanoidLabel = node('label', 'Arbeitsform-Manifest (JSON)'), humanoid = node('input');
   humanoid.type = 'file'; humanoid.accept = '.json,application/json'; humanoidLabel.append(humanoid);
+  const pairingLabel = node('label', 'Ich habe geprüft: Beide Manifeste gehören zu demselben PaKaChi-Charakter.');
+  const pairing = node('input'); pairing.type = 'checkbox'; pairing.id = 'form-comparison-same-character'; pairingLabel.prepend(pairing);
   const button = node('button', 'Formen vergleichen'); button.type = 'button'; button.disabled = true;
-  const status = node('p', 'Beide Manifeste auswählen.'); status.setAttribute('role','status'); status.setAttribute('aria-live','polite');
+  const status = node('p', 'Beide Manifeste auswählen und die gemeinsame Charakteridentität ausdrücklich bestätigen.'); status.setAttribute('role','status'); status.setAttribute('aria-live','polite');
   const output = node('div'); output.className = 'form-comparison-report';
-  const update = () => { button.disabled = !animal.files?.length || !humanoid.files?.length; };
-  animal.addEventListener('change', update); humanoid.addEventListener('change', update);
+  const update = () => { button.disabled = !animal.files?.length || !humanoid.files?.length || !pairing.checked; };
+  animal.addEventListener('change', update); humanoid.addEventListener('change', update); pairing.addEventListener('change', update);
   button.addEventListener('click', async () => {
     button.disabled = true; output.replaceChildren();
     try {
@@ -76,6 +78,6 @@ export function mountClusterFormComparison(host: HTMLElement, getCatalog: () => 
     } catch (error) { status.textContent = error instanceof Error ? error.message : String(error); }
     finally { update(); }
   });
-  panel.append(animalLabel, humanoidLabel, button, status, output); host.replaceChildren(panel);
-  return {dispose: () => { animal.removeEventListener('change', update); humanoid.removeEventListener('change', update); host.replaceChildren(); }};
+  panel.append(animalLabel, humanoidLabel, pairingLabel, button, status, output); host.replaceChildren(panel);
+  return {dispose: () => { animal.removeEventListener('change', update); humanoid.removeEventListener('change', update); pairing.removeEventListener('change', update); host.replaceChildren(); }};
 }
