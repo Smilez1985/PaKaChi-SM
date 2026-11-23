@@ -135,10 +135,12 @@ test('exports confirmed 2D/3D landmark evidence separately without assigning sou
   const picks = [createStudioLandmarkSurfacePick(input())];
   // Rebind the test pick to the exact inventory ID generated from these source bytes.
   picks[0]!.meshId = manifest.meshes[0]!.id;
-  const evidence = createStudioLandmarkEvidenceBundle(root, manifest, document(), picks);
+  const evidence = createStudioLandmarkEvidenceBundle(root, manifest, document(), picks, true);
   assert.equal(evidence.format, 'pakachi-cluster-landmark-evidence');
   assert.equal(evidence.sourceAssetSha256, manifest.sourceAssetSha256);
   assert.equal(evidence.sourceImageSha256, document().source.sha256);
+  assert.equal(evidence.formMappingConfirmed, true);
+  assert.throws(() => createStudioLandmarkEvidenceBundle(root, manifest, document(), picks, false), /Form.*ausdrücklich bestätigt/);
   assert.equal(evidence.correspondences.length, 1);
   assert.equal(evidence.correspondences[0]!.origin, 'user');
   assert.equal(evidence.correspondences[0]!.policy, 'locked');
@@ -153,6 +155,6 @@ test('rejects evidence export for mismatched form and image provenance', async (
   const manifest = await createStudioFormManifest(root, Buffer.from('source').toString('base64'), 'animal', new Date().toISOString(), createPaKaChiSemanticCatalog());
   const pick = createStudioLandmarkSurfacePick(input());
   pick.meshId = manifest.meshes[0]!.id;
-  assert.throws(() => createStudioLandmarkEvidenceBundle(root, manifest, document(), [{...pick,formId:'other-form'}]), /Bildreferenz|same image reference/);
-  assert.throws(() => createStudioLandmarkEvidenceBundle(root, manifest, document(), [{...pick,sourceImageSha256:'c'.repeat(64)}]), /Bildreferenz|same image reference/);
+  assert.throws(() => createStudioLandmarkEvidenceBundle(root, manifest, document(), [{...pick,formId:'other-form'}], true), /Bildreferenz|same image reference/);
+  assert.throws(() => createStudioLandmarkEvidenceBundle(root, manifest, document(), [{...pick,sourceImageSha256:'c'.repeat(64)}], true), /Bildreferenz|same image reference/);
 });
