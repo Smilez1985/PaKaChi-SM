@@ -153,6 +153,6 @@ test('rejects evidence export for mismatched form and image provenance', async (
   const manifest = await createStudioFormManifest(root, Buffer.from('source').toString('base64'), 'animal', new Date().toISOString(), createPaKaChiSemanticCatalog());
   const pick = createStudioLandmarkSurfacePick(input());
   pick.meshId = manifest.meshes[0]!.id;
-  assert.throws(() => createStudioLandmarkEvidenceBundle(root, manifest, document(), [{...pick,formId:'other-form'}]), /same image reference, avatar and form/);
-  assert.throws(() => createStudioLandmarkEvidenceBundle(root, manifest, document(), [{...pick,sourceImageSha256:'c'.repeat(64)}]), /same image reference, avatar and form/);
+  assert.throws(() => createStudioLandmarkEvidenceBundle(root, manifest, document(), [{...pick,formId:'other-form'}]), /bestätigten Bildreferenz|same image reference, avatar and form/);
+  assert.throws(() => createStudioLandmarkEvidenceBundle(root, manifest, document(), [{...pick,sourceImageSha256:'c'.repeat(64)}]), /bestätigten Bildreferenz|same image reference, avatar and form/);
 });
