@@ -383,11 +383,11 @@ test('composite form-pair crop extracts independently confirmed forms and preser
  await page.route('**/',route=>route.fulfill({contentType:'text/html',body:'<!doctype html><html><body></body></html>'}));
  await page.goto('/');
  const result=await page.evaluate(async()=>{
-  const canvas=document.createElement('canvas');canvas.width=400;canvas.height=200;
-  const context=canvas.getContext('2d')!;
+  const sourceCanvas=document.createElement('canvas');sourceCanvas.width=400;sourceCanvas.height=200;
+  const context=sourceCanvas.getContext('2d')!;
   context.fillStyle='#173b25';context.fillRect(0,0,200,200);
   context.fillStyle='#204080';context.fillRect(200,0,200,200);
-  const blob=await new Promise<Blob>(resolve=>canvas.toBlob(value=>resolve(value!),'image/png'));
+  const blob=await new Promise<Blob>(resolve=>sourceCanvas.toBlob((value:Blob|null)=>resolve(value!),'image/png'));
   const source=new File([blob],'pakachi-composite.png',{type:'image/png'});
   const digest=await crypto.subtle.digest('SHA-256',await source.arrayBuffer());
   const hash=Array.from(new Uint8Array(digest),value=>value.toString(16).padStart(2,'0')).join('');
@@ -418,26 +418,26 @@ test('composite form-pair crop extracts independently confirmed forms and preser
  expect(result.crops.map(crop=>({type:crop.type,width:crop.width,height:crop.height}))).toEqual([
   {type:'image/png',width:180,height:180},{type:'image/png',width:180,height:180}
  ]);
- expect(result.crops[0].center[1]).toBeGreaterThan(result.crops[0].center[0]);
- expect(result.crops[0].hole[3]).toBe(0);
- expect(result.crops[1].center[2]).toBeGreaterThan(result.crops[1].center[0]);
+ expect(Number(result.crops[0].center[1])).toBeGreaterThan(Number(result.crops[0].center[0]));
+ expect(Number(result.crops[0].hole?.[3])).toBe(0);
+ expect(Number(result.crops[1].center[2])).toBeGreaterThan(Number(result.crops[1].center[0]));
 });
 
 test('composite form-pair crop rejects a different source image even with matching dimensions',async({page})=>{
  await page.route('**/',route=>route.fulfill({contentType:'text/html',body:'<!doctype html><html><body></body></html>'}));
  await page.goto('/');
  const error=await page.evaluate(async()=>{
-  const canvas=document.createElement('canvas');canvas.width=20;canvas.height=20;
-  const context=canvas.getContext('2d')!;context.fillStyle='#111';context.fillRect(0,0,20,20);
-  const blob=await new Promise<Blob>(resolve=>canvas.toBlob(value=>resolve(value!),'image/png'));
+  const sourceCanvas=document.createElement('canvas');sourceCanvas.width=20;sourceCanvas.height=20;
+  const context=sourceCanvas.getContext('2d')!;context.fillStyle='#111';context.fillRect(0,0,20,20);
+  const blob=await new Promise<Blob>(resolve=>sourceCanvas.toBlob((value:Blob|null)=>resolve(value!),'image/png'));
   const source=new File([blob],'different.png',{type:'image/png'});
-  const document={format:'pakachi-image-reference',version:1,source:{sha256:'0'.repeat(64),width:20,height:20},regions:[
+  const reference={format:'pakachi-image-reference',version:1,source:{sha256:'0'.repeat(64),width:20,height:20},regions:[
    {id:'animal',label:'Animal',kind:'view',status:'confirmed',geometry:{type:'rectangle',x:0,y:0,width:8,height:18}},
    {id:'work',label:'Work',kind:'view',status:'confirmed',geometry:{type:'rectangle',x:12,y:0,width:8,height:18}},
   ],views:[{id:'av',label:'Animal',regionIds:['animal']},{id:'wv',label:'Work',regionIds:['work']}],
   forms:[{id:'af',label:'Animal',viewIds:['av']},{id:'wf',label:'Work',viewIds:['wv']}],avatars:[{id:'a',label:'PaKaChi',formIds:['af','wf']}]};
   const {cropImageReferenceFormPair}=await import('../../src/image-reference-crop.ts');
-  try{await cropImageReferenceFormPair(source,document as any,'a',[{formId:'af',regionId:'animal'},{formId:'wf',regionId:'work'}]);return 'unexpected-success';}
+  try{await cropImageReferenceFormPair(source,reference as any,'a',[{formId:'af',regionId:'animal'},{formId:'wf',regionId:'work'}]);return 'unexpected-success';}
   catch(error){return (error as Error).message;}
  });
  expect(error).toBe('image-reference-source-hash-mismatch');
