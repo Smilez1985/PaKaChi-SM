@@ -82,7 +82,7 @@ test('maps triangulated world points through translated rotated non-uniform mesh
   current,sourceAssetSha256:hash,meshId,positions,indices:null,meshWorld:meshWorld.toArray(),
   avatarId:'pakachi',formId:'animal-form',poseId:'front-neutral',observations,
  });
- assert.equal(result.triangulation.seeds.length,1);
+ assert.equal(result.triangulation.seeds.length,1, JSON.stringify(result.triangulation));
  const seed=result.triangulation.seeds[0]!;
  assert.ok(Math.abs(seed.position[0]-localPoint.x)<1e-6);
  assert.ok(Math.abs(seed.position[1]-localPoint.y)<1e-6);
