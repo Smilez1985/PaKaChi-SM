@@ -75,8 +75,8 @@ test('maps triangulated world points through translated rotated non-uniform mesh
  const localPoint=new Vector3(0,0,4);
  const worldPoint=localPoint.clone().applyMatrix4(meshWorld);
  const observations=[
-  observe(worldPoint,camera('front',worldPoint.clone().add(new Vector3(-1,0,0)),worldPoint)),
-  observe(worldPoint,camera('side',worldPoint.clone().add(new Vector3(1,0,0)),worldPoint)),
+  observe(worldPoint,camera('front',worldPoint.clone().add(new Vector3(-1,0.5,0)),worldPoint)),
+  observe(worldPoint,camera('side',worldPoint.clone().add(new Vector3(1,-0.5,0)),worldPoint)),
  ];
  const result=proposeClusterManifestFrom2DObservations({
   current,sourceAssetSha256:hash,meshId,positions,indices:null,meshWorld:meshWorld.toArray(),
