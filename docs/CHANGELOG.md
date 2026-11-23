@@ -13,7 +13,7 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 ## [Unreleased]
 
 ### Fixed
-- Der Kamerakalibrierungsdialog verwendet eine eigene Pose-ID-Beschriftung, damit die bestehende 2D-Landmarken-Pose-Auswahl eindeutig bleibt. Neue Kalibrierungen erhalten außerdem fortlaufende, kollisionsfreie IDs auch nach dem Löschen älterer Einträge. Stand: 2026-11-23T13:35:00+01:00 (Europe/Berlin).
+- Der Kamerakalibrierungsdialog verwendet einen eigenständigen Schlüssel ohne den Text „Pose ID“, damit barrierefreie Label-Abfragen und die bestehende 2D-Landmarken-Pose-Auswahl eindeutig bleiben. Neue Kalibrierungen erhalten außerdem fortlaufende, kollisionsfreie IDs auch nach dem Löschen älterer Einträge. Stand: 2026-11-23T13:48:00+01:00 (Europe/Berlin).
 
 ### Added
 - Der Bildreferenz-Editor bietet eine manuelle Kamerakalibrierung: explizite Avatar-/Form-/View-Zuordnung über einen ausgewählten Bildbereich, verpflichtende Pose-ID, Eingabe von fx/fy/cx/cy sowie Translation und Rotation; die Kamera-zu-Welt-Matrix wird mit dem validierten Builder erstellt und an den Quellbild-SHA-256 gebunden. Bestehende Kalibrierungen können entfernt und gleichartige View/Pose-Kombinationen aktualisiert werden. Keine automatische Kameraschätzung. Stand: 2026-11-23T13:16:00+01:00 (Europe/Berlin).
