@@ -31,7 +31,7 @@ import type { Cluster2DSemanticCatalog } from './cluster-2d-classifier.ts';
 import type { ClusterMeshInventory } from './cluster-inventory.ts';
 import { createStudioFormManifest } from './studio-form-manifest.ts';
 import { createStudioLandmarkEvidenceBundle, validateStudioLandmarkEvidenceBundle } from './studio-landmark-evidence.ts';
-import { createClusterLandmarkClassificationPreview, acceptClusterLandmarkPreviewItem } from './cluster-landmark-preview.ts';
+import { createClusterLandmarkClassificationPreview, acceptClusterLandmarkPreviewItem, restoreReviewedClusterManifest } from './cluster-landmark-preview.ts';
 import type { ClusterLandmarkClassificationPreview } from './cluster-landmark-preview.ts';
 import type { ClusterManifest } from './cluster-architecture.ts';
 import { createStudioLandmarkSurfacePick } from './studio-landmark-picking.ts';
@@ -269,7 +269,7 @@ export class StudioEditor {
     <section class="studio-semantic-catalog" aria-labelledby="semantic-catalog-title"><h3 id="semantic-catalog-title">Gemeinsame Anatomie &amp; Oberflächen</h3><p class="subtle">Ein Charakterkatalog für Tierform und Arbeitsform. IDs bleiben stabil; Umbenennen ändert nur die lesbare Bezeichnung.</p>
       <h4>Anatomische Teile</h4><label for="catalog-part">Teil auswählen</label><select id="catalog-part"></select><label for="catalog-part-id">Stabile Part-ID</label><input id="catalog-part-id" maxlength="128" pattern="[a-z0-9][a-z0-9_-]*"><label for="catalog-part-label">Bezeichnung</label><input id="catalog-part-label" maxlength="100"><label for="catalog-part-parent">Übergeordnetes Teil</label><select id="catalog-part-parent"></select><div class="studio-actions"><button id="catalog-part-save">Teil speichern / hinzufügen</button><button id="catalog-part-delete">Teil löschen</button></div>
       <h4>Oberflächen-Layer</h4><label for="catalog-layer">Layer auswählen</label><select id="catalog-layer"></select><label for="catalog-layer-id">Stabile Layer-ID</label><input id="catalog-layer-id" maxlength="128" pattern="[a-z0-9][a-z0-9_-]*"><label for="catalog-layer-label">Bezeichnung</label><input id="catalog-layer-label" maxlength="100"><label for="catalog-layer-part">Anatomische Zuordnung</label><select id="catalog-layer-part"></select><div class="studio-actions"><button id="catalog-layer-save">Layer speichern / hinzufügen</button><button id="catalog-layer-delete">Layer löschen</button></div><p class="subtle" id="catalog-feedback" role="status">Gelöschte Teile oder Layer mit abhängigen Kindern, Landmarken oder Bindungen werden geschützt.</p></section>
-    <section class="studio-form-manifest"><h3>Manifest für geöffnetes Modell erzeugen</h3><p class="subtle">Die Form wird ausdrücklich von dir ausgewählt. Das Quellasset wird per SHA-256 gebunden; alle Dreiecke bleiben zunächst anatomisch und als Oberflächen-Layer unklassifiziert.</p><label for="cluster-current-form">Form dieses Modells</label><select id="cluster-current-form"><option value="animal">Tierform</option><option value="humanoid">Arbeitsform</option></select><button id="cluster-export-current-manifest">Unklassifiziertes Form-Manifest exportieren</button><label class="check"><input id="cluster-landmark-form-mapping-confirm" type="checkbox"> Ich bestätige: Die Formauswahl oben entspricht der Form der verwendeten Bildreferenz.</label><button id="cluster-export-landmark-evidence">Bestätigte Landmarken-Belege exportieren</button><input id="cluster-import-landmark-evidence-file" type="file" accept="application/json,.json" hidden><button id="cluster-import-landmark-evidence">Landmarken-Beleg importieren und prüfen</button><div id="cluster-landmark-review" aria-live="polite"><p class="subtle">Noch keine Klassifikationsvorschläge geladen.</p></div><p id="cluster-manifest-status" role="status" aria-live="polite">Noch kein Manifest erzeugt.</p></section><section class="studio-form-comparison"><div id="cluster-form-comparison"></div></section>
+    <section class="studio-form-manifest"><h3>Manifest für geöffnetes Modell erzeugen</h3><p class="subtle">Die Form wird ausdrücklich von dir ausgewählt. Das Quellasset wird per SHA-256 gebunden; alle Dreiecke bleiben zunächst anatomisch und als Oberflächen-Layer unklassifiziert.</p><label for="cluster-current-form">Form dieses Modells</label><select id="cluster-current-form"><option value="animal">Tierform</option><option value="humanoid">Arbeitsform</option></select><button id="cluster-export-current-manifest">Unklassifiziertes Form-Manifest exportieren</button><label class="check"><input id="cluster-landmark-form-mapping-confirm" type="checkbox"> Ich bestätige: Die Formauswahl oben entspricht der Form der verwendeten Bildreferenz.</label><button id="cluster-export-landmark-evidence">Bestätigte Landmarken-Belege exportieren</button><input id="cluster-import-landmark-evidence-file" type="file" accept="application/json,.json" hidden><button id="cluster-import-landmark-evidence">Landmarken-Beleg importieren und prüfen</button><input id="cluster-import-reviewed-manifest-file" type="file" accept="application/json,.json" hidden><button id="cluster-import-reviewed-manifest">Übernommenes Manifest wiederherstellen</button><div id="cluster-landmark-review" aria-live="polite"><p class="subtle">Noch keine Klassifikationsvorschläge geladen.</p></div><p id="cluster-manifest-status" role="status" aria-live="polite">Noch kein Manifest erzeugt.</p></section><section class="studio-form-comparison"><div id="cluster-form-comparison"></div></section>
     <button id="figure-select" ${this.edit?'hidden':''}>Gesamte Figur bewegen</button>
     <label for="studio-points">Gelenk / Gesichtspunkt</label><select id="studio-points"><option value="">Punkt auswählen …</option></select>
     <div class="studio-actions" ${this.edit?'':'hidden'}><label>Position auf der Knochenstrecke <output id="bone-ratio-value">${Math.round(this.insertionRatio*100)} %</output><input id="bone-ratio" type="range" min="10" max="90" step="1" value="${Math.round(this.insertionRatio*100)}" aria-label="Position des Zwischengelenks"><span class="subtle">Vom Elternknochen zum ausgewählten Kindknochen; 50 % = Mitte.</span></label><button id="bone-add">＋ Knochen setzen</button><button id="bone-insert">Knochen dazwischen einfügen</button><button id="point-add">＋ Punkt setzen</button><button id="point-connect" ${this.point?'':'disabled'}>Verbinden / lösen</button></div>
@@ -365,6 +365,46 @@ export class StudioEditor {
       })();};
       fileInput.click();
     })();};
+    q<HTMLButtonElement>('cluster-import-reviewed-manifest').onclick=()=>{
+      const button=q<HTMLButtonElement>('cluster-import-reviewed-manifest'),fileInput=q<HTMLInputElement>('cluster-import-reviewed-manifest-file'),status=q('cluster-manifest-status');
+      if(button.disabled)return;
+      fileInput.value='';
+      fileInput.onchange=()=>{void (async()=>{
+        const file=fileInput.files?.[0];if(!file)return;
+        button.disabled=true;status.textContent='Übernommenes Manifest gegen Modell, Form, Katalog und Bildreferenz prüfen …';
+        try{
+          if(file.size>5_000_000)throw Error('Das Manifest ist größer als 5 MB.');
+          const form=q<HTMLSelectElement>('cluster-current-form').value;
+          if(form!=='animal'&&form!=='humanoid')throw Error('Tierform oder Arbeitsform ausdrücklich auswählen.');
+          if(!this.landmarkDocument)throw Error('Zuerst die zugehörige Bildreferenz laden.');
+          const current=await createStudioFormManifest(this.rig.root,this.project.model,form,new Date().toISOString(),this.project.semanticCatalog);
+          const candidate:unknown=JSON.parse(await file.text());
+          const restored=restoreReviewedClusterManifest(current,candidate,this.landmarkDocument.source.sha256);
+          const operations=restored.overrides.filter(entry=>entry.operation.type==='assign-triangle');
+          if(!operations.length)throw Error('Das Manifest enthält keine bestätigten Landmarken-Dreieck-Zuweisungen.');
+          this.landmarkReviewManifest=restored;
+          this.landmarkReviewPreview={
+            format:'pakachi-cluster-landmark-classification-preview',version:1,
+            sourceAssetSha256:restored.sourceAssetSha256,sourceImageSha256:this.landmarkDocument.source.sha256,
+            avatarId:this.project.avatar.id,formId:this.project.avatar.id,form:restored.form,
+            policy:'review-only',automaticAssignmentsApplied:false,
+            items:operations.map(entry=>{
+              if(entry.operation.type!=='assign-triangle')throw Error('Nicht unterstützte Manifest-Operation.');
+              return {meshId:entry.operation.meshId,triangleIndex:entry.operation.triangleIndex,
+                status:entry.operation.landmarkIds.length>1?'corroborated' as const:'single-evidence' as const,
+                evidenceCount:entry.operation.landmarkIds.length,landmarkIds:[...entry.operation.landmarkIds],
+                proposedPartId:entry.operation.partId,proposedSurfaceLayerId:entry.operation.surfaceLayerId,
+                reasons:['Aus einem zuvor ausdrücklich übernommenen, gesperrten Manifest wiederhergestellt.']};
+            }),
+          };
+          this.renderLandmarkReview();
+          status.textContent='Manifest wiederhergestellt: '+operations.length+' einzeln bestätigte Dreieck-Zuweisungen. Quellmodell, Form, Katalog, Bild-Hash und Override-Protokoll stimmen überein.';
+          this.hooks.feedback('Bestätigte Landmarken-Zuordnungen wurden kontrolliert wiederhergestellt.');
+        }catch(error){status.textContent=error instanceof Error?error.message:String(error);}
+        finally{if(!this.disposed)button.disabled=false;}
+      })();};
+      fileInput.click();
+    };
     const input=(id:string)=>q<HTMLInputElement>(id);
     const on=(id:string,fn:()=>void)=>{q<HTMLButtonElement>(id).onclick=()=>{try{fn();}catch(e){this.hooks.feedback(e instanceof Error?e.message:String(e));}};};
     const catalog=this.project.semanticCatalog!;
