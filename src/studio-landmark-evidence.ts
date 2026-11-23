@@ -15,6 +15,7 @@ export interface StudioLandmarkEvidenceBundle {
   avatarId: string;
   formId: string;
   form: 'animal' | 'humanoid';
+  formMappingConfirmed: true;
   correspondences: ReturnType<typeof resolveReviewedLandmarkSurfacePicks>['correspondences'];
 }
 
@@ -27,7 +28,9 @@ export function createStudioLandmarkEvidenceBundle(
   manifest: ClusterManifest,
   document: ImageReferenceDocument,
   picks: readonly StudioLandmarkSurfacePick[],
+  formMappingConfirmed: boolean,
 ): StudioLandmarkEvidenceBundle {
+  if (formMappingConfirmed !== true) throw new Error('Die Zuordnung der Bildreferenz-Form zur Tier- oder Arbeitsform muss ausdrücklich bestätigt werden.');
   if (!picks.length) throw new Error('Für einen Landmarken-Beleg müssen bestätigte 2D/3D-Zuordnungen vorhanden sein.');
   const form = manifest.form;
   if (form !== 'animal' && form !== 'humanoid') throw new Error('Ein Landmarken-Beleg benötigt ein explizites Form-Manifest.');
@@ -73,6 +76,7 @@ export function createStudioLandmarkEvidenceBundle(
     avatarId: first.avatarId,
     formId: first.formId,
     form,
+    formMappingConfirmed: true,
     correspondences: report.correspondences,
   };
 }
