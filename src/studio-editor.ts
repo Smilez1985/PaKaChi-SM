@@ -35,6 +35,7 @@ import { createClusterLandmarkClassificationPreview, acceptClusterLandmarkPrevie
 import type { ClusterLandmarkClassificationPreview } from './cluster-landmark-preview.ts';
 import type { ClusterManifest } from './cluster-architecture.ts';
 import { createStudioLandmarkSurfacePick } from './studio-landmark-picking.ts';
+import { compareClusterCharacterForms } from './cluster-form-comparison.ts';
 import { mountClusterFormComparison } from './cluster-form-comparison-panel.ts';
 import type { StudioSurfacePickHit } from './studio-landmark-picking.ts';
 interface Snapshot {data:StudioData;values:Record<string,Transform>;semanticCatalog?:Cluster2DSemanticCatalog;clusterFormManifests?:StudioProject['clusterFormManifests']}
