@@ -244,7 +244,7 @@ export class StudioEditor {
       try{
         const form=q<HTMLSelectElement>('cluster-current-form').value;
         if(form!=='animal'&&form!=='humanoid')throw Error('Tierform oder Arbeitsform ausdrücklich auswählen.');
-        const manifest=await createStudioFormManifest(this.rig.root,this.project.model,form);
+        const manifest=await createStudioFormManifest(this.rig.root,this.project.model,form,new Date().toISOString(),this.project.semanticCatalog);
         if(this.disposed)return;
         const json=JSON.stringify(manifest,null,2),url=URL.createObjectURL(new Blob([json],{type:'application/json'}));
         const anchor=document.createElement('a');anchor.href=url;anchor.download=(this.project.avatar.id.replace(/[^a-z0-9_-]/gi,'_')||'pakachi')+'-'+form+'-cluster-manifest.json';anchor.click();
