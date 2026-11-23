@@ -100,6 +100,6 @@ test('rejects malformed landmark provenance and out-of-range triangle acceptance
  }),/Invalid cluster operation|Triangle not found/);
  assert.throws(()=>applyClusterOperation(source,{
   type:'assign-triangle',meshId:'mesh-main',triangleIndex:0,partId:'head',surfaceLayerId:'fur',
-  sourceImageSha256:'invalid',landmarkIds:['left-eye'],
+  sourceImageSha256:'invalid',avatarId:'pakachi-main',formId:'animal-front',landmarkIds:['left-eye'],
  }),/Invalid landmark evidence provenance/);
 });
