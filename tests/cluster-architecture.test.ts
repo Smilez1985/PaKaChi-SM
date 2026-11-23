@@ -101,5 +101,5 @@ test('rejects malformed landmark provenance and out-of-range triangle acceptance
  assert.throws(()=>applyClusterOperation(source,{
   type:'assign-triangle',meshId:'mesh-main',triangleIndex:0,partId:'head',surfaceLayerId:'fur',
   sourceImageSha256:'invalid',landmarkIds:['left-eye'],
- }),/Invalid cluster operation/);
+ }),/Invalid landmark evidence provenance/);
 });
