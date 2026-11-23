@@ -247,7 +247,10 @@ test('restores reviewed triangle manifests only for the exact model, form, catal
   tampered.assignments[0]!.origin = 'imported';
   assert.throws(() => restoreReviewedClusterManifest(manifest, tampered, document().source.sha256), /Zuweisungen stimmen nicht mit .*Override-Protokoll/);
   const mixedIdentity = structuredClone(accepted);
-  if (mixedIdentity.overrides[0]!.operation.type === 'assign-triangle') mixedIdentity.overrides[0]!.operation.formId = 'another-form';
+  const originalOverride = mixedIdentity.overrides[0]!;
+  if (originalOverride.operation.type !== 'assign-triangle') throw new Error('Expected triangle override.');
+  mixedIdentity.overrides.push({ ...originalOverride, id: 'second-override', operation: { ...originalOverride.operation, avatarId: 'another-avatar' } });
+  mixedIdentity.revision++;
   assert.throws(() => restoreReviewedClusterManifest(manifest, mixedIdentity, document().source.sha256), /unterschiedlichen Avatar- oder Formreferenzen/);
   const extraOperation = structuredClone(accepted);
   extraOperation.overrides[0]!.operation = { type: 'assign-mesh', meshId: manifest.meshes[0]!.id, partId: null };

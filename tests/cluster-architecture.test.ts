@@ -74,7 +74,7 @@ test('accepts one reviewed landmark triangle immutably with locked evidence prov
  source.assignments[0]!.partId=null;source.assignments[0]!.surfaceLayerId=null;
  const accepted=applyClusterOperation(source,{
   type:'assign-triangle',meshId:'mesh-main',triangleIndex:0,partId:'head',surfaceLayerId:'fur',
-  sourceImageSha256:'b'.repeat(64),landmarkIds:['left-eye','right-eye'],
+  sourceImageSha256:'b'.repeat(64),avatarId:'pakachi-main',formId:'animal-front',landmarkIds:['left-eye','right-eye'],
  },'user','locked');
  assert.equal(source.assignments[0]!.partId,null);
  assert.equal(accepted.assignments[0]!.partId,'head');
@@ -89,14 +89,14 @@ test('rejects a reviewed triangle proposal when the target is already classified
  const source=fixture();
  assert.throws(()=>applyClusterOperation(source,{
   type:'assign-triangle',meshId:'mesh-main',triangleIndex:0,partId:'head',surfaceLayerId:'fur',
-  sourceImageSha256:'b'.repeat(64),landmarkIds:['left-eye'],
+  sourceImageSha256:'b'.repeat(64),avatarId:'pakachi-main',formId:'animal-front',landmarkIds:['left-eye'],
  }),/already classified or protected/);
 });
 test('rejects malformed landmark provenance and out-of-range triangle acceptance',()=>{
  const source=fixture();
  assert.throws(()=>applyClusterOperation(source,{
   type:'assign-triangle',meshId:'mesh-main',triangleIndex:9,partId:'head',surfaceLayerId:'fur',
-  sourceImageSha256:'b'.repeat(64),landmarkIds:['left-eye'],
+  sourceImageSha256:'b'.repeat(64),avatarId:'pakachi-main',formId:'animal-front',landmarkIds:['left-eye'],
  }),/Invalid cluster operation|Triangle not found/);
  assert.throws(()=>applyClusterOperation(source,{
   type:'assign-triangle',meshId:'mesh-main',triangleIndex:0,partId:'head',surfaceLayerId:'fur',
