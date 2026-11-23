@@ -1,3 +1,4 @@
+import { applyClusterOperation } from './cluster-architecture.ts';
 import type { ClusterManifest } from './cluster-architecture.ts';
 import type { StudioLandmarkEvidenceBundle } from './studio-landmark-evidence.ts';
 
@@ -92,4 +93,40 @@ export function createClusterLandmarkClassificationPreview(
     automaticAssignmentsApplied: false,
     items,
   };
+}
+
+
+/**
+ * Applies one explicitly reviewed, non-conflicting triangle proposal.
+ * Only the exact source triangle is changed; the user decision is stored as a
+ * locked assignment with image/landmark provenance in the manifest override log.
+ */
+export function acceptClusterLandmarkPreviewItem(
+  manifest: ClusterManifest,
+  preview: ClusterLandmarkClassificationPreview,
+  meshId: string,
+  triangleIndex: number,
+): ClusterManifest {
+  if (!manifest || !preview || preview.format !== 'pakachi-cluster-landmark-classification-preview' ||
+      preview.version !== 1 || preview.policy !== 'review-only' || preview.automaticAssignmentsApplied !== false ||
+      preview.sourceAssetSha256 !== manifest.sourceAssetSha256 || preview.form !== manifest.form ||
+      preview.formMappingConfirmed === true) {
+    throw new Error('Klassifikationsvorschau passt nicht zum aktuellen Manifest oder ist nicht review-only.');
+  }
+  if (!/^[a-f0-9]{64}$/.test(preview.sourceImageSha256)) {
+    throw new Error('Bildreferenz-Hash der Vorschau ist ungültig.');
+  }
+  const item = preview.items.find(candidate => candidate.meshId === meshId && candidate.triangleIndex === triangleIndex);
+  if (!item || item.status === 'conflict' || !item.proposedPartId || !item.landmarkIds.length) {
+    throw new Error('Dieser Vorschlag ist nicht eindeutig und kann nicht übernommen werden.');
+  }
+  return applyClusterOperation(manifest, {
+    type: 'assign-triangle',
+    meshId: item.meshId,
+    triangleIndex: item.triangleIndex,
+    partId: item.proposedPartId,
+    surfaceLayerId: item.proposedSurfaceLayerId,
+    sourceImageSha256: preview.sourceImageSha256,
+    landmarkIds: item.landmarkIds,
+  }, 'user', 'locked');
 }
