@@ -13,6 +13,9 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 ## [Unreleased]
 
 ### Added
+- Cluster-Klassifizierung: Eine widerspruchsfreie Landmarken-Vorschau kann jetzt über eine explizite Einzelentscheidung auf genau ein bisher unklassifiziertes Dreieck angewendet werden. Die Zuweisung wird als gesperrte Nutzerentscheidung mit Bildreferenz-Hash und Landmarken-IDs im Override-Protokoll dokumentiert; bestehende Klassifikationen und Konfliktvorschläge werden abgewiesen. Keine Nachbardreiecke oder ganzen Meshes werden verändert. Stand: 2026-11-23T09:50:00+01:00 (Europe/Berlin).
+
+### Added
 - Avatar-Studio: Importierte, validierte 2D/3D-Landmarken-Belege erzeugen eine separate Review-only-Klassifizierungsvorschau pro exakt getroffenem Mesh-Dreieck. Übereinstimmungen mehrerer Landmarken werden als corroborated markiert, widersprüchliche Semantik als Konflikt; Einzelbelege bleiben lokale Hinweise. Keine Nachbardreiecke, Mesh-Flächen oder Manifest-Zuordnungen werden automatisch verändert. Stand: 2026-11-23T07:30:00+01:00 (Europe/Berlin).
 
 ### Fixed
