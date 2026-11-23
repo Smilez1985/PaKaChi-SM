@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { Window } from 'happy-dom';
 import { mountClusterFormComparison } from '../src/cluster-form-comparison-panel.ts';
-import { validClusterFormManifestPair } from '../src/studio-data.ts';
+import { emptyStudio, parseProject, validClusterFormManifestPair } from '../src/studio-data.ts';
 import { createPaKaChiSemanticCatalog } from '../src/cluster-2d-classifier.ts';
 import type { ClusterManifest } from '../src/cluster-architecture.ts';
 
@@ -107,4 +107,23 @@ test('Studio project accepts only a complete, catalog-compatible animal/humanoid
   const foreign = structuredClone(pair);
   foreign.animal.parts[0]!.id = 'not-in-catalog';
   assert.equal(validClusterFormManifestPair(foreign, catalog), false);
+});
+
+
+test('project parser validates persisted form pairs against the shared catalog', () => {
+  const catalog = createPaKaChiSemanticCatalog();
+  const pair = { animal: manifest('animal', 'animal-mesh'), humanoid: manifest('humanoid', 'humanoid-mesh') };
+  const base = {
+    format: 'pakachi-studio', version: 1, model: 'AAAA',
+    avatar: { id: 'pakachi-test', name: 'PaKaChi test', description: '', moves: [] },
+    studio: emptyStudio(),
+    semanticCatalog: catalog,
+    clusterFormManifests: pair,
+  };
+  assert.deepEqual(parseProject(base).clusterFormManifests, pair);
+  assert.throws(() => parseProject({ ...base, clusterFormManifests: { animal: pair.animal } }), /Tier-\/Arbeitsform-Paar/);
+  assert.throws(() => parseProject({ ...base, semanticCatalog: undefined }), /Tier-\/Arbeitsform-Paar/);
+  const foreign = structuredClone(pair);
+  foreign.animal.parts[0]!.id = 'foreign-part';
+  assert.throws(() => parseProject({ ...base, clusterFormManifests: foreign }), /Tier-\/Arbeitsform-Paar/);
 });

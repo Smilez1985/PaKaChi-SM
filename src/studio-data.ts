@@ -162,6 +162,7 @@ export function parseProject(input: unknown): StudioProject {
   require(obj(input) && input.format==='pakachi-studio' && input.version===1,'Unbekanntes Studio-Projektformat.');
   require(input.imageReference===undefined||validImageReferenceDocument(input.imageReference),'Ungültige oder beschädigte Bildreferenzdaten.');
   require(input.semanticCatalog===undefined||validateCluster2DSemanticCatalog(input.semanticCatalog).length===0,'Ungültiger gemeinsamer Anatomie- und Oberflächenkatalog.');
+  require(input.clusterFormManifests===undefined||input.semanticCatalog!==undefined&&validClusterFormManifestPair(input.clusterFormManifests,input.semanticCatalog as Cluster2DSemanticCatalog),'Ungültiges oder nicht zum gemeinsamen Charakterkatalog passendes Tier-/Arbeitsform-Paar.');
   require(input.generationReference===undefined||validGenerationReference(input.generationReference,input.imageReference as ImageReferenceDocument|undefined),'Ungültige Generierungsherkunft.');
   require(typeof input.model==='string' && input.model.length>0 && input.model.length<=70_000_000 && input.model.length%4===0 && /^[A-Za-z0-9+/]*={0,2}$/.test(input.model),'Modelldaten fehlen oder sind ungültig.');
   const a=input.avatar; require(obj(a) && id(a.id) && name(a.name) && typeof a.description==='string' && a.description.length<=1000 && Array.isArray(a.moves) && a.moves.length<=512);
