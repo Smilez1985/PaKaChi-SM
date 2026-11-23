@@ -32,8 +32,8 @@ test('Studio comparison panel validates both form files and renders the shared s
   const window = new Window();
   const previousDocument = Object.getOwnPropertyDescriptor(globalThis, 'document');
   const previousEvent = Object.getOwnPropertyDescriptor(globalThis, 'Event');
-  Object.defineProperty(globalThis, 'document', { configurable: true, value: window.document });
-  Object.defineProperty(globalThis, 'Event', { configurable: true, value: window.Event });
+  Object.defineProperty(globalThis, 'document', { configurable: true, value: window.document as unknown as Document });
+  Object.defineProperty(globalThis, 'Event', { configurable: true, value: window.Event as unknown as typeof Event });
   try {
     const host = window.document.createElement('div');
     const catalog = createPaKaChiSemanticCatalog();
