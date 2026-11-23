@@ -11,7 +11,7 @@ function camera(viewId:string,position:Vector3,target:Vector3):LandmarkCameraCal
 }
 function observe(point:Vector3,c:LandmarkCameraCalibration):Landmark2DObservation {
  const p=point.clone().applyMatrix4(new Matrix4().fromArray([...c.cameraToWorld]).invert());
- return {landmarkId:'torso-center',partId:'torso',x:c.fx*p.x/p.z+c.cx,y:c.fy*p.y/p.z+c.cy,confidence:.95,camera:c,radiusWorld:1};
+ return {avatarId:'pakachi',formId:'animal-form',poseId:'front-neutral',landmarkId:'torso-center',partId:'torso',x:c.fx*p.x/p.z+c.cx,y:c.fy*p.y/p.z+c.cy,confidence:.95,camera:c,radiusWorld:1};
 }
 function fixture() {
  const hash='c'.repeat(64),meshId='mesh-'+hash+'-walk0-mesh0-primitive0';
@@ -30,7 +30,7 @@ test('connects calibrated 2D observations through triangulation to a validated c
  ];
  const result=proposeClusterManifestFrom2DObservations({
   current,sourceAssetSha256:hash,meshId,positions,indices:null,
-  meshWorld:new Matrix4().toArray(),observations,
+  meshWorld:new Matrix4().toArray(),avatarId:'pakachi',formId:'animal-form',poseId:'front-neutral',observations,
  },'2026-11-12T21:01:00.000Z');
  assert.ok(result.candidate);
  assert.equal(result.triangulation.seeds.length,1);
@@ -39,13 +39,24 @@ test('connects calibrated 2D observations through triangulation to a validated c
  assert.equal(result.candidate.assignments[0].partId,'torso');
 });
 
+test('refuses to classify one mesh from mixed avatar, form or pose observations',()=>{
+ const {hash,meshId,current,positions}=fixture();
+ const point=new Vector3(0,0,4);
+ const a=camera('front',new Vector3(-1,0,0),point),b=camera('side',new Vector3(1,0,0),point);
+ const observations=[observe(point,a),{...observe(point,b),poseId:'side-pose'}];
+ assert.throws(()=>proposeClusterManifestFrom2DObservations({
+  current,sourceAssetSha256:hash,meshId,positions,indices:null,
+  meshWorld:new Matrix4().toArray(),avatarId:'pakachi',formId:'animal-form',poseId:'front-neutral',observations,
+ }),/exactly one explicit avatar, form and pose/);
+});
+
 test('does not create a manifest candidate when 2D depth evidence is insufficient',()=>{
  const {hash,meshId,current,positions}=fixture();
  const point=new Vector3(0,0,4);
  const observations=[observe(point,camera('front',new Vector3(-1,0,0),point))];
  const result=proposeClusterManifestFrom2DObservations({
   current,sourceAssetSha256:hash,meshId,positions,indices:null,
-  meshWorld:new Matrix4().toArray(),observations,
+  meshWorld:new Matrix4().toArray(),avatarId:'pakachi',formId:'animal-form',poseId:'front-neutral',observations,
  });
  assert.equal(result.candidate,null);
  assert.equal(result.classifiedTriangles,0);

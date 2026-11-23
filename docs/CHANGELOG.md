@@ -13,6 +13,9 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 ## [Unreleased]
 
 ### Changed
+- 2D-zu-3D-Landmarken: Triangulation gruppiert Beobachtungen jetzt nach stabiler Avatar-, Form-, Pose- und Landmarken-ID; verschiedene Ansichten derselben Pose dürfen gemeinsam Tiefe liefern, unterschiedliche Formen oder Posen dagegen nicht. Der Manifest-Pipeline-Aufruf verlangt zusätzlich eine explizite Zielidentität und weist gemischte Evidenz zurück. Stand: 2026-11-23T11:44:00+01:00 (Europe/Berlin).
+
+### Changed
 - Cluster-Landmarken: Jede übernommene Dreieck-Zuweisung speichert jetzt zusätzlich die exakten Avatar- und Formreferenz-IDs der bestätigten 2D-Landmarken. Beim Wiederherstellen werden diese IDs erhalten und gemischte Avatar-/Formbelege im selben Manifest abgewiesen; die UI leitet Referenzidentität nicht mehr aus der Projekt-ID ab. Stand: 2026-11-23T10:32:41+01:00 (Europe/Berlin).
 
 ### Added

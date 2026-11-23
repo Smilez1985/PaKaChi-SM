@@ -11,6 +11,10 @@ export interface Cluster2DLandmarkPipelineInput {
   indices: ArrayLike<number> | null;
   /** World transform of the exact mesh whose position buffer is supplied. */
   meshWorld: readonly number[];
+  /** The single avatar/form/pose that this target mesh represents. */
+  avatarId: string;
+  formId: string;
+  poseId: string;
   observations: readonly Landmark2DObservation[];
   triangulationOptions?: LandmarkTriangulationOptions;
 }
@@ -38,6 +42,12 @@ export function proposeClusterManifestFrom2DObservations(
   if (!mesh) throw new Error('Target mesh is not part of the source manifest inventory.');
   if (input.positions.length / 3 !== mesh.vertexCount) {
     throw new Error('Position buffer does not match the target mesh vertex inventory.');
+  }
+  if (!/^[a-z0-9][a-z0-9_-]{0,127}$/.test(input.avatarId) ||
+      !/^[a-z0-9][a-z0-9_-]{0,127}$/.test(input.formId) ||
+      !/^[a-z0-9][a-z0-9_-]{0,127}$/.test(input.poseId) ||
+      input.observations.some(item => item.avatarId !== input.avatarId || item.formId !== input.formId || item.poseId !== input.poseId)) {
+    throw new Error('A cluster candidate requires observations from exactly one explicit avatar, form and pose.');
   }
   const triangulation = triangulateLandmarkSeeds(
     input.observations,

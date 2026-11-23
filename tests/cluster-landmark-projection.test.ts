@@ -15,7 +15,7 @@ function project(point:Vector3, calibration:LandmarkCameraCalibration) {
   return {x:calibration.fx*p.x/p.z+calibration.cx,y:calibration.fy*p.y/p.z+calibration.cy};
 }
 function observation(landmarkId:string,partId:string,point:Vector3,calibration:LandmarkCameraCalibration):Landmark2DObservation {
-  return {...project(point,calibration),landmarkId,partId,confidence:0.98,camera:calibration,radiusWorld:0.4};
+  return {...project(point,calibration),avatarId:'pakachi',formId:'animal-form',poseId:'front-neutral',landmarkId,partId,confidence:0.98,camera:calibration,radiusWorld:0.4};
 }
 
 test('triangulates calibrated multi-view 2D landmarks into mesh-local 3D seeds',()=>{
@@ -54,6 +54,23 @@ test('rejects single-view, low-parallax and inconsistent multi-view evidence',()
     observation('ear','head',point,a),observation('ear','head',point,c),inconsistent,
   ],new Matrix4().toArray(),{maxRayErrorWorld:0.001});
   assert.match(bad.rejected[0].reason,/residual/);
+});
+
+test('keeps identical landmark IDs isolated across different poses and forms',()=>{
+  const point=new Vector3(0.1,0.2,4);
+  const frontA=camera('front-a',new Vector3(-1,0,0),point);
+  const frontB=camera('front-b',new Vector3(1,0,0),point);
+  const workA={...frontA,viewId:'work-a'};
+  const workB={...frontB,viewId:'work-b'};
+  const report=triangulateLandmarkSeeds([
+    observation('eye','head',point,frontA),observation('eye','head',point,frontB),
+    {...observation('eye','head',point,workA),formId:'work-form',poseId:'work-neutral'},
+    {...observation('eye','head',point,workB),formId:'work-form',poseId:'work-neutral'},
+  ],new Matrix4().toArray());
+  assert.equal(report.seeds.length,2);
+  assert.deepEqual(report.seeds.map(seed=>[seed.avatarId,seed.formId,seed.poseId,seed.viewCount]),[
+    ['pakachi','animal-form','front-neutral',2],['pakachi','work-form','work-neutral',2],
+  ]);
 });
 
 test('rejects intersections behind a calibrated camera',()=>{

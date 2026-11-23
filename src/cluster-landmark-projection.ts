@@ -13,6 +13,10 @@ export interface LandmarkCameraCalibration {
 }
 
 export interface Landmark2DObservation {
+  /** Explicit image-reference identity; never inferred from array order or camera view. */
+  avatarId: string;
+  formId: string;
+  poseId: string;
   landmarkId: string;
   partId: string;
   /** Normalized image coordinates in [0, 1]. */
@@ -31,6 +35,9 @@ export interface LandmarkTriangulationOptions {
 }
 
 export interface TriangulatedLandmarkSeed extends ClusterLandmarkSeed {
+  avatarId: string;
+  formId: string;
+  poseId: string;
   landmarkId: string;
   viewCount: number;
   reprojectionProxyErrorWorld: number;
@@ -40,7 +47,7 @@ export interface TriangulatedLandmarkSeed extends ClusterLandmarkSeed {
 
 export interface LandmarkTriangulationReport {
   seeds: TriangulatedLandmarkSeed[];
-  rejected: Array<{ landmarkId: string; reason: string }>;
+  rejected: Array<{ avatarId: string; formId: string; poseId: string; landmarkId: string; reason: string }>;
 }
 
 interface Ray {
@@ -155,18 +162,23 @@ export function triangulateLandmarkSeeds(
 
   const groups = new Map<string, Landmark2DObservation[]>();
   for (const observation of observations) {
-    if (!observation || !/^[a-z0-9][a-z0-9_-]{0,127}$/.test(observation.landmarkId) ||
+    if (!observation || !/^[a-z0-9][a-z0-9_-]{0,127}$/.test(observation.avatarId) ||
+        !/^[a-z0-9][a-z0-9_-]{0,127}$/.test(observation.formId) ||
+        !/^[a-z0-9][a-z0-9_-]{0,127}$/.test(observation.poseId) ||
+        !/^[a-z0-9][a-z0-9_-]{0,127}$/.test(observation.landmarkId) ||
         !/^[a-z0-9][a-z0-9_-]{0,127}$/.test(observation.partId) ||
         !Number.isFinite(observation.radiusWorld) || observation.radiusWorld <= 0 ||
         (observation.surfaceLayerId != null && !/^[a-z0-9][a-z0-9_-]{0,127}$/.test(observation.surfaceLayerId))) {
       throw new Error('Invalid semantic landmark metadata or evidence radius.');
     }
-    const key = observation.landmarkId;
+    const key = JSON.stringify([observation.avatarId, observation.formId, observation.poseId, observation.landmarkId]);
     const group = groups.get(key) ?? [];
     if (group.some(item => item.camera.viewId === observation.camera.viewId)) {
       throw new Error('A landmark may have only one observation per calibrated view.');
     }
-    if (group.length && (group[0].partId !== observation.partId ||
+    if (group.length && (group[0].avatarId !== observation.avatarId ||
+        group[0].formId !== observation.formId || group[0].poseId !== observation.poseId ||
+        group[0].partId !== observation.partId ||
         group[0].surfaceLayerId !== observation.surfaceLayerId ||
         Math.abs(group[0].radiusWorld - observation.radiusWorld) > 1e-8)) {
       throw new Error('Observations for one landmark must share part, layer and radius metadata.');
@@ -176,15 +188,16 @@ export function triangulateLandmarkSeeds(
   }
 
   const report: LandmarkTriangulationReport = { seeds: [], rejected: [] };
-  for (const [landmarkId, group] of groups) {
+  for (const group of groups.values()) {
+    const identity = { avatarId: group[0]!.avatarId, formId: group[0]!.formId, poseId: group[0]!.poseId, landmarkId: group[0]!.landmarkId };
     if (group.length < 2) {
-      report.rejected.push({ landmarkId, reason: 'At least two calibrated views are required for depth.' });
+      report.rejected.push({ ...identity, reason: 'At least two calibrated views are required for depth.' });
       continue;
     }
     const rays = group.map(makeRay);
     const result = triangulate(rays);
     if (!result) {
-      report.rejected.push({ landmarkId, reason: 'Camera rays do not provide a stable triangulation.' });
+      report.rejected.push({ ...identity, reason: 'Camera rays do not provide a stable triangulation.' });
       continue;
     }
     // A ray intersection behind any camera is geometrically invalid even when
@@ -193,15 +206,15 @@ export function triangulateLandmarkSeeds(
       result.point.clone().sub(ray.origin).dot(ray.direction) <= 1e-8,
     );
     if (behindCamera) {
-      report.rejected.push({ landmarkId, reason: 'Triangulated landmark lies behind at least one camera.' });
+      report.rejected.push({ ...identity, reason: 'Triangulated landmark lies behind at least one camera.' });
       continue;
     }
     if (result.parallax < minParallax) {
-      report.rejected.push({ landmarkId, reason: 'Camera baseline is too small for reliable depth.' });
+      report.rejected.push({ ...identity, reason: 'Camera baseline is too small for reliable depth.' });
       continue;
     }
     if (result.error > maxError) {
-      report.rejected.push({ landmarkId, reason: 'Multi-view ray residual exceeds the configured tolerance.' });
+      report.rejected.push({ ...identity, reason: 'Multi-view ray residual exceeds the configured tolerance.' });
       continue;
     }
     const local = result.point.applyMatrix4(worldToMesh);
@@ -211,7 +224,7 @@ export function triangulateLandmarkSeeds(
       Math.max(0, 1 - result.error / maxError),
     ));
     report.seeds.push({
-      landmarkId,
+      ...identity,
       partId: group[0].partId,
       position: [local.x, local.y, local.z],
       radius: group[0].radiusWorld / meshScale,
