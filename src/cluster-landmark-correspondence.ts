@@ -41,6 +41,7 @@ export interface ReviewedLandmarkCorrespondence {
   poseId: string;
   meshId: string;
   triangleIndex: number;
+  barycentric: readonly [number, number, number];
   partId: string;
   surfaceLayerId: string | null;
   position: readonly [number, number, number];
@@ -139,7 +140,7 @@ export function resolveReviewedLandmarkSurfacePicks(
     seeds.push({ partId: pick.partId, position, radius: pick.radiusLocal, surfaceLayerId: pick.surfaceLayerId ?? null });
     correspondences.push({
       landmarkId: pick.landmarkId, viewId: pick.viewId, poseId: pick.poseId,
-      meshId: pick.meshId, triangleIndex: pick.triangleIndex, partId: pick.partId,
+      meshId: pick.meshId, triangleIndex: pick.triangleIndex, barycentric: [pick.barycentric[0], pick.barycentric[1], pick.barycentric[2]], partId: pick.partId,
       surfaceLayerId: pick.surfaceLayerId ?? null, position, radius: pick.radiusLocal,
       origin: 'user', policy: 'locked',
     });
