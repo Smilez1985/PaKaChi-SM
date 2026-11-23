@@ -1,4 +1,4 @@
-import { applyClusterOperation } from './cluster-architecture.ts';
+import { applyClusterOperation, validateClusterManifest } from './cluster-architecture.ts';
 import type { ClusterManifest } from './cluster-architecture.ts';
 import type { StudioLandmarkEvidenceBundle } from './studio-landmark-evidence.ts';
 
@@ -128,4 +128,51 @@ export function acceptClusterLandmarkPreviewItem(
     sourceImageSha256: preview.sourceImageSha256,
     landmarkIds: item.landmarkIds,
   }, 'user', 'locked');
+}
+
+
+/**
+ * Restores a previously reviewed landmark manifest onto a freshly generated
+ * manifest for the currently open model. Only the exact triangle-review
+ * operations are replayed; all source geometry and semantic catalog data must
+ * still match. The current image hash is required to prevent stale evidence.
+ */
+export function restoreReviewedClusterManifest(
+  current: ClusterManifest,
+  candidate: unknown,
+  expectedImageSha256: string,
+): ClusterManifest {
+  if (!/^[a-f0-9]{64}$/.test(expectedImageSha256)) {
+    throw new Error('Aktueller Bildreferenz-Hash ist ungültig.');
+  }
+  const issues = validateClusterManifest(candidate);
+  if (issues.length) throw new Error('Importiertes Manifest ist ungültig: ' + issues.map(issue => issue.code).join(', '));
+  const imported = candidate as ClusterManifest;
+  const inventoryKey = (manifest: ClusterManifest) => manifest.meshes
+    .map(({ id, sourceMeshIndex, sourceMeshName, primitiveIndex, vertexCount, triangleCount, sourceNodeIndex, sourceNodeName, sourceNodePath }) =>
+      ({ id, sourceMeshIndex, sourceMeshName, primitiveIndex, vertexCount, triangleCount, sourceNodeIndex, sourceNodeName, sourceNodePath }))
+    .sort((a, b) => a.id.localeCompare(b.id));
+  if (current.sourceAssetSha256 !== imported.sourceAssetSha256 || current.form !== imported.form ||
+      JSON.stringify(inventoryKey(current)) !== JSON.stringify(inventoryKey(imported))) {
+    throw new Error('Manifest gehört zu einem anderen Quellmodell, einer anderen Form oder einem veralteten Meshinventar.');
+  }
+  if (JSON.stringify(current.parts) !== JSON.stringify(imported.parts) ||
+      JSON.stringify(current.layers) !== JSON.stringify(imported.layers)) {
+    throw new Error('Anatomie- oder Oberflächenkatalog stimmt nicht mit dem aktuellen Studio überein.');
+  }
+  if (imported.overrides.length > 10000 || imported.revision !== current.revision + imported.overrides.length) {
+    throw new Error('Manifest-Revision oder Anzahl der Review-Änderungen ist ungültig.');
+  }
+  let restored = structuredClone(current);
+  for (const entry of imported.overrides) {
+    if (entry.origin !== 'user' || entry.policy !== 'locked' || entry.operation.type !== 'assign-triangle' ||
+        entry.operation.sourceImageSha256 !== expectedImageSha256) {
+      throw new Error('Manifest enthält nicht unterstützte Änderungen oder einen anderen Bildreferenz-Beleg.');
+    }
+    restored = applyClusterOperation(restored, entry.operation, 'user', 'locked');
+  }
+  if (JSON.stringify(restored.assignments) !== JSON.stringify(imported.assignments)) {
+    throw new Error('Dreieck-Zuweisungen stimmen nicht mit dem nachvollziehbaren Override-Protokoll überein.');
+  }
+  return restored;
 }
