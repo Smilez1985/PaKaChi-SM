@@ -222,6 +222,33 @@ test('creates a review-only triangle preview from exact confirmed evidence witho
   assert.equal(conflicted.items[0]!.proposedPartId, null);
 });
 
+
+test('restores reviewed triangle manifests only for the exact model, form, catalog and image', async () => {
+  Object.defineProperty(globalThis, 'crypto', { configurable: true, value: webcrypto });
+  const root = new T.Group();
+  const geometry = new T.BufferGeometry();
+  geometry.setAttribute('position', new T.Float32BufferAttribute([0,0,0, 1,0,0, 0,1,0], 3));
+  root.add(new T.Mesh(geometry));
+  const manifest = await createStudioFormManifest(root, Buffer.from('reviewed manifest roundtrip').toString('base64'), 'animal', new Date().toISOString(), createPaKaChiSemanticCatalog());
+  const pick = createStudioLandmarkSurfacePick(input()); pick.meshId = manifest.meshes[0]!.id;
+  const evidence = createStudioLandmarkEvidenceBundle(root, manifest, document(), [pick], true);
+  const { createClusterLandmarkClassificationPreview, acceptClusterLandmarkPreviewItem, restoreReviewedClusterManifest } = await import('../src/cluster-landmark-preview.ts');
+  const preview = createClusterLandmarkClassificationPreview(manifest, evidence);
+  const accepted = acceptClusterLandmarkPreviewItem(manifest, preview, preview.items[0]!.meshId, 0);
+  const restored = restoreReviewedClusterManifest(manifest, JSON.parse(JSON.stringify(accepted)), document().source.sha256);
+  assert.deepEqual(restored.assignments, accepted.assignments);
+  assert.equal(restored.overrides.length, 1);
+  assert.equal(restored.overrides[0]!.operation.type, 'assign-triangle');
+  assert.throws(() => restoreReviewedClusterManifest(manifest, accepted, 'c'.repeat(64)), /anderen Bildreferenz-Beleg/);
+  assert.throws(() => restoreReviewedClusterManifest({ ...manifest, form: 'humanoid' }, accepted, document().source.sha256), /anderes Quellmodell/);
+  const tampered = structuredClone(accepted);
+  tampered.assignments[0]!.origin = 'imported';
+  assert.throws(() => restoreReviewedClusterManifest(manifest, tampered, document().source.sha256), /stimmt nicht mit .*Override-Protokoll/);
+  const extraOperation = structuredClone(accepted);
+  extraOperation.overrides[0]!.operation.type = 'assign-mesh';
+  assert.throws(() => restoreReviewedClusterManifest(manifest, extraOperation, document().source.sha256), /ungültig|nicht unterstützte Änderungen/i);
+});
+
 test('landmark review acceptance rejects conflicts and stale preview provenance', async () => {
   Object.defineProperty(globalThis, 'crypto', { configurable: true, value: webcrypto });
   const root = new T.Group();
