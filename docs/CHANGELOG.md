@@ -13,6 +13,9 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 ## [Unreleased]
 
 ### Added
+- Der Bildreferenz-Editor bietet eine manuelle Kamerakalibrierung: explizite Avatar-/Form-/View-Zuordnung über einen ausgewählten Bildbereich, verpflichtende Pose-ID, Eingabe von fx/fy/cx/cy sowie Translation und Rotation; die Kamera-zu-Welt-Matrix wird mit dem validierten Builder erstellt und an den Quellbild-SHA-256 gebunden. Bestehende Kalibrierungen können entfernt und gleichartige View/Pose-Kombinationen aktualisiert werden. Keine automatische Kameraschätzung. Stand: 2026-11-23T13:16:00+01:00 (Europe/Berlin).
+
+### Added
 - Bildreferenz-Kalibrierung: Eine gemeinsame, getestete Hilfsfunktion erzeugt starre Kamera-zu-Welt-Transformationen aus ausdrücklich angegebenen Translationen und Euler-Winkeln (Grad; Rotationsfolge X→Y→Z, Kameravorwärtsrichtung lokal +Z). Nicht-endliche Eingaben werden abgewiesen. Dies ist die Rechenbasis für die noch folgende Kalibrierungsoberfläche; es gibt weiterhin keine automatische Kameraschätzung. Stand: 2026-11-23T13:05:00+01:00 (Europe/Berlin).
 
 ### Fixed
