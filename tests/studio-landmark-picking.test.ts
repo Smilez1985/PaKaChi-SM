@@ -173,7 +173,7 @@ test('round-trips a landmark evidence sidecar only when model, image, form and g
   const imported = validateStudioLandmarkEvidenceBundle(root, manifest, document(), JSON.parse(JSON.stringify(exported)), true);
   assert.deepEqual(imported, exported);
   assert.throws(() => validateStudioLandmarkEvidenceBundle(root, manifest, document(), exported, false), /ausdrücklich bestätigt/);
-  assert.throws(() => validateStudioLandmarkEvidenceBundle(root, {...manifest, sourceAssetSha256:'c'.repeat(64)}, document(), exported, true), /anderes Quellmodell/);
+  assert.throws(() => validateStudioLandmarkEvidenceBundle(root, {...manifest, sourceAssetSha256:'c'.repeat(64)}, document(), exported, true), /anderen Quellmodell/);
   const changed = JSON.parse(JSON.stringify(exported));
   changed.correspondences[0].position[0] += 0.1;
   assert.throws(() => validateStudioLandmarkEvidenceBundle(root, manifest, document(), changed, true), /Mesh-Geometrie/);
