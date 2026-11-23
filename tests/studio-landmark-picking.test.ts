@@ -178,3 +178,34 @@ test('round-trips a landmark evidence sidecar only when model, image, form and g
   changed.correspondences[0].position[0] += 0.1;
   assert.throws(() => validateStudioLandmarkEvidenceBundle(root, manifest, document(), changed, true), /Mesh-Geometrie/);
 });
+
+test('creates a review-only triangle preview from exact confirmed evidence without changing the manifest', async () => {
+  Object.defineProperty(globalThis, 'crypto', { configurable: true, value: webcrypto });
+  const root = new T.Group();
+  const geometry = new T.BufferGeometry();
+  geometry.setAttribute('position', new T.Float32BufferAttribute([0,0,0, 1,0,0, 0,1,0], 3));
+  root.add(new T.Mesh(geometry));
+  const manifest = await createStudioFormManifest(root, Buffer.from('preview source').toString('base64'), 'animal', new Date().toISOString(), createPaKaChiSemanticCatalog());
+  const pick = createStudioLandmarkSurfacePick(input());
+  pick.meshId = manifest.meshes[0]!.id;
+  const evidence = createStudioLandmarkEvidenceBundle(root, manifest, document(), [pick], true);
+  const { createClusterLandmarkClassificationPreview } = await import('../src/cluster-landmark-preview.ts');
+  const before = structuredClone(manifest.assignments);
+  const preview = createClusterLandmarkClassificationPreview(manifest, evidence);
+  assert.equal(preview.policy, 'review-only');
+  assert.equal(preview.automaticAssignmentsApplied, false);
+  assert.equal(preview.items.length, 1);
+  assert.equal(preview.items[0]!.status, 'single-evidence');
+  assert.equal(preview.items[0]!.proposedPartId, 'head');
+  assert.equal(preview.items[0]!.proposedSurfaceLayerId, 'fur');
+  assert.deepEqual(manifest.assignments, before);
+  const duplicate = { ...evidence, correspondences: [evidence.correspondences[0]!, { ...evidence.correspondences[0]!, landmarkId: 'right-eye' }] };
+  const corroborated = createClusterLandmarkClassificationPreview(manifest, duplicate);
+  assert.equal(corroborated.items[0]!.status, 'corroborated');
+  const conflict = { ...duplicate, correspondences: [duplicate.correspondences[0]!, { ...duplicate.correspondences[1]!, partId: 'body' }] };
+  assert.throws(() => createClusterLandmarkClassificationPreview(manifest, conflict), /Semantikreferenz/);
+  const otherPartManifest = { ...manifest, parts: [...manifest.parts, { id: 'body', name: 'Body', parentPartId: null, orderKey: [2], rigBoneIds: [] }] };
+  const conflicted = createClusterLandmarkClassificationPreview(otherPartManifest, conflict);
+  assert.equal(conflicted.items[0]!.status, 'conflict');
+  assert.equal(conflicted.items[0]!.proposedPartId, null);
+});
