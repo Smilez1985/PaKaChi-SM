@@ -1,4 +1,4 @@
-import type { ImageReferenceCameraCalibration, ImageReferenceDocument } from './image-reference.ts';
+import { validateImageReferenceDocument, type ImageReferenceCameraCalibration, type ImageReferenceDocument } from './image-reference.ts';
 import type { Landmark2DObservation } from './cluster-landmark-projection.ts';
 
 /**
@@ -14,6 +14,10 @@ export function createCalibratedLandmarkObservations(
       !Number.isSafeInteger(document.source.height) || document.source.height <= 0 ||
       !/^[a-f0-9]{64}$/i.test(document.source.sha256)) {
     throw new Error('A valid immutable image-reference document is required.');
+  }
+  const documentIssues = validateImageReferenceDocument(document);
+  if (documentIssues.length > 0) {
+    throw new Error(`invalid-image-reference-document:${documentIssues.map(issue => issue.path).join(',')}`);
   }
   const validId = (value: string) => /^[a-z0-9][a-z0-9_-]{0,127}$/.test(value);
   if (!identity || !validId(identity.avatarId) || !validId(identity.formId) || !validId(identity.poseId) ||

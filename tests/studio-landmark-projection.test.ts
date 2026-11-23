@@ -34,7 +34,7 @@ test('does not borrow another form or pose calibration and rejects foreign image
  doc.cameraCalibrations=doc.cameraCalibrations!.map(item=>({...item,formId:'work-form'}));
  assert.equal(createCalibratedLandmarkObservations(doc,{avatarId:'pakachi',formId:'animal-form',poseId:'neutral',radiusWorld:.12}).length,0);
  doc.cameraCalibrations=fixture().cameraCalibrations!.map(item=>({...item,sourceImageSha256:'b'.repeat(64)}));
- assert.throws(()=>createCalibratedLandmarkObservations(doc,{avatarId:'pakachi',formId:'animal-form',poseId:'neutral',radiusWorld:.12}),/different source image/);
+ assert.throws(()=>createCalibratedLandmarkObservations(doc,{avatarId:'pakachi',formId:'animal-form',poseId:'neutral',radiusWorld:.12}),/invalid-image-reference-document:cameraCalibrations/);
 });
 
 test('requires an explicit world-space evidence radius instead of converting pixel radii',()=>{
@@ -48,4 +48,13 @@ test('image-reference validation rejects calibration outside its explicit hierar
  assert.ok(validateImageReferenceDocument(doc).some(issue=>issue.path==='cameraCalibrations[0].viewId'));
  const bad=fixture();bad.cameraCalibrations![0]!.fx=0;
  assert.ok(validateImageReferenceDocument(bad).some(issue=>issue.path==='cameraCalibrations[0].intrinsics'));
+});
+
+test('blocks reconstruction when any landmark or camera calibration violates document validation',()=>{
+ const badLandmark=fixture();
+ badLandmark.landmarks![0]!.x=1001;
+ assert.throws(()=>createCalibratedLandmarkObservations(badLandmark,{avatarId:'pakachi',formId:'animal-form',poseId:'neutral',radiusWorld:.12}),/invalid-image-reference-document:landmarks\\[0\\]\\.position/);
+ const badCamera=fixture();
+ badCamera.cameraCalibrations![0]!.cameraToWorld[0]=2;
+ assert.throws(()=>createCalibratedLandmarkObservations(badCamera,{avatarId:'pakachi',formId:'animal-form',poseId:'neutral',radiusWorld:.12}),/invalid-image-reference-document:cameraCalibrations\\[0\\]\\.cameraToWorld/);
 });
