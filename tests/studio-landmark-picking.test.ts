@@ -240,7 +240,7 @@ test('restores reviewed triangle manifests only for the exact model, form, catal
   assert.equal(restored.overrides.length, 1);
   assert.equal(restored.overrides[0]!.operation.type, 'assign-triangle');
   assert.throws(() => restoreReviewedClusterManifest(manifest, accepted, 'c'.repeat(64)), /anderen Bildreferenz-Beleg/);
-  assert.throws(() => restoreReviewedClusterManifest({ ...manifest, form: 'humanoid' }, accepted, document().source.sha256), /anderes Quellmodell/);
+  assert.throws(() => restoreReviewedClusterManifest({ ...manifest, form: 'humanoid' }, accepted, document().source.sha256), /anderen Quellmodell/);
   const tampered = structuredClone(accepted);
   tampered.assignments[0]!.origin = 'imported';
   assert.throws(() => restoreReviewedClusterManifest(manifest, tampered, document().source.sha256), /stimmt nicht mit .*Override-Protokoll/);
