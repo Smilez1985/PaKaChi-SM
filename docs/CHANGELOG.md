@@ -12,6 +12,9 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+### Fixed
+- Avatar-Studio: Die Einzelprüfung importierter Landmarken-Vorschläge bleibt bei normalen UI-Neudarstellungen sichtbar. Nach einer Studio-Datenänderung oder einer neuen Bildreferenz wird die Vorschau vorsorglich verworfen, damit keine veralteten Vorschläge übernommen werden. Stand: 2026-11-23T10:13:09+01:00 (Europe/Berlin).
+
 ### Added
 - Avatar-Studio: Importierte Landmarken-Klassifikationsvorschläge erscheinen in einer Einzelprüfung. Konflikte sind nicht übernehmbar; jede eindeutige Dreieck-Zuweisung benötigt einen eigenen Klick und wird als gesperrte Nutzerentscheidung mit Evidenzprovenienz exportierbar. Stand: 2026-11-23T09:05:00+01:00 (Europe/Berlin).
 
