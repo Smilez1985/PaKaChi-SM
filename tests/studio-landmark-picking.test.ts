@@ -1,6 +1,9 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createStudioLandmarkSurfacePick } from '../src/studio-landmark-picking.ts';
+import { createStudioLandmarkEvidenceBundle } from '../src/studio-landmark-evidence.ts';
+import { createStudioFormManifest } from '../src/studio-form-manifest.ts';
+import { webcrypto } from 'node:crypto';
 import type { ImageReferenceDocument } from '../src/image-reference.ts';
 import type { ClusterMeshInventory } from '../src/cluster-inventory.ts';
 import { Window } from 'happy-dom';
@@ -117,4 +120,38 @@ test('studio UI previews a 3D hit and persists it only after explicit confirmati
   button('#studio-undo').click();
   editor.dispose();
   w.happyDOM.abort();
+});
+
+
+test('exports confirmed 2D/3D landmark evidence separately without assigning source triangles', async () => {
+  Object.defineProperty(globalThis, 'crypto', { configurable: true, value: webcrypto });
+  const root = new T.Group();
+  const geometry = new T.BufferGeometry();
+  geometry.setAttribute('position', new T.Float32BufferAttribute([0,0,0, 1,0,0, 0,1,0], 3));
+  root.add(new T.Mesh(geometry));
+  const source = Buffer.from('original source asset').toString('base64');
+  const manifest = await createStudioFormManifest(root, source, 'animal');
+  const picks = [createStudioLandmarkSurfacePick(input())];
+  // Rebind the test pick to the exact inventory ID generated from these source bytes.
+  picks[0]!.meshId = manifest.meshes[0]!.id;
+  const evidence = createStudioLandmarkEvidenceBundle(root, manifest, document(), picks);
+  assert.equal(evidence.format, 'pakachi-cluster-landmark-evidence');
+  assert.equal(evidence.sourceAssetSha256, manifest.sourceAssetSha256);
+  assert.equal(evidence.sourceImageSha256, document().source.sha256);
+  assert.equal(evidence.correspondences.length, 1);
+  assert.equal(evidence.correspondences[0]!.origin, 'user');
+  assert.equal(evidence.correspondences[0]!.policy, 'locked');
+  assert.equal(manifest.assignments[0]!.partId, null);
+  assert.equal(manifest.assignments[0]!.surfaceLayerId, null);
+});
+
+test('rejects evidence export for mismatched form and image provenance', async () => {
+  Object.defineProperty(globalThis, 'crypto', { configurable: true, value: webcrypto });
+  const root = new T.Group();
+  root.add(new T.Mesh(new T.BufferGeometry().setAttribute('position', new T.Float32BufferAttribute([0,0,0,1,0,0,0,1,0],3))));
+  const manifest = await createStudioFormManifest(root, Buffer.from('source').toString('base64'), 'animal');
+  const pick = createStudioLandmarkSurfacePick(input());
+  pick.meshId = manifest.meshes[0]!.id;
+  assert.throws(() => createStudioLandmarkEvidenceBundle(root, manifest, document(), [{...pick,formId:'other-form'}]), /same image reference, avatar and form/);
+  assert.throws(() => createStudioLandmarkEvidenceBundle(root, manifest, document(), [{...pick,sourceImageSha256:'c'.repeat(64)}]), /same image reference, avatar and form/);
 });
