@@ -126,6 +126,8 @@ export function acceptClusterLandmarkPreviewItem(
     partId: item.proposedPartId,
     surfaceLayerId: item.proposedSurfaceLayerId,
     sourceImageSha256: preview.sourceImageSha256,
+    avatarId: preview.avatarId,
+    formId: preview.formId,
     landmarkIds: item.landmarkIds,
   }, 'user', 'locked');
 }
@@ -164,11 +166,17 @@ export function restoreReviewedClusterManifest(
     throw new Error('Manifest-Revision oder Anzahl der Review-Änderungen ist ungültig.');
   }
   let restored = structuredClone(current);
+  let evidenceIdentity: { avatarId: string; formId: string } | null = null;
   for (const entry of imported.overrides) {
     if (entry.origin !== 'user' || entry.policy !== 'locked' || entry.operation.type !== 'assign-triangle' ||
         entry.operation.sourceImageSha256 !== expectedImageSha256) {
       throw new Error('Manifest enthält nicht unterstützte Änderungen oder einen anderen Bildreferenz-Beleg.');
     }
+    const identity = { avatarId: entry.operation.avatarId, formId: entry.operation.formId };
+    if (evidenceIdentity && (evidenceIdentity.avatarId !== identity.avatarId || evidenceIdentity.formId !== identity.formId)) {
+      throw new Error('Manifest mischt Landmarken aus unterschiedlichen Avatar- oder Formreferenzen.');
+    }
+    evidenceIdentity = identity;
     restored = applyClusterOperation(restored, entry.operation, 'user', 'locked');
   }
   if (JSON.stringify(restored.assignments) !== JSON.stringify(imported.assignments)) {

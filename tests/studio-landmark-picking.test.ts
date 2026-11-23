@@ -239,11 +239,16 @@ test('restores reviewed triangle manifests only for the exact model, form, catal
   assert.deepEqual(restored.assignments, accepted.assignments);
   assert.equal(restored.overrides.length, 1);
   assert.equal(restored.overrides[0]!.operation.type, 'assign-triangle');
+  assert.equal(restored.overrides[0]!.operation.type === 'assign-triangle' ? restored.overrides[0]!.operation.avatarId : null, evidence.avatarId);
+  assert.equal(restored.overrides[0]!.operation.type === 'assign-triangle' ? restored.overrides[0]!.operation.formId : null, evidence.formId);
   assert.throws(() => restoreReviewedClusterManifest(manifest, accepted, 'c'.repeat(64)), /anderen Bildreferenz-Beleg/);
   assert.throws(() => restoreReviewedClusterManifest({ ...manifest, form: 'humanoid' }, accepted, document().source.sha256), /anderen Quellmodell/);
   const tampered = structuredClone(accepted);
   tampered.assignments[0]!.origin = 'imported';
   assert.throws(() => restoreReviewedClusterManifest(manifest, tampered, document().source.sha256), /Zuweisungen stimmen nicht mit .*Override-Protokoll/);
+  const mixedIdentity = structuredClone(accepted);
+  if (mixedIdentity.overrides[0]!.operation.type === 'assign-triangle') mixedIdentity.overrides[0]!.operation.formId = 'another-form';
+  assert.throws(() => restoreReviewedClusterManifest(manifest, mixedIdentity, document().source.sha256), /unterschiedlichen Avatar- oder Formreferenzen/);
   const extraOperation = structuredClone(accepted);
   extraOperation.overrides[0]!.operation = { type: 'assign-mesh', meshId: manifest.meshes[0]!.id, partId: null };
   assert.throws(() => restoreReviewedClusterManifest(manifest, extraOperation, document().source.sha256), /ungültig|nicht unterstützte Änderungen/i);

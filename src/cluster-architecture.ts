@@ -6,7 +6,7 @@ export type ClusterOperation=
  | {type:'reparent-part';partId:string;parentPartId:string|null}
  | {type:'reorder-part';partId:string;orderKey:number[]}
  | {type:'assign-mesh';meshId:string;partId:string|null;surfaceLayerId?:string|null;policy?:OverridePolicy}
- | {type:'assign-triangle';meshId:string;triangleIndex:number;partId:string;surfaceLayerId:string|null;sourceImageSha256:string;landmarkIds:string[]}
+ | {type:'assign-triangle';meshId:string;triangleIndex:number;partId:string;surfaceLayerId:string|null;sourceImageSha256:string;avatarId:string;formId:string;landmarkIds:string[]}
  | {type:'set-surface-layer';layerId:string;partId:string|null;name?:string}
  | {type:'add-part';part:ClusterPart}
  | {type:'remove-part';partId:string};
@@ -87,7 +87,7 @@ function assertOperation(op:ClusterOperation){
  else if(op.type==='reparent-part'){id(op.partId);if(op.parentPartId!==null)id(op.parentPartId);}
  else if(op.type==='reorder-part'){id(op.partId);if(!validOrder(op.orderKey))throw new Error('Invalid order key.');}
  else if(op.type==='assign-mesh'){id(op.meshId);if(op.partId!==null)id(op.partId);if(op.surfaceLayerId!==undefined&&op.surfaceLayerId!==null)id(op.surfaceLayerId);if(op.policy!==undefined&&!['recomputable','prefer','locked'].includes(op.policy))throw new Error('Invalid override policy.');}
- else if(op.type==='assign-triangle'){id(op.meshId);if(!Number.isSafeInteger(op.triangleIndex)||op.triangleIndex<0)throw new Error('Invalid triangle index.');id(op.partId);if(op.surfaceLayerId!==null)id(op.surfaceLayerId);if(!/^[a-f0-9]{64}$/.test(op.sourceImageSha256)||!Array.isArray(op.landmarkIds)||op.landmarkIds.length<1||op.landmarkIds.length>10000||op.landmarkIds.some(value=>!validId(value))||new Set(op.landmarkIds).size!==op.landmarkIds.length)throw new Error('Invalid landmark evidence provenance.');}
+ else if(op.type==='assign-triangle'){id(op.meshId);if(!Number.isSafeInteger(op.triangleIndex)||op.triangleIndex<0)throw new Error('Invalid triangle index.');id(op.partId);if(op.surfaceLayerId!==null)id(op.surfaceLayerId);id(op.avatarId);id(op.formId);if(!/^[a-f0-9]{64}$/.test(op.sourceImageSha256)||!Array.isArray(op.landmarkIds)||op.landmarkIds.length<1||op.landmarkIds.length>10000||op.landmarkIds.some(value=>!validId(value))||new Set(op.landmarkIds).size!==op.landmarkIds.length)throw new Error('Invalid landmark evidence provenance.');}
  else if(op.type==='set-surface-layer'){id(op.layerId);if(op.partId!==null)id(op.partId);if(op.name!==undefined&&(typeof op.name!=='string'||!op.name.trim()||op.name.length>100))throw new Error('Invalid layer name.');}
  else if(op.type==='add-part'){if(!isRecord(op.part)||!validId(op.part.id)||typeof op.part.name!=='string'||!op.part.name.trim()||!validOrder(op.part.orderKey)||!Array.isArray(op.part.rigBoneIds))throw new Error('Invalid new part.');}
  else if(op.type==='remove-part')id(op.partId);

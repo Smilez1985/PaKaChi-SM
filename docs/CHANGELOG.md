@@ -12,6 +12,9 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+### Changed
+- Cluster-Landmarken: Jede übernommene Dreieck-Zuweisung speichert jetzt zusätzlich die exakten Avatar- und Formreferenz-IDs der bestätigten 2D-Landmarken. Beim Wiederherstellen werden diese IDs erhalten und gemischte Avatar-/Formbelege im selben Manifest abgewiesen; die UI leitet Referenzidentität nicht mehr aus der Projekt-ID ab. Stand: 2026-11-23T10:32:41+01:00 (Europe/Berlin).
+
 ### Added
 - Avatar-Studio: Bereits übernommene Landmarken-Manifeste lassen sich wiederherstellen. Der Import prüft Quellasset-Hash, Form, Meshinventar, Anatomie-/Oberflächenkatalog, aktuellen Bild-Hash und das vollständige Override-Protokoll. Ausschließlich gesperrte Einzel-Dreieck-Zuweisungen aus Nutzerbestätigungen werden erneut angewendet; manipulierte oder fremde Zuweisungen werden abgewiesen. Stand: 2026-11-23T10:20:42+01:00 (Europe/Berlin).
 
