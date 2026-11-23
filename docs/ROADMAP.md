@@ -194,7 +194,7 @@ Die Umsetzung des integrierten MCP-Arbeitsplatzes, der Caddy-/DuckDNS-Konfigurat
 
 - [x] Für transparente Komponenten einen kleinen perceptual hash ergänzen und visuell ähnliche Ausschnitte als reine manuelle Prüfhilfe anzeigen; keine automatische Identitäts-, Form- oder Ansichtszuordnung.
 
-## 2D-Clusterkern und Landmarken
+## Abgeschlossen: 2D-Clusterkern und Landmarken
 
 - [x] Separaten 2D-Semantikvertrag mit stabilen Anatomie-/Oberflächen-IDs, quellpixelgebundenen Landmarken und Avatar-/Form-/Ansichts-/Posen-Provenienz ergänzen.
 - [x] Konservative 2D-Regionsklassifikation auf bestätigte Bildregionen begrenzen; automatische Vorschläge bleiben unbestätigt, Mehrdeutigkeit und Ansichts-/Posenvermischung bleiben ungelöst.
@@ -212,6 +212,11 @@ Die Umsetzung des integrierten MCP-Arbeitsplatzes, der Caddy-/DuckDNS-Konfigurat
 - [x] Adapter für explizit bestätigte Studio-Mesh-Treffer ergänzen: Trefferindex wird in eine SHA-256-gebundene stabile Mesh-ID aufgelöst; 2D-Provenienz wird aus der bestätigten Landmarke übernommen. Mausmodus, Vorschau, explizite UI-Bestätigung und Persistenz sind integriert.
 - [x] Vergleichskern für Tier- und Arbeitsform: semantische Part-/Surface-Layer-Abdeckung, Dreiecksdifferenzen und unzugewiesene Flächen; Mesh-IDs bleiben formgebunden. ([Vertrag](CLUSTER-FORM-VERGLEICH.md))
 - [x] Studio-Bericht für zwei ausdrücklich geladene Cluster-Manifeste: beide Formdateien werden gegen den Katalog des geöffneten Studio-Projekts validiert und mit getrennten Mesh-Inventaren angezeigt. Noch keine automatische Paarung/Persistenz der Manifeste am Charakter; Dreieckszahlen belegen keine Morph-Kompatibilität.
+- [x] Manuelle Kamerakalibrierung im Bildreferenz-Editor: intrinsische Werte, Pose und Kamera-zu-Welt-Transformation werden explizit eingegeben; jede Kalibrierung ist an Quellbild-Hash, Avatar, Form, Ansicht und Pose gebunden. Automatische Kameraschätzung bleibt ausdrücklich ausgenommen.
+- [x] Validierte Kamera-Projektion: nur starre, rechtshändige Kameratransformationen und gültige Intrinsiken werden akzeptiert; Bildpixel-Y und Kamera-Y werden korrekt gegensinnig behandelt.
+- [x] Ansichtsübergreifende Landmarken-Triangulation: semantische Korrespondenzen teilen sich nur bei identischer Avatar-/Form-/Pose-Identität; unterschiedliche Formen und Posen bleiben getrennt. Nicht-uniforme affine GLB-Welttransformationen werden beim Übertragen von Position und Evidenzradius berücksichtigt.
+- [x] Bildreferenz→Cluster-Kandidat: bestätigte Landmarken und passende Mehransicht-Kalibrierungen können einen geprüften Kandidaten erzeugen. Einzelansichten liefern keine erfundene Tiefe; das Quellmanifest bleibt unverändert und die Übernahme bleibt eine separate Nutzerentscheidung.
+- [x] Vollständige Bildreferenzvalidierung vor Rekonstruktion: ungültige Pixelpositionen, Hierarchieverweise oder Kameramatrizen sperren die Erzeugung kalibrierter 3D-Beobachtungen.
 
 ## Noch zu entscheiden
 
