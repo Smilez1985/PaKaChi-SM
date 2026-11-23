@@ -39,7 +39,11 @@ test('Studio comparison panel validates both form files and renders the shared s
     const inputs = host.querySelectorAll('input');
     installFile(inputs[0] as unknown as HTMLInputElement, manifest('animal', 'animal-mesh'));
     installFile(inputs[1] as unknown as HTMLInputElement, manifest('humanoid', 'humanoid-mesh'));
+    const pairing = host.querySelector<HTMLInputElement>('#form-comparison-same-character')!;
     const button = host.querySelector('button')!;
+    assert.equal(button.disabled, true);
+    pairing.checked = true;
+    pairing.dispatchEvent(new Event('change', { bubbles: true }));
     assert.equal((button as unknown as HTMLButtonElement).disabled, false);
     button.click();
     await new Promise(resolve => setTimeout(resolve, 0));
@@ -71,6 +75,9 @@ test('Studio comparison panel reports invalid form files without producing a rep
     const inputs = host.querySelectorAll('input');
     installFile(inputs[0] as unknown as HTMLInputElement, manifest('humanoid', 'wrong-form'));
     installFile(inputs[1] as unknown as HTMLInputElement, manifest('humanoid', 'humanoid-mesh'));
+    const pairing = host.querySelector<HTMLInputElement>('#form-comparison-same-character')!;
+    pairing.checked = true;
+    pairing.dispatchEvent(new Event('change', { bubbles: true }));
     host.querySelector('button')!.click();
     await new Promise(resolve => setTimeout(resolve, 0));
     assert.match(host.textContent ?? '', /kein Tierform-Manifest/);
