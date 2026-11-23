@@ -7,7 +7,7 @@ import type { Landmark2DObservation } from './cluster-landmark-projection.ts';
  */
 export function createCalibratedLandmarkObservations(
   document: ImageReferenceDocument,
-  identity: { avatarId: string; formId: string; poseId: string },
+  identity: { avatarId: string; formId: string; poseId: string; radiusWorld: number },
 ): Landmark2DObservation[] {
   if (!document || document.format !== 'pakachi-image-reference' || document.version !== 1 ||
       !Number.isSafeInteger(document.source.width) || document.source.width <= 0 ||
@@ -16,7 +16,8 @@ export function createCalibratedLandmarkObservations(
     throw new Error('A valid immutable image-reference document is required.');
   }
   const validId = (value: string) => /^[a-z0-9][a-z0-9_-]{0,127}$/.test(value);
-  if (!identity || !validId(identity.avatarId) || !validId(identity.formId) || !validId(identity.poseId)) {
+  if (!identity || !validId(identity.avatarId) || !validId(identity.formId) || !validId(identity.poseId) ||
+      !Number.isFinite(identity.radiusWorld) || identity.radiusWorld <= 0) {
     throw new Error('Select one explicit avatar, form and pose before reconstructing depth.');
   }
   const avatar = document.avatars.find(item => item.id === identity.avatarId);
@@ -71,7 +72,7 @@ export function createCalibratedLandmarkObservations(
         cy: calibration.cy,
         cameraToWorld: calibration.cameraToWorld,
       },
-      radiusWorld: landmark.radiusPx / Math.max(document.source.width, document.source.height),
+      radiusWorld: identity.radiusWorld,
       surfaceLayerId: landmark.surfaceLayerId ?? null,
     });
   }

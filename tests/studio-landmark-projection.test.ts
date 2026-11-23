@@ -23,18 +23,23 @@ function fixture():ImageReferenceDocument {
 
 test('maps confirmed source-pixel landmarks only through matching image-bound view calibrations',()=>{
  const doc=fixture();
- const observations=createCalibratedLandmarkObservations(doc,{avatarId:'pakachi',formId:'animal-form',poseId:'neutral'});
+ const observations=createCalibratedLandmarkObservations(doc,{avatarId:'pakachi',formId:'animal-form',poseId:'neutral',radiusWorld:.12});
  assert.equal(observations.length,2);
  assert.deepEqual(observations.map(item=>[item.camera.viewId,item.x,item.y]),[['front',.2,.2],['side',.6,.2]]);
- assert.ok(observations.every(item=>item.confidence===1&&item.avatarId==='pakachi'&&item.formId==='animal-form'));
+ assert.ok(observations.every(item=>item.confidence===1&&item.avatarId==='pakachi'&&item.formId==='animal-form'&&item.radiusWorld===.12));
 });
 
 test('does not borrow another form or pose calibration and rejects foreign image hashes',()=>{
  const doc=fixture();
  doc.cameraCalibrations=doc.cameraCalibrations!.map(item=>({...item,formId:'work-form'}));
- assert.equal(createCalibratedLandmarkObservations(doc,{avatarId:'pakachi',formId:'animal-form',poseId:'neutral'}).length,0);
+ assert.equal(createCalibratedLandmarkObservations(doc,{avatarId:'pakachi',formId:'animal-form',poseId:'neutral',radiusWorld:.12}).length,0);
  doc.cameraCalibrations=fixture().cameraCalibrations!.map(item=>({...item,sourceImageSha256:'b'.repeat(64)}));
- assert.throws(()=>createCalibratedLandmarkObservations(doc,{avatarId:'pakachi',formId:'animal-form',poseId:'neutral'}),/different source image/);
+ assert.throws(()=>createCalibratedLandmarkObservations(doc,{avatarId:'pakachi',formId:'animal-form',poseId:'neutral',radiusWorld:.12}),/different source image/);
+});
+
+test('requires an explicit world-space evidence radius instead of converting pixel radii',()=>{
+ const doc=fixture();
+ assert.throws(()=>createCalibratedLandmarkObservations(doc,{avatarId:'pakachi',formId:'animal-form',poseId:'neutral',radiusWorld:0}),/explicit avatar, form and pose/);
 });
 
 test('image-reference validation rejects calibration outside its explicit hierarchy or with bad intrinsics',()=>{
