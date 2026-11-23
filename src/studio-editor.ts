@@ -386,7 +386,7 @@ export class StudioEditor {
           this.landmarkReviewPreview={
             format:'pakachi-cluster-landmark-classification-preview',version:1,
             sourceAssetSha256:restored.sourceAssetSha256,sourceImageSha256:this.landmarkDocument.source.sha256,
-            avatarId:this.project.avatar.id,formId:this.project.avatar.id,form:restored.form,
+            avatarId:this.project.avatar.id,formId:this.project.avatar.id,form,
             policy:'review-only',automaticAssignmentsApplied:false,
             items:operations.map(entry=>{
               if(entry.operation.type!=='assign-triangle')throw Error('Nicht unterstützte Manifest-Operation.');
