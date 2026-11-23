@@ -156,8 +156,48 @@ export function triangulateLandmarkSeeds(
   if (!Number.isFinite(minParallax) || minParallax <= 0 || minParallax >= 90 ||
       !Number.isFinite(maxError) || maxError <= 0) throw new Error('Invalid triangulation thresholds.');
   const meshMatrix = finiteMatrix(meshWorld);
-  const meshScale = meshMatrix.getMaxScaleOnAxis();
-  if (!Number.isFinite(meshScale) || meshScale <= 1e-10) throw new Error('Mesh world transform has no usable scale.');
+  const elements = meshMatrix.elements;
+  if (Math.abs(elements[3]!) > 1e-10 || Math.abs(elements[7]!) > 1e-10 ||
+      Math.abs(elements[11]!) > 1e-10 || Math.abs(elements[15]! - 1) > 1e-10) {
+    throw new Error('Mesh world transform must be affine.');
+  }
+  // A world-space sphere becomes an ellipsoid in mesh-local space. Use the
+  // smallest singular value so the local sphere encloses that ellipsoid even
+  // with non-uniform node scaling or rotated scale axes.
+  const a = [
+    [elements[0]!, elements[4]!, elements[8]!],
+    [elements[1]!, elements[5]!, elements[9]!],
+    [elements[2]!, elements[6]!, elements[10]!],
+  ];
+  const gram = Array.from({ length: 3 }, (_, row) =>
+    Array.from({ length: 3 }, (_, column) =>
+      a[0]![row]! * a[0]![column]! +
+      a[1]![row]! * a[1]![column]! +
+      a[2]![row]! * a[2]![column]!,
+    ),
+  );
+  // Jacobi diagonalization of the symmetric 3x3 Gram matrix.
+  for (let iteration = 0; iteration < 24; iteration++) {
+    let p = 0, q = 1;
+    if (Math.abs(gram[0]![2]!) > Math.abs(gram[p]![q]!)) { p = 0; q = 2; }
+    if (Math.abs(gram[1]![2]!) > Math.abs(gram[p]![q]!)) { p = 1; q = 2; }
+    if (Math.abs(gram[p]![q]!) < 1e-14) break;
+    const angle = 0.5 * Math.atan2(2 * gram[p]![q]!, gram[q]![q]! - gram[p]![p]!);
+    const c = Math.cos(angle), s = Math.sin(angle);
+    const pp = gram[p]![p]!, qq = gram[q]![q]!, pq = gram[p]![q]!;
+    gram[p]![p] = c*c*pp - 2*s*c*pq + s*s*qq;
+    gram[q]![q] = s*s*pp + 2*s*c*pq + c*c*qq;
+    gram[p]![q] = gram[q]![p] = 0;
+    for (let k = 0; k < 3; k++) {
+      if (k === p || k === q) continue;
+      const kp = gram[k]![p]!, kq = gram[k]![q]!;
+      gram[k]![p] = gram[p]![k] = c*kp - s*kq;
+      gram[k]![q] = gram[q]![k] = s*kp + c*kq;
+    }
+  }
+  const minEigenvalue = Math.min(gram[0]![0]!, gram[1]![1]!, gram[2]![2]!);
+  const minScale = Math.sqrt(Math.max(0, minEigenvalue));
+  if (!Number.isFinite(minScale) || minScale <= 1e-10) throw new Error('Mesh world transform has no usable scale.');
   const worldToMesh = meshMatrix.clone().invert();
 
   const groups = new Map<string, Landmark2DObservation[]>();
@@ -227,7 +267,7 @@ export function triangulateLandmarkSeeds(
       ...identity,
       partId: group[0].partId,
       position: [local.x, local.y, local.z],
-      radius: group[0].radiusWorld / meshScale,
+      radius: group[0].radiusWorld / minScale,
       surfaceLayerId: group[0].surfaceLayerId ?? null,
       viewCount: group.length,
       reprojectionProxyErrorWorld: result.error,

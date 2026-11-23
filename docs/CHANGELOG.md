@@ -12,6 +12,9 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+### Fixed
+- Die Mehransichten-Triangulation rechnet Mesh-Welttransformationen jetzt explizit als affine Transformationen und wandelt den Welt-Radius mit der kleinsten Singularskalierung in einen konservativ umschließenden Mesh-Lokalradius um. Damit bleiben Landmarkenpositionen bei Translation, Rotation und nicht-uniformer GLB-Knotenskalierung korrekt; projektive beziehungsweise degenerierte Mesh-Transformationen werden abgewiesen. Regressionen ergänzen den bestehenden Cluster-Pipeline-Test. Stand: 2026-11-23T14:42:00+01:00 (Europe/Berlin).
+
 ### Added
 - Bildreferenz → Cluster-Kandidat: Ein durchgängiger Adapter verbindet bestätigte 2D-Landmarken mit den explizit passenden, quellbildgebundenen Kamera-Kalibrierungen, trianguliert sie ansichtsübergreifend für genau Avatar/Form/Pose und erzeugt daraus einen geprüften Cluster-Kandidaten. Eine Ansicht reicht weiterhin nicht für Tiefe; fehlende oder fremde Kalibrierungen werden nicht ersetzt. Der bestehende Manifestzustand bleibt unverändert; Übernahme und Dreieck-Zuweisung bleiben separate Nutzeraktionen. Regressionen laufen im vorhandenen Bildreferenz-CI-Job. Stand: 2026-11-23T14:21:00+01:00 (Europe/Berlin).
 
