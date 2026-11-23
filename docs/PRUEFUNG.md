@@ -1,6 +1,6 @@
 # Prüfstand und Protokolle
 
-**Softwarestand: 0.102.0 · Dokumentationsabgleich: 2026-11-23T15:39:14+01:00 (Europe/Berlin).**
+**Softwarestand: 0.102.0 · Dokumentationsabgleich: 2026-11-23T15:58:00+01:00 (Europe/Berlin).**
 
 Alle Prüfnachweise stehen in dieser Datei: ein Abschnitt je Softwareversion sowie gesonderte Abschnitte für datierte Zwischenprüfungen. Die Ergebnisse und Grenzen gelten für den jeweils genannten Stand. Spätere Läufe stehen als Nachtrag im selben Abschnitt. Produktänderungen gehören in den [Changelog](CHANGELOG.md), offene Aufgaben in die [Roadmap](ROADMAP.md).
 
@@ -16,6 +16,14 @@ Alle Prüfnachweise stehen in dieser Datei: ein Abschnitt je Softwareversion sow
 **Inhalt des Meilensteins:** Kamera-Kalibrierungen sind an Quellbild-SHA-256, Avatar, Form, Pose und Ansicht gebunden. Nur bestätigte Bildregionen und explizit passende Kalibrierungen werden in normalisierte Beobachtungen umgewandelt. Mehransichten-Triangulation hält Avatar/Form/Pose/Landmarkenidentität getrennt und berücksichtigt affine GLB-Welttransformationen einschließlich nicht-uniformer Skalierung. Die daraus erzeugte Clusterklassifikation bleibt ein Kandidat; das Quellmanifest wird nicht verändert und eine Übernahme erfordert weiterhin eine separate Nutzerentscheidung. Der vollständige Bildreferenz-Dokumentvalidator läuft vor der Rekonstruktion und weist ungültige Landmarken oder Kameramatrizen zurück.
 
 **Grenzen / nicht Teil der Freigabe:** Keine automatische Kameraschätzung, keine Tiefenableitung aus einer einzelnen Ansicht, keine automatische Avatar-/Formidentifikation und keine automatische Manifestübernahme. Die automatische semantische Erkennung, bildkonditionierte 3D-Rekonstruktion, visuelle Abnahme beider Original-PaKaChi-Formen und deren Rigging bleiben offen. Die technischen Test-GLBs sind weiterhin kein finales Original-PaKaChi. Der gezielte CI-Lauf ersetzt weder den vollständigen `npm test`-Gesamtlauf noch die manuelle Charakterabnahme.
+
+## Zwischenprüfung 2026-11-23 – quellgebundene Zwei-Formen-Crops
+
+**Änderung auf `develop`:** `createImageReferenceFormPairCropPlan()` verlangt zwei unterschiedliche, ausdrücklich ausgewählte Formen desselben Avatars und je eine bestätigte Hauptregion, die eindeutig genau einer Ansicht zugeordnet ist. Aus bloßen Bildkoordinaten wird weder Tier-/Arbeitsform noch links/rechts abgeleitet. `cropImageReferenceFormPair()` prüft die tatsächlichen Originalbytes per SHA-256 sowie Bildmaße, extrahiert zwei getrennte PNGs aus den bestätigten Rechteck-/Polygonmasken einschließlich Innenlöchern und erzeugt pro Crop ein eigenes Generierungsmanifest mit Crop-Hash und Avatar-/Form-/Ansichtsprovenienz. Das Originalbild wird nicht verändert.
+
+**Verifizierter Nachweis:** [Bildreferenz-Workflow #45198810004](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/45198810004), Commit `a55a5a2a9f6f53fa8d043c1f762c166aef387fd4): Dependency-Audit erfolgreich; gezielte Node-Testgruppen **101/101 bestanden**, Chromium-Browserfälle **20/20 bestanden**, TypeScript-Check erfolgreich. Browserregression prüft die tatsächliche Extraktion zweier unterschiedlich gefärbter Bildhälften, transparente Polygon-Innenaussparung, getrennte Form-Manifeste und Ablehnung eines fremden Bildes mit identischen Pixelmaßen.
+
+**Grenzen:** Die Funktion ist ein quellgebundener Crop-/Provenienzkern, noch keine vollständige Studio-Bedienung. Auswahl und Ausführung beider Generatoraufträge, getrennte Kandidatenpersistenz und visuelle Abnahme anhand der echten Original-PaKaChi-Referenz bleiben offen. Es wird keine automatische Links-/Rechts-Formzuordnung vorgenommen; bildkonditionierte 3D-Rekonstruktion, Tiefeninferenz und Rigging sind nicht Teil dieses Nachweises.
 
 ## Zwischenprüfung 2026-11-12 – geometrische Naht-/Kontaktklassifikation
 
