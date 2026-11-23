@@ -12,6 +12,9 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+### Fixed
+- Kamerakalibrierungen akzeptieren nur noch starre, rechtshändige 4×4-Kameratransformationen. Skalierung, Scherung, Spiegelung und perspektivische Matrizen werden als ungültige Kamera-Posen zurückgewiesen. Stand: 2026-11-23T12:25:00+01:00 (Europe/Berlin).
+
 ### Added
 - Bildreferenz und 3D-Rekonstruktion: Explizite Kamerakalibrierungen sind jetzt an Quellbild-Hash, Avatar, Form, Pose und Ansichts-ID gebunden. Ein Adapter erzeugt daraus ausschließlich für bestätigte Bildregionen normalisierte 2D-Beobachtungen; fremde Form-/Pose-Kalibrierungen werden nicht übernommen. Ansichtsübergreifende Pixelanker behalten eigene Pick-IDs und teilen nur über eine explizite Korrespondenz-ID dieselbe semantische Landmarke. Auch der 3D-Einflussradius wird als Weltmaß explizit übergeben und nicht fälschlich aus Pixelradien abgeleitet. Kalibrierwerte und Weltmaß müssen weiterhin explizit bereitgestellt werden; automatische Kameraschätzung und Studio-Bedienoberfläche sind noch nicht enthalten. Stand: 2026-11-23T12:11:00+01:00 (Europe/Berlin).
 

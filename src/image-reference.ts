@@ -82,6 +82,30 @@ export interface ImageReferenceCameraCalibration {
   cameraToWorld: number[];
 }
 
+/** Validate a column-major camera-to-world rigid transform (local camera +Z forward). */
+export function isValidImageReferenceCameraTransform(values: readonly number[], tolerance = 1e-4): boolean {
+  if (!Array.isArray(values) || values.length !== 16 || !values.every(Number.isFinite) ||
+      !Number.isFinite(tolerance) || tolerance <= 0) return false;
+  if (Math.abs(values[3]!) > tolerance || Math.abs(values[7]!) > tolerance ||
+      Math.abs(values[11]!) > tolerance || Math.abs(values[15]! - 1) > tolerance) return false;
+  const columns = [
+    [values[0]!, values[1]!, values[2]!],
+    [values[4]!, values[5]!, values[6]!],
+    [values[8]!, values[9]!, values[10]!],
+  ];
+  const dot = (a: number[], b: number[]) => a[0]!*b[0]! + a[1]!*b[1]! + a[2]!*b[2]!;
+  if (columns.some(column => Math.abs(dot(column, column) - 1) > tolerance)) return false;
+  if (Math.abs(dot(columns[0]!, columns[1]!)) > tolerance ||
+      Math.abs(dot(columns[0]!, columns[2]!)) > tolerance ||
+      Math.abs(dot(columns[1]!, columns[2]!)) > tolerance) return false;
+  const [a,b,c] = columns;
+  const determinant =
+    a![0]! * (b![1]!*c![2]! - b![2]!*c![1]!) -
+    b![0]! * (a![1]!*c![2]! - a![2]!*c![1]!) +
+    c![0]! * (a![1]!*b![2]! - a![2]!*b![1]!);
+  return Math.abs(determinant - 1) <= tolerance;
+}
+
 export interface ImageReferenceDocument {
   format:'pakachi-image-reference';
   version:1;
@@ -327,7 +351,7 @@ export function validateImageReferenceDocument(value:ImageReferenceDocument):Ima
       const view=value.views.find(item=>item.id===calibration.viewId);
       if(!avatar||!avatar.formIds.includes(calibration.formId)||!form||!form.viewIds.includes(calibration.viewId)||!view)issues.push({path:p+'.viewId',message:'Kamerakalibrierung verweist nicht auf die angegebene Avatar-/Form-/Ansichtshierarchie.'});
       if(![calibration.fx,calibration.fy,calibration.cx,calibration.cy].every(finite)||calibration.fx<=0||calibration.fy<=0||calibration.cx<0||calibration.cx>1||calibration.cy<0||calibration.cy>1)issues.push({path:p+'.intrinsics',message:'Normierte Kameraintrinsiken sind ungültig.'});
-      if(!Array.isArray(calibration.cameraToWorld)||calibration.cameraToWorld.length!==16||calibration.cameraToWorld.some(item=>!finite(item)))issues.push({path:p+'.cameraToWorld',message:'Kameratransformation benötigt 16 endliche Spaltenvektorwerte.'});
+      if(!isValidImageReferenceCameraTransform(calibration.cameraToWorld))issues.push({path:p+'.cameraToWorld',message:'Kameratransformation muss eine starre, rechtshändige 4×4-Spaltenvektormatrix ohne Skalierung oder Scherung sein.'});
       const key=JSON.stringify([calibration.avatarId,calibration.formId,calibration.poseId,calibration.viewId]);
       if(seenCalibrations.has(key))issues.push({path:p,message:'Für Avatar, Form, Pose und Ansicht darf nur eine Kalibrierung existieren.'});
       seenCalibrations.add(key);

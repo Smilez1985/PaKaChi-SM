@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {addImageReferenceRelation,removeImageReferenceRelation,suggestImageReferenceRelations,checkImageReferenceReadiness,validateImageReferenceDocument,editImageReferenceRectangle,reorderImageReferenceRegions,moveImageReferenceRectangle,resizeImageReferenceRectangle,isValidImageReferencePolygon,isValidImageReferencePolygonWithHoles,moveImageReferencePolygonVertex,moveImageReferencePolygonHoleVertex,splitImageReferencePolygon,splitImageReferenceRegion,simplifyImageReferencePolygon} from '../src/image-reference.ts';
+import {isValidImageReferenceCameraTransform,addImageReferenceRelation,removeImageReferenceRelation,suggestImageReferenceRelations,checkImageReferenceReadiness,validateImageReferenceDocument,editImageReferenceRectangle,reorderImageReferenceRegions,moveImageReferenceRectangle,resizeImageReferenceRectangle,isValidImageReferencePolygon,isValidImageReferencePolygonWithHoles,moveImageReferencePolygonVertex,moveImageReferencePolygonHoleVertex,splitImageReferencePolygon,splitImageReferenceRegion,simplifyImageReferencePolygon} from '../src/image-reference.ts';
 import type {ImageReferenceDocument,ImageReferenceRegion} from '../src/image-reference.ts';
 
 const base=():ImageReferenceDocument=>({
@@ -270,4 +270,15 @@ test('stores and validates explicit source-pixel 2D landmarks with stable semant
  assert.ok(validateImageReferenceDocument(duplicate).some(issue=>issue.path==='landmarks[0].id'));
  const invalidSemantic=structuredClone(d);invalidSemantic.landmarks![0]!.partId='Head';
  assert.ok(validateImageReferenceDocument(invalidSemantic).some(issue=>issue.path==='landmarks[0].partId'));
+});
+
+test('accepts only rigid right-handed camera-to-world transforms',()=>{
+ const identity=[1,0,0,0,0,1,0,0,0,0,1,0,2,-1,3,1];
+ assert.equal(isValidImageReferenceCameraTransform(identity),true);
+ const translated=[...identity];translated[12]=99;assert.equal(isValidImageReferenceCameraTransform(translated),true);
+ const scaled=[...identity];scaled[0]=2;assert.equal(isValidImageReferenceCameraTransform(scaled),false);
+ const sheared=[...identity];sheared[4]=.2;assert.equal(isValidImageReferenceCameraTransform(sheared),false);
+ const reflected=[...identity];reflected[0]=-1;assert.equal(isValidImageReferenceCameraTransform(reflected),false);
+ const perspective=[...identity];perspective[3]=.1;assert.equal(isValidImageReferenceCameraTransform(perspective),false);
+ const malformed=[...identity];malformed[15]=0;assert.equal(isValidImageReferenceCameraTransform(malformed),false);
 });
