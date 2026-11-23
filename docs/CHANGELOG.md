@@ -2451,3 +2451,5 @@ Zeitstempel: 2026-10-12T21:15:58+02:00 (Europe/Berlin)
 [0.94.0]: PRUEFUNG.md#version-0940
 
 [0.98.0]: PRUEFUNG.md#version-0980
+
+[0.102.0]: PRUEFUNG.md#version-01020

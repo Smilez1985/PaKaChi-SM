@@ -17,8 +17,6 @@ Alle Prüfnachweise stehen in dieser Datei: ein Abschnitt je Softwareversion sow
 
 **Grenzen / nicht Teil der Freigabe:** Keine automatische Kameraschätzung, keine Tiefenableitung aus einer einzelnen Ansicht, keine automatische Avatar-/Formidentifikation und keine automatische Manifestübernahme. Die automatische semantische Erkennung, bildkonditionierte 3D-Rekonstruktion, visuelle Abnahme beider Original-PaKaChi-Formen und deren Rigging bleiben offen. Die technischen Test-GLBs sind weiterhin kein finales Original-PaKaChi. Der gezielte CI-Lauf ersetzt weder den vollständigen `npm test`-Gesamtlauf noch die manuelle Charakterabnahme.
 
-
-
 ## Zwischenprüfung 2026-11-12 – geometrische Naht-/Kontaktklassifikation
 
 **Änderung auf `develop`:** `src/surface-intersections.ts` klassifiziert geometrisch gemeinsame Eckpunkte/Kanten unabhängig von der Vertex-Indexidentität. Das erfasst insbesondere UV-Nahtduplikate. Für parallele, koplanare Dreieckspaare wird die Überlappungsfläche nach Projektion auf die dominante Normalebene bestimmt: reine Kanten-/Punktberührung bleibt als erwartete Nachbarschaft bestehen; positive Flächenüberlappung bleibt ausdrücklich unmessbar. Nicht-koplanare Paare mit mindestens zwei geometrisch gemeinsamen Ecken werden nur dann als gemeinsame Kante freigegeben, wenn kein strikter innerer Piercing-Treffer vorliegt. Bestehende echte Schnitt- und Mehrdeutigkeitsmeldungen bleiben erhalten.
