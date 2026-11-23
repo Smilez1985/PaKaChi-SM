@@ -12,6 +12,9 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+### Changed
+- Landmarken-Evidenzexport verlangt zusätzlich eine ausdrückliche Bestätigung, dass die ausgewählte Tier-/Arbeitsform zur Form der verwendeten Bildreferenz gehört. Diese Zuordnungsbestätigung wird im Evidenz-Beleg dokumentiert; Form-IDs werden nicht automatisch als Tier- oder Arbeitsform interpretiert. Stand: 2026-11-23T08:50:00+01:00 (Europe/Berlin).
+
 ### Added
 - Avatar-Studio: Bestätigte 2D/3D-Landmarken lassen sich als separater Evidenz-Beleg exportieren. Der Export bindet Quellmodell- und Bildreferenz-SHA-256, Avatar/Form, stabile Mesh-ID, Dreieck und baryzentrischen Oberflächenpunkt. Die Geometrie wird gegen das aktuelle Meshinventar geprüft; Manifest-Zuordnungen werden nicht verändert und kein Mesh wird pauschal anatomisch klassifiziert. Stand: 2026-11-23T08:42:00+01:00 (Europe/Berlin).
 
