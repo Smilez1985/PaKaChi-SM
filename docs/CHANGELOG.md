@@ -12,6 +12,9 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+### Added
+- Avatar-Studio: Bestätigte 2D/3D-Landmarken lassen sich als separater Evidenz-Beleg exportieren. Der Export bindet Quellmodell- und Bildreferenz-SHA-256, Avatar/Form, stabile Mesh-ID, Dreieck und baryzentrischen Oberflächenpunkt. Die Geometrie wird gegen das aktuelle Meshinventar geprüft; Manifest-Zuordnungen werden nicht verändert und kein Mesh wird pauschal anatomisch klassifiziert. Stand: 2026-11-23T08:42:00+01:00 (Europe/Berlin).
+
 ### Changed
 - Studio-Formvergleich: Der Vergleich lässt sich erst nach ausdrücklicher Bestätigung starten, dass Tierform- und Arbeitsform-Manifest zum selben Charakter gehören. Beide Quellasset-SHA-256-Werte werden im Bericht vollständig angezeigt; die Identität wird nicht aus ähnlichen Mesh-IDs oder Geometriezahlen abgeleitet. Regression prüft die Bestätigungssperre. Stand: 2026-11-23T07:35:00+01:00 (Europe/Berlin).
 
