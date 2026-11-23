@@ -377,3 +377,68 @@ test('editor corrects individual material-boundary vertices in source pixels',as
  const document=await page.evaluate(async()=> (window as any).__imageReferenceEditor.reference());
  expect(document.observations[0].points[0]).toMatchObject({x:25,y:35});
 });
+
+
+test('composite form-pair crop extracts independently confirmed forms and preserves source provenance',async({page})=>{
+ await page.route('**/',route=>route.fulfill({contentType:'text/html',body:'<!doctype html><html><body></body></html>'}));
+ await page.goto('/');
+ const result=await page.evaluate(async()=>{
+  const canvas=document.createElement('canvas');canvas.width=400;canvas.height=200;
+  const context=canvas.getContext('2d')!;
+  context.fillStyle='#173b25';context.fillRect(0,0,200,200);
+  context.fillStyle='#204080';context.fillRect(200,0,200,200);
+  const blob=await new Promise<Blob>(resolve=>canvas.toBlob(value=>resolve(value!),'image/png'));
+  const source=new File([blob],'pakachi-composite.png',{type:'image/png'});
+  const digest=await crypto.subtle.digest('SHA-256',await source.arrayBuffer());
+  const hash=Array.from(new Uint8Array(digest),value=>value.toString(16).padStart(2,'0')).join('');
+  const document={
+   format:'pakachi-image-reference',version:1,source:{sha256:hash,width:400,height:200},
+   regions:[
+    {id:'animal-region',label:'Tierform',kind:'view',status:'confirmed',geometry:{type:'polygon',points:[{x:10,y:10},{x:190,y:10},{x:190,y:190},{x:10,y:190}],holes:[[{x:80,y:80},{x:80,y:110},{x:110,y:110},{x:110,y:80}]]}},
+    {id:'work-region',label:'Arbeitsform',kind:'view',status:'confirmed',geometry:{type:'rectangle',x:210,y:10,width:180,height:180}},
+   ],
+   views:[{id:'animal-view',label:'Tierform frontal',regionIds:['animal-region']},{id:'work-view',label:'Arbeitsform frontal',regionIds:['work-region']}],
+   forms:[{id:'animal-form',label:'Tierform',viewIds:['animal-view']},{id:'work-form',label:'Arbeitsform',viewIds:['work-view']}],
+   avatars:[{id:'pakachi',label:'PaKaChi',formIds:['animal-form','work-form']}],
+  };
+  const {cropImageReferenceFormPair}=await import('../../src/image-reference-crop.ts');
+  const pair=await cropImageReferenceFormPair(source,document as any,'pakachi',[
+   {formId:'animal-form',regionId:'animal-region'},{formId:'work-form',regionId:'work-region'}
+  ]);
+  const bitmaps=await Promise.all(pair.crops.map(file=>createImageBitmap(file)));
+  const sample=(bitmap:ImageBitmap,x:number,y:number)=>{
+   const target=document.createElement('canvas');target.width=bitmap.width;target.height=bitmap.height;
+   const ctx=target.getContext('2d')!;ctx.drawImage(bitmap,0,0);return Array.from(ctx.getImageData(x,y,1,1).data);
+  };
+  const result={plan:pair.plan,crops:pair.crops.map((file,index)=>({name:file.name,type:file.type,width:bitmaps[index]!.width,height:bitmaps[index]!.height,center:sample(bitmaps[index]!,10,10),hole:index===0?sample(bitmaps[index]!,85,85):null}))};
+  bitmaps.forEach(bitmap=>bitmap.close());
+  return result;
+ });
+ expect(result.plan.forms.map(form=>form.form.id)).toEqual(['animal-form','work-form']);
+ expect(result.crops.map(crop=>({type:crop.type,width:crop.width,height:crop.height}))).toEqual([
+  {type:'image/png',width:180,height:180},{type:'image/png',width:180,height:180}
+ ]);
+ expect(result.crops[0].center[1]).toBeGreaterThan(result.crops[0].center[0]);
+ expect(result.crops[0].hole[3]).toBe(0);
+ expect(result.crops[1].center[2]).toBeGreaterThan(result.crops[1].center[0]);
+});
+
+test('composite form-pair crop rejects a different source image even with matching dimensions',async({page})=>{
+ await page.route('**/',route=>route.fulfill({contentType:'text/html',body:'<!doctype html><html><body></body></html>'}));
+ await page.goto('/');
+ const error=await page.evaluate(async()=>{
+  const canvas=document.createElement('canvas');canvas.width=20;canvas.height=20;
+  const context=canvas.getContext('2d')!;context.fillStyle='#111';context.fillRect(0,0,20,20);
+  const blob=await new Promise<Blob>(resolve=>canvas.toBlob(value=>resolve(value!),'image/png'));
+  const source=new File([blob],'different.png',{type:'image/png'});
+  const document={format:'pakachi-image-reference',version:1,source:{sha256:'0'.repeat(64),width:20,height:20},regions:[
+   {id:'animal',label:'Animal',kind:'view',status:'confirmed',geometry:{type:'rectangle',x:0,y:0,width:8,height:18}},
+   {id:'work',label:'Work',kind:'view',status:'confirmed',geometry:{type:'rectangle',x:12,y:0,width:8,height:18}},
+  ],views:[{id:'av',label:'Animal',regionIds:['animal']},{id:'wv',label:'Work',regionIds:['work']}],
+  forms:[{id:'af',label:'Animal',viewIds:['av']},{id:'wf',label:'Work',viewIds:['wv']}],avatars:[{id:'a',label:'PaKaChi',formIds:['af','wf']}]};
+  const {cropImageReferenceFormPair}=await import('../../src/image-reference-crop.ts');
+  try{await cropImageReferenceFormPair(source,document as any,'a',[{formId:'af',regionId:'animal'},{formId:'wf',regionId:'work'}]);return 'unexpected-success';}
+  catch(error){return (error as Error).message;}
+ });
+ expect(error).toBe('image-reference-source-hash-mismatch');
+});

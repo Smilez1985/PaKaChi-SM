@@ -123,3 +123,30 @@ export function createImageReferenceFormPairCropPlan(
   forms:selectedForms as [ImageReferenceFormCropPlan,ImageReferenceFormCropPlan],
  };
 }
+
+
+export interface ImageReferenceFormPairCrops {
+ plan:ImageReferenceFormPairCropPlan;
+ crops:[File,File];
+}
+
+/** Extract both explicitly selected form regions as independent PNGs without modifying the source. */
+export async function cropImageReferenceFormPair(
+ source:File,
+ document:ImageReferenceDocument,
+ avatarId:string,
+ selections:readonly [ImageReferenceFormCropSelection,ImageReferenceFormCropSelection],
+):Promise<ImageReferenceFormPairCrops> {
+ if(!['image/png','image/jpeg'].includes(source.type)||source.size<1||source.size>20*1024*1024)throw new Error('invalid-image-reference-source-file');
+ const digest=await crypto.subtle.digest('SHA-256',await source.arrayBuffer());
+ const hash=Array.from(new Uint8Array(digest),value=>value.toString(16).padStart(2,'0')).join('');
+ if(hash.toLowerCase()!==document.source.sha256.toLowerCase())throw new Error('image-reference-source-hash-mismatch');
+ const bitmap=await createImageBitmap(source);
+ try{
+  if(bitmap.width!==document.source.width||bitmap.height!==document.source.height)throw new Error('image-reference-source-dimensions-mismatch');
+ }finally{bitmap.close();}
+ const plan=createImageReferenceFormPairCropPlan(document,avatarId,selections);
+ const selected=selections.map(selection=>document.regions.find(region=>region.id===selection.regionId)!);
+ const crops=await Promise.all(selected.map(region=>cropImageReferenceRegion(source,region)));
+ return {plan,crops:crops as [File,File]};
+}
