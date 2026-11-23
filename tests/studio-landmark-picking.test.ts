@@ -4,6 +4,7 @@ import { createStudioLandmarkSurfacePick } from '../src/studio-landmark-picking.
 import { createStudioLandmarkEvidenceBundle } from '../src/studio-landmark-evidence.ts';
 import { createStudioFormManifest } from '../src/studio-form-manifest.ts';
 import { webcrypto } from 'node:crypto';
+import { createPaKaChiSemanticCatalog } from '../src/cluster-2d-classifier.ts';
 import type { ImageReferenceDocument } from '../src/image-reference.ts';
 import type { ClusterMeshInventory } from '../src/cluster-inventory.ts';
 import { Window } from 'happy-dom';
@@ -130,7 +131,7 @@ test('exports confirmed 2D/3D landmark evidence separately without assigning sou
   geometry.setAttribute('position', new T.Float32BufferAttribute([0,0,0, 1,0,0, 0,1,0], 3));
   root.add(new T.Mesh(geometry));
   const source = Buffer.from('original source asset').toString('base64');
-  const manifest = await createStudioFormManifest(root, source, 'animal');
+  const manifest = await createStudioFormManifest(root, source, 'animal', new Date().toISOString(), createPaKaChiSemanticCatalog());
   const picks = [createStudioLandmarkSurfacePick(input())];
   // Rebind the test pick to the exact inventory ID generated from these source bytes.
   picks[0]!.meshId = manifest.meshes[0]!.id;
@@ -149,7 +150,7 @@ test('rejects evidence export for mismatched form and image provenance', async (
   Object.defineProperty(globalThis, 'crypto', { configurable: true, value: webcrypto });
   const root = new T.Group();
   root.add(new T.Mesh(new T.BufferGeometry().setAttribute('position', new T.Float32BufferAttribute([0,0,0,1,0,0,0,1,0],3))));
-  const manifest = await createStudioFormManifest(root, Buffer.from('source').toString('base64'), 'animal');
+  const manifest = await createStudioFormManifest(root, Buffer.from('source').toString('base64'), 'animal', new Date().toISOString(), createPaKaChiSemanticCatalog());
   const pick = createStudioLandmarkSurfacePick(input());
   pick.meshId = manifest.meshes[0]!.id;
   assert.throws(() => createStudioLandmarkEvidenceBundle(root, manifest, document(), [{...pick,formId:'other-form'}]), /same image reference, avatar and form/);
