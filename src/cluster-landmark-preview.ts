@@ -109,8 +109,7 @@ export function acceptClusterLandmarkPreviewItem(
 ): ClusterManifest {
   if (!manifest || !preview || preview.format !== 'pakachi-cluster-landmark-classification-preview' ||
       preview.version !== 1 || preview.policy !== 'review-only' || preview.automaticAssignmentsApplied !== false ||
-      preview.sourceAssetSha256 !== manifest.sourceAssetSha256 || preview.form !== manifest.form ||
-      preview.formMappingConfirmed === true) {
+      preview.sourceAssetSha256 !== manifest.sourceAssetSha256 || preview.form !== manifest.form) {
     throw new Error('Klassifikationsvorschau passt nicht zum aktuellen Manifest oder ist nicht review-only.');
   }
   if (!/^[a-f0-9]{64}$/.test(preview.sourceImageSha256)) {
