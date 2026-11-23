@@ -12,6 +12,9 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 
 ## [Unreleased]
 
+### Fixed
+- Landmarken-Evidenz-Roundtrip: TypeScript-Prüfung akzeptiert jetzt die explizite Strukturprüfung der importierten Korrespondenz; der Quellmodell-Regressionstest erwartet die tatsächliche deutsche Fehlermeldung. Stand: 2026-11-23T07:15:00+01:00 (Europe/Berlin).
+
 ### Changed
 - Landmarken-Evidenzexport verlangt zusätzlich eine ausdrückliche Bestätigung, dass die ausgewählte Tier-/Arbeitsform zur Form der verwendeten Bildreferenz gehört. Diese Zuordnungsbestätigung wird im Evidenz-Beleg dokumentiert; Form-IDs werden nicht automatisch als Tier- oder Arbeitsform interpretiert. Stand: 2026-11-23T08:50:00+01:00 (Europe/Berlin).
 
