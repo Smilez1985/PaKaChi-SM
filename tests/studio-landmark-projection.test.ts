@@ -34,7 +34,7 @@ test('does not borrow another form or pose calibration and rejects foreign image
  doc.regions.push({id:'work-region',label:'Work view',kind:'view',status:'confirmed',geometry:{type:'rectangle',x:0,y:0,width:400,height:500}});
  doc.views.push({id:'work-front',label:'Work front',regionIds:['work-region']});
  doc.forms.find(item=>item.id==='work-form')!.viewIds.push('work-front');
- doc.cameraCalibrations=doc.cameraCalibrations!.map(item=>({...item,formId:'work-form',viewId:'work-front'}));
+ doc.cameraCalibrations=[{...doc.cameraCalibrations![0]!,formId:'work-form',viewId:'work-front'}];
  assert.equal(createCalibratedLandmarkObservations(doc,{avatarId:'pakachi',formId:'animal-form',poseId:'neutral',radiusWorld:.12}).length,0);
  doc.cameraCalibrations=fixture().cameraCalibrations!.map(item=>({...item,sourceImageSha256:'b'.repeat(64)}));
  assert.throws(()=>createCalibratedLandmarkObservations(doc,{avatarId:'pakachi',formId:'animal-form',poseId:'neutral',radiusWorld:.12}),/invalid-image-reference-document:cameraCalibrations/);
