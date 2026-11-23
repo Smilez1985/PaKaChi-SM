@@ -7,10 +7,11 @@ import type { ImageReferenceDocument, ImageReferenceCameraCalibration } from '..
 
 const imageHash = 'a'.repeat(64);
 const assetHash = 'c'.repeat(64);
-const point = new Vector3(0, 0, 4);
+const point = new Vector3(0, 0.5, 4);
+const cameraAim = new Vector3(0, 0, 4);
 
 function calibration(viewId: string, position: Vector3): ImageReferenceCameraCalibration {
-  const rotation = new Quaternion().setFromUnitVectors(new Vector3(0, 0, 1), point.clone().sub(position).normalize());
+  const rotation = new Quaternion().setFromUnitVectors(new Vector3(0, 0, 1), cameraAim.clone().sub(position).normalize());
   return {
     id: 'cal-' + viewId, sourceImageSha256: imageHash, avatarId: 'pakachi',
     formId: 'animal-form', poseId: 'neutral', viewId, fx: 1, fy: 1, cx: .5, cy: .5,
@@ -30,7 +31,7 @@ function fixture() {
   const side = calibration('side', new Vector3(1, 0, 0));
   const pixel = (camera: ImageReferenceCameraCalibration) => {
     const local = point.clone().applyMatrix4(new Matrix4().fromArray(camera.cameraToWorld).invert());
-    return { x: (local.x / local.z + .5) * 1000, y: (local.y / local.z + .5) * 500 };
+    return { x: (local.x / local.z + .5) * 1000, y: (.5 - local.y / local.z) * 500 };
   };
   const pFront = pixel(front), pSide = pixel(side);
   const imageReference: ImageReferenceDocument = {
@@ -62,6 +63,8 @@ test('bridges confirmed image-reference landmarks through calibrated multi-view 
   assert.equal(result.observations.length, 2);
   assert.equal(result.triangulation.seeds.length, 1);
   assert.equal(result.triangulation.seeds[0]!.viewCount, 2);
+  assert.ok(Math.abs(result.triangulation.seeds[0]!.position[1]! - point.y) < 1e-6,
+    'image-space downward pixel coordinates must reconstruct positive camera/world Y');
   assert.equal(result.classifiedTriangles, 1);
   assert.equal(result.candidate?.assignments[0]?.partId, 'torso');
   assert.equal(current.assignments[0]?.partId, null, 'source manifest must remain unchanged');

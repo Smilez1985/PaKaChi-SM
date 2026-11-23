@@ -13,6 +13,9 @@ Version 0.0.1 bezeichnet den ursprünglichen Dokumentationsstand. Ab 0.1.0 ist e
 ## [Unreleased]
 
 ### Fixed
+- Die Kameraprojektion berücksichtigt jetzt die unterschiedliche Y-Ausrichtung: Bildpixel zählen nach unten, die lokale Kameraachse +Y zeigt nach oben. Ein asymmetrischer Höhen-Landmarken-Test prüft die korrekte Rekonstruktion statt nur zentrierter Bildpunkte. Stand: 2026-11-23T15:12:00+01:00 (Europe/Berlin).
+
+### Fixed
 - Die Mehransichten-Triangulation rechnet Mesh-Welttransformationen jetzt explizit als affine Transformationen und wandelt den Welt-Radius mit der kleinsten Singularskalierung in einen konservativ umschließenden Mesh-Lokalradius um. Damit bleiben Landmarkenpositionen bei Translation, Rotation und nicht-uniformer GLB-Knotenskalierung korrekt; projektive beziehungsweise degenerierte Mesh-Transformationen werden abgewiesen. Regressionen ergänzen den bestehenden Cluster-Pipeline-Test. Stand: 2026-11-23T14:42:00+01:00 (Europe/Berlin).
 
 ### Added

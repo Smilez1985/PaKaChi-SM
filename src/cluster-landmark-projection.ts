@@ -76,9 +76,10 @@ function makeRay(observation: Landmark2DObservation): Ray {
     throw new Error('Invalid normalized 2D landmark observation or camera intrinsics.');
   }
   const cameraToWorld = finiteMatrix(camera.cameraToWorld);
+  // Image pixel Y grows downward, while the camera's local +Y axis points upward.
   const direction = new Vector3(
     (observation.x - camera.cx) / camera.fx,
-    (observation.y - camera.cy) / camera.fy,
+    (camera.cy - observation.y) / camera.fy,
     1,
   ).transformDirection(cameraToWorld);
   const origin = new Vector3().setFromMatrixPosition(cameraToWorld);
