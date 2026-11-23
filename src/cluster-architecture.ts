@@ -6,6 +6,7 @@ export type ClusterOperation=
  | {type:'reparent-part';partId:string;parentPartId:string|null}
  | {type:'reorder-part';partId:string;orderKey:number[]}
  | {type:'assign-mesh';meshId:string;partId:string|null;surfaceLayerId?:string|null;policy?:OverridePolicy}
+ | {type:'assign-triangle';meshId:string;triangleIndex:number;partId:string;surfaceLayerId:string|null;sourceImageSha256:string;landmarkIds:string[]}
  | {type:'set-surface-layer';layerId:string;partId:string|null;name?:string}
  | {type:'add-part';part:ClusterPart}
  | {type:'remove-part';partId:string};
@@ -86,6 +87,7 @@ function assertOperation(op:ClusterOperation){
  else if(op.type==='reparent-part'){id(op.partId);if(op.parentPartId!==null)id(op.parentPartId);}
  else if(op.type==='reorder-part'){id(op.partId);if(!validOrder(op.orderKey))throw new Error('Invalid order key.');}
  else if(op.type==='assign-mesh'){id(op.meshId);if(op.partId!==null)id(op.partId);if(op.surfaceLayerId!==undefined&&op.surfaceLayerId!==null)id(op.surfaceLayerId);if(op.policy!==undefined&&!['recomputable','prefer','locked'].includes(op.policy))throw new Error('Invalid override policy.');}
+ else if(op.type==='assign-triangle'){id(op.meshId);if(!Number.isSafeInteger(op.triangleIndex)||op.triangleIndex<0)throw new Error('Invalid triangle index.');id(op.partId);if(op.surfaceLayerId!==null)id(op.surfaceLayerId);if(!/^[a-f0-9]{64}$/.test(op.sourceImageSha256)||!Array.isArray(op.landmarkIds)||op.landmarkIds.length<1||op.landmarkIds.length>10000||op.landmarkIds.some(value=>!validId(value))||new Set(op.landmarkIds).size!==op.landmarkIds.length)throw new Error('Invalid landmark evidence provenance.');}
  else if(op.type==='set-surface-layer'){id(op.layerId);if(op.partId!==null)id(op.partId);if(op.name!==undefined&&(typeof op.name!=='string'||!op.name.trim()||op.name.length>100))throw new Error('Invalid layer name.');}
  else if(op.type==='add-part'){if(!isRecord(op.part)||!validId(op.part.id)||typeof op.part.name!=='string'||!op.part.name.trim()||!validOrder(op.part.orderKey)||!Array.isArray(op.part.rigBoneIds))throw new Error('Invalid new part.');}
  else if(op.type==='remove-part')id(op.partId);
@@ -97,12 +99,13 @@ export function applyClusterOperation(manifest:ClusterManifest,operation:Cluster
   case 'rename-part':{const p=next.parts.find(x=>x.id===operation.partId);if(!p)throw new Error('Part not found.');p.name=operation.name.trim();break;}
   case 'reparent-part':{const p=next.parts.find(x=>x.id===operation.partId);if(!p)throw new Error('Part not found.');if(operation.parentPartId!==null&&!next.parts.some(x=>x.id===operation.parentPartId))throw new Error('Parent part not found.');p.parentPartId=operation.parentPartId;break;}
   case 'reorder-part':{const p=next.parts.find(x=>x.id===operation.partId);if(!p)throw new Error('Part not found.');p.orderKey=[...operation.orderKey];break;}
+  case 'assign-triangle':{const mesh=next.meshes.find(x=>x.id===operation.meshId);if(!mesh||operation.triangleIndex>=mesh.triangleCount)throw new Error('Triangle not found in source mesh.');if(!next.parts.some(x=>x.id===operation.partId))throw new Error('Part not found.');if(operation.surfaceLayerId!==null&&!next.layers.some(x=>x.id===operation.surfaceLayerId))throw new Error('Surface layer not found.');const target=next.assignments.find(x=>x.meshId===operation.meshId&&x.triangleIndex===operation.triangleIndex);if(!target)throw new Error('Triangle assignment not found.');if(target.partId!==null||target.surfaceLayerId!==null||target.policy==='locked'||target.origin!=='automatic')throw new Error('Triangle is already classified or protected; explicit reassignment is not part of landmark review.');target.partId=operation.partId;target.surfaceLayerId=operation.surfaceLayerId;target.origin='user';target.policy='locked';target.confidence=1;target.reason='Explicit user acceptance of reviewed 2D/3D landmark evidence ('+operation.landmarkIds.join(', ')+').';break;}
   case 'assign-mesh':{if(!next.meshes.some(x=>x.id===operation.meshId))throw new Error('Mesh not found.');if(operation.partId!==null&&!next.parts.some(x=>x.id===operation.partId))throw new Error('Part not found.');if(operation.surfaceLayerId&& !next.layers.some(x=>x.id===operation.surfaceLayerId))throw new Error('Surface layer not found.');const target=next.assignments.filter(x=>x.meshId===operation.meshId);if(!target.length)throw new Error('Mesh has no triangle assignments.');for(const a of target){a.partId=operation.partId;a.surfaceLayerId=operation.surfaceLayerId??null;a.origin=origin;a.policy=operation.policy??policy;a.confidence=1;a.reason='Explicit '+origin+' assignment.';}break;}
   case 'set-surface-layer':{const l=next.layers.find(x=>x.id===operation.layerId);if(!l)throw new Error('Surface layer not found.');if(operation.partId!==null&&!next.parts.some(x=>x.id===operation.partId))throw new Error('Part not found.');l.partId=operation.partId;if(operation.name)l.name=operation.name.trim();break;}
   case 'add-part':if(next.parts.some(x=>x.id===operation.part.id))throw new Error('Part already exists.');next.parts.push(clone(operation.part));break;
   case 'remove-part':if(!next.parts.some(x=>x.id===operation.partId))throw new Error('Part not found.');if(next.parts.some(x=>x.parentPartId===operation.partId)||next.assignments.some(x=>x.partId===operation.partId)||next.layers.some(x=>x.partId===operation.partId))throw new Error('Part is still referenced; reassign its children, layers and triangles first.');next.parts=next.parts.filter(x=>x.id!==operation.partId);break;
  }
- next.overrides.push({id:globalThis.crypto.randomUUID(),origin,policy:operation.type==='assign-mesh'?(operation.policy??policy):policy,operation:clone(operation),createdAt:new Date().toISOString()});
+ next.overrides.push({id:globalThis.crypto.randomUUID(),origin,policy:operation.type==='assign-mesh'?(operation.policy??policy):operation.type==='assign-triangle'?'locked':policy,operation:clone(operation),createdAt:new Date().toISOString()});
  next.revision++;assertValid(next);return next;
 }
 /** Replaces assignments from a validated candidate for the exact same source asset and mesh inventory. */
