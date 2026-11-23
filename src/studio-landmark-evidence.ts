@@ -29,7 +29,8 @@ export function createStudioLandmarkEvidenceBundle(
   picks: readonly StudioLandmarkSurfacePick[],
 ): StudioLandmarkEvidenceBundle {
   if (!picks.length) throw new Error('Für einen Landmarken-Beleg müssen bestätigte 2D/3D-Zuordnungen vorhanden sein.');
-  if (manifest.form !== 'animal' && manifest.form !== 'humanoid') throw new Error('Ein Landmarken-Beleg benötigt ein explizites Form-Manifest.');
+  const form = manifest.form;
+  if (form !== 'animal' && form !== 'humanoid') throw new Error('Ein Landmarken-Beleg benötigt ein explizites Form-Manifest.');
   const first = picks[0]!;
   if (picks.some(pick => pick.avatarId !== first.avatarId || pick.formId !== first.formId ||
       pick.sourceImageSha256 !== document.source.sha256)) {
@@ -56,7 +57,7 @@ export function createStudioLandmarkEvidenceBundle(
     sourceImageSha256: document.source.sha256,
     avatarId: first.avatarId,
     formId: first.formId,
-    form: manifest.form,
+    form,
     picks,
     geometry: bindings.map(binding => ({
       meshId: binding.meshId,
@@ -71,7 +72,7 @@ export function createStudioLandmarkEvidenceBundle(
     sourceImageSha256: document.source.sha256,
     avatarId: first.avatarId,
     formId: first.formId,
-    form: manifest.form,
+    form,
     correspondences: report.correspondences,
   };
 }
