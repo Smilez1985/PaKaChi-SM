@@ -15,7 +15,7 @@ test('shared semantic catalog editor adds, validates, deletes safely and partici
  const click=(id:string)=>{(host.querySelector('#'+id) as unknown as HTMLButtonElement).click();};
  const select=(id:string)=>host.querySelector('#'+id) as unknown as HTMLSelectElement;
  const field=(id:string,value:string)=>{const input=host.querySelector('#'+id) as unknown as HTMLInputElement;input.value=value;};
- editor.enter();assert.ok(host.querySelector('#catalog-part'));
+ editor.enter();assert.ok(host.querySelector('#catalog-part'));assert.ok(host.querySelector('#cluster-form-comparison .form-comparison'));assert.match(host.textContent??'',/Tierform ↔ Arbeitsform vergleichen/);
  field('catalog-part-id','facial-cheek');field('catalog-part-label','Cheeks');select('catalog-part-parent').value='head';click('catalog-part-save');
  assert.ok(editor.exportProject().semanticCatalog?.parts.some(part=>part.id==='facial-cheek'&&part.parentPartId==='head'));
  click('studio-undo');assert.ok(!editor.exportProject().semanticCatalog?.parts.some(part=>part.id==='facial-cheek'));
