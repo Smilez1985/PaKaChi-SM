@@ -80,3 +80,67 @@ export function createStudioLandmarkEvidenceBundle(
     correspondences: report.correspondences,
   };
 }
+
+
+/**
+ * Validate an imported evidence sidecar against the currently open model and
+ * image reference. Re-resolves every triangle hit from barycentric coordinates;
+ * imported evidence is returned for review and never mutates the manifest.
+ */
+export function validateStudioLandmarkEvidenceBundle(
+  root: THREE.Object3D,
+  manifest: ClusterManifest,
+  document: ImageReferenceDocument,
+  value: unknown,
+  formMappingConfirmed: boolean,
+): StudioLandmarkEvidenceBundle {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error('Der Landmarken-Beleg ist kein JSON-Objekt.');
+  const candidate = value as Partial<StudioLandmarkEvidenceBundle>;
+  if (candidate.format !== 'pakachi-cluster-landmark-evidence' || candidate.version !== 1 ||
+      candidate.formMappingConfirmed !== true || !Array.isArray(candidate.correspondences) ||
+      candidate.correspondences.length === 0 || candidate.correspondences.length > 10000) {
+    throw new Error('Unbekanntes, unvollständiges oder nicht bestätigtes Landmarken-Belegformat.');
+  }
+  if (candidate.sourceAssetSha256 !== manifest.sourceAssetSha256 ||
+      candidate.sourceImageSha256 !== document.source.sha256 ||
+      candidate.form !== manifest.form) {
+    throw new Error('Landmarken-Beleg gehört zu einem anderen Quellmodell, Bild oder Form-Manifest.');
+  }
+  const picks = candidate.correspondences.map(item => {
+    if (!item || typeof item !== 'object') throw new Error('Ungültiger Landmarken-Eintrag im Beleg.');
+    const correspondence = item as StudioLandmarkEvidenceBundle['correspondences'][number];
+    return {
+      landmarkId: correspondence.landmarkId,
+      sourceImageSha256: candidate.sourceImageSha256!,
+      avatarId: candidate.avatarId!,
+      formId: candidate.formId!,
+      viewId: correspondence.viewId,
+      poseId: correspondence.poseId,
+      meshId: correspondence.meshId,
+      triangleIndex: correspondence.triangleIndex,
+      barycentric: correspondence.barycentric,
+      partId: correspondence.partId,
+      surfaceLayerId: correspondence.surfaceLayerId,
+      radiusLocal: correspondence.radius,
+      confirmed: true as const,
+    };
+  });
+  const rebuilt = createStudioLandmarkEvidenceBundle(root, manifest, document, picks, formMappingConfirmed);
+  if (candidate.avatarId !== rebuilt.avatarId || candidate.formId !== rebuilt.formId ||
+      candidate.correspondences.length !== rebuilt.correspondences.length) {
+    throw new Error('Landmarken-Beleg hat eine abweichende Avatar-/Formzuordnung oder Anzahl.');
+  }
+  for (let index = 0; index < rebuilt.correspondences.length; index++) {
+    const actual = candidate.correspondences[index] as Record<string, unknown>;
+    const expected = rebuilt.correspondences[index]!;
+    const keys = ['landmarkId','viewId','poseId','meshId','triangleIndex','partId','surfaceLayerId','radius','origin','policy'];
+    if (keys.some(key => actual[key] !== (expected as unknown as Record<string, unknown>)[key]) ||
+        !Array.isArray(actual.barycentric) || actual.barycentric.length !== 3 ||
+        actual.barycentric.some((v, i) => v !== expected.barycentric[i]) ||
+        !Array.isArray(actual.position) || actual.position.length !== 3 ||
+        actual.position.some((v, i) => typeof v !== 'number' || Math.abs(v - expected.position[i]!) > 1e-6)) {
+      throw new Error('Landmarken-Beleg stimmt nicht mit der aktuellen Mesh-Geometrie oder Bildreferenz überein.');
+    }
+  }
+  return rebuilt;
+}
