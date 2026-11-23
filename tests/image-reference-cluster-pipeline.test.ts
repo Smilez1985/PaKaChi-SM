@@ -90,5 +90,5 @@ test('rejects missing explicit avatar/form/pose calibration rather than borrowin
     current, sourceAssetSha256: assetHash, meshId, positions, indices: null,
     meshWorld: new Matrix4().toArray(), imageReference,
     identity: { avatarId: 'pakachi', formId: 'animal-form', poseId: 'neutral', radiusWorld: 1 },
-  }), /No confirmed landmarks have matching/);
+  }), /invalid-image-reference-document:cameraCalibrations/);
 });
