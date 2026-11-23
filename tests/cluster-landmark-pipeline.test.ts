@@ -33,7 +33,7 @@ test('connects calibrated 2D observations through triangulation to a validated c
   meshWorld:new Matrix4().toArray(),avatarId:'pakachi',formId:'animal-form',poseId:'front-neutral',observations,
  },'2026-11-12T21:01:00.000Z');
  assert.ok(result.candidate);
- assert.equal(result.triangulation.seeds.length,1);
+ assert.equal(result.triangulation.seeds.length,1, JSON.stringify(result.triangulation));
  assert.equal(result.classifiedTriangles,1);
  assert.equal(result.unresolvedTriangles,0);
  assert.equal(result.candidate.assignments[0].partId,'torso');
