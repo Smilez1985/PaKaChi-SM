@@ -1,3 +1,5 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
 import { resolveDraftRigLandmarkAnchors } from '../src/draft-rig-landmark-anchors.ts';
 import type { StudioLandmarkEvidenceBundle } from '../src/studio-landmark-evidence.ts';
 
