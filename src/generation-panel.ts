@@ -85,7 +85,7 @@ export function mountGenerationPanel(host:HTMLElement,bridge:GenerationHost,lang
    fill(pairFirst,previousFirst);fill(pairSecond,previousSecond);refresh();
   }catch{pairControls.hidden=true;}
  }
- pairAvatar.onchange=()=>{void populatePairChoices();};
+ pairAvatar.onchange=()=>{void populatePairChoices();};pairFirst.onchange=pairSecond.onchange=()=>refresh();
  pairPrepare.onclick=async()=>{
   const editor=referenceEditor;if(!editor||pending||!referenceReady)return;
   try{
