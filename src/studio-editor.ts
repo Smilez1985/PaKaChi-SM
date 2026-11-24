@@ -855,7 +855,9 @@ export class StudioEditor {
     if(this.interactionActive)throw new Error('Studio-Bewegung zuerst beenden.');
     const studio=structuredClone(this.data);
     if(this.active)studio.draft=this.rig.capture();
-    return {...structuredClone(this.project),studio};
+    const formModels=this.project.formModels?structuredClone(this.project.formModels):undefined;
+    if(formModels)formModels[formModels.activeForm].studio=structuredClone(studio);
+    return {...structuredClone(this.project),...(formModels?{formModels}:{}),studio};
   }
   save(){
     const value=this.exportProject();
