@@ -113,6 +113,7 @@ test('explicitly prepares two distinct confirmed form crops without starting gen
  const first=f.host.querySelector<HTMLSelectElement>('#generation-pair-first')!;
  const second=f.host.querySelector<HTMLSelectElement>('#generation-pair-second')!;
  const prepare=f.button('pair-prepare');
+ await until(()=>avatar.value==='avatar-panda'&&first.options.length===2&&second.options.length===2);
  assert.equal(avatar.value,'avatar-panda');assert.equal(first.options.length,2);assert.equal(second.options.length,2);
  first.value=JSON.stringify(['form-animal','region-front']);second.value=JSON.stringify(['form-work','region-work']);
  prepare.click();await until(()=>f.host.querySelectorAll('.generation-form-pair-preview img').length===2);
