@@ -1,8 +1,18 @@
 # Prüfstand und Protokolle
 
-**Softwarestand: 0.102.0 · Dokumentationsabgleich: 2026-11-24T12:30:00+01:00 (Europe/Berlin).**
+**Softwarestand: 0.102.0 · Dokumentationsabgleich: 2026-11-24T15:30:00+01:00 (Europe/Berlin).**
 
 Alle Prüfnachweise stehen in dieser Datei: ein Abschnitt je Softwareversion sowie gesonderte Abschnitte für datierte Zwischenprüfungen. Die Ergebnisse und Grenzen gelten für den jeweils genannten Stand. Spätere Läufe stehen als Nachtrag im selben Abschnitt. Produktänderungen gehören in den [Changelog](CHANGELOG.md), offene Aufgaben in die [Roadmap](ROADMAP.md).
+
+## Zwischenprüfung 2026-11-24 – atomarer Rig-Entwurf für Tier- und Arbeitsform
+
+**Änderung auf `develop`:** `prepareDraftRigPair()` erstellt getrennte Rig-Entwürfe für beide GLBs eines validierten Avatarpaares. Die Tierform erhält das quadrupede Template, die Arbeitsform ein aufrechtes Biped-Template. Jede Form wird separat vorbereitet, als GLB exportiert, erneut geladen und in einen eigenen `StudioRig`-Datensatz überführt. Die resultierenden Knochen-Resttransformationen, Kontrollpunkte und Verbindungen werden ausschließlich im zugehörigen Formslot gespeichert. Die Funktion arbeitet nicht mutierend und gibt das neue Paar erst zurück, wenn beide Formen vollständig vorbereitet und validiert wurden. Abbruch oder Fehler liefert kein Teilergebnis.
+
+**Verifizierter Nachweis auf Commit `613f6842c4553cad719fff272f234e21593d0542`:**
+- [Cluster-Landmark-Workflow #45414076251](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/45414076251): **success**. Dependency-Audit, gezielte Cluster-/Landmarken- und Draft-Rig-Paartests, Browser-Surface-Picking (**1/1**) und TypeScript-Check erfolgreich.
+- Der vorherige Lauf #45413998357 wurde durch den Folgelauf mit dem TypeScript-Fix abgebrochen; sein Fehler bei `ArrayBuffer | SharedArrayBuffer` wurde behoben. Nur der nachfolgende Lauf #45414076251 ist als erfolgreich gewertet.
+
+**Grenzen:** Die Rig-Positionen beruhen auf Proportionstemplates und geometrischem Körperrahmen, nicht auf semantisch erkannter Anatomie. Die Oberflächen-Probes sind Hinweise zur manuellen Prüfung und keine Freigabe. Die neue Paarfunktion ist derzeit ein technischer Baustein und noch keine sichtbare Nutzeraktion im Player/Studio. Automatische anatomische Erkennung, UI-Integration, visuelle Original-PaKaChi-Abnahme, Korrekturwerkzeuge, Bewegungsabnahme und gemeinsames Morph-Rig bleiben offen. Die Generator-GLBs sind weiterhin technische Entwürfe.
 
 ## Zwischenprüfung 2026-11-24 – Formwechsel mit getrennten Studiozuständen
 
