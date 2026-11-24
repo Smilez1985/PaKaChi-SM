@@ -1,8 +1,21 @@
 # Prüfstand und Protokolle
 
-**Softwarestand: 0.102.0 · Dokumentationsabgleich: 2026-11-24T19:15:00+01:00 (Europe/Berlin).**
+**Softwarestand: 0.102.0 · Dokumentationsabgleich: 2026-11-24T20:56:00+01:00 (Europe/Berlin).**
 
 Alle Prüfnachweise stehen in dieser Datei: ein Abschnitt je Softwareversion sowie gesonderte Abschnitte für datierte Zwischenprüfungen. Die Ergebnisse und Grenzen gelten für den jeweils genannten Stand. Spätere Läufe stehen als Nachtrag im selben Abschnitt. Produktänderungen gehören in den [Changelog](CHANGELOG.md), offene Aufgaben in die [Roadmap](ROADMAP.md).
+
+## Zwischenprüfung 2026-11-24 – konservative Landmarken-zu-Gelenkanker-Auflösung
+
+**Änderung auf `develop`:** `src/draft-rig-landmark-anchors.ts` ergänzt die Brücke zwischen bestätigten 2D/3D-Landmarken und dem anatomischen Rig-Vokabular. Die gespeicherten Oberflächenpunkte werden über eine explizite mesh-lokal-zu-avatar-lokal Matrix transformiert. Eindeutige semantische Mittellinienregionen (z. B. Becken, Brust, Hals, Kopf und Schweif) erhalten nur dann einen Kandidaten, wenn genau ein Gelenk kompatibel ist. Bei Armen und Beinen ist eine ausdrückliche Zuordnung der Landmarken-ID zum links-/rechtsseitigen Gelenk erforderlich. Semantische Widersprüche, konkurrierende Anker und fehlende Transformationen werden nicht geraten oder automatisch gemittelt. Der Resolver verändert weder Manifest noch Mesh oder Rig; seine Ergebnisse bleiben prüfpflichtige Kandidaten.
+
+**CI auf Commit `db2b9358f66e1c7035ace9e900d2b94f3e10b59c`:**
+- [Cluster-Landmark-Workflow #45475048672](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/45475048672): **success**.
+- 96 gezielte Unit-/Integrationstests bestanden, 0 fehlgeschlagen oder übersprungen.
+- Browser-Surface-Picking: 1/1 bestanden.
+- TypeScript `npx tsc --noEmit`: erfolgreich.
+- Dependency-Audit: erfolgreich.
+
+**Grenzen:** Die Kandidaten werden noch nicht in `bindDraftRig()` übernommen oder in der Studio-Oberfläche angezeigt. Ein 3D-Oberflächenpunkt ist nicht automatisch das Zentrum eines Gelenks; dafür braucht es eine prüfbare Korrektur-/Abnahmestufe. Keine automatische anatomische Erkennung, keine visuelle Original-PaKaChi-Abnahme und kein Meilenstein für `main`.
 
 ## Zwischenprüfung 2026-11-24 – Topologievertrag für Draft-Rigs
 
