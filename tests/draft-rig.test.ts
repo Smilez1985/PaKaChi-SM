@@ -52,3 +52,37 @@ test('cancellation and unsupported models never leave half a skeleton or skin at
  const bound=draftFigure();await bindDraftRig(bound,'biped',signal());await assert.rejects(bindDraftRig(bound,'biped',signal()),/already-bound/);disposeModel(bound);
  const invalid=draftFigure();(invalid.children[0] as T.Mesh).geometry.attributes.position.setX(0,NaN);await assert.rejects(bindDraftRig(invalid,'biped',signal()),/invalid-geometry/);assert.equal(invalid.getObjectByName('Draft_Hips'),undefined);disposeModel(invalid);
 });
+
+
+test('paired draft rigging prepares animal and work forms independently and commits only a complete pair',async()=>{
+ const {prepareDraftRigPair}=await import('../src/draft-rig-pair.ts');
+ const animalBytes=new Uint8Array(await writeFigureGLB(draftFigure(true)));
+ const humanoidBytes=new Uint8Array(await writeFigureGLB(draftFigure(false)));
+ const base64=(bytes:Uint8Array)=>Buffer.from(bytes).toString('base64');
+ const source={
+  avatarId:'pakachi',activeForm:'animal' as const,
+  animal:{formId:'animal-form',label:'Tierform',model:base64(animalBytes),generationReference:{source:'animal'} as any},
+  humanoid:{formId:'work-form',label:'Arbeitsform',model:base64(humanoidBytes),generationReference:{source:'work'} as any},
+ };
+ const original=structuredClone(source);
+ const result=await prepareDraftRigPair(source as any,signal());
+ assert.deepEqual(source,original);
+ assert.equal(result.reports.animal.template,'quadruped');
+ assert.equal(result.reports.humanoid.template,'biped-relaxed');
+ assert.equal(result.reports.animal.review,'required');
+ assert.equal(result.reports.humanoid.review,'required');
+ assert.notEqual(result.formModels.animal.model,source.animal.model);
+ assert.notEqual(result.formModels.humanoid.model,source.humanoid.model);
+ assert.equal(result.formModels.activeForm,'animal');
+ assert.equal(result.formModels.animal.studio!.boneRest.length,23);
+ assert.equal(result.formModels.humanoid.studio!.boneRest.length,21);
+ assert.notDeepEqual(result.formModels.animal.studio,result.formModels.humanoid.studio);
+});
+test('paired draft rigging returns no partial result when the second form fails',async()=>{
+ const {prepareDraftRigPair}=await import('../src/draft-rig-pair.ts');
+ const bytes=new Uint8Array(await writeFigureGLB(draftFigure()));
+ const source={avatarId:'pakachi',activeForm:'animal',animal:{formId:'animal-form',label:'Tierform',model:Buffer.from(bytes).toString('base64'),generationReference:{}},humanoid:{formId:'work-form',label:'Arbeitsform',model:'bm90LWEtZ2xi',generationReference:{}}};
+ const original=structuredClone(source);
+ await assert.rejects(prepareDraftRigPair(source as any,signal()));
+ assert.deepEqual(source,original);
+});
