@@ -9,6 +9,8 @@ import type {Cluster2DSemanticCatalog} from './cluster-2d-classifier.ts';
 import {compareClusterCharacterForms} from './cluster-form-comparison.ts';
 import type {ClusterManifest} from './cluster-architecture.ts';
 import type {ReviewReason} from './studio-review.ts';
+import {validStudioFormModelPair} from './studio-form-model-pair.ts';
+import type {StudioFormModelPair} from './studio-form-model-pair.ts';
 export type Vec3 = [number, number, number];
 export type Quat = [number, number, number, number];
 /** Reserved pose channel; cannot collide with user point IDs. */
@@ -93,6 +95,8 @@ export interface StudioProject {
   imageReference?: ImageReferenceDocument;
   /** Exact selected crop provenance used for the accepted generation. */
   generationReference?: ImageReferenceGenerationManifest;
+  /** Persisted animal/work-form GLBs for the same character identity. */
+  formModels?: StudioFormModelPair;
 }
 export const emptyStudio = (): StudioData => ({points:[],links:[],boneRest:[],poses:[],moves:[]});
 
@@ -164,6 +168,8 @@ export function parseProject(input: unknown): StudioProject {
   require(input.semanticCatalog===undefined||validateCluster2DSemanticCatalog(input.semanticCatalog).length===0,'Ungültiger gemeinsamer Anatomie- und Oberflächenkatalog.');
   require(input.clusterFormManifests===undefined||input.semanticCatalog!==undefined&&validClusterFormManifestPair(input.clusterFormManifests,input.semanticCatalog as Cluster2DSemanticCatalog),'Ungültiges oder nicht zum gemeinsamen Charakterkatalog passendes Tier-/Arbeitsform-Paar.');
   require(input.generationReference===undefined||validGenerationReference(input.generationReference,input.imageReference as ImageReferenceDocument|undefined),'Ungültige Generierungsherkunft.');
+  require(input.formModels===undefined||validStudioFormModelPair(input.formModels,(input.avatar as Record<string,unknown>|undefined)?.id as string,input.model),'Ungültiges Tier-/Arbeitsform-Modellpaar oder aktives Modell passt nicht.');
+  if(input.formModels!==undefined){const pair=input.formModels as StudioFormModelPair;for(const asset of [pair.animal,pair.humanoid])require(validGenerationReference(asset.generationReference,input.imageReference as ImageReferenceDocument|undefined)&&asset.generationReference.selection.avatar.id===pair.avatarId&&asset.generationReference.selection.form.id===asset.formId,'Form-Modell besitzt keine passende bestätigte Bildreferenz.');}
   require(typeof input.model==='string' && input.model.length>0 && input.model.length<=70_000_000 && input.model.length%4===0 && /^[A-Za-z0-9+/]*={0,2}$/.test(input.model),'Modelldaten fehlen oder sind ungültig.');
   const a=input.avatar; require(obj(a) && id(a.id) && name(a.name) && typeof a.description==='string' && a.description.length<=1000 && Array.isArray(a.moves) && a.moves.length<=512);
   const moveIds=new Set<string>();
