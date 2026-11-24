@@ -9,6 +9,7 @@ on:
       - 'src/image-reference-detection.ts'
       - 'src/main.ts'
       - 'src/studio-data.ts'
+      - 'src/studio-form-model-pair.ts'
       - 'src/studio-editor.ts'
       - 'src/image-reference-crop.ts'
       - 'src/image-reference-editor.ts'
@@ -20,6 +21,7 @@ on:
       - 'tests/generation-service.test.mjs'
       - 'src/style.css'
       - 'tests/image-reference.test.ts'
+      - 'tests/studio-form-model-pair.test.ts'
       - 'src/studio-landmark-projection.ts'
       - 'src/image-reference-cluster-pipeline.ts'
       - 'tests/studio-landmark-projection.test.ts'
@@ -62,8 +64,8 @@ jobs:
         run: node --test tests/generation-panel.test.ts
       - name: Test generation HTTP transport and provenance sidecar
         run: node --test tests/generation-service.test.mjs
-      - name: Test persisted image-reference project metadata
-        run: node --test tests/image-reference-project.test.ts
+      - name: Test persisted image-reference and paired form-model metadata
+        run: node --test tests/image-reference-project.test.ts tests/studio-form-model-pair.test.ts
       - name: Browser test for transparent image-reference masks
         run: |
           npx playwright install --with-deps chromium
