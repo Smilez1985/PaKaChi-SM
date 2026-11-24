@@ -116,7 +116,7 @@ export function resolveDraftRigLandmarkAnchors(
     }
     const explicit = assignmentMap.get(item.landmarkId);
     const candidates = explicit ? [explicit] : Object.entries(compatibleParts)
-      .filter(([, parts]) => parts.length === 1 && parts[0] === item.partId)
+      .filter(([, parts]) => parts.includes(item.partId))
       .map(([joint]) => joint);
     if (candidates.length !== 1 || !compatibleParts[candidates[0]!]?.includes(item.partId)) {
       unresolved.push({ landmarkId: item.landmarkId, partId: item.partId, reason: 'no-unambiguous-joint' });
