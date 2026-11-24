@@ -46,7 +46,7 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
     <div id="message" role="status" aria-live="polite">Model Zoo wird geladen …</div>
     <div class="workspace">
       <section class="stage-panel" aria-label="Avatar-Vorschau">
-        <div class="stage-top"><span class="pill" id="model-type">3D · TESTAVATAR</span><button id="reset-camera" class="text-button">Ansicht zurücksetzen ↺</button></div>
+        <div class="stage-top"><span class="pill" id="model-type">3D · TESTAVATAR</span><button id="form-switch" class="text-button" hidden>Zur anderen Form wechseln</button><button id="reset-camera" class="text-button">Ansicht zurücksetzen ↺</button></div>
         <div class="view-tools"><label>Ansicht<select id="view-side"><option value="">Frei drehen</option><option value="front">Vorne</option><option value="back">Hinten</option><option value="left">Links</option><option value="right">Rechts</option><option value="top">Oben</option><option value="bottom">Unten</option></select></label><button id="view-roll-left" title="Ansicht 90 Grad nach links rollen">↶ 90°</button><button id="view-roll-right" title="Ansicht 90 Grad nach rechts rollen">↷ 90°</button></div><div id="viewport"></div><iframe id="legacy-frame" class="legacy-frame" title="PaKaChi Originalplayer mit Tierform und Arbeitsform"></iframe>
         <div class="stage-caption"><div><h2 id="avatar-name">Wird geladen …</h2><p id="avatar-description"></p></div><span class="live-badge" id="activity">Bereit</span></div>
         <p class="camera-help">Mitte halten: frei drehen · rechts ziehen: verschieben · Mausrad: zoomen</p>
@@ -106,6 +106,22 @@ const modelHistory=new ModelSwitchHistory<ModelSnapshot>(value=>JSON.stringify(v
 function captureModel():ModelSnapshot|null {
   if(editor&&loaded)return {kind:'project',project:editor.exportProject(),dirty:editor.dirty,identity:{id:loaded.id,model:loaded.model,rigVersion:loaded.rigVersion}};
   return original?{kind:'original'}:null;
+}
+function renderFormSwitch(){
+ const button=el<HTMLButtonElement>('form-switch'),pair=editor?.exportProject().formModels;
+ button.hidden=!pair||!loaded||original;
+ if(pair){const target=pair.activeForm==='animal'?pair.humanoid:pair.animal;button.textContent=options.language==='de'?target.label+' anzeigen':'Show '+target.label;}
+}
+async function switchForm(){
+ if(busy||!editor||!loaded)return;
+ if(editor.interactionActive){message('Bewegung zuerst beenden, bevor die Form gewechselt wird.',true);return;}
+ try{
+  const current=editor.exportProject(),pair=current.formModels;if(!pair)return;
+  const active=pair.activeForm,targetForm=active==='animal'?'humanoid':'animal',target=pair[targetForm];
+  const next=parseProject({...current,model:target.model,studio:target.studio??emptyStudio(),generationReference:target.generationReference,formModels:{...pair,activeForm:targetForm}});
+  const accepted=await loadAvatar(undefined,undefined,next,()=>!editor?.interactionActive,{confirm:true});
+  if(accepted){message((options.language==='de'?'Form gewechselt: ':'Form switched: ')+target.label);renderFormSwitch();}
+ }catch(error){message((options.language==='de'?'Formwechsel nicht möglich: ':'Could not switch form: ')+(error instanceof Error?error.message:String(error)),true);}
 }
 function renderModelHistory(){
   const blocked=busy||!!editor?.interactionActive;
@@ -259,7 +275,7 @@ function showOriginal(remember=true): boolean {
   original = true; modelEpoch++; machine.unbind();
   el('avatar-name').textContent='PaKaChi Original';
   el('avatar-description').textContent='Panda-KI-Chimera · Tierform und Arbeitsform · 72 Transformationsbilder';
-  el('model-type').textContent='ORIGINAL · 2D';
+  el('model-type').textContent='ORIGINAL · 2D';el<HTMLButtonElement>('form-switch').hidden=true;
   renderMoves([]);syncPlayback();
   el('legacy-frame').parentElement!.classList.add('legacy');
   const frame = el<HTMLIFrameElement>('legacy-frame');
@@ -319,14 +335,14 @@ async function loadAvatar(avatar?: Avatar, file?: File, project?: StudioProject,
     const previous={viewer,editor,playback,loaded,original,modelEpoch};
     prepared.viewer.onFrame=viewer.onFrame;
     const restoreBinding=machine.checkpointBinding();
-    const restoreUI=checkpointElements(['viewport','studio-editor','moves','capabilities','move-count','avatar-cards','avatar-select','avatar-count','avatar-name','avatar-description','model-type','player-controls','studio-controls','legacy-controls','pause','timeline','activity','model-undo','model-redo','model-history-note','message'].map(id=>el(id)));
+    const restoreUI=checkpointElements(['viewport','studio-editor','moves','capabilities','move-count','avatar-cards','avatar-select','avatar-count','avatar-name','avatar-description','model-type','player-controls','studio-controls','legacy-controls','pause','timeline','activity','model-undo','model-redo','model-history-note','form-switch','message'].map(id=>el(id)));
     const legacyStage=el('legacy-frame').parentElement!,wasLegacy=legacyStage.classList.contains('legacy');
     const cleanupErrors=installAtomically(()=>{
       viewer=prepared.viewer as Viewer;editor=prepared.editor;playback=prepared.playback;loaded={...next,moves};original=false;modelEpoch++;
       el('viewport').replaceChildren(prepared.stage);el('studio-editor').replaceChildren(prepared.editorHost);
       legacyStage.classList.remove('legacy');el('player-controls').hidden=studio;el('studio-controls').hidden=!studio;el('legacy-controls').hidden=true;
       renderCatalog();el('avatar-name').textContent=next.name;el('avatar-description').textContent=next.description;
-      el('model-type').textContent=next.id.startsWith('saved-')?'3D · EIGENER AVATAR':next.id==='local-import'?'3D · EIGENER IMPORT':'3D · KATALOGAVATAR';
+      el('model-type').textContent=next.id.startsWith('saved-')?'3D · EIGENER AVATAR':next.id==='local-import'?'3D · EIGENER IMPORT':'3D · KATALOGAVATAR';renderFormSwitch();
       const states=Object.fromEntries(Object.entries(next.states??{}).filter(([,id])=>moves.some(m=>m.id===id)));
       machine.bind({capability:{id:next.id,name:next.name,moves,states:Object.keys(states)},setState:state=>playback!.setBaseMove(states[state]),playMove:id=>{playback!.play(id);}},prepared.initialState);
       refreshCapabilities();
@@ -431,6 +447,7 @@ async function boot(): Promise<void> {
   el('player-tab').onclick = () => changeView(false);
   el('studio-tab').onclick = () => changeView(true);
   el('back-player').onclick = () => changeView(false);
+  el('form-switch').onclick=()=>{void switchForm();};
   el('reset-camera').onclick = () => {viewer?.resetCamera();el<HTMLSelectElement>('view-side').value='';};
   el('view-side').onchange=()=>viewer?.setView(el<HTMLSelectElement>('view-side').value);
   el('view-roll-left').onclick=()=>viewer?.rollView(90);
