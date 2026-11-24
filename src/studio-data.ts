@@ -177,6 +177,7 @@ export function parseProject(input: unknown): StudioProject {
   require(a.defaultMove===undefined || moveIds.has(a.defaultMove as string));
   if(a.states!==undefined) {require(obj(a.states));for(const [key,value] of Object.entries(a.states))require(['idle','talking','thinking','working','waiting','review','error','sleeping'].includes(key) && moveIds.has(value as string));}
   const d=input.studio; require(obj(d) && Array.isArray(d.points) && d.points.length<=256 && Array.isArray(d.links) && d.links.length<=2048 && Array.isArray(d.boneRest) && d.boneRest.length<=512 && d.boneRest.every(v=>transform(v)) && Array.isArray(d.poses) && d.poses.length<=100 && Array.isArray(d.moves) && d.moves.length<=100);
+  if(input.formModels!==undefined){const pair=input.formModels as StudioFormModelPair,activeStudio=pair[pair.activeForm].studio;require(activeStudio===undefined||JSON.stringify(activeStudio)===JSON.stringify(d),'Studio-Daten stimmen nicht mit dem aktiven Formslot überein.');}
   require(validCorrectiveShapes(d.correctiveShapes),'Ungültige geometrische Hautkorrekturen.');
   require(d.landmarkSurfacePicks===undefined || validStudioLandmarkSurfacePicks(d.landmarkSurfacePicks, (input.imageReference as ImageReferenceDocument|undefined)?.source.sha256), 'Ungültige oder nicht zur Bildreferenz passende 2D/3D-Landmarken.');
   if(d.boneInsertions!==undefined){
