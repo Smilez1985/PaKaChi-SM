@@ -28,7 +28,8 @@ export function validStudioFormModelAsset(value:unknown):value is StudioFormMode
   return Object.keys(asset).every(key=>['formId','label','model','generationReference','studio'].includes(key))&&Object.keys(asset).length>=4&&Object.keys(asset).length<=5&&
     id(asset.formId)&&label(asset.label)&&typeof asset.model==='string'&&asset.model.length>0&&asset.model.length<=70_000_000&&
     asset.model.length%4===0&&/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(asset.model)&&
-    !!asset.generationReference&&typeof asset.generationReference==='object'&&!Array.isArray(asset.generationReference)&&\n    (asset.studio===undefined||validFormStudio(asset.studio));
+    !!asset.generationReference&&typeof asset.generationReference==='object'&&!Array.isArray(asset.generationReference)&&
+    (asset.studio===undefined||validFormStudio(asset.studio));
 }
 export function validStudioFormModelPair(value:unknown,avatarId:string,activeModel:string):value is StudioFormModelPair {
   if(!value||typeof value!=='object'||Array.isArray(value))return false;
