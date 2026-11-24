@@ -28,6 +28,6 @@ export function validStudioFormModelPair(value:unknown,avatarId:string,activeMod
     pair.avatarId!==avatarId||!id(pair.avatarId)||!['animal','humanoid'].includes(String(pair.activeForm))||
     !validStudioFormModelAsset(pair.animal)||!validStudioFormModelAsset(pair.humanoid))return false;
   const animal=pair.animal as StudioFormModelAsset,humanoid=pair.humanoid as StudioFormModelAsset;
-  if(animal.formId===humanoid.formId||animal.model===humanoid.model)return false;
+  if(animal.formId===humanoid.formId)return false;
   return (pair.activeForm==='animal'?animal.model:humanoid.model)===activeModel;
 }
