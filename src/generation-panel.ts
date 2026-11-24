@@ -45,7 +45,8 @@ export function mountGenerationPanel(host:HTMLElement,bridge:GenerationHost,lang
  let retryRequest:{config:ProviderConfig;target:ProjectRevision;selected:File;keys:Map<string,string>;reference:ImageReferenceGenerationManifest}|undefined;
  const t=(de:string,en:string)=>language()==='de'?de:en;
  const matches=(target:ProjectRevision)=>{const now=bridge.target();return !!now&&target.session===now.session&&target.revision===now.revision;};
- function clearPairPreview(){pairUrls.forEach(url=>URL.revokeObjectURL(url));pairUrls=[];pairPreview.replaceChildren();pairStatus.textContent='';}\n function clear(preserveReference=false){sequence++;clearPairPreview();pairControls.hidden=true;if(!preserveReference){generationReference=undefined;referenceEditor?.dispose();referenceEditor=undefined;referenceReady=false;referenceHost.replaceChildren();referenceHost.hidden=true;}prepared=undefined;rigPreviewHost?.remove();rigPreviewHost=undefined;rigStatus.textContent='';rigControls.hidden=true;retryRequest=undefined;retry.hidden=true;job?.cancel();if(job?.snapshot.status==='preview'||job?.snapshot.status==='stale')job.discard();job=undefined;controller?.abort();controller=undefined;disposePreview?.();disposePreview=undefined;preview.replaceChildren();preview.hidden=true;pending=false;apply.hidden=true;cancel.disabled=true;discard.disabled=true;file.disabled=false;}
+ function clearPairPreview(){pairUrls.forEach(url=>URL.revokeObjectURL(url));pairUrls=[];pairPreview.replaceChildren();pairStatus.textContent='';}
+ function clear(preserveReference=false){sequence++;clearPairPreview();pairControls.hidden=true;if(!preserveReference){generationReference=undefined;referenceEditor?.dispose();referenceEditor=undefined;referenceReady=false;referenceHost.replaceChildren();referenceHost.hidden=true;}prepared=undefined;rigPreviewHost?.remove();rigPreviewHost=undefined;rigStatus.textContent='';rigControls.hidden=true;retryRequest=undefined;retry.hidden=true;job?.cancel();if(job?.snapshot.status==='preview'||job?.snapshot.status==='stale')job.discard();job=undefined;controller?.abort();controller=undefined;disposePreview?.();disposePreview=undefined;preview.replaceChildren();preview.hidden=true;pending=false;apply.hidden=true;cancel.disabled=true;discard.disabled=true;file.disabled=false;}
  function labels(){pairLegend.textContent=t('Zwei Formen desselben Avatars vorbereiten','Prepare two forms of the same avatar');pairAvatarLabel.textContent=t('Avatar','Avatar');pairFirstLabel.textContent=t('Erste Form und bestätigter Ausschnitt','First form and confirmed region');pairSecondLabel.textContent=t('Zweite Form und bestätigter Ausschnitt','Second form and confirmed region');pairPrepare.textContent=t('Beide Form-Crops prüfen','Prepare and review both form crops');retry.textContent=t('Nächsten Anbieter versuchen','Try next provider');heading.textContent=t('Bild → 3D-Entwurf','Image → 3D draft');label.textContent=t('PNG/JPEG auswählen oder hier ablegen','Choose or drop a PNG/JPEG here');start.textContent=t('3D-Entwurf erzeugen','Generate 3D draft');cancel.textContent=t('Abbrechen','Cancel');discard.textContent=t('Ergebnis verwerfen','Discard result');apply.textContent=t('Als neuen Avatar laden','Load as new avatar');notice.textContent=t('Sendet nur den ausdrücklich ausgewählten und markierten Bildausschnitt an den lokalen TripoSR-Dienst. Ein Entwurf ohne zugesichertes Skelett; keine Promptsteuerung. Das aktuelle Modell bleibt bis zur Übernahme erhalten. Der letzte Modellwechsel lässt sich über „Modellwechsel zurück“ wiederherstellen; Projekte zusätzlich speichern. Automatischer Anbieterwechsel nur vor dem Auftragsstart. Ein weiterer Auftrag benötigt einen ausdrücklichen Klick.','Sends only the explicitly selected and marked image region to the configured local TripoSR service. A draft without a guaranteed skeleton; no prompt control. Your current model remains until acceptance. Use Undo model switch to restore the last project; also save projects to disk. Automatic fallback only before execution. Another job requires an explicit click.');}
  function refresh(){
   labels();const config=readProviderConfig(storage),route=providerRoute(config.config,'generation');
@@ -66,23 +67,22 @@ export function mountGenerationPanel(host:HTMLElement,bridge:GenerationHost,lang
  async function populatePairChoices(){
   const editor=referenceEditor;if(!editor)return;
   try{
-   const document=await editor.reference();if(referenceEditor!==editor)return;
+   const referenceDocument=await editor.reference();if(referenceEditor!==editor)return;
    const previousAvatar=pairAvatar.value,previousFirst=pairFirst.value,previousSecond=pairSecond.value;
-   pairAvatar.replaceChildren();document.avatars.forEach(avatar=>{const option=document.createElement('option');option.value=avatar.id;option.textContent=avatar.label;pairAvatar.append(option);});
-   if(document.avatars.some(avatar=>avatar.id===previousAvatar))pairAvatar.value=previousAvatar;
-   const avatar=document.avatars.find(item=>item.id===pairAvatar.value);
-   const choices: Array<{value:string;label:string}>=[];
-   if(avatar)for(const form of document.forms.filter(item=>avatar.formIds.includes(item.id))){
-    for(const view of document.views.filter(item=>form.viewIds.includes(item.id))){
+   pairAvatar.replaceChildren();referenceDocument.avatars.forEach(avatar=>{const option=document.createElement('option');option.value=avatar.id;option.textContent=avatar.label;pairAvatar.append(option);});
+   if(referenceDocument.avatars.some(avatar=>avatar.id===previousAvatar))pairAvatar.value=previousAvatar;
+   const avatar=referenceDocument.avatars.find(item=>item.id===pairAvatar.value);
+   const choices:Array<{value:string;label:string}>=[];
+   if(avatar)for(const form of referenceDocument.forms.filter(item=>avatar.formIds.includes(item.id))){
+    for(const view of referenceDocument.views.filter(item=>form.viewIds.includes(item.id))){
      for(const regionId of view.regionIds){
-      const region=document.regions.find(item=>item.id===regionId);
-      if(region?.status==='confirmed'&&(region.kind==='form'||region.kind==='view'))choices.push({value:JSON.stringify([form.id,region.id]),label=form.label+' · '+region.label});
+      const region=referenceDocument.regions.find(item=>item.id===regionId);
+      if(region?.status==='confirmed'&&(region.kind==='form'||region.kind==='view'))choices.push({value:JSON.stringify([form.id,region.id]),label:form.label+' · '+region.label});
      }
     }
    }
    const fill=(select:HTMLSelectElement,previous:string)=>{select.replaceChildren();choices.forEach(choice=>{const option=document.createElement('option');option.value=choice.value;option.textContent=choice.label;select.append(option);});if(choices.some(choice=>choice.value===previous))select.value=previous;};
-   fill(pairFirst,previousFirst);fill(pairSecond,previousSecond);
-   refresh();
+   fill(pairFirst,previousFirst);fill(pairSecond,previousSecond);refresh();
   }catch{pairControls.hidden=true;}
  }
  pairAvatar.onchange=()=>{void populatePairChoices();};

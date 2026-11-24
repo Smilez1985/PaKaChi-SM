@@ -108,7 +108,7 @@ test('accepted generation passes the confirmed image-reference hierarchy to the 
 });
 
 test('explicitly prepares two distinct confirmed form crops without starting generation or importing either model',async t=>{
- const f=fixture(t);await f.choose();
+ const f=fixture(t);const originalCreate=URL.createObjectURL,originalRevoke=URL.revokeObjectURL;Object.defineProperty(URL,'createObjectURL',{configurable:true,value:()=> 'blob:pair-preview'});Object.defineProperty(URL,'revokeObjectURL',{configurable:true,value:()=>{}});t.after(()=>{Object.defineProperty(URL,'createObjectURL',{configurable:true,value:originalCreate});Object.defineProperty(URL,'revokeObjectURL',{configurable:true,value:originalRevoke});});await f.choose();
  const avatar=f.host.querySelector<HTMLSelectElement>('#generation-pair-avatar')!;
  const first=f.host.querySelector<HTMLSelectElement>('#generation-pair-first')!;
  const second=f.host.querySelector<HTMLSelectElement>('#generation-pair-second')!;
