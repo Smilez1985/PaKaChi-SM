@@ -86,3 +86,23 @@ test('paired draft rigging returns no partial result when the second form fails'
  await assert.rejects(prepareDraftRigPair(source as any,signal()));
  assert.deepEqual(source,original);
 });
+
+test('draft skeleton topology rejects broken limb chains, duplicate names and detached roots',async()=>{
+ const {validateDraftRigTopology}=await import('../src/draft-rig-topology.ts');
+ const valid=[
+  {name:'Hips',parent:-1},{name:'Spine',parent:0},{name:'Chest',parent:1},{name:'Neck',parent:2},{name:'Head',parent:3},
+  {name:'LeftShoulder',parent:2},{name:'LeftElbow',parent:5},{name:'LeftWrist',parent:6},{name:'LeftHand',parent:7},
+  {name:'RightShoulder',parent:2},{name:'RightElbow',parent:9},{name:'RightWrist',parent:10},{name:'RightHand',parent:11},
+  {name:'LeftHip',parent:0},{name:'LeftKnee',parent:13},{name:'LeftAnkle',parent:14},{name:'LeftFoot',parent:15},
+  {name:'RightHip',parent:0},{name:'RightKnee',parent:17},{name:'RightAnkle',parent:18},{name:'RightFoot',parent:19},
+ ];
+ assert.doesNotThrow(()=>validateDraftRigTopology(valid,'biped'));
+ const broken=structuredClone(valid);broken[14].parent=13;
+ assert.throws(()=>validateDraftRigTopology(broken,'biped'),/topology-chain/);
+ const duplicate=structuredClone(valid);duplicate[20].name='Head';
+ assert.throws(()=>validateDraftRigTopology(duplicate,'biped'),/topology-node/);
+ const detached=structuredClone(valid);detached[0].parent=1;
+ assert.throws(()=>validateDraftRigTopology(detached,'biped'),/topology-root/);
+ const quad=[...valid,{name:'TailBase',parent:0},{name:'TailTip',parent:21}];
+ assert.throws(()=>validateDraftRigTopology(quad,'quadruped'),/topology-chain/);
+});
