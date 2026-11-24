@@ -23,6 +23,7 @@ import { StudioEditor, encodeModel, decodeModel } from './studio-editor.ts';
 import { parseProject, emptyStudio } from './studio-data.ts';
 import type { StudioProject } from './studio-data.ts';
 import {selectStudioForm} from './studio-form-model-pair.ts';
+import {prepareDraftRigPair} from './draft-rig-pair.ts';
 import { StateMachine, STATES } from './control.ts';
 import { mountAgentPanel } from './agent-panel.ts';
 import { availableMoves, importedAvatar, parseCatalog, catalogChoices } from './catalog.ts';
@@ -47,7 +48,7 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
     <div id="message" role="status" aria-live="polite">Model Zoo wird geladen …</div>
     <div class="workspace">
       <section class="stage-panel" aria-label="Avatar-Vorschau">
-        <div class="stage-top"><span class="pill" id="model-type">3D · TESTAVATAR</span><button id="form-switch" class="text-button" hidden>Zur anderen Form wechseln</button><button id="reset-camera" class="text-button">Ansicht zurücksetzen ↺</button></div>
+        <div class="stage-top"><span class="pill" id="model-type">3D · TESTAVATAR</span><button id="form-switch" class="text-button" hidden>Zur anderen Form wechseln</button><button id="form-rig-pair" class="text-button" hidden>Beide Formen riggen</button><button id="reset-camera" class="text-button">Ansicht zurücksetzen ↺</button></div>
         <div class="view-tools"><label>Ansicht<select id="view-side"><option value="">Frei drehen</option><option value="front">Vorne</option><option value="back">Hinten</option><option value="left">Links</option><option value="right">Rechts</option><option value="top">Oben</option><option value="bottom">Unten</option></select></label><button id="view-roll-left" title="Ansicht 90 Grad nach links rollen">↶ 90°</button><button id="view-roll-right" title="Ansicht 90 Grad nach rechts rollen">↷ 90°</button></div><div id="viewport"></div><iframe id="legacy-frame" class="legacy-frame" title="PaKaChi Originalplayer mit Tierform und Arbeitsform"></iframe>
         <div class="stage-caption"><div><h2 id="avatar-name">Wird geladen …</h2><p id="avatar-description"></p></div><span class="live-badge" id="activity">Bereit</span></div>
         <p class="camera-help">Mitte halten: frei drehen · rechts ziehen: verschieben · Mausrad: zoomen</p>
@@ -100,6 +101,7 @@ function selectAvatar(id:string){
 let loaded: Avatar | null = null;
 let studio = false;
 let modelEpoch=0;
+let pairRigging=false;
 function generationTarget():ProjectRevision {const info=editor?.inspect();return info?{session:info.session,revision:info.revision}:{session:`model-${modelEpoch}`,revision:0};}
 let editor: StudioEditor | null = null;
 type ModelSnapshot={kind:'original'}|{kind:'project';project:StudioProject;dirty:boolean;identity:Pick<Avatar,'id'|'model'|'rigVersion'>};
@@ -109,9 +111,36 @@ function captureModel():ModelSnapshot|null {
   return original?{kind:'original'}:null;
 }
 function renderFormSwitch(){
- const button=el<HTMLButtonElement>('form-switch'),pair=editor?.exportProject().formModels;
+ const button=el<HTMLButtonElement>('form-switch'),rigButton=el<HTMLButtonElement>('form-rig-pair'),pair=editor?.exportProject().formModels;
  button.hidden=!pair||!loaded||original;button.disabled=busy||!pair;
- if(pair){const target=pair.activeForm==='animal'?pair.humanoid:pair.animal;button.textContent=options.language==='de'?(pair.activeForm==='animal'?'Tierform aktiv · Arbeitsform anzeigen':'Arbeitsform aktiv · Tierform anzeigen'):(pair.activeForm==='animal'?'Animal active · show work form':'Work form active · show animal form');button.title=target.label;}
+ rigButton.hidden=!pair||!loaded||original;rigButton.disabled=busy||pairRigging||!pair;
+ rigButton.textContent=pairRigging?(options.language==='de'?'Beide Formen werden geriggt …':'Rigging both forms …'):(options.language==='de'?'Beide Formen riggen':'Rig both forms');
+ if(pair){const target=pair.activeForm==='animal'?pair.humanoid:pair.animal;button.textContent=options.language==='de'?(pair.activeForm==='animal'?'Tierform aktiv · Arbeitsform anzeigen':'Arbeitsform aktiv · Tierform anzeigen'):(pair.activeForm==='animal'?'Animal active · show work form':'Work form active · show animal form');button.title=target.label;rigButton.title=options.language==='de'?'Erstellt zwei getrennte, prüfpflichtige Rig-Entwürfe.':'Creates two separate draft rigs that require review.';}
+}
+async function rigBothForms(){
+ if(busy||pairRigging||!editor||!loaded||original)return;
+ if(editor.interactionActive){message('Bewegung zuerst beenden, bevor beide Formen geriggt werden.',true);return;}
+ const sourceEditor=editor,sourceAvatar=loaded,current=sourceEditor.exportProject(),pair=current.formModels;
+ if(!pair)return;
+ const expected=generationTarget(),controller=new AbortController();
+ pairRigging=true;busy=true;fetchController?.abort();fetchController=controller;syncPlayback();renderCatalog();renderFormSwitch();
+ message(options.language==='de'?'Rig-Entwürfe für Tier- und Arbeitsform werden getrennt erstellt …':'Preparing separate animal and work-form draft rigs …');
+ let handedOff=false;
+ const valid=()=>{const now=generationTarget();return !controller.signal.aborted&&editor===sourceEditor&&loaded===sourceAvatar&&!sourceEditor.interactionActive&&now.session===expected.session&&now.revision===expected.revision;};
+ try{
+  const result=await prepareDraftRigPair(pair,controller.signal);
+  if(!valid())throw new Error('Studio-Projekt wurde während der Rig-Erstellung geändert.');
+  const active=result.formModels[result.formModels.activeForm];
+  const next=parseProject({...current,model:active.model,studio:active.studio??emptyStudio(),generationReference:active.generationReference,formModels:result.formModels});
+  busy=false;
+  const accepted=await loadAvatar(undefined,undefined,next,valid,{confirm:true});handedOff=true;
+  if(accepted)message(options.language==='de'?`Beide Rig-Entwürfe erstellt: Tierform ${result.reports.animal.bones} Knochen, Arbeitsform ${result.reports.humanoid.bones} Knochen. Bitte beide prüfen; noch keine automatische Freigabe.`:`Both draft rigs created: animal ${result.reports.animal.bones} bones, work form ${result.reports.humanoid.bones} bones. Review both; no automatic approval.`);
+ }catch(error){message((options.language==='de'?'Rig-Erstellung abgebrochen oder fehlgeschlagen: ':'Rig preparation failed: ')+(error instanceof Error?error.message:String(error)),true);}
+ finally{
+  pairRigging=false;
+  if(!handedOff){busy=false;if(fetchController===controller)fetchController=null;syncPlayback();renderCatalog();}
+  renderFormSwitch();
+ }
 }
 async function switchForm(){
  if(busy||!editor||!loaded)return;
@@ -450,6 +479,7 @@ async function boot(): Promise<void> {
   el('studio-tab').onclick = () => changeView(true);
   el('back-player').onclick = () => changeView(false);
   el('form-switch').onclick=()=>{void switchForm();};
+  el('form-rig-pair').onclick=()=>{void rigBothForms();};
   el('reset-camera').onclick = () => {viewer?.resetCamera();el<HTMLSelectElement>('view-side').value='';};
   el('view-side').onchange=()=>viewer?.setView(el<HTMLSelectElement>('view-side').value);
   el('view-roll-left').onclick=()=>viewer?.rollView(90);
