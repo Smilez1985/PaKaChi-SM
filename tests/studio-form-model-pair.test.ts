@@ -15,10 +15,10 @@ test('rejects partial, duplicated, cross-avatar and active-model-mismatched pair
  assert.equal(validStudioFormModelPair(value,'avatar-1','REVG'),false);
 });
 test('keeps independent rig and pose data in each form asset',()=>{
- const value=pair();
+ const base=pair();
  const animalStudio={points:[{id:'animal-root',name:'Root',kind:'bone',rest:[0,0,0],size:.1,radius:.1}],links:[],boneRest:[],poses:[],moves:[]};
  const humanoidStudio={points:[{id:'work-root',name:'Root',kind:'bone',rest:[0,1,0],size:.2,radius:.2}],links:[],boneRest:[],poses:[{id:'work-idle',name:'Idle',seconds:0,values:{}}],moves:[]};
- value.animal.studio=animalStudio as any;value.humanoid.studio=humanoidStudio as any;
+ const value={...base,animal:{...base.animal,studio:animalStudio},humanoid:{...base.humanoid,studio:humanoidStudio}};
  assert.equal(validStudioFormModelPair(value,'avatar-1','QUJD'),true);
  assert.notDeepEqual(value.animal.studio,value.humanoid.studio);
 });
