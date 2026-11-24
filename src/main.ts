@@ -22,6 +22,7 @@ import {mountOptions,translate} from './options.ts';
 import { StudioEditor, encodeModel, decodeModel } from './studio-editor.ts';
 import { parseProject, emptyStudio } from './studio-data.ts';
 import type { StudioProject } from './studio-data.ts';
+import {selectStudioForm} from './studio-form-model-pair.ts';
 import { StateMachine, STATES } from './control.ts';
 import { mountAgentPanel } from './agent-panel.ts';
 import { availableMoves, importedAvatar, parseCatalog, catalogChoices } from './catalog.ts';
@@ -117,8 +118,8 @@ async function switchForm(){
  if(editor.interactionActive){message('Bewegung zuerst beenden, bevor die Form gewechselt wird.',true);return;}
  try{
   const current=editor.exportProject(),pair=current.formModels;if(!pair)return;
-  const active=pair.activeForm,targetForm=active==='animal'?'humanoid':'animal',target=pair[targetForm];
-  const next=parseProject({...current,model:target.model,studio:target.studio??emptyStudio(),generationReference:target.generationReference,formModels:{...pair,activeForm:targetForm}});
+  const targetForm=pair.activeForm==='animal'?'humanoid':'animal',selection=selectStudioForm(pair,targetForm),target=pair[targetForm];
+  const next=parseProject({...current,model:selection.model,studio:selection.studio??emptyStudio(),generationReference:selection.generationReference,formModels:selection.formModels});
   const accepted=await loadAvatar(undefined,undefined,next,()=>!editor?.interactionActive,{confirm:true});
   if(accepted){message((options.language==='de'?'Form gewechselt: ':'Form switched: ')+target.label);renderFormSwitch();}
  }catch(error){message((options.language==='de'?'Formwechsel nicht möglich: ':'Could not switch form: ')+(error instanceof Error?error.message:String(error)),true);}
