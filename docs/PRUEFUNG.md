@@ -4,6 +4,16 @@
 
 Alle Prüfnachweise stehen in dieser Datei: ein Abschnitt je Softwareversion sowie gesonderte Abschnitte für datierte Zwischenprüfungen. Die Ergebnisse und Grenzen gelten für den jeweils genannten Stand. Spätere Läufe stehen als Nachtrag im selben Abschnitt. Produktänderungen gehören in den [Changelog](CHANGELOG.md), offene Aufgaben in die [Roadmap](ROADMAP.md).
 
+## Zwischenprüfung 2026-11-24 – doppelte 3D-Entwürfe für zwei Formen
+
+**Änderung auf `develop`:** Aufbauend auf der expliziten Avatar-/Form-/Regionsauswahl führt der integrierte Generator jetzt zwei getrennte TripoSR-Aufträge nacheinander aus. Jeder Auftrag erhält ausschließlich den eigenen bestätigten PNG-Crop und sein individuelles Generierungsmanifest. Die zwei Ausgaben müssen jeweils die Modellvalidierung bestehen; danach werden sie in getrennten 3D-Vorschauen nebeneinander angezeigt. Ein Projektwechsel oder Abbruch entwertet die laufende Paarverarbeitung. Scheitert einer der Aufträge oder eine Vorschau, wird kein unvollständiges Paar als erfolgreich dargestellt und kein Modell automatisch übernommen. Ein erneuter Lauf erfordert einen ausdrücklichen Klick.
+
+**Verifizierte Nachweise auf Commit `c2890f8002f36b3a84fc5ce657dbe927f72bb1c6`:**
+- [Bildreferenz-Workflow #45361420737](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/45361420737): **success**. Dependency-Audit, Bildreferenz-Hierarchie, kalibrierte Landmarken-/Cluster-Bridge, Crop-Planung, Generator-Panel **16/16**, HTTP-Provenienz, Projektmetadaten, Chromium **21/21** und TypeScript-Check erfolgreich.
+- [Cluster-Landmark-Workflow #45361421128](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/45361421128): **success**, einschließlich Browserregression für echtes 3D-Surface-Picking.
+
+**Grenzen:** Die beiden GLBs werden aktuell nur als getrennte Vorschauen gehalten. Es gibt noch keine persistente Paar-Kandidatenstruktur und keine atomare Übernahme in den Avatar-/Formbestand. Daher kann aus diesem Ablauf noch kein fertiges Original-PaKaChi-Paar entstehen. Designähnlichkeit, visuelle Abnahme beider Formen, Rigging und Morph-Transformation bleiben offen.
+
 ## Zwischenprüfung 2026-11-24 – Studio-Auswahl für zwei Form-Crops
 
 **Änderung auf `develop`:** Der integrierte Bild-zu-3D-Generator liest nach erfolgreicher Referenzfreigabe die gespeicherte Avatar-/Form-/Ansichtshierarchie ein. Der Nutzer wählt ausdrücklich einen Avatar sowie zwei unterschiedliche Formen und je eine bestätigte Hauptregion (Form- oder Ansichtsregion). Unbestätigte und semantisch ungeeignete Regionen erscheinen nicht in der Auswahl. Beide Crops werden über den bereits quellhashgebundenen Zwei-Formen-Kern erzeugt und nebeneinander mit Form-/Regionslabel, Pixelmaßen und SHA-256-Präfix angezeigt. Eine Auswahländerung muss neu geprüft werden; die Crop-Vorschau ist kein Generatorlauf und keine Übernahme.
