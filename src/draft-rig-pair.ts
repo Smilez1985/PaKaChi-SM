@@ -41,24 +41,24 @@ export async function prepareDraftRigPair(
   const humanoid = await prepareDraftRig(decode(pair.humanoid.model), 'biped-relaxed', signal);
   signal.throwIfAborted();
 
-  const animalModel = await parseModel(animal.bytes.buffer.slice(
-    animal.bytes.byteOffset, animal.bytes.byteOffset + animal.bytes.byteLength,
-  ));
-  let animalStudio;
+  const animalModel = await parseModel(Uint8Array.from(animal.bytes).buffer as ArrayBuffer);
+  let animalStudio: import('./studio-data.ts').StudioData;
+  const animalRig = new StudioRig(animalModel.scene);
   try {
-    animalStudio = structuredClone(new StudioRig(animalModel.scene).data);
+    animalStudio = structuredClone(animalRig.data);
   } finally {
+    animalRig.dispose();
     disposeModel(animalModel.scene);
   }
   signal.throwIfAborted();
 
-  const humanoidModel = await parseModel(humanoid.bytes.buffer.slice(
-    humanoid.bytes.byteOffset, humanoid.bytes.byteOffset + humanoid.bytes.byteLength,
-  ));
-  let humanoidStudio;
+  const humanoidModel = await parseModel(Uint8Array.from(humanoid.bytes).buffer as ArrayBuffer);
+  let humanoidStudio: import('./studio-data.ts').StudioData;
+  const humanoidRig = new StudioRig(humanoidModel.scene);
   try {
-    humanoidStudio = structuredClone(new StudioRig(humanoidModel.scene).data);
+    humanoidStudio = structuredClone(humanoidRig.data);
   } finally {
+    humanoidRig.dispose();
     disposeModel(humanoidModel.scene);
   }
   signal.throwIfAborted();
