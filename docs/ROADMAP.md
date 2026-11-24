@@ -185,6 +185,8 @@ Die Umsetzung des integrierten MCP-Arbeitsplatzes, der Caddy-/DuckDNS-Konfigurat
 
 ## Freie Knochenabzweigungen
 
+- [x] **Konservative Landmarken-zu-Gelenkanker-Auflösung:** `src/draft-rig-landmark-anchors.ts` übersetzt bestätigte 2D/3D-Oberflächenkorrespondenzen über explizite Mesh-zu-Avatar-Transformationen in Kandidatenpositionen. Eindeutige Mittellinienregionen können auf passende Gelenke abgebildet werden; bilaterale Gelenke benötigen eine ausdrückliche Landmarken-zu-Gelenk-Zuordnung. Fehlende Transformationen, semantische Widersprüche und konkurrierende Anker werden nicht geraten oder gemittelt. 5 neue Regressionen; insgesamt 96 Tests im gezielten Lauf bestanden. Noch keine Übernahme in das erzeugte Skelett.
+- [ ] Landmarkenanker im Rigging-Entwurf und Studio-UI integrieren: Mesh-Transformationen aus dem aktuellen Modell beziehen, linke/rechte Gelenkzuordnung prüfbar machen und jeden Kandidaten vor Anwendung sichtbar bestätigen. Oberflächenpunkte sind keine automatisch erkannten Gelenkzentren.
 - [ ] Anatomisches erstes Skelett auf beliebiger ungeriggter Oberfläche erkennen und zuverlässig binden. Proportionale Ausgangsvorlagen für neue statische Generatorausgaben sind seit 0.95.0 vorhanden; manuelle Abnahme und KI-Anatomie fehlen.
 
 ## Gewichtspinsel
