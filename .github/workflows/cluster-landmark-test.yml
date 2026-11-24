@@ -1,5 +1,5 @@
 name: PaKaChi cluster landmark regression
-# Topology guard and malformed-chain fixtures are part of the draft-rig regression.
+# Topology and reviewed-landmark anchor fixtures are part of the draft-rig regression.
 on:
   push:
     branches: [develop]
