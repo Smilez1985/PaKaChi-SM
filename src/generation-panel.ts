@@ -70,7 +70,7 @@ export function mountGenerationPanel(host:HTMLElement,bridge:GenerationHost,lang
    const referenceDocument=await editor.reference();if(referenceEditor!==editor)return;
    const previousAvatar=pairAvatar.value,previousFirst=pairFirst.value,previousSecond=pairSecond.value;
    pairAvatar.replaceChildren();referenceDocument.avatars.forEach(avatar=>{const option=document.createElement('option');option.value=avatar.id;option.textContent=avatar.label;pairAvatar.append(option);});
-   if(referenceDocument.avatars.some(avatar=>avatar.id===previousAvatar))pairAvatar.value=previousAvatar;
+   if(referenceDocument.avatars.some(avatar=>avatar.id===previousAvatar))pairAvatar.value=previousAvatar;else if(referenceDocument.avatars[0])pairAvatar.value=referenceDocument.avatars[0].id;
    const avatar=referenceDocument.avatars.find(item=>item.id===pairAvatar.value);
    const choices:Array<{value:string;label:string}>=[];
    if(avatar)for(const form of referenceDocument.forms.filter(item=>avatar.formIds.includes(item.id))){
@@ -81,7 +81,7 @@ export function mountGenerationPanel(host:HTMLElement,bridge:GenerationHost,lang
      }
     }
    }
-   const fill=(select:HTMLSelectElement,previous:string)=>{select.replaceChildren();choices.forEach(choice=>{const option=document.createElement('option');option.value=choice.value;option.textContent=choice.label;select.append(option);});if(choices.some(choice=>choice.value===previous))select.value=previous;};
+   const fill=(select:HTMLSelectElement,previous:string)=>{select.replaceChildren();choices.forEach(choice=>{const option=document.createElement('option');option.value=choice.value;option.textContent=choice.label;select.append(option);});if(choices.some(choice=>choice.value===previous))select.value=previous;else if(choices[0])select.value=choices[0].value;};
    fill(pairFirst,previousFirst);fill(pairSecond,previousSecond);refresh();
   }catch{pairControls.hidden=true;}
  }
