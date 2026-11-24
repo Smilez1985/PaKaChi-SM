@@ -131,7 +131,7 @@ export function resolveDraftRigLandmarkAnchors(
     }
     anchors.push({
       jointName,
-      position: position.toArray(),
+      position: [position.x, position.y, position.z],
       landmarkId: item.landmarkId,
       partId: item.partId,
       meshId: item.meshId,
