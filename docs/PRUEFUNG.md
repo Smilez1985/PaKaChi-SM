@@ -1,8 +1,16 @@
 # Prüfstand und Protokolle
 
-**Softwarestand: 0.102.0 · Dokumentationsabgleich: 2026-11-23T15:58:00+01:00 (Europe/Berlin).**
+**Softwarestand: 0.102.0 · Dokumentationsabgleich: 2026-11-24T09:51:00+01:00 (Europe/Berlin).**
 
 Alle Prüfnachweise stehen in dieser Datei: ein Abschnitt je Softwareversion sowie gesonderte Abschnitte für datierte Zwischenprüfungen. Die Ergebnisse und Grenzen gelten für den jeweils genannten Stand. Spätere Läufe stehen als Nachtrag im selben Abschnitt. Produktänderungen gehören in den [Changelog](CHANGELOG.md), offene Aufgaben in die [Roadmap](ROADMAP.md).
+
+## Zwischenprüfung 2026-11-24 – Studio-Auswahl für zwei Form-Crops
+
+**Änderung auf `develop`:** Der integrierte Bild-zu-3D-Generator liest nach erfolgreicher Referenzfreigabe die gespeicherte Avatar-/Form-/Ansichtshierarchie ein. Der Nutzer wählt ausdrücklich einen Avatar sowie zwei unterschiedliche Formen und je eine bestätigte Hauptregion (Form- oder Ansichtsregion). Unbestätigte und semantisch ungeeignete Regionen erscheinen nicht in der Auswahl. Beide Crops werden über den bereits quellhashgebundenen Zwei-Formen-Kern erzeugt und nebeneinander mit Form-/Regionslabel, Pixelmaßen und SHA-256-Präfix angezeigt. Eine Auswahländerung muss neu geprüft werden; die Crop-Vorschau ist kein Generatorlauf und keine Übernahme.
+
+**Verifizierter Nachweis:** [Bildreferenz-Workflow #45360759871](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/45360759871), Commit `5b19ceda7444e524dabe2dd7b74efe595e15fb65`: Dependency-Audit erfolgreich; Bildreferenz-, Landmarken-/Cluster-, Crop-, Generation-Panel-, HTTP-Provenienz- und Projektmetadaten-Tests erfolgreich; Generation-Panel **16/16**, Chromium **21/21**, TypeScript-Check erfolgreich. Die drei zwischenzeitlich fehlgeschlagenen Entwicklungsruns betrafen Fehler in der neuen UI-/Testintegration (Zeilenumbruch, asynchrone Optionsbefüllung und Test-Eventtyp); die korrigierte Revision ist der oben genannte erfolgreiche Lauf.
+
+**Grenzen:** Die UI startet noch keine zwei TripoSR-Aufträge, zeigt noch keine 3D-Ergebnis-Paarvorschau und speichert noch keine zusammengehörigen Tier-/Arbeitsform-Kandidaten. Es gibt noch keine atomare gemeinsame Übernahme; die bisherige Einzelübernahme bleibt davon getrennt. Keine automatische Formerkennung oder Links-/Rechts-Heuristik. Das Original-PaKaChi ist weiterhin nicht visuell abgenommen.
 
 ## Version 0.102.0 – Bildreferenz und 2D/3D-Clusterkern
 
