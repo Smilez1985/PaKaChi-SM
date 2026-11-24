@@ -1,8 +1,18 @@
 # Prüfstand und Protokolle
 
-**Softwarestand: 0.102.0 · Dokumentationsabgleich: 2026-11-24T09:51:00+01:00 (Europe/Berlin).**
+**Softwarestand: 0.102.0 · Dokumentationsabgleich: 2026-11-24T12:08:00+01:00 (Europe/Berlin).**
 
 Alle Prüfnachweise stehen in dieser Datei: ein Abschnitt je Softwareversion sowie gesonderte Abschnitte für datierte Zwischenprüfungen. Die Ergebnisse und Grenzen gelten für den jeweils genannten Stand. Spätere Läufe stehen als Nachtrag im selben Abschnitt. Produktänderungen gehören in den [Changelog](CHANGELOG.md), offene Aufgaben in die [Roadmap](ROADMAP.md).
+
+## Zwischenprüfung 2026-11-24 – atomare Übernahme und Persistenz zweier Formmodelle
+
+**Änderung auf `develop`:** Nach der getrennten Erzeugung und Vorschau beider Formen gibt es jetzt eine eigene Aktion „Beide Formen gemeinsam übernehmen“. Der Host lädt beide GLBs vorab getrennt, prüft sichtbare Mesh-Geometrie und Modellgrenzen und prüft anschließend die gemeinsame Projektstruktur. Erst wenn beide Modelle und beide Provenienzmanifeste zum selben expliziten Avatar und zu den jeweiligen Form-IDs passen, wird das neue Projekt über den vorhandenen atomaren Avatar-Installationspfad geladen. Das Projekt enthält beide GLB-Assets, den aktiven Formslot und beide getrennten Generierungsreferenzen. `parseProject` prüft Paarvollständigkeit, eindeutige Form-IDs, aktive Modellkonsistenz und die Referenzzuordnung beider Formassets. Die vorhandene Studio-Projekt- und Model-Zoo-Persistenz führt das Paar mit.
+
+**Verifizierter Nachweis auf Commit `bbce089526c885b5f3ee5f2ef581a84a43c6a46c`:**
+- [Bildreferenz-Workflow #45382305388](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/45382305388): **success**. Dependency-Audit, Bildreferenzhierarchie, kalibrierte Landmarken-/Cluster-Bridge, Crop-Planung, Generation-Panel inklusive expliziter Paarübernahme, HTTP-Provenienz, Projekt- und Formmodellpaar-Validierung, Chromium-Maskentest und abschließender TypeScript-Check erfolgreich.
+- [Cluster-Landmark-Workflow #45381758556](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/45381758556): Cluster-Architektur-/Inventar-/Landmarken-Tests und echter Browser-Surface-Picking-Test erfolgreich. Der TypeScript-Schritt dieses früheren Laufs war vor dem nachfolgenden Typfix noch fehlgeschlagen; der Gesamt-TypeScript-Check ist im erfolgreichen Bildreferenz-Lauf #45382305388 bestätigt.
+
+**Grenzen:** Die beiden Modellbytes werden derzeit im Projekt gespeichert; ein Formwechsel in Player/Studio ist noch nicht vorhanden. Es gibt noch keine getrennten Rig-/Pose-Datensätze pro Form. Die GLBs sind technische Generatorentwürfe, keine visuell abgenommenen Original-PaKaChi-Formen. Designähnlichkeit, anatomische Korrektheit, Rigging, Morph-Topologie und reversible Transformation bleiben offen.
 
 ## Zwischenprüfung 2026-11-24 – doppelte 3D-Entwürfe für zwei Formen
 
