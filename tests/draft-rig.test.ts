@@ -97,7 +97,7 @@ test('draft skeleton topology rejects broken limb chains, duplicate names and de
   {name:'RightHip',parent:0},{name:'RightKnee',parent:17},{name:'RightAnkle',parent:18},{name:'RightFoot',parent:19},
  ];
  assert.doesNotThrow(()=>validateDraftRigTopology(valid,'biped'));
- const broken=structuredClone(valid);broken[14].parent=13;
+ const broken=structuredClone(valid);broken[14].parent=12;
  assert.throws(()=>validateDraftRigTopology(broken,'biped'),/topology-chain/);
  const duplicate=structuredClone(valid);duplicate[20].name='Head';
  assert.throws(()=>validateDraftRigTopology(duplicate,'biped'),/topology-node/);
