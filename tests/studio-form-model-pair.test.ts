@@ -14,6 +14,14 @@ test('rejects partial, duplicated, cross-avatar and active-model-mismatched pair
  assert.equal(validStudioFormModelPair(value,'another-avatar','QUJD'),false);
  assert.equal(validStudioFormModelPair(value,'avatar-1','REVG'),false);
 });
+test('keeps independent rig and pose data in each form asset',()=>{
+ const value=pair();
+ const animalStudio={points:[{id:'animal-root',name:'Root',kind:'bone',rest:[0,0,0],size:.1,radius:.1}],links:[],boneRest:[],poses:[],moves:[]};
+ const humanoidStudio={points:[{id:'work-root',name:'Root',kind:'bone',rest:[0,1,0],size:.2,radius:.2}],links:[],boneRest:[],poses:[{id:'work-idle',name:'Idle',seconds:0,values:{}}],moves:[]};
+ value.animal.studio=animalStudio as any;value.humanoid.studio=humanoidStudio as any;
+ assert.equal(validStudioFormModelPair(value,'avatar-1','QUJD'),true);
+ assert.notDeepEqual(value.animal.studio,value.humanoid.studio);
+});
 test('rejects malformed or oversized encoded model assets',()=>{
  for(const model of ['', 'not base64!', 'A'.repeat(70_000_001)])assert.equal(validStudioFormModelAsset(asset('animal-form',model)),false);
  assert.equal(validStudioFormModelAsset({...asset('animal-form','QUJD'),extra:true}),false);
@@ -29,6 +37,14 @@ test('StudioProject validates and round-trips both form GLBs with their exact co
  humanoid.generationReference=manifest('work-form','region-work','view-work','Work') as any;
  const project={format:'pakachi-studio' as const,version:1 as const,model:animal.model,avatar:{id:'avatar-1',name:'PaKaChi',description:'',moves:[]},studio:emptyStudio(),imageReference:referenceDocument, generationReference:animal.generationReference,formModels:{avatarId:'avatar-1',activeForm:'animal' as const,animal,humanoid}};
  const parsed=parseProject(project);assert.deepEqual(parsed.formModels,project.formModels);assert.equal(parsed.formModels?.humanoid.formId,'work-form');
+ const activeStudio={...emptyStudio(),poses:[{id:'animal-idle',name:'Animal idle',seconds:0,values:{}}]};
+ const animalWithRig={...animal,studio:activeStudio};
+ const withActiveRig={...project,studio:activeStudio,formModels:{...project.formModels,animal:animalWithRig}};
+ assert.deepEqual(parseProject(withActiveRig).formModels?.animal.studio,activeStudio);
+ assert.throws(()=>parseProject({...withActiveRig,studio:emptyStudio()}),/aktiven Formslot/);
+ const workRig={...emptyStudio(),points:[{id:'work-root',name:'Root',kind:'bone',rest:[0,0,0],size:.1,radius:.1}],poses:[{id:'work-pose',name:'Work',seconds:0,values:{}}]};
+ const switched=parseProject({...withActiveRig,model:humanoid.model,studio:workRig,formModels:{...withActiveRig.formModels,activeForm:'humanoid',humanoid:{...humanoid,studio:workRig}}});
+ assert.equal(switched.formModels?.activeForm,'humanoid');assert.deepEqual(switched.studio,workRig);
  assert.throws(()=>parseProject({...project,model:humanoid.model}),/Tier-\/Arbeitsform-Modellpaar/);
  const mismatched={...project,formModels:{...project.formModels,humanoid:{...humanoid,generationReference:manifest('animal-form','region-animal','view-animal','Animal')}}};
  assert.throws(()=>parseProject(mismatched),/bestätigte Bildreferenz/);
