@@ -53,12 +53,12 @@ test('StudioProject validates and round-trips both form GLBs with their exact co
  humanoid.generationReference=manifest('work-form','region-work','view-work','Work') as any;
  const project={format:'pakachi-studio' as const,version:1 as const,model:animal.model,avatar:{id:'avatar-1',name:'PaKaChi',description:'',moves:[]},studio:emptyStudio(),imageReference:referenceDocument, generationReference:animal.generationReference,formModels:{avatarId:'avatar-1',activeForm:'animal' as const,animal,humanoid}};
  const parsed=parseProject(project);assert.deepEqual(parsed.formModels,project.formModels);assert.equal(parsed.formModels?.humanoid.formId,'work-form');
- const activeStudio={...emptyStudio(),poses:[{id:'animal-idle',name:'Animal idle',seconds:.1,values:{}}]};
+ const activeStudio={...emptyStudio(),poseCorrections:true};
  const animalWithRig={...animal,studio:activeStudio};
  const withActiveRig={...project,studio:activeStudio,formModels:{...project.formModels,animal:animalWithRig}};
  assert.deepEqual(parseProject(withActiveRig).formModels?.animal.studio,activeStudio);
  assert.throws(()=>parseProject({...withActiveRig,studio:emptyStudio()}),/aktiven Formslot/);
- const workRig={...emptyStudio(),poses:[{id:'work-pose',name:'Work',seconds:.1,values:{}}]};
+ const workRig={...emptyStudio(),poseCorrections:false};
  const switched=parseProject({...withActiveRig,model:humanoid.model,studio:workRig,formModels:{...withActiveRig.formModels,activeForm:'humanoid',humanoid:{...humanoid,studio:workRig}}});
  assert.equal(switched.formModels?.activeForm,'humanoid');assert.deepEqual(switched.studio,workRig);
  assert.throws(()=>parseProject({...project,model:humanoid.model}),/Tier-\/Arbeitsform-Modellpaar/);
