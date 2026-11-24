@@ -4,6 +4,19 @@
 
 Alle Prüfnachweise stehen in dieser Datei: ein Abschnitt je Softwareversion sowie gesonderte Abschnitte für datierte Zwischenprüfungen. Die Ergebnisse und Grenzen gelten für den jeweils genannten Stand. Spätere Läufe stehen als Nachtrag im selben Abschnitt. Produktänderungen gehören in den [Changelog](CHANGELOG.md), offene Aufgaben in die [Roadmap](ROADMAP.md).
 
+## Zwischenprüfung 2026-11-24 – Topologievertrag für Draft-Rigs
+
+**Änderung auf `develop`:** Neuer Validator `src/draft-rig-topology.ts`, der vor dem Skinning die vollständige Kettenstruktur prüft. Biped: Wirbelsäule, beide Armketten und beide Beinketten. Quadruped: zusätzlich die Schweifkette. Doppelte Namen, ungültige Elternindizes, fehlende Ketten, falsche Wurzel und unerwartete Knochanzahlen werden zurückgewiesen, bevor die Szene verändert wird. Die Prüfung validiert die Struktur der Proportionsvorlage; sie erkennt keine Anatomie aus der GLB-Geometrie.
+
+**CI auf Commit `2ca0223ab674086264e7b802b8a332d46d51e06d`:**
+- [Cluster-Landmark-Workflow #45458514481](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/45458514481): **success**.
+- 91 gezielte Unit-/Integrationstests bestanden, 0 fehlgeschlagen oder übersprungen.
+- Browser-Surface-Picking: 1/1 bestanden.
+- TypeScript `npx tsc --noEmit`: erfolgreich.
+- Dependency-Audit: 0 Schwachstellen.
+
+**Grenzen:** Kein dedizierter UI-E2E-Test für den Button „Beide Formen riggen“. Echte anatomische Erkennung, manuelle Korrektur der anatomischen Vorschläge und visuelle Abnahme des Original-PaKaChi bleiben offen. Kein Meilenstein für `main`.
+
 ## Zwischenprüfung 2026-11-24 – Player/Studio-Aktion für paarweises Rigging
 
 **UI-Integration auf `develop`:** Neben dem Formwechsel zeigt der Player bei einem geladenen Avatarpaar jetzt die Aktion **„Beide Formen riggen“**. Sie startet die getrennte Vorbereitung beider Formslots, zeigt den Arbeitsstatus, blockiert parallele Aktionen und prüft vor der Übernahme, ob Editorinstanz, Avatar und Projektversion unverändert sind. Das Ergebnis wird als vollständiges Paar über den vorhandenen atomaren Avatar-Ladeweg installiert; Fehler/Abbruch übernehmen kein Teilergebnis.
