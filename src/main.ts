@@ -132,6 +132,7 @@ async function rigBothForms(){
   if(!valid())throw new Error('Studio-Projekt wurde während der Rig-Erstellung geändert.');
   const active=result.formModels[result.formModels.activeForm];
   const next=parseProject({...current,model:active.model,studio:active.studio??emptyStudio(),generationReference:active.generationReference,formModels:result.formModels});
+  if(fetchController===controller)fetchController=null;
   busy=false;
   const accepted=await loadAvatar(undefined,undefined,next,valid,{confirm:true});handedOff=true;
   if(accepted)message(options.language==='de'?`Beide Rig-Entwürfe erstellt: Tierform ${result.reports.animal.bones} Knochen, Arbeitsform ${result.reports.humanoid.bones} Knochen. Bitte beide prüfen; noch keine automatische Freigabe.`:`Both draft rigs created: animal ${result.reports.animal.bones} bones, work form ${result.reports.humanoid.bones} bones. Review both; no automatic approval.`);
