@@ -41,3 +41,20 @@ export function validStudioFormModelPair(value:unknown,avatarId:string,activeMod
   if(animal.formId===humanoid.formId)return false;
   return (pair.activeForm==='animal'?animal.model:humanoid.model)===activeModel;
 }
+
+export interface StudioFormSelection {
+  model:string;
+  formModels:StudioFormModelPair;
+  studio?:import('./studio-data.ts').StudioData;
+  generationReference:import('./image-reference-crop.ts').ImageReferenceGenerationManifest;
+}
+/** Selects one form without merging or mutating either form's rig/pose state. */
+export function selectStudioForm(pair:StudioFormModelPair,form:'animal'|'humanoid'):StudioFormSelection {
+  const asset=pair[form];
+  return {
+    model:asset.model,
+    formModels:{...structuredClone(pair),activeForm:form},
+    ...(asset.studio?{studio:structuredClone(asset.studio)}:{}),
+    generationReference:structuredClone(asset.generationReference),
+  };
+}
