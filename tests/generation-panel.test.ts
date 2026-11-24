@@ -120,4 +120,7 @@ test('explicitly prepares two distinct confirmed form crops without starting gen
  assert.match(f.host.querySelector('.generation-form-pair-preview')!.textContent??'',/Animal/);
  assert.match(f.host.querySelector('.generation-form-pair-preview')!.textContent??'',/Work/);
  assert.equal(f.calls,0);assert.equal(f.adoptions,0);
+ f.button('pair-generate').click();await until(()=>f.host.querySelectorAll('.generation-form-pair-models .generation-preview').length===2);
+ assert.equal(f.calls,2);assert.equal(f.previewCalls,2);assert.equal(f.adoptions,0);assert.equal(f.seenReference?.selection.form.id,'form-work');
+ assert.match(f.host.querySelector('.generation-form-pair')!.textContent??'',/gemeinsame Kandidatenübernahme/);
 });
