@@ -5,6 +5,7 @@ import {StudioRig} from './studio-rig.ts';
 import {createPoseSurfaceChecker} from './pose-surface-check.ts';
 import {estimateDraftBodyFrame} from './draft-body-frame.ts';
 import type {DraftBodyFrame} from './draft-body-frame.ts';
+import {validateDraftRigTopology} from './draft-rig-topology.ts';
 
 export type DraftRigTemplate='biped'|'biped-relaxed'|'quadruped';
 export interface DraftRigReport {template:DraftRigTemplate;bones:number;meshes:number;vertices:number;method:'proportional-template';review:'required';frame?:DraftBodyFrame;probes?:{joint:string;degrees:30;status:'within'|'outside'|'unmeasurable';surfaceIssues:number;volumeIssues:number;unmeasurableVolumeComponents:number}[]}
@@ -70,7 +71,7 @@ export async function bindDraftRig(root:T.Object3D,template:DraftRigTemplate,sig
  if(!meshes.length||bounds.isEmpty()||Math.min(size.x,size.y,size.z)<1e-5||Math.max(size.x,size.y,size.z)/Math.min(size.x,size.y,size.z)>100)throw Error('draft-rig-volume-required');
  await pause();signal.throwIfAborted();
  const frame=frameMode==='support'?estimateDraftBodyFrame(cloud,bounds,template==='quadruped'?4:2):{mode:'bounds' as const,reason:'manual-bounds' as const,center:bounds.getCenter(new T.Vector3()).toArray(),right:[1,0,0] as [number,number,number],forward:[0,0,1] as [number,number,number],width:size.x,depth:size.z,height:size.y,floor:bounds.min.y,supports:[]};
- const joints=landmarks(template,frame),lines=joints.map(j=>new T.Line3(j.point,j.end)),sigma=Math.max(frame.width,frame.height,frame.depth)*.035,center=new T.Vector3().fromArray(frame.center),right=new T.Vector3().fromArray(frame.right);
+ const joints=landmarks(template,frame);validateDraftRigTopology(joints,template);const lines=joints.map(j=>new T.Line3(j.point,j.end)),sigma=Math.max(frame.width,frame.height,frame.depth)*.035,center=new T.Vector3().fromArray(frame.center),right=new T.Vector3().fromArray(frame.right);
  const plans:{mesh:T.Mesh;indices:Uint16Array;weights:Float32Array}[]=[],closest=new T.Vector3();
  for(const mesh of meshes){
   const p=mesh.geometry.getAttribute('position'),indices=new Uint16Array(p.count*4),weights=new Float32Array(p.count*4);
