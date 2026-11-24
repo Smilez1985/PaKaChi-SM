@@ -1,8 +1,18 @@
 # Prüfstand und Protokolle
 
-**Softwarestand: 0.102.0 · Dokumentationsabgleich: 2026-11-24T15:30:00+01:00 (Europe/Berlin).**
+**Softwarestand: 0.102.0 · Dokumentationsabgleich: 2026-11-24T19:15:00+01:00 (Europe/Berlin).**
 
 Alle Prüfnachweise stehen in dieser Datei: ein Abschnitt je Softwareversion sowie gesonderte Abschnitte für datierte Zwischenprüfungen. Die Ergebnisse und Grenzen gelten für den jeweils genannten Stand. Spätere Läufe stehen als Nachtrag im selben Abschnitt. Produktänderungen gehören in den [Changelog](CHANGELOG.md), offene Aufgaben in die [Roadmap](ROADMAP.md).
+
+## Zwischenprüfung 2026-11-24 – Player/Studio-Aktion für paarweises Rigging
+
+**UI-Integration auf `develop`:** Neben dem Formwechsel zeigt der Player bei einem geladenen Avatarpaar jetzt die Aktion **„Beide Formen riggen“**. Sie startet die getrennte Vorbereitung beider Formslots, zeigt den Arbeitsstatus, blockiert parallele Aktionen und prüft vor der Übernahme, ob Editorinstanz, Avatar und Projektversion unverändert sind. Das Ergebnis wird als vollständiges Paar über den vorhandenen atomaren Avatar-Ladeweg installiert; Fehler/Abbruch übernehmen kein Teilergebnis.
+
+**CI auf Commit `f56315ccacf39ac2b1eb87f29a63b1baf6a876ee`:**
+- [Cluster-Landmark-Workflow #45414715469](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/45414715469): **success** – Architektur-/Landmarken-/Draft-Rig-Tests, Browser-Surface-Picking und TypeScript.
+- [Bildreferenz-Workflow #45414715286](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/45414715286): **success** – Bildreferenz-/Formpaar-Tests, Browser-Maskentest und TypeScript.
+
+**Noch nicht verifiziert:** Es existiert kein dedizierter Browser-E2E-Test, der den neuen Button anklickt und den gesamten Rigging-Lauf mit einem realen Zwei-Formen-Projekt im UI durchspielt. Die erfolgreichen Browserprüfungen betreffen weiterhin Surface-Picking und Bildmasken. Das Rig basiert auf Proportionstemplates, nicht auf semantischer Anatomieerkennung; automatische Qualitätsfreigabe und visuelle Original-PaKaChi-Abnahme sind nicht erreicht. Daher keine Veröffentlichung als Meilenstein auf `main`.
 
 ## Zwischenprüfung 2026-11-24 – atomarer Rig-Entwurf für Tier- und Arbeitsform
 
