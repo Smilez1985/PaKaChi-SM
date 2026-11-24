@@ -1,8 +1,18 @@
 # Prüfstand und Protokolle
 
-**Softwarestand: 0.102.0 · Dokumentationsabgleich: 2026-11-24T12:08:00+01:00 (Europe/Berlin).**
+**Softwarestand: 0.102.0 · Dokumentationsabgleich: 2026-11-24T12:30:00+01:00 (Europe/Berlin).**
 
 Alle Prüfnachweise stehen in dieser Datei: ein Abschnitt je Softwareversion sowie gesonderte Abschnitte für datierte Zwischenprüfungen. Die Ergebnisse und Grenzen gelten für den jeweils genannten Stand. Spätere Läufe stehen als Nachtrag im selben Abschnitt. Produktänderungen gehören in den [Changelog](CHANGELOG.md), offene Aufgaben in die [Roadmap](ROADMAP.md).
+
+## Zwischenprüfung 2026-11-24 – Formwechsel mit getrennten Studiozuständen
+
+**Änderung auf `develop`:** Im Player ist ein Formschalter sichtbar, sobald ein persistiertes Tier-/Arbeitsform-Paar geladen ist. Er zeigt die aktive Form und bietet den Wechsel zur anderen Form an. Die Auswahlfunktion liefert einen unveränderlichen Snapshot aus GLB, Generierungsmanifest, aktivem Formslot und optionalem Studio-Datensatz. `StudioEditor.exportProject()` schreibt die aktuellen Kontrollpunkte, Rig-Änderungen, Posen, Moves und Draft-Daten ausschließlich in den aktiven Formslot zurück. Der Zielslot wird beim Wechsel mit seinen eigenen Studio-Daten geladen; fehlt dort noch ein Datensatz, beginnt diese Form mit einem leeren Studiozustand. Die vorhandene atomare Avatar-Installation übernimmt den Wechsel erst nach erfolgreicher Modell-/Studio-Vorbereitung. Ein Fehlschlag lässt den vorherigen Avatar bestehen. `parseProject` erzwingt, dass die Studio-Daten des aktiven Formslots exakt dem Projektzustand entsprechen.
+
+**Verifizierte Nachweise auf Commit `7f9f5fe0f1e4e7b0b53c0edea64485f541372b86`:**
+- [Bildreferenz-Workflow #45384372324](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/45384372324): **success**. Bildreferenzhierarchie, kalibrierte Landmarken-/Cluster-Bridge, Crop-Planung, Generation-Panel, HTTP-Provenienz, Projekt-/Paarvalidierung einschließlich unabhängiger Formzustände, Chromium-Maskentest und TypeScript-Check erfolgreich.
+- [Cluster-Landmark-Workflow #45384372302](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/45384372302): **success**. Cluster-Architektur-/Inventar-/Landmarken-Tests, echter Browser-Surface-Picking-Test und TypeScript-Check erfolgreich.
+
+**Grenzen:** Die Formzustände können getrennt gespeichert und gewechselt werden; damit ist noch kein automatisches Rigging der neu erzeugten GLBs belegt. Der sichtbare Formschalter hat in diesem Lauf noch keinen eigenen Browser-End-to-End-Test. Die GLBs sind weiterhin technische Generatorentwürfe und nicht visuell als Original-PaKaChi abgenommen. Anatomische Qualität, echtes Rigging beider Formen, gemeinsame Morph-Topologie und reversible Transformation bleiben offen.
 
 ## Zwischenprüfung 2026-11-24 – atomare Übernahme und Persistenz zweier Formmodelle
 
