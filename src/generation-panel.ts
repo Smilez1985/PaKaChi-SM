@@ -8,7 +8,7 @@ import {mountImageReferenceEditor} from './image-reference-editor.ts';
 import {validateGeneration,showGenerationPreview} from './generation-preview.ts';
 import {prepareDraftRig} from './draft-rig.ts';
 import type {ImageReferenceDocument} from './image-reference.ts';
-import type {ImageReferenceGenerationManifest} from './image-reference-crop.ts';
+import type {ImageReferenceGenerationManifest,ImageReferenceFormCropSelection} from './image-reference-crop.ts';
 import type {Cluster2DSemanticCatalog} from './cluster-2d-classifier.ts';
 import type {DraftRigTemplate} from './draft-rig.ts';
 
@@ -27,26 +27,26 @@ interface Dependencies {
 }
 export function mountGenerationPanel(host:HTMLElement,bridge:GenerationHost,language:()=> 'de'|'en',storage:Pick<Storage,'getItem'>,deps:Dependencies={}){
  const panel=document.createElement('section');panel.className='generation-panel';panel.dataset.userText='';
- const heading=document.createElement('h2'),destination=document.createElement('p'),notice=document.createElement('p'),label=document.createElement('label'),file=document.createElement('input'),chosen=document.createElement('p'),referenceHost=document.createElement('div'),start=document.createElement('button'),retry=document.createElement('button'),cancel=document.createElement('button'),discard=document.createElement('button'),apply=document.createElement('button'),status=document.createElement('p'),preview=document.createElement('div');
+ const heading=document.createElement('h2'),destination=document.createElement('p'),notice=document.createElement('p'),label=document.createElement('label'),file=document.createElement('input'),chosen=document.createElement('p'),referenceHost=document.createElement('div'),pairControls=document.createElement('fieldset'),pairLegend=document.createElement('legend'),pairAvatarLabel=document.createElement('label'),pairAvatar=document.createElement('select'),pairFirstLabel=document.createElement('label'),pairFirst=document.createElement('select'),pairSecondLabel=document.createElement('label'),pairSecond=document.createElement('select'),pairPrepare=document.createElement('button'),pairStatus=document.createElement('p'),pairPreview=document.createElement('div'),start=document.createElement('button'),retry=document.createElement('button'),cancel=document.createElement('button'),discard=document.createElement('button'),apply=document.createElement('button'),status=document.createElement('p'),preview=document.createElement('div');
  file.type='file';file.accept='image/png,image/jpeg';file.id='generation-image';label.htmlFor=file.id;
- retry.id='generation-retry';start.id='generation-start';cancel.id='generation-cancel';discard.id='generation-discard';apply.id='generation-apply';
- for(const button of [start,retry,cancel,discard,apply])button.type='button';
+ retry.id='generation-retry';pairAvatar.id='generation-pair-avatar';pairFirst.id='generation-pair-first';pairSecond.id='generation-pair-second';pairPrepare.id='generation-pair-prepare';start.id='generation-start';cancel.id='generation-cancel';discard.id='generation-discard';apply.id='generation-apply';
+ for(const button of [start,retry,cancel,discard,apply,pairPrepare])button.type='button';
  status.setAttribute('role','status');preview.className='generation-preview';
- referenceHost.className='image-reference-host';referenceHost.hidden=true;
+ referenceHost.className='image-reference-host';referenceHost.hidden=true;pairControls.className='generation-form-pair';pairControls.hidden=true;pairStatus.setAttribute('role','status');pairPreview.className='generation-form-pair-preview';pairAvatarLabel.htmlFor=pairAvatar.id;pairFirstLabel.htmlFor=pairFirst.id;pairSecondLabel.htmlFor=pairSecond.id;pairControls.append(pairLegend,pairAvatarLabel,pairAvatar,pairFirstLabel,pairFirst,pairSecondLabel,pairSecond,pairPrepare,pairStatus,pairPreview);
  const rigControls=document.createElement('div'),rigLabel=document.createElement('label'),template=document.createElement('select'),alignmentLabel=document.createElement('label'),alignment=document.createElement('select'),rigNotice=document.createElement('p'),rig=document.createElement('button'),original=document.createElement('button'),rigStatus=document.createElement('p');
  template.id='generation-rig-template';rigLabel.htmlFor=template.id;rig.id='generation-rig';original.id='generation-original';rig.type=original.type='button';
  for(const value of ['biped','biped-relaxed','quadruped']){const option=document.createElement('option');option.value=value;template.append(option);}
  alignment.id='generation-rig-alignment';alignmentLabel.htmlFor=alignment.id;for(const value of ['support','bounds']){const option=document.createElement('option');option.value=value;alignment.append(option);}
  rigStatus.setAttribute('role','status');rigControls.append(rigLabel,template,alignmentLabel,alignment,rigNotice,rig,original,rigStatus);
- panel.append(heading,destination,notice,label,file,chosen,referenceHost,start,retry,cancel,discard,status,preview,rigControls,apply);host.append(panel);
- let source:File|undefined,referenceEditor:ReferenceEditor|undefined,referenceReady=false,job:ProviderJob|undefined,sequence=0,controller:AbortController|undefined,disposePreview:(()=>void)|undefined,pending=false,disposed=false,generationReference:ImageReferenceGenerationManifest|undefined;
+ panel.append(heading,destination,notice,label,file,chosen,referenceHost,pairControls,start,retry,cancel,discard,status,preview,rigControls,apply);host.append(panel);
+ let source:File|undefined,referenceEditor:ReferenceEditor|undefined,referenceReady=false,job:ProviderJob|undefined,sequence=0,controller:AbortController|undefined,disposePreview:(()=>void)|undefined,pending=false,disposed=false,generationReference:ImageReferenceGenerationManifest|undefined,pairUrls:string[]=[];
  let prepared:Awaited<ReturnType<typeof prepareDraftRig>>|undefined;
  let rigPreviewHost:HTMLDivElement|undefined;
  let retryRequest:{config:ProviderConfig;target:ProjectRevision;selected:File;keys:Map<string,string>;reference:ImageReferenceGenerationManifest}|undefined;
  const t=(de:string,en:string)=>language()==='de'?de:en;
  const matches=(target:ProjectRevision)=>{const now=bridge.target();return !!now&&target.session===now.session&&target.revision===now.revision;};
- function clear(preserveReference=false){sequence++;if(!preserveReference){generationReference=undefined;referenceEditor?.dispose();referenceEditor=undefined;referenceReady=false;referenceHost.replaceChildren();referenceHost.hidden=true;}prepared=undefined;rigPreviewHost?.remove();rigPreviewHost=undefined;rigStatus.textContent='';rigControls.hidden=true;retryRequest=undefined;retry.hidden=true;job?.cancel();if(job?.snapshot.status==='preview'||job?.snapshot.status==='stale')job.discard();job=undefined;controller?.abort();controller=undefined;disposePreview?.();disposePreview=undefined;preview.replaceChildren();preview.hidden=true;pending=false;apply.hidden=true;cancel.disabled=true;discard.disabled=true;file.disabled=false;}
- function labels(){retry.textContent=t('Nächsten Anbieter versuchen','Try next provider');heading.textContent=t('Bild → 3D-Entwurf','Image → 3D draft');label.textContent=t('PNG/JPEG auswählen oder hier ablegen','Choose or drop a PNG/JPEG here');start.textContent=t('3D-Entwurf erzeugen','Generate 3D draft');cancel.textContent=t('Abbrechen','Cancel');discard.textContent=t('Ergebnis verwerfen','Discard result');apply.textContent=t('Als neuen Avatar laden','Load as new avatar');notice.textContent=t('Sendet nur den ausdrücklich ausgewählten und markierten Bildausschnitt an den lokalen TripoSR-Dienst. Ein Entwurf ohne zugesichertes Skelett; keine Promptsteuerung. Das aktuelle Modell bleibt bis zur Übernahme erhalten. Der letzte Modellwechsel lässt sich über „Modellwechsel zurück“ wiederherstellen; Projekte zusätzlich speichern. Automatischer Anbieterwechsel nur vor dem Auftragsstart. Ein weiterer Auftrag benötigt einen ausdrücklichen Klick.','Sends only the explicitly selected and marked image region to the configured local TripoSR service. A draft without a guaranteed skeleton; no prompt control. Your current model remains until acceptance. Use Undo model switch to restore the last project; also save projects to disk. Automatic fallback only before execution. Another job requires an explicit click.');}
+ function clearPairPreview(){pairUrls.forEach(url=>URL.revokeObjectURL(url));pairUrls=[];pairPreview.replaceChildren();pairStatus.textContent='';}\n function clear(preserveReference=false){sequence++;clearPairPreview();pairControls.hidden=true;if(!preserveReference){generationReference=undefined;referenceEditor?.dispose();referenceEditor=undefined;referenceReady=false;referenceHost.replaceChildren();referenceHost.hidden=true;}prepared=undefined;rigPreviewHost?.remove();rigPreviewHost=undefined;rigStatus.textContent='';rigControls.hidden=true;retryRequest=undefined;retry.hidden=true;job?.cancel();if(job?.snapshot.status==='preview'||job?.snapshot.status==='stale')job.discard();job=undefined;controller?.abort();controller=undefined;disposePreview?.();disposePreview=undefined;preview.replaceChildren();preview.hidden=true;pending=false;apply.hidden=true;cancel.disabled=true;discard.disabled=true;file.disabled=false;}
+ function labels(){pairLegend.textContent=t('Zwei Formen desselben Avatars vorbereiten','Prepare two forms of the same avatar');pairAvatarLabel.textContent=t('Avatar','Avatar');pairFirstLabel.textContent=t('Erste Form und bestätigter Ausschnitt','First form and confirmed region');pairSecondLabel.textContent=t('Zweite Form und bestätigter Ausschnitt','Second form and confirmed region');pairPrepare.textContent=t('Beide Form-Crops prüfen','Prepare and review both form crops');retry.textContent=t('Nächsten Anbieter versuchen','Try next provider');heading.textContent=t('Bild → 3D-Entwurf','Image → 3D draft');label.textContent=t('PNG/JPEG auswählen oder hier ablegen','Choose or drop a PNG/JPEG here');start.textContent=t('3D-Entwurf erzeugen','Generate 3D draft');cancel.textContent=t('Abbrechen','Cancel');discard.textContent=t('Ergebnis verwerfen','Discard result');apply.textContent=t('Als neuen Avatar laden','Load as new avatar');notice.textContent=t('Sendet nur den ausdrücklich ausgewählten und markierten Bildausschnitt an den lokalen TripoSR-Dienst. Ein Entwurf ohne zugesichertes Skelett; keine Promptsteuerung. Das aktuelle Modell bleibt bis zur Übernahme erhalten. Der letzte Modellwechsel lässt sich über „Modellwechsel zurück“ wiederherstellen; Projekte zusätzlich speichern. Automatischer Anbieterwechsel nur vor dem Auftragsstart. Ein weiterer Auftrag benötigt einen ausdrücklichen Klick.','Sends only the explicitly selected and marked image region to the configured local TripoSR service. A draft without a guaranteed skeleton; no prompt control. Your current model remains until acceptance. Use Undo model switch to restore the last project; also save projects to disk. Automatic fallback only before execution. Another job requires an explicit click.');}
  function refresh(){
   labels();const config=readProviderConfig(storage),route=providerRoute(config.config,'generation');
   rigLabel.textContent=t('Optionales erstes Skelett','Optional first skeleton');template.options[0].textContent=t('Zweibeiner · A-Pose','Biped · A-pose');template.options[1].textContent=t('Zweibeiner · Arme unten','Biped · arms down');template.options[2].textContent=t('Vierbeiner · stehend','Quadruped · standing');
@@ -57,12 +57,54 @@ export function mountGenerationPanel(host:HTMLElement,bridge:GenerationHost,lang
   rigControls.hidden=!hasPreview;rig.disabled=template.disabled=alignment.disabled=pending||!hasPreview||!matches(job!.snapshot.target);original.hidden=!prepared;original.disabled=rig.disabled;
   const supported=route.some(profile=>profile.adapter==='custom-generation'&&profile.model==='triposr');
   destination.textContent=route.length?route.map(profile=>`${profile.name} · ${profile.model} · ${profile.endpoint}`).join(' → '):t('Optionen: ein Profil „custom-generation“ mit Modell „triposr“ der Rolle 3D-Generator zuordnen.','Options: assign a custom-generation profile with model triposr to the 3D generator role.');
-  start.disabled=pending||!source||!referenceReady||!supported||!bridge.target();chosen.textContent=source?`${source.name} · ${(source.size/1024/1024).toFixed(2)} MiB`:t('Noch kein Bild ausgewählt.','No image selected.');
+  start.disabled=pending||!source||!referenceReady||!supported||!bridge.target();pairControls.hidden=!source||!referenceReady;pairPrepare.disabled=pending||!referenceReady||!bridge.target()||!pairAvatar.value||!pairFirst.value||!pairSecond.value||pairFirst.value===pairSecond.value;chosen.textContent=source?`${source.name} · ${(source.size/1024/1024).toFixed(2)} MiB`:t('Noch kein Bild ausgewählt.','No image selected.');
   retry.disabled=pending||!retryRequest||!matches(retryRequest.target);
   if(job?.snapshot.status==='preview')apply.disabled=pending||!matches(job.snapshot.target);
  }
  function select(value:File,initial?:ImageReferenceDocument){clear();source=undefined;status.textContent='';if(!['image/png','image/jpeg'].includes(value.type)||!value.size||value.size>20*1024*1024){status.textContent=t('PNG/JPEG bis 20 MiB erforderlich.','PNG/JPEG up to 20 MiB required.');}else{source=value;referenceHost.hidden=false;referenceEditor=(deps.referenceEditor??mountImageReferenceEditor)(referenceHost,value,language,()=>{referenceReady=false;refresh();void updateReferenceReadiness();},initial,bridge.semanticCatalog?.());void updateReferenceReadiness();status.textContent=t('Bitte Bildbereiche markieren, zuordnen und bestätigen.','Mark, assign and confirm image regions before generation.');}refresh();}
- async function updateReferenceReadiness(){const editor=referenceEditor;if(!editor)return;try{referenceReady=await editor.ready();if(referenceEditor===editor){refresh();if(!referenceReady)status.textContent=t('3D gesperrt: Alle Bereiche müssen bestätigt oder ignoriert und korrekt zugeordnet sein.','3D locked: every region must be confirmed or ignored and correctly assigned.');}}catch{referenceReady=false;refresh();}}
+ async function updateReferenceReadiness(){const editor=referenceEditor;if(!editor)return;try{referenceReady=await editor.ready();if(referenceEditor===editor){refresh();if(referenceReady)void populatePairChoices();if(!referenceReady)status.textContent=t('3D gesperrt: Alle Bereiche müssen bestätigt oder ignoriert und korrekt zugeordnet sein.','3D locked: every region must be confirmed or ignored and correctly assigned.');}}catch{referenceReady=false;refresh();}}
+ async function populatePairChoices(){
+  const editor=referenceEditor;if(!editor)return;
+  try{
+   const document=await editor.reference();if(referenceEditor!==editor)return;
+   const previousAvatar=pairAvatar.value,previousFirst=pairFirst.value,previousSecond=pairSecond.value;
+   pairAvatar.replaceChildren();document.avatars.forEach(avatar=>{const option=document.createElement('option');option.value=avatar.id;option.textContent=avatar.label;pairAvatar.append(option);});
+   if(document.avatars.some(avatar=>avatar.id===previousAvatar))pairAvatar.value=previousAvatar;
+   const avatar=document.avatars.find(item=>item.id===pairAvatar.value);
+   const choices: Array<{value:string;label:string}>=[];
+   if(avatar)for(const form of document.forms.filter(item=>avatar.formIds.includes(item.id))){
+    for(const view of document.views.filter(item=>form.viewIds.includes(item.id))){
+     for(const regionId of view.regionIds){
+      const region=document.regions.find(item=>item.id===regionId);
+      if(region?.status==='confirmed'&&(region.kind==='form'||region.kind==='view'))choices.push({value:JSON.stringify([form.id,region.id]),label=form.label+' · '+region.label});
+     }
+    }
+   }
+   const fill=(select:HTMLSelectElement,previous:string)=>{select.replaceChildren();choices.forEach(choice=>{const option=document.createElement('option');option.value=choice.value;option.textContent=choice.label;select.append(option);});if(choices.some(choice=>choice.value===previous))select.value=previous;};
+   fill(pairFirst,previousFirst);fill(pairSecond,previousSecond);
+   refresh();
+  }catch{pairControls.hidden=true;}
+ }
+ pairAvatar.onchange=()=>{void populatePairChoices();};
+ pairPrepare.onclick=async()=>{
+  const editor=referenceEditor;if(!editor||pending||!referenceReady)return;
+  try{
+   const first=JSON.parse(pairFirst.value) as [string,string],second=JSON.parse(pairSecond.value) as [string,string];
+   const selections=[{formId:first[0],regionId:first[1]},{formId:second[0],regionId:second[1]}] as [ImageReferenceFormCropSelection,ImageReferenceFormCropSelection];
+   if(selections[0].formId===selections[1].formId||selections[0].regionId===selections[1].regionId)throw new Error('distinct-form-selections-required');
+   pairPrepare.disabled=true;clearPairPreview();pairStatus.textContent=t('Beide bestätigten Bildbereiche werden ausgeschnitten und geprüft …','Cropping and validating both confirmed image regions …');
+   const result=await editor.selectedFormPairPackage(pairAvatar.value,selections);if(referenceEditor!==editor)return;
+   result.crops.forEach((crop,index)=>{
+    const figure=document.createElement('figure'),caption=document.createElement('figcaption'),image=document.createElement('img'),detail=document.createElement('p');
+    const form=result.plan.forms[index]!;const url=URL.createObjectURL(crop);pairUrls.push(url);
+    caption.textContent=form.form.label+' · '+form.region.label;image.src=url;image.alt=t('Bildcrop für ','Image crop for ')+form.form.label;detail.textContent=t(`${crop.name} · ${form.crop.width} × ${form.crop.height} px · SHA-256 ${result.manifests[index]!.selection.crop.sha256.slice(0,12)}…`,`${crop.name} · ${form.crop.width} × ${form.crop.height} px · SHA-256 ${result.manifests[index]!.selection.crop.sha256.slice(0,12)}…`);
+    figure.append(caption,image,detail);pairPreview.append(figure);
+   });
+   pairStatus.textContent=t('Zwei getrennte, quellgebundene Form-Crops sind bereit. Noch wurde kein Generator gestartet und kein Avatar übernommen.','Two separate source-bound form crops are ready. No generator has been started and no avatar has been imported.');
+  }catch{clearPairPreview();pairStatus.textContent=t('Paar konnte nicht vorbereitet werden. Avatar, zwei verschiedene Formen und bestätigte Hauptausschnitte prüfen.','Could not prepare the pair. Check the avatar, two distinct forms and confirmed main regions.');}
+  finally{if(referenceEditor===editor)refresh();}
+ };
+
  file.onchange=()=>{const value=file.files?.[0];if(value)select(value);file.value='';};
  panel.ondragover=event=>{event.preventDefault();event.stopPropagation();};panel.ondrop=event=>{event.preventDefault();event.stopPropagation();document.body.classList.remove('dragging');const value=event.dataTransfer?.files[0];if(value)select(value);};
  start.onclick=async()=>{
