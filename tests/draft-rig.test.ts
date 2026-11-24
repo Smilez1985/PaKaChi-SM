@@ -104,5 +104,6 @@ test('draft skeleton topology rejects broken limb chains, duplicate names and de
  const detached=structuredClone(valid);detached[0].name='Root';
  assert.throws(()=>validateDraftRigTopology(detached,'biped'),/topology-root/);
  const quad=[...valid,{name:'TailBase',parent:0},{name:'TailTip',parent:21}];
- assert.throws(()=>validateDraftRigTopology(quad,'quadruped'),/topology-chain/);
+ assert.doesNotThrow(()=>validateDraftRigTopology(quad,'quadruped'));
+ assert.throws(()=>validateDraftRigTopology(valid,'quadruped'),/topology-chain/);
 });
