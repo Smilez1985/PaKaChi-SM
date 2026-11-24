@@ -8,7 +8,7 @@ import {mountImageReferenceEditor} from './image-reference-editor.ts';
 import {validateGeneration,showGenerationPreview} from './generation-preview.ts';
 import {prepareDraftRig} from './draft-rig.ts';
 import type {ImageReferenceDocument} from './image-reference.ts';
-import type {ImageReferenceGenerationManifest,ImageReferenceFormCropSelection} from './image-reference-crop.ts';
+import type {ImageReferenceGenerationManifest,ImageReferenceFormCropSelection,ImageReferenceFormPairCrops} from './image-reference-crop.ts';
 import type {Cluster2DSemanticCatalog} from './cluster-2d-classifier.ts';
 import type {DraftRigTemplate} from './draft-rig.ts';
 
@@ -27,27 +27,27 @@ interface Dependencies {
 }
 export function mountGenerationPanel(host:HTMLElement,bridge:GenerationHost,language:()=> 'de'|'en',storage:Pick<Storage,'getItem'>,deps:Dependencies={}){
  const panel=document.createElement('section');panel.className='generation-panel';panel.dataset.userText='';
- const heading=document.createElement('h2'),destination=document.createElement('p'),notice=document.createElement('p'),label=document.createElement('label'),file=document.createElement('input'),chosen=document.createElement('p'),referenceHost=document.createElement('div'),pairControls=document.createElement('fieldset'),pairLegend=document.createElement('legend'),pairAvatarLabel=document.createElement('label'),pairAvatar=document.createElement('select'),pairFirstLabel=document.createElement('label'),pairFirst=document.createElement('select'),pairSecondLabel=document.createElement('label'),pairSecond=document.createElement('select'),pairPrepare=document.createElement('button'),pairStatus=document.createElement('p'),pairPreview=document.createElement('div'),start=document.createElement('button'),retry=document.createElement('button'),cancel=document.createElement('button'),discard=document.createElement('button'),apply=document.createElement('button'),status=document.createElement('p'),preview=document.createElement('div');
+ const heading=document.createElement('h2'),destination=document.createElement('p'),notice=document.createElement('p'),label=document.createElement('label'),file=document.createElement('input'),chosen=document.createElement('p'),referenceHost=document.createElement('div'),pairControls=document.createElement('fieldset'),pairLegend=document.createElement('legend'),pairAvatarLabel=document.createElement('label'),pairAvatar=document.createElement('select'),pairFirstLabel=document.createElement('label'),pairFirst=document.createElement('select'),pairSecondLabel=document.createElement('label'),pairSecond=document.createElement('select'),pairPrepare=document.createElement('button'),pairGenerate=document.createElement('button'),pairStatus=document.createElement('p'),pairPreview=document.createElement('div'),pairModelPreview=document.createElement('div'),start=document.createElement('button'),retry=document.createElement('button'),cancel=document.createElement('button'),discard=document.createElement('button'),apply=document.createElement('button'),status=document.createElement('p'),preview=document.createElement('div');
  file.type='file';file.accept='image/png,image/jpeg';file.id='generation-image';label.htmlFor=file.id;
- retry.id='generation-retry';pairAvatar.id='generation-pair-avatar';pairFirst.id='generation-pair-first';pairSecond.id='generation-pair-second';pairPrepare.id='generation-pair-prepare';start.id='generation-start';cancel.id='generation-cancel';discard.id='generation-discard';apply.id='generation-apply';
- for(const button of [start,retry,cancel,discard,apply,pairPrepare])button.type='button';
+ retry.id='generation-retry';pairAvatar.id='generation-pair-avatar';pairFirst.id='generation-pair-first';pairSecond.id='generation-pair-second';pairPrepare.id='generation-pair-prepare';pairGenerate.id='generation-pair-generate';start.id='generation-start';cancel.id='generation-cancel';discard.id='generation-discard';apply.id='generation-apply';
+ for(const button of [start,retry,cancel,discard,apply,pairPrepare,pairGenerate])button.type='button';
  status.setAttribute('role','status');preview.className='generation-preview';
- referenceHost.className='image-reference-host';referenceHost.hidden=true;pairControls.className='generation-form-pair';pairControls.hidden=true;pairStatus.setAttribute('role','status');pairPreview.className='generation-form-pair-preview';pairAvatarLabel.htmlFor=pairAvatar.id;pairFirstLabel.htmlFor=pairFirst.id;pairSecondLabel.htmlFor=pairSecond.id;pairControls.append(pairLegend,pairAvatarLabel,pairAvatar,pairFirstLabel,pairFirst,pairSecondLabel,pairSecond,pairPrepare,pairStatus,pairPreview);
+ referenceHost.className='image-reference-host';referenceHost.hidden=true;pairControls.className='generation-form-pair';pairControls.hidden=true;pairStatus.setAttribute('role','status');pairPreview.className='generation-form-pair-preview';pairModelPreview.className='generation-form-pair-models';pairAvatarLabel.htmlFor=pairAvatar.id;pairFirstLabel.htmlFor=pairFirst.id;pairSecondLabel.htmlFor=pairSecond.id;pairControls.append(pairLegend,pairAvatarLabel,pairAvatar,pairFirstLabel,pairFirst,pairSecondLabel,pairSecond,pairPrepare,pairGenerate,pairStatus,pairPreview,pairModelPreview);
  const rigControls=document.createElement('div'),rigLabel=document.createElement('label'),template=document.createElement('select'),alignmentLabel=document.createElement('label'),alignment=document.createElement('select'),rigNotice=document.createElement('p'),rig=document.createElement('button'),original=document.createElement('button'),rigStatus=document.createElement('p');
  template.id='generation-rig-template';rigLabel.htmlFor=template.id;rig.id='generation-rig';original.id='generation-original';rig.type=original.type='button';
  for(const value of ['biped','biped-relaxed','quadruped']){const option=document.createElement('option');option.value=value;template.append(option);}
  alignment.id='generation-rig-alignment';alignmentLabel.htmlFor=alignment.id;for(const value of ['support','bounds']){const option=document.createElement('option');option.value=value;alignment.append(option);}
  rigStatus.setAttribute('role','status');rigControls.append(rigLabel,template,alignmentLabel,alignment,rigNotice,rig,original,rigStatus);
  panel.append(heading,destination,notice,label,file,chosen,referenceHost,pairControls,start,retry,cancel,discard,status,preview,rigControls,apply);host.append(panel);
- let source:File|undefined,referenceEditor:ReferenceEditor|undefined,referenceReady=false,job:ProviderJob|undefined,sequence=0,controller:AbortController|undefined,disposePreview:(()=>void)|undefined,pending=false,disposed=false,generationReference:ImageReferenceGenerationManifest|undefined,pairUrls:string[]=[];
+ let source:File|undefined,referenceEditor:ReferenceEditor|undefined,referenceReady=false,job:ProviderJob|undefined,sequence=0,controller:AbortController|undefined,disposePreview:(()=>void)|undefined,pending=false,disposed=false,generationReference:ImageReferenceGenerationManifest|undefined,pairUrls:string[]=[],pairPackage:ImageReferenceFormPairCrops|undefined,pairModelCleanups:Array<()=>void>=[],pairJobs:ProviderJob[]=[],pairController:AbortController|undefined;
  let prepared:Awaited<ReturnType<typeof prepareDraftRig>>|undefined;
  let rigPreviewHost:HTMLDivElement|undefined;
  let retryRequest:{config:ProviderConfig;target:ProjectRevision;selected:File;keys:Map<string,string>;reference:ImageReferenceGenerationManifest}|undefined;
  const t=(de:string,en:string)=>language()==='de'?de:en;
  const matches=(target:ProjectRevision)=>{const now=bridge.target();return !!now&&target.session===now.session&&target.revision===now.revision;};
- function clearPairPreview(){pairUrls.forEach(url=>URL.revokeObjectURL(url));pairUrls=[];pairPreview.replaceChildren();pairStatus.textContent='';}
+ function clearPairPreview(){pairController?.abort();pairController=undefined;pairJobs.forEach(task=>task.cancel());pairJobs=[];pairModelCleanups.forEach(cleanup=>cleanup());pairModelCleanups=[];pairPackage=undefined;pairUrls.forEach(url=>URL.revokeObjectURL(url));pairUrls=[];pairPreview.replaceChildren();pairModelPreview.replaceChildren();pairStatus.textContent='';}
  function clear(preserveReference=false){sequence++;clearPairPreview();pairControls.hidden=true;if(!preserveReference){generationReference=undefined;referenceEditor?.dispose();referenceEditor=undefined;referenceReady=false;referenceHost.replaceChildren();referenceHost.hidden=true;}prepared=undefined;rigPreviewHost?.remove();rigPreviewHost=undefined;rigStatus.textContent='';rigControls.hidden=true;retryRequest=undefined;retry.hidden=true;job?.cancel();if(job?.snapshot.status==='preview'||job?.snapshot.status==='stale')job.discard();job=undefined;controller?.abort();controller=undefined;disposePreview?.();disposePreview=undefined;preview.replaceChildren();preview.hidden=true;pending=false;apply.hidden=true;cancel.disabled=true;discard.disabled=true;file.disabled=false;}
- function labels(){pairLegend.textContent=t('Zwei Formen desselben Avatars vorbereiten','Prepare two forms of the same avatar');pairAvatarLabel.textContent=t('Avatar','Avatar');pairFirstLabel.textContent=t('Erste Form und bestätigter Ausschnitt','First form and confirmed region');pairSecondLabel.textContent=t('Zweite Form und bestätigter Ausschnitt','Second form and confirmed region');pairPrepare.textContent=t('Beide Form-Crops prüfen','Prepare and review both form crops');retry.textContent=t('Nächsten Anbieter versuchen','Try next provider');heading.textContent=t('Bild → 3D-Entwurf','Image → 3D draft');label.textContent=t('PNG/JPEG auswählen oder hier ablegen','Choose or drop a PNG/JPEG here');start.textContent=t('3D-Entwurf erzeugen','Generate 3D draft');cancel.textContent=t('Abbrechen','Cancel');discard.textContent=t('Ergebnis verwerfen','Discard result');apply.textContent=t('Als neuen Avatar laden','Load as new avatar');notice.textContent=t('Sendet nur den ausdrücklich ausgewählten und markierten Bildausschnitt an den lokalen TripoSR-Dienst. Ein Entwurf ohne zugesichertes Skelett; keine Promptsteuerung. Das aktuelle Modell bleibt bis zur Übernahme erhalten. Der letzte Modellwechsel lässt sich über „Modellwechsel zurück“ wiederherstellen; Projekte zusätzlich speichern. Automatischer Anbieterwechsel nur vor dem Auftragsstart. Ein weiterer Auftrag benötigt einen ausdrücklichen Klick.','Sends only the explicitly selected and marked image region to the configured local TripoSR service. A draft without a guaranteed skeleton; no prompt control. Your current model remains until acceptance. Use Undo model switch to restore the last project; also save projects to disk. Automatic fallback only before execution. Another job requires an explicit click.');}
+ function labels(){pairLegend.textContent=t('Zwei Formen desselben Avatars vorbereiten','Prepare two forms of the same avatar');pairAvatarLabel.textContent=t('Avatar','Avatar');pairFirstLabel.textContent=t('Erste Form und bestätigter Ausschnitt','First form and confirmed region');pairSecondLabel.textContent=t('Zweite Form und bestätigter Ausschnitt','Second form and confirmed region');pairPrepare.textContent=t('Beide Form-Crops prüfen','Prepare and review both form crops');pairGenerate.textContent=t('Beide 3D-Entwürfe erzeugen','Generate both 3D drafts');retry.textContent=t('Nächsten Anbieter versuchen','Try next provider');heading.textContent=t('Bild → 3D-Entwurf','Image → 3D draft');label.textContent=t('PNG/JPEG auswählen oder hier ablegen','Choose or drop a PNG/JPEG here');start.textContent=t('3D-Entwurf erzeugen','Generate 3D draft');cancel.textContent=t('Abbrechen','Cancel');discard.textContent=t('Ergebnis verwerfen','Discard result');apply.textContent=t('Als neuen Avatar laden','Load as new avatar');notice.textContent=t('Sendet nur den ausdrücklich ausgewählten und markierten Bildausschnitt an den lokalen TripoSR-Dienst. Ein Entwurf ohne zugesichertes Skelett; keine Promptsteuerung. Das aktuelle Modell bleibt bis zur Übernahme erhalten. Der letzte Modellwechsel lässt sich über „Modellwechsel zurück“ wiederherstellen; Projekte zusätzlich speichern. Automatischer Anbieterwechsel nur vor dem Auftragsstart. Ein weiterer Auftrag benötigt einen ausdrücklichen Klick.','Sends only the explicitly selected and marked image region to the configured local TripoSR service. A draft without a guaranteed skeleton; no prompt control. Your current model remains until acceptance. Use Undo model switch to restore the last project; also save projects to disk. Automatic fallback only before execution. Another job requires an explicit click.');}
  function refresh(){
   labels();const config=readProviderConfig(storage),route=providerRoute(config.config,'generation');
   rigLabel.textContent=t('Optionales erstes Skelett','Optional first skeleton');template.options[0].textContent=t('Zweibeiner · A-Pose','Biped · A-pose');template.options[1].textContent=t('Zweibeiner · Arme unten','Biped · arms down');template.options[2].textContent=t('Vierbeiner · stehend','Quadruped · standing');
@@ -58,7 +58,7 @@ export function mountGenerationPanel(host:HTMLElement,bridge:GenerationHost,lang
   rigControls.hidden=!hasPreview;rig.disabled=template.disabled=alignment.disabled=pending||!hasPreview||!matches(job!.snapshot.target);original.hidden=!prepared;original.disabled=rig.disabled;
   const supported=route.some(profile=>profile.adapter==='custom-generation'&&profile.model==='triposr');
   destination.textContent=route.length?route.map(profile=>`${profile.name} · ${profile.model} · ${profile.endpoint}`).join(' → '):t('Optionen: ein Profil „custom-generation“ mit Modell „triposr“ der Rolle 3D-Generator zuordnen.','Options: assign a custom-generation profile with model triposr to the 3D generator role.');
-  start.disabled=pending||!source||!referenceReady||!supported||!bridge.target();pairControls.hidden=!source||!referenceReady;pairPrepare.disabled=pending||!referenceReady||!bridge.target()||!pairAvatar.value||!pairFirst.value||!pairSecond.value||pairFirst.value===pairSecond.value;chosen.textContent=source?`${source.name} · ${(source.size/1024/1024).toFixed(2)} MiB`:t('Noch kein Bild ausgewählt.','No image selected.');
+  start.disabled=pending||!source||!referenceReady||!supported||!bridge.target();pairControls.hidden=!source||!referenceReady;const firstForm=(()=>{try{return (JSON.parse(pairFirst.value) as string[])[0]??'';}catch{return '';}})(),secondForm=(()=>{try{return (JSON.parse(pairSecond.value) as string[])[0]??'';}catch{return '';}})();pairPrepare.disabled=pending||!referenceReady||!bridge.target()||!pairAvatar.value||!firstForm||!secondForm||firstForm===secondForm;pairGenerate.disabled=pending||!pairPackage||!supported||!bridge.target();chosen.textContent=source?`${source.name} · ${(source.size/1024/1024).toFixed(2)} MiB`:t('Noch kein Bild ausgewählt.','No image selected.');
   retry.disabled=pending||!retryRequest||!matches(retryRequest.target);
   if(job?.snapshot.status==='preview')apply.disabled=pending||!matches(job.snapshot.target);
  }
@@ -85,7 +85,7 @@ export function mountGenerationPanel(host:HTMLElement,bridge:GenerationHost,lang
    fill(pairFirst,previousFirst);fill(pairSecond,previousSecond);refresh();
   }catch{pairControls.hidden=true;}
  }
- pairAvatar.onchange=()=>{void populatePairChoices();};pairFirst.onchange=pairSecond.onchange=()=>refresh();
+ pairAvatar.onchange=()=>{clearPairPreview();void populatePairChoices();};pairFirst.onchange=pairSecond.onchange=()=>{clearPairPreview();refresh();};
  pairPrepare.onclick=async()=>{
   const editor=referenceEditor;if(!editor||pending||!referenceReady)return;
   try{
@@ -93,16 +93,56 @@ export function mountGenerationPanel(host:HTMLElement,bridge:GenerationHost,lang
    const selections=[{formId:first[0],regionId:first[1]},{formId:second[0],regionId:second[1]}] as [ImageReferenceFormCropSelection,ImageReferenceFormCropSelection];
    if(selections[0].formId===selections[1].formId||selections[0].regionId===selections[1].regionId)throw new Error('distinct-form-selections-required');
    pairPrepare.disabled=true;clearPairPreview();pairStatus.textContent=t('Beide bestätigten Bildbereiche werden ausgeschnitten und geprüft …','Cropping and validating both confirmed image regions …');
-   const result=await editor.selectedFormPairPackage(pairAvatar.value,selections);if(referenceEditor!==editor)return;
+   const result=await editor.selectedFormPairPackage(pairAvatar.value,selections);if(referenceEditor!==editor)return;pairPackage=result;
    result.crops.forEach((crop,index)=>{
     const figure=document.createElement('figure'),caption=document.createElement('figcaption'),image=document.createElement('img'),detail=document.createElement('p');
     const form=result.plan.forms[index]!;const url=URL.createObjectURL(crop);pairUrls.push(url);
     caption.textContent=form.form.label+' · '+form.region.label;image.src=url;image.alt=t('Bildcrop für ','Image crop for ')+form.form.label;detail.textContent=t(`${crop.name} · ${form.crop.width} × ${form.crop.height} px · SHA-256 ${result.manifests[index]!.selection.crop.sha256.slice(0,12)}…`,`${crop.name} · ${form.crop.width} × ${form.crop.height} px · SHA-256 ${result.manifests[index]!.selection.crop.sha256.slice(0,12)}…`);
     figure.append(caption,image,detail);pairPreview.append(figure);
    });
-   pairStatus.textContent=t('Zwei getrennte, quellgebundene Form-Crops sind bereit. Noch wurde kein Generator gestartet und kein Avatar übernommen.','Two separate source-bound form crops are ready. No generator has been started and no avatar has been imported.');
+   pairStatus.textContent=t('Zwei getrennte, quellgebundene Form-Crops sind bereit. Du kannst beide 3D-Entwürfe gemeinsam starten.','Two separate source-bound form crops are ready. You can now start both 3D drafts together.');
   }catch{clearPairPreview();pairStatus.textContent=t('Paar konnte nicht vorbereitet werden. Avatar, zwei verschiedene Formen und bestätigte Hauptausschnitte prüfen.','Could not prepare the pair. Check the avatar, two distinct forms and confirmed main regions.');}
   finally{if(referenceEditor===editor)refresh();}
+ };
+ pairGenerate.onclick=async()=>{
+  const preparedPair=pairPackage,target=bridge.target(),config=readProviderConfig(storage).config;
+  if(!preparedPair||!target||pending||!matches(target))return;
+  const route=providerRoute(config,'generation');if(!route.some(profile=>profile.adapter==='custom-generation'&&profile.model==='triposr'))return;
+  const keys=new Map(config.profiles.map(profile=>[profile.id,getProviderKey(profile)])),tokenFor=(profile:Readonly<ProviderProfile>)=>keys.get(profile.id)??'';
+  const registry=new ProviderRegistry();
+  registry.register(deps.adapter?{
+   id:'custom-generation',
+   probe:(profile,signal)=>deps.adapter!(tokenFor(profile),profile).probe(profile,signal),
+   run:request=>{const adapter=deps.adapter!(tokenFor(request.profile),request.profile);if(!adapter.run)throw new Error('execution-missing');return adapter.run(request);},
+  }:createLocalGenerationAdapter(tokenFor));
+  const controller=new AbortController();pairController=controller;pending=true;cancel.disabled=false;refresh();
+  pairStatus.textContent=t('Beide Formen werden nacheinander mit getrennten Referenzdaten generiert …','Generating both forms sequentially with separate reference metadata …');
+  const outputs:Uint8Array[]=[];
+  try{
+   for(let index=0;index<2;index++){
+    const crop=preparedPair.crops[index]!,manifest=preparedPair.manifests[index]!,bytes=new Uint8Array(await crop.arrayBuffer());
+    if(pairController!==controller||controller.signal.aborted||!matches(target))throw new Error('pair-generation-stale');
+    const task=new ProviderJob(registry,{config,role:'generation',input:{prompt:'Image reconstruction',source:{mediaType:'image/png',bytes},reference:manifest},target,timeoutMs:3600000,preflightFallbacks:true,mayRun:()=>pairController===controller&&!controller.signal.aborted&&matches(target),validate:deps.validate??validateGeneration});
+    pairJobs.push(task);task.start();const result=await task.done;
+    if(pairController!==controller||controller.signal.aborted||!matches(target))throw new Error('pair-generation-stale');
+    if(result.status!=='preview')throw new Error('pair-generation-'+result.status);
+    const output=task.preview();if(output.kind!=='model')throw new Error('pair-generation-model-required');outputs.push(output.bytes);
+    pairStatus.textContent=index===0?t('Tierform-Entwurf fertig; Arbeitsform wird erzeugt …','Animal-form draft ready; generating work form …'):t('Beide 3D-Entwürfe sind erzeugt; Vorschauen werden geladen …','Both 3D drafts generated; loading previews …');
+   }
+   for(let index=0;index<2;index++){
+    const figure=document.createElement('figure'),caption=document.createElement('figcaption'),view=document.createElement('div');
+    caption.textContent=preparedPair.plan.forms[index]!.form.label+' · '+preparedPair.plan.forms[index]!.region.label;view.className='generation-preview';view.style.height='260px';figure.append(caption,view);pairModelPreview.append(figure);
+    const cleanup=await (deps.preview??showGenerationPreview)(view,outputs[index]!,controller.signal);
+    if(pairController!==controller||controller.signal.aborted||!matches(target)){cleanup();throw new Error('pair-generation-stale');}
+    pairModelCleanups.push(cleanup);
+   }
+   pairStatus.textContent=t('Beide 3D-Entwürfe liegen als getrennte Vorschauen vor. Es wurde noch kein Modell übernommen; die gemeinsame Kandidatenübernahme ist noch nicht implementiert.','Both 3D drafts are available as separate previews. No model has been imported; paired candidate adoption is not implemented yet.');
+  }catch{
+   pairModelCleanups.forEach(cleanup=>cleanup());pairModelCleanups=[];pairModelPreview.replaceChildren();
+   pairStatus.textContent=t('Paar-Generierung fehlgeschlagen oder Projekt geändert. Kein Teilresultat wurde übernommen; beide Aufträge bei Bedarf neu starten.','Pair generation failed or the project changed. No partial result was imported; restart both jobs if needed.');
+  }finally{
+   if(pairController===controller){pairController=undefined;pairJobs=[];pending=false;cancel.disabled=true;refresh();}
+  }
  };
 
  file.onchange=()=>{const value=file.files?.[0];if(value)select(value);file.value='';};
