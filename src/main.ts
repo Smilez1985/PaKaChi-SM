@@ -110,8 +110,8 @@ function captureModel():ModelSnapshot|null {
 }
 function renderFormSwitch(){
  const button=el<HTMLButtonElement>('form-switch'),pair=editor?.exportProject().formModels;
- button.hidden=!pair||!loaded||original;
- if(pair){const target=pair.activeForm==='animal'?pair.humanoid:pair.animal;button.textContent=options.language==='de'?target.label+' anzeigen':'Show '+target.label;}
+ button.hidden=!pair||!loaded||original;button.disabled=busy||!pair;
+ if(pair){const target=pair.activeForm==='animal'?pair.humanoid:pair.animal;button.textContent=options.language==='de'?(pair.activeForm==='animal'?'Tierform aktiv · Arbeitsform anzeigen':'Arbeitsform aktiv · Tierform anzeigen'):(pair.activeForm==='animal'?'Animal active · show work form':'Work form active · show animal form');button.title=target.label;}
 }
 async function switchForm(){
  if(busy||!editor||!loaded)return;
@@ -374,6 +374,7 @@ async function loadAvatar(avatar?: Avatar, file?: File, project?: StudioProject,
 async function boot(): Promise<void> {
   el('model-undo').onclick=()=>{void travelModel('undo');};el('model-redo').onclick=()=>{void travelModel('redo');};
   window.addEventListener('pakachi-options',renderModelHistory);
+  window.addEventListener('pakachi-options',renderFormSwitch);
   const zoo=zooPanel=mountLocalZoo(el('local-zoo-host'),{
     ready:()=>!busy&&!editor?.interactionActive,canSave:()=>!!editor,target:()=>!editor?.interactionActive?generationTarget():null,
     capture:()=>!busy&&editor&&!editor.interactionActive?editor.exportProject():null,
