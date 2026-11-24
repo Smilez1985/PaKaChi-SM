@@ -15,6 +15,7 @@ on:
       - 'src/studio-rig.ts'
       - 'src/draft-rig.ts'
       - 'src/draft-rig-pair.ts'
+      - 'src/draft-rig-topology.ts'
       - 'tests/draft-rig.test.ts'
       - 'tests/helpers/draft-rig-fixture.ts'
       - 'src/avatar-candidate.ts'
