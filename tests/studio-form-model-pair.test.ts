@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {validStudioFormModelAsset,validStudioFormModelPair} from '../src/studio-form-model-pair.ts';
+import {validStudioFormModelAsset,validStudioFormModelPair,selectStudioForm} from '../src/studio-form-model-pair.ts';
 import {parseProject,emptyStudio} from '../src/studio-data.ts';
 const reference=(formId:string)=>({format:'pakachi-image-reference-generation',version:1,source:{sha256:'a'.repeat(64),width:100,height:100},selection:{regionId:'region-'+formId,label:'Region',kind:'form',avatar:{id:'avatar-1',label:'PaKaChi'},form:{id:formId,label:formId},view:{id:'view-1',label:'Front'},crop:{x:0,y:0,width:10,height:10,sha256:'b'.repeat(64)},mask:{type:'rectangle',vertices:4,holes:0}}});
 const asset=(formId:string,model:string)=>({formId,label:formId,model,generationReference:reference(formId)});
@@ -21,6 +21,21 @@ test('keeps independent rig and pose data in each form asset',()=>{
  const value={...base,animal:{...base.animal,studio:animalStudio},humanoid:{...base.humanoid,studio:humanoidStudio}};
  assert.equal(validStudioFormModelPair(value,'avatar-1','QUJD'),true);
  assert.notDeepEqual(value.animal.studio,value.humanoid.studio);
+});
+test('selects either form with its own immutable model, provenance and rig state',()=>{
+ const base=pair();
+ const animalStudio={points:[],links:[],boneRest:[],poses:[{id:'animal-pose',name:'Animal',seconds:0,values:{}}],moves:[]};
+ const workStudio={points:[],links:[],boneRest:[],poses:[{id:'work-pose',name:'Work',seconds:0,values:{}}],moves:[]};
+ const value={...base,animal:{...base.animal,studio:animalStudio},humanoid:{...base.humanoid,studio:workStudio}};
+ const selectedWork=selectStudioForm(value,'humanoid');
+ assert.equal(selectedWork.model,'REVG');assert.equal(selectedWork.formModels.activeForm,'humanoid');
+ assert.deepEqual(selectedWork.studio,workStudio);assert.equal(selectedWork.generationReference.selection.form.id,'work-form');
+ assert.deepEqual(value.animal.studio,animalStudio);
+ const selectedAnimal=selectStudioForm(value,'animal');
+ assert.equal(selectedAnimal.model,'QUJD');assert.equal(selectedAnimal.formModels.activeForm,'animal');
+ assert.deepEqual(selectedAnimal.studio,animalStudio);assert.equal(selectedAnimal.generationReference.selection.form.id,'animal-form');
+ selectedWork.studio!.poses[0]!.name='mutated';
+ assert.equal(value.humanoid.studio!.poses[0]!.name,'Work');
 });
 test('rejects malformed or oversized encoded model assets',()=>{
  for(const model of ['', 'not base64!', 'A'.repeat(70_000_001)])assert.equal(validStudioFormModelAsset(asset('animal-form',model)),false);
