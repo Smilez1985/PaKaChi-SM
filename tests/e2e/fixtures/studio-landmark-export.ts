@@ -1,4 +1,3 @@
-import * as THREE from 'three';
 import { StudioRig } from '../../../src/studio-rig.ts';
 import { StudioEditor } from '../../../src/studio-editor.ts';
 import type { StudioView } from '../../../src/studio-view.ts';
