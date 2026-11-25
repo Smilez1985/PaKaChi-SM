@@ -39,7 +39,7 @@ test('collects skin weights through explicit source mesh IDs and exact unique bo
 
 test('leaves duplicate bone names and bones claimed by multiple parts unmapped',()=>{
  const manifest=fixture();
- manifest.parts.push({id:'left_hand',name:'Left hand',parentPartId:null,orderKey:[3],rigBoneIds:['right-elbow']});
+ manifest.parts.push({id:'left_hand',name:'Left hand',parentPartId:null,orderKey:[3],rigBoneIds:['right_elbow']});
  const mesh=riggedMesh(['left-elbow','right-elbow','right-elbow']);
  const [evidence]=collectRiggedSkinWeightEvidence(manifest,hash,[{meshId,mesh}],new Map([['left-elbow','left_elbow'],['right-elbow','right_elbow']]));
  assert.deepEqual(evidence?.bonePartIds,['left_arm',null,null]);
