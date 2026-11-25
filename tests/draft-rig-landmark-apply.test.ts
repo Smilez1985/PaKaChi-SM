@@ -47,7 +47,7 @@ test('confirmed anchors enter the draft rest pose before skinning and bind matri
   const original = bytes.slice();
   const plan = await planFor(bytes);
   const prepared = await prepareDraftRigWithConfirmedLandmarks(bytes, plan, {
-    avatarId: 'pakachi', formId: 'work-form',
+    avatarId: 'pakachi', formId: 'work-form', form: 'humanoid' as const,
     sourceAssetSha256: plan.sourceAssetSha256, template: 'biped-relaxed',
   }, signal());
   assert.deepEqual(bytes, original);
@@ -76,7 +76,7 @@ test('landmark handover rejects wrong avatar, form, template and source bytes be
   };
   await assert.rejects(prepareDraftRigWithConfirmedLandmarks(bytes, plan, { ...target, avatarId: 'other' }, signal()), /target-mismatch/);
   await assert.rejects(prepareDraftRigWithConfirmedLandmarks(bytes, plan, { ...target, formId: 'animal-form' }, signal()), /target-mismatch/);
-  await assert.rejects(prepareDraftRigWithConfirmedLandmarks(bytes, plan, { ...target, template: 'biped' }, signal()), /target-mismatch/);
+  await assert.rejects(prepareDraftRigWithConfirmedLandmarks(bytes, plan, { ...target, template: 'biped', form: 'animal' }, signal()), /target-mismatch/);
   const changed = bytes.slice(); changed[changed.length - 1] = changed[changed.length - 1]! ^ 1;
   await assert.rejects(prepareDraftRigWithConfirmedLandmarks(changed, plan, target, signal()), /source-hash-mismatch/);
 });
