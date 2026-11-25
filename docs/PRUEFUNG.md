@@ -1,6 +1,6 @@
 # Prüfstand und Protokolle
 
-**Softwarestand: 0.102.0 · Dokumentationsabgleich: 2026-11-25T08:12:00+01:00 (Europe/Berlin).**
+**Softwarestand: 0.102.0 · Dokumentationsabgleich: 2026-11-25T08:15:00+01:00 (Europe/Berlin).**
 
 Alle Prüfnachweise stehen in dieser Datei: ein Abschnitt je Softwareversion sowie gesonderte Abschnitte für datierte Zwischenprüfungen. Die Ergebnisse und Grenzen gelten für den jeweils genannten Stand. Spätere Läufe stehen als Nachtrag im selben Abschnitt. Produktänderungen gehören in den [Changelog](CHANGELOG.md), offene Aufgaben in die [Roadmap](ROADMAP.md).
 
@@ -10,15 +10,15 @@ Alle Prüfnachweise stehen in dieser Datei: ein Abschnitt je Softwareversion sow
 
 **Studio-Aktion:** Im integrierten Studio kann der Benutzer nach vollständiger Prüfung und ausdrücklicher Bestätigung „Draft-Rig mit bestätigten Gelenkankern erzeugen und GLB exportieren“ auslösen. Das aktive Avatar-Modell wird nicht automatisch ersetzt. Der Export wird als prüfpflichtiger GLB ausgegeben; ein eigener Browser-End-to-End-Test des gesamten Buttons/Downloads und die visuelle Prüfung beider Formen stehen noch aus.
 
-**CI auf Code-Commit `9c99f621cd6b6420be578c9c0c836b9e8c337920`:**
-- [Cluster-Landmark-Workflow #45565617189](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/45565617189): **success**.
+**CI auf Code-Commit `21249891c82b9d7aab9217ebfc35a160e0e36a42`:**
+- [Cluster-Landmark-Workflow #45566155719](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/45566155719): **success**.
 - 105 gezielte Regressionstests bestanden, 0 fehlgeschlagen.
 - Zusätzlicher Quadruped-Test: bestätigter Kopfanker wird in die quadrupede Restpose übernommen; `Draft_TailTip` und die 23-Knochen-Topologie bleiben erhalten.
 - Neuer Studio-UI-Integrationstest mit Happy DOM: bestätigt den Gelenkanker-Plan, startet den tatsächlichen Rig-/GLB-Export, prüft den Dateinamen und verifiziert, dass das aktive Avatar-Modell nicht durch den Export ersetzt oder mutiert wird.
-- Browser-Surface-Picking: 1/1 bestanden.
+- Chromium-Browserprüfungen: 2/2 bestanden – echtes Surface-Picking sowie vollständiger Studio-Ablauf mit Gelenkanker-Bestätigung, GLB-Download und Prüfung, dass das aktive Modell unverändert bleibt.
 - TypeScript `npx tsc --noEmit`: erfolgreich.
 - Dependency-Audit: 0 Schwachstellen.
-- Zuvor scheiterte Lauf #45563787917 ausschließlich am TypeScript-Check; die beiden impliziten `any`-Parameter und der `ArrayBuffer | SharedArrayBuffer`-Testfehler wurden behoben. Der zwischenzeitliche UI-Testlauf #45565289577 scheiterte an einem fehlenden semantischen Testkatalog und zwei unsicheren DOM-Casts; beide Testfehler wurden korrigiert. Lauf #45565385196 bestätigte danach den Studio-UI-Integrationsablauf. Der aktuelle Nachweis für Biped- und Quadruped-Übergabe ist #45565617189.
+- Zuvor scheiterte Lauf #45563787917 ausschließlich am TypeScript-Check; die beiden impliziten `any`-Parameter und der `ArrayBuffer | SharedArrayBuffer`-Testfehler wurden behoben. Lauf #45565289577 deckte einen fehlenden semantischen Testkatalog und zwei unsichere DOM-Casts auf; beide wurden korrigiert. Lauf #45565385196 bestätigte den Studio-UI-Integrationsablauf; #45565617189 ergänzte die Quadruped-Regression. Lauf #45566024089 zeigte zwei TypeScript-Probleme im neuen Browser-Test (ungenutzter Import und statisch nicht auflösbarer Fixture-Pfad), die behoben wurden. Maßgeblicher Gesamtnachweis ist #45566155719.
 
 **Grenzen:** Die Gelenkpositionen sind benutzerbestätigte Oberflächen-/Landmarken-Zuordnungen, keine automatisch erkannte Anatomie. Das Rig verwendet weiterhin proportionale Templates. Es gibt noch keine visuelle Original-PaKaChi-Abnahme, keine Freigabe der deformierten Tier- und Arbeitsform und keinen gemeinsamen Morph-Rig-Meilenstein. Daher keine Übernahme nach `main`.
 
