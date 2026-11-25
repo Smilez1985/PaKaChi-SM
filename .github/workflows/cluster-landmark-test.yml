@@ -34,7 +34,9 @@ on:
       - 'tests/studio-editor.test.ts'
       - 'tests/studio-surface-hit.test.ts'
       - 'tests/e2e/studio-surface-pick.spec.ts'
+      - 'tests/e2e/studio-landmark-export.spec.ts'
       - 'tests/e2e/fixtures/studio-surface-pick.ts'
+      - 'tests/e2e/fixtures/studio-landmark-export.ts'
       - 'package.json'
       - 'package-lock.json'
       - 'playwright.config.ts'
@@ -65,7 +67,7 @@ jobs:
       - name: Browser regression for real 3D surface picking
         run: |
           npx playwright install --with-deps chromium
-          npx playwright test tests/e2e/studio-surface-pick.spec.ts
+          npx playwright test tests/e2e/studio-surface-pick.spec.ts tests/e2e/studio-landmark-export.spec.ts
       - name: Type-check project
         if: always()
         run: npx tsc --noEmit
