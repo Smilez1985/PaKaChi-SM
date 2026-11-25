@@ -36,6 +36,7 @@ import type { ClusterLandmarkClassificationPreview } from './cluster-landmark-pr
 import type { ClusterManifest } from './cluster-architecture.ts';
 import { createDraftRigLandmarkReview, confirmDraftRigLandmarkReview } from './draft-rig-landmark-review.ts';
 import type { DraftRigLandmarkReview, ConfirmedDraftRigLandmarkPlan } from './draft-rig-landmark-review.ts';
+import { prepareDraftRigWithConfirmedLandmarks } from './draft-rig-landmark-apply.ts';
 import type { StudioLandmarkEvidenceBundle } from './studio-landmark-evidence.ts';
 import { createStudioLandmarkSurfacePick } from './studio-landmark-picking.ts';
 import { compareClusterCharacterForms } from './cluster-form-comparison.ts';
@@ -254,7 +255,7 @@ export class StudioEditor {
             if(!Number.isFinite(value)||Math.abs(value)>1e6){input.setCustomValidity('Koordinate außerhalb des zulässigen Bereichs.');input.reportValidity();return;}
             input.setCustomValidity('');next[axis]=value;this.draftRigLandmarkPositions.set(item.landmarkId,next);
             this.confirmedDraftRigLandmarkPlan=null;
-            const exportButton=panel.querySelector<HTMLButtonElement>('button:last-child');if(exportButton)exportButton.disabled=true;
+            const exportButton=panel.querySelector<HTMLButtonElement>('#draft-rig-landmark-plan-export');if(exportButton)exportButton.disabled=true;const applyButton=panel.querySelector<HTMLButtonElement>('#draft-rig-landmark-plan-apply');if(applyButton)applyButton.disabled=true;
           });
           field.append(input);xyz.append(field);
         }
@@ -276,10 +277,11 @@ export class StudioEditor {
         })));
         status.textContent='Bestätigter Review-Plan erstellt. Das Skelett wurde nicht verändert.';
         download.disabled=false;
-        this.hooks.feedback('Gelenkanker bestätigt. Es wurde kein Rig automatisch verändert.');
+        const applyButton=panel.querySelector<HTMLButtonElement>('#draft-rig-landmark-plan-apply');if(applyButton)applyButton.disabled=false;
+        this.hooks.feedback('Gelenkanker bestätigt. Das Rig wird erst durch eine separate Aktion neu erzeugt.');
       }catch(error){this.hooks.feedback(error instanceof Error?error.message:String(error));}
     });
-    const download=document.createElement('button');download.type='button';download.textContent='Bestätigten Plan exportieren';download.disabled=!this.confirmedDraftRigLandmarkPlan;
+    const download=document.createElement('button');download.type='button';download.id='draft-rig-landmark-plan-export';download.textContent='Bestätigten Plan exportieren';download.disabled=!this.confirmedDraftRigLandmarkPlan;
     download.addEventListener('click',()=>{
       if(!this.confirmedDraftRigLandmarkPlan)return;
       const blob=new Blob([JSON.stringify(this.confirmedDraftRigLandmarkPlan,null,2)],{type:'application/json'});
@@ -287,7 +289,39 @@ export class StudioEditor {
       a.href=url;a.download=(this.project.avatar.id.replace(/[^a-z0-9_-]/gi,'_')||'pakachi')+'-confirmed-rig-anchors.json';a.click();
       window.setTimeout(()=>URL.revokeObjectURL(url),1000);
     });
-    panel.append(confirm,download);
+    const apply=document.createElement('button');apply.type='button';apply.id='draft-rig-landmark-plan-apply';
+    apply.textContent='Draft-Rig mit bestätigten Gelenkankern erzeugen und GLB exportieren';
+    apply.disabled=!this.confirmedDraftRigLandmarkPlan;
+    apply.addEventListener('click',()=>{void (async()=>{
+      const plan=this.confirmedDraftRigLandmarkPlan;
+      if(!plan||apply.disabled)return;
+      apply.disabled=true;confirm.disabled=true;download.disabled=true;
+      status.textContent='Quellmodell und Formbindung prüfen; Draft-Rig mit bestätigter Restpose erzeugen …';
+      try{
+        if(plan.avatarId!==this.project.avatar.id)throw Error('Bestätigter Plan gehört zu einem anderen Avatar.');
+        const pair=this.project.formModels;
+        if(pair&&pair.avatarId!==this.project.avatar.id)throw Error('Formpaar gehört nicht zum aktuell geöffneten Avatar.');
+        const activeAsset=pair?pair[pair.activeForm]:undefined;
+        if(activeAsset&&(activeAsset.formId!==plan.formId||activeAsset.model!==this.project.model))throw Error('Bestätigter Plan gehört nicht zur aktuell geöffneten Form.');
+        if(pair&&((pair.activeForm==='animal')!==(plan.template==='quadruped')))throw Error('Rig-Template passt nicht zur aktiven Tier-/Arbeitsform.');
+        const binary=atob(this.project.model),sourceBytes=Uint8Array.from(binary,char=>char.charCodeAt(0));
+        const prepared=await prepareDraftRigWithConfirmedLandmarks(sourceBytes,plan,{
+          avatarId:this.project.avatar.id,
+          formId:activeAsset?.formId??plan.formId,
+          sourceAssetSha256:plan.sourceAssetSha256,
+          template:plan.template,
+        },new AbortController().signal);
+        if(this.disposed)return;
+        const blob=new Blob([prepared.bytes.slice().buffer as ArrayBuffer],{type:'model/gltf-binary'});
+        const url=URL.createObjectURL(blob),anchor=document.createElement('a');
+        anchor.href=url;anchor.download=(this.project.avatar.id.replace(/[^a-z0-9_-]/gi,'_')||'pakachi')+'-'+(pair?.activeForm??'avatar')+'-landmark-rig.glb';anchor.click();
+        window.setTimeout(()=>URL.revokeObjectURL(url),1000);
+        status.textContent='Draft-Rig erzeugt und GLB exportiert ('+prepared.report.bones+' Knochen, '+prepared.report.meshes+' Meshes). Der aktuell geladene Avatar blieb unverändert; das exportierte Rig ist weiterhin visuell zu prüfen.';
+        this.hooks.feedback('Draft-Rig aus bestätigten Gelenkankern erzeugt. GLB wurde exportiert; Originalmodell blieb unverändert.');
+      }catch(error){status.textContent=error instanceof Error?error.message:String(error);}
+      finally{if(!this.disposed){apply.disabled=!this.confirmedDraftRigLandmarkPlan;confirm.disabled=review.report.unresolved.length>0||review.report.anchors.length!==evidence.correspondences.length||review.report.anchors.length===0;download.disabled=!this.confirmedDraftRigLandmarkPlan;}}
+    })();});
+    panel.append(confirm,download,apply);
   }
   private rebuildDraftRigLandmarkReview(){
     const evidence=this.draftRigLandmarkEvidence,review=this.draftRigLandmarkReview,manifest=this.landmarkReviewManifest;
