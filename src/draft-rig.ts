@@ -6,6 +6,7 @@ import {createPoseSurfaceChecker} from './pose-surface-check.ts';
 import {estimateDraftBodyFrame} from './draft-body-frame.ts';
 import type {DraftBodyFrame} from './draft-body-frame.ts';
 import {validateDraftRigTopology} from './draft-rig-topology.ts';
+import {draftRigBoneIdentityForJoint} from './draft-rig-bone-identity.ts';
 
 export type DraftRigTemplate='biped'|'biped-relaxed'|'quadruped';
 export interface DraftRigReport {template:DraftRigTemplate;bones:number;meshes:number;vertices:number;method:'proportional-template';review:'required';frame?:DraftBodyFrame;probes?:{joint:string;degrees:30;status:'within'|'outside'|'unmeasurable';surfaceIssues:number;volumeIssues:number;unmeasurableVolumeComponents:number}[]}
@@ -109,6 +110,9 @@ export async function bindDraftRig(root:T.Object3D,template:DraftRigTemplate,sig
  const names=new Set<string>();root.traverse(n=>names.add(n.name));
  for(let i=0;i<bones.length;i++){
   let name='Draft_'+joints[i].name;while(names.has(name))name+='_' ;names.add(name);bones[i].name=name;
+  const identity=draftRigBoneIdentityForJoint(template,joints[i].name);
+  bones[i].userData.pakachiRigBoneId=identity.rigBoneId;
+  bones[i].userData.pakachiClusterPartId=identity.partId;
   bones[i].position.copy(local[i]);if(joints[i].parent>=0){bones[i].position.sub(local[joints[i].parent]);bones[joints[i].parent].add(bones[i]);}
  }
  root.add(bones[0]);root.updateMatrixWorld(true);const skeleton=new T.Skeleton(bones);skeleton.calculateInverses();
