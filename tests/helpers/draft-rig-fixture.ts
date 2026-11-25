@@ -8,6 +8,6 @@ export function draftFigure(withTail=false){
   box(sign===1?'LeftUpperArm':'RightUpperArm',[.13,.23,.12],[sign*.24,.64,0]);box(sign===1?'LeftHand':'RightHand',[.14,.22,.12],[sign*.43,.40,0]);
   box(sign===1?'LeftLeg':'RightLeg',[.13,.39,.14],[sign*.13,.27,0]);box(sign===1?'LeftFoot':'RightFoot',[.15,.09,.27],[sign*.13,.045,.04]);
  }
- if(withTail){const mesh=new T.Mesh(new T.SphereGeometry(.25,20,12),new T.MeshStandardMaterial({color:0x337744}));mesh.name='Asymmetric tail';mesh.position.set(-.72,.47,-.1);root.add(mesh);}
+ if(withTail){const mesh=new T.Mesh(new T.SphereGeometry(.25,20,12),new T.MeshStandardMaterial({color:0x337744}));mesh.name='Asymmetric tail';mesh.position.set(0,.47,-.4);root.add(mesh);}
  return root;
 }
