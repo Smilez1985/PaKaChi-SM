@@ -21,6 +21,7 @@ on:
       - 'src/draft-rig-landmark-review.ts'
       - 'src/draft-rig-landmark-apply.ts'
       - 'tests/draft-rig-landmark-anchors.test.ts'
+      - 'tests/draft-rig-landmark-review.test.ts'
       - 'tests/draft-rig-landmark-apply.test.ts'
       - 'tests/draft-rig.test.ts'
       - 'tests/helpers/draft-rig-fixture.ts'
