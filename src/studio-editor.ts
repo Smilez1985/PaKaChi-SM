@@ -34,6 +34,9 @@ import { createStudioLandmarkEvidenceBundle, validateStudioLandmarkEvidenceBundl
 import { createClusterLandmarkClassificationPreview, acceptClusterLandmarkPreviewItem, restoreReviewedClusterManifest } from './cluster-landmark-preview.ts';
 import type { ClusterLandmarkClassificationPreview } from './cluster-landmark-preview.ts';
 import type { ClusterManifest } from './cluster-architecture.ts';
+import { createDraftRigLandmarkReview, confirmDraftRigLandmarkReview } from './draft-rig-landmark-review.ts';
+import type { DraftRigLandmarkReview, ConfirmedDraftRigLandmarkPlan } from './draft-rig-landmark-review.ts';
+import type { StudioLandmarkEvidenceBundle } from './studio-landmark-evidence.ts';
 import { createStudioLandmarkSurfacePick } from './studio-landmark-picking.ts';
 import { compareClusterCharacterForms } from './cluster-form-comparison.ts';
 import { mountClusterFormComparison } from './cluster-form-comparison-panel.ts';
@@ -79,6 +82,11 @@ export class StudioEditor {
   private landmarkInventory:ClusterMeshInventory|null=null;
   private landmarkReviewManifest:ClusterManifest|null=null;
   private landmarkReviewPreview:ClusterLandmarkClassificationPreview|null=null;
+  private draftRigLandmarkEvidence:StudioLandmarkEvidenceBundle|null=null;
+  private draftRigLandmarkReview:DraftRigLandmarkReview|null=null;
+  private draftRigLandmarkAssignments=new Map<string,string>();
+  private draftRigLandmarkPositions=new Map<string,[number,number,number]>();
+  private confirmedDraftRigLandmarkPlan:ConfirmedDraftRigLandmarkPlan|null=null;
   private selectedLandmarkId:string|null=null;
   private pendingSurfaceHit:StudioSurfacePickHit|null=null;
   private landmarkPickRadius=.05;
@@ -148,6 +156,7 @@ export class StudioEditor {
     this.landmarkInventory=inventory;
     this.landmarkReviewManifest=null;
     this.landmarkReviewPreview=null;
+    this.draftRigLandmarkEvidence=null;this.draftRigLandmarkReview=null;this.draftRigLandmarkAssignments.clear();this.draftRigLandmarkPositions.clear();this.confirmedDraftRigLandmarkPlan=null;
     this.selectedLandmarkId=seeds[0]!.id;
     this.pendingSurfaceHit=null;
     this.render();
@@ -198,6 +207,97 @@ export class StudioEditor {
     this.mutate(()=>{const index=this.data.links.findIndex(([a,b])=>(a===id&&b===this.selected)||(b===id&&a===this.selected));if(index>=0)this.data.links.splice(index,1);else if(this.data.links.length<2048)this.data.links.push([this.selected!,id]);});this.addingBoneParent=null;this.view.setAction('select');
   }
   private refreshNumbers(){const label=this.host.querySelector('#figure-scale-value');if(label)label.textContent=`${Math.round(this.rig.scale*100)} %`;const p=this.point;if(!p)return;const pos=this.rig.position(p);['x','y','z'].forEach((axis,i)=>{const input=this.host.querySelector<HTMLInputElement>(`#point-${axis}`);if(input)input.value=pos.toArray()[i].toFixed(3);});}
+
+
+  private renderDraftRigLandmarkReview(){
+    const panel=this.host.querySelector<HTMLElement>('#draft-rig-landmark-review-panel');
+    if(!panel)return;
+    panel.replaceChildren();
+    const review=this.draftRigLandmarkReview,evidence=this.draftRigLandmarkEvidence;
+    if(!review||!evidence){panel.textContent='Nach Import eines gültigen Landmarken-Belegs erscheinen hier die Gelenkanker-Kandidaten.';return;}
+    const summary=document.createElement('p');summary.className='subtle';
+    summary.textContent=review.report.anchors.length+' Kandidaten · '+review.report.unresolved.length+' ungelöst. Ein Oberflächenpunkt ist kein automatisch erkanntes Gelenkzentrum.';
+    panel.append(summary);
+    const joints=review.template==='quadruped'
+      ? ['Hips','Spine','Chest','Neck','Head','TailBase','TailTip','LeftShoulder','LeftElbow','LeftWrist','LeftHand','LeftHip','LeftKnee','LeftAnkle','LeftFoot','RightShoulder','RightElbow','RightWrist','RightHand','RightHip','RightKnee','RightAnkle','RightFoot']
+      : ['Hips','Spine','Chest','Neck','Head','LeftShoulder','LeftElbow','LeftWrist','LeftHand','LeftHip','LeftKnee','LeftAnkle','LeftFoot','RightShoulder','RightElbow','RightWrist','RightHand','RightHip','RightKnee','RightAnkle','RightFoot'];
+    const anchors=new Map(review.report.anchors.map(anchor=>[anchor.landmarkId,anchor]));
+    const unresolved=new Map(review.report.unresolved.map(item=>[item.landmarkId,item]));
+    const list=document.createElement('ol');list.className='cluster-landmark-review-list';
+    for(const item of evidence.correspondences){
+      const anchor=anchors.get(item.landmarkId),issue=unresolved.get(item.landmarkId);
+      const row=document.createElement('li');
+      const title=document.createElement('strong');title.textContent=item.partId+' · '+item.landmarkId;row.append(title);
+      const note=document.createElement('p');note.className='subtle';
+      note.textContent=anchor?'Transformierter Kandidat in Avatar-Koordinaten; Freigabe noch ausstehend.':'Nicht aufgelöst: '+(issue?.reason??'Zuordnung prüfen.');
+      row.append(note);
+      const label=document.createElement('label');label.textContent='Zielgelenk';
+      const select=document.createElement('select');
+      const blank=document.createElement('option');blank.value='';blank.textContent='Gelenk auswählen …';select.append(blank);
+      for(const joint of joints){const option=document.createElement('option');option.value=joint;option.textContent=joint;select.append(option);}
+      select.value=anchor?.jointName??this.draftRigLandmarkAssignments.get(item.landmarkId)??'';
+      select.addEventListener('change',()=>{
+        if(select.value)this.draftRigLandmarkAssignments.set(item.landmarkId,select.value);
+        else this.draftRigLandmarkAssignments.delete(item.landmarkId);
+        this.rebuildDraftRigLandmarkReview();
+      });
+      label.append(select);row.append(label);
+      if(anchor){
+        const coords=this.draftRigLandmarkPositions.get(item.landmarkId)??[...anchor.position] as [number,number,number];
+        const xyz=document.createElement('div');xyz.className='point-xyz';
+        for(let axis=0;axis<3;axis++){
+          const field=document.createElement('label');field.textContent=['X','Y','Z'][axis]!;
+          const input=document.createElement('input');input.type='number';input.step='0.001';input.value=coords[axis]!.toFixed(3);
+          input.addEventListener('change',()=>{
+            const next=this.draftRigLandmarkPositions.get(item.landmarkId)??[...anchor.position] as [number,number,number];
+            const value=Number(input.value);
+            if(!Number.isFinite(value)||Math.abs(value)>1e6){input.setCustomValidity('Koordinate außerhalb des zulässigen Bereichs.');input.reportValidity();return;}
+            input.setCustomValidity('');next[axis]=value;this.draftRigLandmarkPositions.set(item.landmarkId,next);
+            this.confirmedDraftRigLandmarkPlan=null;
+          });
+          field.append(input);xyz.append(field);
+        }
+        row.append(xyz);
+      }
+      list.append(row);
+    }
+    panel.append(list);
+    const status=document.createElement('p');status.setAttribute('role','status');
+    status.textContent=review.report.unresolved.length?'Freigabe gesperrt: ungelöste Kandidaten müssen zugeordnet werden.':'Alle Kandidaten aufgelöst. Koordinaten prüfen und ausdrücklich bestätigen.';
+    panel.append(status);
+    const confirm=document.createElement('button');confirm.type='button';confirm.textContent='Gelenkanker ausdrücklich bestätigen';
+    confirm.disabled=review.report.unresolved.length>0||review.report.anchors.length!==evidence.correspondences.length||review.report.anchors.length===0;
+    confirm.addEventListener('click',()=>{
+      try{
+        this.confirmedDraftRigLandmarkPlan=confirmDraftRigLandmarkReview(review,review.report.anchors.map(anchor=>({
+          landmarkId:anchor.landmarkId,jointName:anchor.jointName,
+          ...(this.draftRigLandmarkPositions.has(anchor.landmarkId)?{position:this.draftRigLandmarkPositions.get(anchor.landmarkId)!}:{}),
+        })));
+        status.textContent='Bestätigter Review-Plan erstellt. Das Skelett wurde nicht verändert.';
+        download.disabled=false;
+        this.hooks.feedback('Gelenkanker bestätigt. Es wurde kein Rig automatisch verändert.');
+      }catch(error){this.hooks.feedback(error instanceof Error?error.message:String(error));}
+    });
+    const download=document.createElement('button');download.type='button';download.textContent='Bestätigten Plan exportieren';download.disabled=!this.confirmedDraftRigLandmarkPlan;
+    download.addEventListener('click',()=>{
+      if(!this.confirmedDraftRigLandmarkPlan)return;
+      const blob=new Blob([JSON.stringify(this.confirmedDraftRigLandmarkPlan,null,2)],{type:'application/json'});
+      const url=URL.createObjectURL(blob),a=document.createElement('a');
+      a.href=url;a.download=(this.project.avatar.id.replace(/[^a-z0-9_-]/gi,'_')||'pakachi')+'-confirmed-rig-anchors.json';a.click();
+      window.setTimeout(()=>URL.revokeObjectURL(url),1000);
+    });
+    panel.append(confirm,download);
+  }
+  private rebuildDraftRigLandmarkReview(){
+    const evidence=this.draftRigLandmarkEvidence,review=this.draftRigLandmarkReview,manifest=this.landmarkReviewManifest;
+    if(!evidence||!review||!manifest)return;
+    try{
+      this.draftRigLandmarkReview=createDraftRigLandmarkReview(evidence,this.rig.root,manifest,review.template,
+        [...this.draftRigLandmarkAssignments].map(([landmarkId,jointName])=>({landmarkId,jointName})));
+      this.confirmedDraftRigLandmarkPlan=null;
+      this.renderDraftRigLandmarkReview();
+    }catch(error){this.hooks.feedback(error instanceof Error?error.message:String(error));}
+  }
 
   private renderLandmarkReview(){
     const panel=this.host.querySelector<HTMLElement>('#cluster-landmark-review');
@@ -270,7 +370,7 @@ export class StudioEditor {
     <section class="studio-semantic-catalog" aria-labelledby="semantic-catalog-title"><h3 id="semantic-catalog-title">Gemeinsame Anatomie &amp; Oberflächen</h3><p class="subtle">Ein Charakterkatalog für Tierform und Arbeitsform. IDs bleiben stabil; Umbenennen ändert nur die lesbare Bezeichnung.</p>
       <h4>Anatomische Teile</h4><label for="catalog-part">Teil auswählen</label><select id="catalog-part"></select><label for="catalog-part-id">Stabile Part-ID</label><input id="catalog-part-id" maxlength="128" pattern="[a-z0-9][a-z0-9_-]*"><label for="catalog-part-label">Bezeichnung</label><input id="catalog-part-label" maxlength="100"><label for="catalog-part-parent">Übergeordnetes Teil</label><select id="catalog-part-parent"></select><div class="studio-actions"><button id="catalog-part-save">Teil speichern / hinzufügen</button><button id="catalog-part-delete">Teil löschen</button></div>
       <h4>Oberflächen-Layer</h4><label for="catalog-layer">Layer auswählen</label><select id="catalog-layer"></select><label for="catalog-layer-id">Stabile Layer-ID</label><input id="catalog-layer-id" maxlength="128" pattern="[a-z0-9][a-z0-9_-]*"><label for="catalog-layer-label">Bezeichnung</label><input id="catalog-layer-label" maxlength="100"><label for="catalog-layer-part">Anatomische Zuordnung</label><select id="catalog-layer-part"></select><div class="studio-actions"><button id="catalog-layer-save">Layer speichern / hinzufügen</button><button id="catalog-layer-delete">Layer löschen</button></div><p class="subtle" id="catalog-feedback" role="status">Gelöschte Teile oder Layer mit abhängigen Kindern, Landmarken oder Bindungen werden geschützt.</p></section>
-    <section class="studio-form-manifest"><h3>Manifest für geöffnetes Modell erzeugen</h3><p class="subtle">Die Form wird ausdrücklich von dir ausgewählt. Das Quellasset wird per SHA-256 gebunden; alle Dreiecke bleiben zunächst anatomisch und als Oberflächen-Layer unklassifiziert.</p><label for="cluster-current-form">Form dieses Modells</label><select id="cluster-current-form"><option value="animal">Tierform</option><option value="humanoid">Arbeitsform</option></select><button id="cluster-export-current-manifest">Unklassifiziertes Form-Manifest exportieren</button><label class="check"><input id="cluster-landmark-form-mapping-confirm" type="checkbox"> Ich bestätige: Die Formauswahl oben entspricht der Form der verwendeten Bildreferenz.</label><button id="cluster-export-landmark-evidence">Bestätigte Landmarken-Belege exportieren</button><input id="cluster-import-landmark-evidence-file" type="file" accept="application/json,.json" hidden><button id="cluster-import-landmark-evidence">Landmarken-Beleg importieren und prüfen</button><input id="cluster-import-reviewed-manifest-file" type="file" accept="application/json,.json" hidden><button id="cluster-import-reviewed-manifest">Übernommenes Manifest wiederherstellen</button><div id="cluster-landmark-review" aria-live="polite"><p class="subtle">Noch keine Klassifikationsvorschläge geladen.</p></div><p id="cluster-manifest-status" role="status" aria-live="polite">Noch kein Manifest erzeugt.</p></section><section class="studio-form-comparison"><div id="cluster-form-comparison"></div></section>
+    <section class="studio-form-manifest"><h3>Manifest für geöffnetes Modell erzeugen</h3><p class="subtle">Die Form wird ausdrücklich von dir ausgewählt. Das Quellasset wird per SHA-256 gebunden; alle Dreiecke bleiben zunächst anatomisch und als Oberflächen-Layer unklassifiziert.</p><label for="cluster-current-form">Form dieses Modells</label><select id="cluster-current-form"><option value="animal">Tierform</option><option value="humanoid">Arbeitsform</option></select><button id="cluster-export-current-manifest">Unklassifiziertes Form-Manifest exportieren</button><label class="check"><input id="cluster-landmark-form-mapping-confirm" type="checkbox"> Ich bestätige: Die Formauswahl oben entspricht der Form der verwendeten Bildreferenz.</label><button id="cluster-export-landmark-evidence">Bestätigte Landmarken-Belege exportieren</button><input id="cluster-import-landmark-evidence-file" type="file" accept="application/json,.json" hidden><button id="cluster-import-landmark-evidence">Landmarken-Beleg importieren und prüfen</button><input id="cluster-import-reviewed-manifest-file" type="file" accept="application/json,.json" hidden><button id="cluster-import-reviewed-manifest">Übernommenes Manifest wiederherstellen</button><div id="cluster-landmark-review" aria-live="polite"><p class="subtle">Noch keine Klassifikationsvorschläge geladen.</p></div><section class="draft-rig-landmark-review"><h4>Gelenkanker prüfen</h4><p class="subtle">Kandidaten aus dem 3D-Landmarken-Beleg. Jede Zuordnung und Position muss geprüft werden. Die Freigabe verändert das Rig nicht.</p><div id="draft-rig-landmark-review-panel" aria-live="polite"><p class="subtle">Noch kein Beleg geladen.</p></div></section><p id="cluster-manifest-status" role="status" aria-live="polite">Noch kein Manifest erzeugt.</p></section><section class="studio-form-comparison"><div id="cluster-form-comparison"></div></section>
     <button id="figure-select" ${this.edit?'hidden':''}>Gesamte Figur bewegen</button>
     <label for="studio-points">Gelenk / Gesichtspunkt</label><select id="studio-points"><option value="">Punkt auswählen …</option></select>
     <div class="studio-actions" ${this.edit?'':'hidden'}><label>Position auf der Knochenstrecke <output id="bone-ratio-value">${Math.round(this.insertionRatio*100)} %</output><input id="bone-ratio" type="range" min="10" max="90" step="1" value="${Math.round(this.insertionRatio*100)}" aria-label="Position des Zwischengelenks"><span class="subtle">Vom Elternknochen zum ausgewählten Kindknochen; 50 % = Mitte.</span></label><button id="bone-add">＋ Knochen setzen</button><button id="bone-insert">Knochen dazwischen einfügen</button><button id="point-add">＋ Punkt setzen</button><button id="point-connect" ${this.point?'':'disabled'}>Verbinden / lösen</button></div>
@@ -355,7 +455,11 @@ export class StudioEditor {
           const preview=createClusterLandmarkClassificationPreview(manifest,evidence);
           this.landmarkReviewManifest=manifest;
           this.landmarkReviewPreview=preview;
+          this.draftRigLandmarkEvidence=evidence;
+          this.draftRigLandmarkAssignments.clear();this.draftRigLandmarkPositions.clear();this.confirmedDraftRigLandmarkPlan=null;
+          this.draftRigLandmarkReview=createDraftRigLandmarkReview(evidence,this.rig.root,manifest,form==='animal'?'quadruped':'biped-relaxed');
           this.renderLandmarkReview();
+          this.renderDraftRigLandmarkReview();
           const previewJson=JSON.stringify(preview,null,2),previewUrl=URL.createObjectURL(new Blob([previewJson],{type:'application/json'}));
           const previewAnchor=document.createElement('a');previewAnchor.href=previewUrl;previewAnchor.download=(this.project.avatar.id.replace(/[^a-z0-9_-]/gi,'_')||'pakachi')+'-'+form+'-landmark-classification-preview.json';previewAnchor.click();
           window.setTimeout(()=>URL.revokeObjectURL(previewUrl),1000);
