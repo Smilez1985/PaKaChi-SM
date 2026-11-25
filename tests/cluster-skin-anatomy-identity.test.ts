@@ -40,5 +40,5 @@ test('rigged evidence rejects a missing transferred identity rather than inferri
  await bindDraftRig(root,'biped',new AbortController().signal,'bounds');
  const first:THREE.SkinnedMesh[]=[];root.traverse(node=>{if(node instanceof THREE.SkinnedMesh)first.push(node);});
  delete first[0]!.userData.pakachiClusterMeshId;
- assert.throws(()=>collectRiggedSkinWeightEvidenceFromRoot(root,manifest),/missing, stale, or duplicate/);
+ assert.throws(()=>collectRiggedSkinWeightEvidenceFromRoot(root,manifest,new Map([['Draft_LeftElbow','left_elbow'],['Draft_RightElbow','right_elbow']])),/missing, stale, or duplicate/);
 });
