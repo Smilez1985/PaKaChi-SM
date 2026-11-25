@@ -186,3 +186,62 @@ test('confirmed elbow anchors preserve independent arm deformation after GLB exp
     disposeModel(model.scene);
   }
 });
+
+test('confirmed quadruped tail anchors retain tail deformation independently from the torso after GLB reload', async () => {
+  const bytes = new Uint8Array(await writeFigureGLB(draftFigure(true)));
+  const base = await planFor(bytes);
+  const plan = {
+    ...base,
+    formId: 'animal-form',
+    template: 'quadruped' as const,
+    anchors: [{
+      ...base.anchors[0]!,
+      jointName: 'TailTip',
+      position: [0, 0.72, -0.49] as [number, number, number],
+      landmarkId: 'tail-tip',
+      partId: 'tail',
+      meshId: 'tail-mesh',
+    }],
+  };
+  const prepared = await prepareDraftRigWithConfirmedLandmarks(bytes, plan, {
+    avatarId: 'pakachi', formId: 'animal-form', form: 'animal',
+    sourceAssetSha256: plan.sourceAssetSha256, template: 'quadruped',
+  }, signal());
+  const model = await parseModel(Uint8Array.from(prepared.bytes).buffer as ArrayBuffer);
+  const rig = new (await import('../src/studio-rig.ts')).StudioRig(model.scene);
+  try {
+    const tailTip = model.scene.getObjectByName('Draft_TailTip') as THREE.Bone;
+    const tailBase = model.scene.getObjectByName('Draft_TailBase') as THREE.Bone;
+    const tail = model.scene.getObjectByName('Asymmetric tail') as THREE.SkinnedMesh;
+    const body = model.scene.getObjectByName('Body') as THREE.SkinnedMesh;
+    assert.ok(tailTip instanceof THREE.Bone);
+    assert.ok(tailBase instanceof THREE.Bone);
+    assert.ok(tail instanceof THREE.SkinnedMesh);
+    assert.ok(body instanceof THREE.SkinnedMesh);
+    const snapshot = (mesh: THREE.SkinnedMesh) => {
+      model.scene.updateMatrixWorld(true);
+      return Array.from({ length: mesh.geometry.getAttribute('position').count }, (_, i) =>
+        mesh.getVertexPosition(i, new THREE.Vector3()).applyMatrix4(mesh.matrixWorld));
+    };
+    const beforeTail = snapshot(tail);
+    const beforeBody = snapshot(body);
+    const point = rig.data.points.find(candidate => candidate.name === 'Draft_TailBase');
+    assert.ok(point);
+    const pose = rig.capture();
+    pose[point.id]!.rotation = new THREE.Quaternion()
+      .setFromAxisAngle(new THREE.Vector3(1, 0, 0), .7).toArray();
+    rig.apply(pose);
+    const afterTail = snapshot(tail);
+    const afterBody = snapshot(body);
+    const maxDelta = (before: THREE.Vector3[], after: THREE.Vector3[]) =>
+      Math.max(...before.map((value, index) => value.distanceTo(after[index]!)));
+    assert.ok(maxDelta(beforeTail, afterTail) > .01, 'tail surface must follow its tail chain');
+    assert.ok(maxDelta(beforeBody, afterBody) < .005, 'torso must remain independent from tail motion');
+    assert.equal(prepared.report.template, 'quadruped');
+    assert.equal(prepared.report.bones, 23);
+    assert.equal(prepared.report.review, 'required');
+  } finally {
+    rig.dispose();
+    disposeModel(model.scene);
+  }
+});
