@@ -315,6 +315,7 @@ export class StudioEditor {
           template:plan.template,
         },new AbortController().signal);
         if(this.disposed)return;
+        if(this.confirmedDraftRigLandmarkPlan!==plan)throw Error('Der bestätigte Gelenkanker-Plan wurde während des Rigging-Auftrags geändert; Export verworfen.');
         const blob=new Blob([prepared.bytes.slice().buffer as ArrayBuffer],{type:'model/gltf-binary'});
         const url=URL.createObjectURL(blob),anchor=document.createElement('a');
         anchor.href=url;anchor.download=(this.project.avatar.id.replace(/[^a-z0-9_-]/gi,'_')||'pakachi')+'-'+(pair?.activeForm??'avatar')+'-landmark-rig.glb';anchor.click();
