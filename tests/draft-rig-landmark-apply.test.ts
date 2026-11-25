@@ -6,6 +6,14 @@ import { parseModel, disposeModel } from '../src/viewer.ts';
 import { prepareDraftRigWithConfirmedLandmarks, sha256DraftRigSource } from '../src/draft-rig-landmark-apply.ts';
 import { draftFigure } from './helpers/draft-rig-fixture.ts';
 
+class Reader {
+  result: ArrayBuffer | null = null;
+  onloadend: (() => void) | null = null;
+  readAsArrayBuffer(blob: Blob) {
+    void blob.arrayBuffer().then(value => { this.result = value; this.onloadend?.(); });
+  }
+}
+Object.assign(globalThis, { FileReader: Reader, ProgressEvent: class extends Event {} });
 const signal = () => new AbortController().signal;
 async function source() {
   return new Uint8Array(await writeFigureGLB(draftFigure(false)));
