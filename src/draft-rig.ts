@@ -10,6 +10,7 @@ import {validateDraftRigTopology} from './draft-rig-topology.ts';
 export type DraftRigTemplate='biped'|'biped-relaxed'|'quadruped';
 export interface DraftRigReport {template:DraftRigTemplate;bones:number;meshes:number;vertices:number;method:'proportional-template';review:'required';frame?:DraftBodyFrame;probes?:{joint:string;degrees:30;status:'within'|'outside'|'unmeasurable';surfaceIssues:number;volumeIssues:number;unmeasurableVolumeComponents:number}[]}
 type Joint={name:string;parent:number;point:T.Vector3;end:T.Vector3};
+export interface DraftRigAnchorOverride { jointName:string; position:readonly [number,number,number] }
 /** Normalized landmarks are a starting template, never inferred anatomy. Y-up, +Z-front. */
 function landmarks(template:DraftRigTemplate,frame:DraftBodyFrame):Joint[]{
  const center=new T.Vector3().fromArray(frame.center),right=new T.Vector3().fromArray(frame.right),forward=new T.Vector3().fromArray(frame.forward),joints:Joint[]=[];
@@ -53,7 +54,7 @@ function landmarks(template:DraftRigTemplate,frame:DraftBodyFrame):Joint[]{
 }
 const pause=()=>new Promise<void>(resolve=>setTimeout(resolve,0));
 /** Binds an owned, static scene. All validation/weight work finishes before scene mutation. */
-export async function bindDraftRig(root:T.Object3D,template:DraftRigTemplate,signal:AbortSignal,frameMode:'support'|'bounds'='support'):Promise<DraftRigReport>{
+export async function bindDraftRig(root:T.Object3D,template:DraftRigTemplate,signal:AbortSignal,frameMode:'support'|'bounds'='support',anchorOverrides:readonly DraftRigAnchorOverride[]=[]):Promise<DraftRigReport>{
  signal.throwIfAborted();if(!['biped','biped-relaxed','quadruped'].includes(template)||!['support','bounds'].includes(frameMode))throw Error('draft-rig-template');
  root.updateWorldMatrix(true,true);const meshes:T.Mesh[]=[],bounds=new T.Box3();let vertices=0,triangles=0;
  const point=new T.Vector3(),cloud:number[]=[];
@@ -71,7 +72,20 @@ export async function bindDraftRig(root:T.Object3D,template:DraftRigTemplate,sig
  if(!meshes.length||bounds.isEmpty()||Math.min(size.x,size.y,size.z)<1e-5||Math.max(size.x,size.y,size.z)/Math.min(size.x,size.y,size.z)>100)throw Error('draft-rig-volume-required');
  await pause();signal.throwIfAborted();
  const frame=frameMode==='support'?estimateDraftBodyFrame(cloud,bounds,template==='quadruped'?4:2):{mode:'bounds' as const,reason:'manual-bounds' as const,center:bounds.getCenter(new T.Vector3()).toArray(),right:[1,0,0] as [number,number,number],forward:[0,0,1] as [number,number,number],width:size.x,depth:size.z,height:size.y,floor:bounds.min.y,supports:[]};
- const joints=landmarks(template,frame);validateDraftRigTopology(joints,template);const lines=joints.map(j=>new T.Line3(j.point,j.end)),sigma=Math.max(frame.width,frame.height,frame.depth)*.035,center=new T.Vector3().fromArray(frame.center),right=new T.Vector3().fromArray(frame.right);
+ const joints=landmarks(template,frame);
+ if(!Array.isArray(anchorOverrides)||anchorOverrides.length>joints.length)throw Error('draft-rig-anchor-overrides');
+ const jointByName=new Map(joints.map(joint=>[joint.name,joint]));
+ const usedAnchors=new Set<string>();
+ for(const anchor of anchorOverrides){
+  if(!anchor||typeof anchor.jointName!=='string'||usedAnchors.has(anchor.jointName)||
+     !Array.isArray(anchor.position)||anchor.position.length!==3||
+     !anchor.position.every(value=>Number.isFinite(value)&&Math.abs(value)<=1e6))throw Error('draft-rig-anchor-override');
+  const joint=jointByName.get(anchor.jointName);if(!joint)throw Error('draft-rig-anchor-joint:'+anchor.jointName);
+  usedAnchors.add(anchor.jointName);
+  joint.point.fromArray([...anchor.position]).applyMatrix4(root.matrixWorld);
+ }
+ for(let i=0;i<joints.length;i++){const child=joints.find(j=>j.parent===i);if(child)joints[i].end.copy(child.point);}
+ validateDraftRigTopology(joints,template);const lines=joints.map(j=>new T.Line3(j.point,j.end)),sigma=Math.max(frame.width,frame.height,frame.depth)*.035,center=new T.Vector3().fromArray(frame.center),right=new T.Vector3().fromArray(frame.right);
  const plans:{mesh:T.Mesh;indices:Uint16Array;weights:Float32Array}[]=[],closest=new T.Vector3();
  for(const mesh of meshes){
   const p=mesh.geometry.getAttribute('position'),indices=new Uint16Array(p.count*4),weights=new Float32Array(p.count*4);
@@ -111,12 +125,12 @@ export async function bindDraftRig(root:T.Object3D,template:DraftRigTemplate,sig
  return {template,bones:bones.length,meshes:meshes.length,vertices,method:'proportional-template',review:'required',frame};
 }
 /** Source GLB is retained byte-for-byte; generated output is an independently validated GLB. */
-export async function prepareDraftRig(bytes:Uint8Array,template:DraftRigTemplate,signal:AbortSignal,frameMode:'support'|'bounds'='support'):Promise<{bytes:Uint8Array;report:DraftRigReport}>{
+export async function prepareDraftRig(bytes:Uint8Array,template:DraftRigTemplate,signal:AbortSignal,frameMode:'support'|'bounds'='support',anchorOverrides:readonly DraftRigAnchorOverride[]=[]):Promise<{bytes:Uint8Array;report:DraftRigReport}>{
  signal.throwIfAborted();if(bytes.length>50*1024*1024)throw Error('draft-rig-model-size');
  const model=await parseModel(Uint8Array.from(bytes).buffer);
  try{
   if(model.animations.length)throw Error('draft-rig-static-mesh-required');
-  const report=await bindDraftRig(model.scene,template,signal,frameMode);signal.throwIfAborted();
+  const report=await bindDraftRig(model.scene,template,signal,frameMode,anchorOverrides);signal.throwIfAborted();
   const rig=new StudioRig(model.scene);
   try{
    const check=createPoseSurfaceChecker(rig),neutral=rig.capture();report.probes=[];
