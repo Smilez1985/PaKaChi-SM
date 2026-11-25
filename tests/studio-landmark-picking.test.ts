@@ -305,7 +305,7 @@ test('Studio confirms reviewed anchors and exports a bound GLB without replacing
   const image = document();
   image.forms = [{ id: 'work-form', label: 'Work form', viewIds: ['view-front'] }];
   image.avatars = [{ id: 'pakachi', label: 'PaKaChi', formIds: ['work-form'] }];
-  const manifest = await createStudioFormManifest(root, sourceBase64, 'humanoid');
+  const manifest = await createStudioFormManifest(root, sourceBase64, 'humanoid', new Date().toISOString(), createPaKaChiSemanticCatalog());
   const meshInventory = collectClusterMeshInventory(root, manifest.sourceAssetSha256);
   const pick = createStudioLandmarkSurfacePick({
     document: image, inventory: meshInventory, landmarkId: 'left-eye',
@@ -347,8 +347,8 @@ test('Studio confirms reviewed anchors and exports a bound GLB without replacing
   const panel = host.querySelector('#draft-rig-landmark-review-panel')!;
   const buttons = panel.querySelectorAll('button');
   assert.equal(buttons.length, 3);
-  const confirm = [...buttons].find(button => button.textContent?.includes('ausdrücklich bestätigen')) as HTMLButtonElement;
-  const apply = host.querySelector('#draft-rig-landmark-plan-apply') as HTMLButtonElement;
+  const confirm = [...buttons].find(button => button.textContent?.includes('ausdrücklich bestätigen')) as unknown as HTMLButtonElement;
+  const apply = host.querySelector('#draft-rig-landmark-plan-apply') as unknown as HTMLButtonElement;
   assert.equal(apply.disabled, true);
   confirm.click();
   assert.ok(internal.confirmedDraftRigLandmarkPlan);
