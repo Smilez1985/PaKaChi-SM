@@ -26,7 +26,7 @@ test('draft rig writes explicit stable semantic IDs and part ownership onto ever
 });
 
 test('bone metadata populates a form-local manifest without inferring from generated bone names',async()=>{
-  const root=draftFigure().root;
+  const root=draftFigure();
   const hash='a'.repeat(64);
   const inventory=collectClusterMeshInventory(root,hash);
   const manifest=createUnclassifiedClusterManifest(inventory,'animal','2026-11-25T00:00:00.000Z');
