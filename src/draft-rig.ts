@@ -79,7 +79,7 @@ export async function bindDraftRig(root:T.Object3D,template:DraftRigTemplate,sig
  for(const anchor of anchorOverrides){
   if(!anchor||typeof anchor.jointName!=='string'||usedAnchors.has(anchor.jointName)||
      !Array.isArray(anchor.position)||anchor.position.length!==3||
-     !anchor.position.every(value=>Number.isFinite(value)&&Math.abs(value)<=1e6))throw Error('draft-rig-anchor-override');
+     !anchor.position.every((value:number)=>Number.isFinite(value)&&Math.abs(value)<=1e6))throw Error('draft-rig-anchor-override');
   const joint=jointByName.get(anchor.jointName);if(!joint)throw Error('draft-rig-anchor-joint:'+anchor.jointName);
   usedAnchors.add(anchor.jointName);
   joint.point.fromArray([...anchor.position]).applyMatrix4(root.matrixWorld);
