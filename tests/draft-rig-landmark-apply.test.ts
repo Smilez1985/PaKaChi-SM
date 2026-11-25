@@ -127,3 +127,62 @@ test('confirmed head anchors bind into the quadruped template without losing its
     disposeModel(model.scene);
   }
 });
+
+test('confirmed elbow anchors preserve independent arm deformation after GLB export and reload', async () => {
+  const bytes = await source();
+  const plan = {
+    ...await planFor(bytes),
+    anchors: [{
+      jointName: 'LeftElbow',
+      position: [0.31, 0.58, 0.04] as [number, number, number],
+      landmarkId: 'left-elbow',
+      partId: 'left-arm',
+      meshId: 'left-upper-arm',
+      radius: .04,
+      origin: 'user' as const,
+      policy: 'locked' as const,
+    }],
+  };
+  const prepared = await prepareDraftRigWithConfirmedLandmarks(bytes, plan, {
+    avatarId: 'pakachi', formId: 'work-form', form: 'humanoid',
+    sourceAssetSha256: plan.sourceAssetSha256, template: 'biped-relaxed',
+  }, signal());
+  const model = await parseModel(Uint8Array.from(prepared.bytes).buffer as ArrayBuffer);
+  const rig = new (await import('../src/studio-rig.ts')).StudioRig(model.scene);
+  try {
+    const elbow = model.scene.getObjectByName('Draft_LeftElbow') as THREE.Bone;
+    assert.ok(elbow instanceof THREE.Bone);
+    model.scene.updateMatrixWorld(true);
+    const elbowPosition = model.scene.worldToLocal(elbow.getWorldPosition(new THREE.Vector3()));
+    assert.ok(elbowPosition.distanceTo(new THREE.Vector3(...plan.anchors[0]!.position)) < 1e-5);
+
+    const leftHand = model.scene.getObjectByName('LeftHand') as THREE.SkinnedMesh;
+    const rightHand = model.scene.getObjectByName('RightHand') as THREE.SkinnedMesh;
+    assert.ok(leftHand instanceof THREE.SkinnedMesh);
+    assert.ok(rightHand instanceof THREE.SkinnedMesh);
+    const snapshot = (mesh: THREE.SkinnedMesh) => {
+      model.scene.updateMatrixWorld(true);
+      return Array.from({ length: mesh.geometry.getAttribute('position').count }, (_, i) =>
+        mesh.getVertexPosition(i, new THREE.Vector3()).applyMatrix4(mesh.matrixWorld));
+    };
+    const beforeLeft = snapshot(leftHand);
+    const beforeRight = snapshot(rightHand);
+    const values = rig.capture();
+    const elbowPoint = rig.data.points.find(point => point.name === 'Draft_LeftElbow');
+    assert.ok(elbowPoint);
+    values[elbowPoint.id]!.rotation = new THREE.Quaternion()
+      .setFromAxisAngle(new THREE.Vector3(0, 0, 1), .65).toArray();
+    rig.apply(values);
+    const afterLeft = snapshot(leftHand);
+    const afterRight = snapshot(rightHand);
+    const maxDelta = (before: THREE.Vector3[], after: THREE.Vector3[]) =>
+      Math.max(...before.map((point, i) => point.distanceTo(after[i]!)));
+    assert.ok(maxDelta(beforeLeft, afterLeft) > .02, 'left hand must follow its anchored elbow');
+    assert.ok(maxDelta(beforeRight, afterRight) < .005, 'right hand must remain independent');
+    assert.ok(prepared.report.probes?.length === 4);
+    assert.equal(prepared.report.review, 'required');
+  } finally {
+    rig.dispose();
+    disposeModel(model.scene);
+  }
+});
