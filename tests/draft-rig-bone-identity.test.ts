@@ -9,7 +9,7 @@ import {applyDraftRigBoneIdentitiesToManifest,collectDraftRigBoneIdentityMap,dra
 const signal=()=>new AbortController().signal;
 
 test('draft rig writes explicit stable semantic IDs and part ownership onto every generated bone',async()=>{
-  const root=draftFigure().root;
+  const root=draftFigure();
   await bindDraftRig(root,'quadruped',signal(),'bounds');
   const mapping=collectDraftRigBoneIdentityMap(root);
   const bones:THREE.Bone[]=[];
@@ -33,7 +33,6 @@ test('bone metadata populates a form-local manifest without inferring from gener
   const ids=['body','torso','chest','pelvis','neck','head','muzzle','ears','eyes','eyelids','mouth','shoulders','forelimbs','upper-arms','forearms','hands','paws','digits','hips','hindlimbs','thighs','lower-legs','feet','toes','tail','tail-tip'];
   manifest.parts=ids.map((id,index)=>({id,name:id,parentPartId:null,orderKey:[index+1],rigBoneIds:[]}));
   await bindDraftRig(root,'quadruped',signal(),'bounds');
-  for(const bone of [] as THREE.Bone[])void bone;
   const result=applyDraftRigBoneIdentitiesToManifest(manifest,root);
   assert.equal(result.rigBoneIdByName.size,23);
   assert.ok(result.manifest.parts.find(part=>part.id==='forelimbs')!.rigBoneIds.includes('left_shoulder'));
