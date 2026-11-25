@@ -1,3 +1,16 @@
+## Zwischenprüfung 2026-11-25 – stabile Draft-Bone-Identitäten
+
+**Änderung auf `develop`:** Der Draft-Rig-Generator schreibt nun jedem erzeugten `THREE.Bone` eine stabile semantische `pakachiRigBoneId` und den zugehörigen Katalog-Part als `pakachiClusterPartId` in `userData`. Die Zuordnung ist für Biped und Quadruped explizit definiert; sie hängt weder vom generierten Anzeigenamen noch von Traversierungsreihenfolge oder CamelCase-Konvertierung ab. `applyDraftRigBoneIdentitiesToManifest()` baut daraus eine form-lokale `ClusterManifest`-Variante mit `ClusterPart.rigBoneIds` und liefert zugleich die exakte Bone-Name→`rigBoneId`-Map für den Skin-Weight-Adapter. Fehlende Katalogteile, doppelte Identitäten, unbekannte Gelenknamen und Formabweichungen führen zum Abbruch.
+
+**CI auf Commit `efceb0f55ce9c68a9544d515654042d0c2ea5969`:**
+- [Cluster-Landmark-Workflow #45700211077](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/45700211077): **success**.
+- 121/121 gezielte Regressionstests bestanden, 0 fehlgeschlagen oder übersprungen.
+- Chromium: 2/2 Browser-E2E bestanden.
+- TypeScript `npx tsc --noEmit`: erfolgreich.
+- Dependency-Audit: 0 Schwachstellen.
+
+**Grenzen / nächster Integrationsschritt:** Die Metadatenbrücke ist getestet, aber noch nicht automatisch in den Studio-Ablauf eingebunden. Der nächste Schritt ist, vor dem Rigging die Quellmesh-IDs anzubinden, nach dem Rigging das form-lokale Manifest mit Bone-IDs aufzubauen, Skin-Weight-Evidenz zu sammeln und die daraus entstehenden Part-Vorschläge im Studio ausschließlich als prüfpflichtige Vorschau anzuzeigen. Noch keine automatische Übernahme in das gespeicherte Manifest.
+
 ## Zwischenprüfung 2026-11-25 – Mesh-Identität durch Draft-Rigging
 
 **Änderung auf `develop`:** `src/cluster-skin-anatomy-identity.ts` überträgt die quellinventarbasierten Mesh-IDs vor dem Rigging per vollständiger 1:1-Bindung in `userData`. Der produktive `bindDraftRig()`-Pfad kopiert `userData` beim Austausch `THREE.Mesh`→`THREE.SkinnedMesh`; der anschließende Sammler liest ausschließlich diese Marker und verlangt genau den vollständigen Mesh-Satz des Manifests sowie den identischen Quellhash. Fehlende, doppelte, fremde und veraltete Identitäten führen zum Abbruch statt zu einer heuristischen Zuordnung.
