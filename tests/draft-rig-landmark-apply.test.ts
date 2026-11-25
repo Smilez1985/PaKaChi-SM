@@ -93,3 +93,37 @@ test('duplicate or unknown joint anchors are rejected without changing source by
   await assert.rejects(prepareDraftRigWithConfirmedLandmarks(bytes, unknown, target, signal()), /anchor-joint/);
   assert.equal(await sha256DraftRigSource(bytes), plan.sourceAssetSha256);
 });
+
+
+test('confirmed head anchors bind into the quadruped template without losing its tail chain', async () => {
+  const bytes = new Uint8Array(await writeFigureGLB(draftFigure(true)));
+  const plan = {
+    ...await planFor(bytes),
+    formId: 'animal-form',
+    template: 'quadruped' as const,
+    anchors: [{
+      ...((await planFor(bytes)).anchors[0]!),
+      position: [-0.08, 0.92, 0.12] as [number, number, number],
+    }],
+  };
+  const prepared = await prepareDraftRigWithConfirmedLandmarks(bytes, plan, {
+    avatarId: 'pakachi', formId: 'animal-form', form: 'animal',
+    sourceAssetSha256: plan.sourceAssetSha256, template: 'quadruped',
+  }, signal());
+  const modelBytes = Uint8Array.from(prepared.bytes);
+  const model = await parseModel(modelBytes.buffer as ArrayBuffer);
+  try {
+    model.scene.updateMatrixWorld(true);
+    const head = model.scene.getObjectByName('Draft_Head') as THREE.Bone;
+    const tail = model.scene.getObjectByName('Draft_TailTip') as THREE.Bone;
+    assert.ok(head instanceof THREE.Bone);
+    assert.ok(tail instanceof THREE.Bone);
+    const headRootLocal = model.scene.worldToLocal(head.getWorldPosition(new THREE.Vector3()));
+    assert.ok(headRootLocal.distanceTo(new THREE.Vector3(...plan.anchors[0]!.position)) < 1e-5);
+    assert.equal(prepared.report.template, 'quadruped');
+    assert.equal(prepared.report.bones, 23);
+    assert.equal(prepared.report.review, 'required');
+  } finally {
+    disposeModel(model.scene);
+  }
+});
