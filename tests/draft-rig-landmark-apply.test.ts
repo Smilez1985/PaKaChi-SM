@@ -248,3 +248,60 @@ test('confirmed quadruped tail anchors retain tail deformation independently fro
     disposeModel(model.scene);
   }
 });
+
+
+test('quadruped front and hind paw deformation remains independent after confirmed landmark GLB round-trip', async () => {
+  const bytes = new Uint8Array(await writeFigureGLB(draftFigure(true)));
+  const base = await planFor(bytes);
+  const plan = {
+    ...base,
+    formId: 'animal-form',
+    template: 'quadruped' as const,
+    anchors: [
+      { ...base.anchors[0]!, jointName: 'LeftShoulder', position: [0.23, 0.62, 0.23] as [number, number, number], landmarkId: 'front-shoulder', partId: 'front-limb', meshId: 'left-front' },
+      { ...base.anchors[0]!, jointName: 'LeftHip', position: [0.23, 0.57, -0.23] as [number, number, number], landmarkId: 'hind-hip', partId: 'hind-limb', meshId: 'left-hind' },
+    ],
+  };
+  const prepared = await prepareDraftRigWithConfirmedLandmarks(bytes, plan, {
+    avatarId: 'pakachi', formId: 'animal-form', form: 'animal',
+    sourceAssetSha256: plan.sourceAssetSha256, template: 'quadruped',
+  }, signal());
+  const model = await parseModel(Uint8Array.from(prepared.bytes).buffer as ArrayBuffer);
+  const rig = new (await import('../src/studio-rig.ts')).StudioRig(model.scene);
+  try {
+    const mesh = (name: string) => model.scene.getObjectByName(name) as THREE.SkinnedMesh;
+    const front = mesh('LeftHand');
+    const hind = mesh('LeftFoot');
+    const oppositeFront = mesh('RightHand');
+    const oppositeHind = mesh('RightFoot');
+    for (const value of [front, hind, oppositeFront, oppositeHind]) assert.ok(value instanceof THREE.SkinnedMesh);
+    const snapshot = (item: THREE.SkinnedMesh) => {
+      model.scene.updateMatrixWorld(true);
+      return Array.from({ length: item.geometry.getAttribute('position').count }, (_, i) =>
+        item.getVertexPosition(i, new THREE.Vector3()).applyMatrix4(item.matrixWorld));
+    };
+    const maxDelta = (before: THREE.Vector3[], after: THREE.Vector3[]) =>
+      Math.max(...before.map((value, index) => value.distanceTo(after[index]!)));
+    const beforeFront = snapshot(front);
+    const beforeHind = snapshot(hind);
+    const beforeOppositeFront = snapshot(oppositeFront);
+    const beforeOppositeHind = snapshot(oppositeHind);
+    const pose = rig.capture();
+    const elbow = rig.data.points.find(point => point.name === 'Draft_LeftElbow');
+    const knee = rig.data.points.find(point => point.name === 'Draft_LeftKnee');
+    assert.ok(elbow && knee);
+    pose[elbow.id]!.rotation = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), .55).toArray();
+    pose[knee.id]!.rotation = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), .55).toArray();
+    rig.apply(pose);
+    assert.ok(maxDelta(beforeFront, snapshot(front)) > .01, 'front paw must follow its elbow chain');
+    assert.ok(maxDelta(beforeHind, snapshot(hind)) > .01, 'hind paw must follow its knee chain');
+    assert.ok(maxDelta(beforeOppositeFront, snapshot(oppositeFront)) < .005, 'opposite front paw must remain independent');
+    assert.ok(maxDelta(beforeOppositeHind, snapshot(oppositeHind)) < .005, 'opposite hind paw must remain independent');
+    assert.equal(prepared.report.template, 'quadruped');
+    assert.equal(prepared.report.bones, 23);
+    assert.equal(prepared.report.review, 'required');
+  } finally {
+    rig.dispose();
+    disposeModel(model.scene);
+  }
+});
