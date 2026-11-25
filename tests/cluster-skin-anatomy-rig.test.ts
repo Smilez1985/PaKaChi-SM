@@ -10,8 +10,8 @@ function fixture():ClusterManifest{
  const inventory={schemaVersion:1 as const,sourceAssetSha256:hash,meshes:[{id:meshId,sourceMeshIndex:0,sourceMeshName:'Body',primitiveIndex:0,vertexCount:6,triangleCount:2}],totals:{meshes:1,vertices:6,triangles:2}};
  const manifest=createUnclassifiedClusterManifest(inventory,'animal','2026-11-25T00:00:00.000Z');
  manifest.parts=[
-  {id:'left_arm',name:'Left arm',parentPartId:null,orderKey:[1],rigBoneIds:['left-elbow']},
-  {id:'right_arm',name:'Right arm',parentPartId:null,orderKey:[2],rigBoneIds:['right-elbow']},
+  {id:'left_arm',name:'Left arm',parentPartId:null,orderKey:[1],rigBoneIds:['left_elbow']},
+  {id:'right_arm',name:'Right arm',parentPartId:null,orderKey:[2],rigBoneIds:['right_elbow']},
  ];
  return manifest;
 }
@@ -31,7 +31,7 @@ function riggedMesh(names=['left-elbow','right-elbow']):THREE.SkinnedMesh{
 
 test('collects skin weights through explicit source mesh IDs and exact unique bone names',()=>{
  const manifest=fixture(),mesh=riggedMesh(),before=Array.from(mesh.geometry.getAttribute('skinWeight').array);
- const [evidence]=collectRiggedSkinWeightEvidence(manifest,hash,[{meshId,mesh}]);
+ const [evidence]=collectRiggedSkinWeightEvidence(manifest,hash,[{meshId,mesh}],new Map([['left-elbow','left_elbow'],['right-elbow','right_elbow']]));
  assert.deepEqual(evidence?.bonePartIds,['left_arm','right_arm']);
  assert.deepEqual(Array.from(evidence!.skinWeights),before);
  assert.equal(evidence?.meshId,meshId);
@@ -41,7 +41,7 @@ test('leaves duplicate bone names and bones claimed by multiple parts unmapped',
  const manifest=fixture();
  manifest.parts.push({id:'left_hand',name:'Left hand',parentPartId:null,orderKey:[3],rigBoneIds:['right-elbow']});
  const mesh=riggedMesh(['left-elbow','right-elbow','right-elbow']);
- const [evidence]=collectRiggedSkinWeightEvidence(manifest,hash,[{meshId,mesh}]);
+ const [evidence]=collectRiggedSkinWeightEvidence(manifest,hash,[{meshId,mesh}],new Map([['left-elbow','left_elbow'],['right-elbow','right_elbow']]));
  assert.deepEqual(evidence?.bonePartIds,['left_arm',null,null]);
 });
 
@@ -51,5 +51,5 @@ test('rejects stale source, guessed mesh IDs and topology mismatches',()=>{
  assert.throws(()=>collectRiggedSkinWeightEvidence(manifest,hash,[{meshId:'unknown-mesh',mesh}]),/source inventory/);
  const changed=riggedMesh();
  changed.geometry.setAttribute('position',new THREE.Float32BufferAttribute([0,0,0,1,0,0,0,1,0],3));
- assert.throws(()=>collectRiggedSkinWeightEvidence(manifest,hash,[{meshId,mesh:changed}]),/topology or skin attributes/);
+ assert.throws(()=>collectRiggedSkinWeightEvidence(manifest,hash,[{meshId,mesh:changed}],new Map([['left-elbow','left_elbow'],['right-elbow','right_elbow']])),/topology or skin attributes/);
 });
