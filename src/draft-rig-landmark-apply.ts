@@ -5,6 +5,7 @@ import type { ConfirmedDraftRigLandmarkPlan } from './draft-rig-landmark-review.
 export interface DraftRigLandmarkTarget {
   avatarId: string;
   formId: string;
+  form: 'animal' | 'humanoid';
   sourceAssetSha256: string;
   template: DraftRigTemplate;
 }
@@ -35,12 +36,13 @@ export async function prepareDraftRigWithConfirmedLandmarks(
       plan.version !== 1 || plan.status !== 'user-confirmed' ||
       !target || !/^[a-z0-9][a-z0-9_-]{0,127}$/.test(target.avatarId) ||
       !/^[a-z0-9][a-z0-9_-]{0,127}$/.test(target.formId) ||
+      !['animal', 'humanoid'].includes(target.form) ||
       !/^[a-f0-9]{64}$/.test(target.sourceAssetSha256) ||
       !/^[a-f0-9]{64}$/.test(plan.sourceImageSha256) ||
       plan.avatarId !== target.avatarId || plan.formId !== target.formId ||
       plan.sourceAssetSha256 !== target.sourceAssetSha256 ||
       plan.template !== target.template ||
-      (target.formId.length > 0 && target.template === 'quadruped' && plan.template !== 'quadruped')) {
+      ((target.form === 'animal') !== (target.template === 'quadruped'))) {
     throw new Error('draft-rig-landmark-target-mismatch');
   }
   if (!Array.isArray(plan.anchors) || plan.anchors.length === 0 || plan.anchors.length > 64) {
