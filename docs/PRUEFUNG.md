@@ -1,8 +1,24 @@
 # Prüfstand und Protokolle
 
-**Softwarestand: 0.102.0 · Dokumentationsabgleich: 2026-11-24T20:56:00+01:00 (Europe/Berlin).**
+**Softwarestand: 0.102.0 · Dokumentationsabgleich: 2026-11-25T08:02:00+01:00 (Europe/Berlin).**
 
 Alle Prüfnachweise stehen in dieser Datei: ein Abschnitt je Softwareversion sowie gesonderte Abschnitte für datierte Zwischenprüfungen. Die Ergebnisse und Grenzen gelten für den jeweils genannten Stand. Spätere Läufe stehen als Nachtrag im selben Abschnitt. Produktänderungen gehören in den [Changelog](CHANGELOG.md), offene Aufgaben in die [Roadmap](ROADMAP.md).
+
+## Zwischenprüfung 2026-11-25 – bestätigte Gelenkanker in Draft-Rig und Studio-Export
+
+**Änderung auf `develop`:** `src/draft-rig-landmark-apply.ts` übergibt ausschließlich explizit bestätigte Gelenkanker an `prepareDraftRig()`. Vor dem Rigging werden Avatar-ID, Form-ID, Tier-/Arbeitsform, Template, Bildhash und SHA-256 der exakten GLB-Bytes geprüft. Avatar-root-lokale Gelenkpositionen werden vor der Skin-Gewichtung in die Restpose übertragen; Knochenpositionen, Gewichte und inverse Bind-Matrizen entstehen danach konsistent aus derselben Pose. Fehlerhafte, doppelte oder unbekannte Gelenke sowie geänderte/fremde Quelldateien werden abgewiesen. Die Eingabebytes bleiben unverändert.
+
+**Studio-Aktion:** Im integrierten Studio kann der Benutzer nach vollständiger Prüfung und ausdrücklicher Bestätigung „Draft-Rig mit bestätigten Gelenkankern erzeugen und GLB exportieren“ auslösen. Das aktive Avatar-Modell wird nicht automatisch ersetzt. Der Export wird als prüfpflichtiger GLB ausgegeben; ein eigener Browser-End-to-End-Test des gesamten Buttons/Downloads und die visuelle Prüfung beider Formen stehen noch aus.
+
+**CI auf Code-Commit `74bc54c85c55e334e4f9c8ed4562f45e4a7d2355`:**
+- [Cluster-Landmark-Workflow #45564837781](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/45564837781): **success**.
+- 103 gezielte Regressionstests bestanden, 0 fehlgeschlagen.
+- Browser-Surface-Picking: 1/1 bestanden.
+- TypeScript `npx tsc --noEmit`: erfolgreich.
+- Dependency-Audit: 0 Schwachstellen.
+- Zuvor scheiterte Lauf #45563787917 ausschließlich am TypeScript-Check; die beiden impliziten `any`-Parameter und der `ArrayBuffer | SharedArrayBuffer`-Testfehler wurden behoben. Der erfolgreiche Folgelauf #45564837781 ist der maßgebliche Nachweis.
+
+**Grenzen:** Die Gelenkpositionen sind benutzerbestätigte Oberflächen-/Landmarken-Zuordnungen, keine automatisch erkannte Anatomie. Das Rig verwendet weiterhin proportionale Templates. Es gibt noch keine visuelle Original-PaKaChi-Abnahme, keine Freigabe der deformierten Tier- und Arbeitsform und keinen gemeinsamen Morph-Rig-Meilenstein. Daher keine Übernahme nach `main`.
 
 ## Zwischenprüfung 2026-11-24 – konservative Landmarken-zu-Gelenkanker-Auflösung
 
