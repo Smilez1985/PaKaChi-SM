@@ -16,7 +16,8 @@ function fixture(): ClusterManifest{
  ];
  return manifest;
 }
-function evidence(): SkinWeightMeshEvidence{
+type MutableEvidence = Omit<SkinWeightMeshEvidence,'skinIndices'|'skinWeights'|'bonePartIds'|'indices'> & {skinIndices:Uint16Array;skinWeights:Float32Array;bonePartIds:(string|null)[];indices:Uint16Array|null};
+function evidence(): MutableEvidence{
  const skinIndices=new Uint16Array(24),skinWeights=new Float32Array(24);
  for(let vertex=0;vertex<6;vertex++){skinIndices[vertex*4]=vertex<3?0:1;skinWeights[vertex*4]=1;}
  return {meshId,vertexCount:6,triangleCount:2,skinIndices,skinWeights,bonePartIds:['left_arm','right_arm'],indices:null};
