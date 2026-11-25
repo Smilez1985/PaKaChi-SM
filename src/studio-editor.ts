@@ -254,6 +254,7 @@ export class StudioEditor {
             if(!Number.isFinite(value)||Math.abs(value)>1e6){input.setCustomValidity('Koordinate außerhalb des zulässigen Bereichs.');input.reportValidity();return;}
             input.setCustomValidity('');next[axis]=value;this.draftRigLandmarkPositions.set(item.landmarkId,next);
             this.confirmedDraftRigLandmarkPlan=null;
+            const exportButton=panel.querySelector<HTMLButtonElement>('button:last-child');if(exportButton)exportButton.disabled=true;
           });
           field.append(input);xyz.append(field);
         }
@@ -722,6 +723,7 @@ export class StudioEditor {
     if(this.playing){this.host.querySelectorAll<HTMLButtonElement|HTMLInputElement|HTMLSelectElement>('button,input,select').forEach(e=>e.disabled=e.id!=='move-stop'&&e.id!=='studio-agent-edit'&&!(e.id==='move-inspect-save'&&this.inspectionOrigin&&this.paused&&this.data.poses.length<100));}
     if(this.rig.skinPreviewActive){this.host.querySelectorAll<HTMLButtonElement|HTMLInputElement|HTMLSelectElement>('button,input,select').forEach(e=>e.disabled=!['skin-auto-original','skin-auto-preview','skin-auto-stop','skin-auto-apply'].includes(e.id)||e.id!=='skin-auto-stop'&&!this.automaticSummary());}
     this.renderLandmarkReview();
+    this.renderDraftRigLandmarkReview();
     this.view.setFigureEnabled(!this.edit);this.view.setRotation(this.rotate && !this.edit);this.view.select(this.selected);this.refreshWeightPreview();this.refreshWeightColors();this.refreshNumbers();
   }
   inspect(args:Record<string,unknown>={}) {
