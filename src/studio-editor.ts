@@ -303,11 +303,14 @@ export class StudioEditor {
         if(pair&&pair.avatarId!==this.project.avatar.id)throw Error('Formpaar gehört nicht zum aktuell geöffneten Avatar.');
         const activeAsset=pair?pair[pair.activeForm]:undefined;
         if(activeAsset&&(activeAsset.formId!==plan.formId||activeAsset.model!==this.project.model))throw Error('Bestätigter Plan gehört nicht zur aktuell geöffneten Form.');
+        const activeForm=pair?.activeForm??this.draftRigLandmarkEvidence?.form;
+        if(!activeForm)throw Error('Die aktive Tier-/Arbeitsform ist nicht eindeutig gebunden.');
         if(pair&&((pair.activeForm==='animal')!==(plan.template==='quadruped')))throw Error('Rig-Template passt nicht zur aktiven Tier-/Arbeitsform.');
         const binary=atob(this.project.model),sourceBytes=Uint8Array.from(binary,char=>char.charCodeAt(0));
         const prepared=await prepareDraftRigWithConfirmedLandmarks(sourceBytes,plan,{
           avatarId:this.project.avatar.id,
           formId:activeAsset?.formId??plan.formId,
+          form:activeForm,
           sourceAssetSha256:plan.sourceAssetSha256,
           template:plan.template,
         },new AbortController().signal);
