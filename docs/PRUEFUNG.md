@@ -1,6 +1,6 @@
 # Prüfstand und Protokolle
 
-**Softwarestand: 0.102.0 · Dokumentationsabgleich: 2026-11-25T10:27:00+01:00 (Europe/Berlin).**
+**Softwarestand: 0.102.0 · Dokumentationsabgleich: 2026-11-25T10:34:00+01:00 (Europe/Berlin).**
 
 Alle Prüfnachweise stehen in dieser Datei: ein Abschnitt je Softwareversion sowie gesonderte Abschnitte für datierte Zwischenprüfungen. Die Ergebnisse und Grenzen gelten für den jeweils genannten Stand. Spätere Läufe stehen als Nachtrag im selben Abschnitt. Produktänderungen gehören in den [Changelog](CHANGELOG.md), offene Aufgaben in die [Roadmap](ROADMAP.md).
 
@@ -20,13 +20,15 @@ Alle Prüfnachweise stehen in dieser Datei: ein Abschnitt je Softwareversion sow
 - Dependency-Audit: 0 Schwachstellen.
 - Zuvor scheiterte Lauf #45563787917 ausschließlich am TypeScript-Check; die beiden impliziten `any`-Parameter und der `ArrayBuffer | SharedArrayBuffer`-Testfehler wurden behoben. Lauf #45565289577 deckte einen fehlenden semantischen Testkatalog und zwei unsichere DOM-Casts auf; beide wurden korrigiert. Lauf #45565385196 bestätigte den Studio-UI-Integrationsablauf; #45565617189 ergänzte die Quadruped-Regression. Lauf #45566024089 zeigte zwei TypeScript-Probleme im neuen Browser-Test (ungenutzter Import und statisch nicht auflösbarer Fixture-Pfad), die behoben wurden. Maßgeblicher Gesamtnachweis ist #45566155719.
 
-**Erweiterter Deformationsnachweis auf Code-Commit `c5775059482eed19cee7e96465ed2fca5c8c1fc4`:**
-- [Cluster-Landmark-Workflow #45585393732](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/45585393732): **success**.
-- 107/107 gezielte Regressionstests bestanden, 0 fehlgeschlagen.
+**Erweiterter Deformationsnachweis auf Code-Commit `d0ec82e66e8680c8e298b232a4b53e129618b2d8`:**
+- [Cluster-Landmark-Workflow #45586341554](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/45586341554): **success**.
+- 108/108 gezielte Regressionstests bestanden, 0 fehlgeschlagen.
 - Biped: Nach GLB-Export und erneutem Laden bewegt eine Pose am bestätigten linken Ellbogenanker die linke Hand; die rechte Hand bleibt innerhalb der festgelegten Toleranz unbewegt.
-- Quadruped: Nach GLB-Export und erneutem Laden bewegt eine Pose an `Draft_TailBase` die Schwanzoberfläche; der Rumpf bleibt innerhalb der festgelegten Toleranz unbewegt. Das synthetische Testmodell wurde dafür anatomisch passend zur quadrupeden Schweifkette ausgerichtet.
+- Quadruped-Schweif: Eine Pose an `Draft_TailBase` bewegt die Schwanzoberfläche; der Rumpf bleibt innerhalb der festgelegten Toleranz unbewegt.
+- Quadruped-Pfoten: Posen an linkem `Draft_LeftElbow` und `Draft_LeftKnee` bewegen Vorder- und Hinterpfote unabhängig; die jeweils gegenüberliegenden Pfoten bleiben innerhalb der festgelegten Toleranz unbewegt.
+- Alle drei Deformationsprüfungen erfolgen nach GLB-Export und erneutem Laden. Die Geometrie ist weiterhin synthetisch und belegt keine visuelle Qualität oder anatomische Eignung eines echten PaKaChi-Modells.
 - Chromium-Browserprüfungen: 2/2 bestanden; TypeScript erfolgreich; Dependency-Audit 0 Schwachstellen.
-- Fehlerbehebung der Zwischenläufe: #45584897499 zeigte eine unzuverlässige Suche des Schwanzobjekts über den Anzeigenamen; die Prüfung identifiziert das Testmesh jetzt über seine Geometrie. #45585153184 deckte fehlerhaft escapte Zeilenumbrüche im Test auf; korrigiert. #45585275261 zeigte, dass die synthetische Schwanzgeometrie seitlich statt entlang der quadrupeden Schwanzkette lag; die Testfixture wurde entsprechend korrigiert. Nur #45585393732 gilt als erfolgreicher Gesamtnachweis.
+- Der Workflow benötigt einen einzelnen gezielten Lauf; frühere erfolgreiche Teilnachweise bleiben als Historie bestehen. Maßgeblich für den aktuellen Stand ist ausschließlich #45586341554.
 
 **Grenzen:** Die Gelenkpositionen sind benutzerbestätigte Oberflächen-/Landmarken-Zuordnungen, keine automatisch erkannte Anatomie. Das Rig verwendet weiterhin proportionale Templates. Es gibt noch keine visuelle Original-PaKaChi-Abnahme, keine Freigabe der deformierten Tier- und Arbeitsform und keinen gemeinsamen Morph-Rig-Meilenstein. Daher keine Übernahme nach `main`.
 
