@@ -7,7 +7,8 @@ test('Studio confirms reviewed joint anchors and downloads a GLB without replaci
   }));
   await page.goto('/');
   await page.evaluate(async () => {
-    const fixture = await import(/* @vite-ignore */ '/tests/e2e/fixtures/studio-landmark-export.ts');
+    const fixtureUrl = '/tests/e2e/fixtures/studio-landmark-export.ts';
+    const fixture = await import(/* @vite-ignore */ fixtureUrl);
     const host = document.querySelector<HTMLElement>('#studio-host')!;
     const state = await fixture.mountStudioLandmarkExportFixture(host);
     (window as unknown as { __landmarkRig: typeof state }).__landmarkRig = state;
