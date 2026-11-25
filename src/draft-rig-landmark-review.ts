@@ -118,7 +118,7 @@ export function confirmDraftRigLandmarkReview(
         !(typeof correction.jointName === 'string' && /^[A-Z][A-Za-z0-9]{0,63}$/.test(correction.jointName)) || byId.has(correction.landmarkId) ||
         (correction.position !== undefined &&
           (!Array.isArray(correction.position) || correction.position.length !== 3 ||
-           !correction.position.every(value => Number.isFinite(value) && Math.abs(value) <= 1e6)))) {
+           !correction.position.every((value: number) => Number.isFinite(value) && Math.abs(value) <= 1e6)))) {
       throw new Error('draft-rig-landmark-correction');
     }
     byId.set(correction.landmarkId, correction);
