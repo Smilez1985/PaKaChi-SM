@@ -36,7 +36,7 @@ test('keeps boundary triangles and unmapped bone influence unresolved',()=>{
  // Two corners belong to the left arm, one to the right: below the .75 confidence threshold.
  input.skinIndices[8]=1;
  input.skinWeights[8]=1;
- input.skinIndices[12]=2;input.skinWeights[12]=1;
+ for(let vertex=3;vertex<6;vertex++){input.skinIndices[vertex*4]=2;input.skinWeights[vertex*4]=1;}
  input.bonePartIds=['left_arm','right_arm',null];
  const result=proposeSkinWeightClusterAssignments(current,hash,[input],{minConfidence:.75,generatedAt:'2026-11-25T00:02:00.000Z'});
  assert.equal(result.manifest.assignments[0]!.partId,null);
