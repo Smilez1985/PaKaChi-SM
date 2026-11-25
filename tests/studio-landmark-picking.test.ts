@@ -12,6 +12,12 @@ import * as T from 'three';
 import { StudioRig } from '../src/studio-rig.ts';
 import { StudioEditor } from '../src/studio-editor.ts';
 import type { StudioView } from '../src/studio-view.ts';
+import { writeFigureGLB } from '../src/figure-glb.ts';
+import { collectClusterMeshInventory } from '../src/cluster-inventory.ts';
+import { createDraftRigLandmarkReview } from '../src/draft-rig-landmark-review.ts';
+import type { ClusterManifest } from '../src/cluster-architecture.ts';
+import type { StudioLandmarkEvidenceBundle } from '../src/studio-landmark-evidence.ts';
+import { draftFigure } from './helpers/draft-rig-fixture.ts';
 
 const document = (): ImageReferenceDocument => ({
   format: 'pakachi-image-reference', version: 1,
@@ -271,4 +277,107 @@ test('landmark review acceptance rejects conflicts and stale preview provenance'
   const conflict = { ...preview, items: [{ ...preview.items[0]!, status: 'conflict' as const }] };
   assert.throws(() => acceptClusterLandmarkPreviewItem(manifest, conflict, preview.items[0]!.meshId, 0), /nicht eindeutig/);
   assert.throws(() => acceptClusterLandmarkPreviewItem({ ...manifest, sourceAssetSha256: 'c'.repeat(64) }, preview, preview.items[0]!.meshId, 0), /passt nicht/);
+});
+
+
+test('Studio confirms reviewed anchors and exports a bound GLB without replacing the active avatar', async () => {
+  Object.defineProperty(globalThis, 'crypto', { configurable: true, value: webcrypto });
+  class Reader {
+    result: ArrayBuffer | null = null;
+    onloadend: (() => void) | null = null;
+    readAsArrayBuffer(blob: Blob) {
+      void blob.arrayBuffer().then(value => { this.result = value; this.onloadend?.(); });
+    }
+  }
+  Object.assign(globalThis, { FileReader: Reader, ProgressEvent: class extends Event {} });
+  const w = new Window();
+  Object.assign(globalThis, {
+    window: w, document: w.document, Event: w.Event,
+    Option: function (label = '', value = '') {
+      const option = w.document.createElement('option');
+      option.textContent = label; option.value = value; return option;
+    },
+  });
+  const root = draftFigure(false);
+  root.updateMatrixWorld(true);
+  const sourceBytes = new Uint8Array(await writeFigureGLB(root));
+  const sourceBase64 = Buffer.from(sourceBytes).toString('base64');
+  const image = document();
+  image.forms = [{ id: 'work-form', label: 'Work form', viewIds: ['view-front'] }];
+  image.avatars = [{ id: 'pakachi', label: 'PaKaChi', formIds: ['work-form'] }];
+  const manifest = await createStudioFormManifest(root, sourceBase64, 'humanoid');
+  const meshInventory = collectClusterMeshInventory(root, manifest.sourceAssetSha256);
+  const pick = createStudioLandmarkSurfacePick({
+    document: image, inventory: meshInventory, landmarkId: 'left-eye',
+    hit: { meshIndex: 1, triangleIndex: 0, barycentric: [0.2, 0.3, 0.5] },
+    radiusLocal: 0.05, confirmed: true,
+  });
+  const evidence = createStudioLandmarkEvidenceBundle(root, manifest, image, [pick], true);
+  const review = createDraftRigLandmarkReview(evidence, root, manifest, 'biped-relaxed');
+  assert.equal(review.report.unresolved.length, 0);
+  assert.equal(review.report.anchors[0]?.jointName, 'Head');
+
+  const rig = new StudioRig(root);
+  const view = new Proxy({}, {
+    get(_target, key) { return key === 'onSurfacePick' ? () => {} : () => {}; },
+    set() { return true; },
+  }) as unknown as StudioView;
+  const host = w.document.createElement('div');
+  const project = {
+    format: 'pakachi-studio' as const, version: 1 as const, model: sourceBase64,
+    avatar: { id: 'pakachi', name: 'PaKaChi', description: '', moves: [] },
+    imageReference: image,
+  };
+  const editor = new StudioEditor(rig, view, host as unknown as HTMLElement, project, {
+    suspend() {}, resume() {}, changed() {}, feedback() {},
+  });
+  editor.enter();
+  const internal = editor as unknown as {
+    landmarkReviewManifest: ClusterManifest | null;
+    draftRigLandmarkEvidence: StudioLandmarkEvidenceBundle | null;
+    draftRigLandmarkReview: ReturnType<typeof createDraftRigLandmarkReview> | null;
+    renderDraftRigLandmarkReview(): void;
+    confirmedDraftRigLandmarkPlan: unknown;
+  };
+  internal.landmarkReviewManifest = manifest;
+  internal.draftRigLandmarkEvidence = evidence;
+  internal.draftRigLandmarkReview = review;
+  internal.renderDraftRigLandmarkReview();
+
+  const panel = host.querySelector('#draft-rig-landmark-review-panel')!;
+  const buttons = panel.querySelectorAll('button');
+  assert.equal(buttons.length, 3);
+  const confirm = [...buttons].find(button => button.textContent?.includes('ausdrücklich bestätigen')) as HTMLButtonElement;
+  const apply = host.querySelector('#draft-rig-landmark-plan-apply') as HTMLButtonElement;
+  assert.equal(apply.disabled, true);
+  confirm.click();
+  assert.ok(internal.confirmedDraftRigLandmarkPlan);
+  assert.equal(apply.disabled, false);
+
+  const blobs: Blob[] = [];
+  const originalCreate = URL.createObjectURL;
+  const originalRevoke = URL.revokeObjectURL;
+  const originalAnchorClick = w.HTMLAnchorElement.prototype.click;
+  let downloaded = '';
+  URL.createObjectURL = (blob: Blob | MediaSource) => { blobs.push(blob as Blob); return 'blob:pakachi-test'; };
+  URL.revokeObjectURL = () => {};
+  w.HTMLAnchorElement.prototype.click = function () { downloaded = this.download; };
+  try {
+    apply.click();
+    for (let i = 0; i < 300 && !panel.textContent?.includes('Draft-Rig erzeugt und GLB exportiert'); i++) {
+      await new Promise(resolve => setTimeout(resolve, 10));
+    }
+    assert.match(panel.textContent ?? '', /Draft-Rig erzeugt und GLB exportiert/);
+    assert.equal(downloaded, 'pakachi-avatar-landmark-rig.glb');
+    assert.equal(blobs.length, 1);
+    assert.ok(blobs[0]!.size > 0);
+    assert.equal(root.getObjectByName('Draft_Head'), undefined);
+    assert.equal(root.children.some(child => child instanceof T.SkinnedMesh), false);
+  } finally {
+    URL.createObjectURL = originalCreate;
+    URL.revokeObjectURL = originalRevoke;
+    w.HTMLAnchorElement.prototype.click = originalAnchorClick;
+    editor.dispose();
+    w.happyDOM.abort();
+  }
 });
