@@ -71,11 +71,11 @@ test('landmark handover rejects wrong avatar, form, template and source bytes be
   const bytes = await source();
   const plan = await planFor(bytes);
   const target = {
-    avatarId: 'pakachi', formId: 'work-form',
+    avatarId: 'pakachi', formId: 'work-form', form: 'humanoid' as const,
     sourceAssetSha256: plan.sourceAssetSha256, template: 'biped-relaxed' as const,
   };
   await assert.rejects(prepareDraftRigWithConfirmedLandmarks(bytes, plan, { ...target, avatarId: 'other' }, signal()), /target-mismatch/);
-  await assert.rejects(prepareDraftRigWithConfirmedLandmarks(bytes, plan, { ...target, formId: 'animal-form' }, signal()), /target-mismatch/);
+  await assert.rejects(prepareDraftRigWithConfirmedLandmarks(bytes, plan, { ...target, formId: 'animal-form', form: 'animal' }, signal()), /target-mismatch/);
   await assert.rejects(prepareDraftRigWithConfirmedLandmarks(bytes, plan, { ...target, template: 'biped', form: 'animal' }, signal()), /target-mismatch/);
   const changed = bytes.slice(); changed[changed.length - 1] = changed[changed.length - 1]! ^ 1;
   await assert.rejects(prepareDraftRigWithConfirmedLandmarks(changed, plan, target, signal()), /source-hash-mismatch/);
@@ -85,7 +85,7 @@ test('duplicate or unknown joint anchors are rejected without changing source by
   const bytes = await source();
   const plan = await planFor(bytes);
   const target = {
-    avatarId: 'pakachi', formId: 'work-form',
+    avatarId: 'pakachi', formId: 'work-form', form: 'humanoid' as const,
     sourceAssetSha256: plan.sourceAssetSha256, template: 'biped-relaxed' as const,
   };
   const duplicate = { ...plan, anchors: [...plan.anchors, { ...plan.anchors[0]!, landmarkId: 'head-2' }] };
