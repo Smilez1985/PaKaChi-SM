@@ -3,9 +3,11 @@ import assert from 'node:assert/strict';
 import {createUnclassifiedClusterManifest} from '../src/cluster-inventory.ts';
 import {proposeSkinWeightClusterAssignments} from '../src/cluster-skin-anatomy.ts';
 import {validateClusterManifest} from '../src/cluster-architecture.ts';
+import type {ClusterManifest} from '../src/cluster-architecture.ts';
+import type {SkinWeightMeshEvidence} from '../src/cluster-skin-anatomy.ts';
 
 const hash='a'.repeat(64),meshId='mesh-'+hash+'-walk0-mesh0-primitive0';
-function fixture(){
+function fixture(): ClusterManifest{
  const source={schemaVersion:1 as const,sourceAssetSha256:hash,meshes:[{id:meshId,sourceMeshIndex:0,sourceMeshName:'Body',primitiveIndex:0,vertexCount:6,triangleCount:2}],totals:{meshes:1,vertices:6,triangles:2}};
  const manifest=createUnclassifiedClusterManifest(source,'animal','2026-11-25T00:00:00.000Z');
  manifest.parts=[
@@ -14,7 +16,7 @@ function fixture(){
  ];
  return manifest;
 }
-function evidence(){
+function evidence(): SkinWeightMeshEvidence{
  const skinIndices=new Uint16Array(24),skinWeights=new Float32Array(24);
  for(let vertex=0;vertex<6;vertex++){skinIndices[vertex*4]=vertex<3?0:1;skinWeights[vertex*4]=1;}
  return {meshId,vertexCount:6,triangleCount:2,skinIndices,skinWeights,bonePartIds:['left_arm','right_arm'],indices:null};
