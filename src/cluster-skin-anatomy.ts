@@ -66,7 +66,7 @@ export function proposeSkinWeightClusterAssignments(
         !item.skinIndices || !item.skinWeights ||
         item.skinIndices.length !== item.vertexCount * 4 || item.skinWeights.length !== item.vertexCount * 4 ||
         !Array.isArray(item.bonePartIds) || item.bonePartIds.length === 0 || item.bonePartIds.length > 256 ||
-        item.bonePartIds.some(partId => partId !== null && (typeof partId !== 'string' || !parts.has(partId)))) {
+        item.bonePartIds.some((partId: string | null) => partId !== null && (typeof partId !== 'string' || !parts.has(partId)))) {
       throw new Error('Skin-weight evidence does not match the source mesh inventory or semantic catalog.');
     }
     const elementCount = item.indices?.length ?? item.vertexCount;
