@@ -51,9 +51,8 @@ test('confirmed anchors enter the draft rest pose before skinning and bind matri
     sourceAssetSha256: plan.sourceAssetSha256, template: 'biped-relaxed',
   }, signal());
   assert.deepEqual(bytes, original);
-  const model = await parseModel(prepared.bytes.buffer.slice(
-    prepared.bytes.byteOffset, prepared.bytes.byteOffset + prepared.bytes.byteLength,
-  ));
+  const modelBytes = Uint8Array.from(prepared.bytes);
+  const model = await parseModel(modelBytes.buffer as ArrayBuffer);
   try {
     model.scene.updateMatrixWorld(true);
     const head = model.scene.getObjectByName('Draft_Head') as THREE.Bone;
