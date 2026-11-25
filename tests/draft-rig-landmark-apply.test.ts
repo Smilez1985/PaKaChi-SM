@@ -212,7 +212,10 @@ test('confirmed quadruped tail anchors retain tail deformation independently fro
   try {
     const tailTip = model.scene.getObjectByName('Draft_TailTip') as THREE.Bone;
     const tailBase = model.scene.getObjectByName('Draft_TailBase') as THREE.Bone;
-    const skinnedMeshes: THREE.SkinnedMesh[] = [];\n    model.scene.traverse(node => { if (node instanceof THREE.SkinnedMesh) skinnedMeshes.push(node); });\n    // GLTFLoader may normalize display names; the fixture's sphere is the only high-resolution mesh.\n    const tail = skinnedMeshes.find(mesh => mesh.geometry.getAttribute('position').count > 200);
+    const skinnedMeshes: THREE.SkinnedMesh[] = [];
+    model.scene.traverse(node => { if (node instanceof THREE.SkinnedMesh) skinnedMeshes.push(node); });
+    // GLTFLoader may normalize display names; the fixture's sphere is the only high-resolution mesh.
+    const tail = skinnedMeshes.find(mesh => mesh.geometry.getAttribute('position').count > 200);
     const body = model.scene.getObjectByName('Body') as THREE.SkinnedMesh;
     assert.ok(tailTip instanceof THREE.Bone);
     assert.ok(tailBase instanceof THREE.Bone);
