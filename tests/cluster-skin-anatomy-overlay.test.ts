@@ -13,7 +13,7 @@ function fixture(indexed=true): {root:THREE.Group;manifest:ClusterManifest;mesh:
   mesh.userData.pakachiClusterMeshId='mesh-a';mesh.userData.pakachiClusterSourceAssetSha256=hash;
   root.add(mesh);
   const manifest:ClusterManifest={schemaVersion:1,form:'animal',sourceAssetSha256:hash,algorithmId:'test',algorithmVersion:'1.0.0',generatedAt:new Date().toISOString(),revision:0,
-    parts:[{id:'torso',label:'Torso'}],layers:[],meshes:[{id:'mesh-a',sourceMeshIndex:0,sourceMeshName:'not-an-identity',primitiveIndex:0,vertexCount:3,triangleCount:1,sourceNodePath:'root/mesh'}],
+    parts:[{id:'torso',name:'Torso',parentPartId:null,orderKey:[1],rigBoneIds:[]}],layers:[],meshes:[{id:'mesh-a',sourceMeshIndex:0,sourceMeshName:'not-an-identity',primitiveIndex:0,vertexCount:3,triangleCount:1,sourceNodePath:'root/mesh'}],
     assignments:[{meshId:'mesh-a',triangleIndex:0,partId:'torso',surfaceLayerId:null,origin:'automatic',policy:'recomputable',confidence:.8,reason:'clear'}],overrides:[]};
   return {root,manifest,mesh};
 }
