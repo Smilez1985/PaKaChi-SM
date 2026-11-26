@@ -1,3 +1,13 @@
+## Zwischenprüfung 2026-11-26 – interaktive Skin-Weight-Prüfung
+
+**Implementierung auf `develop`:** `src/cluster-skin-anatomy-review.ts` erlaubt quellinventar- und manifestgebundene manuelle Dreieckskorrekturen. Jede Korrektur validiert Mesh, Dreiecksindex, anatomischen Part und optionalen Layer; sie erzeugt eine gesperrte Benutzerzuordnung (`origin: user`, `policy: locked`) und mutiert den ursprünglichen Vorschlagsreport nicht. `confirmSkinWeightProposal()` übernimmt nur klassifizierte Vorschläge als gesperrte Benutzerzuordnungen. Unaufgelöste Dreiecke bleiben offen. Im Studio gibt es je Form Mesh-/Dreiecksauswahl, Part-/Layer-Auswahl, Begründungsfeld und getrennten Export; die gemeinsame Übernahme beider Form-Manifeste erfordert eine ausdrückliche Aktion.
+
+**CI:**
+- [Cluster-Landmark-Workflow #45776499011](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/45776499011): **success**, 126/126 gezielte Regressionen, 2/2 Chromium-E2E, TypeScript erfolgreich, Dependency-Audit 0 Schwachstellen.
+- [Image-Reference-Workflow #45776499092](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/45776499092): **success**, 21/21 Chromium-E2E, TypeScript und Dependency-Audit erfolgreich.
+
+**Grenzen:** Die Oberfläche ermöglicht aktuell die manuelle Prüfung per Mesh und Dreiecksindex; sie rendert noch keine farbige Dreiecks-/Part-Overlay-Vorschau direkt auf der 3D-Oberfläche. Die Tests belegen die Datenoperationen und bestehende Studio-Browserpfade, nicht die visuelle Abnahme des Original-PaKaChi. Nächster Schritt: visuelle Auswahl-/Overlay-Vorschau der vorgeschlagenen Parts im 3D-Viewport und persistente Formmanifest-Review im realen UI-Ablauf.
+
 ## Zwischenprüfung 2026-11-26 – Skin-Weight-Anatomievorschläge im Studio
 
 **Implementierung auf `develop`:** Der tatsächliche Tier-/Arbeitsform-Rigging-Ablauf ist mit der Skin-Weight-Evidenzpipeline verbunden. `prepareDraftRig()` bietet kontrollierte `beforeBind`-/`afterBind`-Hooks. Vor dem Binden erstellt die Pipeline ein quellhashgebundenes Formmanifest, löst das Meshinventar auf und überträgt jede Mesh-ID eindeutig auf das Quellmesh. Nach dem Binden liest sie die stabilen Bone-Metadaten aus, erzeugt das formgebundene Manifest, sammelt die realen `SkinnedMesh`-Skin-Indizes/-Gewichte und klassifiziert Dreiecke konservativ. `prepareDraftRigPair()` führt das getrennt für Tier- und Arbeitsform aus.
