@@ -8,6 +8,7 @@ import * as T from 'three';
 import { TransformControls } from 'three/addons/controls/TransformControls.js';
 type NavigationControls = {enabled:boolean; target:T.Vector3};
 import type { StudioRig } from './studio-rig.ts';
+import type { ClusterSkinOverlayReport, ClusterSkinOverlayState } from './cluster-skin-anatomy-overlay.ts';
 
 export class StudioView {
   readonly group=new T.Group();
@@ -18,6 +19,7 @@ export class StudioView {
   private readonly handles=new T.Group();
   private readonly lines=new T.Group();
   private readonly topologyMarkers=new T.Group();
+  private readonly clusterSkinOverlay=new T.Group();
   private readonly proxy=new T.Object3D();
   private readonly gizmo:TransformControls;
   private readonly ray=new T.Raycaster();
@@ -47,7 +49,7 @@ export class StudioView {
   private orbit:NavigationControls;
   constructor(rig:StudioRig,camera:T.PerspectiveCamera,canvas:HTMLCanvasElement,orbit:NavigationControls,scene:T.Scene) {
     this.rig=rig;this.camera=camera;this.canvas=canvas;this.orbit=orbit;
-    this.group.add(this.handles,this.lines,this.topologyMarkers,this.proxy,this.weightPreview.group);scene.add(this.group);
+    this.group.add(this.handles,this.lines,this.topologyMarkers,this.clusterSkinOverlay,this.proxy,this.weightPreview.group);scene.add(this.group);
     this.gizmo=new TransformControls(camera,canvas);this.gizmo.setSpace('world');this.gizmo.setSize(.75);this.group.add(this.gizmo.getHelper());
     this.gizmo.addEventListener('mouseDown',()=>{this.dragging=true;orbit.enabled=false;this.onStart();});
     this.gizmo.addEventListener('objectChange',()=>{if(this.dragging)this.onMove(this.proxy.position.clone(),this.proxy.quaternion.clone(),this.rotation?'rotate':'translate');});
@@ -110,6 +112,24 @@ export class StudioView {
     }
     if(hits[0]){if(this.action==='connect')this.onConnect(hits[0].id);else this.onSelect(hits[0].id);}
   };
+  /** Render a source-hash-bound, read-only triangle classification overlay. */
+  setClusterSkinOverlay(report:ClusterSkinOverlayReport|null){
+    this.clearGroup(this.clusterSkinOverlay);
+    if(!report)return;
+    if(report.missingMeshIds.length)throw new Error('3D-Overlay unvollständig: Quell-Mesh-Identitäten fehlen.');
+    const colors:Record<ClusterSkinOverlayState,number>={automatic:0x18a889,ambiguous:0xf0a52b,unmapped:0x8b929b,locked:0x2878d0};
+    for(const state of ['automatic','ambiguous','unmapped','locked'] as const){
+      const positions:number[]=[];
+      for(const triangle of report.triangles)if(triangle.state===state)positions.push(...triangle.positions);
+      if(!positions.length)continue;
+      const geometry=new T.BufferGeometry();
+      geometry.setAttribute('position',new T.Float32BufferAttribute(positions,3));
+      geometry.computeVertexNormals();
+      const material=new T.MeshBasicMaterial({color:colors[state],side:T.DoubleSide,transparent:true,opacity:.48,depthWrite:false});
+      const mesh=new T.Mesh(geometry,material);mesh.renderOrder=15;mesh.userData.pakachiClusterOverlayState=state;
+      this.clusterSkinOverlay.add(mesh);
+    }
+  }
   refresh() {
     this.clearGroup(this.handles);this.clearGroup(this.lines);
     for(const p of this.points){const mesh=new T.Mesh(new T.SphereGeometry(1,12,8),new T.MeshBasicMaterial({color:p.id===this.selected?0xffa82e:p.kind==='bone'?0x257fb4:0x17a878,depthTest:false,transparent:true,opacity:.9}));mesh.position.copy(this.rig.position(p));mesh.scale.setScalar(p.size);mesh.renderOrder=20;this.handles.add(mesh);}
@@ -152,5 +172,5 @@ export class StudioView {
     }
   }
   private clearGroup(group:T.Group){for(const child of [...group.children]){group.remove(child);if(child instanceof T.Mesh||child instanceof T.Line){child.geometry.dispose();(child.material as T.Material).dispose();}}}
-  dispose(){this.brush.dispose();this.weightColors.dispose();this.canvas.removeEventListener('pointermove',this.move,true);this.canvas.removeEventListener('pointercancel',this.cancel,true);this.canvas.removeEventListener('lostpointercapture',this.cancel,true);this.canvas.removeEventListener('pointerdown',this.down,true);this.canvas.removeEventListener('pointerup',this.up,true);this.canvas.style.cursor='';this.orbit.enabled=true;this.gizmo.dispose();this.weightPreview.dispose();this.clearGroup(this.handles);this.clearGroup(this.lines);this.clearTopologyMarkers();this.group.removeFromParent();}
+  dispose(){this.brush.dispose();this.weightColors.dispose();this.canvas.removeEventListener('pointermove',this.move,true);this.canvas.removeEventListener('pointercancel',this.cancel,true);this.canvas.removeEventListener('lostpointercapture',this.cancel,true);this.canvas.removeEventListener('pointerdown',this.down,true);this.canvas.removeEventListener('pointerup',this.up,true);this.canvas.style.cursor='';this.orbit.enabled=true;this.gizmo.dispose();this.weightPreview.dispose();this.clearGroup(this.handles);this.clearGroup(this.lines);this.clearGroup(this.clusterSkinOverlay);this.clearTopologyMarkers();this.group.removeFromParent();}
 }
