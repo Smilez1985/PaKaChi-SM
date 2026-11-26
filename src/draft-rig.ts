@@ -129,12 +129,16 @@ export async function bindDraftRig(root:T.Object3D,template:DraftRigTemplate,sig
  return {template,bones:bones.length,meshes:meshes.length,vertices,method:'proportional-template',review:'required',frame};
 }
 /** Source GLB is retained byte-for-byte; generated output is an independently validated GLB. */
-export async function prepareDraftRig(bytes:Uint8Array,template:DraftRigTemplate,signal:AbortSignal,frameMode:'support'|'bounds'='support',anchorOverrides:readonly DraftRigAnchorOverride[]=[]):Promise<{bytes:Uint8Array;report:DraftRigReport}>{
+export interface DraftRigLifecycleHooks { beforeBind?:(root:T.Object3D)=>void|Promise<void>; afterBind?:(root:T.Object3D)=>void|Promise<void> }
+
+export async function prepareDraftRig(bytes:Uint8Array,template:DraftRigTemplate,signal:AbortSignal,frameMode:'support'|'bounds'='support',anchorOverrides:readonly DraftRigAnchorOverride[]=[],lifecycle:DraftRigLifecycleHooks={}):Promise<{bytes:Uint8Array;report:DraftRigReport}>{
  signal.throwIfAborted();if(bytes.length>50*1024*1024)throw Error('draft-rig-model-size');
  const model=await parseModel(Uint8Array.from(bytes).buffer);
  try{
   if(model.animations.length)throw Error('draft-rig-static-mesh-required');
+  await lifecycle.beforeBind?.(model.scene);signal.throwIfAborted();
   const report=await bindDraftRig(model.scene,template,signal,frameMode,anchorOverrides);signal.throwIfAborted();
+  await lifecycle.afterBind?.(model.scene);signal.throwIfAborted();
   const rig=new StudioRig(model.scene);
   try{
    const check=createPoseSurfaceChecker(rig),neutral=rig.capture();report.probes=[];
