@@ -131,11 +131,11 @@ async function rigBothForms(){
   const result=await prepareDraftRigPair(pair,controller.signal,current.semanticCatalog);
   if(!valid())throw new Error('Studio-Projekt wurde während der Rig-Erstellung geändert.');
   const active=result.formModels[result.formModels.activeForm];
-  const next=parseProject({...current,model:active.model,studio:active.studio??emptyStudio(),generationReference:active.generationReference,formModels:result.formModels});
+  const next=parseProject({...current,model:active.model,studio:active.studio??emptyStudio(),generationReference:active.generationReference,formModels:result.formModels,clusterSkinAnatomyProposals:{animal:result.skinAnatomy.animal.report,humanoid:result.skinAnatomy.humanoid.report}});
   if(fetchController===controller)fetchController=null;
   busy=false;
   const accepted=await loadAvatar(undefined,undefined,next,valid,{confirm:true});handedOff=true;
-  if(accepted)message(options.language==='de'?`Beide Rig-Entwürfe erstellt: Tierform ${result.reports.animal.bones} Knochen, Arbeitsform ${result.reports.humanoid.bones} Knochen. Bitte beide prüfen; noch keine automatische Freigabe.`:`Both draft rigs created: animal ${result.reports.animal.bones} bones, work form ${result.reports.humanoid.bones} bones. Review both; no automatic approval.`);
+  if(accepted)message(options.language==='de'?`Beide Rig-Entwürfe erstellt: Tierform ${result.reports.animal.bones} Knochen, Arbeitsform ${result.reports.humanoid.bones} Knochen. Anatomie-Vorschläge: Tier ${result.skinAnatomy.animal.report.classified} sicher / ${result.skinAnatomy.animal.report.ambiguous+result.skinAnatomy.animal.report.unmapped} offen, Arbeit ${result.skinAnatomy.humanoid.report.classified} sicher / ${result.skinAnatomy.humanoid.report.ambiguous+result.skinAnatomy.humanoid.report.unmapped} offen. Im Studio prüfen; keine automatische Übernahme.`:`Both draft rigs created: animal ${result.reports.animal.bones} bones, work form ${result.reports.humanoid.bones} bones. Anatomy proposals: animal ${result.skinAnatomy.animal.report.classified} confident / ${result.skinAnatomy.animal.report.ambiguous+result.skinAnatomy.animal.report.unmapped} unresolved, work ${result.skinAnatomy.humanoid.report.classified} confident / ${result.skinAnatomy.humanoid.report.ambiguous+result.skinAnatomy.humanoid.report.unmapped} unresolved. Review in Studio; nothing is auto-applied.`);
  }catch(error){message((options.language==='de'?'Rig-Erstellung abgebrochen oder fehlgeschlagen: ':'Rig preparation failed: ')+(error instanceof Error?error.message:String(error)),true);}
  finally{
   pairRigging=false;
