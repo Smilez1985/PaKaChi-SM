@@ -44,6 +44,7 @@ on:
       - 'tests/studio-editor.test.ts'
       - 'tests/studio-surface-hit.test.ts'
       - 'tests/e2e/studio-surface-pick.spec.ts'
+      - 'tests/e2e/fixtures/studio-surface-pick.ts'
       - 'tests/e2e/studio-landmark-export.spec.ts'
       - 'tests/e2e/fixtures/studio-surface-pick.ts'
       - 'tests/e2e/fixtures/studio-landmark-export.ts'
