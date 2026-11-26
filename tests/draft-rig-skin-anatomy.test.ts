@@ -18,11 +18,11 @@ test('real draft rig lifecycle carries source mesh IDs into skin-weight anatomy 
  assert.deepEqual(bytes,original);
  assert.ok(output);
  assert.equal(output.sourceManifest.form,'animal');
- assert.equal(output.report.candidateManifest.algorithmId,'skin-weight-anatomy');
- assert.equal(output.report.candidateManifest.meshes.length,output.sourceManifest.meshes.length);
+ assert.equal(output.report.manifest.algorithmId,'skin-weight-anatomy');
+ assert.equal(output.report.manifest.meshes.length,output.sourceManifest.meshes.length);
  assert.equal(output.report.classified+output.report.ambiguous+output.report.unmapped,output.sourceManifest.assignments.length);
- assert.ok(output.report.candidateManifest.assignments.every(item=>item.origin==='automatic'||item.origin==='imported'));
+ assert.ok(output.report.manifest.assignments.every(item=>item.origin==='automatic'||item.origin==='imported'));
  assert.equal(prepared.report.bones,23);
- assert.equal(output.report.candidateManifest.parts.find(part=>part.id==='forelimbs')!.rigBoneIds.includes('left_shoulder'),true);
- assert.equal(output.report.candidateManifest.parts.find(part=>part.id==='hindlimbs')!.rigBoneIds.includes('right_hip'),true);
+ assert.equal(output.report.manifest.parts.find(part=>part.id==='forelimbs')!.rigBoneIds.includes('left_shoulder'),true);
+ assert.equal(output.report.manifest.parts.find(part=>part.id==='hindlimbs')!.rigBoneIds.includes('right_hip'),true);
 });
