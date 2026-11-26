@@ -109,6 +109,25 @@ export class StudioEditor {
   constructor(rig:StudioRig,view:StudioView,host:HTMLElement,project:Omit<StudioProject,'studio'>,hooks:Hooks) {
     this.rig=rig;this.playbackTransition=new PlaybackTransition(rig.root);this.view=view;this.host=host;this.project={...project,semanticCatalog:structuredClone(project.semanticCatalog??createPaKaChiSemanticCatalog()),...(project.clusterFormManifests?{clusterFormManifests:structuredClone(project.clusterFormManifests)}:{}),...(project.clusterSkinAnatomyProposals?{clusterSkinAnatomyProposals:structuredClone(project.clusterSkinAnatomyProposals)}:{})};this.landmarkDocument=project.imageReference?structuredClone(project.imageReference):null;this.hooks=hooks;this.initial=structuredClone(rig.initial);
     view.onSelect=id=>{this.surfaceCheck?.abort();this.weightCorrection=null;this.selected=id;this.render();};
+    view.onClusterSkinTrianglePick=hit=>{
+      const matches=(['animal','humanoid'] as const).filter(form=>{
+        const report=this.project.clusterSkinAnatomyProposals?.[form];
+        return report?.manifest.sourceAssetSha256===hit.sourceAssetSha256&&report.manifest.meshes.some(mesh=>mesh.id===hit.meshId);
+      });
+      if(matches.length!==1){this.hooks.feedback('Viewport-Treffer ist keiner eindeutigen Form-/Quellinventar-Kombination zugeordnet.');return;}
+      const form=matches[0]!;
+      const section=this.host.querySelector<HTMLElement>(`#cluster-skin-anatomy-proposals [data-cluster-form="${form}"]`);
+      const meshSelect=section?.querySelector<HTMLSelectElement>('select[data-cluster-mesh]');
+      const triangleInput=section?.querySelector<HTMLInputElement>('input[data-cluster-triangle]');
+      const partSelect=section?.querySelector<HTMLSelectElement>('select[data-cluster-part]');
+      const status=section?.querySelector<HTMLElement>('[data-cluster-pick-status]');
+      if(!section||!meshSelect||!triangleInput||!partSelect||!status){this.hooks.feedback('Korrekturmaske für den gewählten Formdatensatz ist nicht verfügbar.');return;}
+      meshSelect.value=hit.meshId;triangleInput.value=String(hit.triangleIndex);
+      if(hit.partId&&[...partSelect.options].some(option=>option.value===hit.partId))partSelect.value=hit.partId;
+      status.textContent=`3D-Auswahl: ${hit.meshId} · Dreieck ${hit.triangleIndex} · ${hit.state}`;
+      status.dataset.sourceHash=hit.sourceAssetSha256;
+      this.hooks.feedback('Exaktes Mesh und Dreieck aus dem 3D-Overlay in die passende Korrekturmaske übernommen. Noch nicht gespeichert.');
+    };
     view.onSurfacePick=hit=>{
       this.view.setAction('select');
       const mesh=this.landmarkInventory?.meshes[hit.meshIndex];
@@ -221,7 +240,7 @@ export class StudioEditor {
     const forms=['animal','humanoid'] as const;
     const partOptions=this.project.semanticCatalog?.parts??[];
     for(const form of forms){
-      const report=proposals[form],section=document.createElement('section');
+      const report=proposals[form],section=document.createElement('section');section.dataset.clusterForm=form;
       const heading=document.createElement('h5');heading.textContent=form==='animal'?'Tierform':'Arbeitsform';section.append(heading);
       const summary=document.createElement('p');summary.textContent=`Sicher klassifiziert: ${report.classified} · mehrdeutig: ${report.ambiguous} · ohne eindeutige Knochenzuordnung: ${report.unmapped} · Quellhash: ${report.manifest.sourceAssetSha256.slice(0,16)}…`;section.append(summary);
       const overlay=document.createElement('button');overlay.type='button';overlay.textContent='Zuordnungen im 3D-Modell anzeigen';
@@ -235,11 +254,12 @@ export class StudioEditor {
       });section.append(overlay);
       const clearOverlay=document.createElement('button');clearOverlay.type='button';clearOverlay.textContent='3D-Overlay ausblenden';
       clearOverlay.addEventListener('click',()=>this.view.setClusterSkinOverlay(null));section.append(clearOverlay);
-      const meshLabel=document.createElement('label');meshLabel.textContent='Mesh';const meshSelect=document.createElement('select');
+      const meshLabel=document.createElement('label');meshLabel.textContent='Mesh';const meshSelect=document.createElement('select');meshSelect.dataset.clusterMesh='';
       for(const mesh of report.manifest.meshes){const option=document.createElement('option');option.value=mesh.id;option.textContent=`${mesh.sourceMeshName} · ${mesh.id.slice(0,24)}`;meshSelect.append(option);}
       meshLabel.append(meshSelect);section.append(meshLabel);
-      const triangleLabel=document.createElement('label');triangleLabel.textContent='Dreieck-Index';const triangleInput=document.createElement('input');triangleInput.type='number';triangleInput.min='0';triangleInput.step='1';triangleInput.value='0';triangleLabel.append(triangleInput);section.append(triangleLabel);
-      const partLabel=document.createElement('label');partLabel.textContent='Anatomischer Part';const partSelect=document.createElement('select');
+      const triangleLabel=document.createElement('label');triangleLabel.textContent='Dreieck-Index';const triangleInput=document.createElement('input');triangleInput.type='number';triangleInput.min='0';triangleInput.step='1';triangleInput.value='0';triangleInput.dataset.clusterTriangle='';triangleLabel.append(triangleInput);section.append(triangleLabel);
+      const pickStatus=document.createElement('p');pickStatus.className='subtle';pickStatus.dataset.clusterPickStatus='';pickStatus.textContent='Noch kein Dreieck im 3D-Viewport ausgewählt.';section.append(pickStatus);
+      const partLabel=document.createElement('label');partLabel.textContent='Anatomischer Part';const partSelect=document.createElement('select');partSelect.dataset.clusterPart='';
       const empty=document.createElement('option');empty.value='';empty.textContent='Part auswählen …';partSelect.append(empty);
       for(const part of partOptions){const option=document.createElement('option');option.value=part.id;option.textContent=`${part.label} · ${part.id}`;partSelect.append(option);}
       partLabel.append(partSelect);section.append(partLabel);
