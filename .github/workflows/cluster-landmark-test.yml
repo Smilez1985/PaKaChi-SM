@@ -5,7 +5,8 @@ on:
     branches: [develop]
     paths:
       - '.github/workflows/cluster-landmark-test.yml'
-      - 'src/cluster-*.ts'\n      - 'tests/cluster-skin-anatomy-overlay.test.ts'
+      - 'src/cluster-*.ts'
+      - 'tests/cluster-skin-anatomy-overlay.test.ts'
       - 'tests/cluster-skin-anatomy.test.ts'
       - 'tests/cluster-skin-anatomy-review.test.ts'
       - 'tests/cluster-skin-anatomy-rig.test.ts'
