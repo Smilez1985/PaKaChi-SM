@@ -40,6 +40,7 @@ import { prepareDraftRigWithConfirmedLandmarks } from './draft-rig-landmark-appl
 import type { StudioLandmarkEvidenceBundle } from './studio-landmark-evidence.ts';
 import { createStudioLandmarkSurfacePick } from './studio-landmark-picking.ts';
 import { compareClusterCharacterForms } from './cluster-form-comparison.ts';
+import { correctSkinWeightProposal, confirmSkinWeightProposal } from './cluster-skin-anatomy-review.ts';
 import { mountClusterFormComparison } from './cluster-form-comparison-panel.ts';
 import type { StudioSurfacePickHit } from './studio-landmark-picking.ts';
 interface Snapshot {data:StudioData;values:Record<string,Transform>;semanticCatalog?:Cluster2DSemanticCatalog;clusterFormManifests?:StudioProject['clusterFormManifests']}
@@ -216,20 +217,59 @@ export class StudioEditor {
     panel.replaceChildren();
     const proposals=this.project.clusterSkinAnatomyProposals;
     if(!proposals){const note=document.createElement('p');note.className='subtle';note.textContent='Noch keine Skin-Weight-Vorschläge. Beide Formen zuerst gemeinsam riggen.';panel.append(note);return;}
-    for(const form of ['animal','humanoid'] as const){
+    const forms=['animal','humanoid'] as const;
+    const partOptions=this.project.semanticCatalog?.parts??[];
+    for(const form of forms){
       const report=proposals[form],section=document.createElement('section');
       const heading=document.createElement('h5');heading.textContent=form==='animal'?'Tierform':'Arbeitsform';section.append(heading);
       const summary=document.createElement('p');summary.textContent=`Sicher klassifiziert: ${report.classified} · mehrdeutig: ${report.ambiguous} · ohne eindeutige Knochenzuordnung: ${report.unmapped} · Quellhash: ${report.manifest.sourceAssetSha256.slice(0,16)}…`;section.append(summary);
-      const button=document.createElement('button');button.type='button';button.textContent=form==='animal'?'Tierform-Vorschlag exportieren':'Arbeitsform-Vorschlag exportieren';
-      button.addEventListener('click',()=>{
+      const meshLabel=document.createElement('label');meshLabel.textContent='Mesh';const meshSelect=document.createElement('select');
+      for(const mesh of report.manifest.meshes){const option=document.createElement('option');option.value=mesh.id;option.textContent=`${mesh.sourceMeshName} · ${mesh.id.slice(0,24)}`;meshSelect.append(option);}
+      meshLabel.append(meshSelect);section.append(meshLabel);
+      const triangleLabel=document.createElement('label');triangleLabel.textContent='Dreieck-Index';const triangleInput=document.createElement('input');triangleInput.type='number';triangleInput.min='0';triangleInput.step='1';triangleInput.value='0';triangleLabel.append(triangleInput);section.append(triangleLabel);
+      const partLabel=document.createElement('label');partLabel.textContent='Anatomischer Part';const partSelect=document.createElement('select');
+      const empty=document.createElement('option');empty.value='';empty.textContent='Part auswählen …';partSelect.append(empty);
+      for(const part of partOptions){const option=document.createElement('option');option.value=part.id;option.textContent=`${part.label} · ${part.id}`;partSelect.append(option);}
+      partLabel.append(partSelect);section.append(partLabel);
+      const layerLabel=document.createElement('label');layerLabel.textContent='Oberflächen-Layer (optional)';const layerSelect=document.createElement('select');
+      const noLayer=document.createElement('option');noLayer.value='';noLayer.textContent='Kein Layer';layerSelect.append(noLayer);
+      for(const layer of this.project.semanticCatalog?.surfaceLayers??[]){const option=document.createElement('option');option.value=layer.id;option.textContent=`${layer.label} · ${layer.id}`;layerSelect.append(option);}
+      layerLabel.append(layerSelect);section.append(layerLabel);
+      const reasonLabel=document.createElement('label');reasonLabel.textContent='Begründung der manuellen Korrektur';const reason=document.createElement('textarea');reason.rows=2;reason.maxLength=500;reason.placeholder='Abgleich mit Bildreferenz / Anatomie …';reasonLabel.append(reason);section.append(reasonLabel);
+      const correction=document.createElement('button');correction.type='button';correction.textContent='Dreieck-Zuordnung manuell korrigieren';
+      correction.addEventListener('click',()=>{
+        try{
+          const partId=partSelect.value;
+          if(!partId)throw new Error('Einen anatomischen Part auswählen.');
+          const index=Number(triangleInput.value);
+          this.project.clusterSkinAnatomyProposals![form]=correctSkinWeightProposal(this.project.clusterSkinAnatomyProposals![form],{
+            meshId:meshSelect.value,triangleIndex:index,partId,surfaceLayerId:layerSelect.value||null,reason:reason.value,
+          });
+          this.mark();this.render();this.hooks.feedback('Dreieck manuell korrigiert und als gesperrte Benutzerzuordnung gespeichert.');
+        }catch(error){this.hooks.feedback(error instanceof Error?error.message:String(error));}
+      });
+      section.append(correction);
+      const exportButton=document.createElement('button');exportButton.type='button';exportButton.textContent=form==='animal'?'Tierform-Vorschlag exportieren':'Arbeitsform-Vorschlag exportieren';
+      exportButton.addEventListener('click',()=>{
         const blob=new Blob([JSON.stringify(report.manifest,null,2)],{type:'application/json'});
         const url=URL.createObjectURL(blob),anchor=document.createElement('a');
         anchor.href=url;anchor.download=(this.project.avatar.id.replace(/[^a-z0-9_-]/gi,'_')||'pakachi')+'-'+form+'-skin-anatomy-proposal.json';anchor.click();
         window.setTimeout(()=>URL.revokeObjectURL(url),1000);
       });
-      section.append(button);panel.append(section);
+      section.append(exportButton);panel.append(section);
     }
-    const note=document.createElement('p');note.className='subtle';note.textContent='Status: Vorschläge sind nicht bestätigt und nicht automatisch übernommen. Gesperrte manuelle Zuordnungen bleiben geschützt.';panel.append(note);
+    const confirm=document.createElement('button');confirm.type='button';confirm.textContent='Beide Formen ausdrücklich übernehmen';confirm.addEventListener('click',()=>{
+      try{
+        if(!this.active||this.interactionActive)throw new Error('Übernahme nur im aktiven, ruhenden Studio möglich.');
+        const current=this.project.clusterSkinAnatomyProposals;
+        if(!current)throw new Error('Skin-Weight-Vorschläge fehlen.');
+        const pair={animal:confirmSkinWeightProposal(current.animal),humanoid:confirmSkinWeightProposal(current.humanoid)};
+        this.setClusterFormManifests(pair);
+        this.hooks.feedback('Beide Form-Manifeste wurden ausdrücklich übernommen. Unaufgelöste Dreiecke bleiben offen; manuelle Korrekturen sind gesperrt.');
+      }catch(error){this.hooks.feedback(error instanceof Error?error.message:String(error));}
+    });
+    panel.append(confirm);
+    const note=document.createElement('p');note.className='subtle';note.textContent='Manuelle Korrekturen werden als gesperrte Benutzerzuordnungen gespeichert. Erst die gemeinsame ausdrückliche Übernahme schreibt beide Form-Manifeste; unaufgelöste Dreiecke bleiben offen.';panel.append(note);
   }
 
   private renderDraftRigLandmarkReview(){
