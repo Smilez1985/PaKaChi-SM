@@ -41,6 +41,7 @@ import type { StudioLandmarkEvidenceBundle } from './studio-landmark-evidence.ts
 import { createStudioLandmarkSurfacePick } from './studio-landmark-picking.ts';
 import { compareClusterCharacterForms } from './cluster-form-comparison.ts';
 import { correctSkinWeightProposal, confirmSkinWeightProposal } from './cluster-skin-anatomy-review.ts';
+import { collectClusterSkinOverlay } from './cluster-skin-anatomy-overlay.ts';
 import { mountClusterFormComparison } from './cluster-form-comparison-panel.ts';
 import type { StudioSurfacePickHit } from './studio-landmark-picking.ts';
 interface Snapshot {data:StudioData;values:Record<string,Transform>;semanticCatalog?:Cluster2DSemanticCatalog;clusterFormManifests?:StudioProject['clusterFormManifests']}
