@@ -1,3 +1,15 @@
+## Zwischenprüfung 2026-11-26 – quellgebundenes Skin-Anatomie-Overlay
+
+**Implementierung auf `develop`:** `src/cluster-skin-anatomy-overlay.ts` erzeugt aus dem aktiven Szenenbaum einen read-only Snapshot klassifizierter Dreiecke. Meshes werden ausschließlich über `pakachiClusterMeshId` und `pakachiClusterSourceAssetSha256` gebunden; Namen und Traversierungsreihenfolge werden nicht als Identität verwendet. Quellhash, vollständige Inventarzuordnung, Vertex-/Dreieckszahlen und Triangle-Indizes werden validiert. Indexierte und nicht indexierte BufferGeometries werden unterstützt.
+
+`StudioView.setClusterSkinOverlay()` rendert vier getrennte Zustände: automatische Zuordnung, mehrdeutig, unaufgelöst und manuell gesperrt. Das Review-Panel bietet je Form eine explizite Anzeige und Ausblendung. Das Overlay ist ein separater Render-Layer und verändert weder Modellgeometrie noch Skin-Weights. Bei fehlenden, doppelten oder veralteten Identitäten wird die Anzeige verweigert.
+
+**CI auf Commit `0d5ac386e5c4e8791d57a841b988f69005912d09`:**
+- [Cluster-Landmark-Workflow #45882535878](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/45882535878): **success**, 130/130 gezielte Regressionen, 2/2 Chromium-E2E, TypeScript erfolgreich, Dependency-Audit 0 Schwachstellen.
+- [Image-Reference-Workflow #45882535827](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/45882535827): **success**, 21/21 Chromium-E2E, TypeScript und Dependency-Audit erfolgreich.
+
+**Grenzen / nächster Schritt:** Das Overlay kann formweise explizit ein- und ausgeblendet werden. Ein Klick auf ein farbiges Dreieck übernimmt dessen Mesh-ID und Dreiecksindex noch nicht direkt in die Korrekturmaske. Diese Viewport-Auswahlbindung bleibt offen. Es erfolgte keine visuelle Abnahme an den Original-PaKaChi-Referenzen; `main` bleibt unverändert.
+
 ## Zwischenprüfung 2026-11-26 – interaktive Skin-Weight-Prüfung
 
 **Implementierung auf `develop`:** `src/cluster-skin-anatomy-review.ts` erlaubt quellinventar- und manifestgebundene manuelle Dreieckskorrekturen. Jede Korrektur validiert Mesh, Dreiecksindex, anatomischen Part und optionalen Layer; sie erzeugt eine gesperrte Benutzerzuordnung (`origin: user`, `policy: locked`) und mutiert den ursprünglichen Vorschlagsreport nicht. `confirmSkinWeightProposal()` übernimmt nur klassifizierte Vorschläge als gesperrte Benutzerzuordnungen. Unaufgelöste Dreiecke bleiben offen. Im Studio gibt es je Form Mesh-/Dreiecksauswahl, Part-/Layer-Auswahl, Begründungsfeld und getrennten Export; die gemeinsame Übernahme beider Form-Manifeste erfordert eine ausdrückliche Aktion.
