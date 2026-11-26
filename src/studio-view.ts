@@ -35,6 +35,7 @@ export class StudioView {
   onAdd:(position:T.Vector3,mesh?:number)=>void=()=>{};
   onConnect:(id:string)=>void=()=>{};
   onSurfacePick:(hit:{meshIndex:number;triangleIndex:number;barycentric:readonly [number,number,number]})=>void=()=>{};
+  onClusterSkinTrianglePick:(hit:{meshId:string;triangleIndex:number;sourceAssetSha256:string;state:ClusterSkinOverlayState;partId:string|null})=>void=()=>{};
   onStart:()=>void=()=>{};
   onMove:(position:T.Vector3,rotation:T.Quaternion,intent?:'translate'|'rotate')=>void=()=>{};
   onEnd:()=>void=()=>{};
@@ -89,6 +90,12 @@ export class StudioView {
     if(this.action==='brush')return;
     const start=this.start;this.start=null;if(!start||!this.enabled||event.button!==0||Math.hypot(event.clientX-start.x,event.clientY-start.y)>4||this.dragging||this.gizmo.axis)return;
     const rect=this.canvas.getBoundingClientRect();this.ray.setFromCamera(new T.Vector2((event.clientX-rect.left)/rect.width*2-1,-(event.clientY-rect.top)/rect.height*2+1),this.camera);
+    const overlayHit=this.ray.intersectObjects(this.clusterSkinOverlay.children,false)[0];
+    if(overlayHit&&Number.isSafeInteger(overlayHit.faceIndex)){
+      const refs=(overlayHit.object as T.Mesh).userData.pakachiClusterOverlayTriangles as Array<{meshId:string;triangleIndex:number;sourceAssetSha256:string;state:ClusterSkinOverlayState;partId:string|null}>|undefined;
+      const selection=refs?.[overlayHit.faceIndex!];
+      if(selection){event.preventDefault();event.stopImmediatePropagation();this.onClusterSkinTrianglePick(selection);return;}
+    }
     // Minimum 10 px pick radius keeps tiny face points usable without enlarging their display.
     const click=new T.Vector2(event.clientX,event.clientY);
     const hits=this.points.map(p=>{const world=this.rig.position(p),v=world.clone().project(this.camera);const pixel=new T.Vector2(rect.left+(v.x+1)*rect.width/2,rect.top+(1-v.y)*rect.height/2);const radius=Math.max(10,p.size*rect.height/(2*Math.tan(T.MathUtils.degToRad(this.camera.fov/2))*world.distanceTo(this.camera.position)));return {id:p.id,d:pixel.distanceTo(click),radius,z:v.z};}).filter(x=>x.z>=-1&&x.z<=1&&x.d<=x.radius).sort((a,b)=>a.d-b.d);
@@ -120,13 +127,14 @@ export class StudioView {
     const colors:Record<ClusterSkinOverlayState,number>={automatic:0x18a889,ambiguous:0xf0a52b,unmapped:0x8b929b,locked:0x2878d0};
     for(const state of ['automatic','ambiguous','unmapped','locked'] as const){
       const positions:number[]=[];
-      for(const triangle of report.triangles)if(triangle.state===state)positions.push(...triangle.positions);
+      const triangleRefs:Array<{meshId:string;triangleIndex:number;sourceAssetSha256:string;state:ClusterSkinOverlayState;partId:string|null}>=[];
+      for(const triangle of report.triangles)if(triangle.state===state){positions.push(...triangle.positions);triangleRefs.push({meshId:triangle.meshId,triangleIndex:triangle.triangleIndex,sourceAssetSha256:report.sourceAssetSha256,state,partId:triangle.partId});}
       if(!positions.length)continue;
       const geometry=new T.BufferGeometry();
       geometry.setAttribute('position',new T.Float32BufferAttribute(positions,3));
       geometry.computeVertexNormals();
       const material=new T.MeshBasicMaterial({color:colors[state],side:T.DoubleSide,transparent:true,opacity:.48,depthWrite:false});
-      const mesh=new T.Mesh(geometry,material);mesh.renderOrder=15;mesh.userData.pakachiClusterOverlayState=state;
+      const mesh=new T.Mesh(geometry,material);mesh.renderOrder=15;mesh.userData.pakachiClusterOverlayState=state;mesh.userData.pakachiClusterOverlayTriangles=triangleRefs;
       this.clusterSkinOverlay.add(mesh);
     }
   }
