@@ -7,7 +7,9 @@ import type {ImageReferenceGenerationManifest} from './image-reference-crop.ts';
 import {validateCluster2DSemanticCatalog} from './cluster-2d-classifier.ts';
 import type {Cluster2DSemanticCatalog} from './cluster-2d-classifier.ts';
 import {compareClusterCharacterForms} from './cluster-form-comparison.ts';
+import {validateClusterManifest} from './cluster-architecture.ts';
 import type {ClusterManifest} from './cluster-architecture.ts';
+import type {SkinWeightClassificationReport} from './cluster-skin-anatomy.ts';
 import type {ReviewReason} from './studio-review.ts';
 import {validStudioFormModelPair} from './studio-form-model-pair.ts';
 import type {StudioFormModelPair} from './studio-form-model-pair.ts';
@@ -83,6 +85,7 @@ export interface StudioData {
   points: ControlPoint[]; links: [string, string][]; boneRest: Transform[]; poses: Pose[]; moves: StudioMove[]; draft?: Record<string,Transform>;
 }
 export interface ClusterFormManifestPair {animal:ClusterManifest;humanoid:ClusterManifest}
+export interface ClusterSkinAnatomyProposalPair {animal:SkinWeightClassificationReport;humanoid:SkinWeightClassificationReport}
 export interface StudioProject {
   format: 'pakachi-studio'; version: 1; model: string;
   avatar: { id: string; name: string; description: string; moves: {id:string;name:string;clip:string;loop:boolean}[]; defaultMove?: string; states?: Record<string,string> };
@@ -91,6 +94,8 @@ export interface StudioProject {
   semanticCatalog?: Cluster2DSemanticCatalog;
   /** Validated animal/work-form manifests; mesh identities remain form-local. */
   clusterFormManifests?: ClusterFormManifestPair;
+  /** Unaccepted skin-weight anatomy proposals produced by the latest pair rigging run. */
+  clusterSkinAnatomyProposals?: ClusterSkinAnatomyProposalPair;
   /** Confirmed source-image segmentation retained with the avatar project. */
   imageReference?: ImageReferenceDocument;
   /** Exact selected crop provenance used for the accepted generation. */
@@ -153,6 +158,22 @@ export function validBendLimit(v:unknown):v is {min:number;max:number}{return ob
 export const validFigureScale = (v:unknown):v is number => typeof v==='number' && Number.isFinite(v) && v>=.1 && v<=5;
 const transform = (v:unknown,figure=false) => obj(v) && (v.scale===undefined || figure && validFigureScale(v.scale)) && vector(v.position,3) && vector(v.rotation,4) && Math.abs((v.rotation as number[]).reduce((s,x)=>s+x*x,0)-1)<.01;
 function require(condition:unknown, message='Ungültige Studio-Projektdatei.'): asserts condition { if(!condition) throw new Error(message); }
+function validClusterSkinAnatomyProposalPair(value:unknown,catalog:Cluster2DSemanticCatalog):value is ClusterSkinAnatomyProposalPair {
+ if(!obj(value)||Object.keys(value).length!==2||!('animal' in value)||!('humanoid' in value))return false;
+ for(const form of ['animal','humanoid'] as const){
+  const report=value[form];
+  if(!obj(report)||!obj(report.manifest)||report.manifest.form!==form||report.manifest.algorithmId!=='skin-weight-anatomy'||
+     !Number.isSafeInteger(report.classified)||!Number.isSafeInteger(report.ambiguous)||!Number.isSafeInteger(report.unmapped)||
+     Number(report.classified)<0||Number(report.ambiguous)<0||Number(report.unmapped)<0)return false;
+  if(JSON.stringify(report).length>20_000_000||validateClusterManifest(report.manifest).length)return false;
+  const manifest=report.manifest as unknown as ClusterManifest;
+  if(manifest.parts.length!==catalog.parts.length||manifest.parts.some(part=>!catalog.parts.some(item=>item.id===part.id))||
+     manifest.layers.length!==catalog.surfaceLayers.length||manifest.layers.some(layer=>!catalog.surfaceLayers.some(item=>item.id===layer.id)))return false;
+  if(Number(report.classified)+Number(report.ambiguous)+Number(report.unmapped)>manifest.assignments.length)return false;
+ }
+ return true;
+}
+
 export function validClusterFormManifestPair(value:unknown,catalog:Cluster2DSemanticCatalog):value is ClusterFormManifestPair {
  if(!obj(value)||Object.keys(value).length!==2||!('animal' in value)||!('humanoid' in value))return false;
  try {
@@ -167,6 +188,7 @@ export function parseProject(input: unknown): StudioProject {
   require(input.imageReference===undefined||validImageReferenceDocument(input.imageReference),'Ungültige oder beschädigte Bildreferenzdaten.');
   require(input.semanticCatalog===undefined||validateCluster2DSemanticCatalog(input.semanticCatalog).length===0,'Ungültiger gemeinsamer Anatomie- und Oberflächenkatalog.');
   require(input.clusterFormManifests===undefined||input.semanticCatalog!==undefined&&validClusterFormManifestPair(input.clusterFormManifests,input.semanticCatalog as Cluster2DSemanticCatalog),'Ungültiges oder nicht zum gemeinsamen Charakterkatalog passendes Tier-/Arbeitsform-Paar.');
+  require(input.clusterSkinAnatomyProposals===undefined||input.semanticCatalog!==undefined&&validClusterSkinAnatomyProposalPair(input.clusterSkinAnatomyProposals,input.semanticCatalog as Cluster2DSemanticCatalog),'Ungültige oder nicht zum Charakterkatalog passende Skin-Weight-Vorschläge.');
   require(input.generationReference===undefined||validGenerationReference(input.generationReference,input.imageReference as ImageReferenceDocument|undefined),'Ungültige Generierungsherkunft.');
   require(input.formModels===undefined||validStudioFormModelPair(input.formModels,(input.avatar as Record<string,unknown>|undefined)?.id as string,input.model as string),'Ungültiges Tier-/Arbeitsform-Modellpaar oder aktives Modell passt nicht.');
   if(input.formModels!==undefined){const pair=input.formModels as StudioFormModelPair;for(const asset of [pair.animal,pair.humanoid])require(validGenerationReference(asset.generationReference,input.imageReference as ImageReferenceDocument|undefined)&&asset.generationReference.selection.avatar.id===pair.avatarId&&asset.generationReference.selection.form.id===asset.formId,'Form-Modell besitzt keine passende bestätigte Bildreferenz.');}
