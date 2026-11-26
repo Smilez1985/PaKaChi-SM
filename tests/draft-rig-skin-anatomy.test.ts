@@ -5,6 +5,7 @@ import {prepareDraftRig} from '../src/draft-rig.ts';
 import {createPaKaChiSemanticCatalog} from '../src/cluster-2d-classifier.ts';
 import {createDraftRigSkinAnatomyPreparation} from '../src/draft-rig-skin-anatomy.ts';
 import {draftFigure} from './helpers/draft-rig-fixture.ts';
+import {parseProject} from '../src/studio-data.ts';
 class Reader{result:ArrayBuffer|null=null;onloadend:(()=>void)|null=null;readAsArrayBuffer(blob:Blob){void blob.arrayBuffer().then(value=>{this.result=value;this.onloadend?.();});}}
 Object.assign(globalThis,{FileReader:Reader,ProgressEvent:class extends Event{}});
 const signal=()=>new AbortController().signal;
@@ -25,4 +26,9 @@ test('real draft rig lifecycle carries source mesh IDs into skin-weight anatomy 
  assert.equal(prepared.report.bones,23);
  assert.equal(output.report.manifest.parts.find(part=>part.id==='forelimbs')!.rigBoneIds.includes('left_shoulder'),true);
  assert.equal(output.report.manifest.parts.find(part=>part.id==='hindlimbs')!.rigBoneIds.includes('right_hip'),true);
+ const workReport=structuredClone(output.report);workReport.manifest.form='humanoid';
+ const project=parseProject({format:'pakachi-studio',version:1,model:base64(bytes),avatar:{id:'pakachi',name:'PaKaChi',description:'',moves:[]},studio:{points:[],links:[],boneRest:[],poses:[],moves:[]},semanticCatalog:createPaKaChiSemanticCatalog(),clusterSkinAnatomyProposals:{animal:output.report,humanoid:workReport}});
+ assert.equal(project.clusterSkinAnatomyProposals?.animal.classified,output.report.classified);
+ const invalid=structuredClone(project);invalid.clusterSkinAnatomyProposals!.humanoid.manifest.form='animal';
+ assert.throws(()=>parseProject(invalid),/Skin-Weight-Vorschläge/);
 });
