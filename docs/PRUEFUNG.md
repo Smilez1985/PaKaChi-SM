@@ -1,3 +1,18 @@
+## Zwischenprüfung 2026-11-26 – Skin-Weight-Anatomievorschläge im Studio
+
+**Implementierung auf `develop`:** Der tatsächliche Tier-/Arbeitsform-Rigging-Ablauf ist mit der Skin-Weight-Evidenzpipeline verbunden. `prepareDraftRig()` bietet kontrollierte `beforeBind`-/`afterBind`-Hooks. Vor dem Binden erstellt die Pipeline ein quellhashgebundenes Formmanifest, löst das Meshinventar auf und überträgt jede Mesh-ID eindeutig auf das Quellmesh. Nach dem Binden liest sie die stabilen Bone-Metadaten aus, erzeugt das formgebundene Manifest, sammelt die realen `SkinnedMesh`-Skin-Indizes/-Gewichte und klassifiziert Dreiecke konservativ. `prepareDraftRigPair()` führt das getrennt für Tier- und Arbeitsform aus.
+
+Die Ergebnisse werden als getrennte, validierte `clusterSkinAnatomyProposals` im Studio-Projekt gespeichert. Das Studio zeigt pro Form sicher klassifizierte, mehrdeutige und nicht aufgelöste Dreiecke und erlaubt den Export der jeweiligen Vorschlags-Manifeste. Die Vorschläge sind ausdrücklich **nicht bestätigt** und werden nicht automatisch in die aktiven Form-Manifeste übernommen. Der vollständige Ablauf wird mit einem echten GLB-Draft-Rig geprüft; die Testdaten bleiben synthetische Fixture-Geometrie und sind keine visuelle Abnahme des Original-PaKaChi.
+
+**CI auf Commit `360a55299153cc417b17a9b44fab3a7f263e31b7`:**
+- [Cluster-Landmark-Workflow #45775567883](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/45775567883): **success**.
+- 122/122 gezielte Regressionstests bestanden, 0 fehlgeschlagen oder übersprungen.
+- Chromium: 2/2 Browser-E2E bestanden.
+- TypeScript `npx tsc --noEmit`: erfolgreich.
+- Dependency-Audit: 0 Schwachstellen.
+
+**Offen:** Interaktive Prüfung einzelner Part-/Dreiecksvorschläge mit expliziter Bestätigung und Übernahme in das Formmanifest; danach visuelle Qualitäts- und Deformationsabnahme an den Originalreferenzen beider PaKaChi-Formen.
+
 ## Zwischenprüfung 2026-11-25 – stabile Draft-Bone-Identitäten
 
 **Änderung auf `develop`:** Der Draft-Rig-Generator schreibt nun jedem erzeugten `THREE.Bone` eine stabile semantische `pakachiRigBoneId` und den zugehörigen Katalog-Part als `pakachiClusterPartId` in `userData`. Die Zuordnung ist für Biped und Quadruped explizit definiert; sie hängt weder vom generierten Anzeigenamen noch von Traversierungsreihenfolge oder CamelCase-Konvertierung ab. `applyDraftRigBoneIdentitiesToManifest()` baut daraus eine form-lokale `ClusterManifest`-Variante mit `ClusterPart.rigBoneIds` und liefert zugleich die exakte Bone-Name→`rigBoneId`-Map für den Skin-Weight-Adapter. Fehlende Katalogteile, doppelte Identitäten, unbekannte Gelenknamen und Formabweichungen führen zum Abbruch.
