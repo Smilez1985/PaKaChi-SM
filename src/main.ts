@@ -128,7 +128,7 @@ async function rigBothForms(){
  let handedOff=false;
  const valid=()=>{const now=generationTarget();return !controller.signal.aborted&&editor===sourceEditor&&loaded===sourceAvatar&&!sourceEditor.interactionActive&&now.session===expected.session&&now.revision===expected.revision;};
  try{
-  const result=await prepareDraftRigPair(pair,controller.signal);
+  const result=await prepareDraftRigPair(pair,controller.signal,current.semanticCatalog);
   if(!valid())throw new Error('Studio-Projekt wurde während der Rig-Erstellung geändert.');
   const active=result.formModels[result.formModels.activeForm];
   const next=parseProject({...current,model:active.model,studio:active.studio??emptyStudio(),generationReference:active.generationReference,formModels:result.formModels});
