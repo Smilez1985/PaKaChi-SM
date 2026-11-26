@@ -1,3 +1,14 @@
+## Zwischenprüfung 2026-11-27 – 3D-Viewport-Dreiecksauswahl
+
+**Implementierung auf `develop`:** Das Overlay speichert beim Aufbau für jedes gerenderte Face eine explizite Referenz auf Quell-Mesh-ID, Quell-Dreiecksindex, Quellhash, Klassifizierungsstatus und Part-ID. Der Raycaster löst `faceIndex` über genau diese Referenzliste auf; es gibt keine Ableitung aus Mesh-Namen, Traversierungsreihenfolge oder Overlay-Index. Der Editor akzeptiert den Treffer nur, wenn genau eines der beiden Form-Manifeste denselben Quellhash und die Mesh-ID enthält. Danach werden die passenden Felder der Tier- oder Arbeitsform-Korrekturmaske befüllt. Die Auswahl ist nur vorgemerkt und schreibt keine Korrektur; Speichern und gemeinsame Manifestübernahme bleiben explizite Aktionen.
+
+**CI auf Commit `c8729bba9bfe600ea6bb4ed3fab793d0ad38076d`:**
+- [Cluster-Landmark-Workflow #45898033306](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/45898033306): **success**, Cluster-Regressionen, 2/2 Chromium-E2E (Landmarkenexport und reales 3D-Surface-Picking), TypeScript und Dependency-Audit erfolgreich.
+- [Image-Reference-Workflow #45898033253](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/45898033253): **success**, 21/21 Chromium-E2E, TypeScript und Dependency-Audit erfolgreich.
+- [Studio-Topology-Workflow #45898029118](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/45898029118): **success**, 17/17 gezielte Regressionen, Dependency-Audit erfolgreich.
+
+**Grenzen / nächster Schritt:** Die CI prüft die bestehende echte Canvas-Surface-Pick-Interaktion und die Cluster-Regressionen, enthält aber noch keinen dedizierten Browser-Test, der das farbige Skin-Overlay anklickt und die Formularfelder bis zur Korrekturspeicherung durchläuft. Visuelle Abnahme an den Original-PaKaChi-Referenzen ist weiterhin offen; `main` bleibt unverändert.
+
 ## Zwischenprüfung 2026-11-26 – quellgebundenes Skin-Anatomie-Overlay
 
 **Implementierung auf `develop`:** `src/cluster-skin-anatomy-overlay.ts` erzeugt aus dem aktiven Szenenbaum einen read-only Snapshot klassifizierter Dreiecke. Meshes werden ausschließlich über `pakachiClusterMeshId` und `pakachiClusterSourceAssetSha256` gebunden; Namen und Traversierungsreihenfolge werden nicht als Identität verwendet. Quellhash, vollständige Inventarzuordnung, Vertex-/Dreieckszahlen und Triangle-Indizes werden validiert. Indexierte und nicht indexierte BufferGeometries werden unterstützt.
@@ -8,7 +19,7 @@
 - [Cluster-Landmark-Workflow #45882535878](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/45882535878): **success**, 130/130 gezielte Regressionen, 2/2 Chromium-E2E, TypeScript erfolgreich, Dependency-Audit 0 Schwachstellen.
 - [Image-Reference-Workflow #45882535827](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/45882535827): **success**, 21/21 Chromium-E2E, TypeScript und Dependency-Audit erfolgreich.
 
-**Grenzen / nächster Schritt:** Das Overlay kann formweise explizit ein- und ausgeblendet werden. Ein Klick auf ein farbiges Dreieck übernimmt dessen Mesh-ID und Dreiecksindex noch nicht direkt in die Korrekturmaske. Diese Viewport-Auswahlbindung bleibt offen. Es erfolgte keine visuelle Abnahme an den Original-PaKaChi-Referenzen; `main` bleibt unverändert.
+**Grenzen / nächster Schritt:** Die Viewport-Auswahlbindung ist inzwischen implementiert; siehe Zwischenprüfung vom 2026-11-27. Ein dedizierter E2E-Test für Overlay-Klick bis Korrekturspeicherung und die visuelle Abnahme an den Original-PaKaChi-Referenzen bleiben offen. `main` bleibt unverändert.
 
 ## Zwischenprüfung 2026-11-26 – interaktive Skin-Weight-Prüfung
 
