@@ -223,6 +223,17 @@ export class StudioEditor {
       const report=proposals[form],section=document.createElement('section');
       const heading=document.createElement('h5');heading.textContent=form==='animal'?'Tierform':'Arbeitsform';section.append(heading);
       const summary=document.createElement('p');summary.textContent=`Sicher klassifiziert: ${report.classified} · mehrdeutig: ${report.ambiguous} · ohne eindeutige Knochenzuordnung: ${report.unmapped} · Quellhash: ${report.manifest.sourceAssetSha256.slice(0,16)}…`;section.append(summary);
+      const overlay=document.createElement('button');overlay.type='button';overlay.textContent='Zuordnungen im 3D-Modell anzeigen';
+      overlay.addEventListener('click',()=>{
+        try{
+          const snapshot=collectClusterSkinOverlay(this.rig.root,report.manifest);
+          if(snapshot.missingMeshIds.length)throw new Error('Mesh-Inventar unvollständig; Overlay wird nicht angezeigt.');
+          this.view.setClusterSkinOverlay(snapshot);
+          this.hooks.feedback((form==='animal'?'Tierform':'Arbeitsform')+'-Overlay angezeigt. Farben: automatisch, mehrdeutig, offen und manuell gesperrt. Modell und Skin-Weights bleiben unverändert.');
+        }catch(error){this.view.setClusterSkinOverlay(null);this.hooks.feedback(error instanceof Error?error.message:String(error));}
+      });section.append(overlay);
+      const clearOverlay=document.createElement('button');clearOverlay.type='button';clearOverlay.textContent='3D-Overlay ausblenden';
+      clearOverlay.addEventListener('click',()=>this.view.setClusterSkinOverlay(null));section.append(clearOverlay);
       const meshLabel=document.createElement('label');meshLabel.textContent='Mesh';const meshSelect=document.createElement('select');
       for(const mesh of report.manifest.meshes){const option=document.createElement('option');option.value=mesh.id;option.textContent=`${mesh.sourceMeshName} · ${mesh.id.slice(0,24)}`;meshSelect.append(option);}
       meshLabel.append(meshSelect);section.append(meshLabel);
