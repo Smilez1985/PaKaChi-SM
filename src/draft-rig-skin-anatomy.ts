@@ -1,4 +1,3 @@
-import * as THREE from 'three';
 import type { Cluster2DSemanticCatalog } from './cluster-2d-classifier.ts';
 import type { ClusterManifest } from './cluster-architecture.ts';
 import type { ClusterForm } from './cluster-architecture.ts';
