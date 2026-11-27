@@ -217,12 +217,12 @@ export function createLandmarkTriangulationQualityReport(
 ): LandmarkTriangulationQualityReport {
   const coverage = createLandmarkCalibrationCoverageReport(document, { ...identity, radiusWorld: 1 });
   const observations = createCalibratedLandmarkObservations(document, { ...identity, radiusWorld: 1 });
-  const solved = triangulateLandmarkSeeds(observations, [
+  const solved = observations.length ? triangulateLandmarkSeeds(observations, [
     1, 0, 0, 0,
     0, 1, 0, 0,
     0, 0, 1, 0,
     0, 0, 0, 1,
-  ], options);
+  ], options) : { seeds: [], rejected: [] };
   const minParallaxDegrees = options.minParallaxDegrees ?? 3;
   const maxRayErrorWorld = options.maxRayErrorWorld ?? 0.05;
   const items = coverage.items.map(item => {
