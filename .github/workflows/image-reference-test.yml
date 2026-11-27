@@ -23,6 +23,7 @@ on:
       - 'tests/image-reference.test.ts'
       - 'tests/studio-form-model-pair.test.ts'
       - 'src/studio-landmark-projection.ts'
+      - 'tests/studio-landmark-projection.test.ts'
       - 'src/image-reference-cluster-pipeline.ts'
       - 'tests/studio-landmark-projection.test.ts'
       - 'tests/image-reference-cluster-pipeline.test.ts'
