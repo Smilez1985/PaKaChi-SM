@@ -60,8 +60,9 @@ test('real overlay click fills the Studio correction form, locks the correction 
  const animal=page.locator('[data-cluster-form="animal"]');
  await expect(animal.locator('select[data-cluster-mesh]')).toHaveValue('animal-body');
  await expect(animal.locator('input[data-cluster-triangle]')).toHaveValue('0');
- const pickDiagnostics=await page.evaluate(()=>{const state=(window as any).__editorCorrection;return {picked:state.pickedHit(),raycast:state.raycast(),events:(window as any).__editorCorrectionEvents,options:[...document.querySelector('[data-cluster-form="animal"] select[data-cluster-part]')!.querySelectorAll('option')].map((option:HTMLOptionElement)=>option.value)};});
- expect(pickDiagnostics.picked).toEqual({meshId:'animal-body',triangleIndex:0,sourceAssetSha256:'a'.repeat(64),state:'automatic',partId:'paws'});\n expect(pickDiagnostics.options).toContain('paws');
+ await page.mouse.click(clickX,clickY);\n const pickDiagnostics=await page.evaluate(()=>{const state=(window as any).__editorCorrection;return {picked:state.pickedHit(),raycast:state.raycast(),events:(window as any).__editorCorrectionEvents,options:[...document.querySelector('[data-cluster-form="animal"] select[data-cluster-part]')!.querySelectorAll('option')].map((option:HTMLOptionElement)=>option.value)};});
+ expect(pickDiagnostics.picked).toEqual({meshId:'animal-body',triangleIndex:0,sourceAssetSha256:'a'.repeat(64),state:'automatic',partId:'paws'});
+ expect(pickDiagnostics.options).toContain('paws');
  await expect(animal.locator('select[data-cluster-part]')).toHaveValue('paws');
  await expect(animal.locator('[data-cluster-pick-status]')).toContainText('animal-body · Dreieck 0');
  await animal.locator('textarea').fill('Gegen die freigegebene Referenz geprüft.');
