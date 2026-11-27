@@ -1,3 +1,15 @@
+## Zwischenprüfung 2026-11-28 – Landmark-Kalibrierungsabdeckung im Referenz-Editor
+
+**Implementierung auf `develop`:** `createLandmarkCalibrationCoverageReport()` liefert einen read-only Bericht je korrespondierender bestätigter Landmarke. Die Zuordnung wird auf die explizite Avatar-/Form-/Pose-Identität und den Quellbildhash begrenzt. Der Referenz-Editor bietet die Aktion „Landmark-Kalibrierungsabdeckung prüfen“ und zeigt kalibrierte sowie fehlende Ansichten pro anatomischem Part. Die Prüfung verändert keine Daten und schätzt keine Kalibrierung. Zwei Ansichten werden nur als Mindestabdeckung für einen späteren Triangulationsversuch markiert; Parallaxe und Gültigkeit einer 3D-Lösung sind nicht geprüft. Ein Chromium-E2E-Test prüft eine Frontansicht mit vorhandener Kalibrierung und fehlender Seitenansicht.
+
+**CI [Image-Reference-Workflow #46082880514](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/46082880514):**
+- npm ci und Dependency-Audit: **success**.
+- Image-Reference-Hierarchie, Landmark-Projektion, Crop-Planung, Generation-Gates, Transport/Provenienz und persistierte Formpaar-Metadaten: **success**.
+- Chromium-Browserregressionen einschließlich der neuen Abdeckungsprüfung: **success**.
+- TypeScript `npx tsc --noEmit`: **success**.
+
+**Grenzen / nächster Schritt:** Der Bericht misst nur Kalibrierungsabdeckung. Er prüft weder die geometrische Parallaxe noch die Konditionierung einer Triangulation und erzeugt keine 3D-Koordinaten. Als nächster fachlicher Schritt kann eine explizite Parallaxen-/Triangulationsgüteprüfung vorbereitet werden. Die visuelle Abnahme der Original-PaKaChi-Tier- und Arbeitsform gegen die freigegebenen Referenzen bleibt weiterhin offen; `main` bleibt unverändert.
+
 ## Zwischenprüfung 2026-11-27 – vollständiger Browser-Korrekturpfad für Skin-Anatomie
 
 **Implementierung auf `develop`, Commit `dc11e34a837ebc3386fbd5c1a483441a638b5c98`:** Der echte Chromium-Ablauf klickt das gerenderte Skin-Overlay im Canvas an. Die Auswahl wird der korrekten Form zugeordnet und füllt Mesh-, Dreiecks- und Part-Feld sowie den Status der Review-Maske. Die ausdrückliche Korrekturaktion speichert den Override als `origin: user` und `policy: locked`; der Projekt-Export und der erneute Editor-Aufbau stellen den Override wieder her. Die Gegenform behält ihre automatische Zuordnung. Ursache des zuvor roten E2E-Tests war die konkurrierende Pointer-Interaktion des Transform-Gizmos. Der neue `cluster-pick`-Modus deaktiviert diese Interaktion während der Overlay-Auswahl und stellt beim Ausblenden den vorherigen Studio-Modus wieder her.
