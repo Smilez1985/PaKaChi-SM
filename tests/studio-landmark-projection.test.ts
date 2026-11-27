@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { createCalibratedLandmarkObservations } from '../src/studio-landmark-projection.ts';
+import { createCalibratedLandmarkObservations, createLandmarkCalibrationCoverageReport } from '../src/studio-landmark-projection.ts';
 import { validateImageReferenceDocument, type ImageReferenceDocument } from '../src/image-reference.ts';
 
 const hash='a'.repeat(64);
@@ -60,4 +60,25 @@ test('blocks reconstruction when any landmark or camera calibration violates doc
  const badCamera=fixture();
  badCamera.cameraCalibrations![0]!.cameraToWorld[0]=2;
  assert.throws(()=>createCalibratedLandmarkObservations(badCamera,{avatarId:'pakachi',formId:'animal-form',poseId:'neutral',radiusWorld:.12}),/invalid-image-reference-document:cameraCalibrations/);
+});
+
+
+test('reports per-landmark calibrated view coverage without claiming a valid depth solution',()=>{
+ const doc=fixture();
+ const report=createLandmarkCalibrationCoverageReport(doc,{avatarId:'pakachi',formId:'animal-form',poseId:'neutral',radiusWorld:.12});
+ assert.equal(report.policy,'read-only');
+ assert.equal(report.automaticCalibrationApplied,false);
+ assert.equal(report.landmarkCount,1);
+ assert.equal(report.calibratedViewCount,2);
+ assert.equal(report.landmarksWithMultiViewCalibration,1);
+ assert.deepEqual(report.items[0],{
+  landmarkId:'eye-left',partId:'head',viewIds:['front','side'],
+  calibratedViewIds:['front','side'],missingCalibrationViewIds:[],hasMultiViewCalibration:true,
+ });
+ doc.cameraCalibrations=doc.cameraCalibrations!.slice(0,1);
+ const partial=createLandmarkCalibrationCoverageReport(doc,{avatarId:'pakachi',formId:'animal-form',poseId:'neutral',radiusWorld:.12});
+ assert.equal(partial.calibratedViewCount,1);
+ assert.equal(partial.landmarksWithOneCalibratedView,1);
+ assert.equal(partial.landmarksWithMultiViewCalibration,0);
+ assert.deepEqual(partial.items[0]!.missingCalibrationViewIds,['side']);
 });
