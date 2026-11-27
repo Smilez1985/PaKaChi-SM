@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { createCalibratedLandmarkObservations, createLandmarkCalibrationCoverageReport } from '../src/studio-landmark-projection.ts';
+import { createCalibratedLandmarkObservations, createLandmarkCalibrationCoverageReport, createLandmarkTriangulationQualityReport } from '../src/studio-landmark-projection.ts';
 import { validateImageReferenceDocument, type ImageReferenceDocument } from '../src/image-reference.ts';
 
 const hash='a'.repeat(64);
@@ -82,3 +82,29 @@ test('reports per-landmark calibrated view coverage without claiming a valid dep
  assert.equal(partial.landmarksWithMultiViewCalibration,0);
  assert.deepEqual(partial.items[0]!.missingCalibrationViewIds,['side']);
 });
+
+test('reports read-only triangulation quality, low view coverage and missing observations',()=>{
+ const doc=fixture();
+ doc.cameraCalibrations![1]!.fx=.5;
+ doc.cameraCalibrations![1]!.cx=.8;
+ const quality=createLandmarkTriangulationQualityReport(doc,{avatarId:'pakachi',formId:'animal-form',poseId:'neutral'});
+ assert.equal(quality.policy,'read-only');
+ assert.equal(quality.automaticCalibrationApplied,false);
+ assert.equal(quality.triangulatedPositionsExported,false);
+ assert.equal(quality.readyCount,1);
+ assert.equal(quality.rejectedCount,0);
+ assert.equal(quality.items[0]!.status,'ready');
+ assert.ok(quality.items[0]!.parallaxDegrees!>=quality.thresholds.minParallaxDegrees);
+ assert.ok(quality.items[0]!.rayErrorWorld!<=quality.thresholds.maxRayErrorWorld);
+ assert.equal(quality.items[0]!.viewIds.length,2);
+ const oneView=fixture();oneView.cameraCalibrations=oneView.cameraCalibrations!.slice(0,1);
+ const rejected=createLandmarkTriangulationQualityReport(oneView,{avatarId:'pakachi',formId:'animal-form',poseId:'neutral'});
+ assert.equal(rejected.rejectedCount,1);
+ assert.equal(rejected.items[0]!.status,'rejected');
+ assert.match(rejected.items[0]!.reason!,/At least two calibrated views/);
+ const none=fixture();none.cameraCalibrations=[];
+ const missing=createLandmarkTriangulationQualityReport(none,{avatarId:'pakachi',formId:'animal-form',poseId:'neutral'});
+ assert.equal(missing.missingObservationCount,1);
+ assert.equal(missing.items[0]!.status,'missing-observations');
+});
+
