@@ -1,5 +1,6 @@
 import { validateImageReferenceDocument, type ImageReferenceCameraCalibration, type ImageReferenceDocument } from './image-reference.ts';
-import type { Landmark2DObservation } from './cluster-landmark-projection.ts';
+import { triangulateLandmarkSeeds } from './cluster-landmark-projection.ts';
+import type { Landmark2DObservation, LandmarkTriangulationOptions } from './cluster-landmark-projection.ts';
 
 /**
  * Convert confirmed source-pixel landmarks into calibrated normalized observations.
@@ -176,3 +177,82 @@ export function createLandmarkCalibrationCoverageReport(
     items,
   };
 }
+
+export interface LandmarkTriangulationQualityItem {
+  landmarkId: string;
+  partId: string;
+  viewIds: string[];
+  calibratedViewIds: string[];
+  status: 'ready' | 'rejected' | 'missing-observations';
+  parallaxDegrees: number | null;
+  rayErrorWorld: number | null;
+  confidence: number | null;
+  reason: string | null;
+}
+
+export interface LandmarkTriangulationQualityReport {
+  avatarId: string;
+  formId: string;
+  poseId: string;
+  sourceImageSha256: string;
+  policy: 'read-only';
+  automaticCalibrationApplied: false;
+  triangulatedPositionsExported: false;
+  thresholds: { minParallaxDegrees: number; maxRayErrorWorld: number };
+  readyCount: number;
+  rejectedCount: number;
+  missingObservationCount: number;
+  items: LandmarkTriangulationQualityItem[];
+}
+
+/**
+ * Runs the existing calibrated-ray triangulation as a read-only quality gate.
+ * The identity mesh transform is used only to run the solver; mesh-local points
+ * are discarded and never exposed or persisted by this diagnostic report.
+ */
+export function createLandmarkTriangulationQualityReport(
+  document: ImageReferenceDocument,
+  identity: { avatarId: string; formId: string; poseId: string },
+  options: LandmarkTriangulationOptions = {},
+): LandmarkTriangulationQualityReport {
+  const coverage = createLandmarkCalibrationCoverageReport(document, { ...identity, radiusWorld: 1 });
+  const observations = createCalibratedLandmarkObservations(document, { ...identity, radiusWorld: 1 });
+  const solved = triangulateLandmarkSeeds(observations, [
+    1, 0, 0, 0,
+    0, 1, 0, 0,
+    0, 0, 1, 0,
+    0, 0, 0, 1,
+  ], options);
+  const minParallaxDegrees = options.minParallaxDegrees ?? 3;
+  const maxRayErrorWorld = options.maxRayErrorWorld ?? 0.05;
+  const items = coverage.items.map(item => {
+    const seed = solved.seeds.find(value => value.landmarkId === item.landmarkId);
+    if (seed) return {
+      landmarkId: item.landmarkId, partId: item.partId, viewIds: item.viewIds,
+      calibratedViewIds: item.calibratedViewIds, status: 'ready' as const,
+      parallaxDegrees: seed.parallaxDegrees, rayErrorWorld: seed.reprojectionProxyErrorWorld,
+      confidence: seed.confidence, reason: null,
+    };
+    const rejection = solved.rejected.find(value => value.landmarkId === item.landmarkId);
+    return {
+      landmarkId: item.landmarkId, partId: item.partId, viewIds: item.viewIds,
+      calibratedViewIds: item.calibratedViewIds,
+      status: (rejection ? 'rejected' : 'missing-observations') as 'rejected' | 'missing-observations',
+      parallaxDegrees: null, rayErrorWorld: null, confidence: null,
+      reason: rejection?.reason ?? 'No calibrated observations are available for this landmark.',
+    };
+  });
+  return {
+    ...identity,
+    sourceImageSha256: document.source.sha256,
+    policy: 'read-only',
+    automaticCalibrationApplied: false,
+    triangulatedPositionsExported: false,
+    thresholds: { minParallaxDegrees, maxRayErrorWorld },
+    readyCount: items.filter(item => item.status === 'ready').length,
+    rejectedCount: items.filter(item => item.status === 'rejected').length,
+    missingObservationCount: items.filter(item => item.status === 'missing-observations').length,
+    items,
+  };
+}
+
