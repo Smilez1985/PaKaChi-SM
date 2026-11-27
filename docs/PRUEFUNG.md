@@ -1,3 +1,16 @@
+## Zwischenprüfung 2026-11-27 – echtes Skin-Overlay-Face-Picking
+
+**Implementierung auf develop, Commit aa4b5d12f98483bba3d48785ad49a9062b6d1f30:** Ein dedizierter Playwright-Test klickt das tatsächlich gerenderte Overlay-Face im Canvas an und prüft den vollständigen Callback-Treffer. Die Fixture-Quelle verwendet absichtlich triangleIndex: 42, obwohl das Overlay nur ein Face enthält. Damit wird nachgewiesen, dass faceIndex über die beim Aufbau gespeicherte Referenztabelle auf den ursprünglichen Quell-Dreiecksindex zurückgeführt wird und nicht versehentlich als Quellindex behandelt wird. Erwartet und erhalten werden Mesh-ID, Quellindex, SHA-256, Status locked und Part-ID.
+
+**CI [Cluster-Landmark-Workflow #46035605039](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/46035605039):**
+- npm ci: **success**.
+- Dependency-Audit: **success**.
+- Cluster-/Anatomie-/Landmark-Regressionen: **success**.
+- Chromium-Browserregression für Surface- und Overlay-Picking: **success**.
+- TypeScript npx tsc --noEmit: **success**.
+
+**Grenzen / nächster Schritt:** Der Test beweist die reale 3D-Raycaster-Zuordnung bis zum Viewport-Callback. Er testet noch nicht den Editor-Callback, die Formularfelder, das Speichern einer manuellen Korrektur oder den erneuten Import des gespeicherten Projekts. Als Nächstes wird dieser UI-Pfad gegen falsche/alte Form- und Quellhashbindungen abgesichert. Die visuelle Abnahme an den Original-PaKaChi-Referenzen bleibt offen; main bleibt unverändert.
+
 ## Zwischenprüfung 2026-11-27 – 3D-Viewport-Dreiecksauswahl
 
 **Implementierung auf `develop`:** Das Overlay speichert beim Aufbau für jedes gerenderte Face eine explizite Referenz auf Quell-Mesh-ID, Quell-Dreiecksindex, Quellhash, Klassifizierungsstatus und Part-ID. Der Raycaster löst `faceIndex` über genau diese Referenzliste auf; es gibt keine Ableitung aus Mesh-Namen, Traversierungsreihenfolge oder Overlay-Index. Der Editor akzeptiert den Treffer nur, wenn genau eines der beiden Form-Manifeste denselben Quellhash und die Mesh-ID enthält. Danach werden die passenden Felder der Tier- oder Arbeitsform-Korrekturmaske befüllt. Die Auswahl ist nur vorgemerkt und schreibt keine Korrektur; Speichern und gemeinsame Manifestübernahme bleiben explizite Aktionen.
