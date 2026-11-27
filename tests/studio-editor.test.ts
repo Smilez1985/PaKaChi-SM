@@ -5,6 +5,75 @@ import * as T from 'three';
 import { StudioRig } from '../src/studio-rig.ts';
 import { StudioEditor,encodeModel,decodeModel } from '../src/studio-editor.ts';
 import type { StudioView } from '../src/studio-view.ts';
+import {createUnclassifiedClusterManifest} from '../src/cluster-inventory.ts';
+import {proposeSkinWeightClusterAssignments} from '../src/cluster-skin-anatomy.ts';
+import {createPaKaChiSemanticCatalog} from '../src/cluster-2d-classifier.ts';
+
+
+function skinProposalFixture(form:'animal'|'humanoid',hash:string,meshId:string){
+ const source={schemaVersion:1 as const,sourceAssetSha256:hash,meshes:[{id:meshId,sourceMeshIndex:0,sourceMeshName:'Body',primitiveIndex:0,vertexCount:3,triangleCount:1}],totals:{meshes:1,vertices:3,triangles:1}};
+ const manifest=createUnclassifiedClusterManifest(source,form,'2026-11-27T00:00:00.000Z');
+ manifest.parts=[{id:'paws',name:'Paws',parentPartId:null,orderKey:[1],rigBoneIds:['paw-bone']}];
+ const skinIndices=new Uint16Array(12),skinWeights=new Float32Array(12);
+ for(let vertex=0;vertex<3;vertex++){skinIndices[vertex*4]=0;skinWeights[vertex*4]=1;}
+ return proposeSkinWeightClusterAssignments(manifest,hash,[{meshId,vertexCount:3,triangleCount:1,skinIndices,skinWeights,bonePartIds:['paws'],indices:null}],{generatedAt:'2026-11-27T00:00:00.000Z'});
+}
+function editorView(){
+ return {setEnabled(){},setFigureEnabled(){},setAction(){},setRotation(){},select(){},refresh(){},dispose(){},setClusterSkinOverlay(){},onClusterSkinTrianglePick:null as ((hit:{meshId:string;triangleIndex:number;sourceAssetSha256:string;state:'automatic'|'ambiguous'|'unmapped'|'locked';partId:string|null})=>void)|null};
+}
+
+test('3D overlay pick pre-fills the correct form and manual correction persists as a locked override',()=>{
+ const window=new Window();Object.assign(globalThis,{document:window.document,Option:function(text="",value=""){const o=window.document.createElement("option");o.textContent=text;o.value=value;return o;}});
+ const host=window.document.createElement('div'),root=new T.Group();root.add(new T.Mesh(new T.SphereGeometry(.5,8,8)));
+ const animalHash='a'.repeat(64),humanoidHash='b'.repeat(64),animalMesh='animal-body',humanoidMesh='humanoid-body';
+ const proposals={animal:skinProposalFixture('animal',animalHash,animalMesh),humanoid:skinProposalFixture('humanoid',humanoidHash,humanoidMesh)};
+ const project={format:'pakachi-studio' as const,version:1 as const,model:'AAAA',avatar:{id:'x',name:'X',description:'',moves:[]},semanticCatalog:createPaKaChiSemanticCatalog(),clusterSkinAnatomyProposals:proposals};
+ const view=editorView();let feedback='';
+ const editor=new StudioEditor(new StudioRig(root),view as unknown as StudioView,host as unknown as HTMLElement,project,{suspend(){},resume(){},changed(){},feedback(value){feedback=value;}});
+ editor.enter();
+ assert.ok(view.onClusterSkinTrianglePick);
+ view.onClusterSkinTrianglePick({meshId:animalMesh,triangleIndex:0,sourceAssetSha256:animalHash,state:'automatic',partId:'paws'});
+ const animal=host.querySelector<HTMLElement>('[data-cluster-form="animal"]')!;
+ const humanoid=host.querySelector<HTMLElement>('[data-cluster-form="humanoid"]')!;
+ assert.equal(animal.querySelector<HTMLSelectElement>('[data-cluster-mesh]')!.value,animalMesh);
+ assert.equal(animal.querySelector<HTMLInputElement>('[data-cluster-triangle]')!.value,'0');
+ assert.equal(animal.querySelector<HTMLSelectElement>('[data-cluster-part]')!.value,'paws');
+ assert.match(animal.querySelector<HTMLElement>('[data-cluster-pick-status]')!.textContent??'',/animal-body.*Dreieck 0/);
+ assert.equal(humanoid.querySelector<HTMLSelectElement>('[data-cluster-mesh]')!.value,humanoidMesh);
+ const reason=animal.querySelector('textarea') as HTMLTextAreaElement;reason.value='Gegen die freigegebene Referenz geprüft.';
+ (animal.querySelector('button:last-of-type') as HTMLButtonElement).click();
+ const saved=editor.exportProject();
+ const corrected=saved.clusterSkinAnatomyProposals!.animal.manifest.assignments[0]!;
+ assert.equal(corrected.partId,'paws');assert.equal(corrected.origin,'user');assert.equal(corrected.policy,'locked');
+ assert.equal(saved.clusterSkinAnatomyProposals!.humanoid.manifest.assignments[0]!.origin,'automatic');
+ const restoredRoot=new T.Group();restoredRoot.add(new T.Mesh(new T.SphereGeometry(.5,8,8)));
+ const restored=new StudioEditor(new StudioRig(restoredRoot),editorView() as unknown as StudioView,window.document.createElement('div') as unknown as HTMLElement,saved,{suspend(){},resume(){},changed(){},feedback(){}});
+ const roundTrip=restored.exportProject();
+ assert.equal(roundTrip.clusterSkinAnatomyProposals!.animal.manifest.assignments[0]!.policy,'locked');
+ assert.equal(roundTrip.clusterSkinAnatomyProposals!.humanoid.manifest.assignments[0]!.origin,'automatic');
+ assert.match(feedback,/gesperrte Benutzerzuordnung/);
+ editor.dispose();restored.dispose();window.happyDOM.abort();
+});
+
+test('3D overlay pick refuses stale and ambiguous form/hash bindings without pre-filling a correction',()=>{
+ const window=new Window();Object.assign(globalThis,{document:window.document,Option:function(text="",value=""){const o=window.document.createElement("option");o.textContent=text;o.value=value;return o;}});
+ const host=window.document.createElement('div'),root=new T.Group();root.add(new T.Mesh(new T.SphereGeometry(.5,8,8)));
+ const hash='c'.repeat(64),meshId='shared-mesh';
+ const proposals={animal:skinProposalFixture('animal',hash,meshId),humanoid:skinProposalFixture('humanoid',hash,meshId)};
+ const project={format:'pakachi-studio' as const,version:1 as const,model:'AAAA',avatar:{id:'x',name:'X',description:'',moves:[]},semanticCatalog:createPaKaChiSemanticCatalog(),clusterSkinAnatomyProposals:proposals};
+ const view=editorView();let feedback='';
+ const editor=new StudioEditor(new StudioRig(root),view as unknown as StudioView,host as unknown as HTMLElement,project,{suspend(){},resume(){},changed(){},feedback(value){feedback=value;}});
+ editor.enter();assert.ok(view.onClusterSkinTrianglePick);
+ view.onClusterSkinTrianglePick({meshId,triangleIndex:0,sourceAssetSha256:'d'.repeat(64),state:'automatic',partId:'paws'});
+ assert.match(feedback,/keiner eindeutigen Form/);
+ view.onClusterSkinTrianglePick({meshId,triangleIndex:0,sourceAssetSha256:hash,state:'automatic',partId:'paws'});
+ assert.match(feedback,/keiner eindeutigen Form/);
+ for(const form of ['animal','humanoid']){
+  const section=host.querySelector<HTMLElement>(`[data-cluster-form="${form}"]`)!;
+  assert.equal(section.querySelector<HTMLElement>('[data-cluster-pick-status]')!.dataset.sourceHash,undefined);
+ }
+ editor.dispose();window.happyDOM.abort();
+});
 
 test('shared semantic catalog editor adds, validates, deletes safely and participates in undo/redo',()=>{
  const window=new Window();Object.assign(globalThis,{document:window.document,Option:function(text="",value=""){const o=window.document.createElement("option");o.textContent=text;o.value=value;return o;}});
