@@ -74,7 +74,7 @@ export function mountClusterEditorCorrectionFixture(canvas:HTMLCanvasElement,hos
  const editor=new StudioEditor(rig,view,host,project,hooks);editor.enter();
  let pickedHit:unknown=null;const pick= view.onClusterSkinTrianglePick;view.onClusterSkinTrianglePick=hit=>{pickedHit=hit;pick(hit);};
  view.setClusterSkinOverlay({sourceAssetSha256:animalHash,missingMeshIds:[],triangles:[{meshId:'animal-body',triangleIndex:0,state:'automatic',partId:'paws',positions:[-1,-1,0,1,-1,0,0,1,0]}]});
- return {view,editor,feedback:()=>feedback,pickedHit:()=>pickedHit,restore(){
+ return {view,editor,feedback:()=>feedback,pickedHit:()=>pickedHit,raycast(){camera.updateMatrixWorld(true);view.group.updateMatrixWorld(true);const raycaster=new THREE.Raycaster();raycaster.setFromCamera(new THREE.Vector2(0,0),camera);return {enabled:view['enabled'],overlayChildren:view.group.children.map(child=>({type:child.type,visible:child.visible,children:child.children.length})),hits:raycaster.intersectObjects(view.group.children.find(child=>child.type==='Group'&&child.children.some(item=>item.userData.pakachiClusterOverlayTriangles))?.children??[],false).map(hit=>({faceIndex:hit.faceIndex,point:hit.point.toArray()}))};},restore(){
   const saved=JSON.parse(JSON.stringify(editor.exportProject()));
   const restoredHost=document.createElement('div');restoredHost.innerHTML='<div id="cluster-skin-anatomy-proposals"></div>';document.body.append(restoredHost);
   const restoredRoot=new THREE.Group();restoredRoot.add(new THREE.Mesh(new THREE.SphereGeometry(.5,8,8)));
