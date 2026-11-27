@@ -25,7 +25,8 @@ export class StudioView {
   private readonly ray=new T.Raycaster();
   private enabled=false;
   private selected:string|null=null;
-  private action:'select'|'add'|'connect'|'brush'|'surface-pick'='select';
+  private action:'select'|'add'|'connect'|'brush'|'surface-pick'|'cluster-pick'='select';
+  private overlayPickPreviousAction:Exclude<StudioView['action'],'cluster-pick'>|null=null;
   private rotation=false;
   private figureEnabled=false;
   setFigureEnabled(value:boolean){this.figureEnabled=value;}
@@ -59,8 +60,8 @@ export class StudioView {
     this.brush=new StudioWeightPointer(canvas,(x,y)=>{this.aim(x,y);return this.ray.intersectObjects(this.rig.surfaces.map(s=>s.mesh),false)[0]?.point??null;},()=>this.onBrushStart(),p=>this.onBrushSample(p),cancel=>this.onBrushEnd(cancel),orbit);
     this.setEnabled(false);
   }
-  setEnabled(value:boolean) {if(!value){this.brush.finish();this.weightColors.clear();}this.brush.enabled=value&&this.action==='brush';this.enabled=value;this.canvas.style.cursor=value&&(this.action==='add'||this.action==='surface-pick')?'crosshair':'';this.group.visible=value;this.gizmo.enabled=value;this.orbit.enabled=true;if(!value){this.gizmo.detach();this.dragging=false;}else this.refresh();}
-  setAction(value:'select'|'add'|'connect'|'brush'|'surface-pick'){if(value!=='brush')this.brush.finish();this.brush.enabled=this.enabled&&value==='brush';this.action=value;if(value!=='select')this.gizmo.detach();else this.refresh();this.canvas.style.cursor=(value==='add'||value==='brush'||value==='surface-pick')?'crosshair':'';}
+  setEnabled(value:boolean) {if(!value){this.brush.finish();this.weightColors.clear();}this.brush.enabled=value&&this.action==='brush';this.enabled=value;this.canvas.style.cursor=value&&(this.action==='add'||this.action==='surface-pick'||this.action==='cluster-pick')?'crosshair':'';this.group.visible=value;this.gizmo.enabled=value;this.orbit.enabled=true;if(!value){this.gizmo.detach();this.dragging=false;}else this.refresh();}
+  setAction(value:'select'|'add'|'connect'|'brush'|'surface-pick'|'cluster-pick'){if(value!=='cluster-pick'&&this.action==='cluster-pick')this.overlayPickPreviousAction=null;if(value!=='brush')this.brush.finish();this.brush.enabled=this.enabled&&value==='brush';this.action=value;if(value!=='select')this.gizmo.detach();else this.refresh();this.canvas.style.cursor=(value==='add'||value==='brush'||value==='surface-pick'||value==='cluster-pick')?'crosshair':'';}
   setRotation(value:boolean){this.rotation=value;this.gizmo.setMode(value?'rotate':'translate');}
   select(id:string|null){this.selected=id;this.refresh();}
   private start:{x:number;y:number}|null=null;
@@ -100,6 +101,7 @@ export class StudioView {
       const selection=refs?.[overlayHit.faceIndex!];
       if(selection){event.preventDefault();event.stopImmediatePropagation();this.onClusterSkinTrianglePick(selection);return;}
     }
+    if(this.action==='cluster-pick')return;
     // Minimum 10 px pick radius keeps tiny face points usable without enlarging their display.
     const click=new T.Vector2(event.clientX,event.clientY);
     const hits=this.points.map(p=>{const world=this.rig.position(p),v=world.clone().project(this.camera);const pixel=new T.Vector2(rect.left+(v.x+1)*rect.width/2,rect.top+(1-v.y)*rect.height/2);const radius=Math.max(10,p.size*rect.height/(2*Math.tan(T.MathUtils.degToRad(this.camera.fov/2))*world.distanceTo(this.camera.position)));return {id:p.id,d:pixel.distanceTo(click),radius,z:v.z};}).filter(x=>x.z>=-1&&x.z<=1&&x.d<=x.radius).sort((a,b)=>a.d-b.d);
@@ -126,7 +128,7 @@ export class StudioView {
   /** Render a source-hash-bound, read-only triangle classification overlay. */
   setClusterSkinOverlay(report:ClusterSkinOverlayReport|null){
     this.clearGroup(this.clusterSkinOverlay);
-    if(!report)return;
+    if(!report){if(this.action==='cluster-pick')this.setAction(this.overlayPickPreviousAction??'select');this.overlayPickPreviousAction=null;return;}
     if(report.missingMeshIds.length)throw new Error('3D-Overlay unvollständig: Quell-Mesh-Identitäten fehlen.');
     const colors:Record<ClusterSkinOverlayState,number>={automatic:0x18a889,ambiguous:0xf0a52b,unmapped:0x8b929b,locked:0x2878d0};
     for(const state of ['automatic','ambiguous','unmapped','locked'] as const){
@@ -141,6 +143,7 @@ export class StudioView {
       const mesh=new T.Mesh(geometry,material);mesh.renderOrder=15;mesh.userData.pakachiClusterOverlayState=state;mesh.userData.pakachiClusterOverlayTriangles=triangleRefs;
       this.clusterSkinOverlay.add(mesh);
     }
+    if(this.action!=='cluster-pick'){this.overlayPickPreviousAction=this.action;this.setAction('cluster-pick');}
   }
   refresh() {
     this.clearGroup(this.handles);this.clearGroup(this.lines);
