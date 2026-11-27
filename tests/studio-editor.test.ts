@@ -41,7 +41,7 @@ test('3D overlay pick pre-fills the correct form and manual correction persists 
  assert.match(animal.querySelector<HTMLElement>('[data-cluster-pick-status]')!.textContent??'',/animal-body.*Dreieck 0/);
  assert.equal(humanoid.querySelector<HTMLSelectElement>('[data-cluster-mesh]')!.value,humanoidMesh);
  const reason=animal.querySelector('textarea') as HTMLTextAreaElement;reason.value='Gegen die freigegebene Referenz geprüft.';
- (animal.querySelector('button:last-of-type') as HTMLButtonElement).click();
+ [...animal.querySelectorAll('button')].find(button=>button.textContent?.includes('Dreieck-Zuordnung manuell korrigieren'))!.click();
  const saved=editor.exportProject();
  const corrected=saved.clusterSkinAnatomyProposals!.animal.manifest.assignments[0]!;
  assert.equal(corrected.partId,'paws');assert.equal(corrected.origin,'user');assert.equal(corrected.policy,'locked');
