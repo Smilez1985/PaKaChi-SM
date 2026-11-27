@@ -6,6 +6,7 @@ import type {ImageReferenceFormCropSelection,ImageReferenceFormPairCrops} from '
 import {createPaKaChiSemanticCatalog,validateCluster2DSemanticCatalog,imageReferenceLandmarksToCluster2DSeeds,proposeCluster2DRegionAssignments} from './cluster-2d-classifier.ts';
 import type {Cluster2DSemanticCatalog} from './cluster-2d-classifier.ts';
 import {createLandmarkCalibrationCoverageReport} from './studio-landmark-projection.ts';
+import {createLandmarkTriangulationQualityReport} from './studio-landmark-projection.ts';
 
 interface Entry {region:ImageReferenceRegion;avatar:string;form:string;view:string;use:boolean;appearanceHash?:string}
 const makeId=(prefix:string,n:number)=>`${prefix}-${n}`;
@@ -158,6 +159,39 @@ export function mountImageReferenceEditor(host:HTMLElement,source:File,language:
    }catch(error){const note=document.createElement('p');note.textContent=t('Abdeckungsprüfung nicht möglich: '+String(error),'Coverage check unavailable: '+String(error));coverageResults.append(note);}
   };
   cameraPanel.append(checkCoverage,coverageResults);
+  const checkTriangulation=document.createElement('button'),triangulationResults=document.createElement('div');
+  checkTriangulation.type='button';checkTriangulation.textContent=t('Triangulationsqualität prüfen','Check triangulation quality');
+  triangulationResults.setAttribute('aria-live','polite');checkTriangulation.disabled=!availableEntries.length;
+  checkTriangulation.onclick=async()=>{
+   triangulationResults.replaceChildren();
+   try{
+    const poseId=cameraPose.value.trim();if(!/^[a-z0-9][a-z0-9_-]{0,127}$/.test(poseId))throw new Error('invalid-triangulation-pose-id');
+    const doc=await documentFor(),regionId=cameraRegion.value;
+    const view=doc.views.find(item=>item.regionIds.includes(regionId));
+    const form=view&&doc.forms.find(item=>item.viewIds.includes(view.id));
+    const avatar=form&&doc.avatars.find(item=>item.formIds.includes(form.id));
+    if(!view||!form||!avatar)throw new Error('triangulation-form-binding-not-found');
+    const report=createLandmarkTriangulationQualityReport(doc,{avatarId:avatar.id,formId:form.id,poseId});
+    const summary=document.createElement('p');
+    summary.textContent=t(
+     `Triangulationsprüfung: bereit ${report.readyCount} · abgelehnt ${report.rejectedCount} · ohne kalibrierte Beobachtung ${report.missingObservationCount} · Mindestparallaxe ${report.thresholds.minParallaxDegrees}° · maximaler Strahlfehler ${report.thresholds.maxRayErrorWorld}`,
+     `Triangulation check: ready ${report.readyCount} · rejected ${report.rejectedCount} · no calibrated observations ${report.missingObservationCount} · minimum parallax ${report.thresholds.minParallaxDegrees}° · maximum ray error ${report.thresholds.maxRayErrorWorld}`
+    );triangulationResults.append(summary);
+    if(!report.items.length){const empty=document.createElement('p');empty.textContent=t('Keine bestätigten Landmarken für diese Form und Pose gefunden.','No confirmed landmarks found for this form and pose.');triangulationResults.append(empty);}
+    report.items.forEach(item=>{
+     const row=document.createElement('p');
+     const viewLabel=(id:string)=>doc.views.find(viewItem=>viewItem.id===id)?.label??id;
+     const views=item.calibratedViewIds.map(viewLabel).join(', ')||'–';
+     const detail=item.status==='ready'
+      ?t(`akzeptiert · Parallaxe ${item.parallaxDegrees!.toFixed(2)}° · Strahlfehler ${item.rayErrorWorld!.toFixed(5)} · Konfidenz ${item.confidence!.toFixed(2)}`,`accepted · parallax ${item.parallaxDegrees!.toFixed(2)}° · ray error ${item.rayErrorWorld!.toFixed(5)} · confidence ${item.confidence!.toFixed(2)}`)
+      :t('nicht freigegeben · ','not accepted · ')+(item.reason??'');
+     row.textContent=item.partId+' · '+detail+' · '+t('Ansichten: ','Views: ')+views;
+     triangulationResults.append(row);
+    });
+    const note=document.createElement('p');note.textContent=t('Nur Qualitätsdiagnose: Es werden keine 3D-Punkte exportiert, gespeichert oder auf das Modell angewendet.','Quality diagnostic only: no 3D points are exported, saved or applied to the model.');triangulationResults.append(note);
+   }catch(error){const note=document.createElement('p');note.textContent=t('Triangulationsprüfung nicht möglich: '+String(error),'Triangulation check unavailable: '+String(error));triangulationResults.append(note);}
+  };
+  cameraPanel.append(checkTriangulation,triangulationResults);
   cameraCalibrations.forEach(item=>{const row=document.createElement('div'),label=document.createElement('span'),remove=document.createElement('button');label.textContent=item.avatarId+' / '+item.formId+' / '+item.poseId+' / '+item.viewId;remove.type='button';remove.textContent=t('Löschen','Delete');remove.onclick=()=>{cameraCalibrations=cameraCalibrations.filter(value=>value.id!==item.id);render();changed();};row.append(label,remove);cameraPanel.append(row);});
   const relationTitle=document.createElement('legend');relationTitle.textContent=t('Beziehungen zwischen Bildbereichen','Relations between image regions');relationPanel.append(relationTitle);
   const relationSource=document.createElement('select'),relationTarget=document.createElement('select'),relationKind=document.createElement('select');relationSource.setAttribute('aria-label',t('Quellbereich','Source region'));relationTarget.setAttribute('aria-label',t('Zielbereich','Target region'));relationKind.setAttribute('aria-label',t('Beziehungstyp','Relation type'));
