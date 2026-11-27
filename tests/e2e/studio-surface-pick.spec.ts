@@ -32,7 +32,8 @@ test('StudioView maps an overlay face click to its exact source mesh, triangle a
  await page.goto('/');
  await page.evaluate(async()=>{
   const canvas=document.querySelector<HTMLCanvasElement>('#studio')!;
-  const {mountClusterOverlayPickFixture}=await import(/* @vite-ignore */ '/tests/e2e/fixtures/studio-surface-pick.ts');
+  const fixtureUrl='/tests/e2e/fixtures/studio-surface-pick.ts';
+  const {mountClusterOverlayPickFixture}=await import(/* @vite-ignore */ fixtureUrl);
   (window as any).__overlayPick=mountClusterOverlayPickFixture(canvas);
  });
  const bounds=await page.locator('#studio').boundingBox();expect(bounds).not.toBeNull();
