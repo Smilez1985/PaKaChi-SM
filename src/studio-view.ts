@@ -90,6 +90,10 @@ export class StudioView {
     if(this.action==='brush')return;
     const start=this.start;this.start=null;if(!start||!this.enabled||event.button!==0||Math.hypot(event.clientX-start.x,event.clientY-start.y)>4||this.dragging||this.gizmo.axis)return;
     const rect=this.canvas.getBoundingClientRect();this.ray.setFromCamera(new T.Vector2((event.clientX-rect.left)/rect.width*2-1,-(event.clientY-rect.top)/rect.height*2+1),this.camera);
+    // The overlay can be replaced between rendered frames (e.g. immediately after entering the editor).
+    // Refresh its world matrices before raycasting so a first click never depends on a prior render pass.
+    this.group.updateMatrixWorld(true);
+    this.clusterSkinOverlay.updateMatrixWorld(true);
     const overlayHit=this.ray.intersectObjects(this.clusterSkinOverlay.children,false)[0];
     if(overlayHit&&Number.isSafeInteger(overlayHit.faceIndex)){
       const refs=(overlayHit.object as T.Mesh).userData.pakachiClusterOverlayTriangles as Array<{meshId:string;triangleIndex:number;sourceAssetSha256:string;state:ClusterSkinOverlayState;partId:string|null}>|undefined;
