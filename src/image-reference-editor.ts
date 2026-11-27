@@ -5,6 +5,7 @@ import {createImageReferenceGenerationManifest,cropImageReferenceRegion,cropImag
 import type {ImageReferenceFormCropSelection,ImageReferenceFormPairCrops} from './image-reference-crop.ts';
 import {createPaKaChiSemanticCatalog,validateCluster2DSemanticCatalog,imageReferenceLandmarksToCluster2DSeeds,proposeCluster2DRegionAssignments} from './cluster-2d-classifier.ts';
 import type {Cluster2DSemanticCatalog} from './cluster-2d-classifier.ts';
+import {createLandmarkCalibrationCoverageReport} from './studio-landmark-projection.ts';
 
 interface Entry {region:ImageReferenceRegion;avatar:string;form:string;view:string;use:boolean;appearanceHash?:string}
 const makeId=(prefix:string,n:number)=>`${prefix}-${n}`;
@@ -123,6 +124,40 @@ export function mountImageReferenceEditor(host:HTMLElement,source:File,language:
    feedback.textContent=t('Kamerakalibrierung gespeichert. Sie wird erst mit dem Bildreferenz-Dokument exportiert und bleibt manuell zugeordnet.','Camera calibration saved. It is exported with the image-reference document and remains manually assigned.');render();changed();
   }catch(error){feedback.textContent=t('Kalibrierung nicht gespeichert: '+String(error),'Calibration not saved: '+String(error));}};
   cameraPanel.append(saveCamera);
+  const checkCoverage=document.createElement('button'),coverageResults=document.createElement('div');
+  checkCoverage.type='button';checkCoverage.textContent=t('Landmark-Kalibrierungsabdeckung prüfen','Check landmark calibration coverage');
+  coverageResults.setAttribute('aria-live','polite');
+  checkCoverage.disabled=!availableEntries.length;
+  checkCoverage.onclick=async()=>{
+   coverageResults.replaceChildren();
+   try{
+    const poseId=cameraPose.value.trim();if(!/^[a-z0-9][a-z0-9_-]{0,127}$/.test(poseId))throw new Error('invalid-coverage-pose-id');
+    const doc=await documentFor(),regionId=cameraRegion.value;
+    const view=doc.views.find(item=>item.regionIds.includes(regionId));
+    const form=view&&doc.forms.find(item=>item.viewIds.includes(view.id));
+    const avatar=form&&doc.avatars.find(item=>item.formIds.includes(form.id));
+    if(!view||!form||!avatar)throw new Error('coverage-form-binding-not-found');
+    // The report only checks view coverage; its internal unit radius is not a reconstruction scale.
+    const report=createLandmarkCalibrationCoverageReport(doc,{avatarId:avatar.id,formId:form.id,poseId,radiusWorld:1});
+    const summary=document.createElement('p');
+    summary.textContent=t(
+     `Landmarken: ${report.landmarkCount} · ohne Kalibrierung: ${report.landmarksWithNoCalibration} · eine Ansicht: ${report.landmarksWithOneCalibratedView} · mindestens zwei Ansichten: ${report.landmarksWithMultiViewCalibration}`,
+     `Landmarks: ${report.landmarkCount} · no calibration: ${report.landmarksWithNoCalibration} · one view: ${report.landmarksWithOneCalibratedView} · at least two views: ${report.landmarksWithMultiViewCalibration}`
+    );coverageResults.append(summary);
+    if(!report.items.length){const empty=document.createElement('p');empty.textContent=t('Keine bestätigten Landmarken für diese Form und Pose gefunden.','No confirmed landmarks found for this form and pose.');coverageResults.append(empty);}
+    report.items.forEach(item=>{
+     const row=document.createElement('p');
+     const viewLabel=(id:string)=>doc.views.find(viewItem=>viewItem.id===id)?.label??id;
+     const calibrated=item.calibratedViewIds.map(viewLabel),missing=item.missingCalibrationViewIds.map(viewLabel);
+     const state=item.hasMultiViewCalibration
+      ?t('Mindestabdeckung erreicht – Parallaxe und 3D-Lösung nicht geprüft','Minimum coverage reached – parallax and 3D solution not validated')
+      :t('Unzureichende Mehransicht-Kalibrierung','Insufficient multi-view calibration');
+     row.textContent=item.partId+' · '+state+' · '+t('kalibriert: ','calibrated: ')+(calibrated.join(', ')||'–')+' · '+t('fehlt: ','missing: ')+(missing.join(', ')||'–');
+     coverageResults.append(row);
+    });
+   }catch(error){const note=document.createElement('p');note.textContent=t('Abdeckungsprüfung nicht möglich: '+String(error),'Coverage check unavailable: '+String(error));coverageResults.append(note);}
+  };
+  cameraPanel.append(checkCoverage,coverageResults);
   cameraCalibrations.forEach(item=>{const row=document.createElement('div'),label=document.createElement('span'),remove=document.createElement('button');label.textContent=item.avatarId+' / '+item.formId+' / '+item.poseId+' / '+item.viewId;remove.type='button';remove.textContent=t('Löschen','Delete');remove.onclick=()=>{cameraCalibrations=cameraCalibrations.filter(value=>value.id!==item.id);render();changed();};row.append(label,remove);cameraPanel.append(row);});
   const relationTitle=document.createElement('legend');relationTitle.textContent=t('Beziehungen zwischen Bildbereichen','Relations between image regions');relationPanel.append(relationTitle);
   const relationSource=document.createElement('select'),relationTarget=document.createElement('select'),relationKind=document.createElement('select');relationSource.setAttribute('aria-label',t('Quellbereich','Source region'));relationTarget.setAttribute('aria-label',t('Zielbereich','Target region'));relationKind.setAttribute('aria-label',t('Beziehungstyp','Relation type'));
