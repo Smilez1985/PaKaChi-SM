@@ -1,3 +1,13 @@
+## Zwischenprüfung 2026-11-27 – vollständiger Browser-Korrekturpfad für Skin-Anatomie
+
+**Implementierung auf `develop`, Commit `dc11e34a837ebc3386fbd5c1a483441a638b5c98`:** Der echte Chromium-Ablauf klickt das gerenderte Skin-Overlay im Canvas an. Die Auswahl wird der korrekten Form zugeordnet und füllt Mesh-, Dreiecks- und Part-Feld sowie den Status der Review-Maske. Die ausdrückliche Korrekturaktion speichert den Override als `origin: user` und `policy: locked`; der Projekt-Export und der erneute Editor-Aufbau stellen den Override wieder her. Die Gegenform behält ihre automatische Zuordnung. Ursache des zuvor roten E2E-Tests war die konkurrierende Pointer-Interaktion des Transform-Gizmos. Der neue `cluster-pick`-Modus deaktiviert diese Interaktion während der Overlay-Auswahl und stellt beim Ausblenden den vorherigen Studio-Modus wieder her.
+
+**CI:**
+- [Cluster-Landmark-Workflow #46077928608](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/46077928608): **success** – npm ci, Dependency-Audit, Cluster-/Anatomie-/Landmark-Regressionen, 4/4 Chromium-E2E und TypeScript.
+- [Studio-Topology-Workflow #46077928613](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/46077928613): **success** – gezielte Studio-Topology-Regression und Dependency-Audit.
+
+**Grenzen / nächster Schritt:** Der technische Browser-Korrekturpfad ist abgeschlossen. Offen bleibt die visuelle Abnahme der Original-PaKaChi-Tier- und Arbeitsform gegen die freigegebenen 2D-Referenzen. Technische E2E-Tests ersetzen diese Abnahme nicht. `main` bleibt unverändert.
+
 ## Zwischenprüfung 2026-11-27 – Editor-Korrekturpfad und Persistenzregressionen
 
 **Implementierung auf `develop`, Commit `788961776ff5951c19e37c7b500bee43539a99a4`:** Zwei gezielte Regressionen prüfen den Übergang vom 3D-Pick in den Editor. Ein eindeutiger Treffer mit Quellhash und Mesh-ID füllt die Formularfelder der richtigen Form vor; stale Hashes und mehrdeutige Bindungen beider Formen werden abgewiesen. Die manuelle Korrektur wird erst nach expliziter Aktion als `origin: user` und `policy: locked` gespeichert. Der Export enthält den Override nur für die betroffene Form; ein neu aufgebauter Editor stellt ihn nach dem Projekt-Roundtrip weiterhin als gesperrte Korrektur her.
