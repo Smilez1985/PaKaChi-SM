@@ -520,4 +520,8 @@ test('reference editor reports calibrated landmark views and missing coverage pe
  await expect(panel).toContainText('calibrated: Front');
  await expect(panel).toContainText('missing: Side');
  await expect(panel).toContainText('Insufficient multi-view calibration');
+ await page.getByRole('button',{name:'Check triangulation quality'}).click();
+ await expect(panel).toContainText('rejected 1');
+ await expect(panel).toContainText('At least two calibrated views are required for depth.');
+ await expect(panel).toContainText('no 3D points are exported');
 });
