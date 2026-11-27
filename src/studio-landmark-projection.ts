@@ -82,3 +82,97 @@ export function createCalibratedLandmarkObservations(
   }
   return observations;
 }
+
+
+export interface LandmarkCalibrationCoverageItem {
+  landmarkId: string;
+  partId: string;
+  viewIds: string[];
+  calibratedViewIds: string[];
+  missingCalibrationViewIds: string[];
+  hasMultiViewCalibration: boolean;
+}
+
+export interface LandmarkCalibrationCoverageReport {
+  avatarId: string;
+  formId: string;
+  poseId: string;
+  sourceImageSha256: string;
+  policy: 'read-only';
+  automaticCalibrationApplied: false;
+  calibratedViewCount: number;
+  landmarkCount: number;
+  landmarksWithNoCalibration: number;
+  landmarksWithOneCalibratedView: number;
+  landmarksWithMultiViewCalibration: number;
+  items: LandmarkCalibrationCoverageItem[];
+}
+
+/**
+ * Reports whether each confirmed landmark has enough explicitly calibrated
+ * views to attempt depth triangulation. Two views are only a minimum coverage
+ * gate: this report does not claim sufficient parallax or a valid 3D solution.
+ */
+export function createLandmarkCalibrationCoverageReport(
+  document: ImageReferenceDocument,
+  identity: { avatarId: string; formId: string; poseId: string; radiusWorld: number },
+): LandmarkCalibrationCoverageReport {
+  // Reuse the strict source, hierarchy, identity and calibration validation.
+  createCalibratedLandmarkObservations(document, identity);
+  const form = document.forms.find(item => item.id === identity.formId)!;
+  const viewByRegion = new Map<string, string>();
+  for (const viewId of form.viewIds) {
+    const view = document.views.find(item => item.id === viewId)!;
+    for (const regionId of view.regionIds) viewByRegion.set(regionId, viewId);
+  }
+  const confirmedRegions = new Set(document.regions
+    .filter(region => region.status === 'confirmed')
+    .map(region => region.id));
+  const groups = new Map<string, { partId: string; viewIds: Set<string> }>();
+  for (const landmark of document.landmarks ?? []) {
+    if (landmark.poseId !== identity.poseId || !confirmedRegions.has(landmark.regionId)) continue;
+    const viewId = viewByRegion.get(landmark.regionId);
+    if (!viewId) continue;
+    const landmarkId = landmark.correspondenceId ?? landmark.id;
+    const group = groups.get(landmarkId) ?? { partId: landmark.partId, viewIds: new Set<string>() };
+    if (group.partId !== landmark.partId) {
+      throw new Error('A landmark correspondence cannot span different anatomical parts.');
+    }
+    group.viewIds.add(viewId);
+    groups.set(landmarkId, group);
+  }
+  const calibrations = new Set((document.cameraCalibrations ?? [])
+    .filter(item => item.avatarId === identity.avatarId && item.formId === identity.formId &&
+      item.poseId === identity.poseId && item.sourceImageSha256 === document.source.sha256)
+    .map(item => item.viewId));
+  const items = [...groups.entries()].map(([landmarkId, group]) => {
+    const viewIds = [...group.viewIds].sort();
+    const calibratedViewIds = viewIds.filter(viewId => calibrations.has(viewId));
+    const missingCalibrationViewIds = viewIds.filter(viewId => !calibrations.has(viewId));
+    return {
+      landmarkId,
+      partId: group.partId,
+      viewIds,
+      calibratedViewIds,
+      missingCalibrationViewIds,
+      hasMultiViewCalibration: calibratedViewIds.length >= 2,
+    };
+  }).sort((a, b) => a.landmarkId.localeCompare(b.landmarkId));
+  const counts = {
+    landmarksWithNoCalibration: items.filter(item => item.calibratedViewIds.length === 0).length,
+    landmarksWithOneCalibratedView: items.filter(item => item.calibratedViewIds.length === 1).length,
+    landmarksWithMultiViewCalibration: items.filter(item => item.hasMultiViewCalibration).length,
+  };
+  return {
+    avatarId: identity.avatarId,
+    formId: identity.formId,
+    poseId: identity.poseId,
+    sourceImageSha256: document.source.sha256,
+    policy: 'read-only',
+    automaticCalibrationApplied: false,
+    calibratedViewCount: new Set(items.flatMap(item => item.calibratedViewIds)).size,
+    landmarkCount: items.length,
+    ...counts,
+    items,
+  };
+}
