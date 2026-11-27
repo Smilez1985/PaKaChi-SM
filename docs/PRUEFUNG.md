@@ -1,3 +1,16 @@
+## Zwischenprüfung 2026-11-27 – Editor-Korrekturpfad und Persistenzregressionen
+
+**Implementierung auf `develop`, Commit `788961776ff5951c19e37c7b500bee43539a99a4`:** Zwei gezielte Regressionen prüfen den Übergang vom 3D-Pick in den Editor. Ein eindeutiger Treffer mit Quellhash und Mesh-ID füllt die Formularfelder der richtigen Form vor; stale Hashes und mehrdeutige Bindungen beider Formen werden abgewiesen. Die manuelle Korrektur wird erst nach expliziter Aktion als `origin: user` und `policy: locked` gespeichert. Der Export enthält den Override nur für die betroffene Form; ein neu aufgebauter Editor stellt ihn nach dem Projekt-Roundtrip weiterhin als gesperrte Korrektur her.
+
+**CI [Cluster-Landmark-Workflow #46036286231](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/46036286231):**
+- npm ci: **success**.
+- Dependency-Audit: **success**.
+- Cluster-/Anatomie-/Landmark- und Editor-Regressionen: **success**.
+- Chromium-Browserregression für reales 3D-Overlay-Face-Picking: **success**.
+- TypeScript `npx tsc --noEmit`: **success**.
+
+**Grenzen / nächster Schritt:** Der Editor-Callback, Formularzustand, explizite Korrektur und Projekt-Roundtrip sind durch Editor-Regressionen abgesichert, aber noch nicht als durchgehender Playwright-Ablauf in einem echten Browser. Der nächste technische Schritt ist dieser Browserpfad. Danach bleibt die visuelle Abnahme von Tier- und Arbeitsform gegen die freigegebenen Original-2D-Referenzen zwingend; technische Tests ersetzen diese Abnahme nicht. `main` bleibt unverändert.
+
 ## Zwischenprüfung 2026-11-27 – echtes Skin-Overlay-Face-Picking
 
 **Implementierung auf develop, Commit aa4b5d12f98483bba3d48785ad49a9062b6d1f30:** Ein dedizierter Playwright-Test klickt das tatsächlich gerenderte Overlay-Face im Canvas an und prüft den vollständigen Callback-Treffer. Die Fixture-Quelle verwendet absichtlich triangleIndex: 42, obwohl das Overlay nur ein Face enthält. Damit wird nachgewiesen, dass faceIndex über die beim Aufbau gespeicherte Referenztabelle auf den ursprünglichen Quell-Dreiecksindex zurückgeführt wird und nicht versehentlich als Quellindex behandelt wird. Erwartet und erhalten werden Mesh-ID, Quellindex, SHA-256, Status locked und Part-ID.
