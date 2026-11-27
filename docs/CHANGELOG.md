@@ -1,6 +1,9 @@
 ## [Unreleased]
 
 ### Added
+- Editor-Regressionen für den vollständigen Korrektur-Datenpfad nach einem 3D-Pick: eindeutige Form-/Hash-/Mesh-Bindung, Vorbelegung von Mesh-/Dreiecks-/Part-Feldern, Ablehnung veralteter oder mehrdeutiger Treffer, explizite manuelle Korrektur als gesperrter Benutzer-Override (`origin: user`, `policy: locked`) sowie Export und Wiederherstellung mit unveränderter Gegenform. Die Tests belegen den Editor-/Persistenzpfad auf Komponentenebene; ein echter Browser-E2E-Durchlauf vom gerenderten Overlay bis zum erneuten Laden bleibt offen. CI [Cluster-Landmark #46036286231](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/46036286231): Audit, Cluster-Regressionen, Chromium-Overlay-Picking und TypeScript vollständig erfolgreich. Stand: 2026-11-27T17:xx:00+01:00 (Europe/Berlin).
+
+### Added
 - Dedizierter Chromium-E2E-Test für das quellgebundene Skin-Overlay-Picking: Ein echter Canvas-Klick auf das gerenderte Overlay-Face liefert exakt Quell-Mesh-ID, ursprünglichen Quell-Dreiecksindex, SHA-256, Klassifizierungsstatus und Part-ID an den Callback. Der Test verwendet absichtlich einen Quell-Dreiecksindex ungleich dem Overlay-Face-Index (42), damit die explizite Face-Referenztabelle geprüft wird. Korrigierter dynamischer Fixture-Import ist TypeScript-kompatibel. CI [Cluster-Landmark #46035605039](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/46035605039) auf Commit aa4b5d12f98483bba3d48785ad49a9062b6d1f30: Audit, Cluster-Regressionen, Chromium-Browserprüfungen und TypeScript erfolgreich. Stand: 2026-11-27T17:00:00+01:00 (Europe/Berlin).
 
 ### Added
