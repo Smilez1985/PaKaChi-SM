@@ -72,8 +72,9 @@ export function mountClusterEditorCorrectionFixture(canvas:HTMLCanvasElement,hos
  let feedback='';
  const hooks={suspend(){},resume(){},changed(){},feedback(value:string){feedback=value;}};
  const editor=new StudioEditor(rig,view,host,project,hooks);editor.enter();
+ let pickedHit:unknown=null;const pick= view.onClusterSkinTrianglePick;view.onClusterSkinTrianglePick=hit=>{pickedHit=hit;pick(hit);};
  view.setClusterSkinOverlay({sourceAssetSha256:animalHash,missingMeshIds:[],triangles:[{meshId:'animal-body',triangleIndex:0,state:'automatic',partId:'paws',positions:[-1,-1,0,1,-1,0,0,1,0]}]});
- return {view,editor,feedback:()=>feedback,restore(){
+ return {view,editor,feedback:()=>feedback,pickedHit:()=>pickedHit,restore(){
   const saved=JSON.parse(JSON.stringify(editor.exportProject()));
   const restoredHost=document.createElement('div');restoredHost.innerHTML='<div id="cluster-skin-anatomy-proposals"></div>';document.body.append(restoredHost);
   const restoredRoot=new THREE.Group();restoredRoot.add(new THREE.Mesh(new THREE.SphereGeometry(.5,8,8)));
