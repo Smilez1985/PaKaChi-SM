@@ -1,3 +1,15 @@
+## Zwischenprüfung 2026-11-28 – Triangulationsqualität als read-only Editorprüfung
+
+**Implementierung auf `develop`:** `createLandmarkTriangulationQualityReport()` verbindet die streng quellhash- und formgebundene Kalibrierungs-/Landmarkenauflösung mit `triangulateLandmarkSeeds()`. Die vorhandene Strahlgeometrie bewertet Mindestparallaxe (Standard 3°), Strahlfehler (Standard 0,05 Welteinheiten), Punkte hinter Kameras und numerische Stabilität. Der Referenz-Editor zeigt pro Landmarke, ob die Triangulation die Qualitätsgrenzen erfüllt oder warum sie abgelehnt wurde. Der Diagnosebericht verwirft die errechneten Positionen: Es werden keine 3D-Punkte exportiert, gespeichert oder auf ein Modell angewendet. Die Diagnose benutzt einen neutralen Einheitsradius nur intern; daraus wird keine reale Modellgröße abgeleitet.
+
+**CI [Image-Reference-Workflow #46083187656](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/46083187656):**
+- npm ci und Dependency-Audit: **success**.
+- Landmark-Projektion und Triangulations-Qualitätsregressionen (erfolgreicher Mehransicht-Fall, Einansicht-Ablehnung, fehlende Kalibrierungen): **success**.
+- Chromium-E2E einschließlich Editoranzeige des Einansicht-Ablehnungsgrunds: **success**.
+- TypeScript `npx tsc --noEmit`: **success**.
+
+**Grenzen / nächster Schritt:** Die Editorprüfung ist ein Qualitätsgate, keine Modellrekonstruktion. Sie liefert keine dauerhaften 3D-Landmarken, keine Oberflächenprojektion und keine automatische Skalierung. Vor einer tatsächlichen Übernahme müssen die Kamera- und Mesh-Weltkoordinatensysteme explizit verbunden und die resultierenden Punkte gegen die Originalreferenz und die reale Modellgeometrie geprüft werden. Die visuelle Original-PaKaChi-Abnahme bleibt offen; `main` bleibt unverändert.
+
 ## Zwischenprüfung 2026-11-28 – Landmark-Kalibrierungsabdeckung im Referenz-Editor
 
 **Implementierung auf `develop`:** `createLandmarkCalibrationCoverageReport()` liefert einen read-only Bericht je korrespondierender bestätigter Landmarke. Die Zuordnung wird auf die explizite Avatar-/Form-/Pose-Identität und den Quellbildhash begrenzt. Der Referenz-Editor bietet die Aktion „Landmark-Kalibrierungsabdeckung prüfen“ und zeigt kalibrierte sowie fehlende Ansichten pro anatomischem Part. Die Prüfung verändert keine Daten und schätzt keine Kalibrierung. Zwei Ansichten werden nur als Mindestabdeckung für einen späteren Triangulationsversuch markiert; Parallaxe und Gültigkeit einer 3D-Lösung sind nicht geprüft. Ein Chromium-E2E-Test prüft eine Frontansicht mit vorhandener Kalibrierung und fehlender Seitenansicht.
