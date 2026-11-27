@@ -49,11 +49,11 @@ test('real overlay click fills the Studio correction form, locks the correction 
  await page.goto('/');
  await page.evaluate(async()=>{
   const canvas=document.querySelector<HTMLCanvasElement>('#studio')!,host=document.querySelector<HTMLElement>('#editor')!;
+  (window as any).__editorCorrectionEvents=[];
+  for(const name of ['pointerdown','pointerup','click'])window.addEventListener(name,event=>(window as any).__editorCorrectionEvents.push(name+':'+(event.target as Element).tagName),true);
   const fixtureUrl='/tests/e2e/fixtures/studio-surface-pick.ts';
   const {mountClusterEditorCorrectionFixture}=await import(/* @vite-ignore */ fixtureUrl);
   (window as any).__editorCorrection=mountClusterEditorCorrectionFixture(canvas,host);
-  (window as any).__editorCorrectionEvents=[];
-  for(const name of ['pointerdown','pointerup','click'])canvas.addEventListener(name,event=>(window as any).__editorCorrectionEvents.push(name+':'+(event.target as Element).tagName),true);
  });
  const bounds=await page.locator('#studio').boundingBox();expect(bounds).not.toBeNull();
  const clickX=bounds!.x+bounds!.width/2,clickY=bounds!.y+bounds!.height/2;
