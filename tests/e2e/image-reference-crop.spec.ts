@@ -482,3 +482,42 @@ test('image-reference editor exposes explicit same-avatar form-pair crops to the
  expect(result.cropHashes[0]).not.toBe(result.cropHashes[1]);
  expect(result.sizes.every(size=>size>0)).toBe(true);
 });
+
+
+test('reference editor reports calibrated landmark views and missing coverage per correspondence',async({page})=>{
+ await page.route('**/',route=>route.fulfill({contentType:'text/html',body:'<!doctype html><html><body></body></html>'}));
+ await page.goto('/');
+ await page.evaluate(async()=>{
+  const canvas=document.createElement('canvas');canvas.width=100;canvas.height=100;
+  const context=canvas.getContext('2d')!;context.fillStyle='#202020';context.fillRect(0,0,100,100);
+  const blob=await new Promise<Blob>(resolve=>canvas.toBlob((value:Blob|null)=>resolve(value!),'image/png'));
+  const source=new File([blob],'coverage.png',{type:'image/png'});
+  const digest=await crypto.subtle.digest('SHA-256',await source.arrayBuffer());
+  const sourceHash=[...new Uint8Array(digest)].map(value=>value.toString(16).padStart(2,'0')).join('');
+  const initial={format:'pakachi-image-reference',version:1,source:{sha256:sourceHash,width:100,height:100},
+   regions:[
+    {id:'front-region',label:'Front region',kind:'view',status:'confirmed',geometry:{type:'rectangle',x:0,y:0,width:45,height:100}},
+    {id:'side-region',label:'Side region',kind:'view',status:'confirmed',geometry:{type:'rectangle',x:55,y:0,width:45,height:100}}
+   ],
+   views:[{id:'front',label:'Front',regionIds:['front-region']},{id:'side',label:'Side',regionIds:['side-region']}],
+   forms:[{id:'animal-form',label:'Animal',viewIds:['front','side']}],
+   avatars:[{id:'pakachi',label:'PaKaChi',formIds:['animal-form']}],
+   landmarks:[
+    {id:'eye-front',correspondenceId:'left-eye',regionId:'front-region',partId:'head',poseId:'neutral',x:20,y:25,radiusPx:5},
+    {id:'eye-side',correspondenceId:'left-eye',regionId:'side-region',partId:'head',poseId:'neutral',x:70,y:25,radiusPx:5}
+   ],
+   cameraCalibrations:[{id:'front-calibration',sourceImageSha256:sourceHash,avatarId:'pakachi',formId:'animal-form',poseId:'neutral',viewId:'front',fx:1,fy:1,cx:.5,cy:.5,cameraToWorld:[1,0,0,0,0,1,0,0,0,0,1,0,-1,0,0,1]}]
+  };
+  const {mountImageReferenceEditor}=await import('../../src/image-reference-editor.ts');
+  const host=document.createElement('div');document.body.append(host);
+  mountImageReferenceEditor(host,source,()=> 'en',()=>{},initial as any);
+ });
+ await page.getByLabel('Camera calibration key').fill('neutral');
+ await page.getByRole('button',{name:'Check landmark calibration coverage'}).click();
+ const panel=page.locator('fieldset').filter({has:page.getByRole('button',{name:'Check landmark calibration coverage'})});
+ await expect(panel).toContainText('Landmarks: 1');
+ await expect(panel).toContainText('one view: 1');
+ await expect(panel).toContainText('calibrated: Front');
+ await expect(panel).toContainText('missing: Side');
+ await expect(panel).toContainText('Insufficient multi-view calibration');
+});
