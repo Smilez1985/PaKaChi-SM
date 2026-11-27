@@ -1,6 +1,9 @@
 ## [Unreleased]
 
 ### Added
+- Read-only Kalibrierungsabdeckung für 2D-Landmarken im Bildreferenz-Editor: `createLandmarkCalibrationCoverageReport()` gruppiert korrespondierende bestätigte Landmarken nach Form und Pose und weist kalibrierte sowie fehlende Ansichten aus. Der Editor zeigt pro anatomischem Part die Abdeckung; mindestens zwei Ansichten sind ausdrücklich nur eine Mindestvoraussetzung, keine Bestätigung ausreichender Parallaxe oder einer gültigen 3D-Lösung. Keine automatische Kalibrierung oder Mutation. Chromium-E2E prüft eine nur frontal kalibrierte Landmarke mit fehlender Seitenansicht. CI [Image-Reference #46082880514](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/46082880514): Dependency-Audit, sämtliche Image-Reference-Regressionen, Browser-E2E und TypeScript erfolgreich. Commits `12be1566` und `dc31d240`. Stand: 2026-11-28T00:31:00+01:00 (Europe/Berlin).
+
+### Added
 - Vollständiger Browser-E2E-Korrekturpfad für das Skin-Anatomie-Overlay: Chromium klickt ein reales Overlay-Dreieck, der Studio-Callback übernimmt Quell-Mesh-ID, Dreiecksindex, Quellhash, Status und Part-ID in die eindeutig passende Tier-/Arbeitsformmaske. Die explizite manuelle Korrektur wird als `origin: user` / `policy: locked` gespeichert und bleibt nach Projekt-Export sowie erneutem Editor-Aufbau erhalten; die Gegenform bleibt unverändert. Der neue `cluster-pick`-Modus entkoppelt die Overlay-Auswahl vom Transform-Gizmo und stellt beim Ausblenden den vorherigen Interaktionsmodus wieder her. CI [Cluster-Landmark #46077928608](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/46077928608): Audit, Cluster-/Anatomie-Regressionen, alle 4 Chromium-E2E-Tests und TypeScript vollständig erfolgreich. Separater Studio-Topology-CI-Lauf [#46077928613](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/46077928613) ebenfalls erfolgreich. Commit `dc11e34a837ebc3386fbd5c1a483441a638b5c98`. Stand: 2026-11-27T23:40:00+01:00 (Europe/Berlin).
 
 ### Added
