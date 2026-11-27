@@ -24,7 +24,7 @@ function editorView(){
 
 test('3D overlay pick pre-fills the correct form and manual correction persists as a locked override',()=>{
  const window=new Window();Object.assign(globalThis,{document:window.document,Option:function(text="",value=""){const o=window.document.createElement("option");o.textContent=text;o.value=value;return o;}});
- const host=window.document.createElement('div'),root=new T.Group();root.add(new T.Mesh(new T.SphereGeometry(.5,8,8)));
+ const host=window.document.createElement('div') as unknown as HTMLElement,root=new T.Group();root.add(new T.Mesh(new T.SphereGeometry(.5,8,8)));
  const animalHash='a'.repeat(64),humanoidHash='b'.repeat(64),animalMesh='animal-body',humanoidMesh='humanoid-body';
  const proposals={animal:skinProposalFixture('animal',animalHash,animalMesh),humanoid:skinProposalFixture('humanoid',humanoidHash,humanoidMesh)};
  const project={format:'pakachi-studio' as const,version:1 as const,model:'AAAA',avatar:{id:'x',name:'X',description:'',moves:[]},semanticCatalog:createPaKaChiSemanticCatalog(),clusterSkinAnatomyProposals:proposals};
@@ -57,7 +57,7 @@ test('3D overlay pick pre-fills the correct form and manual correction persists 
 
 test('3D overlay pick refuses stale and ambiguous form/hash bindings without pre-filling a correction',()=>{
  const window=new Window();Object.assign(globalThis,{document:window.document,Option:function(text="",value=""){const o=window.document.createElement("option");o.textContent=text;o.value=value;return o;}});
- const host=window.document.createElement('div'),root=new T.Group();root.add(new T.Mesh(new T.SphereGeometry(.5,8,8)));
+ const host=window.document.createElement('div') as unknown as HTMLElement,root=new T.Group();root.add(new T.Mesh(new T.SphereGeometry(.5,8,8)));
  const hash='c'.repeat(64),meshId='shared-mesh';
  const proposals={animal:skinProposalFixture('animal',hash,meshId),humanoid:skinProposalFixture('humanoid',hash,meshId)};
  const project={format:'pakachi-studio' as const,version:1 as const,model:'AAAA',avatar:{id:'x',name:'X',description:'',moves:[]},semanticCatalog:createPaKaChiSemanticCatalog(),clusterSkinAnatomyProposals:proposals};
