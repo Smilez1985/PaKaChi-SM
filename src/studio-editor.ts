@@ -493,7 +493,7 @@ export class StudioEditor {
     panel.replaceChildren();
     const heading=document.createElement('h3');heading.textContent='2D-Referenz → 3D-Mesh-Kandidat';
     const help=document.createElement('p');help.className='subtle';
-    help.textContent='Trianguliert bestätigte Landmarken aus kalibrierten Ansichten und erstellt einen Review-Kandidaten für alle Meshes der ausgewählten Tier- oder Arbeitsform. Kamera- und Meshkoordinaten müssen denselben Modell-Root-Rahmen verwenden. Keine automatische Übernahme.';
+    help.textContent='Trianguliert bestätigte Landmarken aus kalibrierten Ansichten und erstellt einen Review-Kandidaten für alle Meshes der ausgewählten Tier- oder Arbeitsform. Kamera- und Meshkoordinaten müssen denselben Modell-Root-Rahmen verwenden. Geskinntes oder morph-verformtes Mesh wird ohne explizite Restpose-Geometrie abgewiesen. Keine automatische Übernahme.';
     panel.append(heading,help);
     const doc=this.landmarkDocument;
     if(!doc){const note=document.createElement('p');note.textContent='Nicht verfügbar: zuerst eine Bildreferenz mit bestätigten Landmarken laden.';panel.append(note);return;}
@@ -548,7 +548,7 @@ export class StudioEditor {
         this.rig.root.updateWorldMatrix(true,true);
         const rootInverse=this.rig.root.matrixWorld.clone().invert();
         const result=proposeClusterManifestsFromImageReference({
-          current:manifest,sourceAssetSha256:manifest.sourceAssetSha256,meshCoordinateFrameId:coordinateFrameId,
+          current:manifest,sourceAssetSha256:manifest.sourceAssetSha256,targetForm,meshCoordinateFrameId:coordinateFrameId,
           imageReference:doc,identity:{avatarId,formId,poseId,radiusWorld},
           meshes:bindings.map(binding=>({
             meshId:binding.meshId,positions:binding.positions,indices:binding.indices,
