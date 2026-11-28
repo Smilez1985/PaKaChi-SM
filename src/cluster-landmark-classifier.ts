@@ -2,6 +2,8 @@ import type {ClusterAssignment} from './cluster-architecture.ts';
 
 export interface ClusterLandmarkSeed {
   partId: string;
+  /** Stable source landmark identity, when available from calibrated evidence. */
+  landmarkId?: string;
   position: readonly [number, number, number];
   radius: number;
   surfaceLayerId?: string | null;
@@ -47,6 +49,7 @@ export function proposeLandmarkClusterAssignments(
     if (!/^[a-z0-9][a-z0-9_-]{0,127}$/.test(seed.partId) ||
         seed.position.length !== 3 || !seed.position.every(Number.isFinite) ||
         !Number.isFinite(seed.radius) || seed.radius <= 0 ||
+        (seed.landmarkId !== undefined && !/^[a-z0-9][a-z0-9_-]{0,127}$/.test(seed.landmarkId)) ||
         (seed.surfaceLayerId != null && !/^[a-z0-9][a-z0-9_-]{0,127}$/.test(seed.surfaceLayerId))) {
       throw new Error('Invalid anatomical landmark seed.');
     }
@@ -68,7 +71,7 @@ export function proposeLandmarkClusterAssignments(
       (a[1] + b[1] + c[1]) / 3,
       (a[2] + b[2] + c[2]) / 3,
     ] as [number, number, number]];
-    const byPart = new Map<string, { score: number; layer: string | null }>();
+    const byPart = new Map<string, { score: number; layer: string | null; landmarkIds: string[] }>();
     for (const seed of seeds) {
       let score = 0;
       for (const point of samples) {
@@ -76,7 +79,11 @@ export function proposeLandmarkClusterAssignments(
         score = Math.max(score, distance / seed.radius);
       }
       const prior = byPart.get(seed.partId);
-      if (!prior || score < prior.score) byPart.set(seed.partId, { score, layer: seed.surfaceLayerId ?? null });
+      if (!prior || score < prior.score - 1e-8) {
+        byPart.set(seed.partId, { score, layer: seed.surfaceLayerId ?? null, landmarkIds: seed.landmarkId ? [seed.landmarkId] : [] });
+      } else if (Math.abs(score - prior.score) <= 1e-8 && seed.landmarkId && !prior.landmarkIds.includes(seed.landmarkId)) {
+        prior.landmarkIds.push(seed.landmarkId);
+      }
     }
     const ranked = [...byPart.entries()].map(([partId, value]) => ({ partId, ...value }))
       .sort((x, y) => x.score - y.score || x.partId.localeCompare(y.partId));
@@ -90,6 +97,7 @@ export function proposeLandmarkClusterAssignments(
       partId: accepted ? best.partId : null,
       surfaceLayerId: accepted ? best.layer : null,
       origin: 'automatic', policy: 'recomputable', confidence,
+      ...(accepted && best.landmarkIds.length ? { landmarkIds: [...best.landmarkIds].sort() } : {}),
       reason: accepted ? 'Landmark-seed proximity proposal; review required.' :
         best.score > 1 ? 'No anatomical landmark seed covers this triangle.' :
           'Competing anatomical landmark seeds are insufficiently separated.',
