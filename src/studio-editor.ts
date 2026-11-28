@@ -28,7 +28,9 @@ import type { Move } from './catalog.ts';
 import { imageReferenceLandmarksToCluster2DSeeds,createPaKaChiSemanticCatalog,upsertCluster2DSemanticPart,removeCluster2DSemanticPart,upsertCluster2DSurfaceLayer,removeCluster2DSurfaceLayer } from './cluster-2d-classifier.ts';
 import type { ImageReferenceDocument } from './image-reference.ts';
 import type { Cluster2DSemanticCatalog } from './cluster-2d-classifier.ts';
+import { collectClusterMeshInventory, resolveClusterMeshBindings } from './cluster-inventory.ts';
 import type { ClusterMeshInventory } from './cluster-inventory.ts';
+import { proposeClusterManifestsFromImageReference } from './image-reference-cluster-pipeline.ts';
 import { createStudioFormManifest } from './studio-form-manifest.ts';
 import { createStudioLandmarkEvidenceBundle, validateStudioLandmarkEvidenceBundle } from './studio-landmark-evidence.ts';
 import { createClusterLandmarkClassificationPreview, acceptClusterLandmarkPreviewItem, restoreReviewedClusterManifest } from './cluster-landmark-preview.ts';
@@ -484,6 +486,100 @@ export class StudioEditor {
     }
   }
 
+
+  private renderImageReferenceClusterPipelinePanel(){
+    const panel=this.host.querySelector<HTMLElement>('#cluster-image-reference-pipeline');
+    if(!panel)return;
+    panel.replaceChildren();
+    const heading=document.createElement('h3');heading.textContent='2D-Referenz → 3D-Mesh-Kandidat';
+    const help=document.createElement('p');help.className='subtle';
+    help.textContent='Trianguliert bestätigte Landmarken aus kalibrierten Ansichten und erstellt einen Review-Kandidaten für alle Meshes der ausgewählten Tier- oder Arbeitsform. Kamera- und Meshkoordinaten müssen denselben Modell-Root-Rahmen verwenden. Keine automatische Übernahme.';
+    panel.append(heading,help);
+    const doc=this.landmarkDocument;
+    if(!doc){const note=document.createElement('p');note.textContent='Nicht verfügbar: zuerst eine Bildreferenz mit bestätigten Landmarken laden.';panel.append(note);return;}
+    const makeSelect=(labelText:string,id:string)=>{
+      const label=document.createElement('label');label.textContent=labelText;
+      const select=document.createElement('select');select.id=id;
+      const empty=document.createElement('option');empty.value='';empty.textContent='Bitte ausdrücklich auswählen …';select.append(empty);
+      label.append(select);panel.append(label);return select;
+    };
+    const avatarSelect=makeSelect('Bildreferenz-Avatar','cluster-ref-avatar');
+    doc.avatars.forEach(item=>{const option=document.createElement('option');option.value=item.id;option.textContent=item.label+' · '+item.id;avatarSelect.append(option);});
+    const formSelect=makeSelect('Bildreferenz-Form','cluster-ref-form');
+    const updateForms=()=>{
+      formSelect.replaceChildren();
+      const empty=document.createElement('option');empty.value='';empty.textContent='Bitte ausdrücklich auswählen …';formSelect.append(empty);
+      const avatar=doc.avatars.find(item=>item.id===avatarSelect.value);
+      for(const formId of avatar?.formIds??[]){
+        const form=doc.forms.find(item=>item.id===formId);if(!form)continue;
+        const option=document.createElement('option');option.value=form.id;option.textContent=form.label+' · '+form.id;formSelect.append(option);
+      }
+    };
+    avatarSelect.onchange=updateForms;updateForms();
+    const poseSelect=makeSelect('Landmark-Pose','cluster-ref-pose');
+    for(const poseId of [...new Set((doc.landmarks??[]).map(item=>item.poseId))].sort()){
+      const option=document.createElement('option');option.value=poseId;option.textContent=poseId;poseSelect.append(option);
+    }
+    const frameLabel=document.createElement('label');frameLabel.textContent='Zielmodell-Koordinatenrahmen-ID';
+    const frameInput=document.createElement('input');frameInput.id='cluster-ref-frame';frameInput.placeholder='z. B. avatar-root';frameLabel.append(frameInput);panel.append(frameLabel);
+    const radiusLabel=document.createElement('label');radiusLabel.textContent='Einflussradius in Modell-Root-Einheiten';
+    const radiusInput=document.createElement('input');radiusInput.id='cluster-ref-radius';radiusInput.type='number';radiusInput.min='0.001';radiusInput.max='100';radiusInput.step='0.001';radiusInput.placeholder='z. B. 0.05';radiusLabel.append(radiusInput);panel.append(radiusLabel);
+    const button=document.createElement('button');button.type='button';button.textContent='Mehransicht-Landmarken für alle Meshes prüfen und Kandidat exportieren';
+    const results=document.createElement('div');results.id='cluster-ref-results';results.setAttribute('role','status');results.setAttribute('aria-live','polite');
+    panel.append(button,results);
+    button.onclick=()=>{void(async()=>{
+      if(button.disabled)return;button.disabled=true;results.replaceChildren();
+      const note=(message:string)=>{const p=document.createElement('p');p.textContent=message;results.append(p);};
+      try{
+        const avatarId=avatarSelect.value,formId=formSelect.value,poseId=poseSelect.value,coordinateFrameId=frameInput.value.trim(),radiusWorld=radiusInput.valueAsNumber;
+        const avatar=doc.avatars.find(item=>item.id===avatarId),formReference=doc.forms.find(item=>item.id===formId);
+        if(!avatar||!formReference||!avatar.formIds.includes(formId))throw new Error('Bildreferenz-Avatar und -Form müssen ausdrücklich und hierarchisch passend ausgewählt werden.');
+        if(!poseId)throw new Error('Eine Pose-ID muss ausdrücklich ausgewählt werden.');
+        if(!/^[a-z0-9][a-z0-9_-]{0,127}$/.test(coordinateFrameId))throw new Error('Eine gültige Zielmodell-Koordinatenrahmen-ID ist erforderlich.');
+        if(!Number.isFinite(radiusWorld)||radiusWorld<=0||radiusWorld>100)throw new Error('Einflussradius muss größer 0 und höchstens 100 Modell-Root-Einheiten sein.');
+        if(!this.host.querySelector<HTMLInputElement>('#cluster-landmark-form-mapping-confirm')?.checked)throw new Error('Bitte zuerst ausdrücklich bestätigen, dass die Bildreferenz-Form der oben gewählten Tier- oder Arbeitsform entspricht.');
+        const targetForm=this.host.querySelector<HTMLSelectElement>('#cluster-current-form')?.value;
+        if(targetForm!=='animal'&&targetForm!=='humanoid')throw new Error('Tierform oder Arbeitsform muss ausdrücklich ausgewählt sein.');
+        note('Quellmodell, Meshinventar und echte Mesh-Transformationen prüfen …');
+        const manifest=await createStudioFormManifest(this.rig.root,this.project.model,targetForm,new Date().toISOString(),this.project.semanticCatalog);
+        if(this.disposed)return;
+        const inventory=collectClusterMeshInventory(this.rig.root,manifest.sourceAssetSha256);
+        const bindings=resolveClusterMeshBindings(this.rig.root,inventory);
+        this.rig.root.updateWorldMatrix(true,true);
+        const rootInverse=this.rig.root.matrixWorld.clone().invert();
+        const result=proposeClusterManifestsFromImageReference({
+          current:manifest,sourceAssetSha256:manifest.sourceAssetSha256,meshCoordinateFrameId:coordinateFrameId,
+          imageReference:doc,identity:{avatarId,formId,poseId,radiusWorld},
+          meshes:bindings.map(binding=>({
+            meshId:binding.meshId,positions:binding.positions,indices:binding.indices,
+            meshWorld:rootInverse.clone().multiply(binding.mesh.matrixWorld).toArray(),
+          })),
+        });
+        results.replaceChildren();
+        const totalSeeds=result.meshResults.reduce((sum,item)=>sum+item.triangulation.seeds.length,0);
+        const totalRejected=result.meshResults.reduce((sum,item)=>sum+item.triangulation.rejected.length,0);
+        const totalClassified=result.meshResults.reduce((sum,item)=>sum+item.classifiedTriangles,0);
+        result.meshResults.forEach(item=>{
+          const row=document.createElement('p');
+          row.textContent=item.meshId+' · '+item.triangulation.seeds.length+' triangulierte Landmarken · '+item.triangulation.rejected.length+' abgelehnt · '+item.classifiedTriangles+' Dreiecke vorgeschlagen · '+item.unresolvedTriangles+' ungeklärt';
+          results.append(row);
+          for(const rejected of item.triangulation.rejected){const reason=document.createElement('p');reason.className='subtle';reason.textContent=rejected.landmarkId+': '+rejected.reason;results.append(reason);}
+        });
+        if(!result.candidate){note('Kein Kandidat erzeugt: keine Landmarke hat die Mehransicht-Triangulation bestanden.');return;}
+        const artifact={
+          format:'pakachi-image-reference-cluster-candidate',version:1,policy:'review-only',automaticAssignmentsApplied:false,
+          sourceAssetSha256:manifest.sourceAssetSha256,sourceImageSha256:doc.source.sha256,coordinateFrameId,
+          identity:{avatarId,formId,poseId,targetForm,radiusWorld},meshResults:result.meshResults,candidate:result.candidate,
+        };
+        const blob=new Blob([JSON.stringify(artifact,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob);
+        const anchor=document.createElement('a');anchor.href=url;anchor.download=(this.project.avatar.id.replace(/[^a-z0-9_-]/gi,'_')||'pakachi')+'-'+targetForm+'-2d-landmark-candidate.json';anchor.click();
+        window.setTimeout(()=>URL.revokeObjectURL(url),1000);
+        note('Review-Kandidat exportiert: '+result.meshResults.length+' Meshes · '+totalSeeds+' triangulierte Landmarken · '+totalRejected+' abgelehnt · '+totalClassified+' Dreiecke vorgeschlagen. Das geöffnete Modell und sein Manifest wurden nicht verändert.');
+      }catch(error){note(error instanceof Error?error.message:String(error));}
+      finally{if(!this.disposed)button.disabled=false;}
+    })();};
+  }
+
   private render(){
     if(this.weightCorrection&&this.weightCorrection.jointId!==this.point?.id)this.weightCorrection=null;
     const remembered = Object.fromEntries(['pose-name','move-name','move-id','pose-list','studio-moves','library-moves','move-steps'].map(id=>[id,this.host.querySelector<HTMLInputElement>(`#${id}`)?.value ?? '']));
@@ -503,7 +599,7 @@ export class StudioEditor {
     <section class="studio-semantic-catalog" aria-labelledby="semantic-catalog-title"><h3 id="semantic-catalog-title">Gemeinsame Anatomie &amp; Oberflächen</h3><p class="subtle">Ein Charakterkatalog für Tierform und Arbeitsform. IDs bleiben stabil; Umbenennen ändert nur die lesbare Bezeichnung.</p>
       <h4>Anatomische Teile</h4><label for="catalog-part">Teil auswählen</label><select id="catalog-part"></select><label for="catalog-part-id">Stabile Part-ID</label><input id="catalog-part-id" maxlength="128" pattern="[a-z0-9][a-z0-9_-]*"><label for="catalog-part-label">Bezeichnung</label><input id="catalog-part-label" maxlength="100"><label for="catalog-part-parent">Übergeordnetes Teil</label><select id="catalog-part-parent"></select><div class="studio-actions"><button id="catalog-part-save">Teil speichern / hinzufügen</button><button id="catalog-part-delete">Teil löschen</button></div>
       <h4>Oberflächen-Layer</h4><label for="catalog-layer">Layer auswählen</label><select id="catalog-layer"></select><label for="catalog-layer-id">Stabile Layer-ID</label><input id="catalog-layer-id" maxlength="128" pattern="[a-z0-9][a-z0-9_-]*"><label for="catalog-layer-label">Bezeichnung</label><input id="catalog-layer-label" maxlength="100"><label for="catalog-layer-part">Anatomische Zuordnung</label><select id="catalog-layer-part"></select><div class="studio-actions"><button id="catalog-layer-save">Layer speichern / hinzufügen</button><button id="catalog-layer-delete">Layer löschen</button></div><p class="subtle" id="catalog-feedback" role="status">Gelöschte Teile oder Layer mit abhängigen Kindern, Landmarken oder Bindungen werden geschützt.</p></section>
-    <section class="studio-form-manifest"><h3>Manifest für geöffnetes Modell erzeugen</h3><p class="subtle">Die Form wird ausdrücklich von dir ausgewählt. Das Quellasset wird per SHA-256 gebunden; alle Dreiecke bleiben zunächst anatomisch und als Oberflächen-Layer unklassifiziert.</p><label for="cluster-current-form">Form dieses Modells</label><select id="cluster-current-form"><option value="animal">Tierform</option><option value="humanoid">Arbeitsform</option></select><button id="cluster-export-current-manifest">Unklassifiziertes Form-Manifest exportieren</button><label class="check"><input id="cluster-landmark-form-mapping-confirm" type="checkbox"> Ich bestätige: Die Formauswahl oben entspricht der Form der verwendeten Bildreferenz.</label><button id="cluster-export-landmark-evidence">Bestätigte Landmarken-Belege exportieren</button><input id="cluster-import-landmark-evidence-file" type="file" accept="application/json,.json" hidden><button id="cluster-import-landmark-evidence">Landmarken-Beleg importieren und prüfen</button><input id="cluster-import-reviewed-manifest-file" type="file" accept="application/json,.json" hidden><button id="cluster-import-reviewed-manifest">Übernommenes Manifest wiederherstellen</button><div id="cluster-landmark-review" aria-live="polite"><p class="subtle">Noch keine Klassifikationsvorschläge geladen.</p></div><section class="draft-rig-landmark-review"><h4>Gelenkanker prüfen</h4><p class="subtle">Kandidaten aus dem 3D-Landmarken-Beleg. Jede Zuordnung und Position muss geprüft werden. Die Freigabe verändert das Rig nicht.</p><div id="draft-rig-landmark-review-panel" aria-live="polite"><p class="subtle">Noch kein Beleg geladen.</p></div></section><p id="cluster-manifest-status" role="status" aria-live="polite">Noch kein Manifest erzeugt.</p><section class="skin-anatomy-proposal"><h4>Skin-Weight-Anatomie-Vorschläge</h4><p class="subtle">Automatisch aus dem Draft-Rig abgeleitet. Nur prüfen und exportieren; die Vorschläge verändern das Manifest nicht.</p><div id="cluster-skin-anatomy-proposals" aria-live="polite"><p class="subtle">Noch keine Vorschläge vorhanden.</p></div></section></section><section class="studio-form-comparison"><div id="cluster-form-comparison"></div></section>
+    <section class="studio-form-manifest"><h3>Manifest für geöffnetes Modell erzeugen</h3><p class="subtle">Die Form wird ausdrücklich von dir ausgewählt. Das Quellasset wird per SHA-256 gebunden; alle Dreiecke bleiben zunächst anatomisch und als Oberflächen-Layer unklassifiziert.</p><label for="cluster-current-form">Form dieses Modells</label><select id="cluster-current-form"><option value="animal">Tierform</option><option value="humanoid">Arbeitsform</option></select><button id="cluster-export-current-manifest">Unklassifiziertes Form-Manifest exportieren</button><label class="check"><input id="cluster-landmark-form-mapping-confirm" type="checkbox"> Ich bestätige: Die Formauswahl oben entspricht der Form der verwendeten Bildreferenz.</label><button id="cluster-export-landmark-evidence">Bestätigte Landmarken-Belege exportieren</button><input id="cluster-import-landmark-evidence-file" type="file" accept="application/json,.json" hidden><button id="cluster-import-landmark-evidence">Landmarken-Beleg importieren und prüfen</button><input id="cluster-import-reviewed-manifest-file" type="file" accept="application/json,.json" hidden><button id="cluster-import-reviewed-manifest">Übernommenes Manifest wiederherstellen</button><div id="cluster-landmark-review" aria-live="polite"><p class="subtle">Noch keine Klassifikationsvorschläge geladen.</p></div><section class="draft-rig-landmark-review"><h4>Gelenkanker prüfen</h4><p class="subtle">Kandidaten aus dem 3D-Landmarken-Beleg. Jede Zuordnung und Position muss geprüft werden. Die Freigabe verändert das Rig nicht.</p><div id="draft-rig-landmark-review-panel" aria-live="polite"><p class="subtle">Noch kein Beleg geladen.</p></div></section><p id="cluster-manifest-status" role="status" aria-live="polite">Noch kein Manifest erzeugt.</p><section class="skin-anatomy-proposal"><h4>Skin-Weight-Anatomie-Vorschläge</h4><p class="subtle">Automatisch aus dem Draft-Rig abgeleitet. Nur prüfen und exportieren; die Vorschläge verändern das Manifest nicht.</p><div id="cluster-skin-anatomy-proposals" aria-live="polite"><p class="subtle">Noch keine Vorschläge vorhanden.</p></div></section><section id="cluster-image-reference-pipeline" class="studio-form-manifest" aria-live="polite"></section></section><section class="studio-form-comparison"><div id="cluster-form-comparison"></div></section>
     <button id="figure-select" ${this.edit?'hidden':''}>Gesamte Figur bewegen</button>
     <label for="studio-points">Gelenk / Gesichtspunkt</label><select id="studio-points"><option value="">Punkt auswählen …</option></select>
     <div class="studio-actions" ${this.edit?'':'hidden'}><label>Position auf der Knochenstrecke <output id="bone-ratio-value">${Math.round(this.insertionRatio*100)} %</output><input id="bone-ratio" type="range" min="10" max="90" step="1" value="${Math.round(this.insertionRatio*100)}" aria-label="Position des Zwischengelenks"><span class="subtle">Vom Elternknochen zum ausgewählten Kindknochen; 50 % = Mitte.</span></label><button id="bone-add">＋ Knochen setzen</button><button id="bone-insert">Knochen dazwischen einfügen</button><button id="point-add">＋ Punkt setzen</button><button id="point-connect" ${this.point?'':'disabled'}>Verbinden / lösen</button></div>
@@ -534,6 +630,7 @@ export class StudioEditor {
     const q=<E extends HTMLElement=HTMLElement>(id:string)=>this.host.querySelector<E>(`#${id}`)!;
     mountClusterFormComparison(q('cluster-form-comparison'),()=>this.project.semanticCatalog,()=>this.project.clusterFormManifests,pair=>this.setClusterFormManifests(pair));
     this.renderClusterSkinAnatomyProposalPanel();
+    this.renderImageReferenceClusterPipelinePanel();
     q<HTMLButtonElement>('cluster-export-current-manifest').onclick=()=>{void (async()=>{
       const button=q<HTMLButtonElement>('cluster-export-current-manifest'),status=q('cluster-manifest-status');
       if(button.disabled)return;button.disabled=true;status.textContent='Quellasset prüfen und Meshinventar erstellen …';
