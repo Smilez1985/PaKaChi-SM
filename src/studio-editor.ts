@@ -29,7 +29,7 @@ import { imageReferenceLandmarksToCluster2DSeeds,createPaKaChiSemanticCatalog,up
 import type { ImageReferenceDocument } from './image-reference.ts';
 import type { Cluster2DSemanticCatalog } from './cluster-2d-classifier.ts';
 import { collectClusterMeshInventory, resolveClusterMeshBindings } from './cluster-inventory.ts';
-import type { ClusterMeshInventory } from './cluster-inventory.ts';
+import type { ClusterMeshInventory, ClusterMeshBinding } from './cluster-inventory.ts';
 import { proposeClusterManifestsFromImageReference } from './image-reference-cluster-pipeline.ts';
 import { createStudioFormManifest } from './studio-form-manifest.ts';
 import { createStudioLandmarkEvidenceBundle, validateStudioLandmarkEvidenceBundle } from './studio-landmark-evidence.ts';
@@ -89,6 +89,7 @@ export class StudioEditor {
   private landmarkReviewManifest:ClusterManifest|null=null;
   private landmarkReviewPreview:ClusterLandmarkClassificationPreview|null=null;
   private landmarkReviewHistory:LandmarkReviewUndo[]=[];
+  private landmarkReviewOverlayBindings:readonly ClusterMeshBinding[]|null=null;
   private draftRigLandmarkEvidence:StudioLandmarkEvidenceBundle|null=null;
   private draftRigLandmarkReview:DraftRigLandmarkReview|null=null;
   private draftRigLandmarkAssignments=new Map<string,string>();
@@ -198,6 +199,7 @@ export class StudioEditor {
     this.landmarkReviewManifest=null;
     this.landmarkReviewPreview=null;
     this.landmarkReviewHistory=[];
+    this.landmarkReviewOverlayBindings=null;
     this.draftRigLandmarkEvidence=null;this.draftRigLandmarkReview=null;this.draftRigLandmarkAssignments.clear();this.draftRigLandmarkPositions.clear();this.confirmedDraftRigLandmarkPlan=null;
     this.selectedLandmarkId=seeds[0]!.id;
     this.pendingSurfaceHit=null;
@@ -214,7 +216,7 @@ export class StudioEditor {
   private snapshot():Snapshot{return {data:structuredClone(this.data),values:this.rig.capture(),semanticCatalog:structuredClone(this.project.semanticCatalog!),...(this.project.clusterFormManifests?{clusterFormManifests:structuredClone(this.project.clusterFormManifests)}:{})};}
   private restore(s:Snapshot){this.rig.data=structuredClone(s.data);if(s.semanticCatalog)this.project.semanticCatalog=structuredClone(s.semanticCatalog);if(s.clusterFormManifests)this.project.clusterFormManifests=structuredClone(s.clusterFormManifests);else delete this.project.clusterFormManifests;this.rig.reset();this.rig.apply(s.values);this.mark();this.render();}
   private changeSemanticCatalog(next:Cluster2DSemanticCatalog){if(!this.active||this.interactionActive)throw Error('Katalog nur im aktiven, ruhenden Studio bearbeiten.');const before=this.snapshot();this.project.semanticCatalog=structuredClone(next);this.history.push(before);this.mark();this.render();this.hooks.feedback('Gemeinsamer Anatomie-/Oberflächenkatalog geändert. Rückgängig ist möglich; beide Formen verwenden denselben Katalog.');}
-  private mark(){this.automaticCheck?.abort();this.automaticProposal=null;this.automaticOutcome='';this.moveCheck?.abort();this.surfaceCheck?.abort();this.weightCorrection=null;this.landmarkReviewManifest=null;this.landmarkReviewPreview=null;this.landmarkReviewHistory=[];this.draftRigLandmarkEvidence=null;this.draftRigLandmarkReview=null;this.draftRigLandmarkAssignments.clear();this.draftRigLandmarkPositions.clear();this.confirmedDraftRigLandmarkPlan=null;this.revision++;this.dirty=true;this.hooks.changed();}
+  private mark(){this.automaticCheck?.abort();this.automaticProposal=null;this.automaticOutcome='';this.moveCheck?.abort();this.surfaceCheck?.abort();this.weightCorrection=null;this.landmarkReviewManifest=null;this.landmarkReviewPreview=null;this.landmarkReviewHistory=[];this.landmarkReviewOverlayBindings=null;this.draftRigLandmarkEvidence=null;this.draftRigLandmarkReview=null;this.draftRigLandmarkAssignments.clear();this.draftRigLandmarkPositions.clear();this.confirmedDraftRigLandmarkPlan=null;this.revision++;this.dirty=true;this.hooks.changed();}
   private mutate(fn:()=>void){this.rig.stopSkinPreview();const before=this.snapshot();fn();flagAffectedPoses(before.data,this.data);this.history.push(before);this.mark();this.render();}
   beginPlaybackTransition(){
     const d=this.data;
@@ -452,6 +454,19 @@ export class StudioEditor {
     }catch(error){this.hooks.feedback(error instanceof Error?error.message:String(error));}
   }
 
+  private refreshLandmarkReviewOverlay(){
+    const manifest=this.landmarkReviewManifest,bindings=this.landmarkReviewOverlayBindings;
+    if(!manifest||!bindings)return;
+    try{
+      const overlay=collectClusterSkinOverlayFromBindings(bindings,manifest);
+      if(overlay.missingMeshIds.length)throw new Error('Mesh-Inventar für die Review-Vorschau ist unvollständig.');
+      this.view.setClusterSkinOverlay(overlay);
+    }catch(error){
+      this.view.setClusterSkinOverlay(null);
+      this.hooks.feedback('3D-Review-Overlay konnte nicht aktualisiert werden: '+(error instanceof Error?error.message:String(error)));
+    }
+  }
+
   private renderLandmarkReview(){
     const panel=this.host.querySelector<HTMLElement>('#cluster-landmark-review');
     const manifest=this.landmarkReviewManifest,preview=this.landmarkReviewPreview;
@@ -474,7 +489,7 @@ export class StudioEditor {
         Object.assign(target,structuredClone(previous.assignment));
         restored.overrides=restored.overrides.slice(0,previous.overridesLength);
         restored.revision=previous.revision;restored.generatedAt=previous.generatedAt;
-        this.landmarkReviewManifest=restored;this.renderLandmarkReview();
+        this.landmarkReviewManifest=restored;this.refreshLandmarkReviewOverlay();this.renderLandmarkReview();
         const status=this.host.querySelector<HTMLElement>('#cluster-manifest-status');
         if(status)status.textContent='Letzte Dreieck-Übernahme zurückgenommen. Die vorherigen bestätigten Einzelzuweisungen bleiben erhalten.';
         this.hooks.feedback('Letzte Landmarken-Dreieck-Zuweisung rückgängig gemacht.');
@@ -507,6 +522,7 @@ export class StudioEditor {
             revision:current.revision,overridesLength:current.overrides.length,generatedAt:current.generatedAt,
           });
           this.landmarkReviewManifest=next;
+          this.refreshLandmarkReviewOverlay();
           this.renderLandmarkReview();
           const status=this.host.querySelector<HTMLElement>('#cluster-manifest-status');
           if(status)status.textContent='Einzelzuweisung übernommen: '+item.meshId+' / Dreieck '+item.triangleIndex+'. Die Zuweisung ist gesperrt und im Override-Protokoll mit Bild-Hash und Landmarken dokumentiert.';
@@ -614,12 +630,14 @@ export class StudioEditor {
         if(!result.candidate){note('Kein Kandidat erzeugt: keine Landmarke hat die Mehransicht-Triangulation bestanden.');return;}
         const preview=createClusterLandmarkTriangulationPreview(manifest,result.candidate,{avatarId,formId,sourceImageSha256:doc.source.sha256});
         this.landmarkReviewManifest=manifest;this.landmarkReviewPreview=preview;this.landmarkReviewHistory=[];
+        this.landmarkReviewOverlayBindings=bindings;
         this.renderLandmarkReview();
         try{
           const overlay=collectClusterSkinOverlayFromBindings(bindings,result.candidate);
           if(overlay.missingMeshIds.length)throw new Error('Mesh-Identitäten für die 3D-Vorschau sind unvollständig.');
           this.view.setClusterSkinOverlay(overlay);
         }catch(overlayError){
+          this.landmarkReviewOverlayBindings=null;
           this.view.setClusterSkinOverlay(null);
           note('Review-Liste bereit; 3D-Overlay nicht verfügbar: '+(overlayError instanceof Error?overlayError.message:String(overlayError)));
         }
