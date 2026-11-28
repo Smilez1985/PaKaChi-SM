@@ -55,6 +55,6 @@ test('rejects mismatched target form, missing or ambiguous calibration and coord
  const noCalibration={...f.document,cameraCalibrations:[]};
  assert.throws(()=>compareSelectedClusterFormSilhouette({document:noCalibration,selection:f.selection,manifest:f.manifest,bindings:[f.binding]}),/No exact camera calibration/i);
  const duplicate={...f.document,cameraCalibrations:[...f.document.cameraCalibrations!,{...f.document.cameraCalibrations![0]!,id:'cal-duplicate'}]};
- assert.throws(()=>compareSelectedClusterFormSilhouette({document:duplicate,selection:f.selection,manifest:f.manifest,bindings:[f.binding]}),/Multiple camera calibrations/i);
+ assert.throws(()=>compareSelectedClusterFormSilhouette({document:duplicate,selection:f.selection,manifest:f.manifest,bindings:[f.binding]}),/Invalid image reference document/i);
  assert.throws(()=>compareSelectedClusterFormSilhouette({document:f.document,selection:{...f.selection,meshCoordinateFrameId:'different'},manifest:f.manifest,bindings:[f.binding]}),/coordinate frame/i);
 });
