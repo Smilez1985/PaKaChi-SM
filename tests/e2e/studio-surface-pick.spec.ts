@@ -80,3 +80,24 @@ test('real overlay click fills the Studio correction form, locks the correction 
   const state=(window as any).__editorCorrection;state.editor.dispose();state.view.dispose();
  });
 });
+
+
+test('triangulated 3D overlay click selects the matching review row without accepting it',async({page})=>{
+ await page.route('**/',route=>route.fulfill({contentType:'text/html',body:'<!doctype html><html><body><canvas id="studio" style="display:block;width:400px;height:300px"></canvas><div id="editor"></div></body></html>'}));
+ await page.goto('/');
+ await page.evaluate(async()=>{
+  const canvas=document.querySelector<HTMLCanvasElement>('#studio')!,host=document.querySelector<HTMLElement>('#editor')!;
+  const fixtureUrl='/tests/e2e/fixtures/studio-surface-pick.ts';
+  const {mountTriangulationReviewOverlayFixture}=await import(/* @vite-ignore */ fixtureUrl);
+  (window as any).__triangulationReview=mountTriangulationReviewOverlayFixture(canvas,host);
+ });
+ const bounds=await page.locator('#studio').boundingBox();expect(bounds).not.toBeNull();
+ await page.mouse.click(bounds!.x+bounds!.width/2,bounds!.y+bounds!.height/2);
+ const row=page.locator('[data-landmark-review-mesh="review-mesh"][data-landmark-review-triangle="0"]');
+ await expect(row).toHaveAttribute('data-selected','true');
+ await expect(row).toHaveAttribute('aria-current','true');
+ await expect(row.getByRole('button',{name:'Diesen Vorschlag übernehmen'})).toBeEnabled();
+ const accepted=await page.evaluate(()=> (window as any).__triangulationReview.acceptedCount());
+ expect(accepted).toBe(0);
+ await page.evaluate(()=>{const state=(window as any).__triangulationReview;state.editor.dispose();state.view.dispose();});
+});
