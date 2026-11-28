@@ -43,7 +43,7 @@ import type { StudioLandmarkEvidenceBundle } from './studio-landmark-evidence.ts
 import { createStudioLandmarkSurfacePick } from './studio-landmark-picking.ts';
 import { compareClusterCharacterForms } from './cluster-form-comparison.ts';
 import { correctSkinWeightProposal, confirmSkinWeightProposal } from './cluster-skin-anatomy-review.ts';
-import { collectClusterSkinOverlay } from './cluster-skin-anatomy-overlay.ts';
+import { collectClusterSkinOverlay, collectClusterSkinOverlayFromBindings } from './cluster-skin-anatomy-overlay.ts';
 import { mountClusterFormComparison } from './cluster-form-comparison-panel.ts';
 import type { StudioSurfacePickHit } from './studio-landmark-picking.ts';
 interface Snapshot {data:StudioData;values:Record<string,Transform>;semanticCatalog?:Cluster2DSemanticCatalog;clusterFormManifests?:StudioProject['clusterFormManifests']}
@@ -616,7 +616,7 @@ export class StudioEditor {
         this.landmarkReviewManifest=manifest;this.landmarkReviewPreview=preview;this.landmarkReviewHistory=[];
         this.renderLandmarkReview();
         try{
-          const overlay=collectClusterSkinOverlay(this.rig.root,result.candidate);
+          const overlay=collectClusterSkinOverlayFromBindings(bindings,result.candidate);
           if(overlay.missingMeshIds.length)throw new Error('Mesh-Identitäten für die 3D-Vorschau sind unvollständig.');
           this.view.setClusterSkinOverlay(overlay);
         }catch(overlayError){
