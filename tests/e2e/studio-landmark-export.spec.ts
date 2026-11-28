@@ -15,15 +15,16 @@ test('Studio confirms reviewed joint anchors and downloads a GLB without replaci
   });
 
   const panel = page.locator('#draft-rig-landmark-review-panel');
+  const clusterPanel = page.locator('#cluster-landmark-review');
   await expect(panel).toContainText('1 Kandidaten · 0 ungelöst');
   const apply = page.locator('#draft-rig-landmark-plan-apply');
   await expect(apply).toBeDisabled();
   await panel.getByRole('button', { name: 'Gelenkanker ausdrücklich bestätigen' }).click();
   await expect(apply).toBeEnabled();
   await page.getByRole('button', { name: 'Letzte Dreieck-Übernahme zurücknehmen' }).click();
-  await expect(panel.getByRole('button', { name: 'Diesen Vorschlag übernehmen' })).toBeEnabled();
-  await panel.getByRole('button', { name: 'Diesen Vorschlag übernehmen' }).click();
-  await expect(panel).toContainText('Übernommen');
+  await expect(clusterPanel.getByRole('button', { name: 'Diesen Vorschlag übernehmen' })).toBeEnabled();
+  await clusterPanel.getByRole('button', { name: 'Diesen Vorschlag übernehmen' }).click();
+  await expect(clusterPanel).toContainText('Übernommen');
 
   const downloadPromise = page.waitForEvent('download');
   await apply.click();
