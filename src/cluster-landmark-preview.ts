@@ -97,6 +97,64 @@ export function createClusterLandmarkClassificationPreview(
 
 
 /**
+ * Converts calibrated multi-view triangle assignments into the same
+ * per-triangle review surface used by manually picked 2D/3D correspondences.
+ * Every suggestion must carry exact source landmark IDs from the classifier.
+ */
+export function createClusterLandmarkTriangulationPreview(
+  manifest: ClusterManifest,
+  candidate: ClusterManifest,
+  identity: { avatarId: string; formId: string; sourceImageSha256: string },
+): ClusterLandmarkClassificationPreview {
+  const issues = validateClusterManifest(candidate);
+  if (issues.length || !manifest || manifest.sourceAssetSha256 !== candidate.sourceAssetSha256 ||
+      manifest.form !== candidate.form || (candidate.form !== 'animal' && candidate.form !== 'humanoid') ||
+      !/^[a-z0-9][a-z0-9_-]{0,127}$/.test(identity.avatarId) ||
+      !/^[a-z0-9][a-z0-9_-]{0,127}$/.test(identity.formId) ||
+      !/^[a-f0-9]{64}$/.test(identity.sourceImageSha256)) {
+    throw new Error('Triangulation candidate, source manifest and image-reference identity do not match.');
+  }
+  const meshKey = (value: ClusterManifest) => value.meshes
+    .map(mesh => [mesh.id, mesh.sourceMeshIndex, mesh.primitiveIndex, mesh.vertexCount, mesh.triangleCount])
+    .sort((a, b) => String(a[0]).localeCompare(String(b[0])));
+  if (JSON.stringify(meshKey(manifest)) !== JSON.stringify(meshKey(candidate)) ||
+      JSON.stringify(manifest.parts) !== JSON.stringify(candidate.parts) ||
+      JSON.stringify(manifest.layers) !== JSON.stringify(candidate.layers)) {
+    throw new Error('Triangulation candidate changed the source mesh inventory or semantic catalog.');
+  }
+  const items: ClusterLandmarkPreviewItem[] = candidate.assignments
+    .filter(item => item.partId !== null && item.origin === 'automatic' && item.policy === 'recomputable')
+    .map(item => {
+      if (!item.landmarkIds?.length) {
+        throw new Error('A triangulated triangle proposal is missing exact landmark provenance.');
+      }
+      return {
+        meshId: item.meshId,
+        triangleIndex: item.triangleIndex,
+        status: item.landmarkIds.length > 1 ? 'corroborated' : 'single-evidence',
+        evidenceCount: item.landmarkIds.length,
+        landmarkIds: [...item.landmarkIds],
+        proposedPartId: item.partId,
+        proposedSurfaceLayerId: item.surfaceLayerId,
+        reasons: [item.reason],
+      };
+    })
+    .sort((a, b) => a.meshId.localeCompare(b.meshId) || a.triangleIndex - b.triangleIndex);
+  return {
+    format: 'pakachi-cluster-landmark-classification-preview',
+    version: 1,
+    sourceAssetSha256: manifest.sourceAssetSha256,
+    sourceImageSha256: identity.sourceImageSha256,
+    avatarId: identity.avatarId,
+    formId: identity.formId,
+    form: manifest.form,
+    policy: 'review-only',
+    automaticAssignmentsApplied: false,
+    items,
+  };
+}
+
+/**
  * Applies one explicitly reviewed, non-conflicting triangle proposal.
  * Only the exact source triangle is changed; the user decision is stored as a
  * locked assignment with image/landmark provenance in the manifest override log.
