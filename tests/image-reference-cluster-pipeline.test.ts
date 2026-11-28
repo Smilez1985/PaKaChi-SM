@@ -14,7 +14,7 @@ function calibration(viewId: string, position: Vector3): ImageReferenceCameraCal
   const rotation = new Quaternion().setFromUnitVectors(new Vector3(0, 0, 1), cameraAim.clone().sub(position).normalize());
   return {
     id: 'cal-' + viewId, sourceImageSha256: imageHash, avatarId: 'pakachi',
-    formId: 'animal-form', poseId: 'neutral', viewId, fx: 1, fy: 1, cx: .5, cy: .5,
+    formId: 'animal-form', poseId: 'neutral', viewId, coordinateFrameId: 'avatar-root', fx: 1, fy: 1, cx: .5, cy: .5,
     cameraToWorld: new Matrix4().compose(position, rotation, new Vector3(1, 1, 1)).toArray(),
   };
 }
@@ -57,7 +57,7 @@ test('bridges confirmed image-reference landmarks through calibrated multi-view 
   const { meshId, current, imageReference, positions } = fixture();
   const result = proposeClusterManifestFromImageReference({
     current, sourceAssetSha256: assetHash, meshId, positions, indices: null,
-    meshWorld: new Matrix4().toArray(), imageReference,
+    meshWorld: new Matrix4().toArray(), meshCoordinateFrameId: 'avatar-root', imageReference,
     identity: { avatarId: 'pakachi', formId: 'animal-form', poseId: 'neutral', radiusWorld: 1 },
   }, '2026-11-23T13:01:00.000Z');
   assert.equal(result.observations.length, 2);
@@ -75,7 +75,7 @@ test('refuses a one-view source instead of inventing depth or a candidate', () =
   imageReference.cameraCalibrations = imageReference.cameraCalibrations!.slice(0, 1);
   const result = proposeClusterManifestFromImageReference({
     current, sourceAssetSha256: assetHash, meshId, positions, indices: null,
-    meshWorld: new Matrix4().toArray(), imageReference,
+    meshWorld: new Matrix4().toArray(), meshCoordinateFrameId: 'avatar-root', imageReference,
     identity: { avatarId: 'pakachi', formId: 'animal-form', poseId: 'neutral', radiusWorld: 1 },
   });
   assert.equal(result.candidate, null);
@@ -88,7 +88,23 @@ test('rejects missing explicit avatar/form/pose calibration rather than borrowin
   imageReference.cameraCalibrations = imageReference.cameraCalibrations!.map(item => ({ ...item, formId: 'work-form' }));
   assert.throws(() => proposeClusterManifestFromImageReference({
     current, sourceAssetSha256: assetHash, meshId, positions, indices: null,
-    meshWorld: new Matrix4().toArray(), imageReference,
+    meshWorld: new Matrix4().toArray(), meshCoordinateFrameId: 'avatar-root', imageReference,
     identity: { avatarId: 'pakachi', formId: 'animal-form', poseId: 'neutral', radiusWorld: 1 },
   }), /invalid-image-reference-document:cameraCalibrations/);
 });
+
+test('refuses camera-to-mesh triangulation when coordinate-frame identity is missing or different', () => {
+  const { meshId, current, imageReference, positions } = fixture();
+  assert.throws(() => proposeClusterManifestFromImageReference({
+    current, sourceAssetSha256: assetHash, meshId, positions, indices: null,
+    meshWorld: new Matrix4().toArray(), meshCoordinateFrameId: 'scene-root', imageReference,
+    identity: { avatarId: 'pakachi', formId: 'animal-form', poseId: 'neutral', radiusWorld: 1 },
+  }), /coordinate frames are missing or do not match/);
+  imageReference.cameraCalibrations = imageReference.cameraCalibrations!.map(item => ({ ...item, coordinateFrameId: undefined }));
+  assert.throws(() => proposeClusterManifestFromImageReference({
+    current, sourceAssetSha256: assetHash, meshId, positions, indices: null,
+    meshWorld: new Matrix4().toArray(), meshCoordinateFrameId: 'avatar-root', imageReference,
+    identity: { avatarId: 'pakachi', formId: 'animal-form', poseId: 'neutral', radiusWorld: 1 },
+  }), /coordinate frames are missing or do not match/);
+});
+
