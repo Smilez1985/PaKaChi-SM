@@ -99,5 +99,11 @@ test('triangulated 3D overlay click selects the matching review row without acce
  await expect(row.getByRole('button',{name:'Diesen Vorschlag übernehmen'})).toBeEnabled();
  const accepted=await page.evaluate(()=> (window as any).__triangulationReview.acceptedCount());
  expect(accepted).toBe(0);
+ await row.getByRole('button',{name:'Diesen Vorschlag übernehmen'}).click();
+ await expect(row).toContainText('Übernommen');
+ expect(await page.evaluate(()=> (window as any).__triangulationReview.overlayState())).toBe('locked');
+ await page.getByRole('button',{name:'Letzte Dreieck-Übernahme zurücknehmen'}).click();
+ expect(await page.evaluate(()=> (window as any).__triangulationReview.overlayState())).toBe('automatic');
+ await expect(row.getByRole('button',{name:'Diesen Vorschlag übernehmen'})).toBeEnabled();
  await page.evaluate(()=>{const state=(window as any).__triangulationReview;state.editor.dispose();state.view.dispose();});
 });
