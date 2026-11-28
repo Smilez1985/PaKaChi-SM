@@ -7,6 +7,8 @@ import { proposeClusterManifestFrom2DObservations } from './cluster-landmark-pip
 export interface ImageReferenceClusterPipelineInput {
   current: ClusterManifest;
   sourceAssetSha256: string;
+  /** Explicit mapping from the selected reference form to the opened model form. */
+  targetForm: 'animal' | 'humanoid';
   meshId: string;
   positions: ArrayLike<number>;
   indices: ArrayLike<number> | null;
@@ -30,6 +32,9 @@ export function proposeClusterManifestFromImageReference(
 ) {
   if (!input?.imageReference || !input.identity) {
     throw new Error('An image-reference document and explicit avatar/form/pose identity are required.');
+  }
+  if ((input.targetForm !== 'animal' && input.targetForm !== 'humanoid') || input.current.form !== input.targetForm) {
+    throw new Error('The explicitly selected image-reference form does not match the target model form.');
   }
   if (!/^[a-z0-9][a-z0-9_-]{0,127}$/.test(input.meshCoordinateFrameId)) {
     throw new Error('An explicit target mesh coordinate-frame ID is required.');
@@ -68,6 +73,8 @@ export interface ImageReferenceClusterMeshInput {
 export interface ImageReferenceClusterBatchPipelineInput {
   current: ClusterManifest;
   sourceAssetSha256: string;
+  /** Explicit mapping from the selected reference form to the opened model form. */
+  targetForm: 'animal' | 'humanoid';
   meshes: readonly ImageReferenceClusterMeshInput[];
   meshCoordinateFrameId: string;
   imageReference: ImageReferenceDocument;
@@ -98,6 +105,9 @@ export function proposeClusterManifestsFromImageReference(
 ): ImageReferenceClusterBatchPipelineResult {
   if (!input || !Array.isArray(input.meshes) || input.meshes.length === 0 || input.meshes.length > 64) {
     throw new Error('A bounded, non-empty set of exact target mesh bindings is required.');
+  }
+  if ((input.targetForm !== 'animal' && input.targetForm !== 'humanoid') || input.current.form !== input.targetForm) {
+    throw new Error('The explicitly selected image-reference form does not match the target model form.');
   }
   if (!/^[a-z0-9][a-z0-9_-]{0,127}$/.test(input.meshCoordinateFrameId)) {
     throw new Error('An explicit target mesh coordinate-frame ID is required.');
