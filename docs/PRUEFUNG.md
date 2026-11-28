@@ -1,3 +1,13 @@
+## Zwischenprüfung 2026-11-28 – anklickbares 3D-Overlay für 2D→3D-Review
+
+**Implementierung auf `develop`:** `collectClusterSkinOverlayFromBindings()` erstellt die 3D-Dreiecksvorschau aus den exakten `ClusterMeshBinding`-Objekten, die unmittelbar zuvor für die Mehrmesh-Triangulation aufgelöst wurden. Mesh-Identität, Quellinventar, Vertex-/Dreieckszahlen und Indexgrenzen werden erneut geprüft. Es sind keine zusätzlichen `userData`-Marker am Live-Modell erforderlich. Die Dreieckpositionen werden über die aktuelle Mesh-Weltmatrix in denselben Szenenraum wie das Studio-Overlay überführt.
+
+**Interaktion und Sicherheit:** Ein Klick auf ein Overlay-Dreieck markiert nur den eindeutig passenden Review-Listeneintrag und zeigt Status/Provenienz an. Es erfolgt keine Übernahme. Die separate Schaltfläche übernimmt weiterhin genau ein Dreieck als `origin=user` / `policy=locked`. Nach Übernahme wird das Overlay aus dem neuen Manifest aktualisiert und zeigt den gesperrten Zustand. Undo aktualisiert es auf den tatsächlichen vorherigen Manifestzustand; bei einem zuvor unzugeordneten Dreieck ist das `unmapped`, nicht automatisch `automatic`.
+
+**CI [Cluster-Landmark #46173296280](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/46173296280):** Dependency-Audit, Cluster-/Landmark-/Inventar-Regressionen, Chromium-E2E (3D-Klick ohne Übernahme, Übernahme → `locked`, Undo → vorheriger Status) und TypeScript: **success**.
+
+**Grenzen / nächster Schritt:** Die technische 2D→3D-Kandidatenprüfung ist jetzt direkt im Studio-Viewport reviewbar. Die geometrische Qualität hängt weiterhin von korrekten Kamera-Kalibrierungen, gemeinsamen Koordinatenrahmen und Landmarken ab. Die Original-PaKaChi-Tier- und Arbeitsform sind noch nicht visuell gegen die freigegebenen Vorlagen abgenommen; `main` bleibt deshalb unverändert.
+
 ## Zwischenprüfung 2026-11-28 – Einzelreview und Undo für triangulierte Dreiecke
 
 **Implementierung auf `develop`:** Die kalibrierte Mehrmesh-Pipeline erzeugt weiterhin nur einen Review-Kandidaten. `ClusterLandmarkSeed` trägt nun die stabile Landmark-ID; der Dreieckklassifikator speichert die nächstgelegenen, gleichwertigen Landmark-IDs als optionale Provenienz im Kandidatenmanifest. `createClusterLandmarkTriangulationPreview()` validiert Quellasset, Form, Meshinventar und Bildhash und erzeugt daraus einzelne Review-Einträge. Die vorhandene Studio-Review-Oberfläche erlaubt die Übernahme eines Dreiecks nach dem anderen. Die Übernahme wird als `origin=user`, `policy=locked` mit exakten Landmark-IDs im Override-Protokoll festgeschrieben. Es werden keine Nachbardreiecke verändert.
@@ -6,7 +16,7 @@
 
 **CI [Cluster-Landmark #46099826978](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/46099826978):** Dependency-Audit, alle Cluster-/Landmark-/Inventar-Regressionen, Chromium-E2E (3D-Picking, Review-Undo und Wiederübernahme) sowie TypeScript: **success**. Der zugehörige Mehrmesh-/Koordinatenrahmen-Pipeline-Lauf [Image-Reference #46099586101](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/46099586101) ist ebenfalls vollständig **success**.
 
-**Grenzen / nächster Schritt:** Die Studio-Review-Liste zeigt die Vorschläge und Provenienz; die räumliche Darstellung der einzelnen triangulierten Kandidatendreiecke als farbige, anklickbare 3D-Overlay-Vorschau fehlt noch. Erst danach kann die manuelle Abnahme direkt am Modell erfolgen, statt nur über die Liste. Die Original-PaKaChi-Formen müssen weiterhin visuell gegen die Referenzvorlagen abgenommen werden; `main` bleibt unverändert.
+**Abgeschlossen:** Die räumliche Darstellung der triangulierten Kandidatendreiecke als farbige, anklickbare 3D-Overlay-Vorschau ist inzwischen implementiert und separat in der folgenden Zwischenprüfung dokumentiert. Die Original-PaKaChi-Formen müssen weiterhin visuell gegen die Referenzvorlagen abgenommen werden; `main` bleibt unverändert.
 
 ## Zwischenprüfung 2026-11-28 – Mehrmesh-2D→3D-Kandidatenlauf im Avatar-Studio
 
