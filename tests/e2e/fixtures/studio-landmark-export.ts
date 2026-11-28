@@ -6,6 +6,7 @@ import { createStudioFormManifest } from '../../../src/studio-form-manifest.ts';
 import { collectClusterMeshInventory } from '../../../src/cluster-inventory.ts';
 import { createStudioLandmarkSurfacePick } from '../../../src/studio-landmark-picking.ts';
 import { createStudioLandmarkEvidenceBundle } from '../../../src/studio-landmark-evidence.ts';
+import { createClusterLandmarkClassificationPreview } from '../../../src/cluster-landmark-preview.ts';
 import { createDraftRigLandmarkReview } from '../../../src/draft-rig-landmark-review.ts';
 import { createPaKaChiSemanticCatalog } from '../../../src/cluster-2d-classifier.ts';
 import type { ImageReferenceDocument } from '../../../src/image-reference.ts';
@@ -40,6 +41,7 @@ export async function mountStudioLandmarkExportFixture(host: HTMLElement) {
     radiusLocal: 0.05, confirmed: true,
   });
   const evidence = createStudioLandmarkEvidenceBundle(root, manifest, image, [pick], true);
+  const preview = createClusterLandmarkClassificationPreview(manifest, evidence);
   const review = createDraftRigLandmarkReview(evidence, root, manifest, 'biped-relaxed');
   if (review.report.unresolved.length || review.report.anchors.length !== 1) {
     throw new Error('Fixture landmark did not resolve to one confirmed review candidate.');
@@ -60,13 +62,17 @@ export async function mountStudioLandmarkExportFixture(host: HTMLElement) {
   editor.enter();
   const internal = editor as unknown as {
     landmarkReviewManifest: ClusterManifest | null;
+    landmarkReviewPreview: ReturnType<typeof createClusterLandmarkClassificationPreview> | null;
     draftRigLandmarkEvidence: StudioLandmarkEvidenceBundle | null;
     draftRigLandmarkReview: ReturnType<typeof createDraftRigLandmarkReview> | null;
     renderDraftRigLandmarkReview(): void;
+    renderLandmarkReview(): void;
   };
   internal.landmarkReviewManifest = manifest;
+  internal.landmarkReviewPreview = preview;
   internal.draftRigLandmarkEvidence = evidence;
   internal.draftRigLandmarkReview = review;
   internal.renderDraftRigLandmarkReview();
+  internal.renderLandmarkReview();
   return { editor, root };
 }
