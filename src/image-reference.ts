@@ -74,6 +74,8 @@ export interface ImageReferenceCameraCalibration {
   formId: string;
   poseId: string;
   viewId: string;
+  /** Explicit shared world frame used by every camera and the target model. */
+  coordinateFrameId?: string;
   fx: number;
   fy: number;
   cx: number;
@@ -372,6 +374,7 @@ export function validateImageReferenceDocument(value:ImageReferenceDocument):Ima
       const semanticId=/^[a-z0-9][a-z0-9_-]{0,127}$/;
       if(!hashPattern.test(calibration.sourceImageSha256)||calibration.sourceImageSha256!==source.sha256)issues.push({path:p+'.sourceImageSha256',message:'Kamerakalibrierung muss an den unveränderten Hash des aktuellen Quellbildes gebunden sein.'});
       for(const [field,id] of [['avatarId',calibration.avatarId],['formId',calibration.formId],['poseId',calibration.poseId],['viewId',calibration.viewId]] as const)if(typeof id!=='string'||!semanticId.test(id))issues.push({path:p+'.'+field,message:'Kamerakalibrierung benötigt gültige Avatar-, Form-, Pose- und Ansichts-IDs.'});
+      if(calibration.coordinateFrameId!==undefined&&(typeof calibration.coordinateFrameId!=='string'||!semanticId.test(calibration.coordinateFrameId)))issues.push({path:p+'.coordinateFrameId',message:'Koordinatenrahmen-ID muss eine explizite gültige ID sein.'});
       const avatar=value.avatars.find(item=>item.id===calibration.avatarId);
       const form=value.forms.find(item=>item.id===calibration.formId);
       const view=value.views.find(item=>item.id===calibration.viewId);
