@@ -67,6 +67,9 @@ Es gibt keine Beschränkung auf humanoide Figuren. Zusätzliche Arme, Flügel, S
 
 Seit 0.12.0 ist ein experimenteller lokaler TripoSR-Testlauf als separates Entwicklerwerkzeug vorhanden. Er erzeugt bei eingerichteter Laufzeit einen zu prüfenden GLB-Entwurf; seit 0.83.0 ist echte CPU-Inferenz für beide Originalformen belegt. Designqualität und GPU-Ausführung bleiben abzunehmen. Tier- und humanoide Form werden einzeln getestet. Ein erfolgreicher Import ersetzt weder anatomisches Rigging noch den abgestimmten Formwechsel. Details: [KI-Testlauf](KI-GENERIERUNG.md).
 
+**2D-Referenz und gemeinsamer 3D-Koordinatenrahmen:** Mehransicht-Landmarken dürfen erst trianguliert und auf ein Zielmesh übertragen werden, wenn jede Kamerakalibrierung und die Weltmatrix des Meshes nachweislich denselben explizit benannten Koordinatenrahmen verwenden. Die Koordinatenrahmen-ID ist eine Identitätsprüfung, keine automatische Transformation: Kamerapositionen müssen im Zielmodell-Root-Rahmen gemessen werden. Fehlende oder widersprüchliche IDs blockieren die Bildreferenz→Mesh-Pipeline. Ältere Kalibrierungen bleiben lesbar, müssen für die Rekonstruktion aber erneut mit einer Rahmen-ID gespeichert werden. Selbst bei passendem Rahmen bleibt die Dreieckszuordnung zunächst ein überprüfbarer Kandidat; es erfolgt keine automatische Übernahme.
+
+
 Die geplante Auswahl unabhängiger Generator- und Rigging-Anbieter beschreibt [Studio als KI-Harness](#11-studio-als-ki-harness-und-freie-anbieterwahl).
 
 ## 3. Genau zwei Bearbeitungsmodi
