@@ -1,3 +1,15 @@
+## Zwischenprüfung 2026-11-28 – Mehrmesh-2D→3D-Kandidatenlauf im Avatar-Studio
+
+**Implementierung auf `develop`:** Der Avatar-Studio-Editor bietet eine explizite Kandidatenerzeugung aus kalibrierten 2D-Landmarken. Der Nutzer wählt Bildreferenz-Avatar, Bildreferenz-Form, Pose, Zielmodell-Form, Koordinatenrahmen-ID und Einflussradius. Die Formzuordnung erfordert die vorhandene ausdrückliche Bestätigung. Das Studio erstellt das Quellmanifest, prüft das vollständige Meshinventar und löst jede Mesh-ID an die tatsächliche Geometrie auf. Für jedes Mesh wird `mesh.matrixWorld` in den Modell-Root-Rahmen überführt (`inverse(root.matrixWorld) × mesh.matrixWorld`) und zusammen mit dem gemeinsamen Koordinatenrahmen an die Mehrmesh-Pipeline übergeben. Das Ergebnis ist ein Review-JSON mit dem Kandidatenmanifest und per-Mesh Triangulations-, Ablehnungs- und Dreiecksstatistik. Das aktive Modell und das Ausgangsmanifest werden nicht verändert; es gibt keine automatische Übernahme. Geskinntes oder morph-verformtes Mesh wird ohne explizite Restpose-Geometrie abgewiesen.
+
+**Zusätzliche Pipeline-Sicherungen:** Die Batch-Pipeline verlangt eine explizite Zielmodell-Form, die mit dem Manifest übereinstimmt, einen passenden Quellasset-Hash, eine nichtleere und eindeutige Mesh-Bindungsliste sowie denselben Koordinatenrahmen für alle Kamerabeobachtungen und das Zielmesh. Ohne triangulierte Landmarken wird kein Kandidat exportiert.
+
+**CI:**
+- [Cluster-Landmark #46099146479](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/46099146479): Dependency-Audit, Cluster-/Inventar-/Landmark-Regressionen, Chromium-3D-Oberflächenwahl und TypeScript: **success**.
+- [Image-Reference #46099160733](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/46099160733): Dependency-Audit, Image-Reference-/Triangulations-/Multi-Mesh-Pipeline-Regressionen, Chromium einschließlich Koordinatenrahmen-Eingabe und TypeScript: **success**.
+
+**Grenzen / nächster Schritt:** Der Kandidat enthält automatisch berechnete, weiterhin nur vorgeschlagene Dreieckszuordnungen. Er besitzt noch keine Studio-interne Dreieck-für-Dreieck-Vorschau mit expliziter Übernahme und Undo. Außerdem bleibt die visuelle Qualität der beiden Original-PaKaChi-Formen gegen die freigegebenen Referenzen abzunehmen. `main` bleibt unverändert.
+
 ## Zwischenprüfung 2026-11-28 – Gemeinsamer Koordinatenrahmen für Kameras und Zielmesh
 
 **Implementierung auf `develop`:** Neue Kamerakalibrierungen im Bildreferenz-Editor erhalten eine explizite `coordinateFrameId`. Der Hinweis im Editor stellt klar, dass diese ID keine Transformation durchführt: Kamera-Translationen und -Rotationen müssen tatsächlich im selben 3D-Rahmen wie der Zielmodell-Root gemessen werden. Die Low-Level-Triangulation lehnt Mehransicht-Beobachtungen derselben Landmarke ab, wenn Rahmen-IDs gemischt oder nur teilweise vorhanden sind. Die Bildreferenz→Mesh-Pipeline verlangt zusätzlich eine explizite `meshCoordinateFrameId` und blockiert fehlende oder abweichende IDs. Bestehende Projektdateien bleiben lesbar; Kalibrierungen ohne ID sind jedoch nicht für die Modellrekonstruktion verwendbar, bis sie neu gespeichert wurden.
