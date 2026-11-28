@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { Matrix4, Quaternion, Vector3 } from 'three';
 import { createUnclassifiedClusterManifest } from '../src/cluster-inventory.ts';
 import { proposeClusterManifestFromImageReference, proposeClusterManifestsFromImageReference } from '../src/image-reference-cluster-pipeline.ts';
+import { createClusterLandmarkTriangulationPreview, acceptClusterLandmarkPreviewItem } from '../src/cluster-landmark-preview.ts';
 import type { ImageReferenceDocument, ImageReferenceCameraCalibration } from '../src/image-reference.ts';
 
 const imageHash = 'a'.repeat(64);
@@ -67,6 +68,18 @@ test('bridges confirmed image-reference landmarks through calibrated multi-view 
     'image-space downward pixel coordinates must reconstruct positive camera/world Y');
   assert.equal(result.classifiedTriangles, 1);
   assert.equal(result.candidate?.assignments[0]?.partId, 'torso');
+  assert.deepEqual(result.candidate?.assignments[0]?.landmarkIds, ['torso-center']);
+  const preview = createClusterLandmarkTriangulationPreview(current, result.candidate!, {
+    avatarId: 'pakachi', formId: 'animal-form', sourceImageSha256: imageHash,
+  });
+  assert.equal(preview.policy, 'review-only');
+  assert.equal(preview.automaticAssignmentsApplied, false);
+  assert.equal(preview.items.length, 1);
+  assert.deepEqual(preview.items[0]!.landmarkIds, ['torso-center']);
+  const accepted = acceptClusterLandmarkPreviewItem(current, preview, meshId, 0);
+  assert.equal(accepted.assignments[0]!.origin, 'user');
+  assert.equal(accepted.assignments[0]!.policy, 'locked');
+  assert.deepEqual(accepted.overrides[0]!.operation.type === 'assign-triangle' ? accepted.overrides[0]!.operation.landmarkIds : [], ['torso-center']);
   assert.equal(current.assignments[0]?.partId, null, 'source manifest must remain unchanged');
 });
 
