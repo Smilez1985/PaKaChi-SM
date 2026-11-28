@@ -1,3 +1,15 @@
+## Zwischenprüfung 2026-11-28 – Auswahlbindung für den Silhouettenvergleich
+
+**Implementierung auf `develop`:** `src/cluster-form-silhouette-session.ts` verbindet den read-only Pixelvergleich mit dem bestehenden `ImageReferenceDocument`. Der Aufruf verlangt explizite Avatar-, Form-, Ansicht-, Regions-, Pose-, Zielform- und Modell-Koordinatenrahmen-IDs. Die Region muss `confirmed`, darf kein `helper` sein und muss in der ausgewählten Ansicht liegen, die wiederum der gewählten Form und dem Avatar zugeordnet ist. Die Kamera wird ausschließlich über die exakte Kombination aus Quellbildhash, Avatar, Form, Pose und Ansicht aufgelöst; Mehrdeutigkeit oder fehlende Kalibrierung blockieren. Zielmanifest und Kamerarahmen müssen übereinstimmen.
+
+**Sicherheitsverhalten:** Der Adapter ruft den bestehenden Silhouettenkern erst nach erfolgreicher Struktur- und Bindungsprüfung auf. Er ändert keine Referenzdaten, Meshes, Manifeste oder Zuordnungen. Eine nur vorgeschlagene, ignorierte, nicht verknüpfte oder als Helper markierte Region kann nicht verglichen werden.
+
+**Regressionen:** Gültige Hierarchie-/Kalibrierungsbindung mit pixelgenauem Ergebnis; Ablehnung nicht bestätigter, Helper- und nicht verknüpfter Regionen; Ablehnung abweichender Zielform, fehlender/mehrdeutiger Kalibrierung und Koordinatenrahmen.
+
+**CI:** Workflow für Commit `dc05eecb` (#46176624437) und die Regressionen (#46176657045) ist zum Zeitpunkt dieser Zwischenprüfung noch nicht abgeschlossen. Keine Erfolgsmeldung vor Abschluss.
+
+**Grenze / nächster Schritt:** Die strikte technische Verbindung ist vorhanden, aber noch keine Studio-Bedienoberfläche. Als Nächstes wird der vorhandene Referenz-/Studio-Workflow um die Auswahl und Anzeige des Vergleichsberichts ergänzt; die Originalformen bleiben bis zur visuellen Prüfung gegen die freigegebenen 2D-Vorlagen nicht abgenommen.
+
 ## Zwischenprüfung 2026-11-28 – kalibrierter Pixel-Silhouettenvergleich
 
 **Implementierung auf `develop`:** `src/cluster-form-silhouette.ts` projiziert die tatsächlichen Mesh-Geometrien über ihre Weltmatrizen und eine explizite Kamera-zu-Welt-Kalibrierung in den Bildraum. Die Funktion verlangt identische `coordinateFrameId`-Werte für Kamera und Modell, validiert die starre Kameramatrix, Intrinsiken, Bildgröße und vollständige eindeutige Quellmesh-Bindungen. Dreiecke vor der Near Plane werden abgeschnitten; die Rasterung nutzt einen Tiefenpuffer, damit verdeckte Flächen nicht mehrfach als sichtbare Silhouette gezählt werden.
