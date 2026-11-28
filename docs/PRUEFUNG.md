@@ -1,3 +1,15 @@
+## Zwischenprüfung 2026-11-28 – kalibrierter Pixel-Silhouettenvergleich
+
+**Implementierung auf `develop`:** `src/cluster-form-silhouette.ts` projiziert die tatsächlichen Mesh-Geometrien über ihre Weltmatrizen und eine explizite Kamera-zu-Welt-Kalibrierung in den Bildraum. Die Funktion verlangt identische `coordinateFrameId`-Werte für Kamera und Modell, validiert die starre Kameramatrix, Intrinsiken, Bildgröße und vollständige eindeutige Quellmesh-Bindungen. Dreiecke vor der Near Plane werden abgeschnitten; die Rasterung nutzt einen Tiefenpuffer, damit verdeckte Flächen nicht mehrfach als sichtbare Silhouette gezählt werden.
+
+**Pixelvergleich:** Eine bestätigte Bildregion kann als Rechteck oder Polygon mit optionalen Innenlöchern vorliegen. Die Funktion erzeugt eine Region-Binärmaske und eine projizierte Modell-Binärmaske. Der Bericht enthält Pixelanzahlen, Schnittmenge, Vereinigungsmenge, False Positives/Negatives sowie IoU, Precision und Recall. Leere/ungültige Geometrien und überschrittene Pixelbudgets werden kontrolliert behandelt. Die Funktion ist read-only: keine Geometrie-, Material-, Manifest- oder Szenenmutation und keine automatische Übernahme.
+
+**Regressionen:** Exakte Projektion einer bekannten Dreiecksfläche (IoU/Precision/Recall = 1), falscher Koordinatenrahmen, fehlende/fremde/doppelte Mesh-Bindungen, Geometrie hinter der Kamera, Polygonlöcher und ungültige Bildregion.
+
+**CI [Cluster-Landmark #46173737289](https://github.com/Smilez1985/PaKaChi-SM/actions/runs/46173737289):** Dependency-Audit, Cluster-/Landmark-/Inventar-Regressionen, Chromium-E2E und TypeScript: **success**.
+
+**Grenzen / nächster Schritt:** Der geometrische Vergleichskern ist implementiert und getestet, aber noch nicht als Bedienoberfläche im Studio angeschlossen. Dafür müssen die ausgewählte bestätigte Referenzregion, die zugehörige Kamerakalibrierung und die passenden Quellmesh-Bindings gemeinsam ausgewählt werden. Erst danach kann der Bericht in einer synchronisierten 2D-/3D-Ansicht angezeigt werden. Die Originalformen sind weiterhin nicht visuell freigegeben.
+
 ## Zwischenprüfung 2026-11-28 – anklickbares 3D-Overlay für 2D→3D-Review
 
 **Implementierung auf `develop`:** `collectClusterSkinOverlayFromBindings()` erstellt die 3D-Dreiecksvorschau aus den exakten `ClusterMeshBinding`-Objekten, die unmittelbar zuvor für die Mehrmesh-Triangulation aufgelöst wurden. Mesh-Identität, Quellinventar, Vertex-/Dreieckszahlen und Indexgrenzen werden erneut geprüft. Es sind keine zusätzlichen `userData`-Marker am Live-Modell erforderlich. Die Dreieckpositionen werden über die aktuelle Mesh-Weltmatrix in denselben Szenenraum wie das Studio-Overlay überführt.
