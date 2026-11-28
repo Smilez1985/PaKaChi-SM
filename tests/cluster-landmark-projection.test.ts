@@ -7,7 +7,7 @@ function camera(viewId:string, position:Vector3, target:Vector3):LandmarkCameraC
   const direction=target.clone().sub(position).normalize();
   const rotation=new Quaternion().setFromUnitVectors(new Vector3(0,0,1),direction);
   const transform=new Matrix4().compose(position,rotation,new Vector3(1,1,1));
-  return {viewId,fx:1,fy:1,cx:0.5,cy:0.5,cameraToWorld:transform.toArray()};
+  return {viewId,coordinateFrameId:'avatar-root',fx:1,fy:1,cx:0.5,cy:0.5,cameraToWorld:transform.toArray()};
 }
 function project(point:Vector3, calibration:LandmarkCameraCalibration) {
   const worldToCamera=new Matrix4().fromArray([...calibration.cameraToWorld]).invert();
@@ -99,3 +99,15 @@ test('rejects malformed calibration, duplicate views and singular mesh transform
     observation('eye','head',point,a),observation('eye','head',point,b)
   ],new Matrix4().makeScale(0,1,1).toArray()),/singular/);
 });
+
+test('rejects multi-view landmarks whose camera transforms declare different coordinate frames',()=>{
+  const point=new Vector3(0,0.2,4);
+  const a=camera('front',new Vector3(-1,0,0),point);
+  const b={...camera('side',new Vector3(1,0,0),point),coordinateFrameId:'scene-root'};
+  const report=triangulateLandmarkSeeds([
+    observation('eye','head',point,a),observation('eye','head',point,b),
+  ],new Matrix4().toArray());
+  assert.equal(report.seeds.length,0);
+  assert.match(report.rejected[0]!.reason,/do not share one explicit coordinate frame/);
+});
+
