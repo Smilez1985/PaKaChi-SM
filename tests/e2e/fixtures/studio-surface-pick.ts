@@ -100,14 +100,18 @@ export function mountTriangulationReviewOverlayFixture(canvas:HTMLCanvasElement,
  const project={format:'pakachi-studio' as const,version:1 as const,model:'AAAA',avatar:{id:'review',name:'Review',description:'',moves:[]},semanticCatalog:createPaKaChiSemanticCatalog()};
  const hooks={suspend(){},resume(){},changed(){},feedback(){}};
  const editor=new StudioEditor(rig,view,host,project,hooks);editor.enter();
- const internals=editor as unknown as {landmarkReviewManifest:typeof manifest;landmarkReviewPreview:any;renderLandmarkReview:()=>void};
+ let latestOverlay:any=null;const setOverlay=view.setClusterSkinOverlay.bind(view);
+ view.setClusterSkinOverlay=(report:any)=>{latestOverlay=report;setOverlay(report);};
+ const internals=editor as unknown as {landmarkReviewManifest:typeof manifest;landmarkReviewPreview:any;landmarkReviewOverlayBindings:any;renderLandmarkReview:()=>void};
  internals.landmarkReviewManifest=manifest;
  internals.landmarkReviewPreview={
   format:'pakachi-cluster-landmark-classification-preview',version:1,sourceAssetSha256:hash,sourceImageSha256:'d'.repeat(64),
   avatarId:'review',formId:'animal-reference',form:'animal',policy:'review-only',automaticAssignmentsApplied:false,
   items:[{meshId:'review-mesh',triangleIndex:0,status:'single-evidence',evidenceCount:1,landmarkIds:['paw-anchor'],proposedPartId:'paws',proposedSurfaceLayerId:null,reasons:['single landmark']}],
  };
+ const mesh=root.children[0] as THREE.Mesh;
+ internals.landmarkReviewOverlayBindings=[{meshId:'review-mesh',mesh,geometry:mesh.geometry,positions:new Float64Array([ -1,-1,0,1,-1,0,0,1,0]),indices:new Uint32Array([0,1,2]),meshWorld:mesh.matrixWorld.toArray()}];
  internals.renderLandmarkReview();
  view.setClusterSkinOverlay({sourceAssetSha256:hash,missingMeshIds:[],triangles:[{meshId:'review-mesh',triangleIndex:0,state:'automatic',partId:'paws',positions:[-1,-1,0,1,-1,0,0,1,0]}]});
- return {editor,view,acceptedCount:()=>internals.landmarkReviewManifest.overrides.length};
+ return {editor,view,acceptedCount:()=>internals.landmarkReviewManifest.overrides.length,overlayState:()=>latestOverlay?.triangles?.[0]?.state};
 }
