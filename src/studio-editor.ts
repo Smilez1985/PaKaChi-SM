@@ -48,6 +48,7 @@ import { mountClusterFormComparison } from './cluster-form-comparison-panel.ts';
 import type { StudioSurfacePickHit } from './studio-landmark-picking.ts';
 interface Snapshot {data:StudioData;values:Record<string,Transform>;semanticCatalog?:Cluster2DSemanticCatalog;clusterFormManifests?:StudioProject['clusterFormManifests']}
 interface Hooks { suspend:()=>void; resume:()=>void; changed:()=>void; feedback:(s:string)=>void }
+interface LandmarkReviewUndo { meshId:string; triangleIndex:number; assignment:ClusterManifest['assignments'][number]; revision:number; overridesLength:number; generatedAt:string }
 const uid=()=>`p-${crypto.randomUUID()}`;
 const volumeText=(v:SurfaceVolumeReport)=>`Volumenschätzung: ${v.measuredComponents?'min '+v.minimumRatio?.toFixed(3)+'× · max '+v.maximumRatio?.toFixed(3)+'×':'nicht messbar'} · ${v.issues} auffällig · ${v.measuredComponents} messbar · ${v.unmeasurableComponents} nicht messbar`;
 export class StudioEditor {
@@ -87,7 +88,7 @@ export class StudioEditor {
   private landmarkInventory:ClusterMeshInventory|null=null;
   private landmarkReviewManifest:ClusterManifest|null=null;
   private landmarkReviewPreview:ClusterLandmarkClassificationPreview|null=null;
-  private landmarkReviewHistory:ClusterManifest[]=[];
+  private landmarkReviewHistory:LandmarkReviewUndo[]=[];
   private draftRigLandmarkEvidence:StudioLandmarkEvidenceBundle|null=null;
   private draftRigLandmarkReview:DraftRigLandmarkReview|null=null;
   private draftRigLandmarkAssignments=new Map<string,string>();
@@ -449,8 +450,13 @@ export class StudioEditor {
     if(this.landmarkReviewHistory.length){
       const undo=document.createElement('button');undo.type='button';undo.textContent='Letzte Dreieck-Übernahme zurücknehmen';
       undo.addEventListener('click',()=>{
-        const previous=this.landmarkReviewHistory.pop();if(!previous)return;
-        this.landmarkReviewManifest=previous;this.renderLandmarkReview();
+        const previous=this.landmarkReviewHistory.pop(),current=this.landmarkReviewManifest;if(!previous||!current)return;
+        const restored=structuredClone(current),target=restored.assignments.find(item=>item.meshId===previous.meshId&&item.triangleIndex===previous.triangleIndex);
+        if(!target)throw new Error('Undo-Ziel-Dreieck ist im aktuellen Manifest nicht mehr vorhanden.');
+        Object.assign(target,structuredClone(previous.assignment));
+        restored.overrides=restored.overrides.slice(0,previous.overridesLength);
+        restored.revision=previous.revision;restored.generatedAt=previous.generatedAt;
+        this.landmarkReviewManifest=restored;this.renderLandmarkReview();
         const status=this.host.querySelector<HTMLElement>('#cluster-manifest-status');
         if(status)status.textContent='Letzte Dreieck-Übernahme zurückgenommen. Die vorherigen bestätigten Einzelzuweisungen bleiben erhalten.';
         this.hooks.feedback('Letzte Landmarken-Dreieck-Zuweisung rückgängig gemacht.');
@@ -473,8 +479,14 @@ export class StudioEditor {
       action.addEventListener('click',()=>{
         try{
           if(!this.landmarkReviewManifest||!this.landmarkReviewPreview)throw new Error('Review-Zustand ist nicht mehr verfügbar. Beleg erneut importieren.');
-          this.landmarkReviewHistory.push(structuredClone(this.landmarkReviewManifest));
-          this.landmarkReviewManifest=acceptClusterLandmarkPreviewItem(this.landmarkReviewManifest,this.landmarkReviewPreview,item.meshId,item.triangleIndex);
+          const current=this.landmarkReviewManifest;
+          const previousAssignment=current.assignments.find(value=>value.meshId===item.meshId&&value.triangleIndex===item.triangleIndex);
+          if(!previousAssignment)throw new Error('Quell-Dreieck für die Undo-Aufzeichnung ist nicht mehr vorhanden.');
+          this.landmarkReviewHistory.push({
+            meshId:item.meshId,triangleIndex:item.triangleIndex,assignment:structuredClone(previousAssignment),
+            revision:current.revision,overridesLength:current.overrides.length,generatedAt:current.generatedAt,
+          });
+          this.landmarkReviewManifest=acceptClusterLandmarkPreviewItem(current,this.landmarkReviewPreview,item.meshId,item.triangleIndex);
           this.renderLandmarkReview();
           const status=this.host.querySelector<HTMLElement>('#cluster-manifest-status');
           if(status)status.textContent='Einzelzuweisung übernommen: '+item.meshId+' / Dreieck '+item.triangleIndex+'. Die Zuweisung ist gesperrt und im Override-Protokoll mit Bild-Hash und Landmarken dokumentiert.';
