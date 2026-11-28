@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { Matrix4, Quaternion, Vector3 } from 'three';
 import { createUnclassifiedClusterManifest } from '../src/cluster-inventory.ts';
-import { proposeClusterManifestFromImageReference } from '../src/image-reference-cluster-pipeline.ts';
+import { proposeClusterManifestFromImageReference, proposeClusterManifestsFromImageReference } from '../src/image-reference-cluster-pipeline.ts';
 import type { ImageReferenceDocument, ImageReferenceCameraCalibration } from '../src/image-reference.ts';
 
 const imageHash = 'a'.repeat(64);
@@ -106,5 +106,24 @@ test('refuses camera-to-mesh triangulation when coordinate-frame identity is mis
     meshWorld: new Matrix4().toArray(), meshCoordinateFrameId: 'avatar-root', imageReference,
     identity: { avatarId: 'pakachi', formId: 'animal-form', poseId: 'neutral', radiusWorld: 1 },
   }), /coordinate frames are missing or do not match/);
+});
+
+test('builds one review-only candidate across multiple exact mesh bindings without mutating the source manifest', () => {
+  const { meshId, current, imageReference, positions } = fixture();
+  const secondMeshId = 'mesh-' + assetHash + '-walk1-mesh1-primitive0';
+  current.meshes.push({ ...current.meshes[0]!, id: secondMeshId, sourceMeshIndex: 1, sourceMeshName: 'Body detail' });
+  current.assignments.push({ ...current.assignments[0]!, meshId: secondMeshId });
+  const result = proposeClusterManifestsFromImageReference({
+    current, sourceAssetSha256: assetHash, meshCoordinateFrameId: 'avatar-root', imageReference,
+    identity: { avatarId: 'pakachi', formId: 'animal-form', poseId: 'neutral', radiusWorld: 1 },
+    meshes: [
+      { meshId, positions, indices: null, meshWorld: new Matrix4().toArray() },
+      { meshId: secondMeshId, positions, indices: null, meshWorld: new Matrix4().toArray() },
+    ],
+  });
+  assert.equal(result.meshResults.length, 2);
+  assert.ok(result.meshResults.every(item => item.triangulation.seeds.length === 1));
+  assert.equal(result.candidate?.assignments.filter(item => item.partId === 'torso').length, 2);
+  assert.ok(current.assignments.every(item => item.partId === null), 'source manifest must remain unmodified');
 });
 
