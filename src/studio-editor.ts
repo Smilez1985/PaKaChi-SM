@@ -33,7 +33,7 @@ import type { ClusterMeshInventory } from './cluster-inventory.ts';
 import { proposeClusterManifestsFromImageReference } from './image-reference-cluster-pipeline.ts';
 import { createStudioFormManifest } from './studio-form-manifest.ts';
 import { createStudioLandmarkEvidenceBundle, validateStudioLandmarkEvidenceBundle } from './studio-landmark-evidence.ts';
-import { createClusterLandmarkClassificationPreview, acceptClusterLandmarkPreviewItem, restoreReviewedClusterManifest } from './cluster-landmark-preview.ts';
+import { createClusterLandmarkClassificationPreview, createClusterLandmarkTriangulationPreview, acceptClusterLandmarkPreviewItem, restoreReviewedClusterManifest } from './cluster-landmark-preview.ts';
 import type { ClusterLandmarkClassificationPreview } from './cluster-landmark-preview.ts';
 import type { ClusterManifest } from './cluster-architecture.ts';
 import { createDraftRigLandmarkReview, confirmDraftRigLandmarkReview } from './draft-rig-landmark-review.ts';
@@ -87,6 +87,7 @@ export class StudioEditor {
   private landmarkInventory:ClusterMeshInventory|null=null;
   private landmarkReviewManifest:ClusterManifest|null=null;
   private landmarkReviewPreview:ClusterLandmarkClassificationPreview|null=null;
+  private landmarkReviewHistory:ClusterManifest[]=[];
   private draftRigLandmarkEvidence:StudioLandmarkEvidenceBundle|null=null;
   private draftRigLandmarkReview:DraftRigLandmarkReview|null=null;
   private draftRigLandmarkAssignments=new Map<string,string>();
@@ -180,6 +181,7 @@ export class StudioEditor {
     this.landmarkInventory=inventory;
     this.landmarkReviewManifest=null;
     this.landmarkReviewPreview=null;
+    this.landmarkReviewHistory=[];
     this.draftRigLandmarkEvidence=null;this.draftRigLandmarkReview=null;this.draftRigLandmarkAssignments.clear();this.draftRigLandmarkPositions.clear();this.confirmedDraftRigLandmarkPlan=null;
     this.selectedLandmarkId=seeds[0]!.id;
     this.pendingSurfaceHit=null;
@@ -196,7 +198,7 @@ export class StudioEditor {
   private snapshot():Snapshot{return {data:structuredClone(this.data),values:this.rig.capture(),semanticCatalog:structuredClone(this.project.semanticCatalog!),...(this.project.clusterFormManifests?{clusterFormManifests:structuredClone(this.project.clusterFormManifests)}:{})};}
   private restore(s:Snapshot){this.rig.data=structuredClone(s.data);if(s.semanticCatalog)this.project.semanticCatalog=structuredClone(s.semanticCatalog);if(s.clusterFormManifests)this.project.clusterFormManifests=structuredClone(s.clusterFormManifests);else delete this.project.clusterFormManifests;this.rig.reset();this.rig.apply(s.values);this.mark();this.render();}
   private changeSemanticCatalog(next:Cluster2DSemanticCatalog){if(!this.active||this.interactionActive)throw Error('Katalog nur im aktiven, ruhenden Studio bearbeiten.');const before=this.snapshot();this.project.semanticCatalog=structuredClone(next);this.history.push(before);this.mark();this.render();this.hooks.feedback('Gemeinsamer Anatomie-/Oberflächenkatalog geändert. Rückgängig ist möglich; beide Formen verwenden denselben Katalog.');}
-  private mark(){this.automaticCheck?.abort();this.automaticProposal=null;this.automaticOutcome='';this.moveCheck?.abort();this.surfaceCheck?.abort();this.weightCorrection=null;this.landmarkReviewManifest=null;this.landmarkReviewPreview=null;this.draftRigLandmarkEvidence=null;this.draftRigLandmarkReview=null;this.draftRigLandmarkAssignments.clear();this.draftRigLandmarkPositions.clear();this.confirmedDraftRigLandmarkPlan=null;this.revision++;this.dirty=true;this.hooks.changed();}
+  private mark(){this.automaticCheck?.abort();this.automaticProposal=null;this.automaticOutcome='';this.moveCheck?.abort();this.surfaceCheck?.abort();this.weightCorrection=null;this.landmarkReviewManifest=null;this.landmarkReviewPreview=null;this.landmarkReviewHistory=[];this.draftRigLandmarkEvidence=null;this.draftRigLandmarkReview=null;this.draftRigLandmarkAssignments.clear();this.draftRigLandmarkPositions.clear();this.confirmedDraftRigLandmarkPlan=null;this.revision++;this.dirty=true;this.hooks.changed();}
   private mutate(fn:()=>void){this.rig.stopSkinPreview();const before=this.snapshot();fn();flagAffectedPoses(before.data,this.data);this.history.push(before);this.mark();this.render();}
   beginPlaybackTransition(){
     const d=this.data;
@@ -444,6 +446,17 @@ export class StudioEditor {
     const summary=document.createElement('p');summary.className='subtle';
     summary.textContent=preview.items.length+' Dreiecke · '+preview.items.filter(item=>item.status==='conflict').length+' Konflikte · '+preview.items.filter(item=>item.status==='corroborated').length+' mehrfach bestätigte Hinweise. Änderungen erfolgen ausschließlich über die jeweilige Schaltfläche.';
     panel.append(summary);
+    if(this.landmarkReviewHistory.length){
+      const undo=document.createElement('button');undo.type='button';undo.textContent='Letzte Dreieck-Übernahme zurücknehmen';
+      undo.addEventListener('click',()=>{
+        const previous=this.landmarkReviewHistory.pop();if(!previous)return;
+        this.landmarkReviewManifest=previous;this.renderLandmarkReview();
+        const status=this.host.querySelector<HTMLElement>('#cluster-manifest-status');
+        if(status)status.textContent='Letzte Dreieck-Übernahme zurückgenommen. Die vorherigen bestätigten Einzelzuweisungen bleiben erhalten.';
+        this.hooks.feedback('Letzte Landmarken-Dreieck-Zuweisung rückgängig gemacht.');
+      });
+      panel.append(undo);
+    }
     const list=document.createElement('ol');list.className='cluster-landmark-review-list';
     for(const item of preview.items){
       const row=document.createElement('li');
@@ -460,6 +473,7 @@ export class StudioEditor {
       action.addEventListener('click',()=>{
         try{
           if(!this.landmarkReviewManifest||!this.landmarkReviewPreview)throw new Error('Review-Zustand ist nicht mehr verfügbar. Beleg erneut importieren.');
+          this.landmarkReviewHistory.push(structuredClone(this.landmarkReviewManifest));
           this.landmarkReviewManifest=acceptClusterLandmarkPreviewItem(this.landmarkReviewManifest,this.landmarkReviewPreview,item.meshId,item.triangleIndex);
           this.renderLandmarkReview();
           const status=this.host.querySelector<HTMLElement>('#cluster-manifest-status');
@@ -566,10 +580,13 @@ export class StudioEditor {
           for(const rejected of item.triangulation.rejected){const reason=document.createElement('p');reason.className='subtle';reason.textContent=rejected.landmarkId+': '+rejected.reason;results.append(reason);}
         });
         if(!result.candidate){note('Kein Kandidat erzeugt: keine Landmarke hat die Mehransicht-Triangulation bestanden.');return;}
+        const preview=createClusterLandmarkTriangulationPreview(manifest,result.candidate,{avatarId,formId,sourceImageSha256:doc.source.sha256});
+        this.landmarkReviewManifest=manifest;this.landmarkReviewPreview=preview;this.landmarkReviewHistory=[];
+        this.renderLandmarkReview();
         const artifact={
           format:'pakachi-image-reference-cluster-candidate',version:1,policy:'review-only',automaticAssignmentsApplied:false,
           sourceAssetSha256:manifest.sourceAssetSha256,sourceImageSha256:doc.source.sha256,coordinateFrameId,
-          identity:{avatarId,formId,poseId,targetForm,radiusWorld},meshResults:result.meshResults,candidate:result.candidate,
+          identity:{avatarId,formId,poseId,targetForm,radiusWorld},meshResults:result.meshResults,preview,candidate:result.candidate,
         };
         const blob=new Blob([JSON.stringify(artifact,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob);
         const anchor=document.createElement('a');anchor.href=url;anchor.download=(this.project.avatar.id.replace(/[^a-z0-9_-]/gi,'_')||'pakachi')+'-'+targetForm+'-2d-landmark-candidate.json';anchor.click();
@@ -686,6 +703,7 @@ export class StudioEditor {
           const preview=createClusterLandmarkClassificationPreview(manifest,evidence);
           this.landmarkReviewManifest=manifest;
           this.landmarkReviewPreview=preview;
+          this.landmarkReviewHistory=[];
           this.draftRigLandmarkEvidence=evidence;
           this.draftRigLandmarkAssignments.clear();this.draftRigLandmarkPositions.clear();this.confirmedDraftRigLandmarkPlan=null;
           this.draftRigLandmarkReview=createDraftRigLandmarkReview(evidence,this.rig.root,manifest,form==='animal'?'quadruped':'biped-relaxed');
@@ -719,6 +737,7 @@ export class StudioEditor {
           const operations=restored.overrides.filter(entry=>entry.operation.type==='assign-triangle');
           if(!operations.length)throw Error('Das Manifest enthält keine bestätigten Landmarken-Dreieck-Zuweisungen.');
           this.landmarkReviewManifest=restored;
+          this.landmarkReviewHistory=[];
           this.landmarkReviewPreview={
             format:'pakachi-cluster-landmark-classification-preview',version:1,
             sourceAssetSha256:restored.sourceAssetSha256,sourceImageSha256:this.landmarkDocument.source.sha256,
