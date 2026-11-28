@@ -114,6 +114,21 @@ export class StudioEditor {
     this.rig=rig;this.playbackTransition=new PlaybackTransition(rig.root);this.view=view;this.host=host;this.project={...project,semanticCatalog:structuredClone(project.semanticCatalog??createPaKaChiSemanticCatalog()),...(project.clusterFormManifests?{clusterFormManifests:structuredClone(project.clusterFormManifests)}:{}),...(project.clusterSkinAnatomyProposals?{clusterSkinAnatomyProposals:structuredClone(project.clusterSkinAnatomyProposals)}:{})};this.landmarkDocument=project.imageReference?structuredClone(project.imageReference):null;this.hooks=hooks;this.initial=structuredClone(rig.initial);
     view.onSelect=id=>{this.surfaceCheck?.abort();this.weightCorrection=null;this.selected=id;this.render();};
     view.onClusterSkinTrianglePick=hit=>{
+      const preview=this.landmarkReviewPreview;
+      if(preview&&preview.sourceAssetSha256===hit.sourceAssetSha256){
+        const item=preview.items.find(value=>value.meshId===hit.meshId&&value.triangleIndex===hit.triangleIndex);
+        if(item){
+          const panel=this.host.querySelector<HTMLElement>('#cluster-landmark-review');
+          const rows=panel?.querySelectorAll<HTMLElement>('[data-landmark-review-mesh]');
+          rows?.forEach(row=>{row.dataset.selected='false';row.removeAttribute('aria-current');});
+          const row=[...(rows??[])].find(value=>value.dataset.landmarkReviewMesh===hit.meshId&&value.dataset.landmarkReviewTriangle===String(hit.triangleIndex));
+          if(row){row.dataset.selected='true';row.setAttribute('aria-current','true');row.focus();row.scrollIntoView({block:'nearest'});}
+          const status=panel?.querySelector<HTMLElement>('[data-landmark-review-selection]');
+          if(status)status.textContent='3D-Auswahl: '+hit.meshId+' · Dreieck '+hit.triangleIndex+' · '+item.status+'. Übernahme weiterhin nur über die Schaltfläche in der Liste.';
+          this.hooks.feedback('Triangulationsvorschlag im Review markiert. Keine Zuordnung übernommen.');
+          return;
+        }
+      }
       const matches=(['animal','humanoid'] as const).filter(form=>{
         const report=this.project.clusterSkinAnatomyProposals?.[form];
         return report?.manifest.sourceAssetSha256===hit.sourceAssetSha256&&report.manifest.meshes.some(mesh=>mesh.id===hit.meshId);
@@ -447,6 +462,9 @@ export class StudioEditor {
     const summary=document.createElement('p');summary.className='subtle';
     summary.textContent=preview.items.length+' Dreiecke · '+preview.items.filter(item=>item.status==='conflict').length+' Konflikte · '+preview.items.filter(item=>item.status==='corroborated').length+' mehrfach bestätigte Hinweise. Änderungen erfolgen ausschließlich über die jeweilige Schaltfläche.';
     panel.append(summary);
+    const selection=document.createElement('p');selection.className='subtle';selection.dataset.landmarkReviewSelection='';selection.setAttribute('role','status');
+    selection.textContent='Ein Dreieck im farbigen 3D-Overlay anklicken, um den passenden Listeneintrag zu markieren. Die Übernahme bleibt separat.';
+    panel.append(selection);
     if(this.landmarkReviewHistory.length){
       const undo=document.createElement('button');undo.type='button';undo.textContent='Letzte Dreieck-Übernahme zurücknehmen';
       undo.addEventListener('click',()=>{
@@ -466,6 +484,7 @@ export class StudioEditor {
     const list=document.createElement('ol');list.className='cluster-landmark-review-list';
     for(const item of preview.items){
       const row=document.createElement('li');
+      row.tabIndex=-1;row.dataset.landmarkReviewMesh=item.meshId;row.dataset.landmarkReviewTriangle=String(item.triangleIndex);
       const title=document.createElement('strong');title.textContent=item.meshId+' · Dreieck '+item.triangleIndex;row.append(title);
       const detail=document.createElement('p');detail.className='subtle';
       detail.textContent=item.status==='conflict'
@@ -596,6 +615,14 @@ export class StudioEditor {
         const preview=createClusterLandmarkTriangulationPreview(manifest,result.candidate,{avatarId,formId,sourceImageSha256:doc.source.sha256});
         this.landmarkReviewManifest=manifest;this.landmarkReviewPreview=preview;this.landmarkReviewHistory=[];
         this.renderLandmarkReview();
+        try{
+          const overlay=collectClusterSkinOverlay(this.rig.root,result.candidate);
+          if(overlay.missingMeshIds.length)throw new Error('Mesh-Identitäten für die 3D-Vorschau sind unvollständig.');
+          this.view.setClusterSkinOverlay(overlay);
+        }catch(overlayError){
+          this.view.setClusterSkinOverlay(null);
+          note('Review-Liste bereit; 3D-Overlay nicht verfügbar: '+(overlayError instanceof Error?overlayError.message:String(overlayError)));
+        }
         const artifact={
           format:'pakachi-image-reference-cluster-candidate',version:1,policy:'review-only',automaticAssignmentsApplied:false,
           sourceAssetSha256:manifest.sourceAssetSha256,sourceImageSha256:doc.source.sha256,coordinateFrameId,
