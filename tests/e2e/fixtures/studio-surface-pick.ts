@@ -83,3 +83,31 @@ export function mountClusterEditorCorrectionFixture(canvas:HTMLCanvasElement,hos
   return {editor:restored,host:restoredHost,saved};
  }};
 }
+
+
+export function mountTriangulationReviewOverlayFixture(canvas:HTMLCanvasElement,host:HTMLElement){
+ canvas.width=400;canvas.height=300;
+ host.innerHTML='<div id="cluster-landmark-review"></div>';
+ const scene=new THREE.Scene(),root=new THREE.Group(),geometry=new THREE.BufferGeometry();
+ geometry.setAttribute('position',new THREE.Float32BufferAttribute([-1,-1,0,1,-1,0,0,1,0],3));geometry.setIndex([0,1,2]);
+ root.add(new THREE.Mesh(geometry,new THREE.MeshBasicMaterial({side:THREE.DoubleSide})));scene.add(root);
+ const rig=new StudioRig(root),camera=new THREE.PerspectiveCamera(45,400/300,.1,100);
+ camera.position.set(0,0,5);camera.lookAt(0,0,0);camera.updateProjectionMatrix();camera.updateMatrixWorld(true);
+ const orbit={enabled:true,target:new THREE.Vector3()},view=new StudioView(rig,camera,canvas,orbit,scene);
+ const hash='c'.repeat(64),source={schemaVersion:1 as const,sourceAssetSha256:hash,meshes:[{id:'review-mesh',sourceMeshIndex:0,sourceMeshName:'Body',primitiveIndex:0,vertexCount:3,triangleCount:1}],totals:{meshes:1,vertices:3,triangles:1}};
+ const manifest=createUnclassifiedClusterManifest(source,'animal','2026-11-28T00:00:00.000Z');
+ manifest.parts=[{id:'paws',name:'Paws',parentPartId:null,orderKey:[1],rigBoneIds:[]}];
+ const project={format:'pakachi-studio' as const,version:1 as const,model:'AAAA',avatar:{id:'review',name:'Review',description:'',moves:[]},semanticCatalog:createPaKaChiSemanticCatalog()};
+ const hooks={suspend(){},resume(){},changed(){},feedback(){}};
+ const editor=new StudioEditor(rig,view,host,project,hooks);editor.enter();
+ const internals=editor as unknown as {landmarkReviewManifest:typeof manifest;landmarkReviewPreview:any;renderLandmarkReview:()=>void};
+ internals.landmarkReviewManifest=manifest;
+ internals.landmarkReviewPreview={
+  format:'pakachi-cluster-landmark-classification-preview',version:1,sourceAssetSha256:hash,sourceImageSha256:'d'.repeat(64),
+  avatarId:'review',formId:'animal-reference',form:'animal',policy:'review-only',automaticAssignmentsApplied:false,
+  items:[{meshId:'review-mesh',triangleIndex:0,status:'single-evidence',evidenceCount:1,landmarkIds:['paw-anchor'],proposedPartId:'paws',proposedSurfaceLayerId:null,reasons:['single landmark']}],
+ };
+ internals.renderLandmarkReview();
+ view.setClusterSkinOverlay({sourceAssetSha256:hash,missingMeshIds:[],triangles:[{meshId:'review-mesh',triangleIndex:0,state:'automatic',partId:'paws',positions:[-1,-1,0,1,-1,0,0,1,0]}]});
+ return {editor,view,acceptedCount:()=>internals.landmarkReviewManifest.overrides.length};
+}
