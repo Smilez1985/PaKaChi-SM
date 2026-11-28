@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as THREE from 'three';
-import { collectClusterSkinOverlay } from '../src/cluster-skin-anatomy-overlay.ts';
+import { collectClusterSkinOverlay, collectClusterSkinOverlayFromBindings } from '../src/cluster-skin-anatomy-overlay.ts';
 import type { ClusterManifest } from '../src/cluster-architecture.ts';
 
 const hash='a'.repeat(64);
@@ -41,4 +41,33 @@ test('transforms indexed triangle vertices into current world space',()=>{
   const {root,manifest,mesh}=fixture();mesh.position.set(2,3,4);
   const report=collectClusterSkinOverlay(root,manifest);
   assert.deepEqual(report.triangles[0].positions,[2,3,4,3,3,4,2,4,4]);
+});
+
+
+test('builds a candidate overlay from resolved source bindings without live identity markers',()=>{
+  const {root,manifest,mesh}=fixture();
+  mesh.userData={};
+  mesh.position.set(2,3,4);
+  root.updateMatrixWorld(true);
+  const position=mesh.geometry.getAttribute('position');
+  const binding={
+    meshId:'mesh-a',mesh,geometry:mesh.geometry,
+    positions:new Float64Array([0,0,0,1,0,0,0,1,0]),
+    indices:new Uint32Array([0,1,2]),meshWorld:mesh.matrixWorld.toArray(),
+  };
+  const report=collectClusterSkinOverlayFromBindings([binding],manifest);
+  assert.equal(report.triangles.length,1);
+  assert.deepEqual(report.missingMeshIds,[]);
+  assert.equal(report.triangles[0].meshId,'mesh-a');
+  assert.deepEqual(report.triangles[0].positions,[2,3,4,3,3,4,2,4,4]);
+  assert.equal(mesh.userData.pakachiClusterMeshId,undefined);
+  assert.equal(position.count,3);
+});
+
+test('binding overlay rejects duplicate, foreign and incomplete source bindings',()=>{
+  const {mesh,manifest}=fixture();
+  const binding={meshId:'mesh-a',mesh,geometry:mesh.geometry,positions:new Float64Array(9),indices:new Uint32Array([0,1,2]),meshWorld:mesh.matrixWorld.toArray()};
+  assert.throws(()=>collectClusterSkinOverlayFromBindings([binding,binding],manifest),/duplicate/i);
+  assert.throws(()=>collectClusterSkinOverlayFromBindings([{...binding,meshId:'foreign'}],manifest),/outside|missing/i);
+  assert.deepEqual(collectClusterSkinOverlayFromBindings([],manifest).missingMeshIds,['mesh-a']);
 });
