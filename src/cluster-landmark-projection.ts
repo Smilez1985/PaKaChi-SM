@@ -3,6 +3,8 @@ import type { ClusterLandmarkSeed } from './cluster-landmark-classifier.ts';
 
 export interface LandmarkCameraCalibration {
   viewId: string;
+  /** Optional for legacy diagnostics; required by the image-reference-to-model bridge. */
+  coordinateFrameId?: string;
   /** Focal length and principal point in normalized image coordinates. */
   fx: number;
   fy: number;
@@ -68,6 +70,7 @@ function finiteMatrix(values: readonly number[]): Matrix4 {
 function makeRay(observation: Landmark2DObservation): Ray {
   const { camera } = observation;
   if (!camera || !/^[a-z0-9][a-z0-9_-]{0,127}$/.test(camera.viewId) ||
+      (camera.coordinateFrameId !== undefined && !/^[a-z0-9][a-z0-9_-]{0,127}$/.test(camera.coordinateFrameId)) ||
       ![camera.fx, camera.fy, camera.cx, camera.cy].every(Number.isFinite) ||
       camera.fx <= 0 || camera.fy <= 0 ||
       ![observation.x, observation.y].every(Number.isFinite) ||
@@ -233,6 +236,12 @@ export function triangulateLandmarkSeeds(
     const identity = { avatarId: group[0]!.avatarId, formId: group[0]!.formId, poseId: group[0]!.poseId, landmarkId: group[0]!.landmarkId };
     if (group.length < 2) {
       report.rejected.push({ ...identity, reason: 'At least two calibrated views are required for depth.' });
+      continue;
+    }
+    const frameIds = group.map(item => item.camera.coordinateFrameId);
+    if (frameIds.some(value => value !== undefined) &&
+        (frameIds.some(value => value === undefined) || new Set(frameIds).size !== 1)) {
+      report.rejected.push({ ...identity, reason: 'Camera observations do not share one explicit coordinate frame.' });
       continue;
     }
     const rays = group.map(makeRay);
