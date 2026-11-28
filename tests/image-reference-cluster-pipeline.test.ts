@@ -70,6 +70,15 @@ test('bridges confirmed image-reference landmarks through calibrated multi-view 
   assert.equal(current.assignments[0]?.partId, null, 'source manifest must remain unchanged');
 });
 
+test('refuses to map a reference form onto the wrong target model form', () => {
+  const { meshId, current, imageReference, positions } = fixture();
+  assert.throws(() => proposeClusterManifestFromImageReference({
+    current, sourceAssetSha256: assetHash, targetForm: 'humanoid', meshId, positions, indices: null,
+    meshWorld: new Matrix4().toArray(), meshCoordinateFrameId: 'avatar-root', imageReference,
+    identity: { avatarId: 'pakachi', formId: 'animal-form', poseId: 'neutral', radiusWorld: 1 },
+  }), /does not match the target model form/);
+});
+
 test('refuses a one-view source instead of inventing depth or a candidate', () => {
   const { meshId, current, imageReference, positions } = fixture();
   imageReference.cameraCalibrations = imageReference.cameraCalibrations!.slice(0, 1);
