@@ -56,7 +56,7 @@ function fixture() {
 test('bridges confirmed image-reference landmarks through calibrated multi-view triangulation into a candidate', () => {
   const { meshId, current, imageReference, positions } = fixture();
   const result = proposeClusterManifestFromImageReference({
-    current, sourceAssetSha256: assetHash, meshId, positions, indices: null,
+    current, sourceAssetSha256: assetHash, targetForm: 'animal', meshId, positions, indices: null,
     meshWorld: new Matrix4().toArray(), meshCoordinateFrameId: 'avatar-root', imageReference,
     identity: { avatarId: 'pakachi', formId: 'animal-form', poseId: 'neutral', radiusWorld: 1 },
   }, '2026-11-23T13:01:00.000Z');
@@ -74,7 +74,7 @@ test('refuses a one-view source instead of inventing depth or a candidate', () =
   const { meshId, current, imageReference, positions } = fixture();
   imageReference.cameraCalibrations = imageReference.cameraCalibrations!.slice(0, 1);
   const result = proposeClusterManifestFromImageReference({
-    current, sourceAssetSha256: assetHash, meshId, positions, indices: null,
+    current, sourceAssetSha256: assetHash, targetForm: 'animal', meshId, positions, indices: null,
     meshWorld: new Matrix4().toArray(), meshCoordinateFrameId: 'avatar-root', imageReference,
     identity: { avatarId: 'pakachi', formId: 'animal-form', poseId: 'neutral', radiusWorld: 1 },
   });
@@ -87,7 +87,7 @@ test('rejects missing explicit avatar/form/pose calibration rather than borrowin
   const { meshId, current, imageReference, positions } = fixture();
   imageReference.cameraCalibrations = imageReference.cameraCalibrations!.map(item => ({ ...item, formId: 'work-form' }));
   assert.throws(() => proposeClusterManifestFromImageReference({
-    current, sourceAssetSha256: assetHash, meshId, positions, indices: null,
+    current, sourceAssetSha256: assetHash, targetForm: 'animal', meshId, positions, indices: null,
     meshWorld: new Matrix4().toArray(), meshCoordinateFrameId: 'avatar-root', imageReference,
     identity: { avatarId: 'pakachi', formId: 'animal-form', poseId: 'neutral', radiusWorld: 1 },
   }), /invalid-image-reference-document:cameraCalibrations/);
@@ -96,13 +96,13 @@ test('rejects missing explicit avatar/form/pose calibration rather than borrowin
 test('refuses camera-to-mesh triangulation when coordinate-frame identity is missing or different', () => {
   const { meshId, current, imageReference, positions } = fixture();
   assert.throws(() => proposeClusterManifestFromImageReference({
-    current, sourceAssetSha256: assetHash, meshId, positions, indices: null,
+    current, sourceAssetSha256: assetHash, targetForm: 'animal', meshId, positions, indices: null,
     meshWorld: new Matrix4().toArray(), meshCoordinateFrameId: 'scene-root', imageReference,
     identity: { avatarId: 'pakachi', formId: 'animal-form', poseId: 'neutral', radiusWorld: 1 },
   }), /coordinate frames are missing or do not match/);
   imageReference.cameraCalibrations = imageReference.cameraCalibrations!.map(item => ({ ...item, coordinateFrameId: undefined }));
   assert.throws(() => proposeClusterManifestFromImageReference({
-    current, sourceAssetSha256: assetHash, meshId, positions, indices: null,
+    current, sourceAssetSha256: assetHash, targetForm: 'animal', meshId, positions, indices: null,
     meshWorld: new Matrix4().toArray(), meshCoordinateFrameId: 'avatar-root', imageReference,
     identity: { avatarId: 'pakachi', formId: 'animal-form', poseId: 'neutral', radiusWorld: 1 },
   }), /coordinate frames are missing or do not match/);
@@ -114,7 +114,7 @@ test('builds one review-only candidate across multiple exact mesh bindings witho
   current.meshes.push({ ...current.meshes[0]!, id: secondMeshId, sourceMeshIndex: 1, sourceMeshName: 'Body detail' });
   current.assignments.push({ ...current.assignments[0]!, meshId: secondMeshId });
   const result = proposeClusterManifestsFromImageReference({
-    current, sourceAssetSha256: assetHash, meshCoordinateFrameId: 'avatar-root', imageReference,
+    current, sourceAssetSha256: assetHash, targetForm: 'animal', meshCoordinateFrameId: 'avatar-root', imageReference,
     identity: { avatarId: 'pakachi', formId: 'animal-form', poseId: 'neutral', radiusWorld: 1 },
     meshes: [
       { meshId, positions, indices: null, meshWorld: new Matrix4().toArray() },
