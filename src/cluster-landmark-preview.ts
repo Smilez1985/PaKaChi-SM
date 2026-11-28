@@ -131,7 +131,7 @@ export function createClusterLandmarkTriangulationPreview(
       return {
         meshId: item.meshId,
         triangleIndex: item.triangleIndex,
-        status: item.landmarkIds.length > 1 ? 'corroborated' : 'single-evidence',
+        status: item.landmarkIds.length > 1 ? 'corroborated' as const : 'single-evidence' as const,
         evidenceCount: item.landmarkIds.length,
         landmarkIds: [...item.landmarkIds],
         proposedPartId: item.partId,
@@ -147,7 +147,7 @@ export function createClusterLandmarkTriangulationPreview(
     sourceImageSha256: identity.sourceImageSha256,
     avatarId: identity.avatarId,
     formId: identity.formId,
-    form: manifest.form,
+    form: candidate.form as 'animal' | 'humanoid',
     policy: 'review-only',
     automaticAssignmentsApplied: false,
     items,
