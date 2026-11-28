@@ -15,6 +15,16 @@ test('proposes generic landmark regions on a single connected mesh without a rig
  assert.equal(result.classified,2);assert.equal(result.ambiguous,0);assert.equal(result.outsideEvidence,0);
  assert.ok(result.assignments.every(a=>a.origin==='automatic'&&a.policy==='recomputable'&&a.confidence>0));
 });
+test('retains the nearest calibrated landmark IDs as proposal provenance',()=>{
+ const positions=new Float32Array([0,0,0,.2,0,0,0,.2,0]);
+ const result=proposeLandmarkClusterAssignments('mesh-main',positions,null,[
+  {partId:'head',landmarkId:'eye-front',position:[0,0,0],radius:1},
+  {partId:'head',landmarkId:'eye-side',position:[0,0,0],radius:1},
+ ]);
+ assert.equal(result.assignments[0]!.partId,'head');
+ assert.deepEqual(result.assignments[0]!.landmarkIds,['eye-front','eye-side']);
+});
+
 test('keeps triangles unresolved outside evidence and at ambiguous boundaries',()=>{
  const positions=new Float32Array([
   4.9,0,0, 5.1,0,0, 5,.2,0,
