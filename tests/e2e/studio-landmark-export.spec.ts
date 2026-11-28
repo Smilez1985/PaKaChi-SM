@@ -20,6 +20,10 @@ test('Studio confirms reviewed joint anchors and downloads a GLB without replaci
   await expect(apply).toBeDisabled();
   await panel.getByRole('button', { name: 'Gelenkanker ausdrücklich bestätigen' }).click();
   await expect(apply).toBeEnabled();
+  await page.getByRole('button', { name: 'Letzte Dreieck-Übernahme zurücknehmen' }).click();
+  await expect(panel.getByRole('button', { name: 'Diesen Vorschlag übernehmen' })).toBeEnabled();
+  await panel.getByRole('button', { name: 'Diesen Vorschlag übernehmen' }).click();
+  await expect(panel).toContainText('Übernommen');
 
   const downloadPromise = page.waitForEvent('download');
   await apply.click();
