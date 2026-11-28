@@ -71,6 +71,7 @@ export function createCalibratedLandmarkObservations(
       confidence: 1,
       camera: {
         viewId: calibration.viewId,
+        ...(calibration.coordinateFrameId ? { coordinateFrameId: calibration.coordinateFrameId } : {}),
         fx: calibration.fx,
         fy: calibration.fy,
         cx: calibration.cx,
