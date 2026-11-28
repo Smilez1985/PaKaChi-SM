@@ -482,11 +482,12 @@ export class StudioEditor {
           const current=this.landmarkReviewManifest;
           const previousAssignment=current.assignments.find(value=>value.meshId===item.meshId&&value.triangleIndex===item.triangleIndex);
           if(!previousAssignment)throw new Error('Quell-Dreieck für die Undo-Aufzeichnung ist nicht mehr vorhanden.');
+          const next=acceptClusterLandmarkPreviewItem(current,this.landmarkReviewPreview,item.meshId,item.triangleIndex);
           this.landmarkReviewHistory.push({
             meshId:item.meshId,triangleIndex:item.triangleIndex,assignment:structuredClone(previousAssignment),
             revision:current.revision,overridesLength:current.overrides.length,generatedAt:current.generatedAt,
           });
-          this.landmarkReviewManifest=acceptClusterLandmarkPreviewItem(current,this.landmarkReviewPreview,item.meshId,item.triangleIndex);
+          this.landmarkReviewManifest=next;
           this.renderLandmarkReview();
           const status=this.host.querySelector<HTMLElement>('#cluster-manifest-status');
           if(status)status.textContent='Einzelzuweisung übernommen: '+item.meshId+' / Dreieck '+item.triangleIndex+'. Die Zuweisung ist gesperrt und im Override-Protokoll mit Bild-Hash und Landmarken dokumentiert.';
