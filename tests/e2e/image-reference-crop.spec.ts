@@ -38,6 +38,20 @@ test('selected polygon crop has a transparent interior hole and opaque exterior'
  expect(pixels).toEqual({width:80,height:80,hole:0,outsideHole:255});
 });
 
+test('camera calibration records the explicit shared model coordinate frame',async({page})=>{
+ await mountEditor(page);
+ await page.getByLabel('Camera calibration key').fill('neutral');
+ await page.getByLabel('Shared coordinate frame ID').fill('avatar-root');
+ for(const [label,value] of [['fx','1'],['fy','1'],['cx (0–1)','0.5'],['cy (0–1)','0.5'],['Position X','-1'],['Position Y','0'],['Position Z','0'],['Rotation X°','0'],['Rotation Y°','0'],['Rotation Z°','0']] as const){
+  await page.getByLabel(label).fill(value);
+ }
+ await page.getByRole('button',{name:'Save calibration'}).click();
+ const calibration=await page.evaluate(async()=> (await (window as any).__imageReferenceEditor.reference()).cameraCalibrations[0]);
+ expect(calibration.coordinateFrameId).toBe('avatar-root');
+ expect(calibration.formId).toBe('form-1');
+ expect(calibration.viewId).toBe('view-1');
+});
+
 test('a hole vertex can be moved in the editor and remains attached to its region',async({page})=>{
  await mountEditor(page);
  const canvas=page.locator('canvas.image-reference-canvas');
